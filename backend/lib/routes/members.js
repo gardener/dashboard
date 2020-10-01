@@ -40,7 +40,6 @@ router.route('/')
       const body = req.body
       res.send(await members.create({ user, namespace, body }))
     } catch (err) {
-      console.log(err)
       next(err)
     }
   })
@@ -64,7 +63,6 @@ router.route('/:name')
       const body = req.body
       res.send(await members.update({ user, namespace, name, body }))
     } catch (err) {
-      console.log(err)
       next(err)
     }
   })

@@ -23,7 +23,47 @@ const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
 const cache = require('../cache')
-const { uniq } = require('lodash')
+
+const normalizedMembersFromProject = function (project) {
+  const members = [...project.spec.members]
+  const normalizedUsers = _.filter(members, member => {
+    return member.kind === 'User' && !hasServiceAccountPrefix(member.name)
+  })
+
+  const normalizedServiceAccounts =
+  _.chain(members)
+    .filter(member => {
+       return member.kind === 'ServiceAccount' || hasServiceAccountPrefix(member.name)
+    })
+    .map(member => {
+      const normalizedMember = _.cloneDeep(member)
+      if (!hasServiceAccountPrefix(normalizedMember.name)) {
+        normalizedMember.name = toServiceAccountName(normalizedMember.name, normalizedMember.namespace)
+      }
+      return normalizedMember
+    })
+    .value()
+
+  const normalizedMembers = [...normalizedUsers, ...normalizedServiceAccounts]
+  return _.chain(normalizedMembers)
+    .uniqBy('name')
+    .map(member => {
+      const allRoles = _.chain(normalizedMembers)
+        .filter({ name: member.name })
+        .flatMap(member => {
+          return joinMemberRoleAndRoles(member.role, member.roles)
+        })
+        .uniq()
+        .value()
+      return {
+        username: member.name,
+        roles: allRoles
+      }
+    })
+    .value()
+}
+
+exports.normalizedMembersFromProject = normalizedMembersFromProject
 
 function toServiceAccountName (name, namespace) {
   if (hasServiceAccountPrefix(name)) {
@@ -32,7 +72,7 @@ function toServiceAccountName (name, namespace) {
   return `system:serviceaccount:${namespace}:${name}`
 }
 
-function hasServiceAccountPrefix(name) {
+function hasServiceAccountPrefix (name) {
   return _.startsWith(name, 'system:serviceaccount:')
 }
 
@@ -44,7 +84,7 @@ function prefixedServiceAccountToComponents (name) {
   return {}
 }
 
-function memberFromMembers(members, name) {
+function memberFromNotNormalizedProjectMembers (members, name) {
   if (hasServiceAccountPrefix(name)) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     return _.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
@@ -53,7 +93,7 @@ function memberFromMembers(members, name) {
   }
 }
 
-function toUserName(name, namespace, kind) {
+function toUserName (name, namespace, kind) {
   if (kind === 'ServiceAccount' && !hasServiceAccountPrefix(name)) {
     return toServiceAccountName(name, namespace)
   }
@@ -70,24 +110,10 @@ function fromResource (project = {}, serviceAccounts = []) {
         roles: []
     }))
     .value()
+  const normalizedMembers = normalizedMembersFromProject(project)
+  const noMemberServiceAccounts = _.differenceBy(serviceAccountsMetadata, normalizedMembers, 'username')
 
-  const members = _
-    .chain(project)
-    .get('spec.members')
-    .map(({ name, namespace, kind, role, roles }) => {
-      const username = toUserName(name, namespace, kind)
-      return {
-        username,
-        roles: joinMemberRoleAndRoles(role, roles),
-        ...serviceAccountsMetadata[username]
-      }
-    })
-    .value()
-
-  const noMemberServiceAccounts = _.differenceBy(serviceAccountsMetadata, members, 'username')
-
-  return [...members, ...noMemberServiceAccounts]
-
+  return [...normalizedMembers, ...noMemberServiceAccounts]
 }
 
 function readProject (client, namespace) {
@@ -119,22 +145,32 @@ async function deleteServiceaccount (client, { namespace, name }) {
   }
 }
 
-async function setProjectMember (client, { namespace, name, roles: memberRoles }) {
-  // get project
-  const project = await readProject(client, namespace)
-  // get project members from project
-  const members = [...project.spec.members]
+const removeAllOccurrencesOfMemberFromList = function (memberName, memberList) {
+  let member
+  do {
+    member = memberFromNotNormalizedProjectMembers(memberList, memberName)
+    if (member) {
+      _.remove(memberList, member)
+    }
+  } while(member)
+}
 
+// Adds or updates member, makes sure that a member occurs only once in the list and
+// migrates ServiceAccounts into kind ServiceAccount
+const updateMemberInList = function (memberName, memberRoles, memberList) {
   // Gardener wants to have a role for backward compatibility...
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
-  const member = memberFromMembers(members, name)
-  if (member) {
-    throw new Conflict(`'${name}' is already member of this project`)
+  // First remove all occurrences, we need this to clean up as a member might has multiple entries
+  removeAllOccurrencesOfMemberFromList(memberName, memberList)
+
+  if (!memberRoles.length) {
+    return
   }
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    members.push({
+
+  if (hasServiceAccountPrefix(memberName)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(memberName)
+    memberList.push({
       kind: 'ServiceAccount',
       name: serviceAccountName,
       namespace: serviceAccountNamespace,
@@ -142,14 +178,28 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
       roles
     })
   } else {
-    members.push({
+    memberList.push({
       kind: 'User',
-      name,
+      name: memberName,
       apiGroup: 'rbac.authorization.k8s.io',
       role,
       roles
     })
   }
+}
+
+async function setProjectMember (client, { namespace, name, roles }) {
+  // get project
+  const project = await readProject(client, namespace)
+  // get project members from project
+  const members = [...project.spec.members]
+
+  const member = memberFromNotNormalizedProjectMembers(members, name)
+  if (member) {
+    throw new Conflict(`'${name}' is already member of this project`)
+  }
+
+  updateMemberInList(name, roles, members)
 
   const body = {
     spec: {
@@ -159,41 +209,19 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
-async function updateProjectMemberRoles (client, { namespace, name, roles: memberRoles }) {
+async function updateProjectMemberRoles (client, { namespace, name, roles }) {
   // get project
   const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
 
-  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
-
-  let member = _.find(members, { name, kind: 'User' })
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (member) {
-      // Service Account set as User => remove
-      _.remove(members, member)
-    }
-    member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-    if (member) {
-      if (!memberRoles.length) {
-        // Removed all roles from Service Account => delete from member list
-        _.remove(members, member)
-      }
-    } else if (!member && memberRoles.length) { // Not a ServiceAccount member (yet) =>add
-      member = {
-        kind: 'ServiceAccount',
-        name: serviceAccountName,
-        namespace: serviceAccountNamespace,
-        role,
-        roles
-      }
-      members.push(member)
-    }
-  } else if (!member) {
+  const member = memberFromNotNormalizedProjectMembers(members, name)
+  if (!hasServiceAccountPrefix(name) && !member) {
+    // Users need to exist, ServiceAccount will be created on demand
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
- _.assign(member, { role, roles })
+
+  updateMemberInList(name, roles, members)
 
   const body = {
     spec: {
@@ -210,11 +238,13 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project members from project
   const members = [...project.spec.members]
 
-  const member = memberFromMembers(members, name)
+  const member = memberFromNotNormalizedProjectMembers(members, name)
   if (!member) {
     return project
   }
-  _.remove(members, member)
+
+  removeAllOccurrencesOfMemberFromList(name, members)
+
   const body = {
     spec: {
       members
@@ -242,29 +272,20 @@ exports.get = async function ({ user, namespace, name }) {
 
   // get project
   const project = await readProject(client, namespace)
+
   // get project members from project
-  const members = [...project.spec.members]
+  const normalizedMembers = normalizedMembersFromProject(project)
 
-  const projectName = project.metadata.name
-
-  // find member of project
-  let member
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    member =  _.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-  } else{
-    member = _.find(members, {
-      name,
-      kind: 'User'
-    })
-  }
-  if (!member) {
-    throw new NotFound(`User ${name} is not a member of project ${projectName}`)
+  const normalizedMember = _.find(normalizedMembers, { username: name} )
+  if (!hasServiceAccountPrefix(name) && !normalizedMembers) {
+    // Users need to exist, ServiceAccount will be created on demand
+    throw new NotFound(`User '${name}' is not a member of this project`)
   }
 
   if (hasServiceAccountPrefix(name)) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     if (serviceAccountNamespace === namespace) {
+      const projectName = project.metadata.name
       const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
       const server = config.apiServerUrl
       const secretName = _.first(serviceaccount.secrets).name
@@ -284,14 +305,19 @@ exports.get = async function ({ user, namespace, name }) {
         server,
         caData
       })
+      if (normalizedMember) {
+        return {
+          ...normalizedMember,
+          kubeconfig
+        }
+      }
       return {
-        ...member,
-        kind,
+        username: name,
         kubeconfig
       }
     }
   }
-  return member
+  return normalizedMember
 }
 
 exports.create = async function ({ user, namespace, body: { name, roles } }) {

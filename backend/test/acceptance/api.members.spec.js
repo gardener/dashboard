@@ -35,16 +35,17 @@ module.exports = function ({ agent, k8s, auth }) {
     cache.projects.replace(k8s.projectList)
   })
 
-  it('should return two project members', async function () {
+  it('should return all project members, including service accounts without entry in project', async function () {
     const bearer = await user.bearer
     k8s.stub.getMembers({ bearer, namespace })
     const res = await agent
       .get(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
 
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.have.deep.members(members)
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.have.length(4)
+      expect(res.body).to.have.deep.members(members)
   })
 
   it('should not return members but respond "not found"', async function () {
@@ -71,8 +72,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.name).to.equal(name)
-    expect(res.body.kind).to.equal('ServiceAccount')
+    expect(res.body.username).to.equal(name)
     expect(res.body).to.have.property('kubeconfig')
     expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes.external.foo.bar')
   })
