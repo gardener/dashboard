@@ -191,7 +191,7 @@ function errorRoute (context, path) {
   }
 }
 
-function homeRoute ({ getters }, path) {
+function homeRoute ({ getters, dispatch }, path) {
   return {
     path,
     name: 'Home',
@@ -201,8 +201,14 @@ function homeRoute ({ getters }, path) {
       projectScope: false,
       breadcrumbs: homeBreadcrumbs
     },
-    beforeEnter (to, from, next) {
+    async beforeEnter (to, from, next) {
       const namespace = getters.defaultNamespace
+      try {
+        await dispatch('refreshSubjectRules', namespace) // namespace may also be undefined and will be defaulted
+      } catch (error) {
+        console.error('could not refresh subject rules', error.message)
+      }
+
       if (namespace) {
         return next({
           name: 'ShootList',
