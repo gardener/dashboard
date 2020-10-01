@@ -83,13 +83,13 @@ app.use(helmet.referrerPolicy({
 }))
 
 app.use(express.static(PUBLIC_DIRNAME))
+app.use(['/css', '/fonts', '/img', '/js'], notFound)
 
 app.use(helmet.frameguard({
   action: 'deny'
 }))
 app.use(historyFallback(INDEX_FILENAME))
 
-app.use(notFound)
 app.use(renderError)
 
 module.exports = app
