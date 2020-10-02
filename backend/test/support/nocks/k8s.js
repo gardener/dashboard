@@ -20,7 +20,7 @@ const _ = require('lodash')
 const nock = require('nock')
 const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
-const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, prefixedServiceAccountToComponents } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { find } = require('lodash')
@@ -514,14 +514,6 @@ function getServiceAccountsForNamespace (scope, namespace, additionalServiceAcco
   scope
     .get(`/api/v1/namespaces/${namespace}/serviceaccounts`)
     .reply(200, () => ({ items }))
-}
-
-function prefixedServiceAccountToComponents (name) {
-  if (name) {
-    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-    return { serviceAccountNamespace, serviceAccountName }
-  }
-  return {}
 }
 
 function authorizationHeader (bearer) {

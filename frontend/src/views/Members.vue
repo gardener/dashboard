@@ -194,6 +194,8 @@ import {
   gravatarUrlGeneric,
   isEmail,
   nameFromPrefixedServiceAccountName,
+  isForeignServiceAccount,
+  prefixedServiceAccountToComponents,
   isServiceAccount,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
@@ -414,13 +416,32 @@ export default {
       })
     },
     async onDeleteServiceAccount (serviceAccountName) {
-      const deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
+      let deletionConfirmed
+      if (isForeignServiceAccount(serviceAccountName, this.namespace)) {
+        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(serviceAccountName)
+      } else {
+        deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
+      }
       if (deletionConfirmed) {
         await this.deleteMember(serviceAccountName)
       }
     },
-    confirmDeleteServiceAccount (serviceAccountName) {
+    confirmRemoveForeignServiceAccount (name) {
+      const projectName = escape(this.projectDetails.projectName)
+      const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
       const memberName = escape(displayName(serviceAccountName))
+      const memberNamespace = escape(displayName(serviceAccountNamespace))
+
+      const messageHtml = `Do you want to remove the service account <i>${memberName}</i> of namespace <i>${memberNamespace}</i> from the project <i>${projectName}</i>?`
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Remove Member',
+        messageHtml,
+        dialogColor: 'red'
+      })
+    },
+    confirmDeleteServiceAccount (name) {
+      const memberName = escape(displayName(name))
       const messageHtml = `Do you want to delete the service account <i>${memberName}</i>?`
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
