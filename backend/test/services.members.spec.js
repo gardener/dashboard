@@ -17,7 +17,8 @@
 'use strict'
 
 const {
-  normalizedMembersFromProject
+  normalizedMembersFromProject,
+  updateMemberInNotNormalizedProjectMemberList
 } = require('../lib/services/members')
 
 const _ = require('lodash')
@@ -139,6 +140,40 @@ describe('services', function () {
         expect(normalizedMembers).to.deep.contain({ username: 'system:serviceaccount:garden-lukas:robot-multiple', roles: ['otherrole', 'admin', 'myrole', 'viewer' ] })
         expect(normalizedMembers).to.deep.contain({ username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace', roles: ['myrole', 'viewer', 'admin' ] })
       })
+    })
+
+    describe('#updateMemberInNotNormalizedProjectMemberList', function () {
+      let memberList
+
+      beforeEach(function () {
+        memberList = _.cloneDeep(members)
+      })
+
+      it('should update member roles', async function () {
+        updateMemberInNotNormalizedProjectMemberList('foo@bar.com', ['admin', 'viewer', 'myrole'], memberList)
+        const updatedMember = _.find(memberList, { name: 'foo@bar.com' })
+        expect(updatedMember.role).to.eql('admin')
+        expect(updatedMember.roles).to.have.deep.members(['admin', 'viewer', 'myrole'])
+      })
+
+      it('should remove duplicate user entries on update', async function () {
+        expect(memberList).to.have.length(11)
+        updateMemberInNotNormalizedProjectMemberList('mutiple@bar.com', ['test'], memberList)
+        const updatedMember = _.find(memberList, { name: 'mutiple@bar.com', kind: 'User' })
+        expect(memberList).to.have.length(10)
+        expect(updatedMember.role).to.eql('test')
+        expect(updatedMember.roles).to.have.deep.members(['test'])
+      })
+
+      it('should remove duplicate service account entries on update', async function () {
+        expect(memberList).to.have.length(11)
+        updateMemberInNotNormalizedProjectMemberList('system:serviceaccount:garden-lukas:robot-multiple', ['admin', 'viewer'], memberList)
+        const updatedMember = _.find(memberList, { name: 'robot-multiple', namespace: 'garden-lukas', kind: 'ServiceAccount' })
+        expect(memberList).to.have.length(9)
+        expect(updatedMember.role).to.eql('admin')
+        expect(updatedMember.roles).to.have.deep.members(['admin', 'viewer'])
+      })
+
     })
   })
 })

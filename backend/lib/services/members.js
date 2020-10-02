@@ -93,13 +93,6 @@ function memberFromNotNormalizedProjectMembers (members, name) {
   }
 }
 
-function toUserName (name, namespace, kind) {
-  if (kind === 'ServiceAccount' && !hasServiceAccountPrefix(name)) {
-    return toServiceAccountName(name, namespace)
-  }
-  return name
-}
-
 function fromResource (project = {}, serviceAccounts = []) {
   const serviceAccountsMetadata = _
     .chain(serviceAccounts)
@@ -157,7 +150,7 @@ const removeAllOccurrencesOfMemberFromList = function (memberName, memberList) {
 
 // Adds or updates member, makes sure that a member occurs only once in the list and
 // migrates ServiceAccounts into kind ServiceAccount
-const updateMemberInList = function (memberName, memberRoles, memberList) {
+const updateMemberInNotNormalizedProjectMemberList = function (memberName, memberRoles, memberList) {
   // Gardener wants to have a role for backward compatibility...
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
@@ -188,6 +181,8 @@ const updateMemberInList = function (memberName, memberRoles, memberList) {
   }
 }
 
+exports.updateMemberInNotNormalizedProjectMemberList = updateMemberInNotNormalizedProjectMemberList
+
 async function setProjectMember (client, { namespace, name, roles }) {
   // get project
   const project = await readProject(client, namespace)
@@ -199,7 +194,7 @@ async function setProjectMember (client, { namespace, name, roles }) {
     throw new Conflict(`'${name}' is already member of this project`)
   }
 
-  updateMemberInList(name, roles, members)
+  updateMemberInNotNormalizedProjectMemberList(name, roles, members)
 
   const body = {
     spec: {
@@ -221,7 +216,7 @@ async function updateProjectMemberRoles (client, { namespace, name, roles }) {
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
 
-  updateMemberInList(name, roles, members)
+  updateMemberInNotNormalizedProjectMemberList(name, roles, members)
 
   const body = {
     spec: {
