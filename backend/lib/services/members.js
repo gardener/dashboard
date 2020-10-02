@@ -33,7 +33,7 @@ const normalizedMembersFromProject = function (project) {
   const normalizedServiceAccounts =
   _.chain(members)
     .filter(member => {
-       return member.kind === 'ServiceAccount' || hasServiceAccountPrefix(member.name)
+      return member.kind === 'ServiceAccount' || hasServiceAccountPrefix(member.name)
     })
     .map(member => {
       const normalizedMember = _.cloneDeep(member)
@@ -97,10 +97,10 @@ function fromResource (project = {}, serviceAccounts = []) {
   const serviceAccountsMetadata = _
     .chain(serviceAccounts)
     .map(({ metadata }) => ({
-        username: toServiceAccountName(metadata.name, metadata.namespace),
-        createdBy: _.get(metadata, ['annotations', 'garden.sapcloud.io/createdBy']),
-        creationTimestamp: metadata.creationTimestamp,
-        roles: []
+      username: toServiceAccountName(metadata.name, metadata.namespace),
+      createdBy: _.get(metadata, ['annotations', 'garden.sapcloud.io/createdBy']),
+      creationTimestamp: metadata.creationTimestamp,
+      roles: []
     }))
     .value()
   const normalizedMembers = normalizedMembersFromProject(project)
@@ -145,7 +145,7 @@ const removeAllOccurrencesOfMemberFromList = function (memberName, memberList) {
     if (member) {
       _.remove(memberList, member)
     }
-  } while(member)
+  } while (member)
 }
 
 // Adds or updates member, makes sure that a member occurs only once in the list and
@@ -271,7 +271,7 @@ exports.get = async function ({ user, namespace, name }) {
   // get project members from project
   const normalizedMembers = normalizedMembersFromProject(project)
 
-  const normalizedMember = _.find(normalizedMembers, { username: name} )
+  const normalizedMember = _.find(normalizedMembers, { username: name })
   if (!hasServiceAccountPrefix(name) && !normalizedMembers) {
     // Users need to exist, ServiceAccount will be created on demand
     throw new NotFound(`User '${name}' is not a member of this project`)
@@ -290,7 +290,6 @@ exports.get = async function ({ user, namespace, name }) {
       const clusterName = 'garden'
       const contextName = `${clusterName}-${projectName}-${name}`
 
-      const kind = 'ServiceAccount'
       const kubeconfig = dumpKubeconfig({
         user: serviceAccountName,
         context: contextName,
