@@ -66,6 +66,14 @@ function splitMemberRolesIntoRoleAndRoles (roles) {
   return { role, roles }
 }
 
+function prefixedServiceAccountToComponents (name) {
+  if (name) {
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+    return { serviceAccountNamespace, serviceAccountName }
+  }
+  return {}
+}
+
 module.exports = {
   decodeBase64,
   encodeBase64,
@@ -73,5 +81,6 @@ module.exports = {
   getSeedNameFromShoot,
   shootHasIssue,
   joinMemberRoleAndRoles,
-  splitMemberRolesIntoRoleAndRoles
+  splitMemberRolesIntoRoleAndRoles,
+  prefixedServiceAccountToComponents
 }

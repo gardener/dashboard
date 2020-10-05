@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
+const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, prefixedServiceAccountToComponents } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
@@ -74,14 +74,6 @@ function toServiceAccountName (name, namespace) {
 
 function hasServiceAccountPrefix (name) {
   return _.startsWith(name, 'system:serviceaccount:')
-}
-
-function prefixedServiceAccountToComponents (name) {
-  if (name) {
-    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-    return { serviceAccountNamespace, serviceAccountName }
-  }
-  return {}
 }
 
 function memberFromNotNormalizedProjectMembers (members, name) {
