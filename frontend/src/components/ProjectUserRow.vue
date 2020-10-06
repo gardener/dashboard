@@ -61,7 +61,7 @@ limitations under the License.
               </v-btn>
             </div>
           </template>
-          <span v-if="isowner">This user is set as owner</span>
+          <span v-if="isowner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
           <span v-else>Remove user from project</span>
         </v-tooltip>
       </v-list-item-action>

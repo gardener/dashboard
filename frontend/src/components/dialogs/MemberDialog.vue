@@ -203,7 +203,7 @@ export default {
         }
       } else if (this.isServiceDialog) {
         validationErrors.internalRoles = {
-          required: 'You need to configure roles for service accounts that are referenced from a foreign namespace'
+          required: 'You need to assign roles for service accounts that you want to invite to this project'
         }
         validationErrors.internalName = {
           required: 'Service Account is required',
@@ -304,7 +304,10 @@ export default {
       return undefined
     },
     addMemberButtonText () {
-      if (this.isServiceDialog && !isForeignServiceAccount(this.internalName, this.namespace)) {
+      if (this.isServiceDialog) {
+        if (isForeignServiceAccount(this.internalName, this.namespace)) {
+          return 'Invite'
+        }
         return 'Create'
       }
       return 'Add'
