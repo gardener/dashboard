@@ -27,12 +27,12 @@ const cache = require('../cache')
 function normalizedMembersFromProject (project) {
   const normalizedMember = ({ kind, name, namespace, role, roles }) => {
     if (kind === 'ServiceAccount' && name && namespace) {
-      name = toServiceAccountName(name, namespace) 
+      name = toServiceAccountName(name, namespace)
     }
     roles = joinMemberRoleAndRoles(role, roles)
     return { username: name, roles }
   }
-  
+
   const normalizedMemberRoles = (members, username) => {
     const roles = _
       .chain(members)
@@ -74,10 +74,6 @@ function memberPredicate (name) {
       return member.kind === 'User' && member.name === name
     }
   }
-}
-
-function memberFromNotNormalizedProjectMembers (members, name) {
-  return _.find(members, memberPredicate(name))
 }
 
 function fromResource (project = {}, serviceAccounts = []) {
@@ -166,7 +162,7 @@ async function setProjectMember (client, { namespace, name, roles }) {
   // get project members from project
   const members = [...project.spec.members]
 
-  const member = memberFromNotNormalizedProjectMembers(members, name)
+  const member = _.find(members, memberPredicate(name))
   if (member) {
     throw new Conflict(`'${name}' is already member of this project`)
   }
@@ -187,7 +183,7 @@ async function updateProjectMemberRoles (client, { namespace, name, roles }) {
   // get project members from project
   const members = [...project.spec.members]
 
-  const member = memberFromNotNormalizedProjectMembers(members, name)
+  const member = _.find(members, memberPredicate(name))
   if (!hasServiceAccountPrefix(name) && !member) {
     // Users need to exist, ServiceAccount will be created on demand
     throw new NotFound(`User '${name}' is not a member of this project`)
@@ -210,7 +206,7 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project members from project
   let members = [...project.spec.members]
 
-  const member = memberFromNotNormalizedProjectMembers(members, name)
+  const member = _.find(members, memberPredicate(name))
   if (!member) {
     return project
   }

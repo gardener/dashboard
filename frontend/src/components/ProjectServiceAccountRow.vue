@@ -177,7 +177,7 @@ export default {
       'canGetSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
-      return !isForeignServiceAccount(this.username, this.namespace)
+      return !isForeignServiceAccount(this.namespace, this.username)
     },
     createdByClasses () {
       return this.createdBy ? ['font-weight-bold'] : ['grey--text']

@@ -163,12 +163,12 @@ export default {
           validators.internalName = {
             required,
             unique: unique('projectUserNames'),
-            noServiceAccount: value => !isServiceAccount(value)
+            isNoServiceAccount: value => !isServiceAccount(value)
           }
         } else if (this.isServiceDialog) {
           validators.internalRoles = {
             required: requiredIf(function () {
-              return isForeignServiceAccount(this.internalName, this.namespace)
+              return isForeignServiceAccount(this.namespace, this.internalName)
             })
           }
           validators.internalName = {
@@ -180,7 +180,7 @@ export default {
               return resourceName(value)
             },
             unique: value => {
-              if (isForeignServiceAccount(value, this.namespace)) {
+              if (isForeignServiceAccount(this.namespace, value)) {
                 return true
               }
               return unique('serviceAccountNames')(nameFromPrefixedServiceAccountName(value), this)
@@ -199,7 +199,7 @@ export default {
         validationErrors.internalName = {
           required: 'User is required',
           unique: `User '${this.internalName}' is already member of this project.`,
-          noServiceAccount: 'Please use add service account to add service accounts'
+          isNoServiceAccount: 'Please use add service account to add service accounts'
         }
       } else if (this.isServiceDialog) {
         validationErrors.internalRoles = {
@@ -219,7 +219,7 @@ export default {
         return `Change Roles of ${this.nameLabel}`
       }
       if (this.isServiceDialog) {
-        if (isForeignServiceAccount(this.internalName, this.namespace)) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
           return 'Invite Service Account'
         }
         return 'Create Service Account'
@@ -259,7 +259,7 @@ export default {
           serviceAccountNamespace = this.namespace
           serviceAccountName = this.internalName
         }
-        if (isForeignServiceAccount(this.internalName, this.namespace)) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
           return `Will add the Service Account with name ${serviceAccountName} of the namespace ${serviceAccountNamespace} as member to this project`
         }
         return `Will create a Kubernetes Service Account with name ${serviceAccountName} in the namespace of this project`
@@ -304,7 +304,7 @@ export default {
     },
     addMemberButtonText () {
       if (this.isServiceDialog) {
-        if (isForeignServiceAccount(this.internalName, this.namespace)) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
           return 'Invite'
         }
         return 'Create'

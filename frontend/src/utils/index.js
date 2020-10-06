@@ -160,8 +160,8 @@ export function fullDisplayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [namespace, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(`${namespace} / ${serviceaccount}`)
+    const [namespace, serviceAccount] = split(username, ':', 4).slice(2)
+    return toUpper(`${namespace} / ${serviceAccount}`)
   }
   return username
 }
@@ -174,8 +174,8 @@ export function displayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(serviceaccount)
+    const [, serviceAccount] = split(username, ':', 4).slice(2)
+    return toUpper(serviceAccount)
   }
   return username
 }

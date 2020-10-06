@@ -387,15 +387,16 @@ export default {
     },
     async onRemoveUser (name) {
       const removalConfirmed = await this.confirmRemoveUser(name)
-      if (removalConfirmed) {
-        await this.deleteMember(name)
-        if (this.isCurrentUser(name) && !this.isAdmin) {
-          if (this.projectList.length > 0) {
-            const p1 = this.projectList[0]
-            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-          } else {
-            this.$router.push({ name: 'Home', params: { } })
-          }
+      if (!removalConfirmed) {
+        return
+      }
+      await this.deleteMember(name)
+      if (this.isCurrentUser(name) && !this.isAdmin) {
+        if (this.projectList.length > 0) {
+          const p1 = this.projectList[0]
+          this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+        } else {
+          this.$router.push({ name: 'Home', params: { } })
         }
       }
     },
@@ -417,7 +418,7 @@ export default {
     },
     async onDeleteServiceAccount (serviceAccountName) {
       let deletionConfirmed
-      if (isForeignServiceAccount(serviceAccountName, this.namespace)) {
+      if (isForeignServiceAccount(this.namespace, serviceAccountName)) {
         deletionConfirmed = await this.confirmRemoveForeignServiceAccount(serviceAccountName)
       } else {
         deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
