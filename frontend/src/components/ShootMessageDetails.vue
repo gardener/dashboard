@@ -50,7 +50,7 @@ limitations under the License.
         <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
           <v-lazy>
-            <time-string :dateTime="lastUpdateTime" :pointInTime="-1"></time-string>
+            <time-string :dateTime="lastUpdateTime" mode="past"></time-string>
           </v-lazy>
         </v-list-item-title>
       </v-list-item-content>
@@ -61,7 +61,7 @@ limitations under the License.
         <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
           <v-lazy>
-            <time-string :dateTime="lastTransitionTime" :pointInTime="-1"></time-string>
+            <time-string :dateTime="lastTransitionTime" mode="past"></time-string>
           </v-lazy>
         </v-list-item-title>
       </v-list-item-content>

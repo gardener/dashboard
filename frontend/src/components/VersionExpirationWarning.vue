@@ -37,7 +37,7 @@ limitations under the License.
           <span v-if="k8sExpiration.isValidTerminationDate">Kubernetes version of this cluster expires
             <v-tooltip right>
               <template v-slot:activator="{ on }">
-                <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate" :pointInTime="1"></time-string></span>
+                <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate" mode="future"></time-string></span>
               </template>
               <span>{{getDateFormatted(k8sExpiration.expirationDate)}}</span>
             </v-tooltip>
@@ -58,7 +58,7 @@ limitations under the License.
         <span v-if="isValidTerminationDate">expires
           <v-tooltip right>
             <template v-slot:activator="{ on }">
-              <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" :pointInTime="1"></time-string></span>
+              <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
             </template>
             <span>{{getDateFormatted(expirationDate)}}</span>
           </v-tooltip>

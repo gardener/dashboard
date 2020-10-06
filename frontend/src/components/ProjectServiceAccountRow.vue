@@ -44,7 +44,7 @@ limitations under the License.
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <span v-on="on">
-                          <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
+                          <time-string :date-time="creationTimestamp" mode="past"></time-string>
                         </span>
                       </template>
                       {{created}}
