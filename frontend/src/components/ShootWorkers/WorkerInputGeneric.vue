@@ -106,10 +106,10 @@ limitations under the License.
           item-color="cyan darken-2"
           label="Zone"
           :items="zoneItems"
-          :error-messages="getErrorMessages('worker.zones')"
-          v-model="worker.zones"
+          :error-messages="getErrorMessages('selectedZones')"
+          v-model="selectedZones"
           @input="onInputZones"
-          @blur="$v.worker.zones.$touch()"
+          @blur="$v.selectedZones.$touch()"
           multiple
           chips
           deletable-chips
@@ -136,9 +136,11 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
+import forEach from 'lodash/forEach'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
+const uuidv4 = require('uuid/v4')
 
 const validationErrors = {
   worker: {
@@ -162,10 +164,10 @@ const validationErrors = {
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value'
-    },
-    zones: {
-      required: 'Zone is required'
     }
+  },
+  selectedZones: {
+    required: 'Zone is required'
   }
 }
 
@@ -253,12 +255,12 @@ export default {
           },
           maxSurge: {
             numberOrPercentage
-          },
-          zones: {
-            required: requiredIf(function () {
-              return this.zonedCluster
-            })
           }
+        },
+        selectedZones: {
+          required: requiredIf(function () {
+            return this.zonedCluster
+          })
         }
       }
     },
@@ -314,15 +316,50 @@ export default {
         }
       }
     },
+    selectedZones: {
+      get: function () {
+        const uniqZones = []
+        const duplicateZones = []
+        forEach(this.worker.zones, zone => {
+          if (!includes(uniqZones, zone)) {
+            uniqZones.push(zone)
+          } else {
+            duplicateZones.push(zone)
+          }
+        })
+        const duplicateZoneObjects = map(duplicateZones, duplicateZone => {
+          return {
+            isDuplicate: true,
+            zone: duplicateZone,
+            id: uuidv4()
+          }
+        })
+        return [...uniqZones, ...duplicateZoneObjects]
+      },
+      set: function (zones) {
+        this.worker.zones = zones
+      }
+    },
     zoneItems () {
       const sortedZones = sortBy(this.allZones)
-      return map(sortedZones, zone => ({
+      const zoneItems = map(sortedZones, zone => ({
         text: zone,
         value: zone,
         disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
       }))
+      const duplicateZones = filter(this.selectedZones, { isDuplicate: true })
+      const duplicateZoneItems = map(duplicateZones, duplicateZone => ({
+        text: duplicateZone.zone,
+        value: duplicateZone,
+        disabled: true
+      }))
+      return [...zoneItems, ...duplicateZoneItems]
     },
     zoneHint () {
+      console.log(this.maxAdditionalZones, this.availableZones.length)
+      if (this.maxAdditionalZones >= this.availableZones.length) {
+        return undefined
+      }
       if (this.maxAdditionalZones === 0) {
         return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
       }
@@ -370,7 +407,7 @@ export default {
       this.validateInput()
     },
     onInputZones () {
-      this.$v.worker.zones.$touch()
+      this.$v.selectedZones.$touch()
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {
