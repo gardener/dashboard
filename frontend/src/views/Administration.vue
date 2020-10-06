@@ -97,7 +97,7 @@ limitations under the License.
                         :rules="[rules.owner]"
                         placeholder="Select the owner"
                         no-data-text="No project member available"
-                        :save="updateowner"
+                        :save="updateOwner"
                       ></editable-account>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -302,7 +302,7 @@ export default {
     return {
       color: 'blue-grey darken-2',
       edit: false,
-      editowner: false,
+      editOwner: false,
       ownerMessages: [],
       errorMessage: undefined,
       detailedErrorMessage: undefined,
@@ -433,13 +433,13 @@ export default {
       'patchProject',
       'deleteProject'
     ]),
-    onEditowner () {
-      this.editowner = !this.editowner
-      if (this.editowner) {
+    onEditOwner () {
+      this.editOwner = !this.editOwner
+      if (this.editOwner) {
         this.$nextTick(() => this.$refs.owner.activateMenu())
       }
     },
-    updateowner (value) {
+    updateOwner (value) {
       return this.updateProperty('owner', value)
     },
     updateDescription (value) {

@@ -56,12 +56,12 @@ limitations under the License.
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="isowner" icon color="red" @click.native.stop="onDelete">
+              <v-btn :disabled="isOwner" icon color="red" @click.native.stop="onDelete">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </div>
           </template>
-          <span v-if="isowner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
+          <span v-if="isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
           <span v-else>Remove user from project</span>
         </v-tooltip>
       </v-list-item-action>
@@ -91,7 +91,7 @@ export default {
       type: Boolean,
       required: true
     },
-    isowner: {
+    isOwner: {
       type: Boolean,
       required: true
     },

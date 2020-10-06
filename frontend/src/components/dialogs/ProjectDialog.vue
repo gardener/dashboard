@@ -202,7 +202,7 @@ export default {
     currentPurpose () {
       return this.projectDetails.purpose
     },
-    currentowner () {
+    currentOwner () {
       return this.projectDetails.owner
     },
     currentCostObject () {
@@ -210,7 +210,7 @@ export default {
     },
     memberItems () {
       const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
-      const owner = this.currentowner
+      const owner = this.currentOwner
       if (owner && !includes(members, owner)) {
         members.push(owner)
       }

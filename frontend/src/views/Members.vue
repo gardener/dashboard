@@ -62,7 +62,7 @@ limitations under the License.
             :avatarUrl="user.avatarUrl"
             :displayName="user.displayName"
             :isEmail="user.isEmail"
-            :isowner="user.isowner"
+            :isOwner="user.isOwner"
             :roles="user.roles"
             :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
@@ -281,7 +281,7 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           isEmail: isEmail(username),
-          isowner: this.isowner(username),
+          isOwner: this.isOwner(username),
           roleDisplayNames: this.sortedRoleDisplayNames(user.roles),
           isCurrentUser: this.isCurrentUser(username)
         }
@@ -348,7 +348,7 @@ export default {
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    isowner (username) {
+    isOwner (username) {
       return this.owner === toLower(username)
     },
     avatarUrl (username) {
