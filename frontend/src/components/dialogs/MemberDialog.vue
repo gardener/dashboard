@@ -194,7 +194,7 @@ export default {
       const validationErrors = {}
       if (this.isUserDialog) {
         validationErrors.internalRoles = {
-          required: 'You need to configure roles for the user'
+          required: 'You need to assign roles to this user'
         }
         validationErrors.internalName = {
           required: 'User is required',
