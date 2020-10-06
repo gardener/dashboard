@@ -24,42 +24,31 @@ const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
 const cache = require('../cache')
 
-const normalizedMembersFromProject = function (project) {
-  const members = [...project.spec.members]
-  const normalizedUsers = _.filter(members, member => {
-    return member.kind === 'User' && !hasServiceAccountPrefix(member.name)
-  })
+function normalizedMembersFromProject (project) {
+  const normalizedMember = ({ kind, name, namespace, role, roles }) => {
+    if (kind === 'ServiceAccount' && name && namespace) {
+      name = toServiceAccountName(name, namespace) 
+    }
+    roles = joinMemberRoleAndRoles(role, roles)
+    return { username: name, roles }
+  }
+  
+  const normalizedMemberRoles = (members, username) => {
+    const roles = _
+      .chain(members)
+      .flatMap('roles')
+      .uniq()
+      .value()
+    return { username, roles }
+  }
 
-  const normalizedServiceAccounts =
-  _.chain(members)
-    .filter(member => {
-      return member.kind === 'ServiceAccount' || hasServiceAccountPrefix(member.name)
-    })
-    .map(member => {
-      const normalizedMember = _.cloneDeep(member)
-      if (!hasServiceAccountPrefix(normalizedMember.name)) {
-        normalizedMember.name = toServiceAccountName(normalizedMember.name, normalizedMember.namespace)
-      }
-      return normalizedMember
-    })
-    .value()
-
-  const normalizedMembers = [...normalizedUsers, ...normalizedServiceAccounts]
-  return _.chain(normalizedMembers)
-    .uniqBy('name')
-    .map(member => {
-      const allRoles = _.chain(normalizedMembers)
-        .filter({ name: member.name })
-        .flatMap(member => {
-          return joinMemberRoleAndRoles(member.role, member.roles)
-        })
-        .uniq()
-        .value()
-      return {
-        username: member.name,
-        roles: allRoles
-      }
-    })
+  return  _
+    .chain(project)
+    .get('spec.members')
+    .map(normalizedMember)
+    .groupBy('username')
+    .mapValues(normalizedMemberRoles)
+    .values()
     .value()
 }
 
