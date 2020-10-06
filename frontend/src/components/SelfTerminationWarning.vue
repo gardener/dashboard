@@ -20,7 +20,7 @@ limitations under the License.
       <v-icon v-on="on" color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
       <v-icon v-on="on" color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
     </template>
-    <span v-if="isValidTerminationDate">This cluster will self terminate <span class="font-weight-bold"><time-string :date-time="expirationTimestamp"></time-string></span></span>
+    <span v-if="isValidTerminationDate">This cluster will self terminate <span class="font-weight-bold"><time-string :date-time="expirationTimestamp" :pointInTime="1"></time-string></span></span>
     <span v-else>This cluster is about to self terminate</span>
   </v-tooltip>
 </template>
