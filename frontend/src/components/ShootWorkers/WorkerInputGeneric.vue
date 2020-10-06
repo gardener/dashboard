@@ -356,7 +356,6 @@ export default {
       return [...zoneItems, ...duplicateZoneItems]
     },
     zoneHint () {
-      console.log(this.maxAdditionalZones, this.availableZones.length)
       if (this.maxAdditionalZones >= this.availableZones.length) {
         return undefined
       }
