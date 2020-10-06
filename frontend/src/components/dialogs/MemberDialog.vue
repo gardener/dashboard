@@ -220,7 +220,7 @@ export default {
       }
       if (this.isServiceDialog) {
         if (isForeignServiceAccount(this.internalName, this.namespace)) {
-          return 'Add Service Account from other namespace'
+          return 'Invite Service Account'
         }
         return 'Create Service Account'
       }
