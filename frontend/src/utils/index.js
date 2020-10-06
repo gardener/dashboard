@@ -42,6 +42,7 @@ import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+import { sortBy } from 'lodash'
 const uuidv4 = require('uuid/v4')
 
 export function emailToDisplayName (value) {
@@ -775,6 +776,44 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {
     return expirationDate && (isError || isWarning || isInfo)
   })
+}
+
+export function convertDuplicateSelectedItemsToPlaceholders (items, sort = true, valuePropertyName) {
+  const uniqItems = []
+  const duplicateItems = []
+  forEach(items, item => {
+    if (!includes(uniqItems, item)) {
+      uniqItems.push(item)
+    } else {
+      duplicateItems.push(item)
+    }
+  })
+  const duplicatePlaceholderObjects = map(duplicateItems, duplicateItem => {
+    return {
+      isDuplicate: true,
+      originalValue: valuePropertyName ? duplicateItem[valuePropertyName] : duplicateItem,
+      id: uuidv4()
+    }
+  })
+  const allItems = [...uniqItems, ...duplicatePlaceholderObjects]
+  if (!sort) {
+    return allItems
+  }
+  return sortBy(allItems, item => {
+    if (item.isDuplicate) {
+      return item.originalValue
+    }
+    return item
+  })
+}
+
+export function itemsForSelectedDuplicateItemPlaceholders (items) {
+  const placeholderItems = filter(items, { isDuplicate: true })
+  return map(placeholderItems, placeholderItem => ({
+    text: placeholderItem.originalValue,
+    value: placeholderItem,
+    disabled: true
+  }))
 }
 
 export default {

@@ -136,11 +136,9 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
-import forEach from 'lodash/forEach'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize } from '@/utils'
+import { getValidationErrors, parseSize, convertDuplicateSelectedItemsToPlaceholders, itemsForSelectedDuplicateItemPlaceholders } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
-const uuidv4 = require('uuid/v4')
 
 const validationErrors = {
   worker: {
@@ -318,42 +316,21 @@ export default {
     },
     selectedZones: {
       get: function () {
-        const uniqZones = []
-        const duplicateZones = []
-        forEach(this.worker.zones, zone => {
-          if (!includes(uniqZones, zone)) {
-            uniqZones.push(zone)
-          } else {
-            duplicateZones.push(zone)
-          }
-        })
-        const duplicateZoneObjects = map(duplicateZones, duplicateZone => {
-          return {
-            isDuplicate: true,
-            zone: duplicateZone,
-            id: uuidv4()
-          }
-        })
-        return [...uniqZones, ...duplicateZoneObjects]
+        return convertDuplicateSelectedItemsToPlaceholders(this.worker.zones)
       },
       set: function (zones) {
         this.worker.zones = zones
       }
     },
     zoneItems () {
-      const sortedZones = sortBy(this.allZones)
-      const zoneItems = map(sortedZones, zone => ({
+      const zoneItems = map(this.allZones, zone => ({
         text: zone,
         value: zone,
         disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
       }))
-      const duplicateZones = filter(this.selectedZones, { isDuplicate: true })
-      const duplicateZoneItems = map(duplicateZones, duplicateZone => ({
-        text: duplicateZone.zone,
-        value: duplicateZone,
-        disabled: true
-      }))
-      return [...zoneItems, ...duplicateZoneItems]
+      const duplicateZoneItems = itemsForSelectedDuplicateItemPlaceholders(this.selectedZones)
+      const allZoneItems = [...zoneItems, ...duplicateZoneItems]
+      return sortBy(allZoneItems, 'text')
     },
     zoneHint () {
       if (this.maxAdditionalZones >= this.availableZones.length) {
