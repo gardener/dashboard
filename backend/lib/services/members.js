@@ -76,13 +76,19 @@ function hasServiceAccountPrefix (name) {
   return _.startsWith(name, 'system:serviceaccount:')
 }
 
-function memberFromNotNormalizedProjectMembers (members, name) {
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    return _.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-  } else {
-    return _.find(members, { name, kind: 'User' })
+function memberPredicate (name) {
+  return member => {
+    if (hasServiceAccountPrefix(name)) {
+      const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+      return (member.kind === 'User' && member.name === name) || (member.kind === 'ServiceAccount' && member.name === serviceAccountName && member.namespace === serviceAccountNamespace)
+    } else {
+      return member.kind === 'User' && member.name === name
+    }
   }
+}
+
+function memberFromNotNormalizedProjectMembers (members, name) {
+  return _.find(members, memberPredicate(name))
 }
 
 function fromResource (project = {}, serviceAccounts = []) {
@@ -130,16 +136,6 @@ async function deleteServiceaccount (client, { namespace, name }) {
   }
 }
 
-const removeAllOccurrencesOfMemberFromList = function (memberName, memberList) {
-  let member
-  do {
-    member = memberFromNotNormalizedProjectMembers(memberList, memberName)
-    if (member) {
-      _.remove(memberList, member)
-    }
-  } while (member)
-}
-
 // Adds or updates member, makes sure that a member occurs only once in the list and
 // migrates ServiceAccounts into kind ServiceAccount
 const updateMemberInNotNormalizedProjectMemberList = function (memberName, memberRoles, memberList) {
@@ -147,7 +143,7 @@ const updateMemberInNotNormalizedProjectMemberList = function (memberName, membe
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
   // First remove all occurrences, we need this to clean up as a member might has multiple entries
-  removeAllOccurrencesOfMemberFromList(memberName, memberList)
+  _.remove(memberList, memberPredicate(memberName))
 
   if (!memberRoles.length) {
     return
@@ -223,14 +219,14 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project
   const project = await readProject(client, namespace)
   // get project members from project
-  const members = [...project.spec.members]
+  let members = [...project.spec.members]
 
   const member = memberFromNotNormalizedProjectMembers(members, name)
   if (!member) {
     return project
   }
 
-  removeAllOccurrencesOfMemberFromList(name, members)
+  _.remove(members, memberPredicate(name))
 
   const body = {
     spec: {

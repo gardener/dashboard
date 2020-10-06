@@ -261,9 +261,8 @@ export default {
         }
         if (isForeignServiceAccount(this.internalName, this.namespace)) {
           return `Will add the Service Account with name ${serviceAccountName} of the namespace ${serviceAccountNamespace} as member to this project`
-        } else {
-          return `Will create a Kubernetes Service Account with name ${serviceAccountName} in the namespace of this project`
         }
+        return `Will create a Kubernetes Service Account with name ${serviceAccountName} in the namespace of this project`
       }
       return undefined
     },
