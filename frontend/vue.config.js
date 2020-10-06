@@ -8,6 +8,9 @@ const version = fs.readFileSync(path.resolve(__dirname, '../VERSION'), 'utf8').t
 const proxyTarget = 'http://localhost:3030'
 const currentYear = new Date().getFullYear()
 
+const KiB = 1024
+const MiB = 1024 * KiB
+
 process.env.VUE_APP_VERSION = version
 
 module.exports = {
@@ -46,8 +49,8 @@ module.exports = {
     })
 
     config.performance
-      .maxEntrypointSize(1048576)
-      .maxAssetSize(1048576)
+      .maxAssetSize(1 * MiB)
+      .maxEntrypointSize(2 * MiB)
   },
   devServer: {
     proxy: {
