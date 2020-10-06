@@ -3,18 +3,32 @@
   "version": "1.46.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/gardener/dashboard/tree/master/backend"
-  },
   "author": "Koser, Holger <holger.koser@sap.com>",
   "contributors": [
     "Herz, Andreas <andreas.herz@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>",
     "Gross, Lukas <lukas.gross@sap.com>"
   ],
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "backend"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "main": "server.js",
+  "files": [
+    "bin",
+    "lib",
+    "server.js"
+  ],
+  "bin": {
+    "sync-version": "bin/sync-version"
+  },
   "scripts": {
     "serve": "nodemon --ext js --watch lib server.js",
     "start": "node server.js",

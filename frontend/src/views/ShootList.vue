@@ -25,7 +25,7 @@ limitations under the License.
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
-          prepend-inner-icon="search"
+          prepend-inner-icon="mdi-magnify"
           color="cyan darken-2"
           label="Search"
           clearable
@@ -41,7 +41,7 @@ limitations under the License.
             <v-tooltip open-delay="500" top>
               <template v-slot:activator="{ on: tooltip }">
                 <v-btn v-on="{ ...menu, ...tooltip}" icon>
-                  <v-icon class="cursor-pointer" color="white">more_vert</v-icon>
+                  <v-icon class="cursor-pointer" color="white">mdi-dots-vertical</v-icon>
                 </v-btn>
               </template>
               Table Options
@@ -164,7 +164,7 @@ limitations under the License.
             <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-card-title>
           <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
@@ -173,7 +173,7 @@ limitations under the License.
     </v-card>
     <v-fab-transition v-if="canCreateShoots">
       <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
-        <v-icon dark ref="add">add</v-icon>
+        <v-icon dark ref="add">mdi-plus</v-icon>
       </v-btn>
     </v-fab-transition>
   </v-container>
@@ -187,7 +187,7 @@ import get from 'lodash/get'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
-import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
+const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
   name: 'shoot-list',

@@ -1,14 +1,23 @@
 {
   "name": "@gardener-dashboard/logger",
   "version": "1.0.0",
-  "private": true,
   "description": "Logger",
-  "main": "lib/index.js",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/gardener/dashboard/tree/master/packages/logger"
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/logger"
   },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "jest",

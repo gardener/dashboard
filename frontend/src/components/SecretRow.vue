@@ -37,7 +37,7 @@ limitations under the License.
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete">
-              <v-icon class="red--text">delete</v-icon>
+              <v-icon class="red--text">mdi-delete</v-icon>
             </v-btn>
           </div>
         </template>
@@ -52,7 +52,7 @@ limitations under the License.
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-btn :disabled="!isOwnSecretBinding" icon @click.native.stop="onUpdate">
-              <v-icon class="cyan--text text--darken-2">edit</v-icon>
+              <v-icon class="cyan--text text--darken-2">mdi-pencil</v-icon>
             </v-btn>
           </div>
         </template>

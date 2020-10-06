@@ -120,15 +120,19 @@ limitations under the License.
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
-import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+
 import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
+import DeleteCluster from '@/components/DeleteCluster'
+import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
 import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
-import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
-import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
+
+import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+
 import { shootItem } from '@/mixins/shootItem'
+
 export default {
   components: {
     ChangeHibernation,

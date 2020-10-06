@@ -31,12 +31,16 @@ limitations under the License.
 </template>
 
 <script>
-import get from 'lodash/get'
 import { mapGetters } from 'vuex'
+import get from 'lodash/get'
+
 import ShootDetails from '@/components/ShootDetails/ShootDetails'
-import TerminalSplitpanes from '@/components/TerminalSplitpanes'
+
 import PositionalDropzone from '@/components/PositionalDropzone'
+import TerminalSplitpanes from '@/components/TerminalSplitpanes'
+
 import { PositionEnum } from '@/lib/g-symbol-tree'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

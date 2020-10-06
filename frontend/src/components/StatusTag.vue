@@ -67,6 +67,7 @@ limitations under the License.
 </template>
 
 <script>
+import { mapGetters, mapState, mapMutations } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import map from 'lodash/map'
@@ -82,7 +83,7 @@ import filter from 'lodash/filter'
 
 import GPopper from '@/components/GPopper'
 import ShootMessageDetails from '@/components/ShootMessageDetails'
-import { mapGetters, mapState, mapMutations } from 'vuex'
+
 import { isUserError, objectsFromErrorCodes } from '@/utils/errorCodes'
 
 export default {

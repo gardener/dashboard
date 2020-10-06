@@ -63,11 +63,15 @@ const COOKIE_SIGNATURE = 'gSgn'
 const COOKIE_TOKEN = 'gTkn'
 const GARDENER_AUDIENCE = 'gardener'
 
-const symetricKey = JWK.asKey(decodeSecret(sessionSecret), {
-  use: 'enc'
-})
+const symetricKey = importSymmetricKey(sessionSecret)
 
 let clientPromise
+
+function importSymmetricKey (sessionSecret) {
+  const use = 'enc'
+  const decodedSessionSecret = decodeSecret(sessionSecret)
+  return JWK.asKey(decodedSessionSecret, { use })
+}
 
 /**
  * (Customizing HTTP Requests)[https://github.com/panva/node-openid-client/blob/master/docs/README.md#customizing-http-requests]

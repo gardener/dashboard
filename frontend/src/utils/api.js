@@ -45,6 +45,12 @@ function callResourceMethod (url, data) {
   return axios.post(url, data)
 }
 
+/* Configuration */
+
+export function getConfiguration () {
+  return getResource('/config.json')
+}
+
 /* Infrastructures Secrets */
 
 export function getInfrastructureSecrets ({ namespace }) {

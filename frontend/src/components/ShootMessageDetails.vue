@@ -18,7 +18,7 @@ limitations under the License.
   <v-list>
     <v-list-item>
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">info_outline</v-icon>
+        <v-icon color="cyan darken-2">mdi-information-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Status</v-list-item-subtitle>

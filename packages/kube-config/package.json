@@ -1,14 +1,23 @@
 {
   "name": "@gardener-dashboard/kube-config",
   "version": "1.0.0",
-  "private": true,
   "description": "Kubernetes Config",
-  "main": "lib/index.js",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/gardener/dashboard/tree/master/packages/kube-config"
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/kube-config"
   },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "jest",

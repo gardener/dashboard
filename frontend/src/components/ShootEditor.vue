@@ -151,15 +151,6 @@ import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
 
-// js-yaml
-import jsyaml from 'js-yaml'
-
-function safeDump (value) {
-  return jsyaml.safeDump(value, {
-    skipInvalid: true
-  })
-}
-
 export default {
   components: {
     CopyBtn,
@@ -436,9 +427,9 @@ export default {
         this.clearHistory()
       }
     },
-    update (value = this.value) {
+    async update (value = this.value) {
       if (value) {
-        this.setContent(safeDump(value))
+        this.setContent(await this.$yaml.safeDump(value))
       }
     },
     onCopy () {

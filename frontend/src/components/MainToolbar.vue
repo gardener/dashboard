@@ -32,7 +32,7 @@ limitations under the License.
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
               <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
-                <v-icon medium>help_outline</v-icon>
+                <v-icon medium>mdi-help-circle-outline</v-icon>
               </v-btn>
             </template>
             <span>Info</span>
@@ -73,7 +73,7 @@ limitations under the License.
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="supervisor_account">
+              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="mdi-account-supervisor">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
@@ -86,7 +86,7 @@ limitations under the License.
               {{avatarTitle}}
               <v-chip small color="cyan darken-2" dark>
                 <v-avatar>
-                  <v-icon>supervisor_account</v-icon>
+                  <v-icon>mdi-account-supervisor</v-icon>
                 </v-avatar>
                 <span class="operator">Operator</span>
               </v-chip>
@@ -106,14 +106,14 @@ limitations under the License.
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
-              <v-icon class="mr-3">account_circle</v-icon>
+              <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
-              <v-icon class="mr-3">exit_to_app</v-icon>
+              <v-icon class="mr-3">mdi-exit-to-app</v-icon>
               Logout
             </v-btn>
           </v-card-actions>
@@ -155,7 +155,7 @@ export default {
       'setError'
     ]),
     handleLogout () {
-      this.$userManager.signout()
+      this.$auth.signout()
     }
   },
   computed: {

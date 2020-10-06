@@ -22,7 +22,7 @@ limitations under the License.
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">cloud_queue</v-icon>
+          <v-icon color="cyan darken-2">mdi-cloud-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
@@ -52,7 +52,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">spa</v-icon>
+            <v-icon color="cyan darken-2">mdi-spa</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Seed</v-list-item-subtitle>
@@ -80,7 +80,7 @@ limitations under the License.
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">settings_ethernet</v-icon>
+          <v-icon color="cyan darken-2">mdi-ip-network</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Pods CIDR</v-list-item-subtitle>
@@ -144,22 +144,23 @@ limitations under the License.
 </template>
 
 <script>
-
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
+
 import CopyBtn from '@/components/CopyBtn'
+import LbClass from '@/components/ShootDetails/LbClass'
 import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
-import LbClass from '@/components/ShootDetails/LbClass'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     CopyBtn,
-    ShootSeedName,
     LbClass,
+    ShootSeedName,
     Vendor
   },
   props: {

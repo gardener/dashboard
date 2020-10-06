@@ -3,16 +3,22 @@
   "version": "1.0.0",
   "description": "Gardener Dashboard Charts",
   "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/gardener/dashboard/tree/master/charts"
-  },
   "contributors": [
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>",
     "Gross, Lukas <lukas.gross@sap.com>"
   ],
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "charts"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "jest"

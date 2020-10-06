@@ -15,7 +15,7 @@
 //
 
 import utils from '@/utils'
-import { map } from 'lodash'
+import map from 'lodash/map'
 
 const { canI, selectedImageIsNotLatest } = utils
 

@@ -77,7 +77,7 @@ limitations under the License.
                   single-line
                   hide-details
                   color="grey darken-1"
-                  prepend-icon="search"
+                  prepend-icon="mdi-magnify"
                   class="pl-4 mt-0 pt-0 project-filter"
                   v-model="projectFilter"
                   ref="projectFilter"
@@ -102,7 +102,7 @@ limitations under the License.
                 :data-g-project-name="project.metadata.name"
               >
                 <v-list-item-avatar>
-                  <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
+                  <v-icon v-if="project.metadata.name === projectName" color="teal">mdi-check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
@@ -124,7 +124,7 @@ limitations under the License.
                       :disabled="!canCreateProject"
                       @click.stop="openProjectDialog"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon>mdi-plus</v-icon>
                       <span class="ml-2">Create Project</span>
                     </v-btn>
                   </div>

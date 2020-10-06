@@ -187,7 +187,7 @@ limitations under the License.
           >
             <template v-slot:item="{ item }">
                 <v-list-item-action >
-                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
+                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
                 </v-list-item-action>
                 <v-list-item-content :class="{ 'grey--text': item.disabled }">
                   <v-list-item-title>{{ item.text }}</v-list-item-title>

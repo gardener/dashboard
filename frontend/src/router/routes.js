@@ -37,25 +37,29 @@ import {
 } from './breadcrumbs'
 
 /* Layouts */
-const Login = () => import('@/views/Login')
-const Default = () => import('@/views/Default')
+import Login from '@/views/Login'
+import Default from '@/views/Default'
 
 /* Pages */
+
+import NotFound from '@/views/NotFound'
+import Error from '@/views/Error'
+
+import ProjectPlaceholder from '@/views/ProjectPlaceholder'
+import NewShootEditor from '@/views/NewShootEditor'
+import ShootItemPlaceholder from '@/views/ShootItemPlaceholder'
+import ShootItemEditor from '@/views/ShootItemEditor'
+import Account from '@/views/Account'
+
+const Members = () => import('@/views/Members')
 const Home = () => import('@/views/Home')
+const Secrets = () => import('@/views/Secrets')
+const Administration = () => import('@/views/Administration')
+
 const NewShoot = () => import('@/views/NewShoot')
 const ShootList = () => import('@/views/ShootList')
-const ShootItemTerminal = () => import('@/views/ShootItemTerminal')
 const ShootItem = () => import('@/views/ShootItem')
-const ShootItemEditor = () => import('@/views/ShootItemEditor')
-const NewShootEditor = () => import('@/views/NewShootEditor')
-const Secrets = () => import('@/views/Secrets')
-const Members = () => import('@/views/Members')
-const Account = () => import('@/views/Account')
-const Administration = () => import('@/views/Administration')
-const ProjectPlaceholder = () => import('@/views/ProjectPlaceholder')
-const ShootItemPlaceholder = () => import('@/views/ShootItemPlaceholder')
-const NotFound = () => import('@/views/NotFound')
-const Error = () => import('@/views/Error')
+const ShootItemTerminal = () => import('@/views/ShootItemTerminal')
 
 const PlaceholderComponent = {
   render (createElement) {

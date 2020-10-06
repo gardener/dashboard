@@ -20,7 +20,7 @@ limitations under the License.
     @dialogOpened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
-    icon="delete"
+    icon="mdi-delete"
     :iconColor="iconColor"
     dialogColor="red"
     confirmButtonText="Delete"

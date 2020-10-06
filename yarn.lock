@@ -3,7 +3,7 @@
 
 __metadata:
   version: 4
-  cacheKey: 6
+  cacheKey: 7
 
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4":
   version: 7.10.4
@@ -1073,16 +1073,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/polyfill@npm:^7.4.4":
-  version: 7.11.5
-  resolution: "@babel/polyfill@npm:7.11.5"
-  dependencies:
-    core-js: ^2.6.5
-    regenerator-runtime: ^0.13.4
-  checksum: a28837a580dbe6a69f8435dbc16b403bfcec25a1d0a1b6478ceadbba3ea0755a586c2ebf46a6dccd57c65dd99b5afcfcfe8fe1d5e418d58050e57a0838b818c3
-  languageName: node
-  linkType: hard
-
 "@babel/preset-env@npm:^7.11.0, @babel/preset-env@npm:^7.4.5":
   version: 7.11.5
   resolution: "@babel/preset-env@npm:7.11.5"
@@ -1228,7 +1218,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/types@npm:^7.0.0, @babel/types@npm:^7.10.4, @babel/types@npm:^7.10.5, @babel/types@npm:^7.11.0, @babel/types@npm:^7.11.5, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.0, @babel/types@npm:^7.4.4, @babel/types@npm:^7.7.0":
+"@babel/types@npm:^7.0.0, @babel/types@npm:^7.10.4, @babel/types@npm:^7.10.5, @babel/types@npm:^7.11.0, @babel/types@npm:^7.11.5, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.0, @babel/types@npm:^7.4.4, @babel/types@npm:^7.7.0, @babel/types@npm:^7.8.3":
   version: 7.11.5
   resolution: "@babel/types@npm:7.11.5"
   dependencies:
@@ -1333,6 +1323,8 @@ __metadata:
     socket.io-client: ^2.3.0
     swagger-parser: ^8.0.1
     uuid: ^8.3.0
+  bin:
+    sync-version: bin/sync-version
   languageName: unknown
   linkType: soft
 
@@ -1357,8 +1349,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
-    "@babel/polyfill": ^7.4.4
-    "@mdi/font": ^5.5.55
+    "@mdi/font": ^5.6.55
     "@vue/cli-plugin-babel": ~4.5.0
     "@vue/cli-plugin-eslint": ~4.5.0
     "@vue/cli-plugin-router": ~4.5.0
@@ -1391,20 +1382,22 @@ __metadata:
     jwt-decode: ^2.2.0
     lodash: ^4.17.19
     marked: ^0.8.2
-    material-design-icons-iconfont: ^5.0.1
     md5: ^2.2.1
-    moment-timezone: ^0.5.28
+    moment-locales-webpack-plugin: ^1.2.0
+    moment-timezone: ^0.5.31
+    moment-timezone-data-webpack-plugin: ^1.3.0
     netmask: ^1.0.6
     object-hash: ^2.0.3
     ora: ^3.4.0
     p-timeout: ^3.2.0
-    roboto-fontface: "*"
+    regenerator-runtime: ^0.13.7
     sass: ^1.26.5
     sass-loader: ^8.0.2
     semver: ^7.2.1
     socket.io-client: ^2.3.0
     splitpanes: ^2.2.1
     symbol-tree: ^3.2.4
+    typeface-roboto: "*"
     url-template: ^2.0.8
     uuid: ^8.3.0
     vue: ^2.6.11
@@ -1416,7 +1409,7 @@ __metadata:
     vue-snotify: ^3.2.1
     vue-template-compiler: ^2.6.11
     vuelidate: ^0.7.5
-    vuetify: ^2.2.11
+    vuetify: ^2.3.12
     vuetify-loader: ^1.3.0
     vuex: ^3.4.0
     webpack: ^4.44.2
@@ -1430,9 +1423,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-client@workspace:packages/kube-client"
   dependencies:
-    "@gardener-dashboard/kube-config": "*"
-    "@gardener-dashboard/logger": "*"
-    "@gardener-dashboard/request": "*"
+    "@gardener-dashboard/kube-config": "workspace:*"
+    "@gardener-dashboard/logger": "workspace:*"
+    "@gardener-dashboard/request": "workspace:*"
     agentkeepalive: ^4.1.0
     base64url: ^3.0.1
     delay: ^4.3.0
@@ -1460,7 +1453,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/kube-config@*, @gardener-dashboard/kube-config@workspace:*, @gardener-dashboard/kube-config@workspace:packages/kube-config":
+"@gardener-dashboard/kube-config@workspace:*, @gardener-dashboard/kube-config@workspace:packages/kube-config":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-config@workspace:packages/kube-config"
   dependencies:
@@ -1477,7 +1470,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/logger@*, @gardener-dashboard/logger@workspace:*, @gardener-dashboard/logger@workspace:packages/logger":
+"@gardener-dashboard/logger@workspace:*, @gardener-dashboard/logger@workspace:packages/logger":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/logger@workspace:packages/logger"
   dependencies:
@@ -1494,7 +1487,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/request@*, @gardener-dashboard/request@workspace:*, @gardener-dashboard/request@workspace:packages/request":
+"@gardener-dashboard/request@workspace:*, @gardener-dashboard/request@workspace:packages/request":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/request@workspace:packages/request"
   dependencies:
@@ -1959,7 +1952,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdi/font@npm:^5.5.55":
+"@mdi/font@npm:^5.6.55":
   version: 5.6.55
   resolution: "@mdi/font@npm:5.6.55"
   checksum: da2cfb0954538c99a5ec5c0b82d2edfa6536970ef9179d4198319e42255771e81eb6731f8f06f0b34cb01a8061defc91867bf77619c2c3d9191ec4469623c629
@@ -5760,7 +5753,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^2.4.0, core-js@npm:^2.6.5":
+"core-js@npm:^2.4.0":
   version: 2.6.11
   resolution: "core-js@npm:2.6.11"
   checksum: 39ad00b46deaecf344470ef940949b58c4b15e71608a98e8ac7429cd16e485b829f9720d44a44b5f4dee966ff04a18baf5283feb8aaba2cb59ce2c25fa72b88c
@@ -8317,20 +8310,20 @@ fsevents@^1.2.7:
 
 "fsevents@patch:fsevents@^1.2.7#builtin<compat/fsevents>":
   version: 1.2.13
-  resolution: "fsevents@patch:fsevents@npm%3A1.2.13#builtin<compat/fsevents>::version=1.2.13&hash=87eb42"
+  resolution: "fsevents@patch:fsevents@npm%3A1.2.13#builtin<compat/fsevents>::version=1.2.13&hash=127e8e"
   dependencies:
     bindings: ^1.5.0
     nan: ^2.12.1
-  checksum: 31c62373556f061f4b4c52ff61c91bc9080243ea074a38a81cf12c1f2c9098da731ea3d39705c805b738427e4284af6b8151efe65ce9ca6b11378d43f36db2c4
+  checksum: 7bc048c164eb72f91b18ba7cd2ba30679a0afe57e9cd6352eac4bdbc4ddd4ca2ea98674d0bd3a80e96427469adc433c13532494b36aea40fceab36e198982182
   languageName: node
   linkType: hard
 
 "fsevents@patch:fsevents@^2.1.2#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.1.1#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.1.2#builtin<compat/fsevents>":
   version: 2.1.3
-  resolution: "fsevents@patch:fsevents@npm%3A2.1.3#builtin<compat/fsevents>::version=2.1.3&hash=87eb42"
+  resolution: "fsevents@patch:fsevents@npm%3A2.1.3#builtin<compat/fsevents>::version=2.1.3&hash=127e8e"
   dependencies:
     node-gyp: latest
-  checksum: d8ae862048fc127cdbd00d02b2feb7c25946c3ce4cbc44e958134be87e239577a16dafafa1c270d010b8624e1b1e0372e23f7865c55c6f83e83fc9f68b0a30d2
+  checksum: e2b8c379340e21a786d32c653854c8876f94eb1202dd5be378fd42c062bc123aab5051c32bf0011865257c85982c41ded203f9fe8c9f9c8f8c84dc4672abc0e0
   languageName: node
   linkType: hard
 
@@ -8351,33 +8344,6 @@ fsevents@^1.2.7:
 "gardener-dashboard@workspace:.":
   version: 0.0.0-use.local
   resolution: "gardener-dashboard@workspace:."
-  dependencies:
-    "@vue/cli-plugin-babel": ~4.5.0
-    "@vue/cli-plugin-eslint": ~4.5.0
-    "@vue/cli-plugin-router": ~4.5.0
-    "@vue/cli-plugin-unit-jest": ~4.5.0
-    "@vue/cli-plugin-vuex": ~4.5.0
-    "@vue/cli-service": ~4.5.0
-    "@vue/eslint-config-standard": ^5.1.2
-    "@vue/test-utils": ^1.0.3
-    babel-eslint: ^10.1.0
-    eslint: ^6.7.2
-    eslint-plugin-import: ^2.20.2
-    eslint-plugin-node: ^11.1.0
-    eslint-plugin-promise: ^4.2.1
-    eslint-plugin-standard: ^4.0.0
-    eslint-plugin-vue: ^6.2.2
-    eslint-plugin-vuetify: ^1.0.0-beta.7
-    jest-environment-jsdom-fifteen: ^1.0.2
-    jest-serializer-vue: ^2.0.2
-    sass: ^1.26.5
-    sass-loader: ^8.0.2
-    vue: ^2.6.11
-    vue-cli-plugin-vuetify: ~2.0.7
-    vue-template-compiler: ^2.6.11
-    vuetify: ^2.2.11
-    vuetify-loader: ^1.3.0
-    webpack: ^4.44.2
   languageName: unknown
   linkType: soft
 
@@ -11747,6 +11713,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"lodash.difference@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.difference@npm:4.5.0"
+  checksum: 7a2c297cf5fb6cf6899825e620cb017694a1891b3b35e11aa7ddc503128222a84d851937c36584a9e690344ccaf84116f137d04fdd8949ee90918edd4637d3b6
+  languageName: node
+  linkType: hard
+
 "lodash.flattendeep@npm:^4.4.0":
   version: 4.4.0
   resolution: "lodash.flattendeep@npm:4.4.0"
@@ -12031,13 +12004,6 @@ fsevents@^1.2.7:
   bin:
     marked: bin/marked
   checksum: 49148dd7898fcd7215458a6ba5dec895a8343f2823c12da527dd40b29ed71c5235cba06a19833cc61e138811fa459484550a69ad89aa42af9f6e87b9dad19b7d
-  languageName: node
-  linkType: hard
-
-"material-design-icons-iconfont@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "material-design-icons-iconfont@npm:5.0.1"
-  checksum: 54eecee8e0db2641baf2b2cf88ca4b6de3c3c356d7ce351f844649a14f6b2d2946af72af043f9286faaf91ccc4d139b268d8754b6a8b03927bece16288c7b055
   languageName: node
   linkType: hard
 
@@ -12433,7 +12399,32 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:^0.5.28":
+"moment-locales-webpack-plugin@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "moment-locales-webpack-plugin@npm:1.2.0"
+  dependencies:
+    lodash.difference: ^4.5.0
+  peerDependencies:
+    moment: ^2.8.0
+    webpack: ^1 || ^2 || ^3 || ^4 || ^5
+  checksum: a1613eaa41f44587378d32ccfa5dbd123545891a679aef1c5bfebe9aa2b3dafbb43ee915b15d7775993ee61c0610b350a1702931db8b11f2becfc1a07f1d80f4
+  languageName: node
+  linkType: hard
+
+"moment-timezone-data-webpack-plugin@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "moment-timezone-data-webpack-plugin@npm:1.3.0"
+  dependencies:
+    find-cache-dir: ^3.0.0
+    make-dir: ^3.0.0
+  peerDependencies:
+    moment-timezone: ">= 0.1.0"
+    webpack: 4.x.x || 5.x.x
+  checksum: 30466ae1230bea37d1f3065b74b1c89c30df1adb0e8123f959b9ae1579c77d9a42c8ba3642f53d34720d2335e123634c92a03b040ea40d28fd3d3a06fb2cfe56
+  languageName: node
+  linkType: hard
+
+"moment-timezone@npm:^0.5.31":
   version: 0.5.31
   resolution: "moment-timezone@npm:0.5.31"
   dependencies:
@@ -12442,7 +12433,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment@npm:>= 2.9.0, moment@npm:^2.24.0":
+"moment@npm:>= 2.9.0, moment@npm:^2.24.0, moment@npm:^2.8.0":
   version: 2.29.0
   resolution: "moment@npm:2.29.0"
   checksum: ad4850191348e75447d4d0b1362c78825b3d966f5abc42b3ed0ae0a6fcda5eb4504789c361d18c762f7467b3a7923b59f8bf1d52769568585516035b6c848a55
@@ -14988,7 +14979,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.13.4":
+"regenerator-runtime@npm:^0.13.4, regenerator-runtime@npm:^0.13.7":
   version: 0.13.7
   resolution: "regenerator-runtime@npm:0.13.7"
   checksum: 6ef567c662088b1b292214920cbd72443059298d477f72e1a37e0a113bafbfac9057cbfe35ae617284effc4b423493326a78561bbff7b04162c7949bdb9624e8
@@ -15425,13 +15416,6 @@ resolve@1.1.7:
     hash-base: ^3.0.0
     inherits: ^2.0.1
   checksum: e0370fbe779b1f15d74c3e7dffc0ce40b57b845fc7e431fab8a571958d5fd9c91eb0038a252604600e20786d117badea0cc4cf8816b8a6be6b9166b565ad6797
-  languageName: node
-  linkType: hard
-
-"roboto-fontface@npm:*":
-  version: 0.10.0
-  resolution: "roboto-fontface@npm:0.10.0"
-  checksum: a0ab6e22b49bd5afa22ad2c2b2bdde81232d75e86a1e94512c139dc0786ba7aecf5377f2695dce7477fe511dc678c66513f549a2fc497899906b1f512c15bace
   languageName: node
   linkType: hard
 
@@ -17289,6 +17273,13 @@ resolve@1.1.7:
   languageName: node
   linkType: hard
 
+"typeface-roboto@npm:*":
+  version: 0.0.75
+  resolution: "typeface-roboto@npm:0.0.75"
+  checksum: ee56f5cc5720b2c15ee851652f3584a53d56ec2d1448dc757e0097808071f4d7d6843e66e343483a92e94d7b3f3a9436153517818834a367977bea888fc6d429
+  languageName: node
+  linkType: hard
+
 "uglify-js@npm:3.4.x":
   version: 3.4.10
   resolution: "uglify-js@npm:3.4.10"
@@ -17887,12 +17878,12 @@ resolve@1.1.7:
   languageName: node
   linkType: hard
 
-"vuetify@npm:^2.2.11":
-  version: 2.3.10
-  resolution: "vuetify@npm:2.3.10"
+"vuetify@npm:^2.3.12":
+  version: 2.3.12
+  resolution: "vuetify@npm:2.3.12"
   peerDependencies:
     vue: ^2.6.4
-  checksum: a6a433fe98845d12eff21142323dd870bcefaa0c2100792e56096603efac674465a813b2e93708e77a4d4e3d26cc7bc43865545b850edf8f7f95c68a917a6d37
+  checksum: 628bb3501641abaf87a534833f35d5aa6e4977befff582cee7af34919c8b0eab276efcd24ca2a502418f4de8da0d69ce182d23031aba2d5a79ea6395af91e5ae
   languageName: node
   linkType: hard
 

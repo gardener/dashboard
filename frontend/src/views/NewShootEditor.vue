@@ -40,7 +40,6 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
-import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -48,8 +47,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 
-// js-yaml
-import jsyaml from 'js-yaml'
+const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
   components: {
@@ -91,7 +89,7 @@ export default {
       })
     },
     async createClicked () {
-      const shootResource = jsyaml.safeLoad(this.$refs.shootEditor.getContent())
+      const shootResource = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
 
       try {
         await this.createShoot(shootResource)
@@ -111,7 +109,7 @@ export default {
       }
     },
     async isShootContentDirty () {
-      const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
+      const data = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
       return !isEqual(this.initialNewShootResource, data)
     }
   },
@@ -122,7 +120,7 @@ export default {
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
+        const data = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
         this.setNewShootResource(data)
         return next()
       } catch (err) {

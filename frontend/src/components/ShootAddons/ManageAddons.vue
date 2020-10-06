@@ -36,6 +36,7 @@ limitations under the License.
 import { mapGetters, mapState } from 'vuex'
 import filter from 'lodash/filter'
 import cloneDeep from 'lodash/cloneDeep'
+
 import { shootAddonList } from '@/utils'
 
 export default {
