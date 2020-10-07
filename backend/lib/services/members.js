@@ -42,7 +42,7 @@ function normalizedMembersFromProject (project) {
     return { username, roles }
   }
 
-  return  _
+  return _
     .chain(project)
     .get('spec.members')
     .map(normalizedMember)
@@ -204,7 +204,7 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project
   const project = await readProject(client, namespace)
   // get project members from project
-  let members = [...project.spec.members]
+  const members = [...project.spec.members]
 
   const member = _.find(members, memberPredicate(name))
   if (!member) {
@@ -254,9 +254,9 @@ exports.get = async function ({ user, namespace, name }) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     if (serviceAccountNamespace === namespace) {
       const projectName = project.metadata.name
-      const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
+      const serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
       const server = config.apiServerUrl
-      const secretName = _.first(serviceaccount.secrets).name
+      const secretName = _.first(serviceAccount.secrets).name
       const secret = await client.core.secrets.get(namespace, secretName)
       const token = decodeBase64(secret.data.token)
       const caData = secret.data['ca.crt']
