@@ -16,8 +16,11 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticketTitle">
-      Ticket {{ticketTitle}}<ticket-labels class="ml-2" :labels="ticket.data.labels"></ticket-labels>
+    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticket-toolbar">
+      <div class="d-flex flex-wrap align-center">
+        <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
+        <div v-if="labels.length" class="labels"><ticket-label v-for="label in labels" :key="label.id" :label="label"></ticket-label></div>
+      </div>
     </v-card-title>
 
     <v-container>
@@ -45,13 +48,13 @@ limitations under the License.
 import get from 'lodash/get'
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
-import TicketLabels from '@/components/ShootTickets/TicketLabels'
+import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import TicketComment from '@/components/ShootTickets/TicketComment'
 
 export default {
   components: {
     TimeString,
-    TicketLabels,
+    TicketLabel,
     TicketComment
   },
   props: {
@@ -77,6 +80,9 @@ export default {
     ticketHtmlUrl () {
       return get(this.ticket, 'data.html_url')
     },
+    labels () {
+      return get(this.ticket, 'data.labels', [])
+    },
     commentsForTicket () {
       const issueNumber = get(this.ticket, 'metadata.number')
       return this.ticketCommentsByIssueNumber({ issueNumber })
@@ -92,8 +98,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-  .ticketTitle {
+  .ticket-toolbar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .ticket-title {
+    line-height: 20px;
+  }
+  .labels {
     line-height: 10px;
   }
 

@@ -15,14 +15,14 @@ limitations under the License.
 -->
 
 <template>
-  <v-row dense>
-    <v-col style="max-width: 60px;">
+  <v-row dense class="flex-nowrap">
+    <v-col cols="1" v-if="avatarUrl" style="min-width: 50px;">
       <v-avatar size="40px">
         <img :src="avatarUrl" :title="login"/>
       </v-avatar>
     </v-col>
-    <v-col class="fluid" >
-      <div class="comment">
+    <v-col :cols="!avatarUrl ? 12 : 11">
+      <div :class="{ comment: true, 'comment-no-avatar': !avatarUrl}">
         <div class="comment-header">
           <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
         </div>
@@ -35,8 +35,15 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
-import { compileMarkdown } from '@/utils'
+import { compileMarkdown, gravatarUrlIdenticon } from '@/utils'
 import TimeString from '@/components/TimeString'
+import { mapState } from 'vuex'
+
+const AvatarEnum = {
+  GITHUB: 'github', // default
+  GRAVATAR: 'gravatar',
+  NONE: 'none'
+}
 
 export default {
   components: {
@@ -49,6 +56,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     compiledMarkdown () {
       return compileMarkdown(get(this.comment, 'data.body', ''))
     },
@@ -58,8 +68,18 @@ export default {
     createdAt () {
       return get(this.comment, 'metadata.created_at')
     },
+    avatarSource () {
+      return get(this.cfg, 'ticket.avatarSource', AvatarEnum.GITHUB)
+    },
     avatarUrl () {
-      return get(this.comment, 'data.user.avatar_url')
+      switch (this.avatarSource) {
+        case AvatarEnum.GITHUB:
+          return get(this.comment, 'data.user.avatar_url')
+        case AvatarEnum.GRAVATAR:
+          return gravatarUrlIdenticon(this.login)
+        default:
+          return undefined
+      }
     },
     htmlUrl () {
       return get(this.comment, 'data.html_url')
@@ -69,6 +89,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+  .comment-no-avatar {
+    margin-left: 16px;
+  }
 
   .comment {
     border-radius: 2px;
@@ -94,6 +118,10 @@ export default {
     word-wrap: break-word;
     /* does not work with firefox */
     word-break: break-word;
+
+    ::v-deep > pre {
+      overflow: auto;
+    }
 
     ::v-deep > h1 {
       font-size: 21px;

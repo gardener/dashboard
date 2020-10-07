@@ -15,12 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <span v-if="labels.length">
-    <span v-for="label in labels" :key="label.id" class="label-color" :style="labelStyle(label)">
-      {{ label.name }}
-    </span>
+  <span class="label-color" :style="labelStyle(label)">
+    {{ label.name }}
   </span>
-
 </template>
 
 <script>
@@ -29,8 +26,8 @@ import get from 'lodash/get'
 
 export default {
   props: {
-    labels: {
-      type: Array,
+    label: {
+      type: Object,
       required: true
     }
   },
@@ -49,12 +46,14 @@ export default {
 <style lang="scss" scoped>
 
   .label-color {
-      margin-left: 4px;
-      padding: 2px 4px;
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: 2px;
-      box-shadow: inset 0 -1px 0 rgba(27,31,35,0.12);
+    line-height: 10px;
+    margin: 2px;
+    padding: 2px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 2px;
+    box-shadow: inset 0 -1px 0 rgba(27,31,35,0.12);
+    display: inline-block;
   }
 
 </style>

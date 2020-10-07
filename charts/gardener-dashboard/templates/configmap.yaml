@@ -170,6 +170,7 @@ data:
           {{- end }}
         {{- end }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
+        avatarSource: {{ .Values.frontendConfig.ticket.avatarSource | default "github" }}
         issueDescriptionTemplate: |-
 {{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
       {{- end }}
