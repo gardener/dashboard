@@ -20,7 +20,6 @@ limitations under the License.
 
 <script>
 import { getTimeStringFrom, getTimeStringTo } from '@/utils'
-import toLower from 'lodash/toLower'
 import Vue from 'vue'
 
 class Clock {
