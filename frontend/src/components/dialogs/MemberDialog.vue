@@ -83,7 +83,7 @@ import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { nameFromPrefixedServiceAccountName, isServiceAccount, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, prefixedServiceAccountToComponents, isPrefixedServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { nameFromPrefixedServiceAccountName, hasServiceAccountPrefix, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, parseUsernameToMember, isPrefixedServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -163,7 +163,7 @@ export default {
           validators.internalName = {
             required,
             unique: unique('projectUserNames'),
-            isNoServiceAccount: value => !isServiceAccount(value)
+            isNoServiceAccount: value => !hasServiceAccountPrefix(value)
           }
         } else if (this.isServiceDialog) {
           validators.internalRoles = {
@@ -251,19 +251,9 @@ export default {
         return 'Enter the username that should become a member of this project'
       }
       if (this.isServiceDialog) {
-        if (!this.internalName || !this.internalName.length) {
-          return 'Enter a valid Kubernetes Service Account name'
-        }
-        let { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(this.internalName)
-        if (!serviceAccountNamespace || !serviceAccountName) {
-          serviceAccountNamespace = this.namespace
-          serviceAccountName = this.internalName
-        }
-        if (isForeignServiceAccount(this.namespace, this.internalName)) {
-          return `Will add the Service Account with name ${serviceAccountName} of the namespace ${serviceAccountNamespace} as member to this project`
-        }
-        return `Will create a Kubernetes Service Account with name ${serviceAccountName} in the namespace of this project`
+        return 'Enter a valid Kubernetes Service Account name'
       }
+
       return undefined
     },
     rolesHint () {
@@ -282,11 +272,11 @@ export default {
       return undefined
     },
     serviceAccountNames () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => hasServiceAccountPrefix(username))
       return map(serviceAccounts, ({ username }) => nameFromPrefixedServiceAccountName(username))
     },
     projectUserNames () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      const users = filter(this.memberList, ({ username }) => !hasServiceAccountPrefix(username))
       return map(users, 'username')
     },
     memberName () {

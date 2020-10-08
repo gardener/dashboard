@@ -110,7 +110,7 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus, hasServiceAccountPrefix, compileMarkdown, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -209,7 +209,7 @@ export default {
       return this.projectDetails.costObject
     },
     memberItems () {
-      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
+      const members = filter(map(this.memberList, 'username'), username => !hasServiceAccountPrefix(username))
       const owner = this.currentOwner
       if (owner && !includes(members, owner)) {
         members.push(owner)

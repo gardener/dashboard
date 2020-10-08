@@ -20,7 +20,7 @@ const _ = require('lodash')
 const nock = require('nock')
 const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
-const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, prefixedServiceAccountToComponents } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, parseUsernameToMember } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { find } = require('lodash')
@@ -1338,10 +1338,10 @@ const stub = {
 
     getServiceAccountsForNamespace(scope, namespace)
 
-    const { serviceAccountNamespace, serviceAccountName  } = prefixedServiceAccountToComponents(username)
-    if (serviceAccountName &&
-      serviceAccountNamespace === namespace &&
-      !_.find(serviceAccountList, { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })) {
+    const member = parseUsernameToMember(username)
+    if (member.name &&
+      member.namespace === namespace &&
+      !_.find(serviceAccountList, { metadata: { namespace: member.namespace, name: member.name } })) {
       scope
       .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
       .reply(200)

@@ -195,8 +195,8 @@ import {
   isEmail,
   nameFromPrefixedServiceAccountName,
   isForeignServiceAccount,
-  prefixedServiceAccountToComponents,
-  isServiceAccount,
+  nameAndNamespaceFromServiceAccountUsername,
+  hasServiceAccountPrefix,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
@@ -259,7 +259,7 @@ export default {
       return this.projectDetails.costObject
     },
     serviceAccountList () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => hasServiceAccountPrefix(username))
       return map(serviceAccounts, serviceAccount => {
         const { username } = serviceAccount
         return {
@@ -273,7 +273,7 @@ export default {
       })
     },
     userList () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      const users = filter(this.memberList, ({ username }) => !hasServiceAccountPrefix(username))
       return map(users, user => {
         const { username } = user
         return {
@@ -289,7 +289,7 @@ export default {
     },
     sortedAndFilteredUserList () {
       const predicate = ({ username }) => {
-        if (isServiceAccount(username)) {
+        if (hasServiceAccountPrefix(username)) {
           return false
         }
 
@@ -427,11 +427,11 @@ export default {
         await this.deleteMember(serviceAccountName)
       }
     },
-    confirmRemoveForeignServiceAccount (name) {
+    confirmRemoveForeignServiceAccount (serviceAccountName) {
       const projectName = escape(this.projectDetails.projectName)
-      const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-      const memberName = escape(displayName(serviceAccountName))
-      const memberNamespace = escape(displayName(serviceAccountNamespace))
+      const { namespace, name } = nameAndNamespaceFromServiceAccountUsername(serviceAccountName)
+      const memberName = escape(displayName(name))
+      const memberNamespace = escape(displayName(namespace))
 
       const messageHtml = `Do you want to remove the service account <i>${memberName}</i> of namespace <i>${memberNamespace}</i> from the project <i>${projectName}</i>?`
       return this.$refs.confirmDialog.waitForConfirmation({

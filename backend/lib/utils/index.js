@@ -66,12 +66,23 @@ function splitMemberRolesIntoRoleAndRoles (roles) {
   return { role, roles }
 }
 
-function prefixedServiceAccountToComponents (name) {
-  if (name) {
-    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-    return { serviceAccountNamespace, serviceAccountName }
+function parseUsernameToMember(username) {
+  if (!username) {
+    return undefined
   }
-  return {}
+  const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  if (name && namespace) {
+    return {
+      kind: 'ServiceAccount',
+      name,
+      namespace
+    }
+  }
+  return {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'User',
+    name: username
+  }
 }
 
 module.exports = {
@@ -82,5 +93,5 @@ module.exports = {
   shootHasIssue,
   joinMemberRoleAndRoles,
   splitMemberRolesIntoRoleAndRoles,
-  prefixedServiceAccountToComponents
+  parseUsernameToMember
 }

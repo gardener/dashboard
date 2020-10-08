@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, prefixedServiceAccountToComponents } = require('../utils')
+const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, parseUsernameToMember } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
@@ -68,8 +68,8 @@ function hasServiceAccountPrefix (name) {
 function memberPredicate (name) {
   return member => {
     if (hasServiceAccountPrefix(name)) {
-      const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-      return (member.kind === 'User' && member.name === name) || (member.kind === 'ServiceAccount' && member.name === serviceAccountName && member.namespace === serviceAccountNamespace)
+      const serviceAccountMember = parseUsernameToMember(name)
+      return (member.kind === 'User' && member.name === name) || (member.kind === 'ServiceAccount' && member.name === serviceAccountMember.name && member.namespace === serviceAccountMember.namespace)
     } else {
       return member.kind === 'User' && member.name === name
     }
@@ -134,24 +134,12 @@ const updateMemberInNotNormalizedProjectMemberList = function (memberName, membe
     return
   }
 
-  if (hasServiceAccountPrefix(memberName)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(memberName)
-    memberList.push({
-      kind: 'ServiceAccount',
-      name: serviceAccountName,
-      namespace: serviceAccountNamespace,
-      role,
-      roles
-    })
-  } else {
-    memberList.push({
-      kind: 'User',
-      name: memberName,
-      apiGroup: 'rbac.authorization.k8s.io',
-      role,
-      roles
-    })
-  }
+  const member = parseUsernameToMember(memberName)
+  memberList.push({
+    ...member,
+    role,
+    roles
+  })
 }
 
 exports.updateMemberInNotNormalizedProjectMemberList = updateMemberInNotNormalizedProjectMemberList
@@ -251,10 +239,10 @@ exports.get = async function ({ user, namespace, name }) {
   }
 
   if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (serviceAccountNamespace === namespace) {
+    const serviceAccountMember = parseUsernameToMember(name)
+    if (serviceAccountMember.namespace === namespace) {
       const projectName = project.metadata.name
-      const serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
+      const serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountMember.name)
       const server = config.apiServerUrl
       const secretName = _.first(serviceAccount.secrets).name
       const secret = await client.core.secrets.get(namespace, secretName)
@@ -264,10 +252,10 @@ exports.get = async function ({ user, namespace, name }) {
       const contextName = `${clusterName}-${projectName}-${name}`
 
       const kubeconfig = dumpKubeconfig({
-        user: serviceAccountName,
+        user: serviceAccountMember.name,
         context: contextName,
         cluster: clusterName,
-        namespace: serviceAccountNamespace,
+        namespace: serviceAccountMember.namespace,
         token,
         server,
         caData
@@ -292,12 +280,12 @@ exports.create = async function ({ user, namespace, body: { name, roles } }) {
 
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
 
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (serviceAccountNamespace === namespace && !_.find(serviceAccounts, { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })) {
+  const member = parseUsernameToMember(name)
+  if (member.kind === 'ServiceAccount') {
+    if (member.namespace === namespace && !_.find(serviceAccounts, { metadata: { namespace: member.namespace, name: member.name } })) {
       await createServiceaccount(client, {
-        namespace: serviceAccountNamespace,
-        name: serviceAccountName,
+        namespace: member.namespace,
+        name: member.name,
         createdBy: user.id
       })
     }
@@ -329,12 +317,12 @@ exports.remove = async function ({ user, namespace, name }) {
   // unassign user from project
   const project = await unsetProjectMember(client, { namespace, name })
 
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (serviceAccountNamespace === namespace) {
+  const member = parseUsernameToMember(name)
+  if (member.kind === 'ServiceAccount') {
+    if (member.namespace === namespace) {
       await deleteServiceaccount(client, {
         namespace,
-        name: serviceAccountName
+        name: member.name
       })
     }
   }

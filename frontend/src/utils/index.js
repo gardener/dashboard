@@ -159,7 +159,7 @@ export function fullDisplayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
+  if (hasServiceAccountPrefix(username)) {
     const [namespace, serviceAccount] = split(username, ':', 4).slice(2)
     return toUpper(`${namespace} / ${serviceAccount}`)
   }
@@ -173,7 +173,7 @@ export function displayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
+  if (hasServiceAccountPrefix(username)) {
     const [, serviceAccount] = split(username, ':', 4).slice(2)
     return toUpper(serviceAccount)
   }
@@ -202,7 +202,7 @@ export function gravatarUrlGeneric (username, size = 128) {
   if (isEmail(username)) {
     return gravatarUrlIdenticon(username, size)
   }
-  if (isServiceAccount(username)) {
+  if (hasServiceAccountPrefix(username)) {
     return gravatarUrlRobohash(username, size)
   }
   return gravatarUrlRetro(username, size)
@@ -406,31 +406,26 @@ export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
 
-export function isServiceAccount (username) {
+export function hasServiceAccountPrefix (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
-export function isForeignServiceAccount (serviceAccount, namespace) {
-  if (serviceAccount && namespace) {
-    const { serviceAccountNamespace } = prefixedServiceAccountToComponents(serviceAccount)
-    if (serviceAccountNamespace && serviceAccountNamespace !== namespace) {
+export function isForeignServiceAccount (serviceAccountName, currentNamespace) {
+  if (serviceAccountName && currentNamespace) {
+    const { namespace } = nameAndNamespaceFromServiceAccountUsername(serviceAccountName)
+    if (namespace && namespace !== currentNamespace) {
       return true
     }
   }
   return false
 }
 
-export function prefixedServiceAccountToComponents (serviceAccount) {
-  if (serviceAccount) {
-    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(serviceAccount) || []
-    return { serviceAccountNamespace, serviceAccountName }
+export function nameAndNamespaceFromServiceAccountUsername(username) {
+  if (!username) {
+    return undefined
   }
-  return {}
-}
-
-export function isPrefixedServiceAccount (serviceAccount) {
-  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(serviceAccount)
-  return serviceAccountNamespace && serviceAccountName
+  const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  return { namespace, name }
 }
 
 // expect colors to be in format <color> <optional:modifier>
