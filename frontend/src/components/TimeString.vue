@@ -89,7 +89,7 @@ export default {
       let diffInMilliseconds
       if (this.mode === 'past') {
         this.negativeRefDate = true
-      } else if (toLower(this.mode) === 'future') {
+      } else if (this.mode === 'future') {
         this.negativeRefDate = false
       } else if (currentDate > refDate) {
         this.negativeRefDate = true
