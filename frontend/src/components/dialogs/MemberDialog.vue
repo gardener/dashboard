@@ -180,10 +180,10 @@ export default {
               return resourceName(value)
             },
             unique: value => {
-              if (isForeignServiceAccount(this.namespace, value)) {
-                return true
+              if (hasServiceAccountPrefix(value)) {
+                return unique('serviceAccountNames')(value, this)
               }
-              return unique('serviceAccountNames')(nameFromPrefixedServiceAccountName(value), this)
+              return unique('serviceAccountNamesWithoutPrefix')(value, this)
             }
           }
         }
@@ -273,7 +273,10 @@ export default {
     },
     serviceAccountNames () {
       const serviceAccounts = filter(this.memberList, ({ username }) => hasServiceAccountPrefix(username))
-      return map(serviceAccounts, ({ username }) => nameFromPrefixedServiceAccountName(username))
+      return map(serviceAccounts, 'username')
+    },
+    serviceAccountNamesWithoutPrefix () {
+      return map(this.serviceAccountNames, nameFromPrefixedServiceAccountName)
     },
     projectUserNames () {
       const users = filter(this.memberList, ({ username }) => !hasServiceAccountPrefix(username))
@@ -405,7 +408,7 @@ export default {
     defaultServiceName () {
       let name = defaultServiceName
       let counter = 1
-      while (includes(this.serviceAccountNames, name)) {
+      while (includes(this.serviceAccountNamesWithoutPrefix, name)) {
         name = `${defaultServiceName}-${counter}`
         counter++
       }

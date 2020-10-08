@@ -410,7 +410,7 @@ export function hasServiceAccountPrefix (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
-export function isForeignServiceAccount (serviceAccountName, currentNamespace) {
+export function isForeignServiceAccount (currentNamespace, serviceAccountName) {
   if (serviceAccountName && currentNamespace) {
     const { namespace } = nameAndNamespaceFromServiceAccountUsername(serviceAccountName)
     if (namespace && namespace !== currentNamespace) {

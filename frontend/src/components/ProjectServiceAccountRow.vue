@@ -29,6 +29,12 @@ limitations under the License.
           >
             <template v-slot:popperRef>
               <span>{{displayName}}</span>
+              <v-tooltip v-if="!isServiceAccountFromCurrentNamespace" top>
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
+                </template>
+                <span>Service Account invitewd from namespace {{serviceAccountNamespace}}</span>
+              </v-tooltip>
             </template>
             <v-list class="pa-0">
               <v-list-item class="px-0">
@@ -81,7 +87,6 @@ limitations under the License.
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -92,7 +97,6 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -103,7 +107,6 @@ limitations under the License.
           <span>Change service account roles</span>
         </v-tooltip>
       </v-list-item-action>
-      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -116,7 +119,6 @@ limitations under the License.
           <span v-else>Remove service account from project</span>
         </v-tooltip>
       </v-list-item-action>
-      <div v-else class="ma-5"></div>
     </v-list-item>
   </div>
 </template>
@@ -127,7 +129,8 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
-  isForeignServiceAccount
+  isForeignServiceAccount,
+  nameAndNamespaceFromServiceAccountUsername
 } from '@/utils'
 
 export default {
@@ -181,6 +184,10 @@ export default {
     },
     createdByClasses () {
       return this.createdBy ? ['font-weight-bold'] : ['grey--text']
+    },
+    serviceAccountNamespace () {
+      const { namespace } = nameAndNamespaceFromServiceAccountUsername(this.username)
+      return namespace
     }
   },
   methods: {
