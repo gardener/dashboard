@@ -29,10 +29,10 @@ limitations under the License.
       <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-string :dateTime="ticket.metadata.created_at" mode="past"></time-string>
     </v-container>
-    <v-container>
+    <v-list>
       <ticket-comment :comment="ticket"></ticket-comment>
       <ticket-comment v-for="comment in commentsForTicket" :key="comment.metadata.id" :comment="comment"></ticket-comment>
-    </v-container>
+    </v-list>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
       <v-btn text class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
