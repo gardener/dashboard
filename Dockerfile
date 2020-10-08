@@ -21,8 +21,8 @@ WORKDIR /tmp/src
 
 COPY . .
 
-# validate zero-installs monorepo project
-RUN yarn install --immutable --immutable-cache
+# validate zero-installs monorepo project (slightly safer because we accept external PRs)
+RUN yarn install --immutable --immutable-cache --check-cache
 
 # run lint in all workspaces
 RUN yarn workspaces foreach --all run lint
@@ -32,7 +32,7 @@ RUN yarn workspaces foreach --all run test-coverage
 
 # run frontend build 
 RUN yarn workspace @gardener-dashboard/frontend run build
-    
+
 # install backend workspace and its dependencies
 RUN rm .pnp.js \
     && rm -rf .yarn/cache \
@@ -40,8 +40,8 @@ RUN rm .pnp.js \
 
 # create production monorepo project
 RUN mkdir -p dist/.yarn dist/backend \
+    && find packages -type d -regex ".*/\(__tests__\|coverage\)$" -prune -exec rm -rf {} \; \
     && cp -r package.json ./.pnp.js packages dist \
-    && find dist/packages -type d -name __tests__ -prune -exec rm -rf {} \; \
     && cp -r ./.yarn/cache dist/.yarn \
     && cp -r backend/package.json backend/server.js backend/lib dist/backend \
     && cp -r frontend/dist dist/backend/public
@@ -53,10 +53,10 @@ RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
     && apk add --no-cache tini libstdc++
 
-WORKDIR /usr/src/app/backend
+WORKDIR /usr/src/backend
 
 ENV NODE_ENV "production"
-ENV NODE_OPTIONS "--require /usr/src/app/.pnp.js"
+ENV NODE_OPTIONS "--require /usr/src/.pnp.js"
 
 ARG PORT=8080
 ENV PORT $PORT
