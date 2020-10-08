@@ -8,6 +8,10 @@ TAG          := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
 build:
 	@docker build -t $(IMAGE):$(TAG) --rm .
 
+.PHONY: build-ci
+build-ci:
+	@docker build -t $(IMAGE):$(TAG) --build-arg CHECK_CACHE=True --rm .
+
 .PHONY: push
 push:
 	@if ! gcloud config configurations list | tail -n +2 | awk '{ print $$1 }' | grep -q -F "gardener"; then echo "Activation of gcloud configuration \"gardener\" failed"; false; fi

@@ -17,12 +17,20 @@
 #### Builder ####
 FROM node:14-alpine3.12 as builder
 
-WORKDIR /tmp/src
+WORKDIR /usr/src/app
 
 COPY . .
 
-# validate zero-installs monorepo project (slightly safer because we accept external PRs)
-RUN yarn install --immutable --immutable-cache --check-cache
+ARG CHECK_CACHE==False
+
+# validate zero-installs project and disable network
+RUN if [ "$CHECK_CACHE" = "True" ]; then \
+        yarn install --immutable --immutable-cache --check-cache \
+        && yarn config set enableNetwork false; \
+    else \
+        yarn config set enableNetwork false \
+        && yarn install --immutable --immutable-cache; \
+    fi
 
 # run lint in all workspaces
 RUN yarn workspaces foreach --all run lint
@@ -30,21 +38,16 @@ RUN yarn workspaces foreach --all run lint
 # run test in all workspaces
 RUN yarn workspaces foreach --all run test-coverage
 
+# run backend production install 
+RUN yarn workspace @gardener-dashboard/backend prod-install /usr/src/build
+
 # run frontend build 
 RUN yarn workspace @gardener-dashboard/frontend run build
 
-# install backend workspace and its dependencies
-RUN rm .pnp.js \
-    && rm -rf .yarn/cache \
-    && yarn workspaces focus --production @gardener-dashboard/backend
-
-# create production monorepo project
-RUN mkdir -p dist/.yarn dist/backend \
-    && find packages -type d -regex ".*/\(__tests__\|coverage\)$" -prune -exec rm -rf {} \; \
-    && cp -r package.json ./.pnp.js packages dist \
-    && cp -r ./.yarn/cache dist/.yarn \
-    && cp -r backend/package.json backend/server.js backend/lib dist/backend \
-    && cp -r frontend/dist dist/backend/public
+# copy files to production directory
+RUN cp -r backend/server.js backend/lib /usr/src/build \
+    && cp -r frontend/dist /usr/src/build/public \
+    && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
 FROM alpine:3.12 as release
@@ -53,10 +56,10 @@ RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
     && apk add --no-cache tini libstdc++
 
-WORKDIR /usr/src/backend
+WORKDIR /usr/src/app
 
 ENV NODE_ENV "production"
-ENV NODE_OPTIONS "--require /usr/src/.pnp.js"
+ENV NODE_OPTIONS "--require /usr/src/app/.pnp.js"
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -64,8 +67,8 @@ ENV PORT $PORT
 # copy node binary
 COPY --from=builder /usr/local/bin/node /usr/local/bin/
 
-# copy root workspace
-COPY --from=builder /tmp/src/dist ../
+# copy production directory
+COPY --chown=node:node --from=builder /usr/src/build .
 
 USER node
 
