@@ -1339,12 +1339,13 @@ const stub = {
     getServiceAccountsForNamespace(scope, namespace)
 
     const member = parseUsernameToMember(username)
+    const serviceAccount = { metadata: { namespace: member.namespace, name: member.name }}
     if (member.name &&
       member.namespace === namespace &&
-      !_.find(serviceAccountList, { metadata: { namespace: member.namespace, name: member.name } })) {
+      !_.find(serviceAccountList, serviceAccount)) {
       scope
       .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
-      .reply(200)
+      .reply(200, () => serviceAccount)
     }
 
     scope

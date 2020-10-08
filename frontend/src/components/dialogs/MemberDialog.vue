@@ -83,7 +83,7 @@ import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { nameFromPrefixedServiceAccountName, hasServiceAccountPrefix, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, parseUsernameToMember, isPrefixedServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { nameFromPrefixedServiceAccountName, hasServiceAccountPrefix, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -174,7 +174,7 @@ export default {
           validators.internalName = {
             required,
             serviceAccountResource: value => {
-              if (isPrefixedServiceAccount(this.internalName)) {
+              if (hasServiceAccountPrefix(this.internalName)) {
                 return true
               }
               return resourceName(value)
@@ -285,7 +285,7 @@ export default {
         return name
       }
       if (this.isServiceDialog) {
-        if (isPrefixedServiceAccount(name)) {
+        if (hasServiceAccountPrefix(name)) {
           return name
         }
         return `system:serviceaccount:${this.namespace}:${name}`

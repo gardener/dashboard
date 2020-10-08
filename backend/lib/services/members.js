@@ -281,13 +281,15 @@ exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
 
   const member = parseUsernameToMember(name)
+
   if (member.kind === 'ServiceAccount') {
     if (member.namespace === namespace && !_.find(serviceAccounts, { metadata: { namespace: member.namespace, name: member.name } })) {
-      await createServiceaccount(client, {
+      const serviceAccount = await createServiceaccount(client, {
         namespace: member.namespace,
         name: member.name,
         createdBy: user.id
       })
+      serviceAccounts.push(serviceAccount)
     }
   }
 

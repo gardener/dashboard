@@ -156,6 +156,7 @@ module.exports = function ({ agent, k8s, auth }) {
       .set('cookie', await user.cookie)
       .send({ metadata, name, roles })
     expect(res).to.have.status(200)
+    expect(res.body).to.have.deep.members(_.concat(members, { username: name, roles }))
   })
 
   it('should add a service account and assign member roles', async function () {

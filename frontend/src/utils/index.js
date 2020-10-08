@@ -420,7 +420,7 @@ export function isForeignServiceAccount (serviceAccountName, currentNamespace) {
   return false
 }
 
-export function nameAndNamespaceFromServiceAccountUsername(username) {
+export function nameAndNamespaceFromServiceAccountUsername (username) {
   if (!username) {
     return undefined
   }
