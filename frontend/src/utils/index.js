@@ -42,7 +42,7 @@ import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
-import { sortBy } from 'lodash'
+import sortBy from 'lodash/sortBy'
 const uuidv4 = require('uuid/v4')
 
 export function emailToDisplayName (value) {
