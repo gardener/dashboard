@@ -87,7 +87,7 @@ export default {
       const currentDate = new Date().getTime()
       const refDate = new Date(dateTimeValue).getTime()
       let diffInMilliseconds
-      if (toLower(this.mode) === 'past') {
+      if (this.mode === 'past') {
         this.negativeRefDate = true
       } else if (toLower(this.mode) === 'future') {
         this.negativeRefDate = false
