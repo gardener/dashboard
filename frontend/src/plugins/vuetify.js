@@ -15,7 +15,7 @@
 // limitations under the License.
 //
 
-import 'typeface-roboto'
+import 'fontsource-roboto'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/dist/vuetify.min.css'
 import '@/sass/main.scss'

@@ -1953,6 +1953,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-standard", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],
             ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.2.2"],
             ["eslint-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.0-beta.7"],
+            ["fontsource-roboto", "npm:3.0.3"],
             ["get-contrast", "npm:2.0.0"],
             ["highlight.js", "npm:9.18.3"],
             ["jest-environment-jsdom-fifteen", "npm:1.0.2"],
@@ -1977,7 +1978,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["socket.io-client", "npm:2.3.0"],
             ["splitpanes", "npm:2.2.1"],
             ["symbol-tree", "npm:3.2.4"],
-            ["typeface-roboto", "npm:0.0.75"],
             ["url-template", "npm:2.0.8"],
             ["uuid", "npm:8.3.0"],
             ["vue", "npm:2.6.12"],
@@ -9843,6 +9843,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["follow-redirects", "npm:1.5.10"],
             ["debug", "virtual:204cd6caf9d7c6ae041582d1a82f7210b000e54b520237d75f39ad7baf693e967075e3da4ed79d47baa24b980c5b72611d5a84c8588cbb0046d9e6a4c986583f#npm:3.1.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["fontsource-roboto", [
+        ["npm:3.0.3", {
+          "packageLocation": "./.yarn/cache/fontsource-roboto-npm-3.0.3-a29e6f1fe0-f558284f81.zip/node_modules/fontsource-roboto/",
+          "packageDependencies": [
+            ["fontsource-roboto", "npm:3.0.3"]
           ],
           "linkType": "HARD",
         }]
@@ -19850,15 +19859,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["typedarray-to-buffer", "npm:3.1.5"],
             ["is-typedarray", "npm:1.0.0"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["typeface-roboto", [
-        ["npm:0.0.75", {
-          "packageLocation": "./.yarn/cache/typeface-roboto-npm-0.0.75-389be8e014-ee56f5cc57.zip/node_modules/typeface-roboto/",
-          "packageDependencies": [
-            ["typeface-roboto", "npm:0.0.75"]
           ],
           "linkType": "HARD",
         }]

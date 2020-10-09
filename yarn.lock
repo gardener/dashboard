@@ -1374,6 +1374,7 @@ __metadata:
     eslint-plugin-standard: ^4.0.0
     eslint-plugin-vue: ^6.2.2
     eslint-plugin-vuetify: ^1.0.0-beta.7
+    fontsource-roboto: "*"
     get-contrast: ^2.0.0
     highlight.js: ^9.18.1
     jest-environment-jsdom-fifteen: ^1.0.2
@@ -1398,7 +1399,6 @@ __metadata:
     socket.io-client: ^2.3.0
     splitpanes: ^2.2.1
     symbol-tree: ^3.2.4
-    typeface-roboto: "*"
     url-template: ^2.0.8
     uuid: ^8.3.0
     vue: ^2.6.11
@@ -8155,6 +8155,13 @@ __metadata:
   dependencies:
     debug: =3.1.0
   checksum: 6e58e02c31337b6b41ffc3d5f3d49920b7db428eddcf374537da00ef121fe473983e12d8557f4304287604168d3efcc288d1f009abaf4c9d61e5db0c0cee3c4a
+  languageName: node
+  linkType: hard
+
+"fontsource-roboto@npm:*":
+  version: 3.0.3
+  resolution: "fontsource-roboto@npm:3.0.3"
+  checksum: f558284f8137ff69111875a6daf6b50355ab54508c5525085b70fe8a767767a6ff6693e535a8b8fc7726343fb7f131525167984b7c92d228986a91f952fb8df2
   languageName: node
   linkType: hard
 
@@ -17278,13 +17285,6 @@ resolve@1.1.7:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: c9ef0176aaf32593514c31e5c6edc1db970847aff6e1f0a0570a6ac0cc996335792f394c2fcec59cc76691d22a01888ea073a2f3c6930cfcf7c519addf4e2ad7
-  languageName: node
-  linkType: hard
-
-"typeface-roboto@npm:*":
-  version: 0.0.75
-  resolution: "typeface-roboto@npm:0.0.75"
-  checksum: ee56f5cc5720b2c15ee851652f3584a53d56ec2d1448dc757e0097808071f4d7d6843e66e343483a92e94d7b3f3a9436153517818834a367977bea888fc6d429
   languageName: node
   linkType: hard
 
