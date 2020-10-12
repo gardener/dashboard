@@ -4,14 +4,18 @@ const fs = require('fs')
 const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin')
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin')
 
-const version = fs.readFileSync(path.resolve(__dirname, '../VERSION'), 'utf8').toString('utf8').trim()
+if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
+  try {
+    process.env.VUE_APP_VERSION = fs.readFileSync(path.resolve(__dirname, '../VERSION')).toString().trim()
+  } catch (err) {
+    process.env.VUE_APP_VERSION = require('./package.json').version
+  }
+}
 const proxyTarget = 'http://localhost:3030'
 const currentYear = new Date().getFullYear()
 
 const KiB = 1024
 const MiB = 1024 * KiB
-
-process.env.VUE_APP_VERSION = version
 
 module.exports = {
   transpileDependencies: [
@@ -31,6 +35,10 @@ module.exports = {
     }
   },
   chainWebpack (config) {
+    if (process.env.NODE_ENV === 'development') {
+      config.plugins.delete('VuetifyLoaderPlugin')
+    }
+
     config
       .plugin('moment-locales')
       .use(MomentLocalesPlugin, [{

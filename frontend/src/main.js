@@ -28,16 +28,34 @@ import './plugins/bus'
 import './plugins/auth'
 import './plugins/storage'
 import './plugins/yaml'
-import vuetify from './plugins/vuetify'
 import App from './App'
 import store from './store'
 import createRouter from './router'
 
-Vue.config.productionTip = false
+import 'fontsource-roboto'
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/dist/vuetify.min.css'
+import '@/sass/main.scss'
 
-new Vue({
-  vuetify,
-  store,
-  router: createRouter(store),
-  render: h => h(App)
-}).$mount('#app')
+async function main () {
+  const { default: Vuetify } = await import(process.env.NODE_ENV === 'development' ? 'vuetify' : 'vuetify/lib')
+
+  Vue.use(Vuetify)
+
+  const vuetify = new Vuetify({
+    icons: {
+      iconfont: 'mdi'
+    }
+  })
+
+  Vue.config.productionTip = false
+
+  new Vue({
+    vuetify,
+    store,
+    router: createRouter(store),
+    render: h => h(App)
+  }).$mount('#app')
+}
+
+main()
