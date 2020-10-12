@@ -39,6 +39,13 @@ module.exports = {
       config.plugins.delete('VuetifyLoaderPlugin')
     }
 
+    const splitChunks = config.optimization.get('splitChunks')
+    Object.assign(splitChunks.cacheGroups.common, {
+      chunks: 'all',
+      maxSize: 512 * 1024
+    })
+    config.optimization.splitChunks(splitChunks)
+
     config
       .plugin('moment-locales')
       .use(MomentLocalesPlugin, [{
