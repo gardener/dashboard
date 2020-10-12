@@ -133,7 +133,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">label_outline</v-icon>
+            <v-icon color="cyan darken-2">mdi-label-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Purpose</v-list-item-subtitle>
