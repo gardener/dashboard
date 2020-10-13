@@ -33,12 +33,15 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
+
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
+
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import get from 'lodash/get'
+
 import { shootItem } from '@/mixins/shootItem'
+const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
 
 export default {
   name: 'hibernation-configuration',

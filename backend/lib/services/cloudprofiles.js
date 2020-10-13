@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { NotFound } = require('../errors')
+const { NotFound } = require('http-errors')
 const logger = require('../logger')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')

@@ -21,7 +21,7 @@ limitations under the License.
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn disabled icon>
-        <v-icon class="white--text">add</v-icon>
+        <v-icon class="white--text">mdi-plus</v-icon>
       </v-btn>
       <v-btn disabled icon>
         <v-icon class="white--text">mdi-help-circle-outline</v-icon>

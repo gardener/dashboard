@@ -16,9 +16,9 @@
 
 'use strict'
 
-const { HTTPError } = require('../lib/http-client')
+const { createHttpError } = require('@gardener-dashboard/request')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { healthCheck } = require('../lib/healthz')
-const { dashboardClient } = require('../lib/kubernetes-client')
 
 describe('healthz', function () {
   /* eslint no-unused-expressions: 0 */
@@ -45,7 +45,7 @@ describe('healthz', function () {
   })
 
   it('should throw a HTTP Error', async function () {
-    getHealthzStub.throws(new HTTPError({ body: 'body', statusCode: 500 }))
+    getHealthzStub.throws(createHttpError({ statusCode: 500, body: 'body' }))
     try {
       await healthCheck(true)
     } catch (err) {

@@ -31,7 +31,7 @@ limitations under the License.
         <v-col>
           <div class="py-4">Do you want to start rotation of kubeconfig credentials?
           </div>
-          <v-alert dense color="warning" icon="priority_high" outlined>
+          <v-alert dense color="warning" icon="mdi-exclamation-thick" outlined>
             The current kubeconfig credentials will be revoked.
           </v-alert>
           <div class="pt-4">Type <strong>{{shootName}}</strong> below and confirm revokation of current kubeconfig credentials.

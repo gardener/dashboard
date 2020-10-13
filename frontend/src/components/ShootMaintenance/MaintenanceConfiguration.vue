@@ -35,13 +35,16 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
+import assign from 'lodash/assign'
+
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+
 import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import get from 'lodash/get'
-import assign from 'lodash/assign'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

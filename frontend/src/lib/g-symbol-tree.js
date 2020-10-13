@@ -15,14 +15,13 @@
 //
 
 import Vue from 'vue'
-import cloneDeep from 'lodash/cloneDeep'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import keys from 'lodash/keys'
 import compact from 'lodash/compact'
 import values from 'lodash/values'
 import SymbolTree from 'symbol-tree'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export const PositionEnum = {
   TOP: 'top',
@@ -36,11 +35,24 @@ export class Leaf {
     this.uuid = uuid
     this.data = data
   }
+
+  toJSON () {
+    return {
+      uuid: this.uuid,
+      data: this.data
+    }
+  }
 }
 
 export class SplitpaneTree {
   constructor ({ horizontal = false } = {}) {
     this.horizontal = horizontal
+  }
+
+  toJSON () {
+    return {
+      horizontal: this.horizontal
+    }
   }
 }
 
@@ -140,16 +152,16 @@ export class GSymbolTree extends SymbolTree {
   }
 
   toJSON (parent) {
-    const clonedParent = cloneDeep(parent)
     if (!this.hasChildren(parent)) {
       return undefined
     }
+    const clonedParent = parent.toJSON()
     const items = []
     for (const child of this.childrenIterator(parent)) {
       if (child instanceof SplitpaneTree) {
         items.push(this.toJSON(child))
       } else {
-        items.push(cloneDeep(child))
+        items.push(child.toJSON())
       }
     }
     clonedParent.items = compact(items)

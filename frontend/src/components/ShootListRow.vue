@@ -127,8 +127,12 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import forEach from 'lodash/forEach'
+import includes from 'lodash/includes'
+
 import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
+import CopyBtn from '@/components/CopyBtn'
 import Vendor from '@/components/Vendor'
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
@@ -136,19 +140,18 @@ import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import TicketLabels from '@/components/ShootTickets/TicketLabels'
-import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
-import forEach from 'lodash/forEach'
-import includes from 'lodash/includes'
+
 import {
   isTypeDelete,
   isShootHasNoHibernationScheduleWarning,
   getTimestampFormatted
 } from '@/utils'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

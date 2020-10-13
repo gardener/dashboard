@@ -55,13 +55,14 @@ limitations under the License.
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
 import cloneDeep from 'lodash/cloneDeep'
 import isEmpty from 'lodash/isEmpty'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
+
 import { compileMarkdown } from '@/utils'
-import { mapState, mapGetters } from 'vuex'
 
 export default {
   props: {

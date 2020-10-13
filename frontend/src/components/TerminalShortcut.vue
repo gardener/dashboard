@@ -85,7 +85,6 @@ import get from 'lodash/get'
 import join from 'lodash/join'
 import { TargetEnum, targetText } from '@/utils'
 import CodeBlock from '@/components/CodeBlock'
-import jsyaml from 'js-yaml'
 
 export default {
   props: {
@@ -111,7 +110,8 @@ export default {
   },
   data () {
     return {
-      expansionPanel: false
+      expansionPanel: false,
+      shortcutYaml: ''
     }
   },
   mixins: [shootItem],
@@ -154,11 +154,6 @@ export default {
     shortcutVisibilityTitle () {
       return this.expansionPanel ? 'Hide Shortcut' : 'Show Shortcut'
     },
-    shortcutYaml () {
-      return jsyaml.safeDump(this.shortcut, {
-        skipInvalid: true
-      })
-    },
     isUnverified () {
       return !!this.shortcut.unverified
     }
@@ -169,6 +164,17 @@ export default {
     },
     shortcutTargetDescription (shortcut) {
       return targetText(shortcut.target)
+    },
+    async updateShortcutYaml (value) {
+      this.shortcutYaml = await this.$yaml.safeDump(value)
+    }
+  },
+  created () {
+    this.updateShortcutYaml(this.shortcut)
+  },
+  watch: {
+    async shortcut (value) {
+      this.updateShortcutYaml(this.shortcut)
     }
   }
 }

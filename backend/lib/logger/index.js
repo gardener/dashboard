@@ -16,7 +16,10 @@
 
 'use strict'
 
-const Logger = require('./Logger')
-const config = require('../config')
+const { logLevel, logHttpRequestBody } = require('../config')
+const { globalLogger } = require('@gardener-dashboard/logger')
 
-module.exports = new Logger(config)
+globalLogger.setLogLevel(logLevel)
+globalLogger.setLogHttpRequestBody(logHttpRequestBody)
+
+module.exports = globalLogger

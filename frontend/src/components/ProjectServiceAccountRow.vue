@@ -80,7 +80,7 @@ limitations under the License.
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click="onKubeconfig">
-              <v-icon>visibility</v-icon>
+              <v-icon>mdi-eye</v-icon>
             </v-btn>
           </template>
           <span>Show Kubeconfig</span>

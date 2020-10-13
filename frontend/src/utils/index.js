@@ -42,7 +42,7 @@ import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export function emailToDisplayName (value) {
   if (value) {

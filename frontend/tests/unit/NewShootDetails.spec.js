@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import NewShootDetails from '@/components/NewShoot/NewShootDetails.vue'
 import Vue from 'vue'
@@ -68,17 +67,17 @@ function createNewShootDetailsComponent () {
       sortedKubernetesVersionsList: () => []
     }
   })
-  const machineImageComponent = wrapper.find(NewShootDetails)
+  const machineImageComponent = wrapper.findComponent(NewShootDetails)
   return machineImageComponent.vm
 }
 
-describe('NewShootDetails.vue', function () {
+describe('NewShootDetails.vue', () => {
   beforeEach(() => {
     vuetify = new Vuetify()
   })
 
-  it('maximum shoot name length should depend on project name', function () {
+  it('maximum shoot name length should depend on project name', () => {
     const shootDetails = createNewShootDetailsComponent()
-    expect(shootDetails.maxShootNameLength).to.equal(18)
+    expect(shootDetails.maxShootNameLength).toBe(18)
   })
 })

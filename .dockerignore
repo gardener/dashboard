@@ -1,9 +1,38 @@
 # Ignore everything
 **
 
-# include backend files and folders
+# include Yarn 2 configuration, cache, releases and plugins
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarnrc.yml
+
+# include root workspace
+!package.json
+!yarn.lock
+
+# include workspace packages/logger
+!packages/logger/package.json
+!packages/logger/lib
+!packages/logger/__tests__
+
+# include workspace packages/request
+!packages/request/package.json
+!packages/request/lib
+!packages/request/__tests__
+
+# include workspace packages/kube-config
+!packages/kube-config/package.json
+!packages/kube-config/lib
+!packages/kube-config/__tests__
+
+# include workspace packages/kube-client
+!packages/kube-client/package.json
+!packages/kube-client/lib
+!packages/kube-client/__tests__
+
+# include workspace backend
 !backend/package.json
-!backend/yarn.lock
 !backend/.mocharc.yaml
 !backend/.babelrc
 !backend/.eslintrc.js
@@ -14,23 +43,25 @@
 !backend/bin
 !backend/test
 
-# include frontend folder
+# include workspace frontend
 !frontend/package.json
-!frontend/yarn.lock
 !frontend/.browserslistrc
 !frontend/.editorconfig
-!frontend/.env
-!frontend/.eslintignore
-!frontend/.eslintrc.js
+!frontend/.env*
+!frontend/.eslint*
 !frontend/*.config.js
 !frontend/public
 !frontend/src
 !frontend/tests
 
+# include workspace charts
+!charts/package.json
+!charts/jest.setup.js
+!charts/_versions.tpl
+!charts/gardener-dashboard
+!charts/identity
+!charts/__tests__
+
 # include metadata files
-!package.json
-!yarn.lock
-!LICENSE.md
-!NOTICE.md
 !VERSION
 !Dockerfile

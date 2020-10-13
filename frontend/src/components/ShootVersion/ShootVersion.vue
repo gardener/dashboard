@@ -32,7 +32,7 @@ limitations under the License.
             depressed
             color="cyan darken-2"
           >
-            <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
+            <v-icon small v-if="availableK8sUpdates">mdi-menu-up</v-icon>
             {{shootK8sVersion}}
           </v-btn>
           <v-btn

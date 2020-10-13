@@ -126,18 +126,6 @@ limitations under the License.
 </template>
 
 <script>
-
-import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
-import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
-import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
-import NewShootDetails from '@/components/NewShoot/NewShootDetails'
-import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
-import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
-import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
-import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
-import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
-import GAlert from '@/components/GAlert'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
@@ -146,9 +134,23 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+
+import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
+import GAlert from '@/components/GAlert'
+import NewShootDetails from '@/components/NewShoot/NewShootDetails'
+import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
+import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
+import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
+const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
+
 const EventEmitter = require('events')
 
 export default {

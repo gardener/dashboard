@@ -21,18 +21,35 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN yarn --cwd=backend install --no-progress --production \
-    && cp -R backend/node_modules backend/production_node_modules \
-    && yarn --cwd=backend install --no-progress \
-    && yarn --cwd=backend lint \
-    && yarn --cwd=backend test:coverage \
-    && yarn --cwd=backend sync-version \
-    && yarn --cwd=frontend install --no-progress \
-    && yarn --cwd=frontend lint \
-    && yarn --cwd=frontend test:unit \
-    && yarn --cwd=frontend build
+ARG CHECK_CACHE==False
 
-# Release
+# validate zero-installs project and disable network
+RUN if [ "$CHECK_CACHE" = "True" ]; then \
+        yarn install --immutable --immutable-cache --check-cache \
+        && yarn config set enableNetwork false; \
+    else \
+        yarn config set enableNetwork false \
+        && yarn install --immutable --immutable-cache; \
+    fi
+
+# run lint in all workspaces
+RUN yarn workspaces foreach --all run lint
+
+# run test in all workspaces
+RUN yarn workspaces foreach --all run test-coverage
+
+# run backend production install 
+RUN yarn workspace @gardener-dashboard/backend prod-install /usr/src/build
+
+# run frontend build 
+RUN yarn workspace @gardener-dashboard/frontend run build
+
+# copy files to production directory
+RUN cp -r backend/server.js backend/lib /usr/src/build \
+    && cp -r frontend/dist /usr/src/build/public \
+    && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
+
+#### Release ####
 FROM alpine:3.12 as release
 
 RUN addgroup -g 1000 node \
@@ -41,18 +58,17 @@ RUN addgroup -g 1000 node \
 
 WORKDIR /usr/src/app
 
-ENV NODE_ENV production
+ENV NODE_ENV "production"
+ENV NODE_OPTIONS "--require /usr/src/app/.pnp.js"
 
 ARG PORT=8080
 ENV PORT $PORT
 
+# copy node binary
 COPY --from=builder /usr/local/bin/node /usr/local/bin/
 
-COPY --from=builder /usr/src/app/backend/package.json /usr/src/app/backend/server.js ./
-COPY --from=builder /usr/src/app/backend/lib ./lib/
-COPY --from=builder /usr/src/app/backend/production_node_modules ./node_modules/
-
-COPY --from=builder /usr/src/app/frontend/dist ./public/
+# copy production directory
+COPY --chown=node:node --from=builder /usr/src/build .
 
 USER node
 
@@ -60,4 +76,4 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "server.js" ]
+ENTRYPOINT [ "/sbin/tini", "--", "node", "server" ]
