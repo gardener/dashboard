@@ -24,7 +24,7 @@ limitations under the License.
     <v-col class="fluid" >
       <div class="comment">
         <div class="comment-header">
-          <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" :pointInTime="-1"></time-string></a>
+          <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
         </div>
         <div class="comment-body" v-html="compiledMarkdown"></div>
       </div>

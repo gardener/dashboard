@@ -71,7 +71,7 @@ limitations under the License.
                             <template v-slot:activator="{ on }">
                               <span class="font-weight-bold" v-on="on">{{staleAutoDeleteDate}}</span>
                             </template>
-                            <time-string :date-time="staleAutoDeleteTimestamp"></time-string>
+                            <time-string :date-time="staleAutoDeleteTimestamp" mode="future"></time-string>
                           </v-tooltip>
                         </span>
                         <span v-else>

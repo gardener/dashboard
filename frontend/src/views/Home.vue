@@ -28,7 +28,7 @@ limitations under the License.
                 :disabled="!canCreateProject"
                 @click.native.stop="projectDialog = true"
               >
-                <v-icon>add</v-icon>
+                <v-icon>mdi-plus</v-icon>
                 <span class="ml-2">{{createProjectBtnText}}</span>
               </v-btn>
             </div>

@@ -19,8 +19,8 @@
 const _ = require('lodash')
 const config = require('./config')
 const logger = require('./logger')
-const { isHttpError } = require('./kubernetes-client')
-const { NotFound, InternalServerError } = require('./errors')
+const { NotFound, InternalServerError, isHttpError } = require('http-errors')
+const { STATUS_CODES } = require('http')
 
 function frontendConfig (req, res, next) {
   const frontendConfig = {}
@@ -52,47 +52,37 @@ function notFound (req, res, next) {
 }
 
 function errorToLocals (err, req) {
-  const message = err.message
-  let reason = err.reason || 'Internal Error'
-  const name = err.name
-  const stack = err.stack
-
-  const error = req.app.get('env') === 'development' ? { name, stack } : { name }
-  let status = 500
-  if (isHttpError(err) && err.response) {
-    status = err.response.statusCode
-    reason = err.response.statusMessage
-  } else if (_.isInteger(err.code)) {
-    status = err.code
-  } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
-    status = parseInt(err.code)
-  } else {
-    logger.error(`Error with invalid code ${err.code}:`, err.message, err.stack)
+  const { message, name, stack } = err
+  const details = req.app.get('env') !== 'production'
+    ? { name, stack }
+    : { name }
+  let code = 500
+  let reason = STATUS_CODES[code]
+  if (isHttpError(err)) {
+    code = err.statusCode
+    reason = STATUS_CODES[code]
   }
-  if (status < 100 || status >= 600) {
-    status = 500
+  if (code < 100 || code >= 600) {
+    code = 500
   }
-  if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
-    status = 401
-    reason = 'Authentication Error'
-  }
-  if (status >= 500) {
+  const status = code < 400 ? 'Success' : 'Failure'
+  if (code >= 500) {
     logger.error(err.message, err.stack)
   }
-  return { message, reason, status, error }
+  return { code, reason, message, status, details }
 }
 
 function sendError (err, req, res, next) {
   const locals = errorToLocals(err, req)
-  res.status(locals.status).send(locals)
+  res.status(locals.code).send(locals)
 }
 
 function renderError (err, req, res, next) {
   const locals = errorToLocals(err, req)
 
   res.format({
-    json: () => res.status(locals.status).send(locals),
-    default: () => res.status(locals.status).send(ErrorTemplate(locals))
+    json: () => res.status(locals.code).send(locals),
+    default: () => res.status(locals.code).send(ErrorTemplate(locals))
   })
 }
 
@@ -117,8 +107,8 @@ const ErrorTemplate = _.template(`<!doctype html>
 </head>
 <body>
   <h1><%= message %></h1>
-  <h2><%= status %></h2>
-  <% if (error.stack) { %><pre><%= error.stack %></pre><% } %>
+  <h2><%= code %></h2>
+  <% if (details.stack) { %><pre><%= details.stack %></pre><% } %>
 </body>
 </html>`)
 

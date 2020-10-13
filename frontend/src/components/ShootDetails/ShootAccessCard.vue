@@ -49,12 +49,12 @@ limitations under the License.
 
     <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="mdi-developer-board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">developer_board</v-icon>
+          <v-icon color="cyan darken-2">mdi-developer-board</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
@@ -106,7 +106,7 @@ limitations under the License.
 
     <v-list-item v-if="isKubeconfigTileVisible">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">insert_drive_file</v-icon>
+        <v-icon color="cyan darken-2">mdi-file</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>

@@ -23,7 +23,7 @@ limitations under the License.
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
-        <v-icon class="white--text">add</v-icon>
+        <v-icon class="white--text">mdi-plus</v-icon>
       </v-btn>
       <v-btn v-if="!disabled" icon @click.native.stop="onToogleHelp()">
         <v-icon class="white--text">mdi-help-circle-outline</v-icon>

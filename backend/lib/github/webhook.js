@@ -23,7 +23,7 @@ const bodyParser = require('body-parser')
 const { createHmac, timingSafeEqual } = require('crypto')
 const config = require('../config')
 const logger = require('../logger')
-const { InternalServerError, Forbidden } = require('../errors')
+const { InternalServerError, Forbidden } = require('http-errors')
 const { fromIssue, fromComment, loadIssueComments } = require('../services/tickets')
 const { getTicketCache } = require('../cache')
 

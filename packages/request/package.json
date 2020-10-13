@@ -1,0 +1,75 @@
+{
+  "name": "@gardener-dashboard/request",
+  "version": "1.0.0",
+  "description": "HTTP Client",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/request"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "lint": "eslint --ext .js .",
+    "test": "jest",
+    "test-coverage": "yarn test --coverage"
+  },
+  "dependencies": {
+    "got": "^11.5.2",
+    "http-errors": "^1.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.7.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^26.4.2"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2020": true,
+      "node": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {},
+    "parserOptions": {
+      "ecmaVersion": 11
+    },
+    "rules": {}
+  },
+  "jest": {
+    "restoreMocks": true,
+    "verbose": true,
+    "coverageDirectory": "coverage",
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 95,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  }
+}

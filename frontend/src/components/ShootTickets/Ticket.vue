@@ -24,7 +24,7 @@ limitations under the License.
       <span class="font-weight-bold">{{login}}</span> created this
       <a :href="ticketHtmlUrl" target="_blank" class="cyan--text text--darken-2">ticket</a>
       <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :dateTime="ticket.metadata.created_at" :pointInTime="-1"></time-string>
+      <time-string :dateTime="ticket.metadata.created_at" mode="past"></time-string>
     </v-container>
     <v-container>
       <ticket-comment :comment="ticket"></ticket-comment>

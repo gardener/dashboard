@@ -123,7 +123,7 @@ limitations under the License.
               <v-divider class="mt-1 mb-1"></v-divider>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
-                  <v-icon small class="mr-2">mdi-settings</v-icon>
+                  <v-icon small class="mr-2">mdi-cog</v-icon>
                   Settings
                 </v-btn>
               </v-card-actions>

@@ -17,12 +17,12 @@
 'use strict'
 
 const assert = require('assert').strict
-const { Unauthorized } = require('../errors')
+const { Unauthorized } = require('http-errors')
 const logger = require('../logger')
 const {
   dashboardClient,
   Resources
-} = require('../kubernetes-client')
+} = require('@gardener-dashboard/kube-client')
 
 exports.isAuthenticated = async function ({ token } = {}) {
   const { apiVersion, kind } = Resources.TokenReview

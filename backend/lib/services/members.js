@@ -14,16 +14,13 @@
 // limitations under the License.
 //
 
-
 'use strict'
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, parseUsernameToMember } = require('../utils')
-const { isHttpError } = require('../kubernetes-client')
-const { dumpKubeconfig } = require('../kubernetes-config')
-const { Conflict, NotFound } = require('../errors.js')
-const cache = require('../cache')
+const { decodeBase64 } = require('../utils')
+const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
+const { NotFound } = require('http-errors')
 
 class Member {
   constructor ({ id, roles }) {
@@ -34,7 +31,7 @@ class Member {
   }
 
   get isServiceAccount () {
-    return  _.startsWith(this.id, 'system:serviceaccount:')
+    return _.startsWith(this.id, 'system:serviceaccount:')
   }
 
   get subject () {
@@ -56,7 +53,7 @@ class Member {
 
 class SubjectListItem {
   constructor (index) {
-    this.index= index
+    this.index = index
   }
 
   get id () {
@@ -107,7 +104,7 @@ class SubjectListItemUniq extends SubjectListItem {
       .value()
   }
 
-  set roles ([ role, ...roles ] = []) {
+  set roles ([role, ...roles] = []) {
     this.subject.role = role
     if (_.isEmpty(roles)) {
       delete this.subject.roles
@@ -246,7 +243,7 @@ class SubjectList {
 
 class ProjectMemberManager {
   constructor (client, project, serviceAccounts) {
-    this.client  = client
+    this.client = client
     this.project = project
     this.serviceAccounts = serviceAccounts
     this.subjectList = new SubjectList(project.spec.members)
@@ -286,7 +283,7 @@ class ProjectMemberManager {
       .differenceBy(_.map(serviceAccountMembers, 'subject'), 'name')
       .value()
 
-    const noMemberServiceAccountSubjects = new SubjectList(_.map(noMemberServiceAccounts, ({ name, namespace}) => ({
+    const noMemberServiceAccountSubjects = new SubjectList(_.map(noMemberServiceAccounts, ({ name, namespace }) => ({
       name,
       namespace,
       kind: 'ServiceAccount'
@@ -300,7 +297,7 @@ class ProjectMemberManager {
       .values()
       .map(member => ({
         ...member,
-        username: member.id,
+        username: member.id
       }))
       .value()
   }
@@ -360,7 +357,7 @@ class ProjectMemberManager {
     this.serviceAccounts.push(serviceAccount)
   }
 
-  async deleteServiceAccount(name) {
+  async deleteServiceAccount (name) {
     const member = new Member({ name })
     if (!member.isServiceAccount) {
       return
@@ -433,7 +430,7 @@ exports.get = async function ({ user, namespace, name }) {
   const memberManager = await ProjectMemberManager.create(client, namespace)
   const member = await memberManager.get(name)
 
-  if(!member) {
+  if (!member) {
     throw new NotFound(`Member '${name}' is not a member of this project`)
   }
 
@@ -456,7 +453,7 @@ exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const memberManager = await ProjectMemberManager.create(client, namespace)
   await memberManager.createServiceAccountIfRequired(name, createdBy)
   if (roles.length) { // service account can be created without roles
-    await memberManager.create(name,roles) // assign user to project
+    await memberManager.create(name, roles) // assign user to project
   }
   return await memberManager.list()
 }
@@ -475,7 +472,7 @@ exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
 
   const memberManager = await ProjectMemberManager.create(client, namespace)
-  await memberManager.remove(name)  // unassign user from project
+  await memberManager.remove(name) // unassign user from project
   await memberManager.deleteServiceAccount(name)
 
   return await memberManager.list()

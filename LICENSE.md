@@ -224,11 +224,6 @@ Copyright (c) 2012 Cloud9 IDE, Inc. (Mike de Boer)\
 Copyright (c) 2017-2018 Octokit contributors\
 [MIT License](https://github.com/octokit/rest.js/blob/master/LICENSE)
 
-- [agentkeepalive](https://github.com/node-modules/agentkeepalive)\
-Copyright(c) node-modules and other contributors.\
-Copyright(c) 2012 - 2015 fengmk2 <fengmk2@gmail.com>\
-[MIT License](https://github.com/node-modules/agentkeepalive/blob/master/LICENSE)
-
 - [base64url](https://github.com/brianloveswords/base64url)\
 Copyright (c) 2013–2016 Brian J. Brennan\
 [MIT License](https://github.com/brianloveswords/base64url/blob/master/LICENSE)
@@ -242,10 +237,6 @@ Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/body-parser/blob/master/LICENSE)
 
-- [chalk](https://github.com/chalk/chalk)\
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
-[MIT License](https://github.com/chalk/chalk/blob/master/license)
-
 - [cookie-parser](https://github.com/expressjs/cookie-parser)\
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>\
 Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
@@ -254,10 +245,6 @@ Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 - [delay](https://github.com/sindresorhus/delay)\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/delay/blob/master/license)
-
-- [es6-error](https://github.com/bjyoungblood/es6-error)\
-Copyright (c) 2015 Ben Youngblood\
-[MIT License](https://github.com/bjyoungblood/es6-error/blob/master/LICENSE.md)
 
 - [express](https://github.com/expressjs/express)\
 Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>\
@@ -268,10 +255,6 @@ Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 - [fnv-plus](https://github.com/tjwebb/fnv-plus)\
 Copyright (c) Travis Webb\
 [MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
-
-- [got](https://github.com/sindresorhus/got)\
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
-[MIT License](https://github.com/sindresorhus/got/blob/master/license)
 
 - [helmet](https://github.com/helmetjs/helmet)\
 Copyright (c) 2012-2018 Evan Hahn, Adam Baldwin\
@@ -292,10 +275,6 @@ Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
 - [lodash](https://github.com/lodash/lodash)\
 Copyright JS Foundation and other contributors <https://js.foundation/>\
 [MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
-
-- [mixwith](https://github.com/justinfagnani/mixwith.js)\
-Copyright (c) 2014 Justin Fagnani\
-[Apache License 2.0](https://github.com/justinfagnani/mixwith.js/blob/master/LICENSE)
 
 - [moment](https://github.com/moment/moment)\
 Copyright (c) JS Foundation and other contributors\
@@ -326,10 +305,6 @@ Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/p-timeout/blob/master/license)
 
-- [reconnect-core](https://github.com/juliangruber/reconnect-core)\
-Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
-[MIT License](https://github.com/juliangruber/reconnect-core#license)
-
 - [semver](https://github.com/npm/node-semver)\
 Copyright (c) Isaac Z. Schlueter and Contributors\
 [ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)
@@ -346,20 +321,100 @@ Copyright (c) 2015 James Messinger\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
 [MIT License](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)
 
+#### Workspace: `@gardener-dashboard/logger`
+
+- [chalk](https://github.com/chalk/chalk)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/chalk/chalk/blob/master/license)
+
+#### Workspace: `@gardener-dashboard/request`
+
+- [got](https://github.com/sindresorhus/got)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/got/blob/master/license)
+
+- [http-errors](https://github.com/jshttp/http-errors)\
+Copyright (c) 2014 Jonathan Ong me@jongleberry.com\
+Copyright (c) 2016 Douglas Christopher Wilson doug@somethingdoug.com\
+[MIT License](https://github.com/jshttp/http-errors/blob/master/LICENSE)
+
+#### Workspace: `@gardener-dashboard/kube-config`
+
+- [js-yaml](https://github.com/nodeca/js-yaml)\
+Copyright (C) 2011-2015 by Vitaly Puzrin\
+[MIT License](https://github.com/nodeca/js-yaml/blob/master/LICENSE)
+
+- [lodash](https://github.com/lodash/lodash)\
+Copyright JS Foundation and other contributors <https://js.foundation/>\
+[MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
+
+#### Workspace: `@gardener-dashboard/kube-client`
+
+- [agentkeepalive](https://github.com/node-modules/agentkeepalive)\
+Copyright(c) node-modules and other contributors.\
+Copyright(c) 2012 - 2015 fengmk2 <fengmk2@gmail.com>\
+[MIT License](https://github.com/node-modules/agentkeepalive/blob/master/LICENSE)
+
+- [base64url](https://github.com/brianloveswords/base64url)\
+Copyright (c) 2013–2016 Brian J. Brennan\
+[MIT License](https://github.com/brianloveswords/base64url/blob/master/LICENSE)
+
+- [delay](https://github.com/sindresorhus/delay)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/delay/blob/master/license)
+
+- [http-errors](https://github.com/jshttp/http-errors)\
+Copyright (c) 2014 Jonathan Ong me@jongleberry.com\
+Copyright (c) 2016 Douglas Christopher Wilson doug@somethingdoug.com\
+[MIT License](https://github.com/jshttp/http-errors/blob/master/LICENSE)
+
+- [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)\
+Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
+[MIT License](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)
+
+- [lodash](https://github.com/lodash/lodash)\
+Copyright JS Foundation and other contributors <https://js.foundation/>\
+[MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
+
+- [mixwith](https://github.com/justinfagnani/mixwith.js)\
+Copyright (c) 2014 Justin Fagnani\
+[Apache License 2.0](https://github.com/justinfagnani/mixwith.js/blob/master/LICENSE)
+
+- [moment](https://github.com/moment/moment)\
+Copyright (c) JS Foundation and other contributors\
+[MIT License](https://github.com/moment/moment/blob/develop/LICENSE)
+
+- [node-forge](https://github.com/digitalbazaar/forge)\
+Copyright (c) 2010, Digital Bazaar, Inc.\
+[BSD 3-clause License](https://github.com/digitalbazaar/forge/blob/master/LICENSE)
+
+- [p-event](https://github.com/sindresorhus/p-event)<>
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-event/blob/master/license)
+
+- [p-retry](https://github.com/sindresorhus/p-retry)<>
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-retry/blob/master/license)
+
+- [p-timeout](https://github.com/sindresorhus/p-timeout)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-timeout/blob/master/license)
+
+- [reconnect-core](https://github.com/juliangruber/reconnect-core)\
+Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
+[MIT License](https://github.com/juliangruber/reconnect-core#license)
+
+- [uuid](https://github.com/kelektiv/node-uuid)\
+Copyright (c) 2010-2016 Robert Kieffer and other contributors\
+[MIT License](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)
+
 - [ws](https://github.com/websockets/ws)\
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>\
 [MIT License](https://github.com/websockets/ws/blob/master/LICENSE)
 
-- [x509.js](https://github.com/encharm/x509.js)\
-Copyright (c) 2014 Code Charm\
-[MIT License](https://github.com/encharm/x509.js/blob/master/LICENSE)
 
 ### Frontend
 The Gardener Dashboard frontend depends on the following packages:
-
-- [@babel/polyfill](https://github.com/babel/babel)\
-Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>\
-[MIT License](https://github.com/babel/babel/blob/master/LICENSE)
 
 - [@mdi/font](https://github.com/Templarian/MaterialDesign-Webfont)\
 Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reserved Font Name Material Design Icons.\
@@ -386,13 +441,21 @@ Copyright (C) 2017 by Marijn Haverbeke <marijnh@gmail.com> and others\
 Copyright (c) 2014 Component contributors <dev@component.io>\
 [MIT License](https://github.com/component/emitter/blob/master/LICENSE)
 
-- [DOMPurify](https://github.com/cure53/DOMPurify)\
+- [core-js](https://github.com/zloirock/core-js)\
+Copyright (c) 2014-2020 Denis Pushkarev\
+[MIT License](https://github.com/zloirock/core-js/blob/master/LICENSE)
+
+- [dompurify](https://github.com/cure53/DOMPurify)\
 Copyright (c) 2015 Mario Heiderich\
 [Apache License 2.0](https://github.com/cure53/DOMPurify/blob/master/LICENSE)
 
 - [downloadjs](https://github.com/rndme/download)\
 Copyright (c) 2016 dandavis\
 [MIT License](https://github.com/rndme/download/blob/master/LICENSE.md)
+
+- [fontsource-roboto](https://github.com/fontsource/fontsource/tree/master/packages/roboto)\
+Copyright (c) 2020 Lotus\
+[MIT License](https://github.com/fontsource/fontsource/blob/master/LICENSE)
 
 - [get-contrast](https://github.com/johno/get-contrast)\
 Copyright (c) 2014-2016 John Otander\
@@ -418,10 +481,6 @@ Copyright JS Foundation and other contributors <https://js.foundation/>\
 Copyright (c) 2011-2018, [Christopher Jeffrey](https://github.com/chjj/)\
 [MIT License](https://github.com/markedjs/marked/blob/master/LICENSE.md)
 
-- [material-design-icons-iconfont](https://github.com/jossef/material-design-icons-iconfont)\
-Copyright (c) 2004, Material Design Authors, Jossef Harush\
-[Apache License 2.0](https://github.com/jossef/material-design-icons-iconfont/blob/master/LICENSE)
-
 - [md5](https://github.com/pvorb/node-md5)\
 Copyright © 2011-2012, Paul Vorbach.\
 Copyright © 2009, Jeff Mott.\
@@ -439,25 +498,37 @@ Copyright (c) 2011 Olivier Poitrey rs@dailymotion.com\
 Copyright (c) 2014 object-hash contributors\
 [MIT License](https://github.com/puleos/object-hash/blob/master/LICENSE)
 
+- [ora](https://github.com/sindresorhus/ora)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/ora/blob/master/license)
+
+- [p-timeout](https://github.com/sindresorhus/p-timeout)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-timeout/blob/master/license)
+
 - [semver](https://github.com/npm/node-semver)\
 Copyright (c) Isaac Z. Schlueter and Contributors\
 [ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)
-
-- [splitpanes](https://github.com/antoniandre/splitpanes)\
-Copyright (c) 2018 Antoni Andre\
-[MIT License](https://github.com/antoniandre/splitpanes/blob/master/LICENSE)
 
 - [socket.io-client](https://github.com/socketio/socket.io-client)\
 Copyright (c) 2014 Guillermo Rauch\
 [MIT License](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
 
-- [js-symbol-tree](https://github.com/jsdom/js-symbol-tree)\
+- [splitpanes](https://github.com/antoniandre/splitpanes)\
+Copyright (c) 2018 Antoni Andre\
+[MIT License](https://github.com/antoniandre/splitpanes/blob/master/LICENSE)
+
+- [symbol-tree](https://github.com/jsdom/js-symbol-tree)\
 Copyright (c) 2015 Joris van der Wel\
 [MIT License](https://github.com/jsdom/js-symbol-tree/blob/master/LICENSE)
 
 - [url-template](https://github.com/bramstein/url-template)\
 Copyright (c) 2012-2014, Bram Stein\
 [BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
+
+- [uuid](https://github.com/kelektiv/node-uuid)\
+Copyright (c) 2010-2016 Robert Kieffer and other contributors\
+[MIT License](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)
 
 - [vue](https://github.com/vuejs/vue)\
 Copyright (c) 2013-present, Yuxi (Evan) You\
@@ -495,12 +566,22 @@ Copyright (c) 2016 John Jeremy Leider\
 Copyright (c) 2013-present Evan You\
 [MIT License](https://github.com/vuejs/vuex/blob/dev/LICENSE)
 
-- [ora](https://github.com/sindresorhus/ora)\
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
-[MIT License](https://github.com/sindresorhus/ora/blob/master/license)
+- [xterm](https://github.com/xtermjs/xterm.js)\
+Copyright (c) 2017-2019, The xterm.js authors (https://github.com/xtermjs/xterm.js)\
+Copyright (c) 2014-2016, SourceLair Private Company (https://www.sourcelair.com)\
+Copyright (c) 2012-2013, Christopher Jeffrey (https://github.com/chjj/)\
+[MIT License](https://github.com/xtermjs/xterm.js/blob/master/LICENSE)
 
-- [The Roboto family of fonts](https://github.com/google/roboto)\
-[Apache License 2.0](https://github.com/google/roboto/blob/master/LICENSE)
+- [xterm-addon-fit](https://github.com/xtermjs/xterm.js/blob/master/addons/xterm-addon-fit)\
+Copyright (c) 2019, The xterm.js authors (https://github.com/xtermjs/xterm.js)\
+[MIT License](https://github.com/xtermjs/xterm.js/blob/master/addons/xterm-addon-fit/LICENSE)
+
+- [xterm-addon-web-links](https://github.com/xtermjs/xterm.js/tree/master/addons/xterm-addon-web-links)\
+Copyright (c) 2017, The xterm.js authors (https://github.com/xtermjs/xterm.js)\
+[MIT License](https://github.com/xtermjs/xterm.js/blob/master/addons/xterm-addon-web-links/LICENSE)
+
+- [The Roboto family of fonts](https://github.com/googlefonts/roboto)\
+[Apache License 2.0](https://github.com/googlefonts/roboto/blob/master/LICENSE)
 
 ------
 

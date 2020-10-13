@@ -18,7 +18,7 @@ limitations under the License.
   <div v-show="(!!username || !!email) && !!password">
     <v-list-item v-if="username">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">perm_identity</v-icon>
+        <v-icon color="cyan darken-2">mdi-account-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>User</v-list-item-subtitle>
@@ -30,7 +30,7 @@ limitations under the License.
     </v-list-item>
     <v-list-item v-if="email">
       <v-list-item-icon>
-        <v-icon v-if="!username" color="cyan darken-2">perm_identity</v-icon>
+        <v-icon v-if="!username" color="cyan darken-2">mdi-account-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content class="pt-0">
         <v-list-item-subtitle>Email</v-list-item-subtitle>

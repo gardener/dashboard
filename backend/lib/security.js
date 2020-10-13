@@ -23,12 +23,12 @@ const jwt = require('jsonwebtoken')
 const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const { JWK, JWE } = require('jose')
-const uuidv1 = require('uuid/v1')
+const { v1: uuidv1 } = require('uuid')
 const base64url = require('base64url')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication } = require('./services')
-const { Forbidden, Unauthorized } = require('./errors')
+const { Forbidden, Unauthorized } = require('http-errors')
 const logger = require('./logger')
 const { sessionSecret, oidc = {} } = require('./config')
 
@@ -63,11 +63,15 @@ const COOKIE_SIGNATURE = 'gSgn'
 const COOKIE_TOKEN = 'gTkn'
 const GARDENER_AUDIENCE = 'gardener'
 
-const symetricKey = JWK.asKey(decodeSecret(sessionSecret), {
-  use: 'enc'
-})
+const symetricKey = importSymmetricKey(sessionSecret)
 
 let clientPromise
+
+function importSymmetricKey (sessionSecret) {
+  const use = 'enc'
+  const decodedSessionSecret = decodeSecret(sessionSecret)
+  return JWK.asKey(decodedSessionSecret, { use })
+}
 
 /**
  * (Customizing HTTP Requests)[https://github.com/panva/node-openid-client/blob/master/docs/README.md#customizing-http-requests]

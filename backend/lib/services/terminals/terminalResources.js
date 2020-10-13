@@ -19,7 +19,7 @@
 
 const _ = require('lodash')
 
-const { Resources } = require('../../kubernetes-client')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 

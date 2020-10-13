@@ -14,32 +14,31 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import { unique, serviceAccountKey } from '@/utils/validators'
 
-describe('utils', function () {
-  describe('validators', function () {
+describe('utils', () => {
+  describe('validators', () => {
     const parentVm = {
       keys: [1, 2, 3, false]
     }
-    describe('#unique', function () {
-      it('should not validate duplicate values', function () {
-        expect(unique('keys')(3, parentVm)).to.be.false
+    describe('#unique', () => {
+      it('should not validate duplicate values', () => {
+        expect(unique('keys')(3, parentVm)).toBe(false)
       })
-      it('should validate unique values', function () {
-        expect(unique('keys')(0, parentVm)).to.be.true
+      it('should validate unique values', () => {
+        expect(unique('keys')(0, parentVm)).toBe(true)
       })
     })
 
-    describe('#serviceAccountKey', function () {
-      it('should not validate invalid JSON', function () {
-        expect(serviceAccountKey('{"valid": false')).to.be.false
+    describe('#serviceAccountKey', () => {
+      it('should not validate invalid JSON', () => {
+        expect(serviceAccountKey('{"valid": false')).toBe(false)
       })
-      it('should not validate valid JSON with invalid project_id', function () {
-        expect(serviceAccountKey('{"project_id": "inval!dProjectId"}')).to.be.false
+      it('should not validate valid JSON with invalid project_id', () => {
+        expect(serviceAccountKey('{"project_id": "inval!dProjectId"}')).toBe(false)
       })
-      it('should validate valid JSON with project_id', function () {
-        expect(serviceAccountKey('{"project_id": "val1d-Pr0ject_ID"}')).to.be.true
+      it('should validate valid JSON with project_id', () => {
+        expect(serviceAccountKey('{"project_id": "val1d-Pr0ject_ID"}')).toBe(true)
       })
     })
   })

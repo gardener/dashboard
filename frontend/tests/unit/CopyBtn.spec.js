@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { mount } from '@vue/test-utils'
@@ -27,14 +26,14 @@ global.requestAnimationFrame = cb => cb()
 
 const components = { CopyBtn }
 
-describe('CopyBtn.vue', function () {
+describe('CopyBtn.vue', () => {
   let vuetify
 
   beforeEach(() => {
     vuetify = new Vuetify()
   })
 
-  it('should ensure that the clipboard container is the dialog content', function () {
+  it('should ensure that the clipboard container is the dialog content', () => {
     const template = '<v-dialog v-model="visible" ref="dialog"><copy-btn ref="btn"/></v-dialog>'
     const data = () => {
       return {
@@ -43,13 +42,14 @@ describe('CopyBtn.vue', function () {
     }
     const wrapper = mount({ template, data, components }, { vuetify })
     const { btn, dialog } = wrapper.vm.$refs
-    expect(dialog.$refs.content).to.not.be.undefined
-    expect(btn.clipboard.container).to.equal(dialog.$refs.content)
+    expect(dialog.$refs.content).toBeDefined()
+    expect(btn.clipboard.container).toBe(dialog.$refs.content)
   })
-  it('should ensure that the clipboard container is the document body', function () {
+
+  it('should ensure that the clipboard container is the document body', () => {
     const template = '<v-card><copy-btn ref="btn"/></v-card>'
     const wrapper = mount({ template, components })
     const { btn } = wrapper.vm.$refs
-    expect(btn.clipboard.container).to.equal(document.body)
+    expect(btn.clipboard.container).toBe(document.body)
   })
 })

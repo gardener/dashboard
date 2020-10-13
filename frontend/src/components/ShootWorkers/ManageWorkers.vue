@@ -53,7 +53,7 @@ limitations under the License.
           icon
           class="ml-1"
           color="cyan darken-2">
-          <v-icon class="cyan--text text--darken-2">add</v-icon>
+          <v-icon class="cyan--text text--darken-2">mdi-plus</v-icon>
         </v-btn>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
@@ -78,7 +78,7 @@ import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export default {
   name: 'manage-workers',

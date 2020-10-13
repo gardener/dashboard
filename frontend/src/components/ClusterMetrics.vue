@@ -17,14 +17,14 @@ limitations under the License.
 <template>
   <v-list>
     <link-list-tile v-if="isAdmin"
-      icon="developer_board"
+      icon="mdi-developer-board"
       appTitle="Grafana"
       :url="grafanaUrlOperators"
       :urlText="grafanaUrlOperators"
       :isShootStatusHibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-else
-      icon="developer_board"
+      icon="mdi-developer-board"
       appTitle="Grafana"
       :url="grafanaUrlUsers"
       :urlText="grafanaUrlUsers"

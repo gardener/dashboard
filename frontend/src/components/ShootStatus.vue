@@ -70,20 +70,22 @@ limitations under the License.
 </template>
 
 <script>
-import GPopper from '@/components/GPopper'
-import ShootMessageDetails from '@/components/ShootMessageDetails'
-import RetryOperation from '@/components/RetryOperation'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
+
+import GPopper from '@/components/GPopper'
+import RetryOperation from '@/components/RetryOperation'
+import ShootMessageDetails from '@/components/ShootMessageDetails'
+
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     GPopper,
-    ShootMessageDetails,
-    RetryOperation
+    RetryOperation,
+    ShootMessageDetails
   },
   props: {
     shootItem: {

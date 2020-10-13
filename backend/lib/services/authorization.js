@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { Resources } = require('../kubernetes-client')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {

@@ -25,7 +25,7 @@ limitations under the License.
         <v-spacer></v-spacer>
         <v-text-field v-if="userList.length > 3"
           class="searchField"
-          prepend-inner-icon="search"
+          prepend-inner-icon="mdi-magnify"
           color="green darken-2"
           label="Search"
           hide-details
@@ -39,7 +39,7 @@ limitations under the License.
           <v-icon class="white--text">mdi-email-outline</v-icon>
         </v-btn>
         <v-btn v-if="canManageMembers" icon @click.native.stop="openUserAddDialog">
-          <v-icon class="white--text">add</v-icon>
+          <v-icon class="white--text">mdi-plus</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openUserHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
@@ -82,7 +82,7 @@ limitations under the License.
         <v-spacer></v-spacer>
         <v-text-field v-if="serviceAccountList.length > 3"
           class="searchField"
-          prepend-inner-icon="search"
+          prepend-inner-icon="mdi-magnify"
           color="blue-grey"
           label="Search"
           hide-details
@@ -93,7 +93,7 @@ limitations under the License.
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
         <v-btn v-if="canManageServiceAccountMembers" icon @click.native.stop="openServiceAccountAddDialog">
-          <v-icon class="white--text">add</v-icon>
+          <v-icon class="white--text">mdi-plus</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
@@ -142,7 +142,7 @@ limitations under the License.
           <div class="headline">Kubeconfig <code class="serviceAccount_name">{{currentServiceAccountDisplayName}}</code></div>
           <v-spacer></v-spacer>
           <v-btn icon class="grey--text text--lighten-4" @click.native="kubeconfigDialog = false">
-            <v-icon>close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -155,15 +155,15 @@ limitations under the License.
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <template v-slot:activator>
           <v-btn v-model="fab" color="teal darken-2" dark fab>
-            <v-icon v-if="fab">close</v-icon>
-            <v-icon v-else>add</v-icon>
+            <v-icon v-if="fab">mdi-close</v-icon>
+            <v-icon v-else>mdi-plus</v-icon>
           </v-btn>
         </template>
         <v-btn v-if="canManageServiceAccountMembers" fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
         <v-btn v-if="canManageMembers" fab small color="grey lighten-2" @click="openUserAddDialog">
-          <v-icon color="green darken-2">person</v-icon>
+          <v-icon color="green darken-2">mdi-account</v-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>
@@ -171,6 +171,7 @@ limitations under the License.
 </template>
 
 <script>
+import { mapState, mapActions, mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import replace from 'lodash/replace'
@@ -182,13 +183,13 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import escape from 'lodash/escape'
+
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import CodeBlock from '@/components/CodeBlock'
 import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
-import { mapState, mapActions, mapGetters } from 'vuex'
 import {
   displayName,
   gravatarUrlGeneric,
@@ -201,6 +202,7 @@ import {
   MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
 } from '@/utils'
+
 import { getMember } from '@/utils/api'
 
 export default {

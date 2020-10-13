@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { fromKubeconfig } = require('../../lib/kubernetes-config')
+const { fromKubeconfig } = require('@gardener-dashboard/kube-config')
 const _ = require('lodash')
 const { cache } = require('../../lib/cache')
 

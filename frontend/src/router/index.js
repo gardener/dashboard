@@ -17,13 +17,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import moment from 'moment-timezone'
 import createRoutes from './routes'
 import createGuards from './guards'
 
 Vue.use(Router)
 
-export default function createRouter ({ store, userManager }) {
+const userManager = Vue.auth
+
+export default function createRouter (store) {
   const zeroPoint = { x: 0, y: 0 }
 
   const routerOptions = {
@@ -45,7 +46,6 @@ export default function createRouter ({ store, userManager }) {
     if (expirationTime) {
       if (expirationTime > currentTime) {
         const delay = expirationTime - currentTime
-        console.log(`automatic signout ${moment.duration(delay).humanize(true)}`)
         timeoutID = setTimeout(() => userManager.signout(), delay)
       } else {
         console.error('Expiration time of a new token is not expected to be in the past')

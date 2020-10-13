@@ -20,8 +20,8 @@ const _ = require('lodash')
 const {
   dashboardClient,
   Resources
-} = require('../kubernetes-client')
-const { PreconditionFailed } = require('../errors')
+} = require('@gardener-dashboard/kube-client')
+const { PreconditionFailed } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 const cache = require('../cache')

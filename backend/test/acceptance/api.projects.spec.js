@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
-const { WatchBuilder } = require('../../lib/kubernetes-client')
+const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
@@ -91,7 +91,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(403)
     expect(res).to.be.json
-    expect(res.body.status).to.equal(403)
+    expect(res.body.code).to.equal(403)
+    expect(res.body.reason).to.equal('Forbidden')
   })
 
   it('should create a project', async function () {

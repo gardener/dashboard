@@ -18,13 +18,12 @@
 
 const _ = require('lodash')
 const nock = require('nock')
-const uuidv1 = require('uuid/v1')
+const { v1: uuidv1 } = require('uuid')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles, parseUsernameToMember } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
-const { find } = require('lodash')
-const { url, auth } = require('../../../lib/kubernetes-config').load()
+const { url, auth } = require('@gardener-dashboard/kube-config').load()
 
 const quotas = [
   {
@@ -104,7 +103,7 @@ const projectList = [
         name: 'group1',
         roles: ['admin', 'owner']
       }
-    ],
+    ]
   }),
   getProject({
     name: 'GroupMember2',
@@ -117,7 +116,7 @@ const projectList = [
         name: 'group2',
         roles: ['admin', 'owner']
       }
-    ],
+    ]
   }),
   getProject({
     name: 'new',
@@ -361,7 +360,7 @@ function readProjectMembers (namespace) {
   const members = getProjectMembers(readProject(namespace))
   const serviceAccounts = _.chain(serviceAccountList)
     .filter(['metadata.namespace', namespace])
-    .map(({metadata}) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
+    .map(({ metadata }) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
     .value()
   return _.uniqBy([...members, ...serviceAccounts], 'username')
 }
@@ -408,9 +407,9 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
-  .chain(members)
-  .map(getRoles)
-  .value()
+    .chain(members)
+    .map(getRoles)
+    .value()
   owner = getUser(owner)
   createdBy = getUser(createdBy)
   return {
@@ -1339,13 +1338,13 @@ const stub = {
     getServiceAccountsForNamespace(scope, namespace)
 
     const member = parseUsernameToMember(username)
-    const serviceAccount = { metadata: { namespace: member.namespace, name: member.name }}
+    const serviceAccount = { metadata: { namespace: member.namespace, name: member.name } }
     if (member.name &&
       member.namespace === namespace &&
       !_.find(serviceAccountList, serviceAccount)) {
       scope
-      .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
-      .reply(200, () => serviceAccount)
+        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
+        .reply(200, () => serviceAccount)
     }
 
     scope
@@ -1353,11 +1352,11 @@ const stub = {
       .reply(200, () => project)
     if (!_.find(project.spec.members, ['name', username]) && roles.length) {
       scope
-      .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
-        newProject.spec.members = body.spec.members
-        return true
-      })
-      .reply(200, () => newProject)
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
+          newProject.spec.members = body.spec.members
+          return true
+        })
+        .reply(200, () => newProject)
     }
     return scope
   },

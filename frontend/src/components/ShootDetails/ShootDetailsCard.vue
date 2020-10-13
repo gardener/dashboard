@@ -22,7 +22,7 @@ limitations under the License.
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">info_outline</v-icon>
+          <v-icon color="cyan darken-2">mdi-information-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Name</v-list-item-subtitle>
@@ -106,7 +106,7 @@ limitations under the License.
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">perm_identity</v-icon>
+          <v-icon color="cyan darken-2">mdi-account-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Created by</v-list-item-subtitle>
@@ -124,7 +124,7 @@ limitations under the License.
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{shootCreatedAt}}</span>
               </template>
-              <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
+              <time-string :dateTime="shootMetadata.creationTimestamp" mode="past"></time-string>
             </v-tooltip>
           </v-list-item-title>
         </v-list-item-content>
@@ -133,7 +133,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">label_outline</v-icon>
+            <v-icon color="cyan darken-2">mdi-label-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Purpose</v-list-item-subtitle>
@@ -211,6 +211,9 @@ limitations under the License.
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
+import filter from 'lodash/filter'
+import map from 'lodash/map'
 
 import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
@@ -223,8 +226,7 @@ import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
 import CopyBtn from '@/components/CopyBtn'
-import filter from 'lodash/filter'
-import map from 'lodash/map'
+
 import {
   isSelfTerminationWarning,
   isValidTerminationDate,
@@ -232,8 +234,8 @@ import {
   shootAddonList,
   compileMarkdown
 } from '@/utils'
+
 import { shootItem } from '@/mixins/shootItem'
-import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
