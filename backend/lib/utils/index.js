@@ -54,6 +54,9 @@ function shootHasIssue (shoot) {
 }
 
 function joinMemberRoleAndRoles (role, roles) {
+  if(!role) {
+    return []
+  }
   if (roles) {
     // uniq to also support test scenarios, gardener discards duplicate roles
     return _.uniq([role, ...roles])
