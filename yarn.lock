@@ -8352,6 +8352,8 @@ fsevents@^1.2.7:
 "gardener-dashboard@workspace:.":
   version: 0.0.0-use.local
   resolution: "gardener-dashboard@workspace:."
+  dependencies:
+    eslint: ^6.8.0
   languageName: unknown
   linkType: soft
 

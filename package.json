@@ -17,5 +17,8 @@
     "Gross, Lukas <lukas.gross@sap.com>",
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^6.8.0"
+  }
 }

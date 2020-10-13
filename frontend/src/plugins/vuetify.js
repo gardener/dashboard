@@ -1,7 +1,7 @@
 //
 // Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,30 +14,18 @@
 // limitations under the License.
 //
 
-// Polyfills
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
+import 'fontsource-roboto'
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/dist/vuetify.min.css'
+import '@/sass/main.scss'
 
-// Imports
 import Vue from 'vue'
-import './plugins/vuelidate'
-import './plugins/shortkey'
-import './plugins/snotify'
-import './plugins/cookie'
-import './plugins/bus'
-import './plugins/auth'
-import './plugins/storage'
-import './plugins/yaml'
-import vuetify from './plugins/vuetify'
-import App from './App'
-import store from './store'
-import createRouter from './router'
+import Vuetify from 'vuetify/lib'
 
-Vue.config.productionTip = false
+Vue.use(Vuetify)
 
-new Vue({
-  vuetify,
-  store,
-  router: createRouter(store),
-  render: h => h(App)
-}).$mount('#app')
+export default new Vuetify({
+  icons: {
+    iconfont: 'mdi'
+  }
+})

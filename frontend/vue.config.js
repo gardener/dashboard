@@ -23,7 +23,9 @@ module.exports = {
   ],
   pages: {
     index: {
-      entry: 'src/main.js',
+      entry: process.env.NODE_ENV === 'development'
+        ? 'src/main.dev.js'
+        : 'src/main.js',
       template: 'public/index.html',
       filename: 'index.html',
       title: 'Kubernetes Gardener'
@@ -38,13 +40,6 @@ module.exports = {
     if (process.env.NODE_ENV === 'development') {
       config.plugins.delete('VuetifyLoaderPlugin')
     }
-
-    const splitChunks = config.optimization.get('splitChunks')
-    Object.assign(splitChunks.cacheGroups.common, {
-      chunks: 'all',
-      maxSize: 512 * 1024
-    })
-    config.optimization.splitChunks(splitChunks)
 
     config
       .plugin('moment-locales')

@@ -47,7 +47,7 @@
 !frontend/package.json
 !frontend/.browserslistrc
 !frontend/.editorconfig
-!frontend/.env
+!frontend/.env*
 !frontend/.eslint*
 !frontend/*.config.js
 !frontend/public
@@ -63,7 +63,5 @@
 !charts/__tests__
 
 # include metadata files
-!LICENSE.md
-!NOTICE.md
 !VERSION
 !Dockerfile
