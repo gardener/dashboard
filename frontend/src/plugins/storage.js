@@ -23,7 +23,7 @@ const VueStorage = {
         window.localStorage.setItem(key, value)
       },
       getItem (key) {
-        window.localStorage.getItem(key)
+        return window.localStorage.getItem(key)
       },
       removeItem (key) {
         window.localStorage.removeItem(key)
