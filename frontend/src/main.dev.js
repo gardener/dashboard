@@ -18,26 +18,11 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 
-// Imports
-import Vue from 'vue'
-import './plugins/vuelidate'
-import './plugins/shortkey'
-import './plugins/snotify'
-import './plugins/cookie'
-import './plugins/bus'
-import './plugins/auth'
-import './plugins/storage'
-import './plugins/yaml'
-import vuetify from './plugins/vuetify.dev'
-import App from './App'
-import store from './store'
-import createRouter from './router'
+// Import Plugins
+import '@/plugins'
 
-Vue.config.productionTip = false
+// Create App
+import vuetify from '@/plugins/vuetify.dev'
+import { createApp } from '@/app'
 
-new Vue({
-  vuetify,
-  store,
-  router: createRouter(store),
-  render: h => h(App)
-}).$mount('#app')
+createApp(vuetify).$mount('#app')

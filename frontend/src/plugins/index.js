@@ -1,7 +1,7 @@
 //
 // Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,15 +14,11 @@
 // limitations under the License.
 //
 
-// Polyfills
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
-
-// Import Plugins
-import '@/plugins'
-
-// Create App
-import vuetify from '@/plugins/vuetify'
-import { createApp } from '@/app'
-
-createApp(vuetify).$mount('#app')
+import './vuelidate'
+import './shortkey'
+import './snotify'
+import './cookie'
+import './bus'
+import './auth'
+import './storage'
+import './yaml'
