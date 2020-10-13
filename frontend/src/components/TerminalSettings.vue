@@ -76,7 +76,7 @@ limitations under the License.
           <v-list-item-content v-if="item !== autoSelectNodeItem">
             <v-list-item-title>{{item.data.kubernetesHostname}}</v-list-item-title>
             <v-list-item-subtitle>
-              <span>Ready: {{item.data.readyStatus}} | Version: {{item.data.version}} | Created: <time-string :date-time="item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
+              <span>Ready: {{item.data.readyStatus}} | Version: {{item.data.version}} | Created: <time-string :date-time="item.metadata.creationTimestamp" mode="past"></time-string></span>
             </v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-content v-else>

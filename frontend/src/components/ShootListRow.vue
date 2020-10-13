@@ -61,7 +61,7 @@ limitations under the License.
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
-            <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
+            <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
           </div>
         </template>
         {{ shootCreatedAt }}
@@ -92,7 +92,7 @@ limitations under the License.
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-              <time-string :date-time="shootLastUpdatedTicketTimestamp" :pointInTime="-1"></time-string>
+              <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
             </router-link>
           </div>
         </template>

@@ -124,7 +124,7 @@ limitations under the License.
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{shootCreatedAt}}</span>
               </template>
-              <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
+              <time-string :dateTime="shootMetadata.creationTimestamp" mode="past"></time-string>
             </v-tooltip>
           </v-list-item-title>
         </v-list-item-content>
