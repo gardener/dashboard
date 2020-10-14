@@ -103,9 +103,9 @@ limitations under the License.
       <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
         None
       </template>
-      <template v-else>
-        <ticket-labels :labels="shootTicketsLabels"></ticket-labels>
-      </template>
+      <div class="labels" v-else>
+        <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
+      </div>
     </td>
     <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
       <v-row class="fill-height" align="center" justify="end" >
@@ -139,7 +139,7 @@ import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import TicketLabels from '@/components/ShootTickets/TicketLabels'
+import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import ShootSeedName from '@/components/ShootSeedName'
@@ -162,7 +162,7 @@ export default {
     ShootStatus,
     TimeString,
     ShootVersion,
-    TicketLabels,
+    TicketLabel,
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,
@@ -252,6 +252,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+  .labels {
+    line-height: 10px;
+  }
+
   .action-button-group {
     white-space: nowrap;
 

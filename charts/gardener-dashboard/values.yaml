@@ -76,6 +76,7 @@ frontendConfig:
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
   # ticket:
+  #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
   #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
   #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
   #   - ignore

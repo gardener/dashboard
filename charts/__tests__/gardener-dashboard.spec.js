@@ -326,6 +326,7 @@ describe('gardener-dashboard', function () {
           const values = writeValues(filename, {
             frontendConfig: {
               ticket: {
+                avatarSource: 'gravatar',
                 gitHubRepoUrl: 'https://github.com/gardener/tickets',
                 hideClustersWithLabels: ['ignore1', 'ignore2'],
                 newTicketLabels: ['default-label'],
@@ -357,6 +358,7 @@ describe('gardener-dashboard', function () {
             gitHub
           } = config
           expect(ticket).toEqual({
+            avatarSource: 'gravatar',
             gitHubRepoUrl: 'https://github.com/gardener/tickets',
             hideClustersWithLabels: ['ignore1', 'ignore2'],
             newTicketLabels: ['default-label'],
