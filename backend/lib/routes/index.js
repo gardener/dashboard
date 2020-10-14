@@ -24,6 +24,7 @@ module.exports = {
   '/openapi': require('../openapi'),
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
+  '/seeds': require('./seeds'),
   '/shoots': require('./shoots'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),

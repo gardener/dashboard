@@ -103,6 +103,7 @@ function ensureDataLoaded (store) {
       await Promise.all([
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
+        ensureSeedsLoaded(store),
         ensureKubeconfigDataLoaded(store)
       ])
 
@@ -172,6 +173,12 @@ function ensureProjectsLoaded (store) {
 function ensureCloudProfilesLoaded (store) {
   if (isEmpty(store.getters.cloudProfileList)) {
     return store.dispatch('fetchCloudProfiles')
+  }
+}
+
+function ensureSeedsLoaded (store) {
+  if (isEmpty(store.getters.seedList)) {
+    return store.dispatch('fetchSeeds')
   }
 }
 

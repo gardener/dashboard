@@ -25,22 +25,18 @@ module.exports = function ({ agent, sandbox, auth }) {
   const id = username
   const user = auth.createUser({ id })
 
-  it('should return all cloudprofiles', async function () {
-    common.stub.getCloudProfiles(sandbox)
+  it('should return all seeds', async function () {
+    common.stub.getSeeds(sandbox)
     const res = await agent
-      .get('/api/cloudprofiles')
+      .get('/api/seeds')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(4)
-    let predicate = item => item.metadata.name === 'infra1-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(3)
-    predicate = item => item.metadata.name === 'infra1-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
-    predicate = item => item.metadata.name === 'infra3-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(1)
-    predicate = item => item.metadata.name === 'infra3-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
+    expect(res.body).to.have.length(8)
+    let predicate = item => item.metadata.name === 'infra1-seed'
+    expect(_.find(res.body, predicate).metadata.unreachable).to.be.false
+    predicate = item => item.metadata.name === 'infra3-seed'
+    expect(_.find(res.body, predicate).metadata.unreachable).to.be.true
   })
 }

@@ -270,10 +270,10 @@ export default {
       return this.isAdmin
     },
     isTerminalTileVisible () {
-      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
+      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable
     },
     isTerminalShortcutsTileVisible () {
-      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts
+      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable
     },
     token () {
       return this.shootInfo.cluster_token || ''

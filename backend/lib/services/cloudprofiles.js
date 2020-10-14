@@ -21,21 +21,13 @@ const logger = require('../logger')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
-function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
+function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
   const cloudProviderKind = spec.type
   const name = _.get(metadata, 'name')
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
   const resourceVersion = _.get(metadata, 'resourceVersion')
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
-  const data = { seeds, ...spec }
-  return { metadata, data }
-}
-
-function fromSeedResource ({ metadata, spec }) {
-  metadata = _.pick(metadata, ['name'])
-  const provider = _.get(spec, 'provider')
-  const volume = _.get(spec, 'volume')
-  const data = { volume, ...provider }
+  const data = { seedNames, ...spec }
   return { metadata, data }
 }
 
@@ -53,17 +45,17 @@ function assignSeedsToCloudProfileIteratee (seeds) {
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
     const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [providerType])
 
-    const seedsForCloudProfile = _
+    const seedNamesForCloudProfile = _
       .chain(seeds)
       .filter(filterProviderType)
       .filter({ metadata: { labels: matchLabels } })
-      .map(fromSeedResource)
+      .map('metadata.name')
       .thru(emptyToUndefined)
       .value()
 
     return fromResource({
       cloudProfile: cloudProfileResource,
-      seeds: seedsForCloudProfile
+      seedNames: seedNamesForCloudProfile
     })
   }
 }
@@ -75,7 +67,7 @@ exports.list = function () {
     .chain(cloudProfiles)
     .map(assignSeedsToCloudProfileIteratee(seeds))
     .filter(cloudProfile => {
-      if (!_.isEmpty(cloudProfile.data.seeds)) {
+      if (!_.isEmpty(cloudProfile.data.seedNames)) {
         return true
       }
       logger.warn(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
@@ -93,7 +85,7 @@ exports.read = function ({ name }) {
 
   const seeds = getVisibleAndNotProtectedSeeds()
   const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
-  if (!cloudProfile.data.seeds) {
+  if (!cloudProfile.data.seedNames) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }
 

@@ -165,6 +165,12 @@ export function getCloudprofiles () {
   return getResource('/api/cloudprofiles')
 }
 
+/* Seeds */
+
+export function getSeeds () {
+  return getResource('/api/seeds')
+}
+
 /* Projects */
 
 export function getProjects () {

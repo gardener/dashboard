@@ -33,7 +33,8 @@ import {
 export const shootItem = {
   computed: {
     ...mapGetters([
-      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion'
+      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
+      'isSeedUnreachableByName'
     ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
@@ -177,6 +178,9 @@ export const shootItem = {
     },
     shootSeedName () {
       return get(this.shootSpec, 'seedName')
+    },
+    isSeedUnreachable () {
+      return this.isSeedUnreachableByName(this.shootSeedName)
     },
     shootStatusSeedName () {
       return get(this.shootItem, 'status.seed')

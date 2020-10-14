@@ -118,7 +118,7 @@ function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1
 
 const cloudProfileList = [
   getCloudProfile('infra1-profileName', 'infra1'),
-  getCloudProfile('infra1-profileName2', 'infra1', { providerTypes: ['infra2', 'infra3']}),
+  getCloudProfile('infra1-profileName2', 'infra1', { providerTypes: ['infra2', 'infra3'] }),
   getCloudProfile('infra2-profileName', 'infra2'),
   getCloudProfile('infra3-profileName', 'infra3', { matchLabels: { foo: 'bar' } }),
   getCloudProfile('infra3-profileName2', 'infra3')
@@ -128,7 +128,7 @@ const seedList = [
   getSeed({ name: 'soil-infra1', region: 'foo-east', kind: 'infra1', seedProtected: true, seedVisible: false }),
   getSeed({ name: 'infra1-seed', region: 'foo-east', kind: 'infra1' }),
   getSeed({ name: 'infra1-seed2', region: 'foo-west', kind: 'infra1' }),
-  getSeed({ name: 'infra3-seed', region: 'foo-europe', kind: 'infra3' }),
+  getSeed({ name: 'infra3-seed', region: 'foo-europe', kind: 'infra3', labels: { 'test-unreachable': 'true', biz: 'baz' } }),
   getSeed({ name: 'infra4-seed-without-secretRef', region: 'foo-south', kind: 'infra1', withSecretRef: false }),
   getSeed({ name: 'infra3-seed-with-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true, labels: { foo: 'bar' } }),
   getSeed({ name: 'infra3-seed-protected', region: 'foo-europe', kind: 'infra3', seedProtected: true }),
@@ -146,6 +146,10 @@ const stub = {
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
     getCloudProfilesStub.returns(cloudProfileList)
 
+    const getSeedsStub = sandbox.stub(cache, 'getSeeds')
+    getSeedsStub.returns(seedList)
+  },
+  getSeeds (sandbox) {
     const getSeedsStub = sandbox.stub(cache, 'getSeeds')
     getSeedsStub.returns(seedList)
   },
