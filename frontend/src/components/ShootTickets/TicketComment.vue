@@ -91,7 +91,7 @@ export default {
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
 
-  $cyan-darken-2: map-get($cyan, 'darken-1');
+  $cyan-darken-1: map-get($cyan, 'darken-1');
 
   .comment {
     padding: 0;
@@ -105,24 +105,18 @@ export default {
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border: 0.5px;
-    border-bottom: 0.5px solid$cyan-darken-2;
-    background-color:$cyan-darken-2;
+    border-bottom: 0.5px solid $cyan-darken-1;
+    background-color: $cyan-darken-1;
     color: white;
 
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding: 4px 8px;
     margin-bottom: 0;
   }
 
   .comment-body {
-    border: 0.5px solid$cyan-darken-2;
+    border: 0.5px solid $cyan-darken-1;
 
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding: 4px 8px;
 
     /* not needed for chrome, but kept for firefox */
     word-wrap: break-word;
