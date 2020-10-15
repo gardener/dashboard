@@ -39,7 +39,7 @@ RUN yarn workspaces foreach --all run lint
 RUN yarn workspaces foreach --all run test-coverage
 
 # bump backend and frontend version
-RUN yarn workspaces foreach --include "*/(frontend|backend)" version "${cat VERSION}"
+RUN yarn workspaces foreach --include "*/(frontend|backend)" version "$(cat VERSION)"
 
 # run backend production install 
 RUN yarn workspace @gardener-dashboard/backend prod-install /usr/src/build
