@@ -1323,8 +1323,6 @@ __metadata:
     socket.io-client: ^2.3.0
     swagger-parser: ^8.0.1
     uuid: ^8.3.0
-  bin:
-    sync-version: bin/sync-version
   languageName: unknown
   linkType: soft
 

@@ -26,9 +26,6 @@
     "lib",
     "server.js"
   ],
-  "bin": {
-    "sync-version": "bin/sync-version"
-  },
   "scripts": {
     "serve": "nodemon --ext js --watch lib server.js",
     "start": "node server.js",
