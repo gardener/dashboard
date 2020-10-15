@@ -25,7 +25,7 @@ dashboard:
         pull-request: ~
       steps:
         check:
-          image: 'node:14-alpine13.2'
+          image: 'node:14-alpine3.12'
     release:
       traits:
         version:
