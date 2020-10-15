@@ -47,6 +47,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: false })
+    k8s.stub.getCloudProfiles({ bearer, verb: 'list' })
     const res = await agent
       .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
@@ -66,6 +67,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: true })
+    k8s.stub.getCloudProfiles({ bearer, verb: 'list' })
     const res = await agent
       .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
@@ -80,6 +82,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.createInfrastructureSecret({ bearer, namespace, data, cloudProfileName, resourceVersion })
+    k8s.stub.getCloudProfiles({ bearer, verb: 'get' })
     const res = await agent
       .post(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
@@ -97,6 +100,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.patchInfrastructureSecret({ bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion })
+    k8s.stub.getCloudProfiles({ bearer, verb: 'get' })
     const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)

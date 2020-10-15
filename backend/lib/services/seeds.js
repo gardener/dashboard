@@ -16,11 +16,11 @@
 
 'use strict'
 
-// const { Forbidden } = require('http-errors')
 const _ = require('lodash')
+const { Forbidden } = require('http-errors')
+const authorization = require('./authorization')
 const { getSeeds } = require('../cache')
 const config = require('../config')
-// const authorization = require('./services/authorization')
 
 function fromResource (seed) {
   const unreachable = isUnreachable(seed)
@@ -46,14 +46,14 @@ function fromResource (seed) {
 
 function isUnreachable (seed) {
   const matchLabels = _.get(config, 'unreachableSeeds.matchLabels', {})
-  return _.isMatch(seed, { metadata: { labels: matchLabels }})
+  return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
 exports.list = async function ({ user }) {
-  // const allowed = await authorization.canListSeeds(user)
-  // if (!allowed) {
-  //   throw new Forbidden('You are not allowed to list seeds')
-  // }
+  const allowed = await authorization.canListSeeds(user)
+  if (!allowed) {
+    throw new Forbidden('You are not allowed to list seeds')
+  }
 
   const seeds = getSeeds()
   return _.map(seeds, fromResource)

@@ -72,12 +72,33 @@ exports.canGetShoot = function (user, namespace, name) {
   })
 }
 
-exports.canListSeeds = function (user, name) {
+exports.canListSeeds = function (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'seeds',
+      resource: 'seeds'
+    }
+  })
+}
+
+exports.canListCloudProfiles = function (user, name) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'cloudprofiles',
+      name
+    }
+  })
+}
+
+exports.canGetCloudProfiles = function (user, name) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'get',
+      group: 'core.gardener.cloud',
+      resource: 'cloudprofiles',
       name
     }
   })

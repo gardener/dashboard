@@ -16,7 +16,8 @@
 
 'use strict'
 
-const { NotFound } = require('http-errors')
+const { NotFound, Forbidden } = require('http-errors')
+const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
@@ -60,7 +61,12 @@ function assignSeedsToCloudProfileIteratee (seeds) {
   }
 }
 
-exports.list = function () {
+exports.list = async function ({ user }) {
+  const allowed = await authorization.canListCloudProfiles(user)
+  if (!allowed) {
+    throw new Forbidden('You are not allowed to list cloudprofiles')
+  }
+
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
   return _
@@ -76,7 +82,12 @@ exports.list = function () {
     .value()
 }
 
-exports.read = function ({ name }) {
+exports.read = async function ({ user, name }) {
+  const allowed = await authorization.canGetCloudProfiles(user, name)
+  if (!allowed) {
+    throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)
+  }
+
   const cloudProfiles = getCloudProfiles()
   const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
   if (!cloudProfileResource) {
