@@ -778,7 +778,7 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   })
 }
 
-export function convertDuplicateSelectedItemsToPlaceholders (items, sort = true, valuePropertyName) {
+export function ensureUniqueSelectedItemValues (items, sort = true) {
   const uniqItems = []
   const duplicateItems = []
   forEach(items, item => {
@@ -791,7 +791,7 @@ export function convertDuplicateSelectedItemsToPlaceholders (items, sort = true,
   const duplicatePlaceholderObjects = map(duplicateItems, duplicateItem => {
     return {
       isDuplicate: true,
-      originalValue: valuePropertyName ? duplicateItem[valuePropertyName] : duplicateItem,
+      originalValue: duplicateItem,
       id: uuidv4()
     }
   })
@@ -807,13 +807,14 @@ export function convertDuplicateSelectedItemsToPlaceholders (items, sort = true,
   })
 }
 
-export function itemsForSelectedDuplicateItemPlaceholders (items) {
-  const placeholderItems = filter(items, { isDuplicate: true })
-  return map(placeholderItems, placeholderItem => ({
-    text: placeholderItem.originalValue,
-    value: placeholderItem,
+export function ensureItemsContainsAllSelectedItems (items, selectedItems) {
+  const duplicateSelectedItems = filter(selectedItems, { isDuplicate: true })
+  const additionalItems = map(duplicateSelectedItems, duplicateItem => ({
+    text: duplicateItem.originalValue,
+    value: duplicateItem,
     disabled: true
   }))
+  return [...items, ...additionalItems]
 }
 
 export default {

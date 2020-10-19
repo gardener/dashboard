@@ -137,7 +137,7 @@ import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize, convertDuplicateSelectedItemsToPlaceholders, itemsForSelectedDuplicateItemPlaceholders } from '@/utils'
+import { getValidationErrors, parseSize, ensureUniqueSelectedItemValues, ensureItemsContainsAllSelectedItems } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -316,7 +316,7 @@ export default {
     },
     selectedZones: {
       get: function () {
-        return convertDuplicateSelectedItemsToPlaceholders(this.worker.zones)
+        return ensureUniqueSelectedItemValues(this.worker.zones)
       },
       set: function (zones) {
         this.worker.zones = zones
@@ -328,8 +328,7 @@ export default {
         value: zone,
         disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
       }))
-      const duplicateZoneItems = itemsForSelectedDuplicateItemPlaceholders(this.selectedZones)
-      const allZoneItems = [...zoneItems, ...duplicateZoneItems]
+      const allZoneItems = ensureItemsContainsAllSelectedItems(zoneItems, this.selectedZones)
       return sortBy(allZoneItems, 'text')
     },
     zoneHint () {
