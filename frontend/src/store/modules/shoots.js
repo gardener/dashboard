@@ -231,7 +231,13 @@ const actions = {
     const secret = head(rootGetters.infrastructureSecretsByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
 
-    const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
+    let region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
+    if (!region) {
+      const seedDeterminationStrategySameRegion = rootState.cfg.seedCandidateDeterminationStrategy === 'SameRegion'
+      if (!seedDeterminationStrategySameRegion) {
+        region = head(rootGetters.regionsWithoutSeedByCloudProfileName(cloudProfileName))
+      }
+    }
     set(shootResource, 'spec.region', region)
 
     const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))

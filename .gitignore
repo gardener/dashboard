@@ -24,7 +24,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # other files to ignore
+.DS_Store
 node_modules/
+dist/
 tmp/
 coverage/
 my*

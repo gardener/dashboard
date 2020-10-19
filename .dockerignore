@@ -5,7 +5,9 @@
 !.yarn/cache
 !.yarn/releases
 !.yarn/plugins
+!.yarn/versions
 !.yarnrc.yml
+!.pnp.js
 
 # include root workspace
 !package.json
