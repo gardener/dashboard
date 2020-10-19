@@ -20,7 +20,7 @@ const { EventEmitter } = require('events')
 const fnv = require('fnv-plus')
 const { cache } = require('../../lib/cache')
 const createTicketCache = require('../../lib/cache/tickets')
-const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
+const WatchBuilder = require('@gardener-dashboard/kube-client/lib/WatchBuilder')
 
 function getSeed ({
   name,

@@ -36,13 +36,13 @@ limitations under the License.
 
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { patchShootProvider } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
+const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
 
 export default {
   name: 'worker-configuration',

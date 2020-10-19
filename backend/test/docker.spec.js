@@ -22,7 +22,7 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend } = require('../lib/http-client')
+const { extend } = require('@gardener-dashboard/request')
 const client = extend({
   prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
   resolveBodyOnly: true,

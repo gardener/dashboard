@@ -38,7 +38,6 @@ limitations under the License.
 import { mapActions } from 'vuex'
 import { Splitpanes, Pane } from 'splitpanes'
 import GSplitpane from '@/components/GSplitpane'
-import { SplitpaneTree } from '@/lib/g-symbol-tree'
 
 export default {
   name: 'GSplitpane',
@@ -58,7 +57,8 @@ export default {
       'setSplitpaneResize'
     ]),
     hasChildren (item) {
-      return item instanceof SplitpaneTree
+      const isSplitpaneTree = Reflect.has(item, 'horizontal')
+      return isSplitpaneTree
     },
     resize () {
       // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on

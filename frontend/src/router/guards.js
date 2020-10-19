@@ -16,7 +16,7 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { getPrivileges } from '@/utils/api'
+import { getPrivileges, getConfiguration } from '@/utils/api'
 
 export default function createGuards (store, userManager) {
   return {
@@ -48,7 +48,8 @@ function ensureConfigurationLoaded (store) {
   return async function (to, from, next) {
     try {
       if (!store.state.cfg) {
-        await store.dispatch('fetchConfiguration')
+        const { data } = await getConfiguration()
+        await store.dispatch('setConfiguration', data)
       }
       next()
     } catch (err) {

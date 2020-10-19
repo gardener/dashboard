@@ -41,7 +41,6 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
-import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
@@ -49,8 +48,7 @@ import { replaceShoot } from '@/utils/api'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
 
-// js-yaml
-import jsyaml from 'js-yaml'
+const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
   components: {
@@ -112,7 +110,8 @@ export default {
         }
 
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const data = pick(jsyaml.safeLoad(this.$refs.shootEditor.getContent()), paths)
+        const shootResource = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+        const data = pick(shootResource, paths)
         const { metadata: { namespace, name } } = this.shootContent
         const { data: value } = await replaceShoot({ namespace, name, data })
         this.$refs.shootEditor.update(value)

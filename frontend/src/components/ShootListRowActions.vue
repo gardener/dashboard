@@ -20,7 +20,7 @@ limitations under the License.
       <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
           <v-btn v-on="{ ...menu, ...tooltip}" icon class="cyan--text text--darken-2">
-            <v-icon class="cursor-pointer">more_vert</v-icon>
+            <v-icon class="cursor-pointer">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
         Cluster Actions
@@ -58,13 +58,13 @@ limitations under the License.
 </template>
 
 <script>
-
 import { mapGetters } from 'vuex'
+
 import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
+import DeleteCluster from '@/components/DeleteCluster'
 import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
-import DeleteCluster from '@/components/DeleteCluster'
 
 export default {
   components: {

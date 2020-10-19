@@ -34,13 +34,17 @@ limitations under the License.
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import Purpose from '@/components/Purpose'
-import { updateShootPurpose } from '@/utils/api'
-import { shootItem } from '@/mixins/shootItem'
-import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import find from 'lodash/find'
+
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
+
+import { updateShootPurpose } from '@/utils/api'
+import { errorDetailsFromError } from '@/utils/error'
+
+import { shootItem } from '@/mixins/shootItem'
+
+const Purpose = () => import('@/components/Purpose')
 
 export default {
   name: 'purpose-configuration',

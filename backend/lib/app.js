@@ -71,8 +71,8 @@ app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
     connectSrc,
-    styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com', 'https://cdn.materialdesignicons.com'],
-    fontSrc: ['\'self\'', 'https://fonts.gstatic.com', 'https://cdn.materialdesignicons.com'],
+    styleSrc: ['\'self\'', '\'unsafe-inline\''],
+    fontSrc: ['\'self\'', 'data:'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
     frameAncestors: ['\'none\'']
@@ -83,13 +83,13 @@ app.use(helmet.referrerPolicy({
 }))
 
 app.use(express.static(PUBLIC_DIRNAME))
+app.use(['/css', '/fonts', '/img', '/js'], notFound)
 
 app.use(helmet.frameguard({
   action: 'deny'
 }))
 app.use(historyFallback(INDEX_FILENAME))
 
-app.use(notFound)
 app.use(renderError)
 
 module.exports = app

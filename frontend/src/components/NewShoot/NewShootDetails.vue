@@ -76,17 +76,19 @@ limitations under the License.
 </template>
 
 <script>
-
-import HintColorizer from '@/components/HintColorizer'
-import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
-import { required, maxLength } from 'vuelidate/lib/validators'
-import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import join from 'lodash/join'
 import filter from 'lodash/filter'
+import { required, maxLength } from 'vuelidate/lib/validators'
+
+import HintColorizer from '@/components/HintColorizer'
+
+import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
+import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+
+const Purpose = () => import('@/components/Purpose')
 
 const validationErrors = {
   name: {

@@ -38,17 +38,20 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
-import TicketsCard from '@/components/TicketsCard'
-import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
+import get from 'lodash/get'
+
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
+import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
-import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
-import get from 'lodash/get'
+import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
+import TicketsCard from '@/components/TicketsCard'
+
 import { shootItem } from '@/mixins/shootItem'
 
 import 'codemirror/mode/yaml/yaml.js'
+
+const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
   name: 'shoot-details',

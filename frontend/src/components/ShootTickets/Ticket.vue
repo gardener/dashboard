@@ -16,20 +16,23 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticketTitle">
-      Ticket {{ticketTitle}}<ticket-labels class="ml-2" :labels="ticket.data.labels"></ticket-labels>
+    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticket-toolbar">
+      <div class="d-flex flex-wrap align-center">
+        <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
+        <div v-if="labels.length" class="labels"><ticket-label v-for="label in labels" :key="label.id" :label="label"></ticket-label></div>
+      </div>
     </v-card-title>
 
     <v-container>
       <span class="font-weight-bold">{{login}}</span> created this
       <a :href="ticketHtmlUrl" target="_blank" class="cyan--text text--darken-2">ticket</a>
       <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :dateTime="ticket.metadata.created_at" :pointInTime="-1"></time-string>
+      <time-string :dateTime="ticket.metadata.created_at" mode="past"></time-string>
     </v-container>
-    <v-container>
+    <v-list>
       <ticket-comment :comment="ticket"></ticket-comment>
       <ticket-comment v-for="comment in commentsForTicket" :key="comment.metadata.id" :comment="comment"></ticket-comment>
-    </v-container>
+    </v-list>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
       <v-btn text class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
@@ -45,13 +48,13 @@ limitations under the License.
 import get from 'lodash/get'
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
-import TicketLabels from '@/components/ShootTickets/TicketLabels'
+import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import TicketComment from '@/components/ShootTickets/TicketComment'
 
 export default {
   components: {
     TimeString,
-    TicketLabels,
+    TicketLabel,
     TicketComment
   },
   props: {
@@ -77,6 +80,9 @@ export default {
     ticketHtmlUrl () {
       return get(this.ticket, 'data.html_url')
     },
+    labels () {
+      return get(this.ticket, 'data.labels', [])
+    },
     commentsForTicket () {
       const issueNumber = get(this.ticket, 'metadata.number')
       return this.ticketCommentsByIssueNumber({ issueNumber })
@@ -92,8 +98,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-  .ticketTitle {
+  .ticket-toolbar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .ticket-title {
+    line-height: 20px;
+  }
+  .labels {
     line-height: 10px;
   }
 

@@ -38,7 +38,7 @@ limitations under the License.
             fab
             icon
             color="cyan darken-2">
-            <v-icon class="cyan--text text--darken-2">add</v-icon>
+            <v-icon class="cyan--text text--darken-2">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
@@ -79,17 +79,19 @@ limitations under the License.
 </template>
 
 <script>
-import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import { mapState } from 'vuex'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
+
+import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-import { mapState } from 'vuex'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export default {
   name: 'hibernation-schedule',

@@ -66,7 +66,7 @@ limitations under the License.
             ref="token"
             v-model="token"
             color="grey"
-            :append-icon="showToken ? 'visibility' : 'visibility_off'"
+            :append-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
             :type="showToken ? 'text' : 'password'"
             outline
             label="Token"
@@ -150,7 +150,7 @@ export default {
         setDelayedInputFocus(this, 'token')
       } else {
         try {
-          this.$userManager.signinWithOidc(this.redirectPath)
+          this.$auth.signinWithOidc(this.redirectPath)
         } catch (err) {
           this.showSnotifyLoginError(err.message)
         }
@@ -164,7 +164,7 @@ export default {
       try {
         const token = this.token
         this.token = undefined
-        await this.$userManager.signinWithToken(token)
+        await this.$auth.signinWithToken(token)
         this.dialog = false
         try {
           await this.$router.push(this.redirectPath)

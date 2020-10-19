@@ -1,19 +1,33 @@
-.DS_Store
+# editor directories and files
 .idea
-.vscode
-.yarn
-coverage
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Ignore kubeconfig
-kubeconfig*
+# yarn zero-installs
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
 
-# Ignore node_modules.
-/node_modules
+# local files with sensitive data
+.env.local
+.env.*.local
 
-# Ignore all tempfiles.
-/tmp
-npm-debug.log
+# log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Ignore all files starting with "my"
+# other files to ignore
+.DS_Store
+node_modules/
+dist/
+tmp/
+coverage/
 my*
-buildinfo.json
+kubeconfig*

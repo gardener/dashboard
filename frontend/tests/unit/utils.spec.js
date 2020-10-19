@@ -14,18 +14,17 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import utils from '@/utils'
-import { map } from 'lodash'
+import map from 'lodash/map'
 
 const { canI, selectedImageIsNotLatest } = utils
 
-describe('utils', function () {
-  describe('authorization', function () {
-    describe('#canI', function () {
+describe('utils', () => {
+  describe('authorization', () => {
+    describe('#canI', () => {
       let rulesReview
 
-      beforeEach(function () {
+      beforeEach(() => {
         rulesReview = {
           resourceRules: [{
             verbs: ['get'],
@@ -57,33 +56,33 @@ describe('utils', function () {
         }
       })
 
-      it('should validate', function () {
-        expect(canI(rulesReview, 'get', 'group1', 'resource1')).to.be.true
-        expect(canI(rulesReview, 'get', 'group1', 'resource1', 'anyResourceName')).to.be.true
+      it('should validate', () => {
+        expect(canI(rulesReview, 'get', 'group1', 'resource1')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group1', 'resource1', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'foo', 'group1', 'resource1')).to.be.false
-        expect(canI(rulesReview, 'get', 'foo', 'resource1')).to.be.false
-        expect(canI(rulesReview, 'get', 'group1', 'foo')).to.be.false
-        expect(canI(rulesReview, 'get', 'group1', 'resource3')).to.be.false
-        expect(canI(rulesReview, 'foo', 'bar', 'baz')).to.be.false
+        expect(canI(rulesReview, 'foo', 'group1', 'resource1')).toBe(false)
+        expect(canI(rulesReview, 'get', 'foo', 'resource1')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group1', 'foo')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group1', 'resource3')).toBe(false)
+        expect(canI(rulesReview, 'foo', 'bar', 'baz')).toBe(false)
       })
 
-      it('should validate for resourceName', function () {
-        expect(canI(rulesReview, 'get', 'group2', 'resource2', 'resourceName2')).to.be.true
-        expect(canI(rulesReview, 'get', 'group3', 'resource3')).to.be.true
-        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'resourceName3')).to.be.true
-        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'resourceName4')).to.be.true
-        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'anyResourceName')).to.be.true
+      it('should validate for resourceName', () => {
+        expect(canI(rulesReview, 'get', 'group2', 'resource2', 'resourceName2')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group3', 'resource3')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'resourceName3')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'resourceName4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group3', 'resource3', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'get', 'group2', 'resource2')).to.be.false
-        expect(canI(rulesReview, 'get', 'group2', 'resource2', 'foo')).to.be.false
-        expect(canI(rulesReview, 'foo', 'group2', 'resource2', 'resourceName2')).to.be.false
-        expect(canI(rulesReview, 'get', 'foo', 'resource2', 'resourceName2')).to.be.false
-        expect(canI(rulesReview, 'get', 'group2', 'foo', 'resourceName2')).to.be.false
-        expect(canI(rulesReview, 'foo', 'bar', 'baz', 'resourceName2')).to.be.false
+        expect(canI(rulesReview, 'get', 'group2', 'resource2')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group2', 'resource2', 'foo')).toBe(false)
+        expect(canI(rulesReview, 'foo', 'group2', 'resource2', 'resourceName2')).toBe(false)
+        expect(canI(rulesReview, 'get', 'foo', 'resource2', 'resourceName2')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group2', 'foo', 'resourceName2')).toBe(false)
+        expect(canI(rulesReview, 'foo', 'bar', 'baz', 'resourceName2')).toBe(false)
       })
 
-      it('should validate with wildcard verb', function () {
+      it('should validate with wildcard verb', () => {
         rulesReview = {
           resourceRules: [{
             verbs: ['*'],
@@ -91,17 +90,17 @@ describe('utils', function () {
             resources: ['resource4']
           }]
         }
-        expect(canI(rulesReview, 'get', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'list', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, '*', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).to.be.true
+        expect(canI(rulesReview, 'get', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'list', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, '*', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'get', 'foo', 'resource4')).to.be.false
-        expect(canI(rulesReview, 'get', 'group4', 'foo')).to.be.false
+        expect(canI(rulesReview, 'get', 'foo', 'resource4')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group4', 'foo')).toBe(false)
       })
 
-      it('should validate with wildcard apiGroup', function () {
+      it('should validate with wildcard apiGroup', () => {
         rulesReview = {
           resourceRules: [{
             verbs: ['get'],
@@ -109,16 +108,16 @@ describe('utils', function () {
             resources: ['resource4']
           }]
         }
-        expect(canI(rulesReview, 'get', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', 'foo', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', '*', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).to.be.true
+        expect(canI(rulesReview, 'get', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'foo', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', '*', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).to.be.false
-        expect(canI(rulesReview, 'get', 'group4', 'foo')).to.be.false
+        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group4', 'foo')).toBe(false)
       })
 
-      it('should validate with wildcard resource', function () {
+      it('should validate with wildcard resource', () => {
         rulesReview = {
           resourceRules: [{
             verbs: ['get'],
@@ -126,16 +125,16 @@ describe('utils', function () {
             resources: ['*']
           }]
         }
-        expect(canI(rulesReview, 'get', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', 'foo')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', '*')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).to.be.true
+        expect(canI(rulesReview, 'get', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', 'foo')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', '*')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).to.be.false
-        expect(canI(rulesReview, 'get', 'foo', 'resource4')).to.be.false
+        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).toBe(false)
+        expect(canI(rulesReview, 'get', 'foo', 'resource4')).toBe(false)
       })
 
-      it('should validate with wildcard resource name', function () {
+      it('should validate with wildcard resource name', () => {
         rulesReview = {
           resourceRules: [{
             verbs: ['get'],
@@ -144,29 +143,29 @@ describe('utils', function () {
             resourceName: ['*']
           }]
         }
-        expect(canI(rulesReview, 'get', 'group4', 'resource4')).to.be.true
-        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).to.be.true
+        expect(canI(rulesReview, 'get', 'group4', 'resource4')).toBe(true)
+        expect(canI(rulesReview, 'get', 'group4', 'resource4', 'anyResourceName')).toBe(true)
 
-        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).to.be.false
-        expect(canI(rulesReview, 'get', 'foo', 'resource4')).to.be.false
-        expect(canI(rulesReview, 'get', 'group4', 'foo')).to.be.false
+        expect(canI(rulesReview, 'foo', 'group4', 'resource4')).toBe(false)
+        expect(canI(rulesReview, 'get', 'foo', 'resource4')).toBe(false)
+        expect(canI(rulesReview, 'get', 'group4', 'foo')).toBe(false)
       })
 
-      it('should not fail to validate rulesReview', function () {
-        expect(canI(undefined, 'get', 'group1', 'resource1')).to.be.false
-        expect(canI({}, 'get', 'group1', 'resource1')).to.be.false
-        expect(canI({ resourceRules: [] }, 'get', 'group1', 'resource1')).to.be.false
+      it('should not fail to validate rulesReview', () => {
+        expect(canI(undefined, 'get', 'group1', 'resource1')).toBe(false)
+        expect(canI({}, 'get', 'group1', 'resource1')).toBe(false)
+        expect(canI({ resourceRules: [] }, 'get', 'group1', 'resource1')).toBe(false)
         expect(canI({
           resourceRules: [{
             verbs: [],
             apiGroups: [],
             resources: []
           }]
-        }, 'get', 'group1', 'resource1')).to.be.false
+        }, 'get', 'group1', 'resource1')).toBe(false)
       })
     })
   })
-  describe('#availableK8sUpdatesForShoot', function () {
+  describe('#availableK8sUpdatesForShoot', () => {
     const kubernetesVersions = [
       {
         classification: 'preview',
@@ -207,22 +206,22 @@ describe('utils', function () {
       }
     })
 
-    it('should return available K8sUpdates for given version', function () {
+    it('should return available K8sUpdates for given version', () => {
       const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
-      expect(availableK8sUpdates.minor[0]).to.equal(kubernetesVersions[1])
-      expect(availableK8sUpdates.patch[0]).to.equal(kubernetesVersions[4])
-      expect(availableK8sUpdates.major[0]).to.equal(kubernetesVersions[0])
+      expect(availableK8sUpdates.minor[0]).toBe(kubernetesVersions[1])
+      expect(availableK8sUpdates.patch[0]).toBe(kubernetesVersions[4])
+      expect(availableK8sUpdates.major[0]).toBe(kubernetesVersions[0])
     })
 
-    it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', function () {
+    it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
       const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
-      expect(availableK8sUpdates.patch.length).to.equal(1)
-      expect(availableK8sUpdates.minor.length).to.equal(2)
-      expect(availableK8sUpdates.major.length).to.equal(1)
+      expect(availableK8sUpdates.patch.length).toBe(1)
+      expect(availableK8sUpdates.minor.length).toBe(2)
+      expect(availableK8sUpdates.major.length).toBe(1)
     })
   })
 
-  describe('k8s update functions', function () {
+  describe('k8s update functions', () => {
     const kubernetesVersions = [
       {
         version: '1.1.1',
@@ -264,101 +263,107 @@ describe('utils', function () {
       }
     })
 
-    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should be latest (multiple same minor)', function () {
-      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
-      expect(result).to.be.false
-    })
+    describe('#k8sVersionIsNotLatestPatch', () => {
+      it('selected kubernetes version should be latest (multiple same minor)', () => {
+        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
+        expect(result).toBe(false)
+      })
 
-    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should be latest (one minor, one major, one preview update available)', function () {
-      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
-      expect(result).to.be.false
-    })
+      it('selected kubernetes version should be latest (one minor, one major, one preview update available)', () => {
+        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
+        expect(result).toBe(false)
+      })
 
-    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should not be latest', function () {
-      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
-      expect(result).to.be.true
-    })
-
-    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should have update path (minor update available)', function () {
-      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
-      expect(result).to.be.true
-    })
-
-    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should have update path (patch update available)', function () {
-      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
-      expect(result).to.be.true
-    })
-
-    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should not have update path (minor update is preview)', function () {
-      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
-      expect(result).to.be.false
-    })
-
-    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should not have update path (no next minor version update available)', function () {
-      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
-      expect(result).to.be.false
-    })
-
-    it('#k8sVersionExpirationForShoot - should be info level (patch avialable, auto update enabled))', function () {
-      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
-      expect(versionExpirationWarning).to.eql({
-        expirationDate: kubernetesVersions[0].expirationDate,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: false,
-        isInfo: true
+      it('selected kubernetes version should not be latest', () => {
+        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
+        expect(result).toBe(true)
       })
     })
 
-    it('#k8sVersionExpirationForShoot - should be warning level (patch available, auto update disabled))', function () {
-      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
-      expect(versionExpirationWarning).to.eql({
-        expirationDate: kubernetesVersions[0].expirationDate,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: true,
-        isInfo: false
+    describe('#k8sVersionUpdatePathAvailable', () => {
+      it('selected kubernetes version should have update path (minor update available)', () => {
+        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
+        expect(result).toBe(true)
+      })
+
+      it('selected kubernetes version should have update path (patch update available)', () => {
+        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
+        expect(result).toBe(true)
+      })
+
+      it('selected kubernetes version should not have update path (minor update is preview)', () => {
+        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
+        expect(result).toBe(false)
+      })
+
+      it('selected kubernetes version should not have update path (no next minor version update available)', () => {
+        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
+        expect(result).toBe(false)
       })
     })
 
-    it('#k8sVersionExpirationForShoot - should be warning level (update available, auto update enabled / disabled))', function () {
-      let versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
-      expect(versionExpirationWarning).to.eql({
-        expirationDate: kubernetesVersions[1].expirationDate,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: true,
-        isInfo: false
+    describe('#k8sVersionExpirationForShoot ', () => {
+      it('should be info level (patch avialable, auto update enabled))', () => {
+        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
+        expect(versionExpirationWarning).toEqual({
+          expirationDate: kubernetesVersions[0].expirationDate,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: false,
+          isInfo: true
+        })
       })
 
-      versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
-      expect(versionExpirationWarning).to.eql({
-        expirationDate: kubernetesVersions[1].expirationDate,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: true,
-        isInfo: false
+      it('should be warning level (patch available, auto update disabled))', () => {
+        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
+        expect(versionExpirationWarning).toEqual({
+          expirationDate: kubernetesVersions[0].expirationDate,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: true,
+          isInfo: false
+        })
       })
-    })
 
-    it('#k8sVersionExpirationForShoot - should be error level (no update path available))', function () {
-      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
-      expect(versionExpirationWarning).to.eql({
-        expirationDate: kubernetesVersions[7].expirationDate,
-        isValidTerminationDate: false,
-        isError: true,
-        isWarning: false,
-        isInfo: false
+      it('should be warning level (update available, auto update enabled / disabled))', () => {
+        let versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
+        expect(versionExpirationWarning).toEqual({
+          expirationDate: kubernetesVersions[1].expirationDate,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: true,
+          isInfo: false
+        })
+
+        versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
+        expect(versionExpirationWarning).toEqual({
+          expirationDate: kubernetesVersions[1].expirationDate,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: true,
+          isInfo: false
+        })
       })
-    })
 
-    it('#k8sVersionExpirationForShoot - should be error level (version not expired))', function () {
-      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
-      expect(versionExpirationWarning).to.be.undefined
+      it('should be error level (no update path available))', () => {
+        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
+        expect(versionExpirationWarning).toEqual({
+          expirationDate: kubernetesVersions[7].expirationDate,
+          isValidTerminationDate: false,
+          isError: true,
+          isWarning: false,
+          isInfo: false
+        })
+      })
+
+      it('should be error level (version not expired))', () => {
+        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
+        expect(versionExpirationWarning).toBeUndefined()
+      })
     })
   })
 
-  describe('machine image update functions', function () {
+  describe('machine image update functions', () => {
     const sampleMachineImages = [
       {
         name: 'FooImage',
@@ -417,88 +422,92 @@ describe('utils', function () {
       }
     })
 
-    it('#selectedImageIsNotLatest - selected image should be latest (multiple exist, preview exists)', function () {
-      const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
-      expect(result).to.be.false
-    })
+    describe('#selectedImageIsNotLatest', () => {
+      it('selected image should be latest (multiple exist, preview exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
+        expect(result).toBe(false)
+      })
 
-    it('#selectedImageIsNotLatest - selected image should be latest (one exists)', function () {
-      const result = selectedImageIsNotLatest(sampleMachineImages[3], sampleMachineImages)
-      expect(result).to.be.false
-    })
+      it('selected image should be latest (one exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[3], sampleMachineImages)
+        expect(result).toBe(false)
+      })
 
-    it('#selectedImageIsNotLatest - selected image should not be latest', function () {
-      const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
-      expect(result).to.be.true
-    })
-
-    it('#expiringWorkerGroupsForShoot - one should be info level (update available, auto update enabled))', function () {
-      const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1]])
-      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
-      expect(expiredWorkerGroups).to.be.an.instanceof(Array)
-      expect(expiredWorkerGroups).to.have.length(1)
-      expect(expiredWorkerGroups[0]).to.eql({
-        ...sampleMachineImages[0],
-        workerName: workers[0].name,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: false,
-        isInfo: true
+      it('selected image should not be latest', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
+        expect(result).toBe(true)
       })
     })
 
-    it('#expiringWorkerGroupsForShoot - one should be warning level (update available, auto update disabled))', function () {
-      const workers = generateWorkerGroups([sampleMachineImages[0]])
-      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', false)
-      expect(expiredWorkerGroups).to.be.an.instanceof(Array)
-      expect(expiredWorkerGroups).to.have.length(1)
-      expect(expiredWorkerGroups[0]).to.eql({
-        ...sampleMachineImages[0],
-        workerName: workers[0].name,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: true,
-        isInfo: false
+    describe('#selectedImageIsNotLatest', () => {
+      it('one should be info level (update available, auto update enabled))', () => {
+        const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1]])
+        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        expect(expiredWorkerGroups).toBeInstanceOf(Array)
+        expect(expiredWorkerGroups).toHaveLength(1)
+        expect(expiredWorkerGroups[0]).toEqual({
+          ...sampleMachineImages[0],
+          workerName: workers[0].name,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: false,
+          isInfo: true
+        })
       })
-    })
 
-    it('#expiringWorkerGroupsForShoot - one should be info level, two error (update available, auto update enabled))', function () {
-      const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1], sampleMachineImages[3], sampleMachineImages[4]])
-      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
-      expect(expiredWorkerGroups).to.be.an.instanceof(Array)
-      expect(expiredWorkerGroups).to.have.length(3)
-      expect(expiredWorkerGroups[0]).to.eql({
-        ...sampleMachineImages[0],
-        workerName: workers[0].name,
-        isValidTerminationDate: true,
-        isError: false,
-        isWarning: false,
-        isInfo: true
+      it('one should be warning level (update available, auto update disabled))', () => {
+        const workers = generateWorkerGroups([sampleMachineImages[0]])
+        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', false)
+        expect(expiredWorkerGroups).toBeInstanceOf(Array)
+        expect(expiredWorkerGroups).toHaveLength(1)
+        expect(expiredWorkerGroups[0]).toEqual({
+          ...sampleMachineImages[0],
+          workerName: workers[0].name,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: true,
+          isInfo: false
+        })
       })
-      expect(expiredWorkerGroups[1]).to.eql({
-        ...sampleMachineImages[3],
-        workerName: workers[2].name,
-        isValidTerminationDate: true,
-        isError: true,
-        isWarning: false,
-        isInfo: false,
-        isPreview: true
-      })
-      expect(expiredWorkerGroups[2]).to.eql({
-        ...sampleMachineImages[4],
-        workerName: workers[3].name,
-        isValidTerminationDate: false,
-        isError: true,
-        isWarning: false,
-        isInfo: false
-      })
-    })
 
-    it('#expiringWorkerGroupsForShoot - should be empty array (ignore versions without expiration date))', function () {
-      const workers = generateWorkerGroups([sampleMachineImages[1], sampleMachineImages[2]])
-      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
-      expect(expiredWorkerGroups).to.be.an.instanceof(Array)
-      expect(expiredWorkerGroups).to.have.length(0)
+      it('one should be info level, two error (update available, auto update enabled))', () => {
+        const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1], sampleMachineImages[3], sampleMachineImages[4]])
+        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        expect(expiredWorkerGroups).toBeInstanceOf(Array)
+        expect(expiredWorkerGroups).toHaveLength(3)
+        expect(expiredWorkerGroups[0]).toEqual({
+          ...sampleMachineImages[0],
+          workerName: workers[0].name,
+          isValidTerminationDate: true,
+          isError: false,
+          isWarning: false,
+          isInfo: true
+        })
+        expect(expiredWorkerGroups[1]).toEqual({
+          ...sampleMachineImages[3],
+          workerName: workers[2].name,
+          isValidTerminationDate: true,
+          isError: true,
+          isWarning: false,
+          isInfo: false,
+          isPreview: true
+        })
+        expect(expiredWorkerGroups[2]).toEqual({
+          ...sampleMachineImages[4],
+          workerName: workers[3].name,
+          isValidTerminationDate: false,
+          isError: true,
+          isWarning: false,
+          isInfo: false
+        })
+      })
+
+      it('should be empty array (ignore versions without expiration date))', () => {
+        const workers = generateWorkerGroups([sampleMachineImages[1], sampleMachineImages[2]])
+        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        expect(expiredWorkerGroups).toBeInstanceOf(Array)
+        expect(expiredWorkerGroups).toHaveLength(0)
+      })
     })
   })
 })

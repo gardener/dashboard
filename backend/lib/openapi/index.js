@@ -17,10 +17,10 @@
 'use strict'
 
 const { canGetOpenAPI } = require('../services/authorization')
-const { Forbidden } = require('../errors')
+const { Forbidden } = require('http-errors')
 const SwaggerParser = require('swagger-parser')
 const express = require('express')
-const { dashboardClient } = require('../kubernetes-client')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const _ = require('lodash')
 
 const router = module.exports = express.Router()

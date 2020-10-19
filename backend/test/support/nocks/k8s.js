@@ -18,12 +18,12 @@
 
 const _ = require('lodash')
 const nock = require('nock')
-const uuidv1 = require('uuid/v1')
+const { v1: uuidv1 } = require('uuid')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
-const { url, auth } = require('../../../lib/kubernetes-config').load()
+const { url, auth } = require('@gardener-dashboard/kube-config').load()
 
 const quotas = [
   {
@@ -103,7 +103,7 @@ const projectList = [
         name: 'group1',
         roles: ['admin', 'owner']
       }
-    ],
+    ]
   }),
   getProject({
     name: 'GroupMember2',
@@ -116,7 +116,7 @@ const projectList = [
         name: 'group2',
         roles: ['admin', 'owner']
       }
-    ],
+    ]
   }),
   getProject({
     name: 'new',
@@ -401,9 +401,9 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
-  .chain(members)
-  .map(getRoles)
-  .value()
+    .chain(members)
+    .map(getRoles)
+    .value()
   owner = getUser(owner)
   createdBy = getUser(createdBy)
   return {

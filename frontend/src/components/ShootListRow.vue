@@ -61,7 +61,7 @@ limitations under the License.
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
-            <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
+            <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
           </div>
         </template>
         {{ shootCreatedAt }}
@@ -92,7 +92,7 @@ limitations under the License.
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-              <time-string :date-time="shootLastUpdatedTicketTimestamp" :pointInTime="-1"></time-string>
+              <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
             </router-link>
           </div>
         </template>
@@ -103,9 +103,9 @@ limitations under the License.
       <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
         None
       </template>
-      <template v-else>
-        <ticket-labels :labels="shootTicketsLabels"></ticket-labels>
-      </template>
+      <div class="labels" v-else>
+        <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
+      </div>
     </td>
     <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
       <v-row class="fill-height" align="center" justify="end" >
@@ -127,28 +127,31 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import forEach from 'lodash/forEach'
+import includes from 'lodash/includes'
+
 import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
+import CopyBtn from '@/components/CopyBtn'
 import Vendor from '@/components/Vendor'
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import TicketLabels from '@/components/ShootTickets/TicketLabels'
-import CopyBtn from '@/components/CopyBtn'
+import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
-import forEach from 'lodash/forEach'
-import includes from 'lodash/includes'
+
 import {
   isTypeDelete,
   isShootHasNoHibernationScheduleWarning,
   getTimestampFormatted
 } from '@/utils'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -159,7 +162,7 @@ export default {
     ShootStatus,
     TimeString,
     ShootVersion,
-    TicketLabels,
+    TicketLabel,
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,
@@ -249,6 +252,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+  .labels {
+    line-height: 10px;
+  }
+
   .action-button-group {
     white-space: nowrap;
 

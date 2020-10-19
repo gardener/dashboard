@@ -63,7 +63,7 @@ limitations under the License.
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">timelapse</v-icon>
+                <v-icon color="teal darken-2">mdi-timelapse</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title class="label">Session</v-list-item-title>
@@ -83,7 +83,7 @@ limitations under the License.
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">mdi-key </v-icon>
+                <v-icon color="teal darken-2">mdi-key</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title>Token</v-list-item-title>
@@ -97,7 +97,7 @@ limitations under the License.
               <v-divider inset class="my-2"/>
               <v-list-item>
                 <v-list-item-avatar>
-                  <v-icon color="teal darken-2">insert_drive_file</v-icon>
+                  <v-icon color="teal darken-2">mdi-file</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
@@ -114,7 +114,7 @@ limitations under the License.
                   </v-tooltip>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
-                  <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
+                  <copy-btn :clipboard-text="kubeconfigYaml" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
@@ -184,7 +184,7 @@ limitations under the License.
                         </v-row>
                       </v-tab-item>
                       <v-tab-item>
-                        <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
+                        <code-block lang="yaml" :content="kubeconfigYaml" :show-copy-button="false"></code-block>
                       </v-tab-item>
                     </v-tabs>
                   </v-card-text>
@@ -211,15 +211,6 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import get from 'lodash/get'
 
-// js-yaml
-import jsyaml from 'js-yaml'
-
-function safeDump (value) {
-  return jsyaml.safeDump(value, {
-    skipInvalid: true
-  })
-}
-
 export default {
   components: {
     CopyBtn,
@@ -238,19 +229,11 @@ export default {
       idToken: undefined,
       showToken: false,
       floatingButton: false,
-      showMessage: false
+      showMessage: false,
+      kubeconfigYaml: ''
     }
   },
-  async mounted () {
-    try {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      this.projectName = get(project, 'metadata.name', '')
-      const { data } = await getToken()
-      this.idToken = data.token
-    } catch (err) {
-      console.error(err.message)
-    }
-  },
+
   computed: {
     ...mapState([
       'user',
@@ -273,7 +256,7 @@ export default {
       return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'
     },
     icon () {
-      return this.isAdmin ? 'supervisor_account' : 'mdi-account'
+      return this.isAdmin ? 'mdi-account-suprvisor' : 'mdi-account'
     },
     id () {
       return this.user.id
@@ -348,7 +331,7 @@ export default {
           args
         }
       }
-      return safeDump({
+      return {
         kind: 'Config',
         apiVersion: 'v1',
         clusters: [{
@@ -365,12 +348,33 @@ export default {
           user
         }],
         preferences: {}
-      })
+      }
     }
   },
   methods: {
-    onDownload () {
-      download(this.kubeconfig, this.kubeconfigFilename, 'text/yaml')
+    async onDownload () {
+      const kubeconfig = this.kubeconfigYaml
+      const filename = this.kubeconfigFilename
+      download(kubeconfig, filename, 'text/yaml')
+    },
+    async updateKubeconfigYaml (value) {
+      this.kubeconfigYaml = await this.$yaml.safeDump(value)
+    }
+  },
+  async mounted () {
+    try {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      this.projectName = get(project, 'metadata.name', '')
+      const { data } = await getToken()
+      this.idToken = data.token
+      this.updateKubeconfigYaml(this.kubeconfig)
+    } catch (err) {
+      console.error(err.message)
+    }
+  },
+  watch: {
+    kubeconfig (value) {
+      this.updateKubeconfigYaml(value)
     }
   }
 }

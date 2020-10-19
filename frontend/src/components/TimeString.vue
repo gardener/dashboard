@@ -48,9 +48,8 @@ export default {
     dateTime: {
       type: String
     },
-    pointInTime: {
-      type: Number,
-      default: 0 // negative = force past date, positive = force future date
+    mode: {
+      type: String
     },
     currentString: {
       type: String // access the datetime string from outside of the component
@@ -87,9 +86,9 @@ export default {
       const currentDate = new Date().getTime()
       const refDate = new Date(dateTimeValue).getTime()
       let diffInMilliseconds
-      if (this.pointInTime < 0) {
+      if (this.mode === 'past') {
         this.negativeRefDate = true
-      } else if (this.pointInTime > 0) {
+      } else if (this.mode === 'future') {
         this.negativeRefDate = false
       } else if (currentDate > refDate) {
         this.negativeRefDate = true

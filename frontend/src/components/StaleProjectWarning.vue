@@ -21,7 +21,7 @@ limitations under the License.
       <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-else>mdi-clock-alert-outline</v-icon>
     </template>
      <span v-if="staleAutoDeleteTimestamp">
-      This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
+      This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp" mode="future"></time-string></span>
     </span>
     <span v-else>
       This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
