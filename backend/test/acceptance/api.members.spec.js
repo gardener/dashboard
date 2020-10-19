@@ -42,10 +42,10 @@ module.exports = function ({ agent, k8s, auth }) {
       .get(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
 
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.have.length(4)
-      expect(res.body).to.have.deep.members(members)
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.length(4)
+    expect(res.body).to.have.deep.members(members)
   })
 
   it('should not return members but respond "not found"', async function () {
@@ -58,7 +58,6 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(404)
     expect(res).to.be.json
-    expect(res.body.message).to.match(/not related to a gardener project/i)
   })
 
   it('should return a service account', async function () {
@@ -133,7 +132,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
   })
 
-  it('should not delete member that is not a project member', async function () {
+  it('should not delete a member that is not a project member', async function () {
     const bearer = await user.bearer
     const name = 'baz@example.org'
     k8s.stub.removeMember({ bearer, namespace, name })
