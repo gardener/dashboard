@@ -36,7 +36,7 @@ const getters = {
 const actions = {
   async getAll ({ commit, state }) {
     const { data } = await getSeeds()
-    commit('RECEIVE', res.data)
+    commit('RECEIVE', data)
     return state.all
   }
 }
