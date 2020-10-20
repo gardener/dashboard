@@ -49,7 +49,7 @@ limitations under the License.
       <template v-slot:notAvailablePlaceholder>
         <v-list-item-content>
           <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
+          <v-list-item-title class="wrap-text pt-1">
             <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
             Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
           </v-list-item-title>
@@ -108,3 +108,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .wrap-text {
+    white-space: normal;
+  }
+</style>
