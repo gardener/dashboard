@@ -321,17 +321,13 @@ const getters = {
     return state.seeds.all
   },
   cloudProfileByName (state, getters) {
-    return (name) => {
-      return getters['cloudProfiles/cloudProfileByName'](name)
-    }
+    return name => getters['cloudProfiles/cloudProfileByName'](name)
   },
   seedByName (state, getters) {
-    return (name) => {
-      return getters['seeds/seedByName'](name)
-    }
+    return name => getters['seeds/seedByName'](name)
   },
   isSeedUnreachableByName (state, getters) {
-    return (name) => {
+    return name => {
       const seed = getters.seedByName(name)
       return get(seed, 'metadata.unreachable')
     }
@@ -597,9 +593,7 @@ const getters = {
     }
   },
   seedsByNames (state, getters) {
-    return (seedNames) => {
-      return map(seedNames, getters.seedByName)
-    }
+    return seedNames => map(seedNames, getters.seedByName)
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -957,11 +951,12 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchSeeds ({ dispatch }) {
-    return dispatch('seeds/getAll')
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async fetchSeeds ({ dispatch }) {
+    try {
+      await dispatch('seeds/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   fetchProjects ({ dispatch }) {
     return dispatch('projects/getAll')

@@ -24,21 +24,20 @@ const state = {
 
 // getters
 const getters = {
-  items: state => state.all,
-  seedByName: (state) => (name) => {
-    const predicate = item => item.metadata.name === name
-    return find(state.all, predicate)
+  items (state) {
+    return state.all
+  },
+  seedByName (state) {
+    return name => find(state.all, ['metadata.name', name])
   }
 }
 
 // actions
 const actions = {
-  getAll: ({ commit, rootState }) => {
-    return getSeeds()
-      .then(res => {
-        commit('RECEIVE', res.data)
-        return state.all
-      })
+  async getAll ({ commit, state }) {
+    const { data } = await getSeeds()
+    commit('RECEIVE', res.data)
+    return state.all
   }
 }
 

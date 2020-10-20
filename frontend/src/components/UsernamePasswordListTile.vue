@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 <template>
-  <div v-show="((!!username || !!email) && !!password) || showNotAvailablePlaceholder">
-    <template v-if="(!!username || !!email) && !!password">
+  <div v-if="showCredentials || showNotAvailablePlaceholder">
+    <template v-if="showCredentials">
       <v-list-item v-if="username">
         <v-list-item-icon>
           <v-icon color="cyan darken-2">{{icon}}</v-icon>
@@ -136,6 +136,9 @@ export default {
     },
     visibilityIcon () {
       return this.showPassword ? 'mdi-eye-off' : 'mdi-eye'
+    },
+    showCredentials () {
+      return (!!this.username || !!this.email) && !!this.password
     }
   },
   watch: {
