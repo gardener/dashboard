@@ -194,10 +194,10 @@ import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
-  nameFromPrefixedServiceAccountName,
+  nameFromServiceAccountUsername,
   isForeignServiceAccount,
   nameAndNamespaceFromServiceAccountUsername,
-  hasServiceAccountPrefix,
+  isServiceAccountUsername,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
@@ -261,7 +261,7 @@ export default {
       return this.projectDetails.costObject
     },
     serviceAccountList () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => hasServiceAccountPrefix(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
       return map(serviceAccounts, serviceAccount => {
         const { username } = serviceAccount
         return {
@@ -275,7 +275,7 @@ export default {
       })
     },
     userList () {
-      const users = filter(this.memberList, ({ username }) => !hasServiceAccountPrefix(username))
+      const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
         const { username } = user
         return {
@@ -291,7 +291,7 @@ export default {
     },
     sortedAndFilteredUserList () {
       const predicate = ({ username }) => {
-        if (hasServiceAccountPrefix(username)) {
+        if (isServiceAccountUsername(username)) {
           return false
         }
 
@@ -317,13 +317,13 @@ export default {
         if (!this.serviceAccountFilter) {
           return true
         }
-        const name = nameFromPrefixedServiceAccountName(username)
+        const name = nameFromServiceAccountUsername(username)
         return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
-      return nameFromPrefixedServiceAccountName(this.currentServiceAccountName)
+      return nameFromServiceAccountUsername(this.currentServiceAccountName)
     }
   },
   methods: {

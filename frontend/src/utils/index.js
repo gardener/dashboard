@@ -27,7 +27,6 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
 import toLower from 'lodash/toLower'
-import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import words from 'lodash/words'
@@ -49,12 +48,6 @@ export function emailToDisplayName (value) {
     const names = map(words(replace(value, /@.*$/, '')), capitalize)
     const givenName = names.shift()
     return join(compact([join(names, ' '), givenName]), ', ')
-  }
-}
-
-export function nameFromPrefixedServiceAccountName (serviceAccount) {
-  if (serviceAccount) {
-    return last(split(serviceAccount, ':'))
   }
 }
 
@@ -159,9 +152,9 @@ export function fullDisplayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (hasServiceAccountPrefix(username)) {
+  if (isServiceAccountUsername(username)) {
     const [namespace, serviceAccount] = split(username, ':', 4).slice(2)
-    return toUpper(`${namespace} / ${serviceAccount}`)
+    return `${namespace} / ${serviceAccount}`
   }
   return username
 }
@@ -173,9 +166,9 @@ export function displayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (hasServiceAccountPrefix(username)) {
+  if (isServiceAccountUsername(username)) {
     const [, serviceAccount] = split(username, ':', 4).slice(2)
-    return toUpper(serviceAccount)
+    return serviceAccount
   }
   return username
 }
@@ -202,7 +195,7 @@ export function gravatarUrlGeneric (username, size = 128) {
   if (isEmail(username)) {
     return gravatarUrlIdenticon(username, size)
   }
-  if (hasServiceAccountPrefix(username)) {
+  if (isServiceAccountUsername(username)) {
     return gravatarUrlRobohash(username, size)
   }
   return gravatarUrlRetro(username, size)
@@ -406,7 +399,7 @@ export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
 
-export function hasServiceAccountPrefix (username) {
+export function isServiceAccountUsername (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
@@ -418,6 +411,11 @@ export function isForeignServiceAccount (currentNamespace, serviceAccountName) {
     }
   }
   return false
+}
+export function nameFromServiceAccountUsername (serviceAccount) {
+  if (serviceAccount) {
+    return last(split(serviceAccount, ':'))
+  }
 }
 
 export function nameAndNamespaceFromServiceAccountUsername (username) {

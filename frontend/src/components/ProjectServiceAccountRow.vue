@@ -21,7 +21,7 @@ limitations under the License.
         <img :src="avatarUrl" />
       </v-list-item-avatar>
       <v-list-item-content>
-        <v-list-item-title class="cursor-pointer">
+        <v-list-item-title v-if="isServiceAccountFromCurrentNamespace" class="cursor-pointer">
           <g-popper
             :title="displayName"
             toolbarColor="cyan darken-2"
@@ -29,12 +29,6 @@ limitations under the License.
           >
             <template v-slot:popperRef>
               <span>{{displayName}}</span>
-              <v-tooltip v-if="!isServiceAccountFromCurrentNamespace" top>
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
-                </template>
-                <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
-              </v-tooltip>
             </template>
             <v-list class="pa-0">
               <v-list-item class="px-0">
@@ -60,6 +54,15 @@ limitations under the License.
               </v-list-item>
             </v-list>
           </g-popper>
+        </v-list-item-title>
+        <v-list-item-title v-else>
+          <span>{{displayName}}</span>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
+            </template>
+            <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
+          </v-tooltip>
         </v-list-item-title>
         <v-list-item-subtitle>
           {{username}}

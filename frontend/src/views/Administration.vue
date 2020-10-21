@@ -282,7 +282,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { compileMarkdown, getProjectDetails, textColor, hasServiceAccountPrefix, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { compileMarkdown, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -350,7 +350,7 @@ export default {
     userList () {
       const members = new Set()
       for (const { username } of this.memberList) {
-        if (!hasServiceAccountPrefix(username)) {
+        if (!isServiceAccountUsername(username)) {
           members.add(username)
         }
       }

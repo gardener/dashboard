@@ -83,7 +83,7 @@ import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { nameFromPrefixedServiceAccountName, hasServiceAccountPrefix, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { nameFromServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -163,7 +163,7 @@ export default {
           validators.internalName = {
             required,
             unique: unique('projectUserNames'),
-            isNoServiceAccount: value => !hasServiceAccountPrefix(value)
+            isNoServiceAccount: value => !isServiceAccountUsername(value)
           }
         } else if (this.isServiceDialog) {
           validators.internalRoles = {
@@ -174,13 +174,13 @@ export default {
           validators.internalName = {
             required,
             serviceAccountResource: value => {
-              if (hasServiceAccountPrefix(this.internalName)) {
+              if (isServiceAccountUsername(this.internalName)) {
                 return true
               }
               return resourceName(value)
             },
             unique: value => {
-              if (hasServiceAccountPrefix(value)) {
+              if (isServiceAccountUsername(value)) {
                 return unique('serviceAccountNames')(value, this)
               }
               return unique('serviceAccountNamesWithoutPrefix')(value, this)
@@ -272,14 +272,14 @@ export default {
       return undefined
     },
     serviceAccountNames () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => hasServiceAccountPrefix(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
       return map(serviceAccounts, 'username')
     },
     serviceAccountNamesWithoutPrefix () {
-      return map(this.serviceAccountNames, nameFromPrefixedServiceAccountName)
+      return map(this.serviceAccountNames, nameFromServiceAccountUsername)
     },
     projectUserNames () {
-      const users = filter(this.memberList, ({ username }) => !hasServiceAccountPrefix(username))
+      const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, 'username')
     },
     memberName () {
@@ -288,7 +288,7 @@ export default {
         return name
       }
       if (this.isServiceDialog) {
-        if (hasServiceAccountPrefix(name)) {
+        if (isServiceAccountUsername(name)) {
           return name
         }
         return `system:serviceaccount:${this.namespace}:${name}`
@@ -376,7 +376,7 @@ export default {
         }
       } else if (this.isServiceDialog) {
         if (this.name) {
-          this.internalName = nameFromPrefixedServiceAccountName(this.name)
+          this.internalName = nameFromServiceAccountUsername(this.name)
         } else {
           this.internalName = this.defaultServiceName()
         }
