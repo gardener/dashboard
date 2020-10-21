@@ -409,11 +409,11 @@ export default {
       if (this.isCurrentUser(name)) {
         messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
       } else {
-        messageHtml = `Do you want to remove the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
+        messageHtml = `Do you want to remove the user <i>${memberName}</i> from the project <i>${projectName}</i>?`
       }
       return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Remove Member',
-        captionText: 'Confirm Remove Member',
+        confirmButtonText: 'Remove User',
+        captionText: 'Confirm Remove User',
         messageHtml,
         dialogColor: 'red'
       })
@@ -426,7 +426,7 @@ export default {
         deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
       }
       if (deletionConfirmed) {
-        await this.deleteMember(serviceAccountName)
+        return this.deleteMember(serviceAccountName)
       }
     },
     confirmRemoveForeignServiceAccount (serviceAccountName) {

@@ -251,14 +251,14 @@ export default {
         return 'Enter the username that should become a member of this project'
       }
       if (this.isServiceDialog) {
-        return 'Enter a valid Kubernetes Service Account name'
+        return 'Enter service account name'
       }
 
       return undefined
     },
     rolesHint () {
       if (this.isServiceDialog) {
-        return 'Assign roles to make this Service Account a member of this project'
+        return 'Assign roles to make this service account a member of this project'
       }
       return undefined
     },

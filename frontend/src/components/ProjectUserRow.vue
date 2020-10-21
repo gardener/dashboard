@@ -49,7 +49,7 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Change user roles</span>
+          <span>Change User Roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageMembers" class="ml-1">
@@ -62,7 +62,7 @@ limitations under the License.
             </div>
           </template>
           <span v-if="isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
-          <span v-else>Remove user from project</span>
+          <span v-else>Remove User From Project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>

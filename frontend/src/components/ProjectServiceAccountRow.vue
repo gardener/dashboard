@@ -33,7 +33,7 @@ limitations under the License.
                 <template v-slot:activator="{ on }">
                   <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
                 </template>
-                <span>Service Account invitewd from namespace {{serviceAccountNamespace}}</span>
+                <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
               </v-tooltip>
             </template>
             <v-list class="pa-0">
@@ -104,7 +104,7 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Change service account roles</span>
+          <span>Change Service Account Roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
@@ -116,7 +116,7 @@ limitations under the License.
             </v-btn>
           </template>
           <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
-          <span v-else>Remove service account from project</span>
+          <span v-else>Remove Service Account from Project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
