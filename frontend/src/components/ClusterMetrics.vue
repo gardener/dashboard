@@ -45,7 +45,18 @@ limitations under the License.
       content-class="pt-0"
     ></link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
-    <username-password :username="username" :password="password"></username-password>
+    <username-password v-if="isAdmin" :username="username" :password="password" :showNotAvailablePlaceholder="isSeedUnreachable">
+      <template v-slot:notAvailablePlaceholder>
+        <v-list-item-content>
+          <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
+          <v-list-item-title class="wrap-text pt-1">
+            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
+          </v-list-item-title>
+        </v-list-item-content>
+      </template>
+    </username-password>
+    <username-password v-else :username="username" :password="password"></username-password>
   </v-list>
 </template>
 
@@ -97,3 +108,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .wrap-text {
+    white-space: normal;
+  }
+</style>

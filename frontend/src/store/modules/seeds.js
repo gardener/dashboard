@@ -14,15 +14,44 @@
 // limitations under the License.
 //
 
-module.exports = {
-  cloudprofiles: require('./cloudprofiles'),
-  seeds: require('./seeds'),
-  projects: require('./projects'),
-  shoots: require('./shoots'),
-  infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members'),
-  authorization: require('./authorization'),
-  authentication: require('./authentication'),
-  tickets: require('./tickets'),
-  terminals: require('./terminals')
+import { getSeeds } from '@/utils/api'
+import find from 'lodash/find'
+
+// initial state
+const state = {
+  all: []
+}
+
+// getters
+const getters = {
+  items (state) {
+    return state.all
+  },
+  seedByName (state) {
+    return name => find(state.all, ['metadata.name', name])
+  }
+}
+
+// actions
+const actions = {
+  async getAll ({ commit, state }) {
+    const { data } = await getSeeds()
+    commit('RECEIVE', data)
+    return state.all
+  }
+}
+
+// mutations
+const mutations = {
+  RECEIVE (state, items) {
+    state.all = items
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }

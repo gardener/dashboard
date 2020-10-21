@@ -61,6 +61,7 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
+import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
@@ -316,9 +317,19 @@ const getters = {
   cloudProfileList (state) {
     return state.cloudProfiles.all
   },
+  seedList (state) {
+    return state.seeds.all
+  },
   cloudProfileByName (state, getters) {
-    return (name) => {
-      return getters['cloudProfiles/cloudProfileByName'](name)
+    return name => getters['cloudProfiles/cloudProfileByName'](name)
+  },
+  seedByName (state, getters) {
+    return name => getters['seeds/seedByName'](name)
+  },
+  isSeedUnreachableByName (state, getters) {
+    return name => {
+      const seed = getters.seedByName(name)
+      return get(seed, 'metadata.unreachable')
     }
   },
   cloudProfilesByCloudProviderKind (state) {
@@ -571,14 +582,18 @@ const getters = {
       if (!cloudProfile) {
         return []
       }
-      const seeds = cloudProfile.data.seeds
-      if (!seeds) {
+      const seedNames = cloudProfile.data.seedNames
+      if (!seedNames) {
         return []
       }
+      const seeds = getters.seedsByNames(seedNames)
       const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
       const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
       return uniqueSeedRegionsWithZones
     }
+  },
+  seedsByNames (state, getters) {
+    return seedNames => map(seedNames, getters.seedByName)
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -936,6 +951,13 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  async fetchSeeds ({ dispatch }) {
+    try {
+      await dispatch('seeds/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
   fetchProjects ({ dispatch }) {
     return dispatch('projects/getAll')
       .catch(err => {
@@ -1025,12 +1047,13 @@ const actions = {
           object
         }]
       })
-      const fetchShootAndShootSeedInfo = async ({ metadata }) => {
+      const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
         const promises = []
         if (store.getters.canGetSecrets) {
           promises.push(store.dispatch('getShootInfo', metadata))
         }
-        if (store.getters.isAdmin) {
+        const seedName = spec.seedName
+        if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
           promises.push(store.dispatch('getShootSeedInfo', metadata))
         }
         try {
@@ -1378,6 +1401,7 @@ const modules = {
   members,
   draggable,
   cloudProfiles,
+  seeds,
   shoots,
   infrastructureSecrets,
   tickets

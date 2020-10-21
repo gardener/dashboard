@@ -48,6 +48,10 @@ describe('acceptance', function () {
       require('./acceptance/api.cloudprofiles.spec.js')(context)
     })
 
+    describe('seeds', function () {
+      require('./acceptance/api.seeds.spec.js')(context)
+    })
+
     describe('info', function () {
       require('./acceptance/api.info.spec.js')(context)
     })

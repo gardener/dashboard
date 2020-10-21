@@ -15,50 +15,66 @@ limitations under the License.
 -->
 
 <template>
-  <div v-show="(!!username || !!email) && !!password">
-    <v-list-item v-if="username">
+  <div v-if="showCredentials || showNotAvailablePlaceholder">
+    <template v-if="showCredentials">
+      <v-list-item v-if="username">
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">{{icon}}</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>{{usernameTitle}}</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">{{username}}</v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action>
+          <copy-btn :clipboard-text="username"></copy-btn>
+        </v-list-item-action>
+      </v-list-item>
+      <v-list-item v-if="email">
+        <v-list-item-icon>
+          <v-icon v-if="!username" color="cyan darken-2">{{icon}}</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>{{emailTitle}}</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">{{email}}</v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action>
+          <copy-btn :clipboard-text="email"></copy-btn>
+        </v-list-item-action>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>{{passwordTitle}}</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">{{passwordText}}</v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action class="mx-0">
+          <copy-btn :clipboard-text="password"></copy-btn>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword">
+                <v-icon>{{visibilityIcon}}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{passwordVisibilityTitle}}</span>
+          </v-tooltip>
+        </v-list-item-action>
+      </v-list-item>
+    </template>
+    <v-list-item v-else-if="showNotAvailablePlaceholder">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-account-outline</v-icon>
+        <v-icon color="cyan darken-2">{{icon}}</v-icon>
       </v-list-item-icon>
-      <v-list-item-content>
-        <v-list-item-subtitle>User</v-list-item-subtitle>
-        <v-list-item-title class="pt-1">{{username}}</v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action>
-        <copy-btn :clipboard-text="username"></copy-btn>
-      </v-list-item-action>
-    </v-list-item>
-    <v-list-item v-if="email">
-      <v-list-item-icon>
-        <v-icon v-if="!username" color="cyan darken-2">mdi-account-outline</v-icon>
-      </v-list-item-icon>
-      <v-list-item-content class="pt-0">
-        <v-list-item-subtitle>Email</v-list-item-subtitle>
-        <v-list-item-title class="pt-1">{{email}}</v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action>
-        <copy-btn :clipboard-text="email"></copy-btn>
-      </v-list-item-action>
-    </v-list-item>
-    <v-list-item>
-      <v-list-item-icon/>
-      <v-list-item-content class="pt-0">
-        <v-list-item-subtitle>Password</v-list-item-subtitle>
-        <v-list-item-title class="pt-1">{{passwordText}}</v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action class="mx-0">
-        <copy-btn :clipboard-text="password"></copy-btn>
-      </v-list-item-action>
-      <v-list-item-action class="mx-0">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword">
-              <v-icon>{{visibilityIcon}}</v-icon>
-            </v-btn>
-          </template>
-          <span>{{passwordVisibilityTitle}}</span>
-        </v-tooltip>
-      </v-list-item-action>
+      <slot name="notAvailablePlaceholder">
+        <v-list-item-content>
+          <v-list-item-subtitle>Credentials</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            Currently not available
+          </v-list-item-title>
+        </v-list-item-content>
+      </slot>
     </v-list-item>
   </div>
 </template>
@@ -71,6 +87,22 @@ export default {
     CopyBtn
   },
   props: {
+    icon: {
+      type: String,
+      default: 'mdi-account-outline'
+    },
+    usernameTitle: {
+      type: String,
+      default: 'User'
+    },
+    passwordTitle: {
+      type: String,
+      default: 'Password'
+    },
+    emailTitle: {
+      type: String,
+      default: 'Email'
+    },
     username: {
       type: String
     },
@@ -79,6 +111,10 @@ export default {
     },
     password: {
       type: String
+    },
+    showNotAvailablePlaceholder: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -100,6 +136,9 @@ export default {
     },
     visibilityIcon () {
       return this.showPassword ? 'mdi-eye-off' : 'mdi-eye'
+    },
+    showCredentials () {
+      return (!!this.username || !!this.email) && !!this.password
     }
   },
   watch: {

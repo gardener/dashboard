@@ -25,26 +25,21 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
   const id = username
   const user = auth.createUser({ id })
 
-  it('should return all cloudprofiles', async function () {
+  it('should return all seeds', async function () {
     const bearer = await user.bearer
 
-    common.stub.getCloudProfiles(sandbox)
-    k8s.stub.getCloudProfiles({ bearer, verb: 'list' })
-
+    common.stub.getSeeds(sandbox)
+    k8s.stub.getSeeds({ bearer })
     const res = await agent
-      .get('/api/cloudprofiles')
+      .get('/api/seeds')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(4)
-    let predicate = item => item.metadata.name === 'infra1-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(3)
-    predicate = item => item.metadata.name === 'infra1-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
-    predicate = item => item.metadata.name === 'infra3-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(1)
-    predicate = item => item.metadata.name === 'infra3-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
+    expect(res.body).to.have.length(8)
+    let predicate = item => item.metadata.name === 'infra1-seed'
+    expect(_.find(res.body, predicate).metadata.unreachable).to.be.false
+    predicate = item => item.metadata.name === 'infra3-seed'
+    expect(_.find(res.body, predicate).metadata.unreachable).to.be.true
   })
 }

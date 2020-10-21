@@ -314,6 +314,36 @@ function canGetSecretsInAllNamespaces (scope) {
     })
 }
 
+function canListSeeds (scope, { allowed = true } = {}) {
+  return scope
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
+      const { namespace, verb, resource, group } = body.spec.resourceAttributes
+      return !namespace && group === 'core.gardener.cloud' && resource === 'seeds' && verb === 'list'
+    })
+    .reply(200, function (body) {
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
+}
+
+function canGetCloudProfiles (scope, { allowed = true, verb = 'get' } = {}) {
+  return scope
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
+      const { namespace, verb: resourceAttributeVerb, resource, group } = body.spec.resourceAttributes
+      return !namespace && group === 'core.gardener.cloud' && resource === 'cloudprofiles' && resourceAttributeVerb === verb
+    })
+    .reply(200, function (body) {
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
+}
+
 function canGetOpenAPI (scope) {
   return scope
     .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
@@ -923,6 +953,16 @@ const stub = {
   getProjects ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
+    return scope
+  },
+  getCloudProfiles ({ bearer, verb = 'get' }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetCloudProfiles(scope, { verb })
+    return scope
+  },
+  getSeeds ({ bearer }) {
+    const scope = nockWithAuthorization(bearer)
+    canListSeeds(scope)
     return scope
   },
   getTerminalConfig ({ bearer, namespace, shootName, target }) {
