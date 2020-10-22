@@ -468,7 +468,7 @@ exports.ProjectMemberManager = ProjectMemberManager
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
   const memberManager = await ProjectMemberManager.create(user, namespace)
-  return await memberManager.list()
+  return memberManager.list()
 }
 
 exports.get = async function ({ user, namespace, name }) {
@@ -485,7 +485,7 @@ exports.get = async function ({ user, namespace, name }) {
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const memberManager = await ProjectMemberManager.create(user, namespace)
   await memberManager.create(name, roles) // assign user to project, create service account if required
-  return await memberManager.list()
+  return memberManager.list()
 }
 
 exports.update = async function ({ user, namespace, name, body: { roles } }) {
@@ -506,12 +506,12 @@ exports.update = async function ({ user, namespace, name, body: { roles } }) {
     await memberManager.update(name, roles) // update user roles
   }
 
-  return await memberManager.list()
+  return memberManager.list()
 }
 
 exports.remove = async function ({ user, namespace, name }) {
   const memberManager = await ProjectMemberManager.create(user, namespace)
   await memberManager.remove(name) // unassign user from project, remove service account if required
 
-  return await memberManager.list()
+  return memberManager.list()
 }
