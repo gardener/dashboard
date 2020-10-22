@@ -1421,6 +1421,14 @@ const stub = {
         })
         .reply(200, () => newProject)
     }
+
+    const [, saNamespace, saName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+    if (saName &&
+      saNamespace === namespace) {
+      scope
+        .delete(`/api/v1/namespaces/${namespace}/serviceaccounts/${saName}`)
+        .reply(200)
+    }
     return scope
   },
   getMember ({ bearer, namespace, name: username }) {

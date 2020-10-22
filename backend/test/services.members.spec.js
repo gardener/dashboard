@@ -172,6 +172,11 @@ describe('services', function () {
         projects: {
           mergePatch: _.noop
         }
+      },
+      core: {
+        serviceaccounts: {
+          create: _.noop
+        }
       }
     }
 
@@ -189,7 +194,7 @@ describe('services', function () {
       let projectMemberManager
 
       beforeEach(function () {
-        projectMemberManager = new ProjectMemberManager(client, project, serviceAccounts)
+        projectMemberManager = new ProjectMemberManager(client, 'creator', project, serviceAccounts)
       })
 
       it('should merge multiple occurences of same user in members list', async function () {

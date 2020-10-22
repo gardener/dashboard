@@ -26,17 +26,17 @@ const assert = require('assert').strict
 class Member {
   constructor ({ id, roles }) {
     Object.assign(this, {
-      id,
+      username: id,
       roles
     })
   }
 
   get isServiceAccount () {
-    return Member.isServiceAccount(this.id)
+    return Member.isServiceAccount(this.username)
   }
 
   get subject () {
-    const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(this.id) || []
+    const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(this.username) || []
     if (namespace && name) {
       return {
         kind: 'ServiceAccount',
@@ -47,12 +47,12 @@ class Member {
     return {
       kind: 'User',
       apiGroup: 'rbac.authorization.k8s.io',
-      name: this.id
+      name: this.username
     }
   }
 
-  static isServiceAccount (id) {
-    return _.startsWith(id, 'system:serviceaccount:')
+  static isServiceAccount (username) {
+    return _.startsWith(username, 'system:serviceaccount:')
   }
 }
 
@@ -66,7 +66,7 @@ class SubjectListItem {
   }
 
   get kind () {
-    return _.startsWith(this.id, 'system:serviceaccount:')
+    return _.startsWith(this.id, 'system:serviceaccount:') ? 'ServiceAccount' : 'User'
   }
 
   get size () {
@@ -258,22 +258,12 @@ class SubjectList {
 exports.SubjectList = SubjectList
 
 class ProjectMemberManager {
-  constructor (client, project, serviceAccounts) {
+  constructor (client, userId, project, serviceAccounts) {
     this.client = client
+    this.userId = userId
     this.project = project
     this.serviceAccounts = serviceAccounts
     this.subjectList = new SubjectList(project.spec.members)
-  }
-
-  memberToFrontendJson (member) {
-    const frontendMember = {
-      username: member.id,
-      roles: member.roles,
-      createdBy: member.createdBy,
-      creationTimestamp: member.creationTimestamp,
-      kubeconfig: member.kubeconfig
-    }
-    return _.pickBy(frontendMember, _.identity)
   }
 
   list () {
@@ -322,7 +312,6 @@ class ProjectMemberManager {
       .assign(noMemberServiceAccountSubjectMembers)
       .thru(assignServiceAccountMetadata)
       .values()
-      .map(this.memberToFrontendJson)
       .value()
   }
 
@@ -342,7 +331,7 @@ class ProjectMemberManager {
       member.kubeconfig = await this.createKubeconfig(subject)
     }
 
-    return this.memberToFrontendJson(member)
+    return member
   }
 
   async update (name, roles) {
@@ -351,31 +340,41 @@ class ProjectMemberManager {
       throw NotFound(404, 'Member not found')
     }
     item.roles = roles
-    return this.save()
+    await this.save()
   }
 
   async remove (name) {
+    await this.removeMember(name)
+    await this.deleteServiceAccount(name)
+  }
+
+  async create (name, roles) {
+    if (this.subjectList.has(name)) {
+      throw Conflict(409, 'Member already exists')
+    }
+
+    await this.createServiceAccountIfRequired(name)
+
+    if (roles.length) {
+      const index = this.subjectList.size
+      const subject = new Member({ id: name }).subject
+      const item = new SubjectListItemUniq(subject, index)
+      item.roles = roles
+      this.subjectList.add(item)
+      await this.save()
+    }
+  }
+
+  async removeMember (name) {
     const item = this.subjectList.get(name)
     if (!item) {
       return
     }
     this.subjectList.delete(name)
-    return this.save()
+    await this.save()
   }
 
-  async create (name, roles = ['viewer']) {
-    if (this.subjectList.has(name)) {
-      throw Conflict(409, 'Member already exists')
-    }
-    const index = this.subjectList.size
-    const subject = new Member({ id: name }).subject
-    const item = new SubjectListItemUniq(subject, index)
-    item.roles = roles
-    this.subjectList.add(item)
-    return this.save()
-  }
-
-  async createServiceAccountIfRequired (name, createdBy) {
+  async createServiceAccountIfRequired (name) {
     const member = new Member({ id: name })
     if (!member.isServiceAccount) {
       return
@@ -391,7 +390,7 @@ class ProjectMemberManager {
         name: member.subject.name,
         namespace: member.subject.namespace,
         annotations: {
-          'garden.sapcloud.io/createdBy': createdBy
+          'garden.sapcloud.io/createdBy': this.userId
         }
       }
     }
@@ -413,10 +412,10 @@ class ProjectMemberManager {
     _.remove(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })
   }
 
-  save () {
+  async save () {
     const name = this.project.metadata.name
     const members = this.subjectList.subjects
-    return this.client['core.gardener.cloud'].projects.mergePatch(name, { spec: { members } })
+    await this.client['core.gardener.cloud'].projects.mergePatch(name, { spec: { members } })
   }
 
   async createKubeconfig ({ namespace, name }) {
@@ -444,7 +443,9 @@ class ProjectMemberManager {
     })
   }
 
-  static async create (client, namespace) {
+  static async create (user, namespace) {
+    const { client, id } = user
+
     const namespaceResource = await client.core.namespaces.get(namespace)
     const name = _.get(namespaceResource, ['metadata', 'labels', 'project.gardener.cloud/name'])
     if (!name) {
@@ -459,23 +460,19 @@ class ProjectMemberManager {
       client.core.serviceaccounts.list(namespace)
     ])
 
-    return new this(client, project, serviceAccounts)
+    return new this(client, id, project, serviceAccounts)
   }
 }
 exports.ProjectMemberManager = ProjectMemberManager
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  const client = user.client
-
-  const memberManager = await ProjectMemberManager.create(client, namespace)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
   return await memberManager.list()
 }
 
 exports.get = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  const memberManager = await ProjectMemberManager.create(client, namespace)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
   const member = await memberManager.get(name)
 
   if (!member) {
@@ -486,26 +483,18 @@ exports.get = async function ({ user, namespace, name }) {
 }
 
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
-  const client = user.client
-  const createdBy = user.id
-
-  const memberManager = await ProjectMemberManager.create(client, namespace)
-  await memberManager.createServiceAccountIfRequired(name, createdBy)
-  if (roles.length) { // service account can be created without roles
-    await memberManager.create(name, roles) // assign user to project
-  }
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  await memberManager.create(name, roles) // assign user to project, create service account if required
   return await memberManager.list()
 }
 
 exports.update = async function ({ user, namespace, name, body: { roles } }) {
-  const client = user.client
-
   // update user in project
-  const memberManager = await ProjectMemberManager.create(client, namespace)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
 
   if (Member.isServiceAccount(name)) {
     if (!roles.length) {
-      await memberManager.remove(name) // unassign service account from project
+      await memberManager.removeMember(name) // unassign service account from project
     } else {
       if (!memberManager.subjectList.has(name)) {
         await memberManager.create(name, roles) // assign service account to project
@@ -521,11 +510,8 @@ exports.update = async function ({ user, namespace, name, body: { roles } }) {
 }
 
 exports.remove = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  const memberManager = await ProjectMemberManager.create(client, namespace)
-  await memberManager.remove(name) // unassign user from project
-  await memberManager.deleteServiceAccount(name)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  await memberManager.remove(name) // unassign user from project, remove service account if required
 
   return await memberManager.list()
 }

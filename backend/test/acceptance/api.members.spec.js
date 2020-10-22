@@ -158,6 +158,19 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body).to.have.deep.members(_.concat(members, { username: name, roles }))
   })
 
+  it('should delete a service account', async function () {
+    const bearer = await user.bearer
+    const name = `system:serviceaccount:${namespace}:robot`
+    k8s.stub.removeMember({ bearer, namespace, name })
+    const res = await agent
+      .delete(`/api/namespaces/${namespace}/members/${name}`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
+  })
+
   it('should add a service account and assign member roles', async function () {
     const bearer = await user.bearer
     const name = `system:serviceaccount:${namespace}:foo`
@@ -250,5 +263,19 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.not.deep.contain({ username: name, roles })
+  })
+
+  it('should delete a foreign service account', async function () {
+    const bearer = await user.bearer
+    const foreignNamespace = 'othernamespace'
+    const name = `system:serviceaccount:${foreignNamespace}:fsa`
+    k8s.stub.removeMember({ bearer, namespace, name })
+    const res = await agent
+      .delete(`/api/namespaces/${namespace}/members/${name}`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
   })
 }

@@ -119,7 +119,7 @@ limitations under the License.
             </v-btn>
           </template>
           <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
-          <span v-else>Remove Service Account from Project</span>
+          <span v-else>Remove Foreign Service Account from Project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
