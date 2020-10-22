@@ -39,10 +39,10 @@ limitations under the License.
           </v-btn>
         </template>
       </g-popper>
-      <v-btn text color="cyan darken-2" @click="retry()">
+      <v-btn text color="cyan darken-2" @click="retry">
         Retry
       </v-btn>
-      <v-btn text color="cyan darken-2" @click="hideSnackbar()">
+      <v-btn text color="cyan darken-2" @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
@@ -54,7 +54,7 @@ limitations under the License.
       color="red"
     >
       {{ snackbarText }}
-      <v-btn text @click="hideSnackbar()">
+      <v-btn text @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
@@ -429,6 +429,11 @@ export default {
       if (this.fitAddon) {
         this.fitAddon.fit()
       }
+    },
+    hideSnackbarAndClose () {
+      this.hideSnackbar()
+
+      return this.deleteTerminal()
     },
     hideSnackbar () {
       this.snackbarTop = false
