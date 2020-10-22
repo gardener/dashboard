@@ -47,6 +47,9 @@ function setLoading (store, value) {
 function ensureConfigurationLoaded (store) {
   return async function (to, from, next) {
     try {
+      if (to.name === 'Error') {
+        return next()
+      }
       if (!store.state.cfg) {
         const { data } = await getConfiguration()
         await store.dispatch('setConfiguration', data)

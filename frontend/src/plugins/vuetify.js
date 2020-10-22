@@ -14,7 +14,16 @@
 // limitations under the License.
 //
 
-import 'fontsource-roboto'
+import 'fontsource-roboto/latin-300-normal.css'
+import 'fontsource-roboto/latin-400-normal.css'
+import 'fontsource-roboto/latin-400-italic.css'
+import 'fontsource-roboto/latin-500-normal.css'
+import 'fontsource-roboto/latin-700-normal.css'
+import 'fontsource-roboto/latin-ext-300-normal.css'
+import 'fontsource-roboto/latin-ext-400-normal.css'
+import 'fontsource-roboto/latin-ext-400-italic.css'
+import 'fontsource-roboto/latin-ext-500-normal.css'
+import 'fontsource-roboto/latin-ext-700-normal.css'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/dist/vuetify.min.css'
 import '@/sass/main.scss'
