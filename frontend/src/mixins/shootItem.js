@@ -27,7 +27,8 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated,
   getProjectName,
-  isTypeDelete
+  isTypeDelete,
+  isTruthyValue
 } from '@/utils'
 
 export const shootItem = {
@@ -50,7 +51,7 @@ export const shootItem = {
       const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
       const deletionTimestamp = this.shootDeletionTimestamp
 
-      return !!deletionTimestamp && confirmation === 'true'
+      return !!deletionTimestamp && isTruthyValue(confirmation)
     },
     shootCreatedBy () {
       return getCreatedBy(this.shootMetadata)
