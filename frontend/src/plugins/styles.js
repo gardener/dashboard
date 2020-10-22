@@ -14,12 +14,18 @@
 // limitations under the License.
 //
 
-import './styles'
-import './vuelidate'
-import './shortkey'
-import './snotify'
-import './cookie'
-import './bus'
-import './auth'
-import './storage'
-import './yaml'
+/** Material Design Icons Webfont */
+import '@mdi/font/css/materialdesignicons.css'
+
+/** Roboto Webfont */
+import 'fontsource-roboto/100-normal.css'
+import 'fontsource-roboto/300-normal.css'
+import 'fontsource-roboto/400-normal.css'
+import 'fontsource-roboto/500-normal.css'
+import 'fontsource-roboto/700-normal.css'
+import 'fontsource-roboto/900-normal.css'
+
+import 'fontsource-roboto/400-italic.css'
+
+/** Gardener Styles */
+import '@/sass/main.scss'
