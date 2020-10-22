@@ -137,7 +137,7 @@ import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize, ensureUniqueSelectedItemValues, ensureItemsContainsAllSelectedItems } from '@/utils'
+import { getValidationErrors, parseSize, uniqueWrappersForItems, unwrapItemsByValues, wrappedItemsForSelectedUnwrappedItems } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -316,20 +316,21 @@ export default {
     },
     selectedZones: {
       get: function () {
-        return ensureUniqueSelectedItemValues(this.worker.zones)
+        return wrappedItemsForSelectedUnwrappedItems(this.zoneItems, this.worker.zones)
       },
-      set: function (zones) {
-        this.worker.zones = zones
+      set: function (zoneValues) {
+        this.worker.zones = unwrapItemsByValues(this.zoneItems, zoneValues)
+        console.log(unwrapItemsByValues(this.zoneItems, zoneValues))
       }
     },
     zoneItems () {
-      const zoneItems = map(this.allZones, zone => ({
-        text: zone,
-        value: zone,
-        disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
+      const allWrappedZones = uniqueWrappersForItems(this.allZones, this.worker.zones)
+      const zoneItems = map(allWrappedZones, wrappedZone => ({
+        ...wrappedZone,
+        text: wrappedZone.item,
+        disabled: includes(this.immutableZones, wrappedZone.item) || !includes(this.availableZones, wrappedZone.item)
       }))
-      const allZoneItems = ensureItemsContainsAllSelectedItems(zoneItems, this.selectedZones)
-      return sortBy(allZoneItems, 'text')
+      return sortBy(zoneItems, 'text')
     },
     zoneHint () {
       if (this.maxAdditionalZones >= this.availableZones.length) {

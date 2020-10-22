@@ -82,6 +82,8 @@ import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
 const { v4: uuidv4 } = require('uuid')
 
+const NO_LIMIT = -1
+
 export default {
   name: 'manage-workers',
   components: {
@@ -146,14 +148,15 @@ export default {
     },
     maxAdditionalZones () {
       if (this.isNewCluster) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
       const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
       if (!clusterRequiresZoneNetworkConfiguration) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
-      if (this.currentFreeNetworks.length >= this.unusedZones.length) {
-        return -1 // enough free networks - no limit
+      const hasFreeNetworks = this.currentFreeNetworks.length >= this.unusedZones.length
+      if (hasFreeNetworks) {
+        return NO_LIMIT
       }
       return this.currentFreeNetworks.length
     },

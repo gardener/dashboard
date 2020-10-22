@@ -41,8 +41,8 @@ import join from 'lodash/join'
 import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
+import difference from 'lodash/difference'
 import store from '../store'
-import sortBy from 'lodash/sortBy'
 const { v4: uuidv4 } = require('uuid')
 
 export function emailToDisplayName (value) {
@@ -778,34 +778,59 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   })
 }
 
-export function ensureUniqueSelectedItemValues (items, sort = true) {
-  const uniqItems = []
-  const duplicateItems = []
-  forEach(items, item => {
-    if (!includes(uniqItems, item)) {
-      uniqItems.push(item)
-    } else {
-      duplicateItems.push(item)
-    }
-  })
-  const duplicatePlaceholderObjects = map(duplicateItems, duplicateItem => {
-    return {
-      isDuplicate: true,
-      originalValue: duplicateItem,
-      id: uuidv4()
-    }
-  })
-  const allItems = [...uniqItems, ...duplicatePlaceholderObjects]
-  if (!sort) {
-    return allItems
-  }
-  return sortBy(allItems, item => {
-    if (item.isDuplicate) {
-      return item.originalValue
-    }
-    return item
+export function uniqueWrappersForItems (items, selectedItems) {
+  const wrappedSelectedItems = map(selectedItems, (item, index) => ({
+    item,
+    selectedArrayIndex: index
+  }))
+  const wrappedNotSelectedItems = map(difference(items, selectedItems), item => ({
+    item
+  }))
+  return map([...wrappedSelectedItems, ...wrappedNotSelectedItems], (item, index) => ({
+    ...item,
+    value: index
+  }))
+}
+
+export function unwrapItemsByValues (allWrappedItems, itemvalues) {
+  return map(itemvalues, value => {
+    return get(find(allWrappedItems, { value }), 'item')
   })
 }
+
+export function wrappedItemsForSelectedUnwrappedItems (wrappedItems, unwrappedItems) {
+  return map(unwrappedItems, (item, index) => {
+    return find(wrappedItems, { item, selectedArrayIndex: index })
+  })
+}
+
+// const uniqItems = []
+// const duplicateItems = []
+// forEach(items, item => {
+//   if (!includes(uniqItems, item)) {
+//     uniqItems.push(item)
+//   } else {
+//     duplicateItems.push(item)
+//   }
+// })
+// const duplicatePlaceholderObjects = map(duplicateItems, duplicateItem => {
+//   return {
+//     isDuplicate: true,
+//     originalValue: duplicateItem,
+//     id: uuidv4()
+//   }
+// })
+// const allItems = [...uniqItems, ...duplicatePlaceholderObjects]
+// if (!sort) {
+//   return allItems
+// }
+// return sortBy(allItems, item => {
+//   if (item.isDuplicate) {
+//     return item.originalValue
+//   }
+//   return item
+// })
+// }
 
 export function ensureItemsContainsAllSelectedItems (items, selectedItems) {
   const duplicateSelectedItems = filter(selectedItems, { isDuplicate: true })
