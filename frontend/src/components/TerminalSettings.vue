@@ -195,20 +195,20 @@ export default {
       const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname
         ? undefined
         : this.selectedNode
+
+      const preferredHost = this.selectedRunOnShootWorker ? 'shoot' : 'seed'
+
       const selectedConfig = {
         container: {
           image: this.selectedContainerImage
         },
-        node
+        node,
+        preferredHost,
+        privileged: this.selectedPrivilegedMode,
+        hostPID: this.selectedPrivilegedMode,
+        hostNetwork: this.selectedPrivilegedMode
       }
-      if (this.selectedPrivilegedMode) {
-        selectedConfig.container.privileged = true
-        selectedConfig.hostPID = true
-        selectedConfig.hostNetwork = true
-      }
-      if (this.selectedRunOnShootWorker) {
-        selectedConfig.preferredHost = 'shoot'
-      }
+
       return selectedConfig
     }
   },
