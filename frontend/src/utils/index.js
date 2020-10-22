@@ -384,10 +384,14 @@ export function shootHasIssue (shoot) {
 }
 
 export function isReconciliationDeactivated (metadata) {
-  const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
   const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
   const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
-  return includes(truthyValues, ignore)
+  return isTruthyValue(ignore)
+}
+
+export function isTruthyValue (value) {
+  const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
+  return includes(truthyValues, value)
 }
 
 export function isStatusProgressing (metadata) {
