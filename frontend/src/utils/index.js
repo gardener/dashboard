@@ -804,44 +804,6 @@ export function wrappedItemsForSelectedUnwrappedItems (wrappedItems, unwrappedIt
   })
 }
 
-// const uniqItems = []
-// const duplicateItems = []
-// forEach(items, item => {
-//   if (!includes(uniqItems, item)) {
-//     uniqItems.push(item)
-//   } else {
-//     duplicateItems.push(item)
-//   }
-// })
-// const duplicatePlaceholderObjects = map(duplicateItems, duplicateItem => {
-//   return {
-//     isDuplicate: true,
-//     originalValue: duplicateItem,
-//     id: uuidv4()
-//   }
-// })
-// const allItems = [...uniqItems, ...duplicatePlaceholderObjects]
-// if (!sort) {
-//   return allItems
-// }
-// return sortBy(allItems, item => {
-//   if (item.isDuplicate) {
-//     return item.originalValue
-//   }
-//   return item
-// })
-// }
-
-export function ensureItemsContainsAllSelectedItems (items, selectedItems) {
-  const duplicateSelectedItems = filter(selectedItems, { isDuplicate: true })
-  const additionalItems = map(duplicateSelectedItems, duplicateItem => ({
-    text: duplicateItem.originalValue,
-    value: duplicateItem,
-    disabled: true
-  }))
-  return [...items, ...additionalItems]
-}
-
 export default {
   store,
   canI,
