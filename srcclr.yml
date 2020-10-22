@@ -1,0 +1,4 @@
+scan_collectors: npm, yarn
+scope: production
+vuln_methods_ignored_directories: test, tests, __tests__, doc, docs, bin
+vuln_methods_extra_ignored_directories: public, images, scripts, .yarn, .ci
