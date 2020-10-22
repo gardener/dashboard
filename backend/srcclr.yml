@@ -1,0 +1,3 @@
+scan_collectors: npm, yarn
+scope: production
+vuln_methods_ignored_directories: test, __tests__, docs, public
