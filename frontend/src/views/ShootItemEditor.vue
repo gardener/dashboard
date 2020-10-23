@@ -26,6 +26,7 @@ limitations under the License.
       @clean="onClean"
       @conflictPath="onConflictPath"
       ref="shootEditor"
+      @mounted="onMounted('shootEditor')"
     >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may cause serious problems in your cluster.
@@ -44,6 +45,8 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters, mapState } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
+import asyncRefs from '@/mixins/asyncRefs'
+
 // lodash
 import get from 'lodash/get'
 import pick from 'lodash/pick'
@@ -51,11 +54,12 @@ import pick from 'lodash/pick'
 const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
+  name: 'shoot-item-editor',
   components: {
     ShootEditor,
     ConfirmDialog
   },
-  name: 'shoot-item-editor',
+  mixins: [asyncRefs],
   data () {
     const vm = this
     return {
@@ -102,19 +106,20 @@ export default {
         if (this.untouched) {
           return
         }
+        const vmShootEditor = await this.$asyncRefs.shootEditor
         if (this.clean) {
-          return this.$refs.shootEditor.clearHistory()
+          return vmShootEditor.clearHistory()
         }
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
 
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const shootResource = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+        const shootResource = await this.$yaml.safeLoad(vmShootEditor.getContent())
         const data = pick(shootResource, paths)
         const { metadata: { namespace, name } } = this.shootContent
         const { data: value } = await replaceShoot({ namespace, name, data })
-        this.$refs.shootEditor.update(value)
+        vmShootEditor.update(value)
 
         this.snackbarColor = 'success'
         this.snackbarText = 'Cluster specification has been successfully updated'
@@ -138,10 +143,9 @@ export default {
         messageHtml: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
       })
     },
-    focus () {
-      if (this.$refs.shootEditor) {
-        this.$refs.shootEditor.focus()
-      }
+    async focus () {
+      const vmShootEditor = await this.$asyncRefs.shootEditor
+      vmShootEditor.focus()
     }
   },
   mounted () {
@@ -162,6 +166,9 @@ export default {
     } catch (err) {
       next(err)
     }
+  },
+  created () {
+    this.createAsyncRef('shootEditor')
   }
 }
 </script>

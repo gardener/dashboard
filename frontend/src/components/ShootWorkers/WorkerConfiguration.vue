@@ -27,8 +27,9 @@ limitations under the License.
     disable-confirm-input-focus>
     <template v-slot:actionComponent>
       <manage-workers
-      ref="manageWorkers"
-      @valid="onWorkersValid"
+        ref="manageWorkers"
+        @valid="onWorkersValid"
+        @mounted="onMounted('manageWorkers')"
       ></manage-workers>
     </template>
   </action-button-dialog>
@@ -37,7 +38,8 @@ limitations under the License.
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { patchShootProvider } from '@/utils/api'
-import { shootItem } from '@/mixins/shootItem'
+import shootItem from '@/mixins/shootItem'
+import asyncRefs from '@/mixins/asyncRefs'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
@@ -61,7 +63,7 @@ export default {
       workers: undefined
     }
   },
-  mixins: [shootItem],
+  mixins: [shootItem, asyncRefs],
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
@@ -72,8 +74,9 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const workers = this.$refs.manageWorkers.getWorkers()
-        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
+        const vmManageWorkers = await this.$asyncRefs.manageWorkers
+        const workers = vmManageWorkers.getWorkers()
+        const zonesNetworkConfiguration = vmManageWorkers.currentZonesNetworkConfiguration
         const data = { workers }
         if (zonesNetworkConfiguration) {
           data.infrastructureConfig = {
@@ -91,7 +94,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.workersValid = false
 
       const workers = cloneDeep(this.shootWorkerGroups)
@@ -100,11 +103,16 @@ export default {
       const region = this.shootRegion
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
+
+      const vmManageWorkers = await this.$asyncRefs.manageWorkers
+      vmManageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
     },
     onWorkersValid (value) {
       this.workersValid = value
     }
+  },
+  created () {
+    this.createAsyncRef('manageWorkers')
   }
 }
 </script>

@@ -118,6 +118,9 @@ export default {
       this.internalPurpose = purpose
       this.onInputPurpose()
     }
+  },
+  mounted () {
+    this.$emit('mounted')
   }
 }
 </script>

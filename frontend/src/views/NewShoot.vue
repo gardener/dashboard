@@ -73,6 +73,7 @@ limitations under the License.
             ref="manageWorkers"
             :userInterActionBus="userInterActionBus"
             @valid="onWorkersValid"
+            @mounted="onMounted('manageWorkers')"
           ></manage-workers>
        </v-card-text>
       </v-card>
@@ -111,6 +112,7 @@ limitations under the License.
             ref="hibernationSchedule"
             :userInterActionBus="userInterActionBus"
             @valid="onHibernationScheduleValid"
+            @mounted="onMounted('hibernationSchedule')"
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
@@ -145,6 +147,8 @@ import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComp
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 
+import asyncRefs from '@/mixins/asyncRefs'
+
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
@@ -168,6 +172,7 @@ export default {
     GAlert,
     ConfirmDialog
   },
+  mixins: [asyncRefs],
   data () {
     return {
       userInterActionBus: new EventEmitter(),
@@ -228,7 +233,7 @@ export default {
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
     },
-    shootResourceFromUIComponents () {
+    async shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const {
@@ -287,7 +292,8 @@ export default {
       set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = this.$refs.manageWorkers.getWorkers()
+      const vmManageWorkers = await this.$asyncRefs.manageWorkers
+      const workers = vmManageWorkers.getWorkers()
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -321,9 +327,10 @@ export default {
 
       set(shootResource, 'spec.maintenance', maintenance)
 
-      const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
+      const vmHibernationSchedule = await this.$asyncRefs.hibernationSchedule
+      const hibernationSchedule = vmHibernationSchedule.getScheduleCrontab()
       set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
-      const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
+      const noHibernationSchedule = vmHibernationSchedule.getNoHibernationSchedule()
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
@@ -337,7 +344,7 @@ export default {
       this.setNewShootResource(shootResource)
       return shootResource
     },
-    updateUIComponentsWithShootResource () {
+    async updateUIComponentsWithShootResource () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const infrastructureKind = get(shootResource, 'spec.provider.type')
@@ -391,14 +398,18 @@ export default {
 
       const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
+
+      const vmManageWorkers = await this.$asyncRefs.manageWorkers
+      vmManageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
-      this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
+
+      const vmHibernationSchedule = await this.$asyncRefs.hibernationSchedule
+      vmHibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
       const shootResource = this.updateShootResourceWithUIComponents()
@@ -465,6 +476,10 @@ export default {
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
+  },
+  created () {
+    this.createAsyncRef('manageWorkers')
+    this.createAsyncRef('hibernationSchedule')
   }
 }
 </script>

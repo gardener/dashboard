@@ -62,8 +62,9 @@ limitations under the License.
           ref="purpose"
           :secret="secret"
           @updatePurpose="onUpdatePurpose"
-          @valid="onPurposeValid">
-        </purpose>
+          @valid="onPurposeValid"
+          @mounted="onMounted('purpose')"
+        ></purpose>
       </v-col>
     </v-row>
     <v-row  v-if="slaDescriptionCompiledMarkdown">
@@ -84,6 +85,8 @@ import filter from 'lodash/filter'
 import { required, maxLength } from 'vuelidate/lib/validators'
 
 import HintColorizer from '@/components/HintColorizer'
+
+import asyncRefs from '@/mixins/asyncRefs'
 
 import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -110,6 +113,7 @@ export default {
     HintColorizer,
     Purpose
   },
+  mixins: [asyncRefs],
   props: {
     userInterActionBus: {
       type: Object,
@@ -241,14 +245,15 @@ export default {
         purpose: this.purpose
       }
     },
-    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
+    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
       this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.updateK8sMaintenance = updateK8sMaintenance
 
-      this.$refs.purpose.setPurpose(purpose)
+      const vmPurpose = await this.$asyncRefs.purpose
+      vmPurpose.setPurpose(purpose)
 
       this.validateInput()
     },
@@ -264,9 +269,10 @@ export default {
     }
   },
   mounted () {
-    this.userInterActionBus.on('updateSecret', secret => {
+    this.userInterActionBus.on('updateSecret', async secret => {
       this.secret = secret
-      this.$refs.purpose.setDefaultPurpose()
+      const vmPurpose = await this.$asyncRefs.purpose
+      vmPurpose.setDefaultPurpose()
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName
@@ -277,6 +283,9 @@ export default {
     })
 
     setDelayedInputFocus(this, 'name')
+  },
+  created () {
+    this.createAsyncRef('purpose')
   }
 }
 </script>

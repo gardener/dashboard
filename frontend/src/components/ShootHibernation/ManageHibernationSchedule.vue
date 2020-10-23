@@ -264,6 +264,7 @@ export default {
     }
   },
   mounted () {
+    this.$emit('mounted')
     if (this.userInterActionBus) {
       this.userInterActionBus.on('updatePurpose', purpose => {
         this.purpose = purpose

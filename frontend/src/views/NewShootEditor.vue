@@ -22,7 +22,9 @@ limitations under the License.
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       :shootContent="newShootResource"
-      ref="shootEditor">
+      ref="shootEditor"
+      @mounted="onMounted('shootEditor')"
+    >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
@@ -43,6 +45,8 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 
+import asyncRefs from '@/mixins/asyncRefs'
+
 // lodash
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
@@ -50,11 +54,12 @@ import isEqual from 'lodash/isEqual'
 const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
+  name: 'shoot-create-editor',
   components: {
     ShootEditor,
     ConfirmDialog
   },
-  name: 'shoot-create-editor',
+  mixins: [asyncRefs],
   data () {
     return {
       modificationWarning: true,
@@ -89,7 +94,8 @@ export default {
       })
     },
     async createClicked () {
-      const shootResource = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+      const vmShootEditor = await this.$asyncRefs.shootEditor
+      const shootResource = await this.$yaml.safeLoad(vmShootEditor.getContent())
 
       try {
         await this.createShoot(shootResource)
@@ -109,7 +115,8 @@ export default {
       }
     },
     async isShootContentDirty () {
-      const data = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+      const vmShootEditor = await this.$asyncRefs.shootEditor
+      const data = await this.$yaml.safeLoad(vmShootEditor.getContent())
       return !isEqual(this.initialNewShootResource, data)
     }
   },
@@ -120,7 +127,8 @@ export default {
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const data = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+        const vmShootEditor = await this.$asyncRefs.shootEditor
+        const data = await this.$yaml.safeLoad(vmShootEditor.getContent())
         this.setNewShootResource(data)
         return next()
       } catch (err) {
@@ -133,11 +141,15 @@ export default {
     }
     if (!this.isShootCreated && await this.isShootContentDirty()) {
       if (!await this.confirmEditorNavigation()) {
-        this.$refs.shootEditor.focus()
+        const vmShootEditor = await this.$asyncRefs.shootEditor
+        vmShootEditor.focus()
         return next(false)
       }
     }
     return next()
+  },
+  created () {
+    this.createAsyncRef('shootEditor')
   }
 }
 </script>

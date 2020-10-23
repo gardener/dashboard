@@ -27,8 +27,9 @@ limitations under the License.
         ref="purpose"
         :secret="secret"
         @updatePurpose="onUpdatePurpose"
-        @valid="onPurposeValid">
-      </purpose>
+        @valid="onPurposeValid"
+        @mounted="onMounted('purpose')"
+      ></purpose>
     </template>
   </action-button-dialog>
 </template>
@@ -42,7 +43,8 @@ import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { updateShootPurpose } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
-import { shootItem } from '@/mixins/shootItem'
+import shootItem from '@/mixins/shootItem'
+import asyncRefs from '@/mixins/asyncRefs'
 
 const Purpose = () => import('@/components/Purpose')
 
@@ -57,7 +59,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootItem],
+  mixins: [shootItem, asyncRefs],
   data () {
     return {
       purpose: undefined,
@@ -111,10 +113,14 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.purpose = this.shootPurpose
-      this.$refs.purpose.setPurpose(this.purpose)
+      const vmPurpose = await this.$asyncRefs.purpose
+      vmPurpose.setPurpose(this.purpose)
     }
+  },
+  created () {
+    this.createAsyncRef('purpose')
   }
 }
 </script>

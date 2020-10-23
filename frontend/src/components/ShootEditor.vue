@@ -447,6 +447,7 @@ export default {
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
+    this.$emit('mounted')
 
     const shootSchemaDefinition = await getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
