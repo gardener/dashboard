@@ -45,7 +45,10 @@ function fromResource (seed) {
 }
 
 function isUnreachable (seed) {
-  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels', {})
+  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
+  if (!matchLabels) {
+    return false
+  }
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
