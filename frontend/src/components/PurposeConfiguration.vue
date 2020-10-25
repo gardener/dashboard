@@ -24,11 +24,11 @@ limitations under the License.
     caption="Configure Purpose">
     <template v-slot:actionComponent>
       <purpose
-        ref="purpose"
         :secret="secret"
         @updatePurpose="onUpdatePurpose"
         @valid="onPurposeValid"
-        @mounted="onMounted('purpose')"
+        ref="purpose"
+        v-on="$purpose.hooks"
       ></purpose>
     </template>
   </action-button-dialog>
@@ -44,7 +44,7 @@ import { updateShootPurpose } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
 import shootItem from '@/mixins/shootItem'
-import asyncRefs from '@/mixins/asyncRefs'
+import asyncRef from '@/mixins/asyncRef'
 
 const Purpose = () => import('@/components/Purpose')
 
@@ -59,7 +59,9 @@ export default {
       type: Object
     }
   },
-  mixins: [shootItem, asyncRefs],
+  mixins: [
+    shootItem, asyncRef('purpose')
+  ],
   data () {
     return {
       purpose: undefined,
@@ -113,14 +115,10 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    async reset () {
+    reset () {
       this.purpose = this.shootPurpose
-      const vmPurpose = await this.$asyncRefs.purpose
-      vmPurpose.setPurpose(this.purpose)
+      return this.$purpose.dispatch('setPurpose', this.purpose)
     }
-  },
-  created () {
-    this.createAsyncRef('purpose')
   }
 }
 </script>

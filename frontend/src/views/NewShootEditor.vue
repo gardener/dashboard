@@ -23,7 +23,7 @@ limitations under the License.
       :detailedErrorMessage.sync="detailedErrorMessage"
       :shootContent="newShootResource"
       ref="shootEditor"
-      @mounted="onMounted('shootEditor')"
+      v-on="$shootEditor.hooks"
     >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
@@ -45,7 +45,7 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 
-import asyncRefs from '@/mixins/asyncRefs'
+import asyncRef from '@/mixins/asyncRef'
 
 // lodash
 import get from 'lodash/get'
@@ -59,7 +59,9 @@ export default {
     ShootEditor,
     ConfirmDialog
   },
-  mixins: [asyncRefs],
+  mixins: [
+    asyncRef('shootEditor')
+  ],
   data () {
     return {
       modificationWarning: true,
@@ -94,8 +96,8 @@ export default {
       })
     },
     async createClicked () {
-      const vmShootEditor = await this.$asyncRefs.shootEditor
-      const shootResource = await this.$yaml.safeLoad(vmShootEditor.getContent())
+      const content = await this.$shootEditor.dispatch('getContent')
+      const shootResource = await this.$yaml.safeLoad(content)
 
       try {
         await this.createShoot(shootResource)
@@ -115,9 +117,9 @@ export default {
       }
     },
     async isShootContentDirty () {
-      const vmShootEditor = await this.$asyncRefs.shootEditor
-      const data = await this.$yaml.safeLoad(vmShootEditor.getContent())
-      return !isEqual(this.initialNewShootResource, data)
+      const content = await this.$shootEditor.dispatch('getContent')
+      const shootResource = await this.$yaml.safeLoad(content)
+      return !isEqual(this.initialNewShootResource, shootResource)
     }
   },
   mounted () {
@@ -127,9 +129,9 @@ export default {
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const vmShootEditor = await this.$asyncRefs.shootEditor
-        const data = await this.$yaml.safeLoad(vmShootEditor.getContent())
-        this.setNewShootResource(data)
+        const content = await this.$shootEditor.dispatch('getContent')
+        const shootResource = await this.$yaml.safeLoad(content)
+        this.setNewShootResource(shootResource)
         return next()
       } catch (err) {
         this.errorMessage = get(err, 'response.data.message', err.message)
@@ -141,15 +143,11 @@ export default {
     }
     if (!this.isShootCreated && await this.isShootContentDirty()) {
       if (!await this.confirmEditorNavigation()) {
-        const vmShootEditor = await this.$asyncRefs.shootEditor
-        vmShootEditor.focus()
+        this.$shootEditor.dispatch('focus')
         return next(false)
       }
     }
     return next()
-  },
-  created () {
-    this.createAsyncRef('shootEditor')
   }
 }
 </script>

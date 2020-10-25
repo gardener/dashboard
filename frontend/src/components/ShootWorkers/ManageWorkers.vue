@@ -238,7 +238,6 @@ export default {
     }
   },
   mounted () {
-    this.$emit('mounted')
     if (this.userInterActionBus) {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []

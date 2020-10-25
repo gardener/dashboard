@@ -59,11 +59,11 @@ limitations under the License.
       </v-col>
       <v-col cols="3">
         <purpose
-          ref="purpose"
           :secret="secret"
           @updatePurpose="onUpdatePurpose"
           @valid="onPurposeValid"
-          @mounted="onMounted('purpose')"
+          ref="purpose"
+          v-on="$purpose.hooks"
         ></purpose>
       </v-col>
     </v-row>
@@ -86,7 +86,7 @@ import { required, maxLength } from 'vuelidate/lib/validators'
 
 import HintColorizer from '@/components/HintColorizer'
 
-import asyncRefs from '@/mixins/asyncRefs'
+import asyncRef from '@/mixins/asyncRef'
 
 import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -113,7 +113,9 @@ export default {
     HintColorizer,
     Purpose
   },
-  mixins: [asyncRefs],
+  mixins: [
+    asyncRef('purpose')
+  ],
   props: {
     userInterActionBus: {
       type: Object,
@@ -252,8 +254,7 @@ export default {
       this.kubernetesVersion = kubernetesVersion
       this.updateK8sMaintenance = updateK8sMaintenance
 
-      const vmPurpose = await this.$asyncRefs.purpose
-      vmPurpose.setPurpose(purpose)
+      await this.$purpose.dispatch('setPurpose', purpose)
 
       this.validateInput()
     },
@@ -269,10 +270,9 @@ export default {
     }
   },
   mounted () {
-    this.userInterActionBus.on('updateSecret', async secret => {
+    this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      const vmPurpose = await this.$asyncRefs.purpose
-      vmPurpose.setDefaultPurpose()
+      this.$purpose.dispatch('setDefaultPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName
@@ -283,9 +283,6 @@ export default {
     })
 
     setDelayedInputFocus(this, 'name')
-  },
-  created () {
-    this.createAsyncRef('purpose')
   }
 }
 </script>

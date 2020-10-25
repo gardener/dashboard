@@ -24,11 +24,11 @@ limitations under the License.
     <template v-slot:actionComponent>
       <manage-hibernation-schedule
         id="hibernationSchedule"
-        ref="hibernationSchedule"
         :isHibernationPossible="isHibernationPossible"
         :hibernationPossibleMessage="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
-        @mounted="onMounted('hibernationSchedule')"
+        ref="hibernationSchedule"
+        v-on="$hibernationSchedule.hooks"
       ></manage-hibernation-schedule>
     </template>
   </action-button-dialog>
@@ -43,7 +43,7 @@ import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api
 import { errorDetailsFromError } from '@/utils/error'
 
 import shootItem from '@/mixins/shootItem'
-import asyncRefs from '@/mixins/asyncRefs'
+import asyncRef from '@/mixins/asyncRef'
 
 const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
 
@@ -58,7 +58,10 @@ export default {
       type: Object
     }
   },
-  mixins: [shootItem, asyncRefs],
+  mixins: [
+    shootItem,
+    asyncRef('hibernationSchedule')
+  ],
   data () {
     return {
       hibernationScheduleValid: false
@@ -74,14 +77,15 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const vmHibernationSchedule = await this.$asyncRefs.hibernationSchedule
+        const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
         const noScheduleAnnotation = {
-          'dashboard.garden.sapcloud.io/no-hibernation-schedule': vmHibernationSchedule.getNoHibernationSchedule() ? 'true' : null
+          'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null
         }
+        const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
         await updateShootHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: vmHibernationSchedule.getScheduleCrontab()
+          data: scheduleCrontab
         })
         await addShootAnnotation({
           namespace: this.shootNamespace,
@@ -96,13 +100,12 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    async reset () {
+    reset () {
       this.hibernationScheduleValid = false
 
       const noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
 
-      const vmHibernationSchedule = await this.$asyncRefs.hibernationSchedule
-      vmHibernationSchedule.setScheduleData({
+      return this.$hibernationSchedule.dispatch('setScheduleData', {
         hibernationSchedule: this.shootHibernationSchedules,
         noHibernationSchedule: noScheduleAnnotation,
         purpose: this.shootPurpose
@@ -114,9 +117,6 @@ export default {
     showDialog () { // called from ShootLifeCycleCard
       this.$refs.actionDialog.showDialog()
     }
-  },
-  created () {
-    this.createAsyncRef('hibernationSchedule')
   }
 }
 </script>
