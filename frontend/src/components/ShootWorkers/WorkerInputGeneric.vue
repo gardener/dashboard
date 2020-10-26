@@ -136,6 +136,9 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
+import concat from 'lodash/concat'
+import last from 'lodash/last'
+import difference from 'lodash/difference'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -316,6 +319,7 @@ export default {
     },
     selectedZones: {
       get () {
+        // As this.worker.zones may contain duplicates, value property of items must be transformed to a unique value
         return map(this.worker.zones, (zone, index) => {
           return {
             value: [index, zone],
@@ -329,6 +333,7 @@ export default {
       }
     },
     unselectedZones () {
+      // Transform the remaining unselected zonesto the same item structure as in selectedZones
       const unselectedZones = difference(this.allZones, this.worker.zones)
       return map(unselectedZones, (zone, index) => {
         return {
@@ -339,7 +344,7 @@ export default {
       })
     },
     zoneItems () {
-      }))
+      // items must contain all currently seclect zones (including duplicates) as well as the the currently unselected ones
       return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
