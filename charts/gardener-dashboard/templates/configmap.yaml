@@ -171,8 +171,7 @@ data:
         {{- end }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
         avatarSource: {{ .Values.frontendConfig.ticket.avatarSource | default "github" }}
-        issueDescriptionTemplate: |-
-{{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
+        issueDescriptionTemplate: {{ toJson .Values.frontendConfig.ticket.issueDescriptionTemplate }}
       {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
@@ -236,8 +235,7 @@ data:
       {{- if .Values.frontendConfig.accessRestriction }}
       accessRestriction:
         {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
-        noItemsText: |-
-{{  .Values.frontendConfig.accessRestriction.noItemsText | trim | indent 10 }}
+        noItemsText: {{ toJson .Values.frontendConfig.accessRestriction.noItemsText }}
         {{- end }}
         items:
         {{- range .Values.frontendConfig.accessRestriction.items }}
@@ -247,11 +245,9 @@ data:
             title: {{ .display.title }}{{- end }}{{- if .display.description }}
             description: {{ .display.description }}{{- end }}
           input:
-            title: |-
-{{ .input.title | trim | indent 14 }}
+            title: {{ toJson .input.title }}
             {{- if .input.description }}
-            description: |-
-{{ .input.description | trim | indent 14 }}
+            description: {{ toJson .input.description }}
             {{- end }}
             {{- if .input.inverted }}
             inverted: {{ .input.inverted }}
@@ -265,11 +261,9 @@ data:
               title: {{ .display.title }}{{- end }}{{- if .display.description }}
               description: {{ .display.description }}{{- end }}
             input:
-              title: |-
-{{ .input.title | trim | indent 16 }}
+              title: {{ toJson .input.title }}
               {{- if .input.description }}
-              description: |-
-{{ .input.description | trim | indent 16 }}
+              description: {{ toJson .input.description }}
               {{- end }}
               {{- if .input.inverted }}
               inverted: {{ .input.inverted }}
