@@ -162,14 +162,6 @@ class SubjectListItemGroup extends SubjectListItem {
     const deleteRoles = item => {
       item.roles = _.difference(item.roles, diff.del)
     }
-    const removeItemWithoutRoles = items => {
-      return _.compact(_.map(items, item => {
-        if (!item.roles.length) {
-          return undefined
-        }
-        return item
-      }))
-    }
     const addRoles = item => {
       item.roles = _
         .chain(item.roles)
@@ -185,7 +177,7 @@ class SubjectListItemGroup extends SubjectListItem {
       .thru(addRoles)
       .commit()
 
-    this.items = removeItemWithoutRoles(this.items)
+    this.items = _.filter(this.items, item => !!item.roles.length)
   }
 }
 
@@ -338,6 +330,10 @@ class ProjectMemberManager {
     const item = this.subjectList.get(name)
     if (!item) {
       throw NotFound(404, 'Member not found')
+    }
+    if (!roles.length) {
+      console.log('TYPERR')
+      throw new TypeError('Cannot remove roles with update operation. Use remove member instead')
     }
     item.roles = roles
     await this.save()

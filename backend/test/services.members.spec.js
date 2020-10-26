@@ -299,6 +299,16 @@ describe('services', function () {
         expect(secondUpdatedMemberListItem).to.be.undefined
       })
 
+      it('should throw an error when trying to remove all roles with update', async function () {
+        const name = 'foo@bar.com'
+        const roles = []
+        try {
+          await projectMemberManager.update(name, roles)
+        } catch (e) {
+          expect(e).to.be.an.instanceof(TypeError)
+        }
+      })
+
       it('should not convert a service account kind user to kind serviceaccount', async function () {
         const name = 'system:serviceaccount:garden-foo:robot-user'
         const roles = ['admin', 'viewer']
