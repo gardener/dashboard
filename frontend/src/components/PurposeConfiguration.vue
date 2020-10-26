@@ -92,10 +92,10 @@ export default {
       this.purpose = purpose
     },
     async onConfigurationDialogOpened () {
-      this.reset()
+      await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.updateConfiguration()
+        await this.updateConfiguration()
       }
     },
     async updateConfiguration () {
@@ -115,9 +115,9 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.purpose = this.shootPurpose
-      return this.$purpose.dispatch('setPurpose', this.purpose)
+      await this.$purpose.dispatch('setPurpose', this.purpose)
     }
   }
 }

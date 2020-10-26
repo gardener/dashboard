@@ -103,21 +103,25 @@ export default {
     onConflictPath (conflictPath) {
       this.hasConflict = !!conflictPath
     },
+    async getShootResource () {
+      const content = await this.$shootEditor.dispatch('getContent')
+      return this.$yaml.safeLoad(content)
+    },
     async save () {
       try {
         if (this.untouched) {
           return
         }
         if (this.clean) {
-          return this.$shootEditor.dispatch('clearHistory')
+          this.$shootEditor.dispatch('clearHistory')
+          return
         }
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
 
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const content = await this.$shootEditor.dispatch('getContent')
-        const shootResource = await this.$yaml.safeLoad(content)
+        const shootResource = await this.getShootResource()
         const data = pick(shootResource, paths)
         const { metadata: { namespace, name } } = this.shootContent
         const { data: value } = await replaceShoot({ namespace, name, data })

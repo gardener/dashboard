@@ -69,10 +69,10 @@ export default {
   ],
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
+      await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.updateConfiguration()
+        await this.updateConfiguration()
       }
     },
     async updateConfiguration () {
@@ -97,7 +97,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.workersValid = false
 
       const workers = cloneDeep(this.shootWorkerGroups)
@@ -107,7 +107,7 @@ export default {
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
-      return this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
     },
     onWorkersValid (value) {
       this.workersValid = value

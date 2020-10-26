@@ -95,11 +95,13 @@ export default {
         messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
       })
     },
-    async createClicked () {
+    async getShootResource () {
       const content = await this.$shootEditor.dispatch('getContent')
-      const shootResource = await this.$yaml.safeLoad(content)
-
+      return this.$yaml.safeLoad(content)
+    },
+    async createClicked () {
       try {
+        const shootResource = await this.getShootResource()
         await this.createShoot(shootResource)
         this.isShootCreated = true
         this.$router.push({
@@ -117,8 +119,7 @@ export default {
       }
     },
     async isShootContentDirty () {
-      const content = await this.$shootEditor.dispatch('getContent')
-      const shootResource = await this.$yaml.safeLoad(content)
+      const shootResource = await this.getShootResource()
       return !isEqual(this.initialNewShootResource, shootResource)
     }
   },
@@ -129,8 +130,7 @@ export default {
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const content = await this.$shootEditor.dispatch('getContent')
-        const shootResource = await this.$yaml.safeLoad(content)
+        const shootResource = await this.getShootResource()
         this.setNewShootResource(shootResource)
         return next()
       } catch (err) {

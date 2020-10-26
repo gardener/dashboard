@@ -22,6 +22,11 @@ function setup (obj) {
   })
 }
 
+function logError (err) {
+  // eslint-disable-next-line no-console
+  console.error(err.message)
+}
+
 export function asyncRef (key) {
   const id = Symbol(key)
   const $key = '$' + key
@@ -29,27 +34,24 @@ export function asyncRef (key) {
     created () {
       setup(this[id] = {})
       this[$key] = {
-        vm: async ({ timeout = Infinity } = {}) => {
-          try {
-            return await pTimeout(this[id].vm, timeout, `Promise $${key}.vm timed out`)
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error(err.message)
-          }
+        vm: ({ timeout = 3000 } = {}) => {
+          return pTimeout(this[id].vm, timeout, `Promise $${key}.vm timed out`)
         },
         async dispatch (obj, ...args) {
           const { method, ...options } = typeof obj === 'string'
             ? { method: obj }
             : obj
-          const vm = await this.vm(options)
-          if (vm) {
-            return vm[method](...args)
+          try {
+            return (await this.vm(options))[method](...args)
+          } catch (err) {
+            logError(err)
           }
         },
         async get (name, options) {
-          const vm = await this.vm(options)
-          if (vm) {
-            return vm[name]
+          try {
+            return (await this.vm(options))[name]
+          } catch (err) {
+            logError(err)
           }
         },
         hooks: {
