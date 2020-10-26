@@ -41,7 +41,6 @@ import join from 'lodash/join'
 import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
-import difference from 'lodash/difference'
 import store from '../store'
 const { v4: uuidv4 } = require('uuid')
 
@@ -775,32 +774,6 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   })
   return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {
     return expirationDate && (isError || isWarning || isInfo)
-  })
-}
-
-export function uniqueWrappersForItems (items, selectedItems) {
-  const wrappedSelectedItems = map(selectedItems, (item, index) => ({
-    item,
-    selectedArrayIndex: index
-  }))
-  const wrappedNotSelectedItems = map(difference(items, selectedItems), item => ({
-    item
-  }))
-  return map([...wrappedSelectedItems, ...wrappedNotSelectedItems], (item, index) => ({
-    ...item,
-    value: index
-  }))
-}
-
-export function unwrapItemsByValues (allWrappedItems, itemvalues) {
-  return map(itemvalues, value => {
-    return get(find(allWrappedItems, { value }), 'item')
-  })
-}
-
-export function wrappedItemsForSelectedUnwrappedItems (wrappedItems, unwrappedItems) {
-  return map(unwrappedItems, (item, index) => {
-    return find(wrappedItems, { item, selectedArrayIndex: index })
   })
 }
 

@@ -137,7 +137,7 @@ import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize, uniqueWrappersForItems, unwrapItemsByValues, wrappedItemsForSelectedUnwrappedItems } from '@/utils'
+import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -315,22 +315,32 @@ export default {
       }
     },
     selectedZones: {
-      get: function () {
-        return wrappedItemsForSelectedUnwrappedItems(this.zoneItems, this.worker.zones)
+      get () {
+        return map(this.worker.zones, (zone, index) => {
+          return {
+            value: [index, zone],
+            text: zone,
+            disabled: includes(this.immutableZones, zone)
+          }
+        })
       },
-      set: function (zoneValues) {
-        this.worker.zones = unwrapItemsByValues(this.zoneItems, zoneValues)
-        console.log(unwrapItemsByValues(this.zoneItems, zoneValues))
+      set (zoneValues) {
+        this.worker.zones = map(zoneValues, last)
       }
     },
+    unselectedZones () {
+      const unselectedZones = difference(this.allZones, this.worker.zones)
+      return map(unselectedZones, (zone, index) => {
+        return {
+          value: [index, zone],
+          text: zone,
+          disabled: !includes(this.availableZones, zone)
+        }
+      })
+    },
     zoneItems () {
-      const allWrappedZones = uniqueWrappersForItems(this.allZones, this.worker.zones)
-      const zoneItems = map(allWrappedZones, wrappedZone => ({
-        ...wrappedZone,
-        text: wrappedZone.item,
-        disabled: includes(this.immutableZones, wrappedZone.item) || !includes(this.availableZones, wrappedZone.item)
       }))
-      return sortBy(zoneItems, 'text')
+      return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
       if (this.maxAdditionalZones >= this.availableZones.length) {
