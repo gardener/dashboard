@@ -37,7 +37,7 @@ limitations under the License.
       <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
         <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
         <v-text-field
-          @keyup.enter="okClicked()"
+          @keyup.enter="resolveAction(true)"
           ref="deleteDialogInput"
           :hint="hint"
           persistent-hint
@@ -205,6 +205,10 @@ export default {
       }
     },
     async resolveAction (value) {
+      if (value && !this.valid) {
+        return
+      }
+
       if (isFunction(this.resolve)) {
         if (value) {
           if (this.confirmationInterceptor) {
