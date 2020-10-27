@@ -106,10 +106,10 @@ limitations under the License.
           item-color="cyan darken-2"
           label="Zone"
           :items="zoneItems"
-          :error-messages="getErrorMessages('worker.zones')"
-          v-model="worker.zones"
+          :error-messages="getErrorMessages('selectedZones')"
+          v-model="selectedZones"
           @input="onInputZones"
-          @blur="$v.worker.zones.$touch()"
+          @blur="$v.selectedZones.$touch()"
           multiple
           chips
           deletable-chips
@@ -136,6 +136,9 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
+import concat from 'lodash/concat'
+import last from 'lodash/last'
+import difference from 'lodash/difference'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -162,10 +165,10 @@ const validationErrors = {
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value'
-    },
-    zones: {
-      required: 'Zone is required'
     }
+  },
+  selectedZones: {
+    required: 'Zone is required'
   }
 }
 
@@ -253,12 +256,12 @@ export default {
           },
           maxSurge: {
             numberOrPercentage
-          },
-          zones: {
-            required: requiredIf(function () {
-              return this.zonedCluster
-            })
           }
+        },
+        selectedZones: {
+          required: requiredIf(function () {
+            return this.zonedCluster
+          })
         }
       }
     },
@@ -314,15 +317,40 @@ export default {
         }
       }
     },
+    selectedZones: {
+      get () {
+        // As this.worker.zones may contain duplicates, value property of items must be transformed to a unique value
+        return map(this.worker.zones, (zone, index) => {
+          return {
+            value: [index, zone],
+            text: zone,
+            disabled: includes(this.immutableZones, zone)
+          }
+        })
+      },
+      set (zoneValues) {
+        this.worker.zones = map(zoneValues, last)
+      }
+    },
+    unselectedZones () {
+      // Transform the remaining unselected zonesto the same item structure as in selectedZones
+      const unselectedZones = difference(this.allZones, this.worker.zones)
+      return map(unselectedZones, (zone, index) => {
+        return {
+          value: [index, zone],
+          text: zone,
+          disabled: !includes(this.availableZones, zone)
+        }
+      })
+    },
     zoneItems () {
-      const sortedZones = sortBy(this.allZones)
-      return map(sortedZones, zone => ({
-        text: zone,
-        value: zone,
-        disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
-      }))
+      // items must contain all currently seclect zones (including duplicates) as well as the the currently unselected ones
+      return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
+      if (this.maxAdditionalZones >= this.availableZones.length) {
+        return undefined
+      }
       if (this.maxAdditionalZones === 0) {
         return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
       }
@@ -370,7 +398,7 @@ export default {
       this.validateInput()
     },
     onInputZones () {
-      this.$v.worker.zones.$touch()
+      this.$v.selectedZones.$touch()
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {

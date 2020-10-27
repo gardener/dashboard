@@ -78,7 +78,11 @@ import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
+import flatMap from 'lodash/flatMap'
+import difference from 'lodash/difference'
 const { v4: uuidv4 } = require('uuid')
+
+const NO_LIMIT = -1
 
 export default {
   name: 'manage-workers',
@@ -115,6 +119,10 @@ export default {
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+    unusedZones () {
+      const usedZones = flatMap(this.internalWorkers, 'zones')
+      return difference(this.allZones, usedZones)
+    },
     currentZonesWithNetworkConfigInShoot () {
       return map(this.currentZonesNetworkConfiguration, 'name')
     },
@@ -140,15 +148,15 @@ export default {
     },
     maxAdditionalZones () {
       if (this.isNewCluster) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
       const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
       if (!clusterRequiresZoneNetworkConfiguration) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
-      const totalNumberOfPossibleNetworkConfigurations = this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length
-      if (totalNumberOfPossibleNetworkConfigurations >= this.allZones.length) {
-        return -1 // enough free networks - no limit
+      const hasFreeNetworks = this.currentFreeNetworks.length >= this.unusedZones.length
+      if (hasFreeNetworks) {
+        return NO_LIMIT
       }
       return this.currentFreeNetworks.length
     },
