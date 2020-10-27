@@ -213,3 +213,5 @@ export const shootItem = {
     }
   }
 }
+
+export default shootItem

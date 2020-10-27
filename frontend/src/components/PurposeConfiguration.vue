@@ -24,11 +24,12 @@ limitations under the License.
     caption="Configure Purpose">
     <template v-slot:actionComponent>
       <purpose
-        ref="purpose"
         :secret="secret"
         @updatePurpose="onUpdatePurpose"
-        @valid="onPurposeValid">
-      </purpose>
+        @valid="onPurposeValid"
+        ref="purpose"
+        v-on="$purpose.hooks"
+      ></purpose>
     </template>
   </action-button-dialog>
 </template>
@@ -42,7 +43,8 @@ import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { updateShootPurpose } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
-import { shootItem } from '@/mixins/shootItem'
+import shootItem from '@/mixins/shootItem'
+import asyncRef from '@/mixins/asyncRef'
 
 const Purpose = () => import('@/components/Purpose')
 
@@ -57,7 +59,9 @@ export default {
       type: Object
     }
   },
-  mixins: [shootItem],
+  mixins: [
+    shootItem, asyncRef('purpose')
+  ],
   data () {
     return {
       purpose: undefined,
@@ -88,10 +92,10 @@ export default {
       this.purpose = purpose
     },
     async onConfigurationDialogOpened () {
-      this.reset()
+      await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.updateConfiguration()
+        await this.updateConfiguration()
       }
     },
     async updateConfiguration () {
@@ -111,9 +115,9 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.purpose = this.shootPurpose
-      this.$refs.purpose.setPurpose(this.purpose)
+      await this.$purpose.dispatch('setPurpose', this.purpose)
     }
   }
 }

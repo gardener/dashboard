@@ -27,8 +27,9 @@ limitations under the License.
     disable-confirm-input-focus>
     <template v-slot:actionComponent>
       <manage-workers
-      ref="manageWorkers"
-      @valid="onWorkersValid"
+        @valid="onWorkersValid"
+        ref="manageWorkers"
+        v-on="$manageWorkers.hooks"
       ></manage-workers>
     </template>
   </action-button-dialog>
@@ -37,7 +38,8 @@ limitations under the License.
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { patchShootProvider } from '@/utils/api'
-import { shootItem } from '@/mixins/shootItem'
+import shootItem from '@/mixins/shootItem'
+import asyncRef from '@/mixins/asyncRef'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
@@ -61,19 +63,23 @@ export default {
       workers: undefined
     }
   },
-  mixins: [shootItem],
+  mixins: [
+    shootItem,
+    asyncRef('manageWorkers')
+  ],
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
+      await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.updateConfiguration()
+        await this.updateConfiguration()
       }
     },
     async updateConfiguration () {
       try {
-        const workers = this.$refs.manageWorkers.getWorkers()
-        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
+        const vm = await this.$manageWorkers.vm()
+        const workers = vm.getWorkers()
+        const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
         const data = { workers }
         if (zonesNetworkConfiguration) {
           data.infrastructureConfig = {
@@ -91,7 +97,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.workersValid = false
 
       const workers = cloneDeep(this.shootWorkerGroups)
@@ -100,7 +106,8 @@ export default {
       const region = this.shootRegion
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
+
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
     },
     onWorkersValid (value) {
       this.workersValid = value

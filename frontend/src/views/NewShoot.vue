@@ -70,9 +70,10 @@ limitations under the License.
         </v-card-title>
         <v-card-text>
           <manage-workers
-            ref="manageWorkers"
             :userInterActionBus="userInterActionBus"
             @valid="onWorkersValid"
+            ref="manageWorkers"
+            v-on="$manageWorkers.hooks"
           ></manage-workers>
        </v-card-text>
       </v-card>
@@ -108,9 +109,10 @@ limitations under the License.
         </v-card-title>
         <v-card-text>
           <manage-hibernation-schedule
-            ref="hibernationSchedule"
             :userInterActionBus="userInterActionBus"
             @valid="onHibernationScheduleValid"
+            ref="hibernationSchedule"
+            v-on="$hibernationSchedule.hooks"
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
@@ -145,6 +147,8 @@ import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComp
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 
+import asyncRef from '@/mixins/asyncRef'
+
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
@@ -168,6 +172,10 @@ export default {
     GAlert,
     ConfirmDialog
   },
+  mixins: [
+    asyncRef('manageWorkers'),
+    asyncRef('hibernationSchedule')
+  ],
   data () {
     return {
       userInterActionBus: new EventEmitter(),
@@ -200,9 +208,6 @@ export default {
         this.workersValid &&
         this.maintenanceTimeValid &&
         this.hibernationScheduleValid
-    },
-    isShootContentDirty () {
-      return !isEqual(this.initialNewShootResource, this.shootResourceFromUIComponents())
     }
   },
   methods: {
@@ -228,7 +233,11 @@ export default {
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
     },
-    shootResourceFromUIComponents () {
+    async isShootContentDirty () {
+      const shootResource = await this.shootResourceFromUIComponents()
+      return !isEqual(this.initialNewShootResource, shootResource)
+    },
+    async shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const {
@@ -287,7 +296,7 @@ export default {
       set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = this.$refs.manageWorkers.getWorkers()
+      const workers = await this.$manageWorkers.dispatch('getWorkers')
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -321,9 +330,9 @@ export default {
 
       set(shootResource, 'spec.maintenance', maintenance)
 
-      const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
-      set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
-      const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
+      const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
+      set(shootResource, 'spec.hibernation.schedules', scheduleCrontab)
+      const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
@@ -332,12 +341,12 @@ export default {
 
       return shootResource
     },
-    updateShootResourceWithUIComponents () {
-      const shootResource = this.shootResourceFromUIComponents()
+    async updateShootResourceWithUIComponents () {
+      const shootResource = await this.shootResourceFromUIComponents()
       this.setNewShootResource(shootResource)
       return shootResource
     },
-    updateUIComponentsWithShootResource () {
+    async updateUIComponentsWithShootResource () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const infrastructureKind = get(shootResource, 'spec.provider.type')
@@ -387,21 +396,23 @@ export default {
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
-      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
+      await this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 
       const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
+
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
-      this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
+
+      await this.$hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
-      const shootResource = this.updateShootResourceWithUIComponents()
+      const shootResource = await this.updateShootResourceWithUIComponents()
 
       try {
         await this.createShoot(shootResource)
@@ -452,10 +463,10 @@ export default {
           return next(false)
         }
       }
-      this.updateShootResourceWithUIComponents()
+      await this.updateShootResourceWithUIComponents()
       return next()
     } else {
-      if (!this.isShootCreated && this.isShootContentDirty) {
+      if (!this.isShootCreated && await this.isShootContentDirty()) {
         if (!await this.confirmNavigation()) {
           return next(false)
         }

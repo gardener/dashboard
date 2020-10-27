@@ -59,11 +59,12 @@ limitations under the License.
       </v-col>
       <v-col cols="3">
         <purpose
-          ref="purpose"
           :secret="secret"
           @updatePurpose="onUpdatePurpose"
-          @valid="onPurposeValid">
-        </purpose>
+          @valid="onPurposeValid"
+          ref="purpose"
+          v-on="$purpose.hooks"
+        ></purpose>
       </v-col>
     </v-row>
     <v-row  v-if="slaDescriptionCompiledMarkdown">
@@ -84,6 +85,8 @@ import filter from 'lodash/filter'
 import { required, maxLength } from 'vuelidate/lib/validators'
 
 import HintColorizer from '@/components/HintColorizer'
+
+import asyncRef from '@/mixins/asyncRef'
 
 import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -110,6 +113,9 @@ export default {
     HintColorizer,
     Purpose
   },
+  mixins: [
+    asyncRef('purpose')
+  ],
   props: {
     userInterActionBus: {
       type: Object,
@@ -241,14 +247,14 @@ export default {
         purpose: this.purpose
       }
     },
-    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
+    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
       this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.updateK8sMaintenance = updateK8sMaintenance
 
-      this.$refs.purpose.setPurpose(purpose)
+      await this.$purpose.dispatch('setPurpose', purpose)
 
       this.validateInput()
     },
@@ -266,7 +272,7 @@ export default {
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.$refs.purpose.setDefaultPurpose()
+      this.$purpose.dispatch('setDefaultPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName

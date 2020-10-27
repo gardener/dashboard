@@ -26,6 +26,7 @@ limitations under the License.
       @clean="onClean"
       @conflictPath="onConflictPath"
       ref="shootEditor"
+      v-on="$shootEditor.hooks"
     >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may cause serious problems in your cluster.
@@ -44,6 +45,8 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters, mapState } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
+import asyncRef from '@/mixins/asyncRef'
+
 // lodash
 import get from 'lodash/get'
 import pick from 'lodash/pick'
@@ -51,11 +54,14 @@ import pick from 'lodash/pick'
 const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
+  name: 'shoot-item-editor',
   components: {
     ShootEditor,
     ConfirmDialog
   },
-  name: 'shoot-item-editor',
+  mixins: [
+    asyncRef('shootEditor')
+  ],
   data () {
     const vm = this
     return {
@@ -97,24 +103,29 @@ export default {
     onConflictPath (conflictPath) {
       this.hasConflict = !!conflictPath
     },
+    async getShootResource () {
+      const content = await this.$shootEditor.dispatch('getContent')
+      return this.$yaml.safeLoad(content)
+    },
     async save () {
       try {
         if (this.untouched) {
           return
         }
         if (this.clean) {
-          return this.$refs.shootEditor.clearHistory()
+          this.$shootEditor.dispatch('clearHistory')
+          return
         }
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
 
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const shootResource = await this.$yaml.safeLoad(this.$refs.shootEditor.getContent())
+        const shootResource = await this.getShootResource()
         const data = pick(shootResource, paths)
         const { metadata: { namespace, name } } = this.shootContent
         const { data: value } = await replaceShoot({ namespace, name, data })
-        this.$refs.shootEditor.update(value)
+        await this.$shootEditor.dispatch('update', value)
 
         this.snackbarColor = 'success'
         this.snackbarText = 'Cluster specification has been successfully updated'
@@ -139,9 +150,7 @@ export default {
       })
     },
     focus () {
-      if (this.$refs.shootEditor) {
-        this.$refs.shootEditor.focus()
-      }
+      this.$shootEditor.dispatch('focus')
     }
   },
   mounted () {
