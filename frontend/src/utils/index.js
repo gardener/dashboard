@@ -37,7 +37,6 @@ import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
-import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
@@ -405,20 +404,15 @@ export function isServiceAccountUsername (username) {
 
 export function isForeignServiceAccount (currentNamespace, serviceAccountName) {
   if (serviceAccountName && currentNamespace) {
-    const { namespace } = nameAndNamespaceFromServiceAccountUsername(serviceAccountName)
+    const { namespace } = parseServiceAccountUsername(serviceAccountName)
     if (namespace && namespace !== currentNamespace) {
       return true
     }
   }
   return false
 }
-export function nameFromServiceAccountUsername (serviceAccount) {
-  if (serviceAccount) {
-    return last(split(serviceAccount, ':'))
-  }
-}
 
-export function nameAndNamespaceFromServiceAccountUsername (username) {
+export function parseServiceAccountUsername (username) {
   if (!username) {
     return undefined
   }

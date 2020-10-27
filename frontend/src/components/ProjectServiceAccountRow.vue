@@ -133,7 +133,7 @@ import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
   isForeignServiceAccount,
-  nameAndNamespaceFromServiceAccountUsername
+  parseServiceAccountUsername
 } from '@/utils'
 
 export default {
@@ -189,7 +189,7 @@ export default {
       return this.createdBy ? ['font-weight-bold'] : ['grey--text']
     },
     serviceAccountNamespace () {
-      const { namespace } = nameAndNamespaceFromServiceAccountUsername(this.username)
+      const { namespace } = parseServiceAccountUsername(this.username)
       return namespace
     }
   },

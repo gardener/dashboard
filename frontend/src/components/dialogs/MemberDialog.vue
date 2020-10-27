@@ -83,12 +83,14 @@ import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { nameFromServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
+import negate from 'lodash/negate'
+import get from 'lodash/get'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
@@ -162,7 +164,7 @@ export default {
           }
           validators.internalName = {
             required,
-            unique: unique('projectUserNames'),
+            unique: unique('projectUsernames'),
             isNoServiceAccount: value => !isServiceAccountUsername(value)
           }
         } else if (this.isServiceDialog) {
@@ -183,7 +185,7 @@ export default {
               if (isServiceAccountUsername(value)) {
                 return unique('serviceAccountNames')(value, this)
               }
-              return unique('serviceAccountNamesWithoutPrefix')(value, this)
+              return unique('serviceAccountNames')(value, this)
             }
           }
         }
@@ -271,16 +273,17 @@ export default {
       }
       return undefined
     },
+    memberUsernames () {
+      return map(this.memberList, 'username')
+    },
+    serviceAccountUsernames () {
+      return filter(this.memberUsernames, isServiceAccountUsername)
+    },
     serviceAccountNames () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
-      return map(serviceAccounts, 'username')
+      return map(this.serviceAccountUsernames, username => get(parseServiceAccountUsername(username), 'name'))
     },
-    serviceAccountNamesWithoutPrefix () {
-      return map(this.serviceAccountNames, nameFromServiceAccountUsername)
-    },
-    projectUserNames () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
-      return map(users, 'username')
+    projectUsernames () {
+      return filter(this.memberUsernames, negate(isServiceAccountUsername))
     },
     memberName () {
       const name = toLower(this.internalName)
@@ -376,7 +379,7 @@ export default {
         }
       } else if (this.isServiceDialog) {
         if (this.name) {
-          this.internalName = nameFromServiceAccountUsername(this.name)
+          this.internalName = get(parseServiceAccountUsername(this.name), 'name')
         } else {
           this.internalName = this.defaultServiceName()
         }
@@ -408,7 +411,7 @@ export default {
     defaultServiceName () {
       let name = defaultServiceName
       let counter = 1
-      while (includes(this.serviceAccountNamesWithoutPrefix, name)) {
+      while (includes(this.serviceAccountNames, name)) {
         name = `${defaultServiceName}-${counter}`
         counter++
       }

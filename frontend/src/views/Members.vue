@@ -183,6 +183,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import escape from 'lodash/escape'
+import get from 'lodash/get'
 
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
@@ -194,9 +195,8 @@ import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
-  nameFromServiceAccountUsername,
+  parseServiceAccountUsername,
   isForeignServiceAccount,
-  nameAndNamespaceFromServiceAccountUsername,
   isServiceAccountUsername,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
@@ -317,13 +317,13 @@ export default {
         if (!this.serviceAccountFilter) {
           return true
         }
-        const name = nameFromServiceAccountUsername(username)
+        const { name } = parseServiceAccountUsername(username)
         return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
-      return nameFromServiceAccountUsername(this.currentServiceAccountName)
+      return get(parseServiceAccountUsername(this.currentServiceAccountName), 'name')
     }
   },
   methods: {
@@ -431,7 +431,7 @@ export default {
     },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
       const projectName = escape(this.projectDetails.projectName)
-      const { namespace, name } = nameAndNamespaceFromServiceAccountUsername(serviceAccountName)
+      const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
       const memberName = escape(displayName(name))
       const memberNamespace = escape(displayName(namespace))
 
