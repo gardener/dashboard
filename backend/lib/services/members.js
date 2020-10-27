@@ -169,13 +169,14 @@ class SubjectListItemGroup extends SubjectListItem {
         .uniq()
         .value()
     }
-    this.items = _
+    _
       .chain(this.items)
       .forEach(deleteRoles)
       .head()
       .thru(addRoles)
-      .filter('roles.length')
-      .value()
+      .commit()
+
+    this.items = _.filter(this.items, 'roles.length')
   }
 }
 
@@ -299,7 +300,7 @@ class ProjectMemberManager {
     const noMemberServiceAccountSubjectMembers = noMemberServiceAccountSubjects.map('member')
     return _
       .chain(projectMembers)
-      .concat(noMemberServiceAccountSubjectMembers)
+      .assign(noMemberServiceAccountSubjectMembers)
       .thru(assignServiceAccountMetadata)
       .values()
       .value()
