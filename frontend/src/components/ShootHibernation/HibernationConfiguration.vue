@@ -23,7 +23,6 @@ limitations under the License.
     caption="Configure Hibernation Schedule">
     <template v-slot:actionComponent>
       <manage-hibernation-schedule
-        id="hibernationSchedule"
         :isHibernationPossible="isHibernationPossible"
         :hibernationPossibleMessage="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
