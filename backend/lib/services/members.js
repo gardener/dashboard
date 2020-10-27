@@ -332,7 +332,6 @@ class ProjectMemberManager {
       throw NotFound(404, 'Member not found')
     }
     if (!roles.length) {
-      console.log('TYPERR')
       throw new TypeError('Cannot remove roles with update operation. Use remove member instead')
     }
     item.roles = roles
