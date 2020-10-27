@@ -36,6 +36,13 @@ data:
       pollIntervalSeconds: {{ .Values.gitHub.pollIntervalSeconds }}
       {{- end }}
     {{- end }}
+    {{- if .Values.unreachableSeeds }}
+    unreachableSeeds:
+      {{- with .Values.unreachableSeeds.matchLabels }}
+      matchLabels:
+{{ toYaml . | trim | indent 8 }}
+      {{- end }}
+    {{- end }}
     {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}

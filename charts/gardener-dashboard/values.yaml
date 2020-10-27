@@ -268,3 +268,7 @@ readinessProbe:
 #           -----BEGIN RSA PRIVATE KEY-----
 #           Li4u
 #           -----END RSA PRIVATE KEY-----
+
+# unreachableSeeds: # disables some UI features for seeds that are unreachable by the dashboard
+#   matchLabels:
+#     seed.gardener.cloud/network: private

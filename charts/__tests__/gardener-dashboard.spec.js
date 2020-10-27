@@ -385,6 +385,32 @@ describe('gardener-dashboard', function () {
         })
       })
 
+      describe('unreachableSeeds', function () {
+        it('should render the template', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            unreachableSeeds: {
+              matchLabels: {
+                seed: 'unreachable'
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const { unreachableSeeds } = config
+          expect(unreachableSeeds).toEqual({
+            matchLabels: {
+              seed: 'unreachable'
+            }
+          })
+        })
+      })
+
       describe('terminal', function () {
         describe('shortcuts', function () {
           it('should render the template', async function () {
