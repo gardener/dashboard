@@ -24,9 +24,9 @@ const { NotFound, Conflict } = require('http-errors')
 const assert = require('assert').strict
 
 class Member {
-  constructor ({ id, roles }) {
+  constructor (username, roles) {
     Object.assign(this, {
-      username: id,
+      username,
       roles
     })
   }
@@ -82,7 +82,7 @@ class SubjectListItem {
   }
 
   get member () {
-    return new Member(this)
+    return new Member(this.id, this.roles)
   }
 }
 
@@ -111,14 +111,13 @@ class SubjectListItemUniq extends SubjectListItem {
 
   set roles ([role, ...roles] = []) {
     this.subject.role = role
-    if (_.isEmpty(roles)) {
+    this.subject.roles = _
+      .chain(roles)
+      .compact()
+      .uniq()
+      .value()
+    if (_.isEmpty(this.subject.roles)) {
       delete this.subject.roles
-    } else {
-      this.subject.roles = _
-        .chain(roles)
-        .compact()
-        .uniq()
-        .value()
     }
   }
 }
@@ -170,14 +169,13 @@ class SubjectListItemGroup extends SubjectListItem {
         .uniq()
         .value()
     }
-    _
+    this.items = _
       .chain(this.items)
       .forEach(deleteRoles)
       .head()
       .thru(addRoles)
-      .commit()
-
-    this.items = _.filter(this.items, item => !!item.roles.length)
+      .filter('roles.length')
+      .value()
   }
 }
 
@@ -301,7 +299,7 @@ class ProjectMemberManager {
     const noMemberServiceAccountSubjectMembers = noMemberServiceAccountSubjects.map('member')
     return _
       .chain(projectMembers)
-      .assign(noMemberServiceAccountSubjectMembers)
+      .concat(noMemberServiceAccountSubjectMembers)
       .thru(assignServiceAccountMetadata)
       .values()
       .value()
@@ -311,7 +309,7 @@ class ProjectMemberManager {
     let member = _.get(this.subjectList.get(name), 'member')
 
     if (!member) {
-      member = new Member({ id: name })
+      member = new Member(name)
       if (!member.isServiceAccount) {
         // Service Accounts are not part of project member subjects if they have no roles
         throw NotFound(404, 'Member not found')
@@ -352,7 +350,7 @@ class ProjectMemberManager {
 
     if (roles.length) {
       const index = this.subjectList.size
-      const subject = new Member({ id: name }).subject
+      const subject = new Member(name).subject
       const item = new SubjectListItemUniq(subject, index)
       item.roles = roles
       this.subjectList.add(item)
@@ -370,13 +368,17 @@ class ProjectMemberManager {
   }
 
   async createServiceAccountIfRequired (name) {
-    const member = new Member({ id: name })
+    const member = new Member(name)
     if (!member.isServiceAccount) {
       return
     }
 
     const namespace = this.project.spec.namespace
-    if (member.subject.namespace !== namespace || _.some(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })) {
+    if (member.subject.namespace !== namespace) {
+      return
+    }
+    
+     if (_.some(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })) {
       return
     }
 
@@ -395,7 +397,7 @@ class ProjectMemberManager {
   }
 
   async deleteServiceAccount (name) {
-    const member = new Member({ id: name })
+    const member = new Member(name)
     if (!member.isServiceAccount) {
       return
     }
