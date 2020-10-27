@@ -402,9 +402,9 @@ export function isServiceAccountUsername (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
-export function isForeignServiceAccount (currentNamespace, serviceAccountName) {
-  if (serviceAccountName && currentNamespace) {
-    const { namespace } = parseServiceAccountUsername(serviceAccountName)
+export function isForeignServiceAccount (currentNamespace, username) {
+  if (username && currentNamespace) {
+    const { namespace } = parseServiceAccountUsername(username) || {}
     if (namespace && namespace !== currentNamespace) {
       return true
     }

@@ -183,7 +183,7 @@ export default {
             },
             unique: value => {
               if (isServiceAccountUsername(value)) {
-                return unique('serviceAccountNames')(value, this)
+                return unique('serviceAccountUsernames')(value, this)
               }
               return unique('serviceAccountNames')(value, this)
             }
