@@ -378,8 +378,8 @@ class ProjectMemberManager {
     if (member.subject.namespace !== namespace) {
       return
     }
-    
-     if (_.some(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })) {
+
+    if (_.some(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })) {
       return
     }
 
