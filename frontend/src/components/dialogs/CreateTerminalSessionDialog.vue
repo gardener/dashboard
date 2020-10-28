@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             @valid="onTerminalTargetValid"
             @input="updateSettings"
           ></terminal-target>
-          <v-expansion-panels class="pt-4" focusable v-model="targetTab.value">
+          <v-expansion-panels class="pt-4" focusable v-model="targetTab.value" :disabled="!isAdmin && isShootStatusHibernated">
             <v-expansion-panel>
               <v-expansion-panel-header>Terminal Configuration</v-expansion-panel-header>
               <v-expansion-panel-content>
@@ -68,6 +68,11 @@ SPDX-License-Identifier: Apache-2.0
       <unverified-terminal-shortcuts-dialog
         ref="unverified"
       ></unverified-terminal-shortcuts-dialog>
+      <webterminal-service-account-dialog
+        :namespace="namespace"
+        ref="serviceAccount"
+      ></webterminal-service-account-dialog>
+      <confirm-dialog ref="confirmDialog"></confirm-dialog>
     </template>
   </g-dialog>
 </template>
@@ -78,11 +83,18 @@ import TerminalSettings from '@/components/TerminalSettings'
 import TerminalTarget from '@/components/TerminalTarget'
 import TerminalShortcuts from '@/components/TerminalShortcuts'
 import UnverifiedTerminalShortcutsDialog from '@/components/dialogs/UnverifiedTerminalShortcutsDialog'
+import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalServiceAccountDialog'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters } from 'vuex'
-import { terminalConfig } from '@/utils/api'
+import { getMembers, terminalConfig } from '@/utils/api'
+import { shootItem } from '@/mixins/shootItem'
 import filter from 'lodash/filter'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import pick from 'lodash/pick'
+import find from 'lodash/find'
+import some from 'lodash/some'
 
 export default {
   components: {
@@ -90,8 +102,11 @@ export default {
     TerminalSettings,
     TerminalTarget,
     TerminalShortcuts,
-    UnverifiedTerminalShortcutsDialog
+    UnverifiedTerminalShortcutsDialog,
+    WebterminalServiceAccountDialog,
+    ConfirmDialog
   },
+  mixins: [shootItem],
   props: {
     name: {
       type: String
@@ -123,7 +138,8 @@ export default {
       'hasGardenTerminalAccess',
       'isAdmin',
       'shootByNamespaceAndName',
-      'isTerminalShortcutsFeatureEnabled'
+      'isTerminalShortcutsFeatureEnabled',
+      'projectList'
     ]),
     shootItem () {
       return this.shootByNamespaceAndName({ name: this.name, namespace: this.namespace })
@@ -147,23 +163,8 @@ export default {
     },
     isSettingsExpanded () {
       return this.targetTab.value === 0
-    }
-  },
-  methods: {
-    async promptForSelections (initialState) {
-      this.initialize(initialState)
-      const confirmed = await this.$refs.gDialog.confirmWithDialog(
-        async () => {
-          const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, ['unverified', true])
-          if (isEmpty(unverifiedSelections)) {
-            return true
-          }
-          return await this.$refs.unverified.promptForConfirmation()
-        }
-      )
-      if (!confirmed) {
-        return undefined
-      }
+    },
+    selections () {
       switch (this.tab) {
         case 'target-tab': {
           const {
@@ -190,6 +191,40 @@ export default {
           return undefined
         }
       }
+    }
+  },
+  methods: {
+    async promptForSelections (initialState) {
+      this.initialize(initialState)
+      const confirmed = await this.$refs.gDialog.confirmWithDialog(
+        async () => {
+          const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, ['unverified', true])
+          if (!isEmpty(unverifiedSelections)) {
+            const confirmed = await this.$refs.unverified.promptForConfirmation()
+            if (!confirmed) {
+              return false
+            }
+          }
+          const selectionContainsGardenTarget = some(this.selections, ['target', 'garden'])
+          if (this.isAdmin || !selectionContainsGardenTarget) {
+            return true
+          }
+
+          const { data: projectMembers } = await getMembers({ namespace: this.namespace })
+          const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
+          const member = find(projectMembers, { username: serviceAccountName })
+          const roles = get(member, 'roles')
+          if (includes(roles, 'admin')) {
+            return true
+          }
+
+          return this.$refs.serviceAccount.promptForConfirmation(member)
+        }
+      )
+      if (!confirmed) {
+        return undefined
+      }
+      return this.selections
     },
     initialize ({ target, container }) {
       this.reset()

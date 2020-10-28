@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
                 @input="$v.internalRoles.$touch()"
                 :hint="rolesHint"
                 persistent-hint
+                tabindex="2"
                 >
                 <template v-slot:selection="{ item, index }">
                   <v-chip small color="black" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
@@ -53,14 +54,26 @@ SPDX-License-Identifier: Apache-2.0
               </v-select>
             </v-col>
           </v-row>
+          <v-row v-if="isServiceDialog">
+            <v-col cols="12">
+              <v-text-field
+                color="black"
+                ref="internalDescription"
+                label="Description"
+                v-model.trim="internalDescription"
+                @keyup.enter="submitAddMember()"
+                tabindex="3"
+              ></v-text-field>
+            </v-col>
+          </v-row>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
-        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">{{addMemberButtonText}}</v-btn>
+        <v-btn text @click.stop="cancel" tabindex="5">Cancel</v-btn>
+        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="4">Update</v-btn>
+        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="4">{{addMemberButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -102,6 +115,9 @@ export default {
     name: {
       type: String
     },
+    description: {
+      type: String
+    },
     roles: {
       type: Array
     },
@@ -113,6 +129,7 @@ export default {
     return {
       internalName: undefined,
       internalRoles: undefined,
+      internalDescription: undefined,
       unsupportedRoles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -316,7 +333,7 @@ export default {
         const name = this.memberName
         const roles = this.internalRoles
         try {
-          await this.addMember({ name, roles })
+          await this.addMember({ name, roles, description: this.internalDescription })
           this.hide()
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
@@ -340,7 +357,7 @@ export default {
         try {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          await this.updateMember({ name, roles })
+          await this.updateMember({ name, roles, description: this.internalDescription })
 
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
@@ -361,6 +378,7 @@ export default {
     reset () {
       this.$v.$reset()
 
+      this.internalDescription = this.description
       if (this.isUserDialog) {
         if (this.name) {
           this.internalName = this.name

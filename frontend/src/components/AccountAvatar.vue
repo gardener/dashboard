@@ -10,7 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <img :src="avatarUrl"/>
     </v-avatar>
     <a v-if="mailTo && isEmail" :href="`mailto:${accountName}`" class="pl-2" :class="textColor">{{accountName}}</a>
-    <span v-else class="pl-2">{{accountName || '-unknown-'}}</span>
+    <span v-else-if="accountName" class="pl-2">{{accountName}}</span>
+    <span v-else class="pl-2 font-weight-light text--disabled">Unknown</span>
   </div>
 </template>
 

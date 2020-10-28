@@ -7,9 +7,9 @@
 'use strict'
 
 const _ = require('lodash')
-const assert = require('assert').strict
 const hash = require('object-hash')
 const yaml = require('js-yaml')
+const config = require('../../config')
 
 const { Forbidden, UnprocessableEntity } = require('http-errors')
 const { isHttpError } = require('@gardener-dashboard/request')
@@ -36,7 +36,7 @@ const {
   Bootstrapper
 } = require('./terminalBootstrap')
 
-const { getSeed } = require('../../cache')
+const { getSeed, findProjectByNamespace } = require('../../cache')
 const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
@@ -196,28 +196,65 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
     kubeconfigContextNamespace: undefined,
     namespace: undefined, // this is the namespace where the "access" service account will be created
     credentials: undefined,
-    roleName: 'cluster-admin',
-    bindingKind: undefined,
-    apiServerServiceRef: undefined
+    authorization: {
+      roleBindings: undefined,
+      projectMemberships: undefined
+    },
+    apiServer: undefined
   }
 
   switch (target) {
     case TargetEnum.GARDEN: {
-      assert.strictEqual(isAdmin, true, 'user is not admin')
-
       targetCluster.kubeconfigContextNamespace = namespace
-      targetCluster.namespace = 'garden'
-      targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-      targetCluster.bindingKind = 'ClusterRoleBinding'
+      if (isAdmin) {
+        targetCluster.namespace = 'garden'
+        targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
+        targetCluster.authorization.roleBindings = [
+          {
+            roleRef: {
+              apiGroup: 'rbac.authorization.k8s.io',
+              kind: 'ClusterRole',
+              name: 'cluster-admin'
+            },
+            bindingKind: 'ClusterRoleBinding'
+          }
+        ]
+      } else {
+        const projectName = findProjectByNamespace(namespace).metadata.name
+        targetCluster.namespace = namespace
+        const serviceAccountName = 'dashboard-webterminal'
+
+        // test if service account exists
+        await client.core.serviceaccounts.get(namespace, serviceAccountName)
+
+        targetCluster.credentials = {
+          serviceAccountRef: {
+            name: serviceAccountName,
+            namespace
+          }
+        }
+        targetCluster.authorization.projectMemberships = [
+          {
+            projectName,
+            roles: [
+              'admin'
+            ]
+          }
+        ]
+        targetCluster.apiServer = {
+          server: config.apiServerUrl
+        }
+      }
+
       break
     }
     case TargetEnum.SHOOT: {
-      targetCluster.apiServerServiceRef = {}
+      targetCluster.apiServer = { serviceRef: {} }
       if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
-        targetCluster.apiServerServiceRef.name = 'kube-apiserver'
+        targetCluster.apiServer.serviceRef.name = 'kube-apiserver'
       } else {
-        targetCluster.apiServerServiceRef.name = 'kubernetes'
-        targetCluster.apiServerServiceRef.namespace = 'default'
+        targetCluster.apiServer.serviceRef.name = 'kubernetes'
+        targetCluster.apiServer.serviceRef.namespace = 'default'
       }
 
       targetCluster.kubeconfigContextNamespace = 'default'
@@ -228,7 +265,16 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
           namespace
         }
       }
-      targetCluster.bindingKind = 'ClusterRoleBinding'
+      targetCluster.authorization.roleBindings = [
+        {
+          roleRef: {
+            apiGroup: 'rbac.authorization.k8s.io',
+            kind: 'ClusterRole',
+            name: 'cluster-admin'
+          },
+          bindingKind: 'ClusterRoleBinding'
+        }
+      ]
       break
     }
     case TargetEnum.CONTROL_PLANE: {
@@ -244,7 +290,16 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       targetCluster.credentials = {
         secretRef: _.get(seed, 'spec.secretRef')
       }
-      targetCluster.bindingKind = 'RoleBinding'
+      targetCluster.authorization.roleBindings = [
+        {
+          roleRef: {
+            apiGroup: 'rbac.authorization.k8s.io',
+            kind: 'ClusterRole',
+            name: 'cluster-admin'
+          },
+          bindingKind: 'RoleBinding'
+        }
+      ]
       break
     }
     default: {
@@ -294,8 +349,6 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
 }
 
 async function getShootHostCluster (client, { namespace, name, target, body, shootResource }) {
-  assert.strictEqual(target, TargetEnum.SHOOT, 'unexpected target')
-
   const hostCluster = {}
   hostCluster.config = getConfigFromBody(body)
 
@@ -333,7 +386,7 @@ function getPreferredHost ({ user, body }) {
 function getHostCluster ({ user, namespace, name, target, preferredHost, body, shootResource }) {
   const client = user.client
 
-  if (target === TargetEnum.GARDEN) {
+  if (target === TargetEnum.GARDEN && user.isAdmin) {
     return getGardenTerminalHostCluster(client, { body })
   }
 
@@ -428,14 +481,13 @@ function createHost ({ secretRef, namespace, container, podLabels, node, hostPID
   return host
 }
 
-function createTarget ({ kubeconfigContextNamespace, apiServerServiceRef, credentials, bindingKind, roleName = 'cluster-admin', namespace }) {
+function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, authorization, namespace }) {
   const temporaryNamespace = _.isEmpty(namespace)
   return {
     credentials,
     kubeconfigContextNamespace,
-    apiServerServiceRef,
-    bindingKind,
-    roleName,
+    apiServer,
+    authorization,
     namespace,
     temporaryNamespace
   }
@@ -577,8 +629,8 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
 
   const { coordinate: { target } } = body
 
-  // non-admin users are only allowed to open terminals for shoots
-  if (target === TargetEnum.SHOOT) {
+  // non-admin users are only allowed to open terminals for shoots and the garden cluster
+  if (target === TargetEnum.SHOOT || target === TargetEnum.GARDEN) {
     return
   }
   throw new Forbidden('Terminal usage is not allowed')

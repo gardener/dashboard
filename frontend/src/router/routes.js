@@ -436,7 +436,7 @@ function gardenTerminalRoute ({ getters }, path) {
         title: 'Garden Cluster',
         icon: 'mdi-console',
         get hidden () {
-          return !getters.hasGardenTerminalAccess
+          return !(getters.hasGardenTerminalAccess && getters.isAdmin)
         }
       },
       breadcrumbs: terminalBreadcrumbs

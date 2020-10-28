@@ -32,9 +32,9 @@ const actions = {
     const res = await addMember({ namespace, data })
     commit('RECEIVE', res.data)
   },
-  async update ({ commit, rootState }, { name, roles }) {
+  async update ({ commit, rootState }, { name, roles, description }) {
     const namespace = rootState.namespace
-    const res = await updateMember({ namespace, name, data: { roles } })
+    const res = await updateMember({ namespace, name, data: { roles, description } })
     commit('RECEIVE', res.data)
   },
   async delete ({ commit, rootState }, name) {

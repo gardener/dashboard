@@ -29,6 +29,13 @@ SPDX-License-Identifier: Apache-2.0
               </v-list-item>
               <v-list-item class="px-0">
                 <v-list-item-content class="pt-1">
+                  <v-list-item-subtitle>Description</v-list-item-subtitle>
+                  <v-list-item-title v-if="description">{{description}}</v-list-item-title>
+                  <v-list-item-title v-else class="font-weight-light text--disabled">Not defined</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item class="px-0">
+                <v-list-item-content class="pt-1">
                   <v-list-item-subtitle>Created</v-list-item-subtitle>
                   <v-list-item-title>
                     <v-tooltip top>
@@ -59,16 +66,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
-        <div d-flex flex-row>
-           <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
-            <template v-slot:activator="{ on }">
-              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
-                {{displayName}}
-              </v-chip>
-            </template>
-            <span>{{tooltip}}</span>
-          </v-tooltip>
-        </div>
+        <service-account-roles :role-display-names="roleDisplayNames"></service-account-roles>
       </v-list-item-action>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
@@ -121,6 +119,7 @@ import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
+import ServiceAccountRoles from '@/components/ServiceAccountRoles'
 import {
   isForeignServiceAccount,
   parseServiceAccountUsername
@@ -131,7 +130,8 @@ export default {
   components: {
     TimeString,
     GPopper,
-    AccountAvatar
+    AccountAvatar,
+    ServiceAccountRoles
   },
   props: {
     username: {
@@ -147,6 +147,9 @@ export default {
       required: true
     },
     createdBy: {
+      type: String
+    },
+    description: {
       type: String
     },
     creationTimestamp: {
@@ -191,7 +194,7 @@ export default {
       this.$emit('kubeconfig', this.username)
     },
     onEdit (username) {
-      this.$emit('edit', this.username, this.roles)
+      this.$emit('edit', this.username, this.roles, this.description)
     },
     onDelete (username) {
       this.$emit('delete', this.username)
