@@ -21,16 +21,9 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-ARG CHECK_CACHE==False
-
 # validate zero-installs project and disable network
-RUN if [ "$CHECK_CACHE" = "True" ]; then \
-        yarn install --immutable --immutable-cache --check-cache \
-        && yarn config set enableNetwork false; \
-    else \
-        yarn config set enableNetwork false \
-        && yarn install --immutable --immutable-cache; \
-    fi
+RUN yarn config set enableNetwork false \
+    && yarn install --immutable --immutable-cache
 
 # run lint in all workspaces
 RUN yarn workspaces foreach --all run lint
@@ -42,14 +35,13 @@ RUN yarn workspaces foreach --all run test-coverage
 RUN yarn workspaces foreach --include "*/(frontend|backend)" version "$(cat VERSION)"
 
 # run backend production install 
-RUN yarn workspace @gardener-dashboard/backend prod-install /usr/src/build
+RUN yarn workspace @gardener-dashboard/backend prod-install --pack /usr/src/build
 
 # run frontend build 
 RUN yarn workspace @gardener-dashboard/frontend run build
 
 # copy files to production directory
-RUN cp -r backend/server.js backend/lib /usr/src/build \
-    && cp -r frontend/dist /usr/src/build/public \
+RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
