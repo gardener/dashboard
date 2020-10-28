@@ -32,9 +32,14 @@ limitations under the License.
       </v-list-item-content>
       <v-list-item-action class="ml-1">
         <div d-flex flex-row>
-          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="grey darken-4" outlined>
-            {{roleName}}
-          </v-chip>
+          <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+            <template v-slot:activator="{ on }">
+              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+                {{displayName}}
+              </v-chip>
+            </template>
+            <span>{{tooltip}}</span>
+          </v-tooltip>
         </div>
       </v-list-item-action>
       <v-list-item-action v-if="canManageMembers" class="ml-1">
@@ -44,20 +49,20 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Update User</span>
+          <span>Change User Roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="isTechnicalContact" icon color="red" @click.native.stop="onDelete">
-                <v-icon>mdi-delete</v-icon>
+              <v-btn :disabled="isOwner" icon color="red" @click.native.stop="onDelete">
+                <v-icon>mdi-close</v-icon>
               </v-btn>
             </div>
           </template>
-          <span v-if="isTechnicalContact">This user is set as technical contact</span>
-          <span v-else>Delete User</span>
+          <span v-if="isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
+          <span v-else>Remove User From Project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
@@ -86,7 +91,7 @@ export default {
       type: Boolean,
       required: true
     },
-    isTechnicalContact: {
+    isOwner: {
       type: Boolean,
       required: true
     },

@@ -18,232 +18,498 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
-const { isHttpError } = require('@gardener-dashboard/request')
+const { decodeBase64 } = require('../utils')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
-const { Conflict, NotFound } = require('http-errors')
-const cache = require('../cache')
+const { NotFound, Conflict } = require('http-errors')
+const assert = require('assert').strict
 
-function toServiceAccountName ({ metadata: { name, namespace } }) {
-  return `system:serviceaccount:${namespace}:${name}`
-}
-
-function fromResource (project = {}, serviceAccounts = []) {
-  const serviceAccountsMetadata = _
-    .chain(serviceAccounts)
-    .map(serviceAccount => [
-      toServiceAccountName(serviceAccount),
-      {
-        createdBy: _.get(serviceAccount, ['metadata', 'annotations', 'garden.sapcloud.io/createdBy']),
-        creationTimestamp: serviceAccount.metadata.creationTimestamp
-      }
-    ])
-    .fromPairs()
-    .value()
-
-  return _
-    .chain(project)
-    .get('spec.members')
-    .filter(['kind', 'User'])
-    .map(({ name: username, role, roles }) => ({
+class Member {
+  constructor (username, roles) {
+    Object.assign(this, {
       username,
-      roles: joinMemberRoleAndRoles(role, roles),
-      ...serviceAccountsMetadata[username]
-    }))
-    .value()
+      roles
+    })
+  }
+
+  get isServiceAccount () {
+    return Member.isServiceAccount(this.username)
+  }
+
+  get subject () {
+    const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(this.username) || []
+    if (namespace && name) {
+      return {
+        kind: 'ServiceAccount',
+        namespace,
+        name
+      }
+    }
+    return {
+      kind: 'User',
+      apiGroup: 'rbac.authorization.k8s.io',
+      name: this.username
+    }
+  }
+
+  static isServiceAccount (username) {
+    return _.startsWith(username, 'system:serviceaccount:')
+  }
 }
 
-function readProject (client, namespace) {
-  const project = cache.findProjectByNamespace(namespace)
-  return client['core.gardener.cloud'].projects.get(project.metadata.name)
+class SubjectListItem {
+  constructor (index) {
+    this.index = index
+  }
+
+  get id () {
+    assert.fail(new TypeError('Getter "id" not implemented'))
+  }
+
+  get kind () {
+    return _.startsWith(this.id, 'system:serviceaccount:') ? 'ServiceAccount' : 'User'
+  }
+
+  get size () {
+    return 1
+  }
+
+  get roles () {
+    assert.fail(new TypeError('Getter "roles" not implemented'))
+  }
+
+  set roles (roles) {
+    assert.fail(new TypeError('Setter "roles" not implemented'))
+  }
+
+  get member () {
+    return new Member(this.id, this.roles)
+  }
 }
 
-function createServiceaccount (client, { namespace, name, createdBy }) {
-  const body = {
-    metadata: {
+class SubjectListItemUniq extends SubjectListItem {
+  constructor (subject, index) {
+    super(index)
+    this.subject = subject
+  }
+
+  get id () {
+    const { kind, name, namespace } = this.subject
+    return kind === 'ServiceAccount'
+      ? `system:serviceaccount:${namespace}:${name}`
+      : name
+  }
+
+  get roles () {
+    const { role, roles } = this.subject
+    return _
+      .chain([])
+      .concat(role, roles)
+      .compact()
+      .uniq()
+      .value()
+  }
+
+  set roles ([role, ...roles] = []) {
+    this.subject.role = role
+    this.subject.roles = _
+      .chain(roles)
+      .compact()
+      .uniq()
+      .value()
+    if (_.isEmpty(this.subject.roles)) {
+      delete this.subject.roles
+    }
+  }
+}
+
+class SubjectListItemGroup extends SubjectListItem {
+  constructor (items) {
+    const index = _
+      .chain(items)
+      .map('index')
+      .min()
+      .value()
+    super(index)
+    this.items = items
+  }
+
+  get id () {
+    return _
+      .chain(this.items)
+      .head()
+      .get('id')
+      .value()
+  }
+
+  get size () {
+    return this.items.length
+  }
+
+  get roles () {
+    return _
+      .chain(this.items)
+      .flatMap('roles')
+      .uniq()
+      .value()
+  }
+
+  set roles (roles) {
+    const diff = {
+      del: _.difference(this.roles, roles),
+      add: _.difference(roles, this.roles)
+    }
+    const deleteRoles = item => {
+      item.roles = _.difference(item.roles, diff.del)
+    }
+    const addRoles = item => {
+      item.roles = _
+        .chain(item.roles)
+        .concat(diff.add)
+        .compact()
+        .uniq()
+        .value()
+    }
+    _
+      .chain(this.items)
+      .forEach(deleteRoles)
+      .head()
+      .thru(addRoles)
+      .commit()
+
+    this.items = _.filter(this.items, 'roles.length')
+  }
+}
+
+class SubjectList {
+  constructor (subjects) {
+    const createItem = (...args) => new SubjectListItemUniq(...args)
+    const createGroup = items => {
+      return items.length > 1
+        ? new SubjectListItemGroup(items)
+        : items[0]
+    }
+    this.subjectListItems = _
+      .chain(subjects)
+      .map(createItem)
+      .groupBy('id')
+      .mapValues(createGroup)
+      .value()
+  }
+
+  get size () {
+    return _
+      .chain(this.subjectListItems)
+      .map('size')
+      .sum()
+      .value()
+  }
+
+  get subjects () {
+    const itemOrGroupItems = item => {
+      return item instanceof SubjectListItemGroup
+        ? item.items
+        : item
+    }
+    return _
+      .chain(this.subjectListItems)
+      .flatMap(itemOrGroupItems)
+      .sortBy(['index'])
+      .map(item => item.subject)
+      .value()
+  }
+
+  get (id) {
+    return this.subjectListItems[id]
+  }
+
+  set (id, item) {
+    this.subjectListItems[id] = item
+  }
+
+  add (item) {
+    const id = item.id
+    if (this.has(id)) {
+      throw new TypeError('Subject already exists')
+    }
+    this.set(id, item)
+  }
+
+  delete (id) {
+    delete this.subjectListItems[id]
+  }
+
+  has (id) {
+    return !!this.subjectListItems[id]
+  }
+
+  map (iteratee) {
+    return _.mapValues(this.subjectListItems, iteratee)
+  }
+}
+exports.SubjectList = SubjectList
+
+class ProjectMemberManager {
+  constructor (client, userId, project, serviceAccounts) {
+    this.client = client
+    this.userId = userId
+    this.project = project
+    this.serviceAccounts = serviceAccounts
+    this.subjectList = new SubjectList(project.spec.members)
+  }
+
+  list () {
+    const namespace = this.project.spec.namespace
+    const ownServiceAccountMembers = members => _.filter(members, {
+      subject: {
+        kind: 'ServiceAccount',
+        namespace
+      }
+    })
+
+    const assignServiceAccountMetadata = members => {
+      const serviceAccountMembers = ownServiceAccountMembers(members)
+      if (!_.isEmpty(serviceAccountMembers)) {
+        const metadataList = _
+          .chain(this.serviceAccounts)
+          .map('metadata')
+          .keyBy('name')
+          .value()
+        for (const member of serviceAccountMembers) {
+          const name = member.subject.name
+          member.createdBy = _.get(metadataList, [name, 'annotations', 'garden.sapcloud.io/createdBy'])
+          member.creationTimestamp = _.get(metadataList, [name, 'creationTimestamp'])
+        }
+      }
+      return members
+    }
+
+    const projectMembers = this.subjectList.map('member')
+    const serviceAccountMembers = ownServiceAccountMembers(projectMembers)
+    const noMemberServiceAccounts = _
+      .chain(this.serviceAccounts)
+      .map('metadata')
+      .differenceBy(_.map(serviceAccountMembers, 'subject'), 'name')
+      .value()
+
+    const noMemberServiceAccountSubjects = new SubjectList(_.map(noMemberServiceAccounts, ({ name, namespace }) => ({
       name,
       namespace,
-      annotations: {
-        'garden.sapcloud.io/createdBy': createdBy
+      kind: 'ServiceAccount'
+    })))
+
+    const noMemberServiceAccountSubjectMembers = noMemberServiceAccountSubjects.map('member')
+    return _
+      .chain(projectMembers)
+      .assign(noMemberServiceAccountSubjectMembers)
+      .thru(assignServiceAccountMetadata)
+      .values()
+      .value()
+  }
+
+  async get (name) {
+    let member = _.get(this.subjectList.get(name), 'member')
+
+    if (!member) {
+      member = new Member(name)
+      if (!member.isServiceAccount) {
+        // Service Accounts are not part of project member subjects if they have no roles
+        throw NotFound(404, 'Member not found')
       }
     }
-  }
-  return client.core.serviceaccounts.create(namespace, body)
-}
 
-async function deleteServiceaccount (client, { namespace, name }) {
-  try {
-    return client.core.serviceaccounts.delete(namespace, name)
-  } catch (err) {
-    if (isHttpError(err, [404, 410])) {
-      return { metadata: { name, namespace } }
+    if (member.isServiceAccount) {
+      const subject = member.subject
+      member.kubeconfig = await this.createKubeconfig(subject)
     }
-    throw err
-  }
-}
 
-async function setProjectMember (client, { namespace, name, roles: memberRoles }) {
-  // get project
-  const project = await readProject(client, namespace)
-  // get project members from project
-  const members = [...project.spec.members]
-  if (_.find(members, ['name', name])) {
-    throw new Conflict(`User '${name}' is already member of this project`)
+    return member
   }
-  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
-  members.push({
-    kind: 'User',
-    name,
-    apiGroup: 'rbac.authorization.k8s.io',
-    role,
-    roles
-  })
-  const body = {
-    spec: {
-      members
+
+  async update (name, roles) {
+    const item = this.subjectList.get(name)
+    if (!item) {
+      throw NotFound(404, 'Member not found')
     }
+    if (!roles.length) {
+      throw new TypeError('Cannot remove roles with update operation. Use remove member instead')
+    }
+    item.roles = roles
+    await this.save()
   }
-  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
-}
 
-async function updateProjectMemberRoles (client, { namespace, name, roles: memberRoles }) {
-  // get project
-  const project = await readProject(client, namespace)
-  // get project members from project
-  const members = [...project.spec.members]
-  const member = _.find(members, ['name', name])
-  if (!member) {
-    throw new NotFound(`User '${name}' is not a member of this project`)
+  async remove (name) {
+    await this.removeMember(name)
+    await this.deleteServiceAccount(name)
   }
-  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
-  _.assign(member, { role, roles })
 
-  const body = {
-    spec: {
-      members
+  async create (name, roles) {
+    if (this.subjectList.has(name)) {
+      throw Conflict(409, 'Member already exists')
+    }
+
+    await this.createServiceAccountIfRequired(name)
+
+    if (roles.length) {
+      const index = this.subjectList.size
+      const subject = new Member(name).subject
+      const item = new SubjectListItemUniq(subject, index)
+      item.roles = roles
+      this.subjectList.add(item)
+      await this.save()
     }
   }
-  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
-}
 
-async function unsetProjectMember (client, { namespace, name }) {
-  // get project
-  const project = await readProject(client, namespace)
-  // get project members from project
-  const members = [...project.spec.members]
-  if (!_.find(members, ['name', name])) {
-    return project
-  }
-  _.remove(members, ['name', name])
-  const body = {
-    spec: {
-      members
+  async removeMember (name) {
+    const item = this.subjectList.get(name)
+    if (!item) {
+      return
     }
+    this.subjectList.delete(name)
+    await this.save()
   }
-  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
-}
 
-// list, create and remove is done with the user
-exports.list = async function ({ user, namespace }) {
-  const client = user.client
+  async createServiceAccountIfRequired (name) {
+    const member = new Member(name)
+    if (!member.isServiceAccount) {
+      return
+    }
 
-  // get project
-  const project = await readProject(client, namespace)
+    const namespace = this.project.spec.namespace
+    if (member.subject.namespace !== namespace) {
+      return
+    }
 
-  // list serviceAccounts
-  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+    if (_.some(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })) {
+      return
+    }
 
-  // get project members from project
-  return fromResource(project, serviceAccounts)
-}
+    const body = {
+      metadata: {
+        name: member.subject.name,
+        namespace: member.subject.namespace,
+        annotations: {
+          'garden.sapcloud.io/createdBy': this.userId
+        }
+      }
+    }
 
-exports.get = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  // get project
-  const project = await readProject(client, namespace)
-
-  const projectName = project.metadata.name
-
-  // find member of project
-  const member = _.find(project.spec.members, {
-    name,
-    kind: 'User'
-  })
-  if (!member) {
-    throw new NotFound(`User ${name} is not a member of project ${projectName}`)
+    const serviceAccount = await this.client.core.serviceaccounts.create(namespace, body)
+    this.serviceAccounts.push(serviceAccount)
   }
-  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-  if (serviceAccountNamespace === namespace) {
-    const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
+
+  async deleteServiceAccount (name) {
+    const member = new Member(name)
+    if (!member.isServiceAccount) {
+      return
+    }
+    const namespace = this.project.spec.namespace
+    if (member.subject.namespace !== namespace) {
+      return
+    }
+    await this.client.core.serviceaccounts.delete(namespace, member.subject.name)
+    _.remove(this.serviceAccounts, { metadata: { namespace: member.subject.namespace, name: member.subject.name } })
+  }
+
+  async save () {
+    const name = this.project.metadata.name
+    const members = this.subjectList.subjects
+    await this.client['core.gardener.cloud'].projects.mergePatch(name, { spec: { members } })
+  }
+
+  async createKubeconfig ({ namespace, name }) {
+    const serviceaccount = _.find(this.serviceAccounts, { metadata: { namespace, name } })
+    if (!serviceaccount) {
+      throw NotFound(404, 'Service Account not found')
+    }
     const server = config.apiServerUrl
-    const secretName = _.first(serviceaccount.secrets).name
-    const secret = await client.core.secrets.get(namespace, secretName)
+    const secretName = _.head(serviceaccount.secrets).name
+    const secret = await this.client.core.secrets.get(namespace, secretName)
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
+    const projectName = this.project.metadata.name
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
 
-    const kind = 'ServiceAccount'
-    const kubeconfig = dumpKubeconfig({
-      user: serviceAccountName,
+    return dumpKubeconfig({
+      user: name,
       context: contextName,
       cluster: clusterName,
-      namespace: serviceAccountNamespace,
+      namespace,
       token,
       server,
       caData
     })
-
-    return {
-      ...member,
-      kind,
-      kubeconfig
-    }
   }
+
+  static async create (user, namespace) {
+    const { client, id } = user
+
+    const namespaceResource = await client.core.namespaces.get(namespace)
+    const name = _.get(namespaceResource, ['metadata', 'labels', 'project.gardener.cloud/name'])
+    if (!name) {
+      throw NotFound(404, 'Project not found')
+    }
+
+    const [
+      project,
+      { items: serviceAccounts }
+    ] = await Promise.all([
+      client['core.gardener.cloud'].projects.get(name),
+      client.core.serviceaccounts.list(namespace)
+    ])
+
+    return new this(client, id, project, serviceAccounts)
+  }
+}
+exports.ProjectMemberManager = ProjectMemberManager
+
+// list, create and remove is done with the user
+exports.list = async function ({ user, namespace }) {
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  return memberManager.list()
+}
+
+exports.get = async function ({ user, namespace, name }) {
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  const member = await memberManager.get(name)
+
+  if (!member) {
+    throw new NotFound(`Member '${name}' is not a member of this project`)
+  }
+
   return member
 }
 
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
-  const client = user.client
-
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-  if (serviceaccountNamespace === namespace) {
-    await createServiceaccount(client, {
-      namespace: serviceaccountNamespace,
-      name: serviceaccountName,
-      createdBy: user.id
-    })
-  }
-
-  // assign user to project
-  const project = await setProjectMember(client, { namespace, name, roles })
-  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
-  return fromResource(project, serviceAccounts)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  await memberManager.create(name, roles) // assign user to project, create service account if required
+  return memberManager.list()
 }
 
 exports.update = async function ({ user, namespace, name, body: { roles } }) {
-  const client = user.client
-
   // update user in project
-  const project = await updateProjectMemberRoles(client, { namespace, name, roles })
-  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
-  return fromResource(project, serviceAccounts)
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+
+  if (Member.isServiceAccount(name)) {
+    if (!roles.length) {
+      await memberManager.removeMember(name) // unassign service account from project
+    } else {
+      if (!memberManager.subjectList.has(name)) {
+        await memberManager.create(name, roles) // assign service account to project
+      } else {
+        await memberManager.update(name, roles) // update service account roles
+      }
+    }
+  } else {
+    await memberManager.update(name, roles) // update user roles
+  }
+
+  return memberManager.list()
 }
 
 exports.remove = async function ({ user, namespace, name }) {
-  const client = user.client
+  const memberManager = await ProjectMemberManager.create(user, namespace)
+  await memberManager.remove(name) // unassign user from project, remove service account if required
 
-  // unassign user from project
-  const project = await unsetProjectMember(client, { namespace, name })
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-  if (serviceaccountNamespace === namespace) {
-    await deleteServiceaccount(client, {
-      namespace,
-      name: serviceaccountName
-    })
-  }
-
-  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
-  return fromResource(project, serviceAccounts)
+  return memberManager.list()
 }

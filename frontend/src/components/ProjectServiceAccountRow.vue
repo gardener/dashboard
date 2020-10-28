@@ -21,7 +21,7 @@ limitations under the License.
         <img :src="avatarUrl" />
       </v-list-item-avatar>
       <v-list-item-content>
-        <v-list-item-title class="cursor-pointer">
+        <v-list-item-title v-if="isServiceAccountFromCurrentNamespace" class="cursor-pointer">
           <g-popper
             :title="displayName"
             toolbarColor="cyan darken-2"
@@ -55,15 +55,29 @@ limitations under the License.
             </v-list>
           </g-popper>
         </v-list-item-title>
+        <v-list-item-title v-else>
+          <span>{{displayName}}</span>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
+            </template>
+            <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
+          </v-tooltip>
+        </v-list-item-title>
         <v-list-item-subtitle>
           {{username}}
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
         <div d-flex flex-row>
-          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-            {{roleName}}
-          </v-chip>
+           <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+            <template v-slot:activator="{ on }">
+              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+                {{displayName}}
+              </v-chip>
+            </template>
+            <span>{{tooltip}}</span>
+          </v-tooltip>
         </div>
       </v-list-item-action>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
@@ -93,17 +107,19 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Update Service Account</span>
+          <span>Change Service Account Roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
-              <v-icon>mdi-delete</v-icon>
+              <v-icon v-if="isServiceAccountFromCurrentNamespace">mdi-delete</v-icon>
+              <v-icon v-else>mdi-close</v-icon>
             </v-btn>
           </template>
-          <span>Delete Service Account</span>
+          <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
+          <span v-else>Remove Foreign Service Account from Project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
@@ -116,7 +132,8 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
-  isServiceAccountFromNamespace
+  isForeignServiceAccount,
+  parseServiceAccountUsername
 } from '@/utils'
 
 export default {
@@ -166,10 +183,14 @@ export default {
       'canGetSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
-      return isServiceAccountFromNamespace(this.username, this.namespace)
+      return !isForeignServiceAccount(this.namespace, this.username)
     },
     createdByClasses () {
       return this.createdBy ? ['font-weight-bold'] : ['grey--text']
+    },
+    serviceAccountNamespace () {
+      const { namespace } = parseServiceAccountUsername(this.username)
+      return namespace
     }
   },
   methods: {

@@ -27,7 +27,6 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
 import toLower from 'lodash/toLower'
-import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import words from 'lodash/words'
@@ -38,7 +37,6 @@ import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
-import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
@@ -49,12 +47,6 @@ export function emailToDisplayName (value) {
     const names = map(words(replace(value, /@.*$/, '')), capitalize)
     const givenName = names.shift()
     return join(compact([join(names, ' '), givenName]), ', ')
-  }
-}
-
-export function serviceAccountToDisplayName (serviceAccount) {
-  if (serviceAccount) {
-    return last(split(serviceAccount, ':'))
   }
 }
 
@@ -159,9 +151,9 @@ export function fullDisplayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
-    const [namespace, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(`${namespace} / ${serviceaccount}`)
+  if (isServiceAccountUsername(username)) {
+    const [namespace, serviceAccount] = split(username, ':', 4).slice(2)
+    return `${namespace} / ${serviceAccount}`
   }
   return username
 }
@@ -173,9 +165,9 @@ export function displayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
-    const [, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(serviceaccount)
+  if (isServiceAccountUsername(username)) {
+    const [, serviceAccount] = split(username, ':', 4).slice(2)
+    return serviceAccount
   }
   return username
 }
@@ -202,7 +194,7 @@ export function gravatarUrlGeneric (username, size = 128) {
   if (isEmail(username)) {
     return gravatarUrlIdenticon(username, size)
   }
-  if (isServiceAccount(username)) {
+  if (isServiceAccountUsername(username)) {
     return gravatarUrlRobohash(username, size)
   }
   return gravatarUrlRetro(username, size)
@@ -351,7 +343,7 @@ export function getProjectDetails (project) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
-  const technicalContact = projectData.owner || ''
+  const owner = projectData.owner || ''
   const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
@@ -363,7 +355,7 @@ export function getProjectDetails (project) {
 
   return {
     projectName,
-    technicalContact,
+    owner,
     costObject,
     createdAt,
     creationTimestamp,
@@ -410,12 +402,26 @@ export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
 
-export function isServiceAccount (username) {
+export function isServiceAccountUsername (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
-export function isServiceAccountFromNamespace (username, namespace) {
-  return startsWith(username, `system:serviceaccount:${namespace}:`)
+export function isForeignServiceAccount (currentNamespace, username) {
+  if (username && currentNamespace) {
+    const { namespace } = parseServiceAccountUsername(username) || {}
+    if (namespace && namespace !== currentNamespace) {
+      return true
+    }
+  }
+  return false
+}
+
+export function parseServiceAccountUsername (username) {
+  if (!username) {
+    return undefined
+  }
+  const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  return { namespace, name }
 }
 
 // expect colors to be in format <color> <optional:modifier>
@@ -646,6 +652,12 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'uam',
     displayName: 'UAM'
+  },
+  {
+    name: 'owner',
+    displayName: 'Owner',
+    notEditable: true,
+    tooltip: 'You can change the project owner on the administration page'
   }
 ]
 

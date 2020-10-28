@@ -87,17 +87,17 @@ limitations under the License.
                     <v-icon :color="color">mdi-account-cog-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
-                    <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
+                    <v-list-item-subtitle>Owner</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
                         :color="color"
-                        :value="technicalContact"
+                        :value="owner"
                         :items="userList"
-                        :rules="[rules.technicalContact]"
-                        placeholder="Select the technical contact"
+                        :rules="[rules.owner]"
+                        placeholder="Select the owner"
                         no-data-text="No project member available"
-                        :save="updateTechnicalContact"
+                        :save="updateOwner"
                       ></editable-account>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -282,7 +282,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { compileMarkdown, getProjectDetails, textColor, isServiceAccount, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { compileMarkdown, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -302,17 +302,17 @@ export default {
     return {
       color: 'blue-grey darken-2',
       edit: false,
-      editTechnicalContact: false,
-      technicalContactMessages: [],
+      editOwner: false,
+      ownerMessages: [],
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       rules: {
-        technicalContact: value => {
+        owner: value => {
           if (!value) {
-            return 'Technical Contact is required'
+            return 'Owner is required'
           }
           if (!includes(this.userList, value)) {
-            return 'Technical Contact must be a project member'
+            return 'Owner must be a project member'
           }
           return true
         },
@@ -350,12 +350,12 @@ export default {
     userList () {
       const members = new Set()
       for (const { username } of this.memberList) {
-        if (!isServiceAccount(username)) {
+        if (!isServiceAccountUsername(username)) {
           members.add(username)
         }
       }
-      if (this.technicalContact) {
-        members.add(this.technicalContact)
+      if (this.owner) {
+        members.add(this.owner)
       }
       return Array.from(members)
     },
@@ -379,11 +379,11 @@ export default {
     projectName () {
       return this.projectDetails.projectName
     },
-    technicalContact () {
-      return this.projectDetails.technicalContact
+    owner () {
+      return this.projectDetails.owner
     },
-    technicalContactAvatarUrl () {
-      return gravatarUrlGeneric(this.technicalContact, 48)
+    ownerAvatarUrl () {
+      return gravatarUrlGeneric(this.owner, 48)
     },
     costObject () {
       return this.projectDetails.costObject
@@ -433,13 +433,13 @@ export default {
       'patchProject',
       'deleteProject'
     ]),
-    onEditTechnicalContact () {
-      this.editTechnicalContact = !this.editTechnicalContact
-      if (this.editTechnicalContact) {
-        this.$nextTick(() => this.$refs.technicalContact.activateMenu())
+    onEditOwner () {
+      this.editOwner = !this.editOwner
+      if (this.editOwner) {
+        this.$nextTick(() => this.$refs.owner.activateMenu())
       }
     },
-    updateTechnicalContact (value) {
+    updateOwner (value) {
       return this.updateProperty('owner', value)
     },
     updateDescription (value) {

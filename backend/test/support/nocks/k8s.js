@@ -20,7 +20,7 @@ const _ = require('lodash')
 const nock = require('nock')
 const { v1: uuidv1 } = require('uuid')
 const yaml = require('js-yaml')
-const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('@gardener-dashboard/kube-config').load()
@@ -181,6 +181,7 @@ const infrastructureSecretList = [
 
 const serviceAccountList = [
   getServiceAccount('garden-foo', 'robot'),
+  getServiceAccount('garden-foo', 'robot-nomember'),
   getServiceAccount('garden-bar', 'robot')
 ]
 
@@ -386,10 +387,50 @@ function readProject (namespace) {
 }
 
 function readProjectMembers (namespace) {
-  return getProjectMembers(readProject(namespace))
+  const members = getProjectMembers(readProject(namespace))
+  const serviceAccounts = _.chain(serviceAccountList)
+    .filter(['metadata.namespace', namespace])
+    .map(({ metadata }) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
+    .value()
+  return _.uniqBy([...members, ...serviceAccounts], 'username')
+}
+
+function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
+  const project = readProject(namespace)
+  if (!project) {
+    scope
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(404)
+    return undefined
+  }
+  scope
+    .get(`/api/v1/namespaces/${namespace}`)
+    .reply(200, () => ({
+      metadata: {
+        labels: {
+          'project.gardener.cloud/name': project.metadata.name
+        }
+      }
+    }))
+  scope
+    .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+    .reply(200, () => project)
+
+  getServiceAccountsForNamespace(scope, namespace)
+  return project
 }
 
 function getProjectMembers (project) {
+  const joinMemberRoleAndRoles = (role, roles) => {
+    if (!role) {
+      return []
+    }
+    if (roles) {
+      return _.uniq([role, ...roles])
+    }
+    return [role]
+  }
+
   return _
     .chain(project)
     .get('spec.members')
@@ -411,6 +452,10 @@ function getInfrastructureSecret (namespace, name, profileName, data = {}) {
 }
 
 function getRoles (member) {
+  const splitMemberRolesIntoRoleAndRoles = roles => {
+    const role = _.head(roles) // do not shift role, gardener ignores duplicate role in roles array and will remove role field in future API version
+    return { role, roles }
+  }
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(member.roles)
   _.assign(member, { role, roles })
   return member
@@ -1353,65 +1398,58 @@ const stub = {
   },
   getMembers ({ bearer, namespace }) {
     const scope = nockWithAuthorization(bearer)
-    const project = readProject(namespace)
-    if (project) {
-      scope
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-        .reply(200, () => project)
-      getServiceAccountsForNamespace(scope, namespace)
-    }
+    mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     return scope
   },
   addMember ({ bearer, namespace, name: username, roles }) {
-    const project = readProject(namespace)
+    const scope = nockWithAuthorization(bearer)
+    const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-      .reply(200, () => project)
-    if (!_.find(project.spec.members, ['name', username])) {
+    const [, saNamespace, saName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+    const serviceAccount = { metadata: { namespace: saNamespace, name: saName } }
+    if (saName &&
+      saNamespace === namespace &&
+      !_.find(serviceAccountList, serviceAccount)) {
+      scope
+        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
+        .reply(200, () => serviceAccount)
+    }
+
+    if (!_.find(project.spec.members, ['name', username]) && roles.length) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
-          if (!_.find(body.spec.members, ['name', username])) {
-            return false
-          }
           newProject.spec.members = body.spec.members
           return true
         })
         .reply(200, () => newProject)
-      getServiceAccountsForNamespace(scope, namespace)
     }
     return scope
   },
   updateMember ({ bearer, namespace, name: username, roles }) {
-    const project = readProject(namespace)
+    const scope = nockWithAuthorization(bearer)
+    const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-      .reply(200, () => project)
     const existingMember = _.find(project.spec.members, ['name', username])
-    if (existingMember) {
+    if (existingMember || roles.length) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
-          _.assign(newProject.spec.members, body.spec.members)
+          newProject.spec.members = body.spec.members
           return true
         })
         .reply(200, () => newProject)
     }
-    getServiceAccountsForNamespace(scope, namespace)
     return scope
   },
   removeMember ({ bearer, namespace, name: username }) {
-    const project = readProject(namespace)
+    const scope = nockWithAuthorization(bearer)
+    const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-      .reply(200, () => project)
     if (_.find(project.spec.members, ['name', username])) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
@@ -1423,24 +1461,26 @@ const stub = {
         })
         .reply(200, () => newProject)
     }
-    getServiceAccountsForNamespace(scope, namespace)
+
+    const [, saNamespace, saName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+    if (saName &&
+      saNamespace === namespace) {
+      scope
+        .delete(`/api/v1/namespaces/${namespace}/serviceaccounts/${saName}`)
+        .reply(200)
+    }
     return scope
   },
   getMember ({ bearer, namespace, name: username }) {
-    const project = readProject(namespace)
-    const name = project.metadata.name
-    const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-      .reply(200, () => project)
+    const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
+    const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace && isMember) {
       const serviceAccount = _.find(serviceAccountList, ({ metadata }) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
       const serviceAccountSecret = _.find(serviceAccountSecretList, ({ metadata }) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
       scope
-        .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
-        .reply(200, serviceAccount)
         .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
         .reply(200, serviceAccountSecret)
     }

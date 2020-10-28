@@ -16,34 +16,6 @@ limitations under the License.
 
 <template>
   <v-container fluid>
-    <v-card class="mr-extra">
-      <v-toolbar flat color="teal darken-2">
-        <v-icon class="white--text pr-2">mdi-account</v-icon>
-        <v-toolbar-title class="subtitle-1 white--text">
-          Technical Contact
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-list v-if="!!technicalContact" two-line subheader>
-        <v-list-item>
-          <v-list-item-avatar>
-            <img :src="avatarUrl(technicalContact)" />
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{displayName(technicalContact)}}</v-list-item-title>
-            <v-list-item-subtitle><a :href="'mailto:'+technicalContact" class="cyan--text text--darken-2">{{technicalContact}}</a></v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-      <v-list v-else two-line subheader>
-        <v-list-item avatar>
-          <v-list-item-content>
-            <v-list-item-title>This project has no technical contact configured.</v-list-item-title>
-            <v-list-item-subtitle>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the users from the list below.</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-card>
-
     <v-card class="mr-extra mt-6">
       <v-toolbar flat color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
@@ -90,11 +62,11 @@ limitations under the License.
             :avatarUrl="user.avatarUrl"
             :displayName="user.displayName"
             :isEmail="user.isEmail"
-            :isTechnicalContact="user.isTechnicalContact"
+            :isOwner="user.isOwner"
             :roles="user.roles"
             :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
-            @delete="onDelete"
+            @delete="onRemoveUser"
             @edit="onEditUser"
           ></project-user-row>
         </template>
@@ -148,10 +120,10 @@ limitations under the License.
             :created="serviceAccount.created"
             :roles="serviceAccount.roles"
             :roleDisplayNames="serviceAccount.roleDisplayNames"
-            :key="serviceAccount.username"
+            :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
-            @delete="onDelete"
+            @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
@@ -211,6 +183,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import escape from 'lodash/escape'
+import get from 'lodash/get'
 
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
@@ -222,8 +195,9 @@ import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
-  serviceAccountToDisplayName,
-  isServiceAccount,
+  parseServiceAccountUsername,
+  isForeignServiceAccount,
+  isServiceAccountUsername,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
@@ -280,14 +254,14 @@ export default {
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    technicalContact () {
-      return this.projectDetails.technicalContact
+    owner () {
+      return this.projectDetails.owner
     },
     costObject () {
       return this.projectDetails.costObject
     },
     serviceAccountList () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
       return map(serviceAccounts, serviceAccount => {
         const { username } = serviceAccount
         return {
@@ -301,7 +275,7 @@ export default {
       })
     },
     userList () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
         const { username } = user
         return {
@@ -309,7 +283,7 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           isEmail: isEmail(username),
-          isTechnicalContact: this.isTechnicalContact(username),
+          isOwner: this.isOwner(username),
           roleDisplayNames: this.sortedRoleDisplayNames(user.roles),
           isCurrentUser: this.isCurrentUser(username)
         }
@@ -317,7 +291,7 @@ export default {
     },
     sortedAndFilteredUserList () {
       const predicate = ({ username }) => {
-        if (isServiceAccount(username)) {
+        if (isServiceAccountUsername(username)) {
           return false
         }
 
@@ -343,13 +317,13 @@ export default {
         if (!this.serviceAccountFilter) {
           return true
         }
-        const name = serviceAccountToDisplayName(username)
+        const { name } = parseServiceAccountUsername(username)
         return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
-      return serviceAccountToDisplayName(this.currentServiceAccountName)
+      return get(parseServiceAccountUsername(this.currentServiceAccountName), 'name')
     }
   },
   methods: {
@@ -376,8 +350,8 @@ export default {
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    isTechnicalContact (username) {
-      return this.technicalContact === toLower(username)
+    isOwner (username) {
+      return this.owner === toLower(username)
     },
     avatarUrl (username) {
       return gravatarUrlGeneric(username)
@@ -413,35 +387,72 @@ export default {
         this.kubeconfigDialog = true
       }
     },
-    confirmDelete (username) {
-      const memberName = escape(displayName(username))
+    async onRemoveUser (name) {
+      const removalConfirmed = await this.confirmRemoveUser(name)
+      if (!removalConfirmed) {
+        return
+      }
+      await this.deleteMember(name)
+      if (this.isCurrentUser(name) && !this.isAdmin) {
+        if (this.projectList.length > 0) {
+          const p1 = this.projectList[0]
+          this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+        } else {
+          this.$router.push({ name: 'Home', params: { } })
+        }
+      }
+    },
+    confirmRemoveUser (name) {
+      const memberName = escape(displayName(name))
       const projectName = escape(this.projectDetails.projectName)
       let messageHtml
-      if (this.isCurrentUser(username)) {
+      if (this.isCurrentUser(name)) {
         messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
       } else {
-        messageHtml = `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
+        messageHtml = `Do you want to remove the user <i>${memberName}</i> from the project <i>${projectName}</i>?`
       }
       return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Delete',
-        captionText: 'Confirm Member Deletion',
+        confirmButtonText: 'Remove User',
+        captionText: 'Confirm Remove User',
         messageHtml,
         dialogColor: 'red'
       })
     },
-    async onDelete (username) {
-      const deletionConfirmed = await this.confirmDelete(username)
-      if (deletionConfirmed) {
-        await this.deleteMember(username)
-        if (this.isCurrentUser(username) && !this.isAdmin) {
-          if (this.projectList.length > 0) {
-            const p1 = this.projectList[0]
-            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-          } else {
-            this.$router.push({ name: 'Home', params: { } })
-          }
-        }
+    async onDeleteServiceAccount (serviceAccountName) {
+      let deletionConfirmed
+      if (isForeignServiceAccount(this.namespace, serviceAccountName)) {
+        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(serviceAccountName)
+      } else {
+        deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
       }
+      if (deletionConfirmed) {
+        return this.deleteMember(serviceAccountName)
+      }
+    },
+    confirmRemoveForeignServiceAccount (serviceAccountName) {
+      const projectName = escape(this.projectDetails.projectName)
+      const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
+      const memberName = escape(displayName(name))
+      const memberNamespace = escape(displayName(namespace))
+
+      const messageHtml = `Do you want to remove the service account <i>${memberName}</i> of namespace <i>${memberNamespace}</i> from the project <i>${projectName}</i>?`
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Remove Member',
+        messageHtml,
+        dialogColor: 'red'
+      })
+    },
+    confirmDeleteServiceAccount (name) {
+      const memberName = escape(displayName(name))
+      const messageHtml = `Do you want to delete the service account <i>${memberName}</i>?`
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Member Deletion',
+        messageHtml,
+        dialogColor: 'red',
+        confirmValue: memberName
+      })
     },
     onEditUser (username, roles) {
       this.updatedMemberName = username
@@ -458,10 +469,10 @@ export default {
       forEach(roleNames, roleName => {
         const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
         if (roleDescriptor) {
-          displayNames.push(roleDescriptor.displayName)
+          displayNames.push(roleDescriptor)
         }
       })
-      return displayNames.sort()
+      return sortBy(displayNames, 'displayName')
     },
     isCurrentUser (username) {
       return this.username === username

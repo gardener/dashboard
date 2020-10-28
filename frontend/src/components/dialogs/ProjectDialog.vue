@@ -110,7 +110,7 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccountUsername, compileMarkdown, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -141,7 +141,7 @@ export default {
       projectName: undefined,
       description: undefined,
       purpose: undefined,
-      technicalContact: undefined,
+      owner: undefined,
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
@@ -202,17 +202,17 @@ export default {
     currentPurpose () {
       return this.projectDetails.purpose
     },
-    currentTechnicalContact () {
-      return this.projectDetails.technicalContact
+    currentOwner () {
+      return this.projectDetails.owner
     },
     currentCostObject () {
       return this.projectDetails.costObject
     },
     memberItems () {
-      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
-      const technicalContact = this.currentTechnicalContact
-      if (technicalContact && !includes(members, technicalContact)) {
-        members.push(technicalContact)
+      const members = filter(map(this.memberList, 'username'), username => !isServiceAccountUsername(username))
+      const owner = this.currentOwner
+      if (owner && !includes(members, owner)) {
+        members.push(owner)
       }
 
       return members
@@ -222,7 +222,7 @@ export default {
     },
     validators () {
       const validators = {
-        technicalContact: {
+        owner: {
           required
         },
         costObject: {
@@ -254,8 +254,8 @@ export default {
           noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
           noStartEndHyphen: 'Name must not start or end with a hyphen'
         },
-        technicalContact: {
-          required: 'Technical Contact is required'
+        owner: {
+          required: 'Owner is required'
         },
         costObject: {
           validCostObject: this.costObjectErrorMessage
@@ -330,7 +330,7 @@ export default {
       this.projectName = defaultProjectName
       this.description = undefined
       this.purpose = undefined
-      this.technicalContact = this.username
+      this.owner = this.username
       this.costObject = undefined
 
       setDelayedInputFocus(this, 'projectName')

@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template >
-  <v-dialog v-model="visible" max-width="650">
+  <v-dialog v-model="visible" max-width="650" persistent>
     <v-card :class="cardClass">
       <v-card-title class="dialog-title white--text align-center justify-start">
         <v-icon large dark>mdi-account-plus</v-icon>
@@ -32,7 +32,7 @@ limitations under the License.
                 :label="nameLabel"
                 v-model.trim="internalName"
                 :error-messages="getErrorMessages('internalName')"
-                @input="$v.internalName.$touch()"
+                @input="$v.$touch()"
                 @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
@@ -52,6 +52,8 @@ limitations under the License.
                 v-model="internalRoles"
                 :error-messages="getErrorMessages('internalRoles')"
                 @input="$v.internalRoles.$touch()"
+                :hint="rolesHint"
+                persistent-hint
                 >
                 <template v-slot:selection="{ item, index }">
                   <v-chip small color="black" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
@@ -68,7 +70,7 @@ limitations under the License.
         <v-spacer></v-spacer>
         <v-btn text @click.stop="cancel" tabindex="3">Cancel</v-btn>
         <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
-        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">Add</v-btn>
+        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">{{addMemberButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -77,20 +79,21 @@ limitations under the License.
 <script>
 import toLower from 'lodash/toLower'
 import { mapActions, mapState, mapGetters } from 'vuex'
-import { required } from 'vuelidate/lib/validators'
+import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setDelayedInputFocus, getValidationErrors, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
+import negate from 'lodash/negate'
+import get from 'lodash/get'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
-const defaultRole = 'admin'
 
 export default {
   name: 'member-dialog',
@@ -151,49 +154,82 @@ export default {
     },
     validators () {
       const validators = {
-        internalRoles: {
-          required
-        },
+        internalRoles: {},
         internalName: {}
       }
       if (!this.isUpdateDialog) {
         if (this.isUserDialog) {
+          validators.internalRoles = {
+            required
+          }
           validators.internalName = {
             required,
-            unique: unique('projectUserNames')
+            unique: unique('projectUsernames'),
+            isNoServiceAccount: value => !isServiceAccountUsername(value)
           }
         } else if (this.isServiceDialog) {
+          validators.internalRoles = {
+            required: requiredIf(function () {
+              return isForeignServiceAccount(this.namespace, this.internalName)
+            })
+          }
           validators.internalName = {
             required,
-            resourceName,
-            unique: unique('serviceAccountNames')
+            serviceAccountResource: value => {
+              if (isServiceAccountUsername(this.internalName)) {
+                return true
+              }
+              return resourceName(value)
+            },
+            unique: value => {
+              if (isServiceAccountUsername(value)) {
+                return unique('serviceAccountUsernames')(value, this)
+              }
+              return unique('serviceAccountNames')(value, this)
+            }
           }
         }
       }
       return validators
     },
     validationErrors () {
-      const validationErrors = {
-        internalRoles: {
-          required: 'You need to configure roles'
-        }
-      }
+      const validationErrors = {}
       if (this.isUserDialog) {
+        validationErrors.internalRoles = {
+          required: 'You need to assign roles to this user'
+        }
         validationErrors.internalName = {
           required: 'User is required',
-          unique: `User '${this.internalName}' is already member of this project.`
+          unique: `User '${this.internalName}' is already member of this project.`,
+          isNoServiceAccount: 'Please use add service account to add service accounts'
         }
       } else if (this.isServiceDialog) {
+        validationErrors.internalRoles = {
+          required: 'You need to assign roles for service accounts that you want to invite to this project'
+        }
         validationErrors.internalName = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
+          serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
           unique: `Service Account '${this.internalName}' already exists. Please try a different name.`
         }
       }
       return validationErrors
     },
     title () {
-      return this.isUpdateDialog ? `Update ${this.nameLabel}` : `Add ${this.nameLabel} to Project`
+      if (this.isUpdateDialog) {
+        return `Change Roles of ${this.nameLabel}`
+      }
+      if (this.isServiceDialog) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+          return 'Invite Service Account'
+        }
+        return 'Create Service Account'
+      }
+      if (this.isUserDialog) {
+        return 'Add User to Project'
+      }
+      return undefined
     },
     isUserDialog () {
       return this.type === 'adduser' || this.type === 'updateuser'
@@ -205,17 +241,26 @@ export default {
       return this.type === 'updateuser' || this.type === 'updateservice'
     },
     roleItems () {
-      return MEMBER_ROLE_DESCRIPTORS
+      return filter(MEMBER_ROLE_DESCRIPTORS, role => {
+        return !role.notEditable
+      })
     },
     nameLabel () {
       return this.isUserDialog ? 'User' : 'Service Account'
     },
     nameHint () {
       if (this.isUserDialog) {
-        return 'Enter the username that should become a user of this project'
+        return 'Enter the username that should become a member of this project'
       }
       if (this.isServiceDialog) {
-        return 'Enter the name of a Kubernetes Service Account'
+        return 'Enter service account name'
+      }
+
+      return undefined
+    },
+    rolesHint () {
+      if (this.isServiceDialog) {
+        return 'Assign roles to make this service account a member of this project'
       }
       return undefined
     },
@@ -228,13 +273,17 @@ export default {
       }
       return undefined
     },
-    serviceAccountNames () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
-      return map(serviceAccounts, ({ username }) => serviceAccountToDisplayName(username))
+    memberUsernames () {
+      return map(this.memberList, 'username')
     },
-    projectUserNames () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
-      return map(users, 'username')
+    serviceAccountUsernames () {
+      return filter(this.memberUsernames, isServiceAccountUsername)
+    },
+    serviceAccountNames () {
+      return map(this.serviceAccountUsernames, username => get(parseServiceAccountUsername(username), 'name'))
+    },
+    projectUsernames () {
+      return filter(this.memberUsernames, negate(isServiceAccountUsername))
     },
     memberName () {
       const name = toLower(this.internalName)
@@ -242,9 +291,21 @@ export default {
         return name
       }
       if (this.isServiceDialog) {
+        if (isServiceAccountUsername(name)) {
+          return name
+        }
         return `system:serviceaccount:${this.namespace}:${name}`
       }
       return undefined
+    },
+    addMemberButtonText () {
+      if (this.isServiceDialog) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+          return 'Invite'
+        }
+        return 'Create'
+      }
+      return 'Add'
     }
   },
   methods: {
@@ -290,6 +351,7 @@ export default {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]
           await this.updateMember({ name, roles })
+
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
           }
@@ -317,7 +379,7 @@ export default {
         }
       } else if (this.isServiceDialog) {
         if (this.name) {
-          this.internalName = serviceAccountToDisplayName(this.name)
+          this.internalName = get(parseServiceAccountUsername(this.name), 'name')
         } else {
           this.internalName = this.defaultServiceName()
         }
@@ -334,7 +396,7 @@ export default {
           }
         })
       } else {
-        this.internalRoles = [defaultRole]
+        this.internalRoles = []
         this.unsupportedRoles = []
       }
 
