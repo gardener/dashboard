@@ -26,7 +26,6 @@ module.exports = function ({ agent, k8s, auth }) {
   const project = 'foo'
   const namespace = `garden-${project}`
   const members = k8s.readProjectMembers(namespace)
-  const metadata = {}
   const username = `${name}@example.org`
   const id = username
   const user = auth.createUser({ id })
@@ -84,7 +83,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
@@ -99,7 +98,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(409)
   })
 
@@ -111,7 +111,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
@@ -153,7 +153,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
     expect(res.body).to.have.deep.members(_.concat(members, { username: name, roles }))
   })
@@ -179,7 +180,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
   })
 
@@ -191,7 +193,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(409)
   })
 
@@ -203,7 +206,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
     expect(res).to.have.status(200)
   })
 
@@ -215,7 +218,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.deep.contain({ username: name, roles })
@@ -229,7 +232,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.deep.contain({ username: name, roles })
@@ -244,7 +247,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.deep.contain({ username: name, roles })
@@ -259,7 +262,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.not.deep.contain({ username: name, roles })

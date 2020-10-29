@@ -16,15 +16,20 @@
 
 'use strict'
 
-const {
-  SubjectList,
-  ProjectMemberManager
-} = require('../lib/services/members')
+const { UnprocessableEntity, NotFound } = require('http-errors')
+const MemberManager = require('../lib/services/members/MemberManager')
+const SubjectList = require('../lib/services/members/SubjectList')
 
-const _ = require('lodash')
+const { expect } = require('chai')
 
 describe('services', function () {
   /* eslint no-unused-expressions: 0 */
+  const sandbox = sinon.createSandbox()
+
+  afterEach(function () {
+    sandbox.restore()
+  })
+
   describe('members', function () {
     const memberSubjects = [
       {
@@ -168,160 +173,225 @@ describe('services', function () {
     }
 
     const client = {
-      'core.gardener.cloud': {
-        projects: {
-          mergePatch: _.noop
-        }
-      },
-      core: {
-        serviceaccounts: {
-          create: _.noop
-        }
-      }
+      'core.gardener.cloud': {},
+      core: {}
     }
 
-    describe('#SubjectList', function () {
+    beforeEach(function () {
+      client['core.gardener.cloud'].projects = {
+        mergePatch: sandbox.spy()
+      }
+      client.core.serviceaccounts = {
+        create: sandbox.spy(),
+        delete: sandbox.spy()
+      }
+    })
+
+    describe('SubjectList', function () {
       const subjectList = new SubjectList(memberSubjects)
 
-      it('should merge role, roles into roles', async function () {
-        const memberRoles = subjectList.get('foo@bar.com').roles
-        expect(memberRoles).to.have.length(2)
-        expect(memberRoles).to.have.deep.members(['admin', 'owner'])
+      describe('#get', function () {
+        it('should merge role, roles into roles', async function () {
+          const memberRoles = subjectList.get('foo@bar.com').roles
+          expect(memberRoles).to.have.length(2)
+          expect(memberRoles).to.have.deep.members(['admin', 'owner'])
+        })
+      })
+
+      describe('#has', function () {
+        it('should merge role, roles into roles', async function () {
+          expect(subjectList.has('foo@bar.com')).to.be.true
+          expect(subjectList.has('foo@baz.com')).to.be.false
+        })
       })
     })
 
-    describe('#ProjectMemberManager', function () {
-      let projectMemberManager
+    describe('MemberManager', function () {
+      let memberManager
 
       beforeEach(function () {
-        projectMemberManager = new ProjectMemberManager(client, 'creator', project, serviceAccounts)
+        memberManager = new MemberManager(client, 'creator', project, serviceAccounts)
       })
 
-      it('should merge multiple occurences of same user in members list', async function () {
+      describe('#list', function () {
         // merge all roles
         // do not merge service accounts from different namespaces
         // include no member service accounts
-        const frontendMemberList = projectMemberManager.list()
+        it('should merge multiple occurences of same user in members list', async function () {
+          const frontendMemberList = memberManager.list()
 
-        expect(frontendMemberList).to.have.length(8)
-        expect(frontendMemberList).to.deep.contain({ username: 'mutiple@bar.com', roles: ['admin', 'viewer'] })
-        expect(frontendMemberList).to.deep.contain({ username: 'system:serviceaccount:garden-foo:robot-multiple', roles: ['otherrole', 'admin', 'myrole', 'viewer'], createdBy: 'foo', creationTimestamp: 'bar-time' })
-        expect(frontendMemberList).to.deep.contain({ username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace', roles: ['myrole', 'viewer', 'admin'] })
+          expect(frontendMemberList).to.have.length(8)
+          expect(frontendMemberList).to.deep.contain({
+            username: 'mutiple@bar.com',
+            roles: ['admin', 'viewer']
+          })
+          expect(frontendMemberList).to.deep.contain({
+            username: 'system:serviceaccount:garden-foo:robot-multiple',
+            roles: ['otherrole', 'admin', 'myrole', 'viewer'],
+            createdBy: 'foo',
+            creationTimestamp: 'bar-time'
+          })
+          expect(frontendMemberList).to.deep.contain({
+            username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
+            roles: ['myrole', 'viewer', 'admin']
+          })
+          expect(frontendMemberList).to.deep.contain({
+            username: 'system:serviceaccount:garden-foo:robot-nomember',
+            roles: [],
+            createdBy: 'foo',
+            creationTimestamp: 'bar-time'
+          })
+        })
 
-        expect(frontendMemberList).to.deep.contain({ username: 'system:serviceaccount:garden-foo:robot-nomember', roles: [], createdBy: 'foo', creationTimestamp: 'bar-time' })
+        it('should normalize kind service account members subject to kind user with service account prefix and add metadata from service account', async function () {
+          const frontendMemberList = memberManager.list()
+
+          expect(frontendMemberList).to.deep.contain({
+            username: 'system:serviceaccount:garden-foo:robot-sa',
+            roles: ['admin', 'myrole', 'viewer'],
+            createdBy: 'foo',
+            creationTimestamp: 'bar-time'
+          })
+        })
       })
 
-      it('should normalize kind service account members subject to kind user with service account prefix and add metadata from service account', async function () {
-        const frontendMemberList = projectMemberManager.list()
-
-        expect(frontendMemberList).to.deep.contain({ username: 'system:serviceaccount:garden-foo:robot-sa', roles: ['admin', 'myrole', 'viewer'], createdBy: 'foo', creationTimestamp: 'bar-time' })
+      describe('#get', function () {
+        it('should throw NotFound', async function () {
+          try {
+            await memberManager.get('john.doe@baz.com')
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(NotFound)
+          }
+        })
       })
 
+      describe('#create', function () {
       // update unique member
       // update mutiple member, remove + add role, check that minimal changes are applied to multiple accounts, sa members not migrated
       // delete, check that all occurrences are deleted
+        it('should add a user to project', async function () {
+          const name = 'newuser@bar.com'
+          const roles = ['admin', 'viewer', 'myrole']
 
-      it('should add a user to project', async function () {
-        const name = 'newuser@bar.com'
-        const roles = ['admin', 'viewer', 'myrole']
+          await memberManager.create(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItem = memberSubjects.subjectListItems[name]
 
-        await projectMemberManager.create(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const newMemberListItem = memberSubjects.subjectListItems[name]
+          expect(newMemberListItem.subject.name).to.eql(name)
+          expect(newMemberListItem.subject.kind).to.eql('User')
+          expect(newMemberListItem.subject.role).to.eql('admin')
+          expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer', 'myrole'])
+          expect(newMemberListItem.roles).to.have.deep.members(roles)
+        })
 
-        expect(newMemberListItem.subject.name).to.eql(name)
-        expect(newMemberListItem.subject.kind).to.eql('User')
-        expect(newMemberListItem.subject.role).to.eql('admin')
-        expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer', 'myrole'])
-        expect(newMemberListItem.roles).to.have.deep.members(roles)
+        it('should add a service account to project', async function () {
+          const name = 'system:serviceaccount:garden-foo:newsa'
+          const roles = ['sa-role']
+
+          await memberManager.create(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItem = memberSubjects.subjectListItems[name]
+
+          expect(newMemberListItem.subject.name).to.eql('newsa')
+          expect(newMemberListItem.subject.kind).to.eql('ServiceAccount')
+          expect(newMemberListItem.subject.role).to.eql('sa-role')
+          expect(newMemberListItem.roles).to.have.deep.members(roles)
+        })
       })
 
-      it('should add a service account to project', async function () {
-        const name = 'system:serviceaccount:garden-foo:newsa'
-        const roles = ['sa-role']
+      describe('#update', function () {
+        it('should throw NotFound', async function () {
+          try {
+            await memberManager.update('john.doe@baz.com')
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(NotFound)
+          }
+        })
+        it('should update a project member', async function () {
+          const name = 'foo@bar.com'
+          const roles = ['role1', 'role2']
 
-        await projectMemberManager.create(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const newMemberListItem = memberSubjects.subjectListItems[name]
+          await memberManager.update(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const updatedMemberListItem = memberSubjects.subjectListItems[name]
 
-        expect(newMemberListItem.subject.name).to.eql('newsa')
-        expect(newMemberListItem.subject.kind).to.eql('ServiceAccount')
-        expect(newMemberListItem.subject.role).to.eql('sa-role')
-        expect(newMemberListItem.roles).to.have.deep.members(roles)
+          expect(updatedMemberListItem.subject.name).to.eql(name)
+          expect(updatedMemberListItem.subject.kind).to.eql('User')
+          expect(updatedMemberListItem.subject.role).to.eql('role1')
+          expect(updatedMemberListItem.roles).to.have.deep.members(roles)
+        })
+
+        it('should add new roles to first occurrence of user, remove roles of other occurrences that are no longer assigned to member', async function () {
+          const name = 'mutiple@bar.com'
+          const roles = ['admin', 'newrole']
+
+          await memberManager.update(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItemGroup = memberSubjects.subjectListItems[name]
+
+          const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
+          const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
+
+          expect(firstUpdatedMemberListItem.subject.role).to.eql('admin')
+          expect(firstUpdatedMemberListItem.subject.roles).to.have.deep.members(['newrole'])
+
+          expect(secondUpdatedMemberListItem.subject.role).to.eql('admin')
+          expect(secondUpdatedMemberListItem.subject.roles).to.be.undefined
+        })
+
+        it('should remove member occurrences without roles', async function () {
+          const name = 'mutiple@bar.com'
+          const roles = ['otherrole']
+
+          await memberManager.update(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItemGroup = memberSubjects.subjectListItems[name]
+
+          const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
+          const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
+
+          expect(firstUpdatedMemberListItem.subject.role).to.eql('otherrole')
+          expect(firstUpdatedMemberListItem.subject.roles).to.be.undefined
+
+          expect(secondUpdatedMemberListItem).to.be.undefined
+        })
+
+        it('should throw an error when trying to remove all roles with update', async function () {
+          const name = 'foo@bar.com'
+          const roles = []
+          try {
+            await memberManager.update(name, roles)
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(UnprocessableEntity)
+          }
+        })
+
+        it('should not convert a service account kind user to kind serviceaccount', async function () {
+          const name = 'system:serviceaccount:garden-foo:robot-user'
+          const roles = ['admin', 'viewer']
+
+          await memberManager.update(name, roles) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItem = memberSubjects.subjectListItems[name]
+
+          expect(newMemberListItem.subject.name).to.eql(name)
+          expect(newMemberListItem.subject.kind).to.eql('User')
+          expect(newMemberListItem.subject.role).to.eql('admin')
+          expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer'])
+          expect(newMemberListItem.roles).to.have.deep.members(roles)
+        })
       })
 
-      it('should update a project member', async function () {
-        const name = 'foo@bar.com'
-        const roles = ['role1', 'role2']
-
-        await projectMemberManager.update(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const updatedMemberListItem = memberSubjects.subjectListItems[name]
-
-        expect(updatedMemberListItem.subject.name).to.eql(name)
-        expect(updatedMemberListItem.subject.kind).to.eql('User')
-        expect(updatedMemberListItem.subject.role).to.eql('role1')
-        expect(updatedMemberListItem.roles).to.have.deep.members(roles)
-      })
-
-      it('should add new roles to first occurrence of user, remove roles of other occurrences that are no longer assigned to member', async function () {
-        const name = 'mutiple@bar.com'
-        const roles = ['admin', 'newrole']
-
-        await projectMemberManager.update(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const newMemberListItemGroup = memberSubjects.subjectListItems[name]
-
-        const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
-        const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
-
-        expect(firstUpdatedMemberListItem.subject.role).to.eql('admin')
-        expect(firstUpdatedMemberListItem.subject.roles).to.have.deep.members(['newrole'])
-
-        expect(secondUpdatedMemberListItem.subject.role).to.eql('admin')
-        expect(secondUpdatedMemberListItem.subject.roles).to.be.undefined
-      })
-
-      it('should remove member occurrences without roles', async function () {
-        const name = 'mutiple@bar.com'
-        const roles = ['otherrole']
-
-        await projectMemberManager.update(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const newMemberListItemGroup = memberSubjects.subjectListItems[name]
-
-        const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
-        const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
-
-        expect(firstUpdatedMemberListItem.subject.role).to.eql('otherrole')
-        expect(firstUpdatedMemberListItem.subject.roles).to.be.undefined
-
-        expect(secondUpdatedMemberListItem).to.be.undefined
-      })
-
-      it('should throw an error when trying to remove all roles with update', async function () {
-        const name = 'foo@bar.com'
-        const roles = []
-        try {
-          await projectMemberManager.update(name, roles)
-        } catch (e) {
-          expect(e).to.be.an.instanceof(TypeError)
-        }
-      })
-
-      it('should not convert a service account kind user to kind serviceaccount', async function () {
-        const name = 'system:serviceaccount:garden-foo:robot-user'
-        const roles = ['admin', 'viewer']
-
-        await projectMemberManager.update(name, roles) // assign user to project
-        const memberSubjects = projectMemberManager.subjectList
-        const newMemberListItem = memberSubjects.subjectListItems[name]
-
-        expect(newMemberListItem.subject.name).to.eql(name)
-        expect(newMemberListItem.subject.kind).to.eql('User')
-        expect(newMemberListItem.subject.role).to.eql('admin')
-        expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer'])
-        expect(newMemberListItem.roles).to.have.deep.members(roles)
+      describe('#deleteServiceAccount', function () {
+        it('should not delete a serviceaccount from a different namespace', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).to.not.have.been.called
+        })
       })
     })
   })

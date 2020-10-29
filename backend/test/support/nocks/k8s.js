@@ -21,6 +21,7 @@ const nock = require('nock')
 const { v1: uuidv1 } = require('uuid')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
+const Member = require('../../../lib/services/members/Member')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('@gardener-dashboard/kube-config').load()
@@ -397,26 +398,9 @@ function readProjectMembers (namespace) {
 
 function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
   const project = readProject(namespace)
-  if (!project) {
-    scope
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(404)
-    return undefined
+  if (project) {
+    getServiceAccountsForNamespace(scope, namespace)
   }
-  scope
-    .get(`/api/v1/namespaces/${namespace}`)
-    .reply(200, () => ({
-      metadata: {
-        labels: {
-          'project.gardener.cloud/name': project.metadata.name
-        }
-      }
-    }))
-  scope
-    .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-    .reply(200, () => project)
-
-  getServiceAccountsForNamespace(scope, namespace)
   return project
 }
 
@@ -1407,17 +1391,17 @@ const stub = {
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const [, saNamespace, saName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-    const serviceAccount = { metadata: { namespace: saNamespace, name: saName } }
-    if (saName &&
-      saNamespace === namespace &&
-      !_.find(serviceAccountList, serviceAccount)) {
+    const subject = Member.parseUsername(username)
+    const newServiceAccount = { metadata: { namespace: subject.namespace, name: subject.name } }
+    const existingServiceAccount = _.find(serviceAccountList, newServiceAccount)
+    if (subject.name && subject.namespace === namespace && !existingServiceAccount) {
       scope
         .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
-        .reply(200, () => serviceAccount)
+        .reply(200, () => newServiceAccount)
     }
 
-    if (!_.find(project.spec.members, ['name', username]) && roles.length) {
+    const existingMember = _.find(project.spec.members, ['name', username])
+    if (roles.length && !existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           newProject.spec.members = body.spec.members
@@ -1434,7 +1418,7 @@ const stub = {
     const name = project.metadata.name
 
     const existingMember = _.find(project.spec.members, ['name', username])
-    if (existingMember || roles.length) {
+    if (roles.length || existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           newProject.spec.members = body.spec.members
