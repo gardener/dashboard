@@ -396,14 +396,6 @@ function readProjectMembers (namespace) {
   return _.uniqBy([...members, ...serviceAccounts], 'username')
 }
 
-function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
-  const project = readProject(namespace)
-  if (project) {
-    getServiceAccountsForNamespace(scope, namespace)
-  }
-  return project
-}
-
 function getProjectMembers (project) {
   const joinMemberRoleAndRoles = (role, roles) => {
     if (!role) {
@@ -555,6 +547,18 @@ function getKubeconfig ({ server, name }) {
     users: [{ user, name }],
     'current-context': name
   })
+}
+
+function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
+  const project = readProject(namespace)
+  if (project) {
+    const name = project.metadata.name
+    scope
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    getServiceAccountsForNamespace(scope, namespace)
+  }
+  return project
 }
 
 function getServiceAccountsForNamespace (scope, namespace, additionalServiceAccounts) {

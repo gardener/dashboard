@@ -169,7 +169,8 @@ class MemberManager {
   }
 
   static async create ({ client, id }, namespace) {
-    const project = findProjectByNamespace(namespace)
+    const name = findProjectByNamespace(namespace).metadata.name
+    const project = await client['core.gardener.cloud'].projects.get(name)
     const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
     return new this(client, id, project, serviceAccounts)
   }
