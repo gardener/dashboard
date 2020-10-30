@@ -41,7 +41,9 @@ class SubjectListItem {
   }
 
   extend (obj) {
-    _.assign(this.extensions, obj)
+    const before = _.cloneDeep(this.extensions)
+    const after = _.assign(this.extensions, obj)
+    return !_.isEqual(before, after)
   }
 
   static create (firstArg, ...rest) {

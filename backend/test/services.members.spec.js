@@ -16,6 +16,8 @@
 
 'use strict'
 
+const delay = require('delay')
+const _ = require('lodash')
 const { UnprocessableEntity, NotFound } = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
 const SubjectList = require('../lib/services/members/SubjectList')
@@ -125,7 +127,8 @@ describe('services', function () {
           name: 'robot-sa',
           namespace: 'garden-foo',
           annotations: {
-            'garden.sapcloud.io/createdBy': 'foo'
+            'garden.sapcloud.io/createdBy': 'foo',
+            'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
         }
@@ -179,11 +182,22 @@ describe('services', function () {
 
     beforeEach(function () {
       client['core.gardener.cloud'].projects = {
-        mergePatch: sandbox.spy()
+        mergePatch: sandbox.stub().callsFake(async (name, body) => {
+          await delay(1)
+        })
       }
       client.core.serviceaccounts = {
-        create: sandbox.spy(),
-        delete: sandbox.spy()
+        create: sandbox.stub().callsFake(async (namespace, body) => {
+          await delay(1)
+          _.set(body, 'metadata.creationTimestamp', 'now')
+          return body
+        }),
+        delete: sandbox.stub().callsFake(async (namespace, name) => {
+          await delay(1)
+        }),
+        mergePatch: sandbox.stub().callsFake(async (namespace, name, body) => {
+          await delay(1)
+        })
       }
     })
 
@@ -229,7 +243,8 @@ describe('services', function () {
             username: 'system:serviceaccount:garden-foo:robot-multiple',
             roles: ['otherrole', 'admin', 'myrole', 'viewer'],
             createdBy: 'foo',
-            creationTimestamp: 'bar-time'
+            creationTimestamp: 'bar-time',
+            description: undefined
           })
           expect(frontendMemberList).to.deep.contain({
             username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
@@ -239,7 +254,8 @@ describe('services', function () {
             username: 'system:serviceaccount:garden-foo:robot-nomember',
             roles: [],
             createdBy: 'foo',
-            creationTimestamp: 'bar-time'
+            creationTimestamp: 'bar-time',
+            description: undefined
           })
         })
 
@@ -250,7 +266,8 @@ describe('services', function () {
             username: 'system:serviceaccount:garden-foo:robot-sa',
             roles: ['admin', 'myrole', 'viewer'],
             createdBy: 'foo',
-            creationTimestamp: 'bar-time'
+            creationTimestamp: 'bar-time',
+            description: 'description'
           })
         })
       })
@@ -274,7 +291,7 @@ describe('services', function () {
           const name = 'newuser@bar.com'
           const roles = ['admin', 'viewer', 'myrole']
 
-          await memberManager.create(name, roles) // assign user to project
+          await memberManager.create(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
@@ -289,7 +306,7 @@ describe('services', function () {
           const name = 'system:serviceaccount:garden-foo:newsa'
           const roles = ['sa-role']
 
-          await memberManager.create(name, roles) // assign user to project
+          await memberManager.create(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
@@ -303,17 +320,18 @@ describe('services', function () {
       describe('#update', function () {
         it('should throw NotFound', async function () {
           try {
-            await memberManager.update('john.doe@baz.com')
+            await memberManager.update('john.doe@baz.com', {})
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(NotFound)
           }
         })
+
         it('should update a project member', async function () {
           const name = 'foo@bar.com'
           const roles = ['role1', 'role2']
 
-          await memberManager.update(name, roles) // assign user to project
+          await memberManager.update(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const updatedMemberListItem = memberSubjects.subjectListItems[name]
 
@@ -327,7 +345,7 @@ describe('services', function () {
           const name = 'mutiple@bar.com'
           const roles = ['admin', 'newrole']
 
-          await memberManager.update(name, roles) // assign user to project
+          await memberManager.update(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const newMemberListItemGroup = memberSubjects.subjectListItems[name]
 
@@ -345,7 +363,7 @@ describe('services', function () {
           const name = 'mutiple@bar.com'
           const roles = ['otherrole']
 
-          await memberManager.update(name, roles) // assign user to project
+          await memberManager.update(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const newMemberListItemGroup = memberSubjects.subjectListItems[name]
 
@@ -362,7 +380,7 @@ describe('services', function () {
           const name = 'foo@bar.com'
           const roles = []
           try {
-            await memberManager.update(name, roles)
+            await memberManager.update(name, { roles })
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(UnprocessableEntity)
@@ -373,7 +391,7 @@ describe('services', function () {
           const name = 'system:serviceaccount:garden-foo:robot-user'
           const roles = ['admin', 'viewer']
 
-          await memberManager.update(name, roles) // assign user to project
+          await memberManager.update(name, { roles }) // assign user to project
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
@@ -391,6 +409,15 @@ describe('services', function () {
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
           expect(client.core.serviceaccounts.delete).to.not.have.been.called
+        })
+      })
+
+      describe('#updateServiceAccount ', function () {
+        it('should not delete a serviceaccount from a different namespace', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.updateServiceAccount(item, {})
+          expect(client.core.serviceaccounts.mergePatch).to.not.have.been.called
         })
       })
     })

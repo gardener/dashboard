@@ -56,7 +56,7 @@ class MemberManager {
     return item.member
   }
 
-  async create (id, roles) {
+  async create (id, { roles, description }) {
     let item = this.subjectList.get(id)
     if (item) {
       throw new Conflict(`${item.kind} '${id}' already exists`)
@@ -66,7 +66,10 @@ class MemberManager {
     this.setItemRoles(item, roles)
 
     if (item.kind === 'ServiceAccount') {
-      await this.createServiceAccount(item)
+      await this.createServiceAccount(item, {
+        createdBy: this.userId,
+        description
+      })
     }
     if (roles.length) {
       this.subjectList.set(id, item)
@@ -75,7 +78,7 @@ class MemberManager {
     return this.subjectList.members
   }
 
-  async update (id, roles) {
+  async update (id, { roles, description }) {
     const item = this.subjectList.get(id)
     if (!item) {
       const { kind } = Member.parseUsername(id)
@@ -84,6 +87,9 @@ class MemberManager {
 
     this.setItemRoles(item, roles)
 
+    if (item.kind === 'ServiceAccount') {
+      await this.updateServiceAccount(item, { description })
+    }
     await this.save()
     return this.subjectList.members
   }
@@ -116,29 +122,62 @@ class MemberManager {
     return this.client['core.gardener.cloud'].projects.mergePatch(name, { spec: { members } })
   }
 
-  createServiceAccount (item) {
+  async createServiceAccount (item, { createdBy, description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
       return
     }
-    this.subjectList.set(item.id, item)
-    return this.client.core.serviceaccounts.create(namespace, {
+
+    const serviceAccount = await this.client.core.serviceaccounts.create(namespace, {
       metadata: {
         name,
         namespace,
         annotations: {
-          'garden.sapcloud.io/createdBy': this.userId
+          'garden.sapcloud.io/createdBy': createdBy,
+          'dashboard.gardener.cloud/description': description
         }
       }
     })
+    const {
+      metadata: {
+        creationTimestamp
+      }
+    } = serviceAccount
+
+    item.extend({
+      createdBy,
+      creationTimestamp,
+      description
+    })
+    this.subjectList.set(item.id, item)
   }
 
-  deleteServiceAccount (item) {
+  async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
       return
     }
-    return this.client.core.serviceaccounts.delete(namespace, name)
+
+    const isDirty = item.extend({ description })
+    if (isDirty) {
+      await this.client.core.serviceaccounts.mergePatch(namespace, name, {
+        metadata: {
+          annotations: {
+            'dashboard.gardener.cloud/description': description
+          }
+        }
+      })
+    }
+  }
+
+  async deleteServiceAccount (item) {
+    const { namespace, name } = Member.parseUsername(item.id)
+    if (namespace !== this.namespace) {
+      return
+    }
+
+    await this.client.core.serviceaccounts.delete(namespace, name)
+    this.subjectList.delete(item.id)
   }
 
   async getKubeconfig (item) {

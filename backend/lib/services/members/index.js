@@ -28,14 +28,14 @@ exports.get = async function ({ user, namespace, name }) {
   return memberManager.get(name)
 }
 
-exports.create = async function ({ user, namespace, body: { name, roles } }) {
+exports.create = async function ({ user, namespace, body: { name, ...data } }) {
   const memberManager = await MemberManager.create(user, namespace)
-  return memberManager.create(name, roles)
+  return memberManager.create(name, data)
 }
 
-exports.update = async function ({ user, namespace, name, body: { roles } }) {
+exports.update = async function ({ user, namespace, name, body: data }) {
   const memberManager = await MemberManager.create(user, namespace)
-  return memberManager.update(name, roles)
+  return memberManager.update(name, data)
 }
 
 exports.remove = async function ({ user, namespace, name }) {

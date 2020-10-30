@@ -66,6 +66,12 @@ const projectList = [
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
         roles: ['viewer']
+      },
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
+        name: 'system:serviceaccount:garden-baz:robot',
+        roles: ['viewer', 'admin']
       }
     ],
     description: 'foo-description',
@@ -389,11 +395,24 @@ function readProject (namespace) {
 
 function readProjectMembers (namespace) {
   const members = getProjectMembers(readProject(namespace))
-  const serviceAccounts = _.chain(serviceAccountList)
+  const serviceAccountToMember = ({ metadata }) => {
+    return {
+      username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`,
+      roles: []
+    }
+  }
+  const serviceAccountMembers = _
+    .chain(serviceAccountList)
     .filter(['metadata.namespace', namespace])
-    .map(({ metadata }) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
+    .map(serviceAccountToMember)
+    .concat()
+    .uniqBy('username')
     .value()
-  return _.uniqBy([...members, ...serviceAccounts], 'username')
+  return _
+    .chain(members)
+    .concat(serviceAccountMembers)
+    .uniqBy('username')
+    .value()
 }
 
 function getProjectMembers (project) {
@@ -1395,16 +1414,20 @@ const stub = {
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const subject = Member.parseUsername(username)
-    const newServiceAccount = { metadata: { namespace: subject.namespace, name: subject.name } }
+    const existingMember = _.find(project.spec.members, ['name', username])
+    const { namespace: serviceAccountNamespace, name: serviceAccountName } = Member.parseUsername(username)
+    const newServiceAccount = { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } }
     const existingServiceAccount = _.find(serviceAccountList, newServiceAccount)
-    if (subject.name && subject.namespace === namespace && !existingServiceAccount) {
+
+    if (serviceAccountName && serviceAccountNamespace === namespace && !existingServiceAccount) {
       scope
-        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
+        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`, body => {
+          body.metadata.creationTimestamp = 'now'
+          _.merge(newServiceAccount.metadata, body.metadata)
+          return true
+        })
         .reply(200, () => newServiceAccount)
     }
-
-    const existingMember = _.find(project.spec.members, ['name', username])
     if (roles.length && !existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
@@ -1415,13 +1438,28 @@ const stub = {
     }
     return scope
   },
-  updateMember ({ bearer, namespace, name: username, roles }) {
+  updateMember ({ bearer, namespace, name: username, roles, description }) {
     const scope = nockWithAuthorization(bearer)
     const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
     const existingMember = _.find(project.spec.members, ['name', username])
+    const { namespace: serviceAccountNamespace, name: serviceAccountName } = Member.parseUsername(username)
+    const existingServiceAccount = _
+      .chain(serviceAccountList)
+      .find({ metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })
+      .cloneDeep()
+      .value()
+
+    if (existingServiceAccount && description) {
+      scope
+        .patch(`/api/v1/namespaces/${serviceAccountNamespace}/serviceaccounts/${serviceAccountName}`, body => {
+          _.merge(existingServiceAccount.metadata, body.metadata)
+          return true
+        })
+        .reply(200, () => existingServiceAccount)
+    }
     if (roles.length || existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {

@@ -25,13 +25,18 @@ class SubjectList {
   constructor (subjects, serviceAccounts) {
     const createServiceAccountItem = ({ metadata, secrets }) => {
       const { namespace, name, annotations = {}, creationTimestamp } = metadata
+      const createdByLegacy = annotations['garden.sapcloud.io/createdBy']
+      const createdByTerminal = annotations['terminal.dashboard.gardener.cloud/created-by']
+      const createdBy = annotations['dashboard.gardener.cloud/created-by'] || createdByLegacy || createdByTerminal
+      const description = annotations['dashboard.gardener.cloud/description']
       const item = SubjectListItem.create({
         kind: 'ServiceAccount',
         namespace,
         name
       })
       item.extend({
-        createdBy: annotations['garden.sapcloud.io/createdBy'],
+        createdBy,
+        description,
         creationTimestamp,
         secrets
       })
