@@ -21,6 +21,7 @@ const nock = require('nock')
 const { v1: uuidv1 } = require('uuid')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
+const Member = require('../../../lib/services/members/Member')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('@gardener-dashboard/kube-config').load()
@@ -65,6 +66,12 @@ const projectList = [
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
         roles: ['viewer']
+      },
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
+        name: 'system:serviceaccount:garden-baz:robot',
+        roles: ['viewer', 'admin']
       }
     ],
     description: 'foo-description',
@@ -388,36 +395,24 @@ function readProject (namespace) {
 
 function readProjectMembers (namespace) {
   const members = getProjectMembers(readProject(namespace))
-  const serviceAccounts = _.chain(serviceAccountList)
-    .filter(['metadata.namespace', namespace])
-    .map(({ metadata }) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
-    .value()
-  return _.uniqBy([...members, ...serviceAccounts], 'username')
-}
-
-function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
-  const project = readProject(namespace)
-  if (!project) {
-    scope
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(404)
-    return undefined
+  const serviceAccountToMember = ({ metadata }) => {
+    return {
+      username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`,
+      roles: []
+    }
   }
-  scope
-    .get(`/api/v1/namespaces/${namespace}`)
-    .reply(200, () => ({
-      metadata: {
-        labels: {
-          'project.gardener.cloud/name': project.metadata.name
-        }
-      }
-    }))
-  scope
-    .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-    .reply(200, () => project)
-
-  getServiceAccountsForNamespace(scope, namespace)
-  return project
+  const serviceAccountMembers = _
+    .chain(serviceAccountList)
+    .filter(['metadata.namespace', namespace])
+    .map(serviceAccountToMember)
+    .concat()
+    .uniqBy('username')
+    .value()
+  return _
+    .chain(members)
+    .concat(serviceAccountMembers)
+    .uniqBy('username')
+    .value()
 }
 
 function getProjectMembers (project) {
@@ -571,6 +566,18 @@ function getKubeconfig ({ server, name }) {
     users: [{ user, name }],
     'current-context': name
   })
+}
+
+function mockCreateProjectMemberManagerAndReturnProject (scope, namespace) {
+  const project = readProject(namespace)
+  if (project) {
+    const name = project.metadata.name
+    scope
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    getServiceAccountsForNamespace(scope, namespace)
+  }
+  return project
 }
 
 function getServiceAccountsForNamespace (scope, namespace, additionalServiceAccounts) {
@@ -1407,17 +1414,21 @@ const stub = {
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
-    const [, saNamespace, saName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-    const serviceAccount = { metadata: { namespace: saNamespace, name: saName } }
-    if (saName &&
-      saNamespace === namespace &&
-      !_.find(serviceAccountList, serviceAccount)) {
-      scope
-        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
-        .reply(200, () => serviceAccount)
-    }
+    const existingMember = _.find(project.spec.members, ['name', username])
+    const { namespace: serviceAccountNamespace, name: serviceAccountName } = Member.parseUsername(username)
+    const newServiceAccount = { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } }
+    const existingServiceAccount = _.find(serviceAccountList, newServiceAccount)
 
-    if (!_.find(project.spec.members, ['name', username]) && roles.length) {
+    if (serviceAccountName && serviceAccountNamespace === namespace && !existingServiceAccount) {
+      scope
+        .post(`/api/v1/namespaces/${namespace}/serviceaccounts`, body => {
+          body.metadata.creationTimestamp = 'now'
+          _.merge(newServiceAccount.metadata, body.metadata)
+          return true
+        })
+        .reply(200, () => newServiceAccount)
+    }
+    if (roles.length && !existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           newProject.spec.members = body.spec.members
@@ -1427,14 +1438,29 @@ const stub = {
     }
     return scope
   },
-  updateMember ({ bearer, namespace, name: username, roles }) {
+  updateMember ({ bearer, namespace, name: username, roles, description }) {
     const scope = nockWithAuthorization(bearer)
     const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
     const existingMember = _.find(project.spec.members, ['name', username])
-    if (existingMember || roles.length) {
+    const { namespace: serviceAccountNamespace, name: serviceAccountName } = Member.parseUsername(username)
+    const existingServiceAccount = _
+      .chain(serviceAccountList)
+      .find({ metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })
+      .cloneDeep()
+      .value()
+
+    if (existingServiceAccount && description) {
+      scope
+        .patch(`/api/v1/namespaces/${serviceAccountNamespace}/serviceaccounts/${serviceAccountName}`, body => {
+          _.merge(existingServiceAccount.metadata, body.metadata)
+          return true
+        })
+        .reply(200, () => existingServiceAccount)
+    }
+    if (roles.length || existingMember) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           newProject.spec.members = body.spec.members

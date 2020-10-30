@@ -26,10 +26,9 @@ module.exports = function ({ agent, k8s, auth }) {
   const project = 'foo'
   const namespace = `garden-${project}`
   const members = k8s.readProjectMembers(namespace)
-  const metadata = {}
-  const username = `${name}@example.org`
-  const id = username
-  const user = auth.createUser({ id })
+  const createdBy = `${name}@example.org`
+  const creationTimestamp = 'now'
+  const user = auth.createUser({ id: createdBy })
 
   beforeEach(function () {
     cache.projects.replace(k8s.projectList)
@@ -44,8 +43,8 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(4)
-    expect(res.body).to.have.deep.members(members)
+    expect(res.body).to.have.length(5)
+    expect(res.body).to.eql(members)
   })
 
   it('should not return members but respond "not found"', async function () {
@@ -84,11 +83,12 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.deep.members(_.concat(members, { username: name, roles }))
+    const expectedBody = _.concat(members, { username: name, roles })
+    expect(res.body).to.eql(expectedBody)
   })
 
   it('should not add member that is already a project member', async function () {
@@ -99,7 +99,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(409)
   })
 
@@ -111,11 +112,11 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    const member = _.find(res.body, { username: name })
+    const member = _.find(res.body, ['username', name])
     expect(member).to.eql({ username: name, roles })
   })
 
@@ -129,7 +130,8 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
+    const expectedBody = _.filter(members, ({ username }) => username !== name)
+    expect(res.body).to.eql(expectedBody)
   })
 
   it('should not delete a member that is not a project member', async function () {
@@ -142,7 +144,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.deep.members(members)
+    expect(res.body).to.eql(members)
   })
 
   it('should create a service account without roles', async function () {
@@ -153,9 +155,17 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
-    expect(res.body).to.have.deep.members(_.concat(members, { username: name, roles }))
+    expect(res).to.be.json
+    const expectedBody = _.concat(members, {
+      username: name,
+      roles,
+      createdBy,
+      creationTimestamp
+    })
+    expect(res.body).to.eql(expectedBody)
   })
 
   it('should delete a service account', async function () {
@@ -168,19 +178,30 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
+    const expectedBody = _.filter(members, ({ username }) => username !== name)
+    expect(res.body).to.eql(expectedBody)
   })
 
   it('should add a service account and assign member roles', async function () {
     const bearer = await user.bearer
     const name = `system:serviceaccount:${namespace}:foo`
     const roles = ['myrole']
+    const description = 'description'
     k8s.stub.addMember({ bearer, namespace, name, roles })
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles, description })
+
     expect(res).to.have.status(200)
+    const expectedBody = _.concat(members, {
+      username: name,
+      roles,
+      description,
+      createdBy,
+      creationTimestamp
+    })
+    expect(res.body).to.eql(expectedBody)
   })
 
   it('should not create service account if already exists', async function () {
@@ -191,7 +212,8 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(409)
   })
 
@@ -199,12 +221,16 @@ module.exports = function ({ agent, k8s, auth }) {
     const bearer = await user.bearer
     const name = `system:serviceaccount:${namespace}:robot`
     const roles = ['myrole']
-    k8s.stub.updateMember({ bearer, namespace, name, roles })
+    const description = 'newDescription'
+    k8s.stub.updateMember({ bearer, namespace, name, roles, description })
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles, description })
+
     expect(res).to.have.status(200)
+    const member = _.find(res.body, ['username', name])
+    expect(member).to.eql({ username: name, roles, description })
   })
 
   it('should add roles to existing service account without roles =>add member', async function () {
@@ -215,13 +241,15 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.deep.contain({ username: name, roles })
+    const member = _.find(res.body, ['username', name])
+    expect(member).to.eql({ username: name, roles })
   })
 
-  it('should remove all roles of existing service account =>delete member', async function () {
+  it('should remove all roles of existing service account => delete member', async function () {
     const bearer = await user.bearer
     const name = `system:serviceaccount:${namespace}:robot`
     const roles = []
@@ -229,10 +257,12 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
-      .send({ metadata, roles })
+      .send({ roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.deep.contain({ username: name, roles })
+    const member = _.find(res.body, ['username', name])
+    expect(member).to.eql({ username: name, roles })
   })
 
   it('should add a foreign service account as member to project', async function () {
@@ -244,10 +274,12 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.deep.contain({ username: name, roles })
+    const member = _.find(res.body, ['username', name])
+    expect(member).to.eql({ username: name, roles })
   })
 
   it('should not add a foreign service account without roles as member to project', async function () {
@@ -259,16 +291,16 @@ module.exports = function ({ agent, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
+      .send({ name, roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.not.deep.contain({ username: name, roles })
+    expect(res.body).to.eql(members)
   })
 
   it('should delete a foreign service account', async function () {
     const bearer = await user.bearer
-    const foreignNamespace = 'othernamespace'
-    const name = `system:serviceaccount:${foreignNamespace}:fsa`
+    const name = 'system:serviceaccount:garden-baz:robot'
     k8s.stub.removeMember({ bearer, namespace, name })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/members/${name}`)
@@ -276,6 +308,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.deep.members(_.filter(members, ({ username }) => username !== name))
+    const expectedBody = _.filter(members, ({ username }) => username !== name)
+    expect(res.body).to.eql(expectedBody)
   })
 }
