@@ -20,10 +20,10 @@ const _ = require('lodash')
 const { Forbidden } = require('http-errors')
 const authorization = require('./authorization')
 const { getSeeds } = require('../cache')
-const config = require('../config')
+const { isSeedUnreachable } = require('../utils')
 
 function fromResource (seed) {
-  const unreachable = isUnreachable(seed)
+  const unreachable = isSeedUnreachable(seed)
   const metadata = {
     name: _.get(seed, 'metadata.name'),
     unreachable
@@ -42,14 +42,6 @@ function fromResource (seed) {
   }
 
   return { metadata, data }
-}
-
-function isUnreachable (seed) {
-  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
-  if (!matchLabels) {
-    return false
-  }
-  return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
 exports.list = async function ({ user }) {
