@@ -290,7 +290,9 @@ export default {
       secret: undefined,
       region: undefined,
       floatingPoolName: undefined,
+      // default validation status of subcomponents is true, as they are not shown in all cases
       floatingPoolValid: true,
+      cloudProfileValid: true,
       fpname: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
@@ -300,7 +302,6 @@ export default {
       firewallNetworks: undefined,
       projectID: undefined,
       valid: false,
-      cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
         aws: {
           visible: false,
@@ -510,6 +511,11 @@ export default {
       return getValidationErrors(this, field)
     },
     setDefaultsDependingOnCloudProfile () {
+      // Reset subcomponent valid states
+      // default validation status of subcomponents is true, as they are not shown in all cases
+      this.floatingPoolValid = true
+      this.cloudProfileValid = true
+
       this.secret = head(this.infrastructureSecretsByProfileName)
       this.onInputSecret()
       this.region = head(this.regionsWithSeed)
