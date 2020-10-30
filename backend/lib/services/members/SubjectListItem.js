@@ -21,7 +21,7 @@ const _ = require('lodash')
 const Member = require('./Member')
 
 class SubjectListItem {
-  constructor (index = -1) {
+  constructor (index = SubjectListItem.NOT_IN_LIST) {
     this.index = index
     this.extensions = {}
   }
@@ -57,6 +57,11 @@ class SubjectListItem {
   }
 }
 
+Object.assign(SubjectListItem, {
+  NOT_IN_LIST: -1,
+  END_OF_LIST: Number.MAX_SAFE_INTEGER
+})
+
 class SubjectListItemUniq extends SubjectListItem {
   constructor (subject, index) {
     super(index)
@@ -83,9 +88,9 @@ class SubjectListItemUniq extends SubjectListItem {
   set roles ([role, ...roles] = []) {
     if (this.kind === 'ServiceAccount') {
       if (!role) {
-        this.index = -1
+        this.index = SubjectListItem.NOT_IN_LIST
       } else if (this.index < 0) {
-        this.index = Number.MAX_SAFE_INTEGER
+        this.index = SubjectListItem.END_OF_LIST
       }
     }
     this.subject.role = role

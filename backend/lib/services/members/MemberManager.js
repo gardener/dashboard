@@ -33,8 +33,7 @@ class MemberManager {
     this.userId = userId
     this.namespace = project.spec.namespace
     this.projectName = project.metadata.name
-    const members = _.cloneDeep(project.spec.members)
-    this.subjectList = new SubjectList(members, serviceAccounts)
+    this.subjectList = new SubjectList(project.spec.members, serviceAccounts)
   }
 
   list () {
@@ -61,7 +60,7 @@ class MemberManager {
     if (item) {
       throw new Conflict(`${item.kind} '${id}' already exists`)
     }
-    item = SubjectListItem.create(id, Number.MAX_SAFE_INTEGER)
+    item = SubjectListItem.create(id, SubjectListItem.END_OF_LIST)
 
     this.setItemRoles(item, roles)
 
@@ -133,7 +132,7 @@ class MemberManager {
         name,
         namespace,
         annotations: {
-          'garden.sapcloud.io/createdBy': createdBy,
+          'dashboard.gardener.cloud/created-by': createdBy,
           'dashboard.gardener.cloud/description': description
         }
       }
@@ -209,8 +208,13 @@ class MemberManager {
 
   static async create ({ client, id }, namespace) {
     const name = findProjectByNamespace(namespace).metadata.name
-    const project = await client['core.gardener.cloud'].projects.get(name)
-    const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+    const [
+      project,
+      { items: serviceAccounts }
+    ] = await Promise.all([
+      client['core.gardener.cloud'].projects.get(name),
+      client.core.serviceaccounts.list(namespace)
+    ])
     return new this(client, id, project, serviceAccounts)
   }
 }

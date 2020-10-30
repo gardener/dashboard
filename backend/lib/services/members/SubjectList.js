@@ -42,12 +42,15 @@ class SubjectList {
       })
       return item
     }
+
     const createItem = (...args) => SubjectListItem.create(...args)
+
     const createGroup = items => {
       return items.length > 1
         ? SubjectListItem.create(items)
         : items[0]
     }
+
     const extendItem = item => {
       const id = item.id
       if (serviceAccountItems[id]) {

@@ -127,7 +127,7 @@ describe('services', function () {
           name: 'robot-sa',
           namespace: 'garden-foo',
           annotations: {
-            'garden.sapcloud.io/createdBy': 'foo',
+            'dashboard.gardener.cloud/created-by': 'foo',
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
@@ -138,7 +138,7 @@ describe('services', function () {
           name: 'robot-user',
           namespace: 'garden-foo',
           annotations: {
-            'garden.sapcloud.io/createdBy': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
         }
@@ -148,7 +148,7 @@ describe('services', function () {
           name: 'robot-multiple',
           namespace: 'garden-foo',
           annotations: {
-            'garden.sapcloud.io/createdBy': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
         }
@@ -158,7 +158,7 @@ describe('services', function () {
           name: 'robot-nomember',
           namespace: 'garden-foo',
           annotations: {
-            'garden.sapcloud.io/createdBy': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
         }
