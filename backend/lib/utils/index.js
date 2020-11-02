@@ -53,10 +53,19 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
+function isSeedUnreachable (seed) {
+  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
+  if (!matchLabels) {
+    return false
+  }
+  return _.isMatch(seed, { metadata: { labels: matchLabels } })
+}
+
 module.exports = {
   decodeBase64,
   encodeBase64,
   getConfigValue,
   getSeedNameFromShoot,
-  shootHasIssue
+  shootHasIssue,
+  isSeedUnreachable
 }
