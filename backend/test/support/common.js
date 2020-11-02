@@ -48,17 +48,17 @@ function getSeed ({
       dns: {
         ingressDomain: `ingress.${region}.${kind}.example.org`
       },
-      taints: []
+      taints: [],
+      settings: {
+        scheduling: {
+          visible: seedVisible
+        }
+      }
     }
   }
   if (seedProtected) {
     seed.spec.taints.push({
       key: 'seed.gardener.cloud/protected'
-    })
-  }
-  if (!seedVisible) {
-    seed.spec.taints.push({
-      key: 'seed.gardener.cloud/invisible'
     })
   }
   if (withSecretRef) {

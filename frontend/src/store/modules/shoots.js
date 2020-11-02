@@ -288,7 +288,7 @@ const actions = {
     const purpose = head(purposesForSecret(secret))
     set(shootResource, 'spec.purpose', purpose)
 
-    const kubernetesVersion = rootGetters.defaultKubernetesVersionForCloudProfileName(cloudProfileName)
+    const kubernetesVersion = rootGetters.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
 
     const allZones = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
