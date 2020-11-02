@@ -87,6 +87,7 @@ import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalSer
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters } from 'vuex'
 import { getMembers, terminalConfig } from '@/utils/api'
+import { TargetEnum } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
@@ -205,7 +206,7 @@ export default {
               return false
             }
           }
-          const selectionContainsGardenTarget = some(this.selections, ['target', 'garden'])
+          const selectionContainsGardenTarget = some(this.selections, ['target', TargetEnum.GARDEN])
           if (this.isAdmin || !selectionContainsGardenTarget) {
             return true
           }
