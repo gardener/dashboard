@@ -1,18 +1,8 @@
 
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
@@ -30,7 +20,8 @@ const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
 const {
   getConfigValue,
-  getSeedNameFromShoot
+  getSeedNameFromShoot,
+  isSeedUnreachable
 } = require('../../utils')
 
 const {
@@ -234,6 +225,10 @@ async function handleSeed ({ name }) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
     return
   }
+  if (isSeedUnreachable(seed)) {
+    logger.debug(`Seed ${name} is not reachable from the dashboard, bootstrapping aborted`)
+    return
+  }
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
@@ -270,6 +265,11 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
   // fetch seed resource
   const seedName = getSeedNameFromShoot(shootResource)
   const seedResource = await client['core.gardener.cloud'].seeds.get(seedName)
+
+  if (isSeedUnreachable(seedResource)) {
+    logger.debug(`Seed ${seedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
+    return
+  }
 
   if (!seedResource.spec.secretRef) {
     logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
