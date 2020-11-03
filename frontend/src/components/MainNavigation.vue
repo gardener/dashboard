@@ -170,7 +170,7 @@ import toLower from 'lodash/toLower'
 import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
+import has from 'lodash/has'
 import head from 'lodash/head'
 import slice from 'lodash/slice'
 import last from 'lodash/last'
@@ -228,7 +228,8 @@ export default {
       },
       set ({ metadata = {} } = {}) {
         const namespace = metadata.namespace
-        this.$router.push(this.getProjectMenuTargetRoute(namespace))
+        const route = this.getProjectMenuTargetRoute(namespace)
+        this.$router.push(route)
       }
     },
     hasNoProjects () {
@@ -335,7 +336,7 @@ export default {
         if (namespace === '_all' && get(route, 'meta.projectScope') !== false) {
           return true
         }
-        if (!isEmpty(route, 'params.name')) {
+        if (has(route, 'params.name')) {
           return true
         }
         if (get(route, 'name') === 'GardenTerminal') {
@@ -343,15 +344,24 @@ export default {
         }
         return false
       }
-      const route = {
-        name: fallbackToShootList(this.$route) ? 'ShootList' : routeName(this.$route)
+      if (fallbackToShootList(this.$route)) {
+        return {
+          name: 'ShootList',
+          params: {
+            namespace
+          }
+        }
       }
-      if (get(this.$route, 'meta.namespaced') === false) {
-        route.query = { namespace }
-      } else {
-        route.params = { namespace }
+      const name = routeName(this.$route)
+      const key = get(this.$route, 'meta.namespaced') === false
+        ? 'query'
+        : 'params'
+      return {
+        name,
+        [key]: {
+          namespace
+        }
       }
-      return route
     },
     onInputProjectFilter () {
       this.highlightedProjectName = undefined
