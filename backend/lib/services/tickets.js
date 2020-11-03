@@ -7,8 +7,10 @@
 'use strict'
 
 const _ = require('lodash')
+const config = require('../config')
 const logger = require('../logger')
 const github = require('../github')
+const markdown = require('../markdown')
 const cache = require('../cache')
 
 function fromLabel (item) {
@@ -18,6 +20,11 @@ function fromLabel (item) {
     'color'
   ])
 }
+
+const converter = exports.converter = markdown.createConverter({
+  ghMentions: true,
+  ghMentionsLink: new URL(config.gitHub.apiUrl).origin + '/{u}'
+})
 
 function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
@@ -44,10 +51,10 @@ function fromIssue (issue) {
         'user.login',
         'user.avatar_url',
         'html_url',
-        'body',
         'comments'
       ])
       .assign({
+        body: converter.makeSanitizedHtml(issue.body),
         labels,
         ticketTitle
       })
@@ -57,27 +64,34 @@ function fromIssue (issue) {
 exports.fromIssue = fromIssue
 
 function fromComment (number, name, projectName, item) {
-  return {
-    kind: 'comment',
-    metadata: _
-      .chain(item)
-      .pick([
-        'id',
-        'created_at',
-        'updated_at'
-      ])
-      .assign({
-        number,
-        name,
-        projectName
-      })
-      .value(),
-    data: _.pick(item, [
+  const metadata = _
+    .chain(item)
+    .pick([
+      'id',
+      'created_at',
+      'updated_at'
+    ])
+    .assign({
+      number,
+      name,
+      projectName
+    })
+    .value()
+  const data = _
+    .chain(item)
+    .pick([
       'user.login',
       'user.avatar_url',
-      'body',
       'html_url'
     ])
+    .assign({
+      body: converter.makeSanitizedHtml(item.body)
+    })
+    .value()
+  return {
+    kind: 'comment',
+    metadata,
+    data
   }
 }
 exports.fromComment = fromComment

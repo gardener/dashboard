@@ -18,14 +18,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-title class="comment-header">
         <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
       </v-list-item-title>
-      <v-list-item-subtitle class="wrap-text comment-body" v-html="compiledMarkdown"></v-list-item-subtitle>
+      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentBody"></v-list-item-subtitle>
     </v-list-item-content>
     </v-list-item>
 </template>
 
 <script>
 import get from 'lodash/get'
-import { compileMarkdown, gravatarUrlIdenticon } from '@/utils'
+import { gravatarUrlIdenticon, transformHtml } from '@/utils'
 import TimeString from '@/components/TimeString'
 import { mapState } from 'vuex'
 
@@ -49,8 +49,8 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    compiledMarkdown () {
-      return compileMarkdown(get(this.comment, 'data.body', ''))
+    commentBody () {
+      return transformHtml(get(this.comment, 'data.body', ''))
     },
     login () {
       return get(this.comment, 'data.user.login')

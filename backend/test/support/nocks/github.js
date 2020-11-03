@@ -77,7 +77,7 @@ function createGithubComment ({
   created_at,
   updated_at
 }) {
-  body = body || `This is comment ${id} for issue #${number} `
+  body = body || `This is comment ${id} for issue #${number}`
   const time = (1530563012 + number * 60) * 1000
   created_at = created_at || formatTime(time)
   updated_at = updated_at || formatTime(time)
@@ -98,28 +98,28 @@ function createGithubComment ({
 
 function authorizationHeader (token) {
   const authorization = `token ${token}`
-  return {authorization}
+  return { authorization }
 }
 
 function nockWithAuthorization (token) {
   const reqheaders = authorizationHeader(token || auth.token)
-  return nock(url, {reqheaders})
+  return nock(url, { reqheaders })
 }
 
 const githubIssueList = [
-  createGithubIssue({number: 1}),
-  createGithubIssue({number: 2, body: 'The second bug', comments: 1}),
-  createGithubIssue({number: 3, namespace: 'garden-foobar'}),
-  createGithubIssue({number: 4, state: 'closed', comments: 1})
+  createGithubIssue({ number: 1 }),
+  createGithubIssue({ number: 2, body: 'The second bug', comments: 1 }),
+  createGithubIssue({ number: 3, namespace: 'garden-foobar' }),
+  createGithubIssue({ number: 4, state: 'closed', comments: 1 })
 ]
 
 const githubIssueCommentsList = [
-  createGithubComment({id: 1, number: 4}),
-  createGithubComment({id: 2, number: 2})
+  createGithubComment({ id: 1, number: 4 }),
+  createGithubComment({ id: 2, number: 2 })
 ]
 
 const stub = {
-  getIssues ({name, namespace, state = 'open'} = {}) {
+  getIssues ({ name, namespace, state = 'open' } = {}) {
     const q = [
       `repo:${owner}/${repo}`
     ]
@@ -140,14 +140,14 @@ const stub = {
     })
     return nockWithAuthorization(auth.token)
       .get('/search/issues')
-      .query({q: q.join(' ')})
+      .query({ q: q.join(' ') })
       .reply(200, {
         total_count: items.length,
         incomplete_results: false,
         items
       })
   },
-  getComments ({number}) {
+  getComments ({ number }) {
     const comments = _.filter(githubIssueCommentsList, ['number', number])
     return nockWithAuthorization(auth.token)
       .get(`/repos/${owner}/${repo}/issues/${number}/comments`)

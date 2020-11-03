@@ -54,7 +54,7 @@ app.use(noCache())
 app.use('/auth', auth.router)
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
-app.get('/config.json', api.frontendConfig)
+app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

@@ -7,14 +7,60 @@
 'use strict'
 
 const _ = require('lodash')
-const config = require('./config')
 const logger = require('./logger')
+const markdown = require('./markdown')
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
-function frontendConfig (req, res, next) {
-  const frontendConfig = {}
-  res.json(Object.assign(frontendConfig, config.frontend))
+function frontendConfig (config) {
+  const converter = markdown.createConverter()
+  const convertAndSanitize = (obj, key) => {
+    if (obj[key]) {
+      obj[key] = converter.makeSanitizedHtml(obj[key])
+    }
+  }
+
+  const frontendConfig = _.cloneDeep(config.frontend)
+  const {
+    alert = {},
+    costObject = {},
+    sla = {},
+    addonDefinition = {},
+    accessRestriction: {
+      items = []
+    } = {}
+  } = frontendConfig
+
+  convertAndSanitize(alert, 'message')
+  convertAndSanitize(costObject, 'description')
+  convertAndSanitize(sla, 'description')
+  convertAndSanitize(addonDefinition, 'description')
+
+  for (const item of items) {
+    const {
+      display = {},
+      input = {},
+      options = []
+    } = item
+    convertAndSanitize(display, 'title')
+    convertAndSanitize(display, 'description')
+    convertAndSanitize(input, 'title')
+    convertAndSanitize(input, 'description')
+    for (const option of options) {
+      const {
+        display = {},
+        input = {}
+      } = option
+      convertAndSanitize(display, 'title')
+      convertAndSanitize(display, 'description')
+      convertAndSanitize(input, 'title')
+      convertAndSanitize(input, 'description')
+    }
+  }
+
+  return (req, res, next) => {
+    res.json(frontendConfig)
+  }
 }
 
 function noCache () {
