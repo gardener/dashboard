@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <svg xmlns="http://www.w3.org/2000/svg"
     :width="width"

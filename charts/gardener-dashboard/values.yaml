@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Default values for gardener-dashboard.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
