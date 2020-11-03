@@ -100,6 +100,16 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canDeleteSecrets" class="ml-1">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click="onRotateSecret">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </template>
+          <span>Rotate Service Account Secret</span>
+        </v-tooltip>
+      </v-list-item-action>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -180,7 +190,8 @@ export default {
     ]),
     ...mapGetters([
       'canManageServiceAccountMembers',
-      'canGetSecrets'
+      'canGetSecrets',
+      'canDeleteSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
       return !isForeignServiceAccount(this.namespace, this.username)
@@ -199,6 +210,9 @@ export default {
     },
     onKubeconfig () {
       this.$emit('kubeconfig', this.username)
+    },
+    onRotateSecret () {
+      this.$emit('rotateSecret', this.username)
     },
     onEdit (username) {
       this.$emit('edit', this.username, this.roles)

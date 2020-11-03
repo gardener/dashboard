@@ -1512,6 +1512,20 @@ const stub = {
     }
     return scope
   },
+  removeServiceAccountSecret ({ bearer, namespace, name: username }) {
+    const scope = nockWithAuthorization(bearer)
+    const project = mockCreateProjectMemberManagerAndReturnProject(scope, namespace)
+    const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+    if (serviceAccountNamespace === namespace && isMember) {
+      const serviceAccount = _.find(serviceAccountList, ({ metadata }) => metadata.name === serviceAccountName && metadata.namespace === namespace)
+      const serviceAccountSecretName = _.first(serviceAccount.secrets).name
+      scope
+        .delete(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
+        .reply(200)
+    }
+    return scope
+  },
   healthz () {
     return nockWithAuthorization(auth.bearer)
       .get('/healthz')

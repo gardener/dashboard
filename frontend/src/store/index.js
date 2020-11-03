@@ -878,6 +878,9 @@ const getters = {
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
   },
+  canDeleteSecrets (state) {
+    return canI(state.subjectRules, 'delete', '', 'secrets')
+  },
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
   },
@@ -1204,6 +1207,15 @@ const actions = {
       return result
     } catch (err) {
       await dispatch('setError', { message: `Delete member failed. ${err.message}` })
+    }
+  },
+  async rotateServiceAccountSecret ({ dispatch, commit }, payload) {
+    try {
+      const result = await dispatch('members/rotateServiceAccountSecret', payload)
+      await dispatch('setAlert', { message: 'Service Account Secret Rotation started', type: 'success' })
+      return result
+    } catch (err) {
+      await dispatch('setError', { message: `Failed to Rotate Service Account Secret ${err.message}` })
     }
   },
   setConfiguration ({ commit, getters }, value) {

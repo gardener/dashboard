@@ -311,4 +311,15 @@ module.exports = function ({ agent, k8s, auth }) {
     const expectedBody = _.filter(members, ({ username }) => username !== name)
     expect(res.body).to.eql(expectedBody)
   })
+
+  it('should delete a service account secret', async function () {
+    const bearer = await user.bearer
+    const name = 'system:serviceaccount:garden-foo:robot'
+    k8s.stub.removeServiceAccountSecret({ bearer, namespace, name })
+    const res = await agent
+      .delete(`/api/namespaces/${namespace}/members/${name}/secret`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+  })
 }

@@ -17,7 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity } = require('http-errors')
+const { NotFound, Conflict, UnprocessableEntity, MethodNotAllowed } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
 
 const config = require('../../config')
@@ -107,6 +107,21 @@ class MemberManager {
     return this.subjectList.members
   }
 
+  async deleteSecret (id) {
+    const item = this.subjectList.get(id)
+    if (!item) {
+      return this.subjectList.members
+    }
+
+    if (!item.kind === 'ServiceAccount') {
+      throw new MethodNotAllowed('Member is not a ServiceAccount')
+    }
+
+    await this.deleteServiceAccountSecret(item)
+
+    return this.subjectList.members
+  }
+
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
@@ -177,6 +192,21 @@ class MemberManager {
 
     await this.client.core.serviceaccounts.delete(namespace, name)
     this.subjectList.delete(item.id)
+  }
+
+  async deleteServiceAccountSecret (item) {
+    const { namespace, name } = Member.parseUsername(item.id)
+    if (namespace !== this.namespace) {
+      return
+    }
+
+    const secretName = _
+      .chain(item)
+      .get('extensions.secrets')
+      .head()
+      .get('name')
+      .value()
+    return await this.client.core.secrets.delete(namespace, secretName)
   }
 
   async getKubeconfig (item) {

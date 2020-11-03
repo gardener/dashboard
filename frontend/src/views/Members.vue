@@ -123,6 +123,7 @@ limitations under the License.
             :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
+            @rotateSecret="onRotateServiceAccountSecret"
             @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
@@ -330,7 +331,9 @@ export default {
     ...mapActions([
       'addMember',
       'deleteMember',
-      'setError'
+      'rotateServiceAccountSecret',
+      'setError',
+      'set'
     ]),
     openUserAddDialog () {
       this.userAddDialog = true
@@ -429,6 +432,12 @@ export default {
         return this.deleteMember(serviceAccountName)
       }
     },
+    async onRotateServiceAccountSecret (serviceAccountName) {
+      const rotationConfirmed = await this.confirmRotateServiceAccountSecret(serviceAccountName)
+      if (rotationConfirmed) {
+        return this.rotateServiceAccountSecret(serviceAccountName)
+      }
+    },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
       const projectName = escape(this.projectDetails.projectName)
       const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
@@ -449,6 +458,17 @@ export default {
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
         captionText: 'Confirm Member Deletion',
+        messageHtml,
+        dialogColor: 'red',
+        confirmValue: memberName
+      })
+    },
+    confirmRotateServiceAccountSecret (name) {
+      const memberName = escape(displayName(name))
+      const messageHtml = `Do you want to rotate the secret of service account <i>${memberName}</i>?<br /> Attention: The current kubeconfig credentials will be revoked`
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Rotate',
+        captionText: 'Confirm Service Account Secret Rotation',
         messageHtml,
         dialogColor: 'red',
         confirmValue: memberName

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import { getMembers, addMember, updateMember, deleteMember } from '@/utils/api'
+import { getMembers, addMember, updateMember, deleteMember, deleteServiceAccountSecret } from '@/utils/api'
 
 // initial state
 const state = {
@@ -50,6 +50,11 @@ const actions = {
   async delete ({ commit, rootState }, name) {
     const namespace = rootState.namespace
     const res = await deleteMember({ namespace, name })
+    commit('RECEIVE', res.data)
+  },
+  async rotateServiceAccountSecret ({ commit, rootState }, name) {
+    const namespace = rootState.namespace
+    const res = await deleteServiceAccountSecret({ namespace, name })
     commit('RECEIVE', res.data)
   }
 }

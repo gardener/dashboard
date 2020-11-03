@@ -226,6 +226,12 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
+export function deleteServiceAccountSecret ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return deleteResource(`/api/namespaces/${namespace}/members/${name}/secret`)
+}
+
 /* User */
 export function createTokenReview (data) {
   return createResource('/auth', data)

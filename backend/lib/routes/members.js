@@ -76,3 +76,15 @@ router.route('/:name')
       next(err)
     }
   })
+
+router.route('/:name/secret')
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await members.removeSecret({ user, namespace, name }))
+    } catch (err) {
+      next(err)
+    }
+  })
