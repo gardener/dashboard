@@ -105,7 +105,7 @@ module.exports = {
     const predicate = item => {
       const taints = _.get(item, 'spec.taints')
       const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-      const visible = !_.find(taints, ['key', 'seed.gardener.cloud/invisible'])
+      const visible = _.get(item, 'spec.settings.scheduling.visible')
       return unprotected && visible
     }
     return _.filter(cache.getSeeds(), predicate)

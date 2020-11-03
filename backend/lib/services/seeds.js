@@ -21,7 +21,7 @@ function fromResource (seed) {
 
   const taints = _.get(seed, 'spec.taints')
   const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-  const visible = !_.find(taints, ['key', 'seed.gardener.cloud/invisible'])
+  const visible = _.get(seed, 'spec.settings.scheduling.visible')
   const provider = _.get(seed, 'spec.provider')
   const volume = _.get(seed, 'spec.volume')
   const data = {
