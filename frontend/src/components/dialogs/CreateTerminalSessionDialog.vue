@@ -213,7 +213,7 @@ export default {
 
           const { data: projectMembers } = await getMembers({ namespace: this.namespace })
           const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
-          const member = find(projectMembers, { username: serviceAccountName })
+          const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
           if (includes(roles, 'admin')) {
             return true

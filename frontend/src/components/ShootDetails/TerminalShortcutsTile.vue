@@ -107,7 +107,7 @@ export default {
       if (!this.isAdmin && isGardenTarget) {
         const { data: projectMembers } = await getMembers({ namespace: this.shootNamespace })
         const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
-        const member = find(projectMembers, { username: serviceAccountName })
+        const member = find(projectMembers, ['username', serviceAccountName])
         const roles = get(member, 'roles')
         if (!includes(roles, 'admin')) {
           const confirmation = await this.$refs.serviceAccount.promptForConfirmation(member)
