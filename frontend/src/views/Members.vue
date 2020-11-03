@@ -172,7 +172,6 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import escape from 'lodash/escape'
 import get from 'lodash/get'
 
 import MemberDialog from '@/components/dialogs/MemberDialog'
@@ -181,6 +180,9 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import CodeBlock from '@/components/CodeBlock'
 import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
+import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
+import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
+
 import {
   displayName,
   gravatarUrlGeneric,
@@ -394,18 +396,22 @@ export default {
       }
     },
     confirmRemoveUser (name) {
-      const memberName = escape(displayName(name))
-      const projectName = escape(this.projectDetails.projectName)
-      let messageHtml
+      const { projectName } = this.projectDetails
+      let message
       if (this.isCurrentUser(name)) {
-        messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
+        message = this.$renderComponent(RemoveProjectMember, {
+          projectName
+        })
       } else {
-        messageHtml = `Do you want to remove the user <i>${memberName}</i> from the project <i>${projectName}</i>?`
+        message = this.$renderComponent(RemoveProjectMember, {
+          projectName,
+          name: displayName(name)
+        })
       }
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Remove User',
         captionText: 'Confirm Remove User',
-        messageHtml,
+        messageHtml: message.innerHTML,
         dialogColor: 'red'
       })
     },
@@ -421,28 +427,31 @@ export default {
       }
     },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
-      const projectName = escape(this.projectDetails.projectName)
+      const { projectName } = this.projectDetails
       const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
-      const memberName = escape(displayName(name))
-      const memberNamespace = escape(displayName(namespace))
-
-      const messageHtml = `Do you want to remove the service account <i>${memberName}</i> of namespace <i>${memberNamespace}</i> from the project <i>${projectName}</i>?`
+      const message = this.$renderComponent(RemoveProjectMember, {
+        projectName,
+        name,
+        namespace
+      })
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
         captionText: 'Confirm Remove Member',
-        messageHtml,
+        messageHtml: message.innerHTML,
         dialogColor: 'red'
       })
     },
     confirmDeleteServiceAccount (name) {
-      const memberName = escape(displayName(name))
-      const messageHtml = `Do you want to delete the service account <i>${memberName}</i>?`
+      name = displayName(name)
+      const message = this.$renderComponent(DeleteServiceAccount, {
+        name
+      })
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
         captionText: 'Confirm Member Deletion',
-        messageHtml,
+        messageHtml: message.innerHTML,
         dialogColor: 'red',
-        confirmValue: memberName
+        confirmValue: name
       })
     },
     onEditUser (username, roles) {

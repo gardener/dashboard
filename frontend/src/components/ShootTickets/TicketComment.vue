@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-title class="comment-header">
         <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
       </v-list-item-title>
-      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentBody"></v-list-item-subtitle>
+      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
     </v-list-item-content>
     </v-list-item>
 </template>
@@ -49,7 +49,7 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    commentBody () {
+    commentHtml () {
       return transformHtml(get(this.comment, 'data.body', ''))
     },
     login () {
