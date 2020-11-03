@@ -39,17 +39,30 @@ SPDX-License-Identifier: Apache-2.0
     <unverified-terminal-shortcuts-dialog
       ref="unverified"
     ></unverified-terminal-shortcuts-dialog>
+    <webterminal-service-account-dialog
+      :namespace="shootNamespace"
+      ref="serviceAccount"
+    ></webterminal-service-account-dialog>
   </div>
 </template>
 
 <script>
 
+import { mapGetters } from 'vuex'
 import TerminalShortcuts from '@/components/TerminalShortcuts'
 import IconBase from '@/components/icons/IconBase'
 import TerminalShortcutIcon from '@/components/icons/TerminalShortcutIcon'
 import UnverifiedTerminalShortcutsDialog from '@/components/dialogs/UnverifiedTerminalShortcutsDialog'
+import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalServiceAccountDialog'
+import { TargetEnum } from '@/utils'
+import { shootItem } from '@/mixins/shootItem'
+import { getMembers } from '@/utils/api'
+import get from 'lodash/get'
+import find from 'lodash/find'
+import includes from 'lodash/includes'
 
 export default {
+  mixins: [shootItem],
   props: {
     shootItem: {
       type: Object
@@ -67,9 +80,13 @@ export default {
     TerminalShortcuts,
     IconBase,
     TerminalShortcutIcon,
-    UnverifiedTerminalShortcutsDialog
+    UnverifiedTerminalShortcutsDialog,
+    WebterminalServiceAccountDialog
   },
   computed: {
+    ...mapGetters([
+      'isAdmin'
+    ]),
     expansionPanelIcon () {
       return this.expansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
     },
@@ -85,6 +102,21 @@ export default {
           return
         }
       }
+
+      const isGardenTarget = get(shortcut, 'target') === TargetEnum.GARDEN
+      if (!this.isAdmin && isGardenTarget) {
+        const { data: projectMembers } = await getMembers({ namespace: this.shootNamespace })
+        const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
+        const member = find(projectMembers, ['username', serviceAccountName])
+        const roles = get(member, 'roles')
+        if (!includes(roles, 'admin')) {
+          const confirmation = await this.$refs.serviceAccount.promptForConfirmation(member)
+          if (!confirmation) {
+            return
+          }
+        }
+      }
+
       this.$emit('addTerminalShortcut', shortcut)
     }
   }

@@ -108,6 +108,7 @@ SPDX-License-Identifier: Apache-2.0
             :createdBy="serviceAccount.createdBy"
             :creationTimestamp="serviceAccount.creationTimestamp"
             :created="serviceAccount.created"
+            :description="serviceAccount.description"
             :roles="serviceAccount.roles"
             :roleDisplayNames="serviceAccount.roleDisplayNames"
             :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
@@ -122,8 +123,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :name="memberName" :isCurrentUser="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :isCurrentUser="isCurrentUser(memberName)" :roles="memberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -171,7 +172,6 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import find from 'lodash/find'
 import escape from 'lodash/escape'
 import get from 'lodash/get'
 
@@ -189,8 +189,8 @@ import {
   isForeignServiceAccount,
   isServiceAccountUsername,
   getTimestampFormatted,
-  MEMBER_ROLE_DESCRIPTORS,
-  getProjectDetails
+  getProjectDetails,
+  sortedRoleDisplayNames
 } from '@/utils'
 
 import { getMember } from '@/utils/api'
@@ -214,8 +214,9 @@ export default {
       userHelpDialog: false,
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
-      updatedMemberName: undefined,
-      updatedMemberRoles: undefined,
+      memberName: undefined,
+      memberRoles: undefined,
+      serviceAccountDescription: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -445,24 +446,18 @@ export default {
       })
     },
     onEditUser (username, roles) {
-      this.updatedMemberName = username
-      this.updatedMemberRoles = roles
+      this.memberName = username
+      this.memberRoles = roles
       this.openUserUpdateDialog()
     },
-    onEditServiceAccount (username, roles) {
-      this.updatedMemberName = username
-      this.updatedMemberRoles = roles
+    onEditServiceAccount (username, roles, description) {
+      this.memberName = username
+      this.memberRoles = roles
+      this.serviceAccountDescription = description
       this.openServiceAccountUpdateDialog()
     },
     sortedRoleDisplayNames (roleNames) {
-      const displayNames = []
-      forEach(roleNames, roleName => {
-        const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
-        if (roleDescriptor) {
-          displayNames.push(roleDescriptor)
-        }
-      })
-      return sortBy(displayNames, 'displayName')
+      return sortedRoleDisplayNames(roleNames)
     },
     isCurrentUser (username) {
       return this.username === username

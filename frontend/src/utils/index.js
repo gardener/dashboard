@@ -22,6 +22,7 @@ import forEach from 'lodash/forEach'
 import words from 'lodash/words'
 import find from 'lodash/find'
 import some from 'lodash/some'
+import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
@@ -781,6 +782,11 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {
     return expirationDate && (isError || isWarning || isInfo)
   })
+}
+
+export function sortedRoleDisplayNames (roleNames) {
+  const displayNames = filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
+  return sortBy(displayNames, 'displayName')
 }
 
 export default {

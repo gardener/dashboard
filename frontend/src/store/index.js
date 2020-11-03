@@ -836,7 +836,7 @@ const getters = {
     return getters['shoots/initialNewShootResource']
   },
   hasGardenTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals
   },
   hasControlPlaneTerminalAccess (state, getters) {
     return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
