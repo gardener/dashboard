@@ -785,13 +785,7 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
 }
 
 export function sortedRoleDisplayNames (roleNames) {
-  const displayNames = []
-  forEach(roleNames, roleName => {
-    const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
-    if (roleDescriptor) {
-      displayNames.push(roleDescriptor)
-    }
-  })
+  const displayNames = filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
   return sortBy(displayNames, 'displayName')
 }
 
