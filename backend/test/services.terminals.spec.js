@@ -391,18 +391,6 @@ describe('services', function () {
           expect(err).to.be.instanceof(Forbidden)
         }
       })
-
-      it('should disallow garden terminals for project admins', function () {
-        const isAdmin = false
-        const method = 'create'
-        const target = 'garden'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          expect.fail('Forbidden error expected')
-        } catch (err) {
-          expect(err).to.be.instanceof(Forbidden)
-        }
-      })
     })
 
     describe('resources', function () {

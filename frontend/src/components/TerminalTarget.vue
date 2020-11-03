@@ -5,37 +5,55 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-radio-group
-    v-model="selectedTarget"
-    label="Terminal Target"
-    class="mt-6"
-    :hint="hint"
-    persistent-hint
-  >
-    <v-radio
-      v-if="shootItem && hasControlPlaneTerminalAccess"
-      label="Control Plane"
-      value="cp"
-      color="cyan darken-2"
-    ></v-radio>
-    <v-radio
-      v-if="shootItem && hasShootTerminalAccess"
-      value="shoot"
-      color="cyan darken-2"
-      :disabled="isShootStatusHibernated"
+  <div>
+    <v-radio-group
+      v-model="selectedTarget"
+      label="Terminal Target"
+      class="mt-6"
+      :hint="hint"
+      persistent-hint
     >
-      <template v-slot:label>
-        <div>Cluster</div>
-        <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
-      </template>
-    </v-radio>
-    <v-radio
-      v-if="hasGardenTerminalAccess"
-      label="Garden Cluster"
-      value="garden"
+      <v-radio
+        v-if="shootItem && hasControlPlaneTerminalAccess"
+        label="Control Plane"
+        value="cp"
+        color="cyan darken-2"
+      ></v-radio>
+      <v-radio
+        v-if="shootItem && hasShootTerminalAccess"
+        value="shoot"
+        color="cyan darken-2"
+        :disabled="isShootStatusHibernated"
+      >
+        <template v-slot:label>
+          <div>Cluster</div>
+          <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
+        </template>
+      </v-radio>
+      <v-radio
+        v-if="hasGardenTerminalAccess"
+        value="garden"
+        color="cyan darken-2"
+        :disabled="!isAdmin && isShootStatusHibernated"
+      >
+        <template v-slot:label>
+          <div>Garden Cluster</div>
+          <v-icon v-if="!isAdmin && isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
+        </template>
+      </v-radio>
+    </v-radio-group>
+    <v-alert
+      v-if="!isAdmin && selectedTarget === 'garden'"
+      class="mt-2 mb-2"
+      :value="true"
+      type="info"
       color="cyan darken-2"
-    ></v-radio>
-  </v-radio-group>
+      outlined
+    >
+      <strong>Terminal will be running on <tt>{{shootName}}</tt> cluster</strong><br>
+      Make sure that only gardener project members with <tt>admin</tt> role have privileged access to the <tt>{{shootName}}</tt> cluster before creating this terminal session.
+    </v-alert>
+  </div>
 </template>
 
 <script>
