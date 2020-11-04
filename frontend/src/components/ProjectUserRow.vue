@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
-        <div d-flex flex-row>
+        <div class="d-flex flex-row">
           <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
             <template v-slot:activator="{ on }">
               <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>

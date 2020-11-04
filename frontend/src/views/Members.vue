@@ -97,21 +97,18 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-list two-line subheader v-else>
-        <template v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList">
-          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
+      <v-data-table
+        v-else
+        :headers="serviceAccountTableHeaders"
+        :items="sortedAndFilteredServiceAccountList"
+        disable-pagination
+        hide-default-footer
+      >
+        <template v-slot:item="{ item }">
           <project-service-account-row
-            :username="serviceAccount.username"
-            :isCurrentUser="serviceAccount.isCurrentUser"
-            :avatarUrl="serviceAccount.avatarUrl"
-            :displayName="serviceAccount.displayName"
-            :createdBy="serviceAccount.createdBy"
-            :creationTimestamp="serviceAccount.creationTimestamp"
-            :created="serviceAccount.created"
-            :description="serviceAccount.description"
-            :roles="serviceAccount.roles"
-            :roleDisplayNames="serviceAccount.roleDisplayNames"
-            :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
+            class="my-2"
+            :item="item"
+            :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
             @rotateSecret="onRotateServiceAccountSecret"
@@ -119,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0
             @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
-      </v-list>
+      </v-data-table>
     </v-card>
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
@@ -223,7 +220,45 @@ export default {
       fab: false,
       floatingButton: false,
       currentServiceAccountName: undefined,
-      currentServiceAccountKubeconfig: undefined
+      currentServiceAccountKubeconfig: undefined,
+      serviceAccountTableHeaders: [
+        {
+          text: 'Name',
+          align: 'start',
+          value: 'name',
+          sortable: false
+        },
+        {
+          text: 'Created By',
+          align: 'start',
+          value: 'createdBy',
+          sortable: false
+        },
+        {
+          text: 'Created At',
+          align: 'start',
+          value: 'createdAt',
+          sortable: false
+        },
+        {
+          text: 'Description',
+          align: 'start',
+          value: 'description',
+          sortable: false
+        },
+        {
+          text: 'Roles',
+          align: 'start',
+          value: 'roles',
+          sortable: false
+        },
+        {
+          text: 'Actions',
+          align: 'start',
+          value: 'actions',
+          sortable: false
+        }
+      ]
     }
   },
   computed: {
