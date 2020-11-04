@@ -45,12 +45,14 @@ const {
   dashboardClient
 } = require('@gardener-dashboard/kube-client')
 
+const nextTick = () => new Promise(process.nextTick)
+
 describe('services', function () {
   /* eslint no-unused-expressions: 0 */
   describe('terminals', function () {
     const seedName = 'infra1-seed'
-    const seedName2 = 'infra4-seed-without-secretRef'
-    const seedName3 = 'infra3-seed' // unreachable seed
+    const seedWithoutSecretRefName = 'infra4-seed-without-secretRef'
+    const unreachableSeedName = 'infra3-seed' // unreachable seed
     const soilName = 'soil-infra1'
     const kind = 'infra1'
     const region = 'foo-east'
@@ -61,7 +63,8 @@ describe('services', function () {
       cluster: dashboardClient.cluster,
       core: {
         secrets: {
-          list (namespace) {
+          async list (namespace) {
+            await nextTick()
             return {
               items: [
                 { metadata: { namespace, name: firstSecretName } },
@@ -71,11 +74,12 @@ describe('services', function () {
           }
         }
       },
-      getShoot ({ namespace, name }) {
+      async getShoot ({ namespace, name }) {
+        await nextTick()
         if (namespace === 'garden' && name === soilName) {
           return
         }
-        if (namespace === 'garden' && _.includes([seedName, seedName2], name)) {
+        if (namespace === 'garden' && _.includes([seedName, seedWithoutSecretRefName], name)) {
           return {
             kind: 'Shoot',
             metadata: { namespace, name },
@@ -487,7 +491,8 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal('garden')
               expect(name).to.equal('garden-host-cluster-apiserver')
               return body
@@ -496,7 +501,8 @@ describe('services', function () {
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal('garden')
               expect(name).to.equal('garden-host-cluster-apiserver')
               return body
@@ -511,7 +517,8 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal(`shoot--garden--${seedName}`)
               expect(name).to.equal('dashboard-terminal-kube-apiserver')
               return body
@@ -520,7 +527,8 @@ describe('services', function () {
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal(`shoot--garden--${seedName}`)
               expect(name).to.equal('dashboard-terminal-kube-apiserver')
               return body
@@ -535,7 +543,8 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal('shoot--foo--baz')
               expect(name).to.equal('dashboard-terminal-kube-apiserver')
               return body
@@ -544,7 +553,8 @@ describe('services', function () {
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
+            async mergePatch (namespace, name, body) {
+              await nextTick()
               expect(namespace).to.equal('shoot--foo--baz')
               expect(name).to.equal('dashboard-terminal-kube-apiserver')
               return body
@@ -589,14 +599,14 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'dummyShoot',
+          name: 'dummy',
           uid: '3'
         },
         spec: {
-          seedName: seedName2 // seed without spec.secretRef
+          seedName: seedWithoutSecretRefName // seed without spec.secretRef
         },
         status: {
-          technicalID: 'shoot--foo--baz',
+          technicalID: 'shoot--foo--dummy',
           lastOperation: {
             progress: 50
           }
@@ -605,14 +615,14 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'unreachableShoot',
-          uid: '3'
+          name: 'unreachable',
+          uid: '4'
         },
         spec: {
-          seedName: seedName3 // unreachable seed
+          seedName: unreachableSeedName // unreachable seed
         },
         status: {
-          technicalID: 'shoot--foo--baz',
+          technicalID: 'shoot--foo--unreachable',
           lastOperation: {
             progress: 50
           }
@@ -626,21 +636,37 @@ describe('services', function () {
         sandbox.stub(dashboardClient, 'core.gardener.cloud').get(() => {
           return {
             seeds: {
-              get (name) {
+              async get (name) {
+                await nextTick()
                 return getSeed(name)
               }
             },
             shoots: {
-              get (namespace, name) {
-                return _.find(shootList, ({ metadata }) => metadata.name === name && metadata.namespace === namespace)
+              async get (namespace, name) {
+                await nextTick()
+                if (name === seedName) {
+                  return {
+                    kind: 'Shoot',
+                    metadata: { namespace, name },
+                    spec: {
+                      seedName: soilName
+                    },
+                    status: {
+                      technicalID: `shoot--garden--${name}`
+                    }
+                  }
+                }
+                return _
+                  .chain(shootList)
+                  .find({ metadata: { namespace, name } })
+                  .cloneDeep()
+                  .value()
               }
             }
           }
         })
-        sandbox.stub(dashboardClient, 'getShoot').callsFake(({ namespace, name }) => {
-          return client.getShoot({ namespace, name })
-        })
-        sandbox.stub(dashboardClient, 'createKubeconfigClient').callsFake(({ namespace, name }) => {
+        sandbox.stub(dashboardClient, 'createKubeconfigClient').callsFake(async ({ name }) => {
+          await nextTick()
           if (name === firstSecretName) {
             return hostClient
           }
@@ -706,7 +732,7 @@ describe('services', function () {
       })
 
       it('should skip bootstrap of unreachable seed cluster', async function () {
-        const seedName = seedName3
+        const seedName = unreachableSeedName
         const gardenTerminalHost = {
           seedRef: seedName
         }
@@ -743,9 +769,9 @@ describe('services', function () {
         await pEvent(bootstrapper, 'empty')
         const stats = bootstrapper.getStats()
         expect(bootstrapper.isResourcePending(shootList[0])).to.be.true
-        expect(stats.total).to.equal(2)
+        expect(stats.total).to.equal(3)
         expect(stats.successRate).to.equal(1)
-        expect(bootstrapper.bootstrapped.size).to.equal(2)
+        expect(bootstrapper.bootstrapped.size).to.equal(3)
         expect(bootstrapper.isResourceBootstrapped(shootList[1])).to.be.true
         expect(bootstrapper.isResourceBootstrapped(shootList[2])).to.be.true
       })
@@ -760,7 +786,7 @@ describe('services', function () {
         const infoSpy = sandbox.spy(logger, 'info')
 
         const bootstrapper = new Bootstrapper()
-        // bootstrap dummyShoot whose seed does not have .spec.secretRef set
+        // bootstrap dummy whose seed does not have .spec.secretRef set
         bootstrapper.bootstrapResource(shootList[2])
         await pEvent(bootstrapper, 'empty')
         const stats = bootstrapper.getStats()
@@ -780,7 +806,7 @@ describe('services', function () {
         const debugSpy = sandbox.spy(logger, 'debug')
 
         const bootstrapper = new Bootstrapper()
-        // bootstrap unreachableShoot whose seed is flagged as unreachable
+        // bootstrap unreachable whose seed is flagged as unreachable
         const shoot = shootList[3]
         const { namespace, name } = shoot.metadata
         bootstrapper.bootstrapResource(shoot)
@@ -789,7 +815,7 @@ describe('services', function () {
         expect(bootstrapper.isResourcePending(shootList[0])).to.be.false
         expect(stats.total).to.equal(1)
         expect(stats.successRate).to.equal(1)
-        expect(debugSpy).to.be.calledWith(`Seed ${seedName3} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
+        expect(debugSpy).to.be.calledWith(`Seed ${unreachableSeedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
       })
     })
 
