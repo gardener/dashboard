@@ -18,21 +18,19 @@ const { getQuotas, findProjectByNamespace } = require('../cache')
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
-  const infrastructureSecret = {}
-  infrastructureSecret.metadata = _
-    .chain(secretBinding.secretRef)
-    .pick(['namespace', 'name'])
-    .assign({
+  const infrastructureSecret = {
+    metadata: {
+      secretName: _.get(secretBinding, 'secretRef.name'),
+      secretNamespace: _.get(secretBinding, 'secretRef.namespace'),
       cloudProviderKind,
       cloudProfileName,
       bindingNamespace: _.get(secretBinding, 'metadata.namespace'),
       bindingName: _.get(secretBinding, 'metadata.name'),
       projectName,
       hasCostObject
-    })
-    .value()
-
-  infrastructureSecret.quotas = quotas
+    },
+    quotas
+  }
 
   if (secret) {
     infrastructureSecret.metadata = _

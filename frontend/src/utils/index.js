@@ -292,7 +292,7 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
 }
 
 export function isOwnSecretBinding (secret) {
-  return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
+  return get(secret, 'metadata.secretNamespace') === get(secret, 'metadata.bindingNamespace')
 }
 
 const availableK8sUpdatesCache = {}

@@ -78,7 +78,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
+    expect(res.body.metadata).to.eql({ secretName: name, secretNamespace: namespace, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
@@ -96,7 +96,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, bindingName, cloudProfileName, bindingNamespace: namespace, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
+    expect(res.body.metadata).to.eql({ secretName: name, secretNamespace: namespace, bindingName, cloudProfileName, bindingNamespace: namespace, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
