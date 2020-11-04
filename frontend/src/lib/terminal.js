@@ -200,12 +200,14 @@ export class TerminalSession {
 
       let timeoutSeconds
       if (wasConnected) {
-        timeoutSeconds = 0
         // do not start spinner as this would clear the console
+        timeoutSeconds = 0
+        // eslint-disable-next-line no-console
         console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
       } else { // Try again later
         timeoutSeconds = RETRY_TIMEOUT_SECONDS
         this.vm.spinner.start()
+        // eslint-disable-next-line no-console
         console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
       }
       reconnectTimeoutId = setTimeout(() => this.attachTerminal(), timeoutSeconds * 1000)

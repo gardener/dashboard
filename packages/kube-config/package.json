@@ -56,7 +56,9 @@
     "parserOptions": {
       "ecmaVersion": 11
     },
-    "rules": {}
+    "rules": {
+      "no-console": "error"
+    }
   },
   "jest": {
     "restoreMocks": true,

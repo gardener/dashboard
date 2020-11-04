@@ -24,7 +24,7 @@ class Logger {
     this.logHttpRequestBody = false
     this.setLogHttpRequestBody(logHttpRequestBody)
     this.silent = /^test/.test(process.env.NODE_ENV)
-    this.console = console
+    this.console = global.console
   }
 
   setLogLevel (value) {
