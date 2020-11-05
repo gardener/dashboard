@@ -109,7 +109,7 @@ export default {
       return this.cfg.landingPageUrl
     },
     footerLogoUrl () {
-      return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
+      return this.cfg.footerLogoUrl || '/static/gardener-logo.svg'
     },
     drawerWidth () {
       return Math.floor(this.windowSize.width * 0.4)
