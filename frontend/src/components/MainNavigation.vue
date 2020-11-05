@@ -150,8 +150,6 @@ SPDX-License-Identifier: Apache-2.0
 
       <v-footer fixed>
         <img :src="footerLogoUrl" height="20px">
-        <v-spacer></v-spacer>
-        <div class="white--text">{{ copyright }}</div>
       </v-footer>
 
       <project-create-dialog v-model="projectDialog"></project-create-dialog>
@@ -188,7 +186,6 @@ export default {
   data () {
     return {
       version: process.env.VUE_APP_VERSION,
-      copyright: `© ${new Date().getFullYear()}`,
       projectDialog: false,
       projectFilter: '',
       projectMenu: false,
