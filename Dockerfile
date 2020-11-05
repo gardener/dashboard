@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #### Builder ####
-FROM node:14-alpine3.12 as builder
+FROM  eu.gcr.io/gardener-project/3rd/node:14-alpine3.12 as builder
 
 WORKDIR /usr/src/app
 
@@ -33,7 +33,7 @@ RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM alpine:3.12 as release
+FROM eu.gcr.io/gardener-project/3rd/alpine:3.12 as release
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
