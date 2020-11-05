@@ -619,7 +619,7 @@ describe('services', function () {
           uid: '4'
         },
         spec: {
-          seedName: unreachableSeedName // unreachable seed
+          seedName: unreachableSeedName
         },
         status: {
           technicalID: 'shoot--foo--unreachable',
