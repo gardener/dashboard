@@ -43,24 +43,22 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-list two-line subheader v-else>
-        <template v-for="(user, index) in sortedAndFilteredUserList">
-          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
+      <v-data-table
+        v-else
+        :headers="userAccountTableHeaders"
+        :items="sortedAndFilteredUserList"
+        disable-pagination
+        hide-default-footer
+      >
+        <template v-slot:item="{ item }">
           <project-user-row
-            :username="user.username"
-            :isCurrentUser="user.isCurrentUser"
-            :avatarUrl="user.avatarUrl"
-            :displayName="user.displayName"
-            :isEmail="user.isEmail"
-            :isOwner="user.isOwner"
-            :roles="user.roles"
-            :roleDisplayNames="user.roleDisplayNames"
+            :item="item"
             :key="user.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
           ></project-user-row>
         </template>
-      </v-list>
+      </v-data-table>
     </v-card>
 
     <v-card class="mr-extra mt-6">
@@ -106,7 +104,6 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template v-slot:item="{ item }">
           <project-service-account-row
-            class="my-2"
             :item="item"
             :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
@@ -244,6 +241,26 @@ export default {
           text: 'Description',
           align: 'start',
           value: 'description',
+          sortable: false
+        },
+        {
+          text: 'Roles',
+          align: 'start',
+          value: 'roles',
+          sortable: false
+        },
+        {
+          text: 'Actions',
+          align: 'start',
+          value: 'actions',
+          sortable: false
+        }
+      ],
+      userAccountTableHeaders: [
+        {
+          text: 'Name',
+          align: 'start',
+          value: 'name',
           sortable: false
         },
         {

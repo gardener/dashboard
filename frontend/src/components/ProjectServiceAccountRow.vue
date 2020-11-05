@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td>
-      <div class="d-flex flex-row my-2">
-        <div class="d-flex flex-column mr-3">
-          <div><img :src="item.avatarUrl" width="40px" /></div>
+      <div class="d-flex flex-row my-2 align-center">
+        <div class="d-flex flex-row mr-3">
+          <v-avatar :size="40"><img :src="item.avatarUrl" ></v-avatar>
         </div>
         <div class="d-flex flex-column">
           <div>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       <span v-else class="font-weight-light text--disabled">Not defined</span>
     </td>
     <td>
-      <service-account-roles :role-display-names="item.roleDisplayNames"></service-account-roles>
+      <account-roles :role-display-names="item.roleDisplayNames"></account-roles>
     </td>
     <td>
       <div class="d-flex flex-row">
@@ -111,7 +111,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
 import AccountAvatar from '@/components/AccountAvatar'
-import ServiceAccountRoles from '@/components/ServiceAccountRoles'
+import AccountRoles from '@/components/AccountRoles'
 import {
   isForeignServiceAccount,
   parseServiceAccountUsername
@@ -122,7 +122,7 @@ export default {
   components: {
     TimeString,
     AccountAvatar,
-    ServiceAccountRoles
+    AccountRoles
   },
   props: {
     item: {

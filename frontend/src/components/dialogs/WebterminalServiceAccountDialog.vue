@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
-                <service-account-roles :role-display-names="desiredRoleDisplayNames"></service-account-roles>
+                <account-roles :role-display-names="desiredRoleDisplayNames"></account-roles>
               </v-list-item-action>
             </v-list-item>
           </v-list>
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 import GDialog from '@/components/dialogs/GDialog'
 import AccountAvatar from '@/components/AccountAvatar'
 import GAlert from '@/components/GAlert'
-import ServiceAccountRoles from '@/components/ServiceAccountRoles'
+import AccountRoles from '@/components/AccountRoles'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
@@ -69,7 +69,7 @@ export default {
     GDialog,
     GAlert,
     AccountAvatar,
-    ServiceAccountRoles
+    AccountRoles
   },
   props: {
     namespace: {

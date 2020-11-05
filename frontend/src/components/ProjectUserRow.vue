@@ -5,96 +5,68 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <v-list-item :key="username">
-      <v-list-item-avatar>
-        <img :src="avatarUrl" />
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>
-          {{displayName}}
-          <span v-if="isCurrentUser">(me)</span>
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          <a v-if="isEmail" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
-          <span v-else>{{username}}</span>
-        </v-list-item-subtitle>
-      </v-list-item-content>
-      <v-list-item-action class="ml-1">
-        <div class="d-flex flex-row">
-          <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+  <tr>
+    <td>
+      <div class="d-flex flex-row my-2 align-center">
+        <div class="d-flex flex-column mr-3">
+          <v-avatar :size="40"><img :src="item.avatarUrl" /></v-avatar>
+        </div>
+        <div class="d-flex flex-column">
+          <div>
+            <span class="subtitle-1">{{item.displayName}}</span>
+          </div>
+          <span class="body-2">
+            <a v-if="item.isEmail" :href="`mailto:${item.username}`" class="cyan--text text--darken-2">{{item.username}}</a>
+            <span v-else>{{item.username}}</span>
+          </span>
+        </div>
+      </div>
+    </td>
+    <td>
+      <account-roles :role-display-names="item.roleDisplayNames"></account-roles>
+    </td>
+    <td>
+      <div class="d-flex flex-row">
+        <div v-if="canManageMembers" class="ml-1">
+          <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
-                {{displayName}}
-              </v-chip>
+              <v-btn v-on="on" icon @click.native.stop="onEdit">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
             </template>
-            <span>{{tooltip}}</span>
+            <span>Change User Roles</span>
           </v-tooltip>
         </div>
-      </v-list-item-action>
-      <v-list-item-action v-if="canManageMembers" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onEdit">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-          </template>
-          <span>Change User Roles</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <v-list-item-action v-if="canManageMembers" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn :disabled="isOwner" icon color="red" @click.native.stop="onDelete">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </div>
-          </template>
-          <span v-if="isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
-          <span v-else>Remove User From Project</span>
-        </v-tooltip>
-      </v-list-item-action>
-    </v-list-item>
-  </div>
+        <div v-if="canManageMembers" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn :disabled="item.isOwner" icon color="red" @click.native.stop="onDelete">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span v-if="item.isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
+            <span v-else>Remove User From Project</span>
+          </v-tooltip>
+        </div>
+      </div>
+    </td>
+  </tr>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import AccountRoles from '@/components/AccountRoles'
 
 export default {
   name: 'project-user-row',
+  components: {
+    AccountRoles
+  },
   props: {
-    username: {
-      type: String,
+    item: {
       required: true
-    },
-    avatarUrl: {
-      type: String,
-      required: true
-    },
-    displayName: {
-      type: String,
-      required: true
-    },
-    isEmail: {
-      type: Boolean,
-      required: true
-    },
-    isOwner: {
-      type: Boolean,
-      required: true
-    },
-    roles: {
-      type: Array,
-      required: true
-    },
-    roleDisplayNames: {
-      type: Array,
-      required: true
-    },
-    isCurrentUser: {
-      type: Boolean
     }
   },
   computed: {
@@ -104,10 +76,10 @@ export default {
   },
   methods: {
     onDelete (username) {
-      this.$emit('delete', this.username)
+      this.$emit('delete', this.item.username)
     },
     onEdit (username) {
-      this.$emit('edit', this.username, this.roles)
+      this.$emit('edit', this.item.username, this.item.roles)
     }
   }
 }
