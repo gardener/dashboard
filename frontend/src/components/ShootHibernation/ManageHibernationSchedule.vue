@@ -135,6 +135,7 @@ export default {
         })
         this.setParsedSchedules(parsedScheduleEvents)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn(error)
         this.parseError = true
       }

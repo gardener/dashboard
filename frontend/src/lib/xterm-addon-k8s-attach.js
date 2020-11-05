@@ -59,6 +59,7 @@ export class K8sAttachAddon {
 
     this.pingIntervalId = setInterval(() => {
       if (this._socket.readyState === WsReadyStateEnum.CONNECTING || this._socket.readyState === WsReadyStateEnum.CLOSED) {
+        // eslint-disable-next-line no-console
         console.log('Websocket closing or already closed. Stopping ping')
         clearTimeout(this.pingIntervalId)
         return
