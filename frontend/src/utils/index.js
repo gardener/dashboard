@@ -242,18 +242,15 @@ export function namespacedRoute (route, namespace) {
 }
 
 export function routeName (route) {
-  const firstChild = head(route.children)
-  const toRouteName = get(route, 'meta.toRouteName')
-  if (toRouteName) {
-    return toRouteName
-  } else if (route.name) {
+  if (route.name) {
     return route.name
-  } else if (firstChild) {
-    return firstChild.name
-  } else {
-    console.error('could not determine routeName')
-    return undefined
   }
+  const firstChild = head(route.children)
+  if (firstChild && firstChild.name) {
+    return firstChild.name
+  }
+  // eslint-disable-next-line no-console
+  console.error('could not determine routeName')
 }
 
 export function getDateFormatted (timestamp) {
