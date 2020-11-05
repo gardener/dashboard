@@ -603,7 +603,7 @@ describe('services', function () {
           uid: '3'
         },
         spec: {
-          seedName: seedWithoutSecretRefName // seed without spec.secretRef
+          seedName: seedWithoutSecretRefName
         },
         status: {
           technicalID: 'shoot--foo--dummy',
