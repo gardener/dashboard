@@ -6,12 +6,10 @@
 
 'use strict'
 
-const delay = require('delay')
 const projects = require('../lib/services/projects')
 const cache = require('../lib/cache')
 const authorization = require('../lib/services/authorization')
-
-const { expect } = require('chai')
+const nextTick = () => new Promise(process.nextTick)
 
 describe('services', function () {
   /* eslint no-unused-expressions: 0 */
@@ -89,7 +87,7 @@ describe('services', function () {
     beforeEach(function () {
       sandbox.stub(cache, 'getProjects').returns(projectList)
       sandbox.stub(authorization, 'isAdmin').callsFake(async (user) => {
-        await delay(1)
+        await nextTick()
         if (user.id === 'admin@bar.com') {
           return true
         }
