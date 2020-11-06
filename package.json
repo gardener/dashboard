@@ -18,6 +18,11 @@
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
+  "dependenciesMeta": {
+    "deasync": {
+      "built": false
+    }
+  },
   "devDependencies": {
     "eslint": "^6.8.0"
   }
