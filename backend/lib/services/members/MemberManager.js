@@ -185,7 +185,7 @@ class MemberManager {
   }
 
   async deleteServiceAccountSecret (item) {
-    const { namespace, name } = Member.parseUsername(item.id)
+    const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
       return
     }
