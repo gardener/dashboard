@@ -108,9 +108,12 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   it('should not patch a shared infrastructure secret', async function () {
     const bearer = await user.bearer
     const otherNamespace = 'garden-bar'
+    const secretRef = {
+      namespace: otherNamespace
+    }
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.patchSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, secretRef, data, cloudProfileName, resourceVersion })
+    k8s.stub.patchSharedInfrastructureSecret({ bearer, name, namespace, secretRef, data, cloudProfileName, resourceVersion })
     const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
@@ -136,9 +139,12 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   it('should not delete a shared infrastructure secret', async function () {
     const bearer = await user.bearer
     const otherNamespace = 'garden-bar'
+    const secretRef = {
+      namespace: otherNamespace
+    }
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.deleteSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, project, secretRef, cloudProfileName, resourceVersion })
+    k8s.stub.deleteSharedInfrastructureSecret({ bearer, name, namespace, project, secretRef, cloudProfileName, resourceVersion })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
