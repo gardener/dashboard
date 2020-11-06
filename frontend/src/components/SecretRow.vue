@@ -81,7 +81,7 @@ export default {
       }
     },
     secretOwner () {
-      return get(this.secret, 'metadata.secretNamespace')
+      return get(this.secret, 'metadata.secretRef.namespace')
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length

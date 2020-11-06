@@ -22,8 +22,10 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
     metadata: {
       namespace: _.get(secretBinding, 'metadata.namespace'),
       name: _.get(secretBinding, 'metadata.name'),
-      secretName: _.get(secretBinding, 'secretRef.name'),
-      secretNamespace: _.get(secretBinding, 'secretRef.namespace'),
+      secretRef: {
+        name: _.get(secretBinding, 'secretRef.name'),
+        namespace: _.get(secretBinding, 'secretRef.namespace')
+      },
       cloudProviderKind,
       cloudProfileName,
       projectName,
@@ -73,8 +75,8 @@ function toSecretResource ({ metadata, data }) {
   const kind = resource.kind
   const type = 'Opaque'
   metadata = {
-    name: metadata.secretName,
-    namespace: metadata.secretNamespace
+    name: metadata.secretRef.name,
+    namespace: metadata.secretRef.namespace
   }
   try {
     data = _.mapValues(data, encodeBase64)
@@ -89,10 +91,7 @@ function toSecretBindingResource ({ metadata }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
   const name = metadata.name
-  const secretRef = {
-    name: metadata.secretName,
-    namespace: metadata.secretNamespace
-  }
+  const secretRef = metadata.secretRef
   const labels = {
     'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
   }
@@ -275,8 +274,10 @@ exports.remove = async function ({ user, namespace, name }) {
     metadata: {
       name,
       namespace,
-      secretName,
-      secretNamespace
+      secretRef: {
+        name: secretName,
+        namespace: secretNamespace
+      }
     }
   }
 }

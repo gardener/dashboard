@@ -267,8 +267,10 @@ export default {
         const metadata = {
           name: this.name,
           namespace: this.namespace,
-          secretName: this.name,
-          secretNamespacenamespace: this.namespace,
+          secretRef: {
+            name: this.name,
+            namespace: this.namespace
+          },
           cloudProviderKind: this.cloudProviderKind,
           cloudProfileName: this.cloudProfileName
         }

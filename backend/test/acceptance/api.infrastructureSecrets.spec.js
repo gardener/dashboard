@@ -17,7 +17,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const namespace = `garden-${project}`
   const cloudProfileName = 'infra1-profileName'
   const cloudProviderKind = 'infra1'
-  const metadata = { name, namespace, secretName, secretNamespace: namespace, cloudProfileName, cloudProviderKind }
+  const secretRef = {
+    name: secretName,
+    namespace
+  }
+  const metadata = { name, namespace, secretRef, cloudProfileName, cloudProviderKind }
   const username = `${name}@example.org`
   const id = username
   const user = auth.createUser({ id })
@@ -69,7 +73,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.createInfrastructureSecret({ bearer, namespace, data, cloudProfileName, resourceVersion })
+    k8s.stub.createInfrastructureSecret({ bearer, namespace, secretRef, data, cloudProfileName, resourceVersion })
     k8s.stub.getCloudProfiles({ bearer, verb: 'get' })
     const res = await agent
       .post(`/api/namespaces/${namespace}/infrastructure-secrets`)
@@ -78,7 +82,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, secretName, secretNamespace: namespace, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
+    expect(res.body.metadata).to.eql({ name, namespace, secretRef, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
@@ -87,7 +91,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.patchInfrastructureSecret({ bearer, name, namespace, secretName, secretNamespace: namespace, data, cloudProfileName, resourceVersion })
+    k8s.stub.patchInfrastructureSecret({ bearer, name, namespace, secretRef, data, cloudProfileName, resourceVersion })
     k8s.stub.getCloudProfiles({ bearer, verb: 'get' })
     const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
@@ -96,7 +100,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, secretName, secretNamespace: namespace, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
+    expect(res.body.metadata).to.eql({ name, namespace, secretRef, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
@@ -106,7 +110,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const otherNamespace = 'garden-bar'
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.patchSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, secretName, secretNamespace: namespace, data, cloudProfileName, resourceVersion })
+    k8s.stub.patchSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, secretRef, data, cloudProfileName, resourceVersion })
     const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
@@ -119,14 +123,14 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.deleteInfrastructureSecret({ bearer, name, namespace, project, secretName, secretNamespace: namespace, cloudProfileName, resourceVersion })
+    k8s.stub.deleteInfrastructureSecret({ bearer, name, namespace, project, secretRef, cloudProfileName, resourceVersion })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ secretName, name, namespace })
+    expect(res.body.metadata).to.eql({ name, namespace, secretRef })
   })
 
   it('should not delete a shared infrastructure secret', async function () {
@@ -134,7 +138,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const otherNamespace = 'garden-bar'
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.deleteSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, project, secretName, secretNamespace: namespace, cloudProfileName, resourceVersion })
+    k8s.stub.deleteSharedInfrastructureSecret({ bearer, name, namespace: otherNamespace, project, secretRef, cloudProfileName, resourceVersion })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
@@ -144,7 +148,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should not delete infrastructure secret if referenced by shoot', async function () {
     const bearer = await user.bearer
-    k8s.stub.deleteInfrastructureSecretReferencedByShoot({ bearer, name, namespace, project, secretName, secretNamespace: namespace, cloudProfileName, resourceVersion })
+    k8s.stub.deleteInfrastructureSecretReferencedByShoot({ bearer, name, namespace, project, secretRef, cloudProfileName, resourceVersion })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
