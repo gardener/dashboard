@@ -52,13 +52,8 @@ describe('services', function () {
         spec: {
           members: [
             {
-              apiGroup: 'rbac.authorization.k8s.io',
               kind: 'User',
-              name: 'bar@bar.com',
-              role: 'admin',
-              roles: [
-                'owner'
-              ]
+              name: 'bar@bar.com'
             }
           ]
         },
@@ -75,11 +70,7 @@ describe('services', function () {
             {
               apiGroup: 'rbac.authorization.k8s.io',
               kind: 'User',
-              name: 'bar@bar.com',
-              role: 'admin',
-              roles: [
-                'owner'
-              ]
+              name: 'bar@bar.com'
             }
           ]
         },
