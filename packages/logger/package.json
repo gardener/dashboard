@@ -76,5 +76,9 @@
         "statements": 96
       }
     }
+  },
+  "engines": {
+    "node": "14",
+    "yarn": "2"
   }
 }

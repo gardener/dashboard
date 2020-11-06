@@ -92,7 +92,7 @@
     "socket.io-client": "^2.3.0"
   },
   "engines": {
-    "node": ">= 14.5.0",
-    "yarn": ">= 1.22.4"
+    "node": "14",
+    "yarn": "2"
   }
 }

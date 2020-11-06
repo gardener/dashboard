@@ -68,5 +68,9 @@
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ]
+  },
+  "engines": {
+    "node": "14",
+    "yarn": "2"
   }
 }

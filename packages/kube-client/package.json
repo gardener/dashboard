@@ -90,5 +90,9 @@
         "statements": 92
       }
     }
+  },
+  "engines": {
+    "node": "14",
+    "yarn": "2"
   }
 }
