@@ -36,7 +36,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     kind,
     profile,
     region,
-    bindingName: secret,
+    secretBindingName: secret,
     seed: seedName
   })
   const resourceVersion = 42
@@ -75,7 +75,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return a shoot', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, bindingName: secret })
+    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, secretBindingName: secret })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
@@ -247,7 +247,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     }
     const zonesNetworkConfiguration = {
       workers: '10.250.0.0/20'
-     }
+    }
     const data = {
       workers: [worker],
       network: {

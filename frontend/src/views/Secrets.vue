@@ -177,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecret } from '@/utils'
 import get from 'lodash/get'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
@@ -238,7 +238,7 @@ export default {
   computed: {
     ...mapGetters([
       'cloudProfilesByCloudProviderKind',
-      'getInfrastructureSecretByBindingName'
+      'getInfrastructureSecretByName'
     ]),
     backgroundForSelectedSecret () {
       const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
@@ -302,8 +302,8 @@ export default {
     if (!get(this.$route.params, 'name')) {
       return
     }
-    const infrastructureSecret = this.getInfrastructureSecretByBindingName(this.$route.params)
-    if (!infrastructureSecret || !isOwnSecretBinding(infrastructureSecret)) {
+    const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
+    if (!infrastructureSecret || !isOwnSecret(infrastructureSecret)) {
       return
     }
     this.onUpdate(infrastructureSecret)

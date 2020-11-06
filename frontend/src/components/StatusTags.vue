@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :popper-key="condition.type"
       :key="condition.type"
       :popperPlacement="popperPlacement"
-      :secretName="shootSecretBindingName"
+      :secretBindingName="shootSecretBindingName"
       :namespace="shootNamespace">
     </status-tag>
   </div>

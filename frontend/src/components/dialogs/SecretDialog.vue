@@ -23,16 +23,16 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="isCreateMode">
               <v-text-field
                 :color="color"
-                ref="secretName"
-                v-model.trim="secretName"
+                ref="name"
+                v-model.trim="name"
                 label="Secret Name"
-                :error-messages="getErrorMessages('secretName')"
-                @input="$v.secretName.$touch()"
-                @blur="$v.secretName.$touch()"
+                :error-messages="getErrorMessages('name')"
+                @input="$v.name.$touch()"
+                @blur="$v.name.$touch()"
               ></v-text-field>
             </template>
             <template v-else>
-              <div class="title pb-4">{{secretName}}</div>
+              <div class="title pb-4">{{name}}</div>
             </template>
             </div>
 
@@ -78,7 +78,7 @@ import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
-  secretName: {
+  name: {
     required: 'You can\'t leave this empty.',
     maxLength: 'It exceeds the maximum length of 128 characters.',
     resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
@@ -137,7 +137,7 @@ export default {
   data () {
     return {
       selectedCloudProfile: undefined,
-      secretName: undefined,
+      name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       validationErrors
@@ -168,13 +168,6 @@ export default {
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
     },
-    bindingName () {
-      if (this.isCreateMode) {
-        return this.secretName
-      } else {
-        return get(this.secret, 'metadata.bindingName')
-      }
-    },
     visible: {
       get () {
         return this.value
@@ -193,7 +186,7 @@ export default {
     validators () {
       const validators = {}
       if (this.isCreateMode) {
-        validators.secretName = {
+        validators.name = {
           required,
           maxLength: maxLength(128),
           resourceName,
@@ -221,14 +214,8 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const secretName = get(this.secret, 'metadata.name')
-      if (secretName) {
-        const predicate = item => {
-          return get(item, 'spec.secretBindingName') === secretName
-        }
-        return filter(this.shootList, predicate)
-      }
-      return []
+      const name = get(this.secret, 'metadata.name')
+      return filter(this.shootList, ['spec.secretBindingName', name])
     }
   },
   methods: {
@@ -262,8 +249,8 @@ export default {
           const errorDetails = errorDetailsFromError(err)
           if (this.isCreateMode) {
             if (isConflict(err)) {
-              this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
-              setInputFocus(this, 'secretName')
+              this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+              setInputFocus(this, 'name')
             } else {
               this.errorMessage = 'Failed to create Infrastructure Secret.'
             }
@@ -278,11 +265,12 @@ export default {
     save () {
       if (this.isCreateMode) {
         const metadata = {
-          name: this.secretName,
+          name: this.name,
           namespace: this.namespace,
+          secretName: this.name,
+          secretNamespacenamespace: this.namespace,
           cloudProviderKind: this.cloudProviderKind,
-          cloudProfileName: this.cloudProfileName,
-          bindingName: this.bindingName
+          cloudProfileName: this.cloudProfileName
         }
 
         return this.createInfrastructureSecret({ metadata, data: this.data })
@@ -303,7 +291,7 @@ export default {
       this.secretAccessKey = ''
 
       if (this.isCreateMode) {
-        this.secretName = `my-${this.cloudProviderKind}-secret`
+        this.name = `my-${this.cloudProviderKind}-secret`
 
         if (this.cloudProfiles.length === 1) {
           this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -311,9 +299,9 @@ export default {
           this.cloudProfileName = undefined
         }
 
-        setDelayedInputFocus(this, 'secretName')
+        setDelayedInputFocus(this, 'name')
       } else {
-        this.secretName = get(this.secret, 'metadata.name')
+        this.name = get(this.secret, 'metadata.name')
         this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
         setDelayedInputFocus(this, 'accessKeyId')
       }

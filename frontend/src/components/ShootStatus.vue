@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
       :lastMessage="lastMessage"
       :errorDescriptions="errorDescriptions"
       :lastUpdateTime="shootLastOperation.lastUpdateTime"
-      :secretName="shootSecretBindingName"
+      :secretBindingName="shootSecretBindingName"
       :namespace="shootNamespace"
     />
   </g-popper>

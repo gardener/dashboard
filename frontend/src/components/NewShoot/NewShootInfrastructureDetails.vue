@@ -41,14 +41,14 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <template v-else>
               <span>{{get(item, 'metadata.name')}}</span>
-              <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
+              <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
             </template>
           </template>
           <template v-slot:selection="{ item }">
             <span>
               {{get(item, 'metadata.name')}}
             </span>
-            <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
+            <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
           </template>
         </v-select>
       </v-col>
@@ -196,7 +196,7 @@ import CloudProfile from '@/components/CloudProfile'
 import WildcardSelect from '@/components/WildcardSelect'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
+import { getValidationErrors, isOwnSecret, selfTerminationDaysForSecret } from '@/utils'
 import { includesIfAvailable, requiresCostObjectIfEnabled } from '@/utils/validators'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
@@ -446,9 +446,9 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    isOwnSecretBinding () {
+    isOwnSecret () {
       return (secret) => {
-        return isOwnSecretBinding(secret)
+        return isOwnSecret(secret)
       }
     },
     allLoadBalancerProviderNames () {

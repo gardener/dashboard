@@ -251,7 +251,7 @@ export default {
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
+      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
@@ -345,7 +345,7 @@ export default {
       const cloudProfileName = get(shootResource, 'spec.cloudProfileName')
       const region = get(shootResource, 'spec.region')
       const secretBindingName = get(shootResource, 'spec.secretBindingName')
-      const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
+      const secret = this.infrastructureSecretsByName({ secretBindingName, cloudProfileName })
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
@@ -441,9 +441,9 @@ export default {
         messageHtml: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
       })
     },
-    infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
+    infrastructureSecretsByName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
-      return find(secrets, ['metadata.bindingName', secretBindingName])
+      return find(secrets, ['metadata.name', secretBindingName])
     }
   },
   async beforeRouteLeave (to, from, next) {
