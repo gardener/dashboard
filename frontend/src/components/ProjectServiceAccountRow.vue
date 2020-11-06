@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td>
       <div>
-        <v-tooltip top>
+        <v-tooltip top v-if="item.creationTimestamp">
           <template v-slot:activator="{ on }">
             <span v-on="on">
               <time-string :date-time="item.creationTimestamp" mode="past"></time-string>
@@ -39,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           {{item.created}}
         </v-tooltip>
+        <span v-else class="font-weight-light text--disabled">Unknown</span>
       </div>
     </td>
     <td style="max-width: 20vw">
@@ -139,7 +140,7 @@ export default {
       'canDeleteSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
-      return !isForeignServiceAccount(this.item.namespace, this.item.username)
+      return !isForeignServiceAccount(this.namespace, this.item.username)
     },
     createdByClasses () {
       return this.item.createdBy ? ['font-weight-bold'] : ['grey--text']
