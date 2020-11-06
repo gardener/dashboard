@@ -130,14 +130,23 @@ exports.list = async function ({ user, qs = {} }) {
       .gt(0)
       .value()
 
-    const member = Member.parseUsername(user.id)
-    const hasMembership = _
+    const hasUserMembership = _
       .chain(project)
       .get('spec.members')
+      .filter(['kind', 'User'])
+      .map('name')
+      .includes(user.id)
+      .value()
+
+    const member = Member.parseUsername(user.id)
+    const hasServiceAccountMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'ServiceAccount'])
       .find(member)
       .value()
 
-    return hasGroupMembership || hasMembership
+    return hasGroupMembership || hasUserMembership || hasServiceAccountMembership
   }
 
   const phases = _
