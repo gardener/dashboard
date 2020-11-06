@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-list-item>
     <v-list-item-content>
       <v-list-item-title class="mb-1">
-        {{secret.metadata.name}}
+        {{secret.metadata.bindingName}}
         <v-tooltip v-if="!isOwnSecretBinding" top>
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" small class="mx-1">mdi-account-arrow-left</v-icon>
@@ -81,7 +81,7 @@ export default {
       }
     },
     secretOwner () {
-      return get(this.secret, 'metadata.namespace')
+      return get(this.secret, 'metadata.secretNamespace')
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length

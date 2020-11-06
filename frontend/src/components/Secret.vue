@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-list two-line v-else>
       <secret-row
         v-for="secret in rows"
-        :key="secret.metadata.name"
+        :key="secret.metadata.bindingName"
         :secret="secret"
         :secretDescriptorKey="secretDescriptorKey"
         @update="onUpdate"
