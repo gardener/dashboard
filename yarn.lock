@@ -8352,6 +8352,7 @@ fsevents@^1.2.7:
   resolution: "gardener-dashboard@workspace:."
   dependencies:
     eslint: ^6.8.0
+    node-gyp: latest
   languageName: unknown
   linkType: soft
 
