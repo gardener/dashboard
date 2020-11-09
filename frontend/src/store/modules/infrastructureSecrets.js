@@ -21,8 +21,9 @@ const state = {
 
 // getters
 const getters = {
-  getInfrastructureSecretByName: (state) => ({ name, namespace }) => {
-    return find(state.all, eqlNameAndNamespace({ name, namespace }))
+  getInfrastructureSecretByName (state) {
+    return ({ name, namespace }) => find(state.all, eqlNameAndNamespace({ name, namespace }))
+  }
   }
 }
 

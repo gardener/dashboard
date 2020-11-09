@@ -74,10 +74,7 @@ function toSecretResource ({ metadata, data }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
   const type = 'Opaque'
-  metadata = {
-    name: metadata.secretRef.name,
-    namespace: metadata.secretRef.namespace
-  }
+  metadata = { ...metadata.secretRef }
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
@@ -90,8 +87,7 @@ function toSecretBindingResource ({ metadata }) {
   const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
-  const name = metadata.name
-  const secretRef = metadata.secretRef
+  const { name, secretRef } = metadata
   const labels = {
     'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
   }
@@ -216,11 +212,9 @@ exports.create = async function ({ user, namespace, body }) {
   })
 }
 
-function isOwnSecret (secretBinding) {
-  const secretNamespace = _.get(secretBinding, 'secretRef.namespace')
-  const namespace = _.get(secretBinding, 'metadata.namespace')
+function isOwnSecret ({ metadata, secretRef }) {
 
-  return secretNamespace === namespace
+  return secretRef.namespace === metadata.namespace
 }
 
 exports.patch = async function ({ user, namespace, name, body }) {
