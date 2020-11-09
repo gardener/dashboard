@@ -144,7 +144,7 @@ const shootList = [
     project: 'foo',
     createdBy: 'fooCreator',
     purpose: 'fooPurpose',
-    bindingName: 'fooSecretName'
+    secretBindingName: 'fooSecretName'
   }),
   getShoot({
     name: 'barShoot',
@@ -152,7 +152,7 @@ const shootList = [
     project: 'foo',
     createdBy: 'barCreator',
     purpose: 'barPurpose',
-    bindingName: 'barSecretName'
+    secretBindingName: 'barSecretName'
   }),
   getShoot({
     name: 'dummyShoot',
@@ -160,7 +160,7 @@ const shootList = [
     project: 'foo',
     createdBy: 'fooCreator',
     purpose: 'fooPurpose',
-    bindingName: 'barSecretName',
+    secretBindingName: 'barSecretName',
     seed: 'infra4-seed-without-secretRef'
   })
 ]
@@ -245,18 +245,14 @@ function getServiceAccountSecret (namespace, serviceAccountName) {
   }
 }
 
-function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, bindingName, bindingNamespace, cloudProfileName }) {
+function prepareSecretAndBindingMeta ({ name, namespace, secretRef, data, resourceVersion, cloudProfileName }) {
   const metadataSecretBinding = {
     resourceVersion,
-    name: bindingName,
-    namespace: bindingNamespace,
+    name,
+    namespace,
     labels: {
       'cloudprofile.garden.sapcloud.io/name': cloudProfileName
     }
-  }
-  const secretRef = {
-    name,
-    namespace
   }
   const resultSecretBinding = {
     metadata: metadataSecretBinding,
@@ -265,7 +261,7 @@ function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, 
 
   const metadataSecret = {
     resourceVersion,
-    namespace
+    namespace: secretRef.namespace
   }
   const resultSecret = {
     metadata: metadataSecret,
@@ -498,7 +494,7 @@ function getShoot ({
   kind = 'fooInfra',
   profile = 'infra1-profileName',
   region = 'foo-west',
-  bindingName = 'foo-secret',
+  secretBindingName = 'foo-secret',
   seed = 'infra1-seed',
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0'
@@ -512,7 +508,7 @@ function getShoot ({
       annotations: {}
     },
     spec: {
-      secretBindingName: bindingName,
+      secretBindingName,
       cloudProfileName: profile,
       region,
       hibernation,
@@ -862,12 +858,13 @@ const stub = {
         items: infrastructureSecrets
       })
   },
-  createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
+  createInfrastructureSecret ({ bearer, namespace, secretRef, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding,
       resultSecret
     } = prepareSecretAndBindingMeta({
-      bindingNamespace: namespace,
+      namespace,
+      secretRef,
       data,
       resourceVersion,
       cloudProfileName
@@ -888,7 +885,7 @@ const stub = {
       })
       .reply(200, () => resultSecretBinding)
   },
-  patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
+  patchInfrastructureSecret ({ bearer, namespace, name, secretRef, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding,
       resultSecret
@@ -897,22 +894,21 @@ const stub = {
       namespace,
       data,
       resourceVersion,
-      bindingName,
-      bindingNamespace,
+      secretRef,
       cloudProfileName
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200, () => resultSecretBinding)
-      .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`, body => {
+      .patch(`/api/v1/namespaces/${namespace}/secrets/${secretRef.name}`, body => {
         expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecret.metadata, body.metadata)
         return true
       })
       .reply(200, () => resultSecret)
   },
-  patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
+  patchSharedInfrastructureSecret ({ bearer, namespace, name, secretRef, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
@@ -920,74 +916,70 @@ const stub = {
       namespace,
       data,
       resourceVersion,
-      bindingName,
-      bindingNamespace,
+      secretRef,
       cloudProfileName
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200, () => resultSecretBinding)
   },
-  deleteInfrastructureSecret ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
-    const shoot = getShoot({ name: 'fooShoot', project, bindingName: 'someOtherSecretName' })
+  deleteInfrastructureSecret ({ bearer, namespace, project, name, secretRef, cloudProfileName, resourceVersion = 42 }) {
+    const shoot = getShoot({ name: 'fooShoot', project, secretBindingName: 'someOtherSecretBindingName' })
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
       name,
       namespace,
       resourceVersion,
-      bindingName,
-      bindingNamespace,
+      secretRef,
       cloudProfileName
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: [shoot]
       })
-      .delete(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .delete(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200)
-      .delete(`/api/v1/namespaces/${bindingNamespace}/secrets/${name}`)
+      .delete(`/api/v1/namespaces/${namespace}/secrets/${secretRef.name}`)
       .reply(200)
   },
-  deleteSharedInfrastructureSecret ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
+  deleteSharedInfrastructureSecret ({ bearer, namespace, name, secretRef, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
       name,
       namespace,
       resourceVersion,
-      bindingName,
-      bindingNamespace,
+      secretRef,
       cloudProfileName
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200, () => resultSecretBinding)
   },
-  deleteInfrastructureSecretReferencedByShoot ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
-    const referencingShoot = getShoot({ name: 'referencingShoot', project, bindingName })
-    const shoot = getShoot({ name: 'fooShoot', project, bindingName: 'someOtherSecretName' })
+  deleteInfrastructureSecretReferencedByShoot ({ bearer, namespace, project, name, secretRef, cloudProfileName, resourceVersion = 42 }) {
+    const referencingShoot = getShoot({ name: 'referencingShoot', project, secretBindingName: name })
+    const shoot = getShoot({ name: 'fooShoot', project, secretBindingName: 'someOtherSecretName' })
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
       name,
       namespace,
       resourceVersion,
-      bindingName,
-      bindingNamespace,
+      secretRef,
       cloudProfileName
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${name}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: [shoot, referencingShoot]
       })

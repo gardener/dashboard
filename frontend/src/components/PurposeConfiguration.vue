@@ -67,7 +67,7 @@ export default {
     },
     secret () {
       const secrets = this.infrastructureSecretsByCloudProfileName(this.shootCloudProfileName)
-      const secret = find(secrets, ['metadata.bindingName', this.shootSecretBindingName])
+      const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
       if (!secret) {
         console.error('Secret must not be undefined')
       }

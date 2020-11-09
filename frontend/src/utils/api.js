@@ -48,10 +48,10 @@ export function getInfrastructureSecrets ({ namespace }) {
   return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`)
 }
 
-export function updateInfrastructureSecret ({ namespace, bindingName, data }) {
+export function updateInfrastructureSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
-  bindingName = encodeURIComponent(bindingName)
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, data)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`, data)
 }
 
 export function createInfrastructureSecret ({ namespace, data }) {
@@ -59,10 +59,10 @@ export function createInfrastructureSecret ({ namespace, data }) {
   return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, data)
 }
 
-export function deleteInfrastructureSecret ({ namespace, bindingName }) {
+export function deleteInfrastructureSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
-  bindingName = encodeURIComponent(bindingName)
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
+  name = encodeURIComponent(name)
+  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
 }
 
 /* Shoot Clusters */
