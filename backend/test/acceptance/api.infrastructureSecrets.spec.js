@@ -119,7 +119,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       .set('cookie', await user.cookie)
       .send({ metadata, data })
 
-    expect(res).to.have.status(405)
+    expect(res).to.have.status(422)
   })
 
   it('should delete an own infrastructure secret', async function () {
@@ -149,7 +149,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
 
-    expect(res).to.have.status(405)
+    expect(res).to.have.status(422)
   })
 
   it('should not delete infrastructure secret if referenced by shoot', async function () {
@@ -159,6 +159,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
       .set('cookie', await user.cookie)
 
-    expect(res).to.have.status(412)
+    expect(res).to.have.status(422)
   })
 }

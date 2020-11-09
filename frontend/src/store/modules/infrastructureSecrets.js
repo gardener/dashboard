@@ -24,7 +24,6 @@ const getters = {
   getInfrastructureSecretByName (state) {
     return ({ name, namespace }) => find(state.all, eqlNameAndNamespace({ name, namespace }))
   }
-  }
 }
 
 // actions
@@ -42,8 +41,7 @@ const actions = {
       })
   },
   update: ({ commit, rootState }, { metadata, data }) => {
-    const namespace = metadata.namespace || rootState.namespace
-    const name = metadata.name
+    const { namespace = rootState.namespace, name } = metadata
     return updateInfrastructureSecret({ namespace, name, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
@@ -51,7 +49,7 @@ const actions = {
       })
   },
   create: ({ commit, rootState }, { metadata, data }) => {
-    const namespace = metadata.namespace || rootState.namespace
+    const { namespace = rootState.namespace } = metadata
     return createInfrastructureSecret({ namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)

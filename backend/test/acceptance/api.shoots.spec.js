@@ -24,7 +24,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const user = auth.createUser({ id })
   const kind = 'infra1'
   const region = 'foo-east'
-  const secret = 'fooSecretName' // pragma: whitelist secret
+  const secretBindingName = 'fooSecretName' // pragma: whitelist secret
   const seedName = 'infra1-seed'
   const seedSecretName = `seedsecret-${seedName}`
   const profile = 'infra1-profileName'
@@ -36,7 +36,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     kind,
     profile,
     region,
-    secretBindingName: secret,
+    secretBindingName,
     seed: seedName
   })
   const resourceVersion = 42
@@ -75,7 +75,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return a shoot', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, secretBindingName: secret })
+    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, secretBindingName })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)

@@ -7,7 +7,7 @@
 const _ = require('lodash')
 const logger = require('../logger')
 const { Resources } = require('@gardener-dashboard/kube-client')
-const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('http-errors')
+const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']
@@ -15,17 +15,17 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
+const { UnprocessableEntity } = createError
+
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
+  const { metadata: { namespace, name }, secretRef } = secretBinding
   const infrastructureSecret = {
     metadata: {
-      namespace: _.get(secretBinding, 'metadata.namespace'),
-      name: _.get(secretBinding, 'metadata.name'),
-      secretRef: {
-        name: _.get(secretBinding, 'secretRef.name'),
-        namespace: _.get(secretBinding, 'secretRef.namespace')
-      },
+      namespace,
+      name,
+      secretRef,
       cloudProviderKind,
       cloudProfileName,
       projectName,
@@ -213,7 +213,6 @@ exports.create = async function ({ user, namespace, body }) {
 }
 
 function isOwnSecret ({ metadata, secretRef }) {
-
   return secretRef.namespace === metadata.namespace
 }
 
@@ -221,18 +220,17 @@ exports.patch = async function ({ user, namespace, name, body }) {
   const client = user.client
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
-  const secretName = _.get(secretBinding, 'secretRef.name')
-  const secretNamespace = _.get(secretBinding, 'secretRef.namespace')
 
   if (!isOwnSecret(secretBinding)) {
-    throw new MethodNotAllowed('Patch allowed only for secrets in own namespace')
+    throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
 
-  const secret = await client.core.secrets.mergePatch(secretNamespace, secretName, toSecretResource(body))
+  const secretRef = secretBinding.secretRef
+  const secret = await client.core.secrets.mergePatch(secretRef.namespace, secretRef.name, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
-  const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
+  const projectInfo = getProjectNameAndHasCostObject(secretRef.namespace)
 
   return fromResource({
     secretBinding,
@@ -247,31 +245,27 @@ exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
-  const secretName = _.get(secretBinding, 'secretRef.name')
-  const secretNamespace = _.get(secretBinding, 'secretRef.namespace')
 
   if (!isOwnSecret(secretBinding)) {
-    throw new MethodNotAllowed('Remove allowed only for secrets in own namespace')
+    throw createError(422, 'Remove allowed only for secrets in own namespace')
   }
 
   const { items: shootList } = await shoots.list({ user, namespace })
   const secretReferencedByShoot = _.find(shootList, ['spec.secretBindingName', name])
   if (secretReferencedByShoot) {
-    throw new PreconditionFailed('Only secrets not referened by any shoot can be deleted')
+    throw createError(422, 'Only secrets not referened by any shoot can be deleted')
   }
 
+  const secretRef = secretBinding.secretRef
   await Promise.all([
     await client['core.gardener.cloud'].secretbindings.delete(namespace, name),
-    await client.core.secrets.delete(secretNamespace, secretName)
+    await client.core.secrets.delete(secretRef.namespace, secretRef.name)
   ])
   return {
     metadata: {
       name,
       namespace,
-      secretRef: {
-        name: secretName,
-        namespace: secretNamespace
-      }
+      secretRef
     }
   }
 }
