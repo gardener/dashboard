@@ -11,11 +11,12 @@ const {
   dashboardClient,
   Resources
 } = require('@gardener-dashboard/kube-client')
+
 const { PreconditionFailed } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 const cache = require('../cache')
-
+const Member = require('./members/Member')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function fromResource ({ metadata, spec = {}, status = {} }) {
@@ -137,7 +138,15 @@ exports.list = async function ({ user, qs = {} }) {
       .includes(user.id)
       .value()
 
-    return hasGroupMembership || hasUserMembership
+    const member = Member.parseUsername(user.id)
+    const hasServiceAccountMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'ServiceAccount'])
+      .find(member)
+      .value()
+
+    return hasGroupMembership || hasUserMembership || hasServiceAccountMembership
   }
 
   const phases = _

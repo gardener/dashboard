@@ -407,6 +407,7 @@ export default {
         try {
           await this.terminalSession.deleteTerminal()
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.log('failed to cleanup terminal session on configuration change')
         }
         this.cancelConnectAndClose()

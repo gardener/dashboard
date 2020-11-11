@@ -80,11 +80,11 @@ SPDX-License-Identifier: Apache-2.0
                     <code>
                       <router-link v-if="canLinkToSecret"
                         class="cyan--text text--darken-2"
-                        :to="{ name: 'Secret', params: { name: secretName, namespace: namespace } }"
+                        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
                       >
-                        <span>{{secretName}}</span>
+                        <span>{{secretBindingName}}</span>
                       </router-link>
-                      <span v-else>{{secretName}}</span>
+                      <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
                   {{description}}
                 </span>
@@ -124,7 +124,7 @@ export default {
     lastTransitionTime: {
       type: String
     },
-    secretName: {
+    secretBindingName: {
       type: String
     },
     namespace: {
@@ -136,7 +136,7 @@ export default {
       return !isEmpty(this.errorDescriptions)
     },
     canLinkToSecret () {
-      return this.secretName && this.namespace
+      return this.secretBindingName && this.namespace
     }
   }
 }

@@ -549,9 +549,9 @@ const getters = {
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
   },
-  getInfrastructureSecretByBindingName (state, getters) {
+  getInfrastructureSecretByName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByBindingName']({ namespace, name })
+      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -1250,6 +1250,7 @@ const actions = {
           items
         })
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.warn('Failed to list project terminal shortcuts:', err.message)
       }
     }

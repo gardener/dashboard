@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
         :lastMessage="nonErrorMessage"
         :errorDescriptions="errorDescriptions"
         :lastTransitionTime="tag.lastTransitionTime"
-        :secretName="secretName"
+        :secretBindingName="secretBindingName"
         :namespace="namespace"
       />
     </g-popper>
@@ -86,7 +86,7 @@ export default {
       type: Object,
       required: true
     },
-    secretName: {
+    secretBindingName: {
       type: String
     },
     namespace: {

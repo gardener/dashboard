@@ -7,7 +7,7 @@
 const _ = require('lodash')
 const logger = require('../logger')
 const { Resources } = require('@gardener-dashboard/kube-client')
-const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('http-errors')
+const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']
@@ -15,24 +15,24 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
+const { UnprocessableEntity } = createError
+
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
-  const infrastructureSecret = {}
-  infrastructureSecret.metadata = _
-    .chain(secretBinding.secretRef)
-    .pick(['namespace', 'name'])
-    .assign({
+  const { metadata: { namespace, name }, secretRef } = secretBinding
+  const infrastructureSecret = {
+    metadata: {
+      namespace,
+      name,
+      secretRef,
       cloudProviderKind,
       cloudProfileName,
-      bindingNamespace: _.get(secretBinding, 'metadata.namespace'),
-      bindingName: _.get(secretBinding, 'metadata.name'),
       projectName,
       hasCostObject
-    })
-    .value()
-
-  infrastructureSecret.quotas = quotas
+    },
+    quotas
+  }
 
   if (secret) {
     infrastructureSecret.metadata = _
@@ -74,10 +74,7 @@ function toSecretResource ({ metadata, data }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
   const type = 'Opaque'
-  metadata = _
-    .chain(metadata)
-    .pick(['namespace', 'name'])
-    .value()
+  metadata = { ...metadata.secretRef }
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
@@ -90,11 +87,7 @@ function toSecretBindingResource ({ metadata }) {
   const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
-  const name = metadata.bindingName
-  const secretRef = {
-    name: metadata.name,
-    namespace: metadata.namespace
-  }
+  const { name, secretRef } = metadata
   const labels = {
     'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
   }
@@ -129,14 +122,15 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
         const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
         const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
         const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
+        const name = _.get(secretBinding, 'metadata.name')
         const secretName = _.get(secretBinding, 'secretRef.name')
         const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
         const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
         if (!cloudProviderKind) {
-          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName))
+          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, name))
         }
         const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
-        if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
+        if (isOwnSecret(secretBinding) && !secret) {
           throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
         }
         return fromResource({
@@ -218,28 +212,25 @@ exports.create = async function ({ user, namespace, body }) {
   })
 }
 
-function checkIfOwnSecret (bodySecretBinding) {
-  const secretNamespace = _.get(bodySecretBinding, 'secretRef.namespace')
-  const secretBindingNamespace = _.get(bodySecretBinding, 'metadata.namespace')
-
-  if (secretNamespace !== secretBindingNamespace) {
-    throw new MethodNotAllowed('Patch allowed only for secrets in own namespace')
-  }
+function isOwnSecret ({ metadata, secretRef }) {
+  return secretRef.namespace === metadata.namespace
 }
 
-exports.patch = async function ({ user, namespace, bindingName, body }) {
+exports.patch = async function ({ user, namespace, name, body }) {
   const client = user.client
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
-  const secretName = _.get(secretBinding, 'secretRef.name')
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
 
-  checkIfOwnSecret(secretBinding)
+  if (!isOwnSecret(secretBinding)) {
+    throw createError(422, 'Patch allowed only for secrets in own namespace')
+  }
 
-  const secret = await client.core.secrets.mergePatch(namespace, secretName, toSecretResource(body))
+  const secretRef = secretBinding.secretRef
+  const secret = await client.core.secrets.mergePatch(secretRef.namespace, secretRef.name, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
-  const projectInfo = getProjectNameAndHasCostObject(namespace)
+  const projectInfo = getProjectNameAndHasCostObject(secretRef.namespace)
 
   return fromResource({
     secretBinding,
@@ -250,27 +241,31 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
   })
 }
 
-exports.remove = async function ({ user, namespace, bindingName }) {
+exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
-  const secretName = _.get(secretBinding, 'secretRef.name')
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
 
-  checkIfOwnSecret(secretBinding)
+  if (!isOwnSecret(secretBinding)) {
+    throw createError(422, 'Remove allowed only for secrets in own namespace')
+  }
 
   const { items: shootList } = await shoots.list({ user, namespace })
-  const predicate = (item) => {
-    const itemSecretBindingName = _.get(item, 'spec.secretBindingName')
-    return itemSecretBindingName === bindingName
-  }
-  const secretReferencedByShoot = _.find(shootList, predicate)
+  const secretReferencedByShoot = _.find(shootList, ['spec.secretBindingName', name])
   if (secretReferencedByShoot) {
-    throw new PreconditionFailed('Only secrets not referened by any shoot can be deleted')
+    throw createError(422, 'Only secrets not referened by any shoot can be deleted')
   }
 
+  const secretRef = secretBinding.secretRef
   await Promise.all([
-    await client['core.gardener.cloud'].secretbindings.delete(namespace, bindingName),
-    await client.core.secrets.delete(namespace, secretName)
+    await client['core.gardener.cloud'].secretbindings.delete(namespace, name),
+    await client.core.secrets.delete(secretRef.namespace, secretRef.name)
   ])
-  return { metadata: { name: secretName, bindingName, namespace } }
+  return {
+    metadata: {
+      name,
+      namespace,
+      secretRef
+    }
+  }
 }

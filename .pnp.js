@@ -1,9 +1,4 @@
 #!/usr/bin/env node
-//
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-
 /* eslint-disable */
 
 try {
@@ -77,7 +72,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         [null, {
           "packageLocation": "./",
           "packageDependencies": [
-            ["eslint", "npm:6.8.0"]
+            ["eslint", "npm:6.8.0"],
+            ["node-gyp", "npm:7.1.0"]
           ],
           "linkType": "SOFT",
         }]
@@ -10056,7 +10052,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",
           "packageDependencies": [
             ["gardener-dashboard", "workspace:."],
-            ["eslint", "npm:6.8.0"]
+            ["eslint", "npm:6.8.0"],
+            ["node-gyp", "npm:7.1.0"]
           ],
           "linkType": "SOFT",
         }]

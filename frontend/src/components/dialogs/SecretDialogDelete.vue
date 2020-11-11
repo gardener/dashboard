@@ -92,9 +92,9 @@ export default {
       this.visible = false
     },
     async onDeleteSecret () {
-      const bindingName = get(this.secret, 'metadata.bindingName')
+      const name = get(this.secret, 'metadata.name')
       try {
-        await this.deleteSecret(bindingName)
+        await this.deleteSecret(name)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

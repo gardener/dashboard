@@ -58,7 +58,9 @@
     "parserOptions": {
       "ecmaVersion": 11
     },
-    "rules": {}
+    "rules": {
+      "no-console": "error"
+    }
   },
   "jest": {
     "testEnvironment": "node",
@@ -66,5 +68,9 @@
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ]
+  },
+  "engines": {
+    "node": "^14.15.0",
+    "yarn": "^2.3.3"
   }
 }

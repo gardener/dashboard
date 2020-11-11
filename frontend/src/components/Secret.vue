@@ -35,10 +35,10 @@ SPDX-License-Identifier: Apache-2.0
         @update="onUpdate"
         @delete="onDelete"
       >
-       <template v-if="infrastructureKey === 'openstack' && isOwnSecretBinding(secret)" v-slot:rowSubTitle>
+       <template v-if="infrastructureKey === 'openstack' && isOwnSecret(secret)" v-slot:rowSubTitle>
           {{secret.data.domainName}} / {{secret.data.tenantName}}
         </template>
-        <template v-else-if="infrastructureKey === 'vsphere' && isOwnSecretBinding(secret)" v-slot:rowSubTitle>
+        <template v-else-if="infrastructureKey === 'vsphere' && isOwnSecret(secret)" v-slot:rowSubTitle>
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <span v-on="on">{{secret.data.vsphereUsername}}</span>
@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
 import InfraIcon from '@/components/VendorIcon'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecret } from '@/utils'
 
 export default {
   components: {
@@ -132,8 +132,8 @@ export default {
     onDelete (row) {
       this.$emit('delete', row)
     },
-    isOwnSecretBinding (secret) {
-      return isOwnSecretBinding(secret)
+    isOwnSecret (secret) {
+      return isOwnSecret(secret)
     }
   }
 }

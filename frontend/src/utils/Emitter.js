@@ -23,8 +23,10 @@ class Connector {
 
   onConnect (attempt) {
     if (attempt) {
+      // eslint-disable-next-line no-console
       console.log(`socket connection ${this.socket.id} established after '${attempt}' attempt(s)`)
     } else {
+      // eslint-disable-next-line no-console
       console.log(`socket connection ${this.socket.id} established`)
     }
     store.dispatch('unsetWebsocketConnectionError')
@@ -42,6 +44,7 @@ class Connector {
   }
 
   disconnect () {
+    // eslint-disable-next-line no-console
     console.log(`Disconnect socket ${this.socket.id}`)
     if (this.socket.connected) {
       this.socket.disconnect()
@@ -291,10 +294,12 @@ forEach([shootsConnector, ticketsConnector], connector => {
     console.error(`socket ${socket.id} connection timeout`)
   })
   socket.on('reconnect_attempt', () => {
+    // eslint-disable-next-line no-console
     console.log(`socket ${socket.id} reconnect attempt`)
   })
   socket.on('reconnecting', attempt => {
     store.dispatch('setWebsocketConnectionError', { reconnectAttempt: attempt })
+    // eslint-disable-next-line no-console
     console.log(`socket ${socket.id} reconnecting attempt number '${attempt}'`)
   })
   socket.on('reconnect_error', err => {

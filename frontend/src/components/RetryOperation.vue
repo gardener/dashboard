@@ -55,6 +55,7 @@ export default {
       try {
         await addShootAnnotation({ namespace, name, data: retryAnnotation })
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('failed to retry operation', err)
 
         this.$store.dispatch('setError', err)

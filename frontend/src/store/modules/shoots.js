@@ -219,7 +219,7 @@ const actions = {
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
     const secret = head(rootGetters.infrastructureSecretsByCloudProfileName(cloudProfileName))
-    set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
+    set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
 
     let region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
     if (!region) {
