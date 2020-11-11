@@ -344,6 +344,7 @@ export default {
 
       const cloudProfileName = get(shootResource, 'spec.cloudProfileName')
       const region = get(shootResource, 'spec.region')
+      const networkingType = get(shootResource, 'spec.networking.type')
       const secretBindingName = get(shootResource, 'spec.secretBindingName')
       const secret = this.infrastructureSecretsByName({ secretBindingName, cloudProfileName })
 
@@ -361,6 +362,7 @@ export default {
         infrastructureKind,
         cloudProfileName,
         region,
+        networkingType,
         secret,
         floatingPoolName,
         loadBalancerProviderName,

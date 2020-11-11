@@ -55,6 +55,7 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
+import controllerRegistrations from './modules/controllerRegistrations'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
@@ -334,6 +335,19 @@ const getters = {
       const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
+  },
+  controllerRegistrationList (state) {
+    return state.controllerRegistrations.all
+  },
+  networkingTypeList (state, getters) {
+    const extensions = getters.controllerRegistrationList
+    const networkExtensions = filter(extensions, ({ resources }) => {
+      return find(resources, { kind: 'Network' })
+    })
+
+    return flatMap(networkExtensions, ({ resources }) => {
+      return map(resources, 'type')
+    })
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -997,6 +1011,13 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  fetchControllerRegistrations ({ dispatch }) {
+    try {
+      return dispatch('controllerRegistrations/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
   async fetchSeeds ({ dispatch }) {
     try {
       await dispatch('seeds/getAll')
@@ -1441,6 +1462,7 @@ const modules = {
   members,
   draggable,
   cloudProfiles,
+  controllerRegistrations,
   seeds,
   shoots,
   infrastructureSecrets,

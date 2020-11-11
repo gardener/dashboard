@@ -28,15 +28,33 @@ SPDX-License-Identifier: Apache-2.0
             <span>Info</span>
           </v-tooltip>
         </template>
-        <v-card tile>
+        <v-card tile width="300px">
           <v-card-title primary-title>
             <div class="content">
               <div class="title mb-2">Gardener</div>
               <v-progress-circular size="18" indeterminate v-if="!dashboardVersion"></v-progress-circular>
               <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
               <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
+              <v-expansion-panels flat>
+                <v-expansion-panel v-if="extensionCount && isAdmin">
+                  <v-expansion-panel-header class="caption" @click.native.stop>
+                    {{extensionCount}} deployed extensions
+                  </v-expansion-panel-header>
+                  <v-expansion-panel-content class="extension-expansion-panel">
+                    <div
+                    v-for="extension in extensionList"
+                    :key="extension.id"
+                    class="extension-item">
+                      <div class="caption font-weight-bold">{{extension.name}}</div>
+                      <div class="caption" v-if="!!extension.version">Version: {{extension.version}}</div>
+                      <div class="caption" v-if="!!extension.kind">Kind: {{extension.kind}}</div>
+                    </div>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
             </div>
           </v-card-title>
+          <v-divider></v-divider>
           <v-divider></v-divider>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
@@ -123,6 +141,9 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
+import map from 'lodash/map'
+import join from 'lodash/join'
+import uniq from 'lodash/uniq'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
@@ -160,7 +181,8 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin'
+      'isAdmin',
+      'controllerRegistrationList'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -189,6 +211,19 @@ export default {
         name: 'Account',
         query
       }
+    },
+    extensionCount () {
+      return this.controllerRegistrationList.length
+    },
+    extensionList () {
+      return map(this.controllerRegistrationList, ({ name, version, resources }, id) => {
+        return {
+          id,
+          name,
+          version,
+          kind: join(uniq(map(resources, 'kind')), ', ')
+        }
+      })
     }
   },
   watch: {
@@ -211,6 +246,8 @@ export default {
           this.setError({
             message: `Failed to fetch version information. ${err.message}`
           })
+          this.dashboardVersion = this.dashboardVersion || 'Unknown'
+          this.gardenerVersion = this.gardenerVersion || 'Unknown'
         }
       }
     }
@@ -235,5 +272,15 @@ export default {
   .operator {
     color: white;
     font-weight: bold;
+  }
+
+  .extension-expansion-panel {
+    max-height: 20vh;
+    overflow: scroll;
+  }
+
+  .extension-item {
+    text-align: left;
+    margin-bottom: 10px;
   }
 </style>

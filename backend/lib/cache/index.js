@@ -33,6 +33,7 @@ class Cache {
     this.seeds = new Store()
     this.quotas = new Store()
     this.projects = new Store()
+    this.controllerregistrations = new Store()
     this.ticketCache = createTicketCache()
   }
 
@@ -43,7 +44,7 @@ class Cache {
   */
   synchronize (client) {
     if (!this.synchronizationPromise) {
-      const keys = ['cloudprofiles', 'quotas', 'seeds', 'projects']
+      const keys = ['cloudprofiles', 'quotas', 'seeds', 'projects', 'controllerregistrations']
       const iteratee = key => initializeStoreSynchronization(this[key], client['core.gardener.cloud'][key])
       this.synchronizationPromise = Promise.all(keys.map(iteratee))
     }
@@ -71,6 +72,10 @@ class Cache {
 
   getProjects () {
     return this.list('projects')
+  }
+
+  getControllerRegistrations () {
+    return this.list('controllerregistrations')
   }
 
   getTicketCache () {
@@ -112,6 +117,9 @@ module.exports = {
   },
   getProjects () {
     return cache.getProjects()
+  },
+  getControllerRegistrations () {
+    return cache.getControllerRegistrations()
   },
   findProjectByNamespace (namespace) {
     const project = cache.projects.find(['spec.namespace', namespace])

@@ -55,11 +55,19 @@ describe('cache', function () {
   }
   Project.scope = 'Cluster'
 
+  class ControllerRegistration {
+    syncList (store) {
+      return replace(store, [a, c])
+    }
+  }
+  ControllerRegistration.scope = 'Cluster'
+
   const gardenerCore = {
     cloudprofiles: new CloudProfile(),
     quotas: new Quota(),
     seeds: new Seed(),
-    projects: new Project()
+    projects: new Project(),
+    controllerregistrations: new ControllerRegistration()
   }
 
   const testClient = {
@@ -97,6 +105,12 @@ describe('cache', function () {
     expect(stub).toBeCalledTimes(1)
   })
 
+  it('should dispatch "getControllerRegistrations" to internal cache', function () {
+    const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
+    expect(cache.getControllerRegistrations()).toEqual(list)
+    expect(stub).toBeCalledTimes(1)
+  })
+
   describe('Cache', function () {
     const Cache = internalCache.constructor
     let cache
@@ -110,12 +124,14 @@ describe('cache', function () {
       let syncQuotasSpy
       let syncSeedsSpy
       let syncProjectsSpy
+      let syncControllerregistrationsSpy
 
       beforeEach(function () {
         syncCloudprofilesSpy = jest.spyOn(gardenerCore.cloudprofiles, 'syncList')
         syncQuotasSpy = jest.spyOn(gardenerCore.quotas, 'syncListAllNamespaces')
         syncSeedsSpy = jest.spyOn(gardenerCore.seeds, 'syncList')
         syncProjectsSpy = jest.spyOn(gardenerCore.projects, 'syncList')
+        syncControllerregistrationsSpy = jest.spyOn(gardenerCore.controllerregistrations, 'syncList')
       })
 
       it('should syncronize the cache', async function () {
@@ -125,11 +141,13 @@ describe('cache', function () {
         expect(syncQuotasSpy).toBeCalledTimes(1)
         expect(syncSeedsSpy).toBeCalledTimes(1)
         expect(syncProjectsSpy).toBeCalledTimes(1)
+        expect(syncControllerregistrationsSpy).toBeCalledTimes(1)
         expect(cache.synchronizationPromise).toBeInstanceOf(Promise)
         expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).toEqual([a, c])
         expect(orderBy(cache.getQuotas(), 'metadata.uid')).toEqual([a, b, c])
         expect(orderBy(cache.getSeeds(), 'metadata.uid')).toEqual([a, b])
         expect(orderBy(cache.getProjects(), 'metadata.uid')).toEqual([a, b, c, d])
+        expect(orderBy(cache.getControllerRegistrations(), 'metadata.uid')).toEqual([a, c])
       })
     })
 

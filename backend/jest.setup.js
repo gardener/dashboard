@@ -118,6 +118,7 @@ jest.mock('./lib/cache', () => {
   cache.seeds.replace(fixtures.seeds.list())
   cache.quotas.replace(fixtures.quotas.list())
   cache.projects.replace(fixtures.projects.list())
+  cache.controllerregistrations.replace(fixtures.controllerregistrations.list())
   cache.ticketCache = createTicketCache()
   cache.resetTicketCache = () => (cache.ticketCache = createTicketCache())
   return originalCache

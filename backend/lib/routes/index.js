@@ -16,6 +16,7 @@ module.exports = {
   '/cloudprofiles': require('./cloudprofiles'),
   '/seeds': require('./seeds'),
   '/shoots': require('./shoots'),
+  '/controllerregistrations': require('./controllerregistrations'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),

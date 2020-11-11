@@ -313,3 +313,9 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
   }
   return invokeTerminalMethod('listProjectTerminalShortcuts', body)
 }
+
+/* Controller Registrations */
+
+export function getControllerRegistrations () {
+  return getResource('/api/controllerregistrations')
+}

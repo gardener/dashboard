@@ -96,6 +96,7 @@ function ensureDataLoaded (store, localStorage) {
       await Promise.all([
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
+        ensureControllerRegistrationsLoaded(store),
         ensureSeedsLoaded(store),
         ensureKubeconfigDataLoaded(store)
       ])
@@ -194,5 +195,11 @@ function ensureSeedsLoaded (store) {
 function ensureKubeconfigDataLoaded (store) {
   if (isEmpty(store.state.kubeconfigData)) {
     return store.dispatch('fetchKubeconfigData')
+  }
+}
+
+function ensureControllerRegistrationsLoaded (store) {
+  if (isEmpty(store.getters.controllerRegistrationList)) {
+    return store.dispatch('fetchControllerRegistrations')
   }
 }
