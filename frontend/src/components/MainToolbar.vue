@@ -35,8 +35,8 @@ SPDX-License-Identifier: Apache-2.0
               <v-progress-circular size="18" indeterminate v-if="!dashboardVersion"></v-progress-circular>
               <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
               <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
-              <v-expansion-panels flat>
-                <v-expansion-panel v-if="extensionCount && isAdmin">
+              <v-expansion-panels flat v-if="extensionCount && isAdmin">
+                <v-expansion-panel>
                   <v-expansion-panel-header class="caption" @click.native.stop>
                     {{extensionCount}} deployed extensions
                   </v-expansion-panel-header>
@@ -54,7 +54,6 @@ SPDX-License-Identifier: Apache-2.0
               </v-expansion-panels>
             </div>
           </v-card-title>
-          <v-divider></v-divider>
           <v-divider></v-divider>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
