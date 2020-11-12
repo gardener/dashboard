@@ -97,14 +97,14 @@ class MemberManager {
     return this.subjectList.members
   }
 
-  async deleteSecret (id) {
+  async rotateServiceAccountSecret (id) {
     const item = this.subjectList.get(id)
     if (!item) {
       return this.subjectList.members
     }
 
     if (!item.kind === 'ServiceAccount') {
-      throw new MethodNotAllowed('Member is not a ServiceAccount')
+      throw new UnprocessableEntity('Member is not a ServiceAccount')
     }
 
     await this.deleteServiceAccountSecret(item)
@@ -190,13 +190,13 @@ class MemberManager {
       return
     }
 
-    const secretName = _
+    const name = _
       .chain(item)
       .get('extensions.secrets')
       .head()
       .get('name')
       .value()
-    return await this.client.core.secrets.delete(namespace, secretName)
+    return await this.client.core.secrets.delete(namespace, name)
   }
 
   async getKubeconfig (item) {
