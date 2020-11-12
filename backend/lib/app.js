@@ -32,6 +32,8 @@ if (gitHubRepoUrl) {
   imgSrc.push(url.origin)
   url.hostname = 'avatars.' + url.hostname
   imgSrc.push(url.origin)
+  url.hostname = 'media.' + url.hostname
+  imgSrc.push(url.origin)
 }
 
 // configure app
