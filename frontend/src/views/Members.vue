@@ -375,8 +375,7 @@ export default {
       'addMember',
       'deleteMember',
       'rotateServiceAccountSecret',
-      'setError',
-      'set'
+      'setError'
     ]),
     openUserAddDialog () {
       this.userAddDialog = true

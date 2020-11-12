@@ -216,10 +216,10 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
-export function deleteServiceAccountSecret ({ namespace, name }) {
+export function rotateServiceAccountSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/members/${name}/secret`)
+  return createResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
 /* User */

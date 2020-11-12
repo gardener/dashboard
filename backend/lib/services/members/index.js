@@ -33,7 +33,7 @@ exports.remove = async function ({ user, namespace, name }) {
   return memberManager.delete(name)
 }
 
-exports.removeSecret = async function ({ user, namespace, name }) {
+exports.rotateSecret = async function ({ user, namespace, name }) {
   const memberManager = await MemberManager.create(user, namespace)
-  return memberManager.deleteSecret(name)
+  return memberManager.rotateServiceAccountSecret(name)
 }

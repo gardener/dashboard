@@ -7,7 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity, MethodNotAllowed } = require('http-errors')
+const { NotFound, Conflict, UnprocessableEntity } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
 
 const config = require('../../config')
@@ -108,8 +108,6 @@ class MemberManager {
     }
 
     await this.deleteServiceAccountSecret(item)
-
-    return this.subjectList.members
   }
 
   setItemRoles (item, roles) {
@@ -187,7 +185,7 @@ class MemberManager {
   async deleteServiceAccountSecret (item) {
     const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      throw new UnprocessableEntity(`ServiceAccount namespace ${namespace} does not match project namespace this.namespace`)
     }
 
     const name = _
