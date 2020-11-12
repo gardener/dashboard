@@ -100,7 +100,7 @@ class MemberManager {
   async rotateServiceAccountSecret (id) {
     const item = this.subjectList.get(id)
     if (!item) {
-      return this.subjectList.members
+      return
     }
 
     if (!item.kind === 'ServiceAccount') {
@@ -127,7 +127,7 @@ class MemberManager {
   async createServiceAccount (item, { createdBy, description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      return // do not throw an error as it is allowed to add foreign service accounts
     }
 
     const serviceAccount = await this.client.core.serviceaccounts.create(namespace, {
@@ -157,7 +157,7 @@ class MemberManager {
   async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      throw new UnprocessableEntity(`ServiceAccount namespace ${namespace} does not match project namespace this.namespace`)
     }
 
     const isDirty = item.extend({ description })
@@ -175,7 +175,7 @@ class MemberManager {
   async deleteServiceAccount (item) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      return // do not throw an error as it is allowed to add foreign service accounts
     }
 
     await this.client.core.serviceaccounts.delete(namespace, name)
@@ -186,6 +186,10 @@ class MemberManager {
     const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
       throw new UnprocessableEntity(`ServiceAccount namespace ${namespace} does not match project namespace this.namespace`)
+    }
+
+    if (_.get(item, 'extensions.secrets.length') > 1) {
+      throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
     }
 
     const name = _

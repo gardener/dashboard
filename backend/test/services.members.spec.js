@@ -121,7 +121,12 @@ describe('services', function () {
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          }
+        ]
       },
       {
         metadata: {
@@ -141,7 +146,15 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          },
+          {
+            name: 'secret-2'
+          }
+        ]
       },
       {
         metadata: {
@@ -186,6 +199,12 @@ describe('services', function () {
           await delay(1)
         }),
         mergePatch: sandbox.stub().callsFake(async (namespace, name, body) => {
+          await delay(1)
+        })
+      }
+
+      client.core.secrets = {
+        delete: sandbox.stub().callsFake(async (namespace, name) => {
           await delay(1)
         })
       }
@@ -394,6 +413,15 @@ describe('services', function () {
       })
 
       describe('#deleteServiceAccount', function () {
+        it('should delete a serviceaccount', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).to.have.been.calledOnce
+        })
+      })
+
+      describe('#deleteServiceAccount', function () {
         it('should not delete a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
@@ -403,11 +431,50 @@ describe('services', function () {
       })
 
       describe('#updateServiceAccount ', function () {
-        it('should not delete a serviceaccount from a different namespace', async function () {
+        it('should not update a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await memberManager.updateServiceAccount(item, {})
-          expect(client.core.serviceaccounts.mergePatch).to.not.have.been.called
+          try {
+            await memberManager.updateServiceAccount(item, {})
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(UnprocessableEntity)
+          }
+        })
+      })
+
+      describe('#deleteServiceAccountSecret', function () {
+        it('should delete a serviceaccount secret', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccountSecret(item)
+          expect(client.core.secrets.delete).to.have.been.calledOnce
+        })
+      })
+
+      describe('#deleteServiceAccountSecret', function () {
+        it('should not delete a serviceaccount secret from a different namespace', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          try {
+            await memberManager.deleteServiceAccountSecret(item)
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(UnprocessableEntity)
+          }
+        })
+      })
+
+      describe('#deleteServiceAccountSecret', function () {
+        it('should not delete a service account secret if there is one more secret attached', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          try {
+            await memberManager.deleteServiceAccountSecret(item)
+            expect.fail('should throw an error')
+          } catch (err) {
+            expect(err).to.be.instanceof(UnprocessableEntity)
+          }
         })
       })
     })

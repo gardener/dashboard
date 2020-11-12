@@ -302,13 +302,16 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body).to.eql(expectedBody)
   })
 
-  it('should delete a service account secret', async function () {
+  it('should rotate a service account secret', async function () {
     const bearer = await user.bearer
     const name = 'system:serviceaccount:garden-foo:robot'
     k8s.stub.removeServiceAccountSecret({ bearer, namespace, name })
     const res = await agent
-      .delete(`/api/namespaces/${namespace}/members/${name}/secret`)
+      .post(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
+      .send({
+        method: 'rotateSecret'
+      })
 
     expect(res).to.have.status(200)
   })

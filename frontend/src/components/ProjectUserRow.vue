@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td>
-      <account-roles :role-display-names="item.roleDisplayNames"></account-roles>
+      <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
     </td>
     <td>
       <div class="d-flex flex-row">
@@ -57,12 +57,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
-import AccountRoles from '@/components/AccountRoles'
+import MemberAccountRoles from '@/components/MemberAccountRoles'
 
 export default {
   name: 'project-user-row',
   components: {
-    AccountRoles
+    MemberAccountRoles
   },
   props: {
     item: {

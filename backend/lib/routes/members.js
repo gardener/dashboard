@@ -60,7 +60,13 @@ router.route('/:name')
     try {
       const user = req.user
       const { namespace, name } = req.params
-      res.send(await members.rotateSecret({ user, namespace, name }))
+      const { method } = req.body
+
+      if (method === 'rotateSecret') {
+        res.send(await members.rotateSecret({ user, namespace, name }))
+      } else {
+        throw new Error(`${method} not allowed for members`)
+      }
     } catch (err) {
       next(err)
     }
