@@ -126,9 +126,7 @@ function ensureDataLoaded (store) {
           break
         }
         case 'ShootList': {
-          const promises = [
-            store.dispatch('subscribeShoots')
-          ]
+          const promises = []
           if (store.getters.canUseProjectTerminalShortcuts) {
             promises.push(store.dispatch('ensureProjectTerminalShortcutsLoaded'))
           }

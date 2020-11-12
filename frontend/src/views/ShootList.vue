@@ -174,6 +174,7 @@ import { mapGetters, mapActions, mapState } from 'vuex'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import defaults from 'lodash/defaults'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
@@ -238,9 +239,9 @@ export default {
       setSelectedShootInternal: 'setSelectedShoot',
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
-      setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
       setShootListFilters: 'setShootListFilters',
-      setShootListFilter: 'setShootListFilter'
+      setShootListFilter: 'setShootListFilter',
+      subscribeShoots: 'subscribeShoots'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -314,9 +315,12 @@ export default {
       }
     },
     toggleFilter (key) {
-      if (this.showOnlyShootsWithIssues) {
-        const filters = this.getShootListFilters
-        this.setShootListFilter({ filter: key, value: !filters[key] })
+      const filters = this.getShootListFilters
+      this.setShootListFilter({ filter: key, value: !filters[key] })
+      this.$localStorage.setObject('shootListFilter', pick(filters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+
+      if (key === 'onlyShootsWithIssues') {
+        this.subscribeShoots()
       }
     },
     isFilterActive (key) {
@@ -343,11 +347,11 @@ export default {
       canPatchShoots: 'canPatchShoots',
       canDeleteShoots: 'canDeleteShoots',
       canCreateShoots: 'canCreateShoots',
-      canGetSecrets: 'canGetSecrets'
+      canGetSecrets: 'canGetSecrets',
+      onlyShootsWithIssues: 'onlyShootsWithIssues'
     }),
     ...mapState([
       'shootsLoading',
-      'onlyShootsWithIssues',
       'cfg',
       'namespace'
     ]),
@@ -378,7 +382,7 @@ export default {
         return this.onlyShootsWithIssues
       },
       set (value) {
-        this.setOnlyShootsWithIssues(value)
+        this.toggleFilter('onlyShootsWithIssues')
       }
     },
     items () {
@@ -420,20 +424,26 @@ export default {
     this.floatingButton = true
     this.loadColumnsChecked()
     this.setColumnVisibility()
-    this.setShootListFilters({
+
+    const defaultFilter = {
+      onlyShootsWithIssues: true,
       progressing: true,
       userIssues: this.isAdmin,
       deactivatedReconciliation: this.isAdmin,
       hideTicketsWithLabel: this.isAdmin
-    })
+    }
+    const shootListFilters = defaults(this.$localStorage.getObject('shootListFilter'), defaultFilter)
+    this.setShootListFilters(shootListFilters)
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
+      vm.subscribeShoots()
     })
   },
   beforeRouteUpdate (to, from, next) {
     this.search = null
+    this.subscribeShoots()
     next()
   },
   beforeRouteLeave (to, from, next) {

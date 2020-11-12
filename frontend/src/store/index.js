@@ -81,7 +81,6 @@ const state = {
     incomplete: false,
     evaluationError: null
   },
-  onlyShootsWithIssues: true,
   sidebar: true,
   user: null,
   redirectPath: null,
@@ -132,8 +131,11 @@ class Shortcut {
   }
 }
 
-const getFilterValue = (state) => {
-  return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
+const getFilterValue = (getters) => {
+  if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
+    return 'issues'
+  }
+  return null
 }
 
 const vendorNameFromImageName = imageName => {
@@ -922,6 +924,9 @@ const getters = {
   },
   isKubeconfigEnabled (state) {
     return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
+  },
+  onlyShootsWithIssues (state, getters) {
+    return getters['shoots/onlyShootsWithIssues']
   }
 }
 
@@ -1067,9 +1072,9 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  async subscribeShoots ({ dispatch, commit, state }) {
+  async subscribeShoots ({ dispatch, commit, state, getters }) {
     try {
-      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(getters) })
     } catch (err) { /* ignore error */ }
   },
   async subscribeComments ({ dispatch, commit }, { name, namespace }) {
@@ -1094,17 +1099,19 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListFilters ({ dispatch, commit }, value) {
-    return dispatch('shoots/setShootListFilters', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilters ({ dispatch, getters }, value) {
+    try {
+      await dispatch('shoots/setShootListFilters', value)
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
-  setShootListFilter ({ dispatch, commit }, { filter, value }) {
-    return dispatch('shoots/setShootListFilter', { filter, value })
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilter ({ dispatch, getters }, { filter, value }) {
+    try {
+      await dispatch('shoots/setShootListFilter', { filter, value })
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   setShootListSearchValue ({ dispatch }, searchValue) {
     return dispatch('shoots/setListSearchValue', searchValue)
@@ -1243,10 +1250,6 @@ const actions = {
       }
     }
   },
-  setOnlyShootsWithIssues ({ commit }, value) {
-    commit('SET_ONLYSHOOTSWITHISSUES', value)
-    return state.onlyShootsWithIssues
-  },
   setUser ({ dispatch, commit }, value) {
     commit('SET_USER', value)
     return state.user
@@ -1335,11 +1338,6 @@ const mutations = {
   },
   SET_PROJECT_TERMINAL_SHORTCUTS (state, value) {
     state.projectTerminalShortcuts = value
-  },
-  SET_ONLYSHOOTSWITHISSUES (state, value) {
-    state.onlyShootsWithIssues = value
-    // subscribe again for shoots as the filter has changed
-    EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
   },
   SET_USER (state, value) {
     state.user = value
