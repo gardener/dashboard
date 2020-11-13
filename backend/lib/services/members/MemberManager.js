@@ -157,7 +157,7 @@ class MemberManager {
   async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new UnprocessableEntity(`ServiceAccount namespace ${namespace} does not match project namespace this.namespace`)
+      throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
     }
 
     const isDirty = item.extend({ description })
@@ -185,10 +185,10 @@ class MemberManager {
   async deleteServiceAccountSecret (item) {
     const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new UnprocessableEntity(`ServiceAccount namespace ${namespace} does not match project namespace this.namespace`)
+   throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
     }
 
-    if (_.get(item, 'extensions.secrets.length') > 1) {
+    if (_.size(item, 'extensions.secrets') > 1) {
       throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
     }
 

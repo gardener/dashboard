@@ -62,10 +62,12 @@ router.route('/:name')
       const { namespace, name } = req.params
       const { method } = req.body
 
-      if (method === 'rotateSecret') {
-        res.send(await members.rotateSecret({ user, namespace, name }))
-      } else {
-        throw new Error(`${method} not allowed for members`)
+      switch (method) {
+        case 'rotateSecret':
+          res.send(await members.rotateSecret({ user, namespace, name }))
+          break
+        default:
+          throw new UnprocessableEntity(`${method} not allowed for members`)
       }
     } catch (err) {
       next(err)
