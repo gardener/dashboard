@@ -131,7 +131,7 @@ class Shortcut {
   }
 }
 
-const getFilterValue = (getters) => {
+function getFilterValue (state, getters) {
   if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
     return 'issues'
   }
@@ -1074,7 +1074,7 @@ const actions = {
   },
   async subscribeShoots ({ dispatch, commit, state, getters }) {
     try {
-      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(getters) })
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state, getters) })
     } catch (err) { /* ignore error */ }
   },
   async subscribeComments ({ dispatch, commit }, { name, namespace }) {
