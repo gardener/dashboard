@@ -8,6 +8,7 @@
 
 const express = require('express')
 const { members } = require('../services')
+const { UnprocessableEntity } = require('http-errors')
 
 const router = module.exports = express.Router({
   mergeParams: true

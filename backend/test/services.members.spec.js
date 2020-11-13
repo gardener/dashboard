@@ -393,6 +393,7 @@ describe('services', function () {
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(UnprocessableEntity)
+            expect(err.message).to.match(/At least one role is required/)
           }
         })
 
@@ -417,7 +418,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).to.have.been.calledOnce
+          expect(client.core.serviceaccounts.delete).to.have.been.calledOnceWithExactly('garden-foo', 'robot-sa')
         })
       })
 
@@ -439,6 +440,7 @@ describe('services', function () {
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(UnprocessableEntity)
+            expect(err.message).to.match(/It is not possible to modify ServiceAccount from another namespace/)
           }
         })
       })
@@ -448,7 +450,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccountSecret(item)
-          expect(client.core.secrets.delete).to.have.been.calledOnce
+          expect(client.core.secrets.delete).to.have.been.calledOnceWithExactly('garden-foo', 'secret-1')
         })
       })
 
@@ -461,19 +463,21 @@ describe('services', function () {
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(UnprocessableEntity)
+            expect(err.message).to.match(/It is not possible to modify a ServiceAccount from another namespace/)
           }
         })
       })
 
       describe('#deleteServiceAccountSecret', function () {
         it('should not delete a service account secret if there is one more secret attached', async function () {
-          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const id = 'system:serviceaccount:garden-foo:robot-multiple'
           const item = memberManager.subjectList.get(id)
           try {
             await memberManager.deleteServiceAccountSecret(item)
             expect.fail('should throw an error')
           } catch (err) {
             expect(err).to.be.instanceof(UnprocessableEntity)
+            expect(err.message).to.match(/ServiceAccount .* has more than one secret/)
           }
         })
       })

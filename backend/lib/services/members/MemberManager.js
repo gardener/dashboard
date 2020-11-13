@@ -185,10 +185,10 @@ class MemberManager {
   async deleteServiceAccountSecret (item) {
     const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-   throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
+      throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-    if (_.size(item, 'extensions.secrets') > 1) {
+    if (_.size(_.get(item, 'extensions.secrets')) > 1) {
       throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
     }
 
