@@ -23,10 +23,12 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td>
-      <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
+      <div class="d-flex justify-end">
+        <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
+      </div>
     </td>
-    <td>
-      <div class="d-flex flex-row">
+    <td width="250px">
+      <div class="d-flex flex-row justify-end">
         <div v-if="canManageMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">

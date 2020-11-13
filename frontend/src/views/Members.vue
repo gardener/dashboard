@@ -47,8 +47,6 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="userAccountTableHeaders"
         :items="sortedAndFilteredUserList"
-        disable-pagination
-        hide-default-footer
       >
         <template v-slot:item="{ item }">
           <project-user-row
@@ -99,8 +97,6 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="serviceAccountTableHeaders"
         :items="sortedAndFilteredServiceAccountList"
-        disable-pagination
-        hide-default-footer
       >
         <template v-slot:item="{ item }">
           <project-service-account-row
@@ -245,13 +241,13 @@ export default {
         },
         {
           text: 'Roles',
-          align: 'start',
+          align: 'end',
           value: 'roles',
           sortable: false
         },
         {
           text: 'Actions',
-          align: 'start',
+          align: 'end',
           value: 'actions',
           sortable: false
         }
@@ -265,13 +261,13 @@ export default {
         },
         {
           text: 'Roles',
-          align: 'start',
+          align: 'end',
           value: 'roles',
           sortable: false
         },
         {
           text: 'Actions',
-          align: 'start',
+          align: 'end',
           value: 'actions',
           sortable: false
         }
