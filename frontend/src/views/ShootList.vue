@@ -174,7 +174,6 @@ import { mapGetters, mapActions, mapState } from 'vuex'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import defaults from 'lodash/defaults'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
@@ -424,26 +423,14 @@ export default {
     this.floatingButton = true
     this.loadColumnsChecked()
     this.setColumnVisibility()
-
-    const defaultFilter = {
-      onlyShootsWithIssues: true,
-      progressing: true,
-      userIssues: this.isAdmin,
-      deactivatedReconciliation: this.isAdmin,
-      hideTicketsWithLabel: this.isAdmin
-    }
-    const shootListFilters = defaults(this.$localStorage.getObject('shootListFilter'), defaultFilter)
-    this.setShootListFilters(shootListFilters)
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
-      vm.subscribeShoots()
     })
   },
   beforeRouteUpdate (to, from, next) {
     this.search = null
-    this.subscribeShoots()
     next()
   },
   beforeRouteLeave (to, from, next) {
