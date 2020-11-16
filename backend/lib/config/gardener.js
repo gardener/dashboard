@@ -70,9 +70,6 @@ module.exports = {
     }
   },
   getFilename ({ argv, env } = process) {
-    if (/^test/.test(env.NODE_ENV)) {
-      return joinPath(__dirname, 'test.yaml')
-    }
     if (env.GARDENER_CONFIG) {
       return env.GARDENER_CONFIG
     }

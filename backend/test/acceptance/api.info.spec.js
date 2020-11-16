@@ -21,9 +21,9 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(403)
     expect(res).to.be.json
-    expect(res.body.reason).to.equal('Forbidden')
-    expect(res.body.details).to.have.property('name').that.is.equal('ForbiddenError')
-    expect(res.body.message).to.include('CSRF protection')
+    expect(res.body.reason).toBe('Forbidden')
+    expect(res.body.details).to.have.property('name').toBe('ForbiddenError')
+    expect(res.body.message).toEqual(expect.arrayContaining(['CSRF protection']))
   })
 
   it('should reject requests without authorization header', async function () {
@@ -32,9 +32,9 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.reason).to.equal('Unauthorized')
-    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
-    expect(res.body.message).to.include('authorization token')
+    expect(res.body.reason).toBe('Unauthorized')
+    expect(res.body.details).to.have.property('name').toBe('UnauthorizedError')
+    expect(res.body.message).toEqual(expect.arrayContaining(['authorization token']))
   })
 
   it('should reject requests with invalid signature', async function () {
@@ -45,9 +45,9 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.reason).to.equal('Unauthorized')
-    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
-    expect(res.body.message).to.include('invalid signature')
+    expect(res.body.reason).toBe('Unauthorized')
+    expect(res.body.details).to.have.property('name').toBe('UnauthorizedError')
+    expect(res.body.message).toEqual(expect.arrayContaining(['invalid signature']))
   })
 
   it('should reject requests with invalid audience', async function () {
@@ -58,9 +58,9 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.reason).to.equal('Unauthorized')
-    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
-    expect(res.body.message).to.include('audience invalid')
+    expect(res.body.reason).toBe('Unauthorized')
+    expect(res.body.details).to.have.property('name').toBe('UnauthorizedError')
+    expect(res.body.message).toEqual(expect.arrayContaining(['audience invalid']))
   })
 
   it('should return information with version', async function () {
@@ -73,10 +73,10 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('version').that.is.equal(version)
-    expect(res.body.gardenerVersion).to.have.property('major').that.is.equal(gardenerVersion.major)
-    expect(res.body.gardenerVersion).to.have.property('minor').that.is.equal(gardenerVersion.minor)
-    expect(res.body).not.to.have.property('user')
+    expect(res.body).to.have.property('version').toBe(version)
+    expect(res.body.gardenerVersion).to.have.property('major').toBe(gardenerVersion.major)
+    expect(res.body.gardenerVersion).to.have.property('minor').toBe(gardenerVersion.minor)
+    expect(res.body).not.toHaveProperty('user')
   })
 
   it('should return information without version', async function () {
@@ -88,8 +88,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('version').that.is.equal(version)
-    expect(res.body).not.to.have.property('gardenerVersion')
-    expect(res.body).not.to.have.property('user')
+    expect(res.body).to.have.property('version').toBe(version)
+    expect(res.body).not.toHaveProperty('gardenerVersion')
+    expect(res.body).not.toHaveProperty('user')
   })
 }

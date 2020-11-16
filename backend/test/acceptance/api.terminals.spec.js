@@ -142,7 +142,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql([
+    expect(res.body).toEqual([
       shortcut1
     ])
   })
@@ -172,7 +172,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql([])
+    expect(res.body).toEqual([])
   })
 
   it('should return empty shortcut list for non existing secret', async function () {
@@ -196,7 +196,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql([])
+    expect(res.body).toEqual([])
   })
 
   describe('garden', function () {
@@ -226,7 +226,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -270,11 +270,11 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         }
       })
       const { metadata: { annotations } } = interceptor.replyFunction()
-      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
+      expect(annotations['dashboard.gardener.cloud/operation']).toBe('keepalive')
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -334,7 +334,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(watchBuilderStub).to.have.been.calledTwice
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -371,7 +371,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         container: {
           image: 'dummyImage:1.0.0'
         }
@@ -421,7 +421,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         name,
         namespace
       })
@@ -460,7 +460,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -497,7 +497,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         container: {
           image: 'dummyImage:1.0.0'
         }
@@ -561,7 +561,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -610,11 +610,11 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         }
       })
       const { metadata: { annotations } } = interceptor.replyFunction()
-      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
+      expect(annotations['dashboard.gardener.cloud/operation']).toBe('keepalive')
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         metadata: {
           namespace,
           name
@@ -651,7 +651,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         container: {
           image: 'dummyImage:1.0.0'
         },
@@ -690,7 +690,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql([{
+      expect(res.body).toEqual([{
         metadata: {
           name: 'foo1',
           namespace: 'foo',

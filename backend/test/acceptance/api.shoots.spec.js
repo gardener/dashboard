@@ -50,7 +50,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.items).to.have.length(3)
+    expect(res.body.items).toHaveLength(3)
   })
 
   it('should create a shoot', async function () {
@@ -69,8 +69,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
-    expect(res.body.spec).to.eql(spec)
+    expect(res.body.metadata).toEqual({ name, namespace, resourceVersion, annotations })
+    expect(res.body.spec).toEqual(spec)
   })
 
   it('should return a shoot', async function () {
@@ -82,8 +82,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, uid, annotations })
-    expect(res.body.spec).to.eql(spec)
+    expect(res.body.metadata).toEqual({ name, namespace, uid, annotations })
+    expect(res.body.spec).toEqual(spec)
   })
 
   it('should delete a shoot', async function () {
@@ -99,7 +99,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ namespace, annotations: deleteAnnotations, resourceVersion })
+    expect(res.body.metadata).toEqual({ namespace, annotations: deleteAnnotations, resourceVersion })
   })
 
   it('should return shoot info', async function () {
@@ -121,14 +121,14 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(2)
-    expect(_.keys(res.body).length).to.equal(7)
-    expect(res.body).to.have.own.property('kubeconfig')
-    expect(res.body.canLinkToSeed).to.equal(true)
-    expect(res.body.cluster_username).to.eql(shootUser)
-    expect(res.body.cluster_password).to.eql(shootPassword)
-    expect(res.body.serverUrl).to.eql(shootServerUrl)
-    expect(res.body.dashboardUrlPath).to.eql(dashboardUrlPath)
-    expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
+    expect(_.keys(res.body).length).toBe(7)
+    expect(res.body).toHaveProperty('kubeconfig')
+    expect(res.body.canLinkToSeed).toBe(true)
+    expect(res.body.cluster_username).toEqual(shootUser)
+    expect(res.body.cluster_password).toEqual(shootPassword)
+    expect(res.body.serverUrl).toEqual(shootServerUrl)
+    expect(res.body.dashboardUrlPath).toEqual(dashboardUrlPath)
+    expect(res.body.seedShootIngressDomain).toEqual(seedShootIngressDomain)
   })
 
   it('should return shoot seed info', async function () {
@@ -147,9 +147,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(1)
-    expect(_.keys(res.body).length).to.equal(2)
-    expect(res.body.monitoring_username).to.eql(monitoringUser)
-    expect(res.body.monitoring_password).to.eql(monitoringPassword)
+    expect(_.keys(res.body).length).toBe(2)
+    expect(res.body.monitoring_username).toEqual(monitoringUser)
+    expect(res.body.monitoring_password).toEqual(monitoringPassword)
   })
 
   it('should not return shoot seed info when seed.spec.secretRef missing', async function () {
@@ -165,7 +165,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(_.keys(res.body).length).to.equal(0)
+    expect(_.keys(res.body).length).toBe(0)
     expect(infoSpy).to.be.calledOnce
   })
 
@@ -191,13 +191,13 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const body = res.body
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(body.spec).to.eql(spec)
+    expect(body.spec).toEqual(spec)
     const actLabels = body.metadata.labels
     const expLabels = metadata.labels
-    expect(actLabels).to.eql(expLabels)
+    expect(actLabels).toEqual(expLabels)
     const actCreatedBy = body.metadata.annotations['gardener.cloud/created-by']
     const expCreatedBy = 'baz@example.org'
-    expect(actCreatedBy).to.equal(expCreatedBy)
+    expect(actCreatedBy).toBe(expCreatedBy)
   })
 
   it('should replace shoot kubernetes version', async function () {
@@ -211,7 +211,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.kubernetes.version).to.eql(version.version)
+    expect(res.body.spec.kubernetes.version).toEqual(version.version)
   })
 
   it('should replace shoot maintenance data', async function () {
@@ -237,7 +237,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.maintenance).to.eql(maintenance)
+    expect(res.body.spec.maintenance).toEqual(maintenance)
   })
 
   it('should replace shoot workers', async function () {
@@ -262,7 +262,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.provider).to.eql(data)
+    expect(res.body.spec.provider).toEqual(data)
   })
 
   it('should replace hibernation enabled', async function () {
@@ -276,7 +276,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.hibernation.enabled).to.equal(enabled)
+    expect(res.body.spec.hibernation.enabled).toBe(enabled)
   })
 
   it('should replace hibernation schedules', async function () {
@@ -294,7 +294,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.hibernation.schedules).to.eql(hibernationSchedules)
+    expect(res.body.spec.hibernation.schedules).toEqual(hibernationSchedules)
   })
 
   it('should patch annotations', async function () {
@@ -308,7 +308,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata.annotations).to.eql(Object.assign({}, annotations, patchedAnnotations))
+    expect(res.body.metadata.annotations).toEqual(Object.assign({}, annotations, patchedAnnotations))
   })
 
   it('should replace purpose', async function () {
@@ -322,6 +322,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.purpose).to.equal(purpose)
+    expect(res.body.spec.purpose).toBe(purpose)
   })
 }

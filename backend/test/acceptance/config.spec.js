@@ -15,8 +15,8 @@ module.exports = function ({ agent }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('helpMenuItems').that.is.an('array')
-    expect(res.body.helpMenuItems).to.have.length(3)
-    expect(res.body.landingPageUrl).to.equal('https://gardener.cloud/')
+    expect(Array.isArray(res.body)).toBe(true)
+    expect(res.body.helpMenuItems).toHaveLength(3)
+    expect(res.body.landingPageUrl).toBe('https://gardener.cloud/')
   })
 }

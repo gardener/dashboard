@@ -26,10 +26,10 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(8)
+    expect(res.body).toHaveLength(8)
     let predicate = item => item.metadata.name === 'infra1-seed'
-    expect(_.find(res.body, predicate).metadata.unreachable).to.be.false
+    expect(_.find(res.body, predicate).metadata.unreachable).toBe(false)
     predicate = item => item.metadata.name === 'infra3-seed'
-    expect(_.find(res.body, predicate).metadata.unreachable).to.be.true
+    expect(_.find(res.body, predicate).metadata.unreachable).toBe(true)
   })
 }

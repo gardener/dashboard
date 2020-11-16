@@ -16,7 +16,7 @@ module.exports = function ({ agent, k8s }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql({ status: 'ok' })
+    expect(res.body).toEqual({ status: 'ok' })
   })
 
   it('should return the backend healthz status', async function () {
@@ -25,6 +25,6 @@ module.exports = function ({ agent, k8s }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql({ status: 'ok' })
+    expect(res.body).toEqual({ status: 'ok' })
   })
 }

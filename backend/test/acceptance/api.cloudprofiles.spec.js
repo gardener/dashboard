@@ -27,14 +27,14 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(4)
+    expect(res.body).toHaveLength(4)
     let predicate = item => item.metadata.name === 'infra1-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(3)
+    expect(_.find(res.body, predicate).data.seedNames).toHaveLength(3)
     predicate = item => item.metadata.name === 'infra1-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
+    expect(_.find(res.body, predicate).data.seedNames).toHaveLength(2)
     predicate = item => item.metadata.name === 'infra3-profileName'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(1)
+    expect(_.find(res.body, predicate).data.seedNames).toHaveLength(1)
     predicate = item => item.metadata.name === 'infra3-profileName2'
-    expect(_.find(res.body, predicate).data.seedNames).to.have.length(2)
+    expect(_.find(res.body, predicate).data.seedNames).toHaveLength(2)
   })
 }

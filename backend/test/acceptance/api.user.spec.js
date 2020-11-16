@@ -25,7 +25,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql({
+    expect(res.body).toEqual({
       isAdmin: false
     })
   })
@@ -38,7 +38,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.token).to.equal(bearer)
+    expect(res.body.token).toBe(bearer)
   })
 
   it('should return selfsubjectrules for the user', async function () {
@@ -53,10 +53,10 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('resourceRules')
-    expect(res.body).to.have.property('nonResourceRules')
-    expect(res.body).to.have.property('incomplete')
-    expect(res.body.resourceRules.length).to.equal(2)
+    expect(res.body).toHaveProperty('resourceRules')
+    expect(res.body).toHaveProperty('nonResourceRules')
+    expect(res.body).toHaveProperty('incomplete')
+    expect(res.body.resourceRules.length).toBe(2)
   })
 
   it('should return the kubeconfig data the user', async function () {
@@ -67,7 +67,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql({
+    expect(res.body).toEqual({
       server: apiServerUrl,
       certificateAuthorityData: apiServerCaData,
       oidc: {

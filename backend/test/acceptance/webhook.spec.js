@@ -63,7 +63,7 @@ module.exports = function ({ agent, sandbox, github }) {
 
   it('should initialize the cache with all open issues', function () {
     const issues = cache.getIssues()
-    expect(issues).to.have.length(3)
+    expect(issues).toHaveLength(3)
   })
 
   describe('event "issues"', function () {
@@ -101,7 +101,7 @@ module.exports = function ({ agent, sandbox, github }) {
 
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
-      expect(issues).to.have.length(4)
+      expect(issues).toHaveLength(4)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
       expect(issue).to.be.not.undefined
       expect(issue.data.body).to.equal(githubIssue.body)
@@ -125,7 +125,7 @@ module.exports = function ({ agent, sandbox, github }) {
 
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
       expect(issue).to.be.not.undefined
       expect(issue.data.body).to.equal(githubIssue.body)
@@ -148,7 +148,7 @@ module.exports = function ({ agent, sandbox, github }) {
 
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
-      expect(issues).to.have.length(2)
+      expect(issues).toHaveLength(2)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
       expect(issue).to.be.undefined
       expect(issueEvent.type).to.equal('DELETED')
@@ -172,7 +172,7 @@ module.exports = function ({ agent, sandbox, github }) {
 
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
-      expect(issues).to.have.length(4)
+      expect(issues).toHaveLength(4)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
       expect(issue).to.be.not.undefined
       expect(issue.data.body).to.equal(githubIssue.body)
@@ -231,12 +231,12 @@ module.exports = function ({ agent, sandbox, github }) {
       expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.comments).to.equal(githubIssue.comments)
-      expect(issueEvent.type).to.equal('MODIFIED')
-      expect(issueEvent.object).to.eql(issue)
+      expect(issue).toBeDefined()
+      expect(issue.data.comments).toBe(githubIssue.comments)
+      expect(issueEvent.type).toBe('MODIFIED')
+      expect(issueEvent.object).toEqual(issue)
       // comments
       const comments = cache.getCommentsForIssue({ issueNumber: githubIssue.number })
       expect(commentEvent.type).to.equal('ADDED')
@@ -264,12 +264,12 @@ module.exports = function ({ agent, sandbox, github }) {
       expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.comments).to.equal(githubIssue.comments)
-      expect(issueEvent.type).to.equal('MODIFIED')
-      expect(issueEvent.object).to.eql(issue)
+      expect(issue).toBeDefined()
+      expect(issue.data.comments).toBe(githubIssue.comments)
+      expect(issueEvent.type).toBe('MODIFIED')
+      expect(issueEvent.object).toEqual(issue)
       // comments
       const comments = cache.getCommentsForIssue({ issueNumber: githubIssue.number })
       expect(commentEvent.type).to.equal('DELETED')

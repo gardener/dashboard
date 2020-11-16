@@ -29,7 +29,7 @@ exports.teardown = teardown
 function verifyAndCleanAll () {
   try {
     // eslint-disable-next-line no-unused-expressions
-    expect(nock.isDone()).to.be.true
+    expect(nock.isDone()).toBe(true)
   } catch (err) {
     console.error('pending mocks:', nock.pendingMocks())
     throw err

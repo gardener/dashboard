@@ -30,6 +30,6 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot').that.is.eql({ type: 'object' })
+    expect(res.body).to.have.property('com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot').toEqual({ type: 'object' })
   })
 }

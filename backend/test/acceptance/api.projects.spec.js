@@ -43,7 +43,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(3)
+    expect(res.body).toHaveLength(3)
   })
 
   it('should return all projects', async function () {
@@ -55,7 +55,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(6)
+    expect(res.body).toHaveLength(6)
   })
 
   it('should return the foo project', async function () {
@@ -68,7 +68,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
+    expect(res.body.metadata).toEqual({ name, namespace, annotations, resourceVersion, role })
   })
 
   it('should reject request with authorization error', async function () {
@@ -81,8 +81,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(403)
     expect(res).to.be.json
-    expect(res.body.code).to.equal(403)
-    expect(res.body.reason).to.equal('Forbidden')
+    expect(res.body.code).toBe(403)
+    expect(res.body.reason).toBe('Forbidden')
   })
 
   it('should create a project', async function () {
@@ -128,8 +128,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(watchStub).to.have.been.calledOnce
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
-    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
+    expect(res.body.metadata).toEqual({ name, namespace, annotations, resourceVersion, role })
+    expect(res.body.data).toEqual({ createdBy, owner, description, purpose })
   })
 
   it('should timeout when creating a project', async function () {
@@ -174,7 +174,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(watchStub).to.have.been.calledOnce
     expect(res).to.have.status(504)
     expect(res).to.be.json
-    expect(res.body.message).to.equal(`Resource "${name}" could not be initialized within ${timeout} ms`)
+    expect(res.body.message).toBe(`Resource "${name}" could not be initialized within ${timeout} ms`)
   })
 
   it('should update a project', async function () {
@@ -190,8 +190,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
-    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
+    expect(res.body.metadata).toEqual({ name, namespace, annotations, resourceVersion, role })
+    expect(res.body.data).toEqual({ createdBy, owner, description, purpose })
   })
 
   it('should patch a project', async function () {
@@ -207,7 +207,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.data.description).to.equal(description)
+    expect(res.body.data.description).toBe(description)
   })
 
   it('should delete a project', async function () {
@@ -220,7 +220,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata.name).to.equal(name)
-    expect(res.body.metadata.namespace).to.equal(namespace)
+    expect(res.body.metadata.name).toBe(name)
+    expect(res.body.metadata.namespace).toBe(namespace)
   })
 }

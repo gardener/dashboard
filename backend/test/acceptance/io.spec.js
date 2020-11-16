@@ -52,8 +52,8 @@ module.exports = function ({ sandbox, auth }) {
       ioServer = io()
       for (const stub of Object.values(watches)) {
         expect(stub).to.be.calledOnce
-        expect(stub.firstCall.args).to.have.length(1)
-        expect(stub.firstCall.args[0]).to.be.equal(ioServer)
+        expect(stub.firstCall.args).toHaveLength(1)
+        expect(stub.firstCall.args[0]).toBe(ioServer)
       }
       expect(getTicketCacheStub).to.be.calledOnce
       ioServer.attach(server)
@@ -146,7 +146,7 @@ module.exports = function ({ sandbox, auth }) {
       listShootsStub = sandbox.stub(shoots, 'list')
       readShootStub = sandbox.stub(shoots, 'read')
       socket = await connect('shoots')
-      expect(socket.connected).to.be.true
+      expect(socket.connected).toBe(true)
       expect(createClientStub).to.be.calledOnce
       const bearer = await user.bearer
       expect(createClientStub).to.be.calledWith({ auth: { bearer } })
@@ -164,7 +164,7 @@ module.exports = function ({ sandbox, auth }) {
       expect(isAdminStub).to.not.be.called
       expect(listProjectsStub).to.be.calledOnce
       expect(listShootsStub).to.be.calledOnce
-      expect(shootsByNamespace).to.eql(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
+      expect(shootsByNamespace).toEqual(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
     })
 
     it('should subscribe shoots for all namespaces', async function () {
@@ -178,7 +178,7 @@ module.exports = function ({ sandbox, auth }) {
       expect(isAdminStub).to.be.calledOnce
       expect(listProjectsStub).to.be.calledOnce
       expect(listShootsStub).to.be.calledTwice
-      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
     })
 
     it('should subscribe shoots for all namespaces as admin', async function () {
@@ -192,7 +192,7 @@ module.exports = function ({ sandbox, auth }) {
       expect(isAdminStub).to.be.calledOnce
       expect(listProjectsStub).to.be.calledOnce
       expect(listShootsStub).to.be.calledOnce
-      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
     })
 
     it('should subscribe single shoot', async function () {
@@ -208,7 +208,7 @@ module.exports = function ({ sandbox, auth }) {
       expect(isAdminStub).to.not.be.called
       expect(readShootStub).to.be.calledOnce
       expect(listShootsStub).to.not.be.called
-      expect(event).to.eql(find(shootList, { metadata }))
+      expect(event).toEqual(find(shootList, { metadata }))
     })
   })
 
@@ -251,7 +251,7 @@ module.exports = function ({ sandbox, auth }) {
       getIssueCommentsStub = sandbox.stub(tickets, 'getIssueComments')
         .callsFake(({ number }) => filter(comments, ['issue', number]))
       socket = await connect('tickets')
-      expect(socket.connected).to.be.true
+      expect(socket.connected).toBe(true)
       expect(createClientStub).to.be.calledOnce
       const bearer = await user.bearer
       expect(createClientStub).to.be.calledWith({ auth: { bearer } })
@@ -259,7 +259,7 @@ module.exports = function ({ sandbox, auth }) {
 
     it('should subscribe tickets', async function () {
       const actualIssues = await emitSubscribe('subscribeIssues')
-      expect(actualIssues).to.eql(issues)
+      expect(actualIssues).toEqual(issues)
     })
 
     it('should subscribe ticket comments', async function () {
@@ -272,7 +272,7 @@ module.exports = function ({ sandbox, auth }) {
       const numbers = map(filter(issues, { projectName, name }), 'id')
       expect(getIssueCommentsStub).to.have.callCount(numbers.length)
       const predicate = ({ issue: id }) => includes(numbers, id)
-      expect(issueComments).to.eql(filter(comments, predicate))
+      expect(issueComments).toEqual(filter(comments, predicate))
     })
   })
 }

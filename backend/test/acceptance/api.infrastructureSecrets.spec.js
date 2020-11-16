@@ -46,11 +46,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(3)
+    expect(res.body).toHaveLength(3)
     _.forEach(res.body, secret => {
-      expect(secret.metadata).to.have.property('hasCostObject')
-      expect(secret.metadata).to.have.property('projectName')
-      expect(secret.quotas).to.have.length(2)
+      expect(secret.metadata).toHaveProperty('hasCostObject')
+      expect(secret.metadata).toHaveProperty('projectName')
+      expect(secret.quotas).toHaveLength(2)
     })
   })
 
@@ -66,7 +66,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(0)
+    expect(res.body).toHaveLength(0)
   })
 
   it('should create a infrastructure secret', async function () {
@@ -82,9 +82,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, secretRef, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
-    expect(res.body.data).to.have.own.property('key')
-    expect(res.body.data).to.have.own.property('secret')
+    expect(res.body.metadata).toEqual(
+      { name, namespace, secretRef, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project }
+    )
+    expect(res.body.data).toHaveProperty('key')
+    expect(res.body.data).toHaveProperty('secret')
   })
 
   it('should patch an own infrastructure secret', async function () {
@@ -100,9 +102,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, secretRef, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
-    expect(res.body.data).to.have.own.property('key')
-    expect(res.body.data).to.have.own.property('secret')
+    expect(res.body.metadata).toEqual(
+      { name, namespace, secretRef, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project }
+    )
+    expect(res.body.data).toHaveProperty('key')
+    expect(res.body.data).toHaveProperty('secret')
   })
 
   it('should not patch a shared infrastructure secret', async function () {
@@ -133,7 +137,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, secretRef })
+    expect(res.body.metadata).toEqual({ name, namespace, secretRef })
   })
 
   it('should not delete a shared infrastructure secret', async function () {

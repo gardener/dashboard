@@ -16,11 +16,11 @@ module.exports = function ({ agent, oidc }) {
   it('should return the oidc issuer client', async function () {
     oidc.stub.getIssuerClient()
     const client = await security.getIssuerClient()
-    expect(client[custom.http_options]()).to.include({
+    expect(client[custom.http_options]()).toMatchObject({
       followRedirect: false,
       rejectUnauthorized,
       ca
     })
-    expect(client[custom.clock_tolerance]).to.equal(42)
+    expect(client[custom.clock_tolerance]).toBe(42)
   })
 }

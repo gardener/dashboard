@@ -33,8 +33,8 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(5)
-    expect(res.body).to.eql(members)
+    expect(res.body).toHaveLength(5)
+    expect(res.body).toEqual(members)
   })
 
   it('should not return members but respond "not found"', async function () {
@@ -60,9 +60,9 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.username).to.equal(name)
-    expect(res.body).to.have.property('kubeconfig')
-    expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes.external.foo.bar')
+    expect(res.body.username).toBe(name)
+    expect(res.body).toHaveProperty('kubeconfig')
+    expect(fromKubeconfig(res.body.kubeconfig)).toHaveProperty('url', 'https://kubernetes.external.foo.bar')
   })
 
   it('should add a project member', async function () {
@@ -78,7 +78,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const expectedBody = _.concat(members, { username: name, roles })
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 
   it('should not add member that is already a project member', async function () {
@@ -107,7 +107,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const member = _.find(res.body, ['username', name])
-    expect(member).to.eql({ username: name, roles })
+    expect(member).toEqual({ username: name, roles })
   })
 
   it('should delete a project member', async function () {
@@ -121,7 +121,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const expectedBody = _.filter(members, ({ username }) => username !== name)
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 
   it('should not delete a member that is not a project member', async function () {
@@ -134,7 +134,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(members)
+    expect(res.body).toEqual(members)
   })
 
   it('should create a service account without roles', async function () {
@@ -155,7 +155,7 @@ module.exports = function ({ agent, k8s, auth }) {
       createdBy,
       creationTimestamp
     })
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 
   it('should delete a service account', async function () {
@@ -169,7 +169,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const expectedBody = _.filter(members, ({ username }) => username !== name)
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 
   it('should add a service account and assign member roles', async function () {
@@ -191,7 +191,7 @@ module.exports = function ({ agent, k8s, auth }) {
       createdBy,
       creationTimestamp
     })
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 
   it('should not create service account if already exists', async function () {
@@ -220,7 +220,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     const member = _.find(res.body, ['username', name])
-    expect(member).to.eql({ username: name, roles, description })
+    expect(member).toEqual({ username: name, roles, description })
   })
 
   it('should add roles to existing service account without roles =>add member', async function () {
@@ -236,7 +236,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const member = _.find(res.body, ['username', name])
-    expect(member).to.eql({ username: name, roles })
+    expect(member).toEqual({ username: name, roles })
   })
 
   it('should remove all roles of existing service account => delete member', async function () {
@@ -252,7 +252,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const member = _.find(res.body, ['username', name])
-    expect(member).to.eql({ username: name, roles })
+    expect(member).toEqual({ username: name, roles })
   })
 
   it('should add a foreign service account as member to project', async function () {
@@ -269,7 +269,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const member = _.find(res.body, ['username', name])
-    expect(member).to.eql({ username: name, roles })
+    expect(member).toEqual({ username: name, roles })
   })
 
   it('should not add a foreign service account without roles as member to project', async function () {
@@ -285,7 +285,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(members)
+    expect(res.body).toEqual(members)
   })
 
   it('should delete a foreign service account', async function () {
@@ -299,6 +299,6 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     const expectedBody = _.filter(members, ({ username }) => username !== name)
-    expect(res.body).to.eql(expectedBody)
+    expect(res.body).toEqual(expectedBody)
   })
 }
