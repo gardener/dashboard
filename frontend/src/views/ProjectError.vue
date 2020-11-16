@@ -15,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GError from '@/components/GError'
-import get from 'lodash/get'
 
 export default {
   components: {
@@ -37,22 +36,13 @@ export default {
     buttonText: {
       type: String,
       default: 'Get me out of here'
-    }
-  },
-  computed: {
-    fallbackRoute () {
-      const defaultNamespace = this.$store.getters.defaultNamespace
-      const namespace = get(this.$route, 'params.namespace', defaultNamespace)
-      if (namespace) {
+    },
+    fallbackRoute: {
+      type: Object,
+      default () {
         return {
-          name: 'ShootList',
-          params: {
-            namespace
-          }
+          name: 'Home'
         }
-      }
-      return {
-        name: 'Home'
       }
     }
   },
