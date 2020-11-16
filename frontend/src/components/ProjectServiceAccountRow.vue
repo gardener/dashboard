@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-title v-if="isServiceAccountFromCurrentNamespace" class="cursor-pointer">
           <g-popper
             :title="displayName"
-            toolbarColor="cyan darken-2"
+            toolbarColor="primary"
             :popperKey="`serviceAccount_sa_${username}`"
           >
             <template v-slot:popperRef>
@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
+            <v-btn v-on="on" icon color="error" @click.native.stop="onDelete">
               <v-icon v-if="isServiceAccountFromCurrentNamespace">mdi-delete</v-icon>
               <v-icon v-else>mdi-close</v-icon>
             </v-btn>

@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hintColor="warning">
           <v-text-field
           color="black"
           v-model="username"
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
         </hint-colorizer>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hintColor="warning">
           <v-text-field
             color="black"
             v-model="password"

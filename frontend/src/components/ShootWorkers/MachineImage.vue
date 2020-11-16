@@ -4,10 +4,10 @@ SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <hint-colorizer hintColor="orange">
+  <hint-colorizer hintColor="warning">
     <v-select
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="machineImages"
       item-value="key"
       return-object

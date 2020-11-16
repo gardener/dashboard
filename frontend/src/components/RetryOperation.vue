@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div class="retry-operation-div" v-if="canRetry">
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" small icon text class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
+        <v-btn v-on="on" small icon text class="primary--text retryButton" @click="onRetryOperation">
           <v-icon>mdi-reload</v-icon>
         </v-btn>
       </template>

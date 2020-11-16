@@ -140,7 +140,7 @@ export default {
     },
     confirmAlertColor () {
       const color = this.confirmValue ? this.confirmColor : this.defaultColor
-      return `${color || 'cyan'} lighten-5`
+      return `${color || 'primary'} lighten-3`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
@@ -176,22 +176,22 @@ export default {
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
-        case 'red':
-          return 'red darken-2 grey--text text--lighten-4'
-        case 'orange':
-          return 'orange darken-2 grey--text text--lighten-4'
+        case 'error':
+          return 'error grey--text text--lighten-4'
+        case 'warning':
+          return 'warning grey--text text--lighten-4'
         default:
-          return 'cyan darken-2 grey--text text--lighten-4'
+          return 'primary grey--text text--lighten-4'
       }
     },
     textColorClassForString (textColorClass) {
       switch (textColorClass) {
-        case 'red':
-          return 'red--text text--darken-2'
-        case 'orange':
-          return 'orange--text text--darken-2'
+        case 'error':
+          return 'error--text'
+        case 'warning':
+          return 'warning--text'
         default:
-          return 'cyan--text text--darken-2'
+          return 'primary--text'
       }
     },
     async resolveAction (value) {

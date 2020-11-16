@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-list-item>
     <v-list-item-icon>
-      <v-icon color="cyan darken-2">mdi-console</v-icon>
+      <v-icon color="primary">mdi-console</v-icon>
     </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-title>Terminal</v-list-item-title>

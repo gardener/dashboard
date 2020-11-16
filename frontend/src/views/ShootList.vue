@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid class="shootlist">
     <v-card class="mr-extra">
-      <v-toolbar flat height="72" color="cyan darken-2">
+      <v-toolbar flat height="72" color="primary">
         <img src="../assets/certified_kubernetes_white.svg" height="60" class="ml-1 mr-3">
         <v-toolbar-title class="white--text">
           <div class="headline">Kubernetes Clusters</div>
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
           prepend-inner-icon="mdi-magnify"
-          color="cyan darken-2"
+          color="primary"
           label="Search"
           clearable
           hide-details
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-content>
                 <v-tooltip top style="width: 100%">
                   <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
+                    <v-btn v-on="on" block text class="text-center primary--text" @click.stop="resetColumnsChecked">
                       Reset
                     </v-btn>
                   </template>
@@ -162,7 +162,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-dialog>
     </v-card>
     <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
+      <v-btn v-if="projectScope" class="primary" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
         <v-icon dark ref="add">mdi-plus</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -259,7 +259,7 @@ export default {
       this.clearSelectedShootWithDelay()
     },
     checkboxColor (checked) {
-      return checked ? 'cyan darken-2' : ''
+      return checked ? 'primary' : ''
     },
     checkboxIcon (checked) {
       return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'

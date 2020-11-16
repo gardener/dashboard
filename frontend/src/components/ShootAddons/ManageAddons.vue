@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
       <v-list-item-action class="align-self-start">
         <v-checkbox
-          color="cyan darken-2"
+          color="primary"
           v-model="addons[addonDefinition.name].enabled"
           :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>

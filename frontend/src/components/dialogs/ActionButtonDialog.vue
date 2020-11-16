@@ -118,7 +118,7 @@ export default {
     },
     dialogColor: {
       type: String,
-      default: 'orange'
+      default: 'warning'
     },
     disabled: {
       type: Boolean,

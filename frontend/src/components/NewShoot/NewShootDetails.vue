@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <v-text-field
           ref="name"
-          color="cyan darken-2"
+          color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
           v-model="name"
@@ -21,10 +21,10 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
       </v-col>
       <v-col cols="3">
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hintColor="warning">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Kubernetes Version"
             item-text="version"
             item-value="version"

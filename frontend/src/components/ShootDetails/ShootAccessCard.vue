@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-list key="accessCardList">
     <v-list-item v-show="!isAnyTileVisible">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+        <v-icon color="primary">mdi-alert-circle-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-developer-board</v-icon>
+          <v-icon color="primary">mdi-developer-board</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               Dashboard is not running for hibernated clusters
             </v-tooltip>
-            <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
+            <a v-else :href="dashboardUrl" target="_blank" class="primary--text">{{dashboardUrlText}}</a>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-list-item v-if="isKubeconfigTileVisible">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-file</v-icon>
+        <v-icon color="primary">mdi-file</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon color="primary">
                 <v-icon medium>mdi-help-circle-outline</v-icon>
               </v-btn>
             </template>
@@ -41,10 +41,10 @@ SPDX-License-Identifier: Apache-2.0
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index" class="px-3">
-              <v-btn block text color="cyan darken-2" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon color="cyan darken-2" class="mr-3">{{item.icon}}</v-icon>
+              <v-btn block text color="primary" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
+                <v-icon color="primary" class="mr-3">{{item.icon}}</v-icon>
                 {{item.title}}
-                <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+                <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
               </v-btn>
             </v-card-actions>
           </template>
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="mdi-account-supervisor">
+              <v-badge v-if="isAdmin" color="primary" bottom overlap icon="mdi-account-supervisor">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span v-if="isAdmin">
               {{avatarTitle}}
-              <v-chip small color="cyan darken-2" dark>
+              <v-chip small color="primary" dark>
                 <v-avatar>
                   <v-icon>mdi-account-supervisor</v-icon>
                 </v-avatar>
@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
-            <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
+            <v-btn block text color="primary" class="justify-start" :to="accountLink" title="My Account">
               <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>

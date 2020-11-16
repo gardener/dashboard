@@ -45,7 +45,7 @@ export default {
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
-      this.dialogColor = dialogColor || 'orange'
+      this.dialogColor = dialogColor || 'warning'
       this.maxWidth = maxWidth || '400'
       this.confirmValue = confirmValue
 

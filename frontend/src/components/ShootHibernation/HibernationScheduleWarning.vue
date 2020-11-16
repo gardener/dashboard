@@ -7,14 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     title="No Hibernation Schedule"
-    toolbarColor="cyan darken-2"
+    toolbarColor="primary"
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
     <div class="message">
       To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
       <template v-if="canPatchShoots">
         Please navigate to the cluster details page to
-        <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
+        <router-link  class="primary--text" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
         a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
       </template>
     </div>
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-btn icon>
         <v-tooltip top>
           <template v-slot:activator="{ on: tooltip }">
-            <v-icon v-on="tooltip" color="cyan darken-2">mdi-calendar-alert</v-icon>
+            <v-icon v-on="tooltip" color="primary">mdi-calendar-alert</v-icon>
           </template>
           <span>No Hibernation Schedule</span>
         </v-tooltip>

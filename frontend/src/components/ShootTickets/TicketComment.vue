@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-avatar>
     </v-list-item-avatar>
     <v-list-item-icon v-else class="align-self-start">
-      <v-icon color="cyan darken-2">mdi-comment-outline</v-icon>
+      <v-icon color="primary">mdi-comment-outline</v-icon>
     </v-list-item-icon>
     <v-list-item-content class="comment">
       <v-list-item-title class="comment-header">

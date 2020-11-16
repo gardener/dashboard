@@ -195,7 +195,7 @@ export default {
       if (this.isProgressing && this.isAdmin) {
         return 'blue darken-2'
       }
-      return 'cyan darken-2'
+      return 'primary'
     },
     visible () {
       if (!this.isAdmin) {

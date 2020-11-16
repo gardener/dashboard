@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-title>
           <v-card-text>
             <v-progress-linear
-              color="cyan darken-2"
+              color="primary"
               indeterminate
               height="8"
             ></v-progress-linear>

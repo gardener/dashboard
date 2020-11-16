@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="cyan darken-2">
+    <v-toolbar flat dark dense color="primary">
       <v-toolbar-title class="subtitle-1">Logging and Monitoring</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-tractor</v-icon>
+          <v-icon color="primary">mdi-tractor</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Status</v-list-item-subtitle>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-speedometer</v-icon>
+          <v-icon color="primary">mdi-speedometer</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Readiness</v-list-item-subtitle>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
         <cluster-metrics v-if="!metricsNotAvailableText" :shootItem="shootItem"></cluster-metrics>
         <v-list-item v-else>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>

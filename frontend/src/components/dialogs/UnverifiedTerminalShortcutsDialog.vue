@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     confirmButtonText="Confirm"
     max-width="750px"
     max-height="100vh"
-    defaultColor="cyan-darken-2"
+    defaultColor="primary"
     ref="gDialog"
     >
     <template v-slot:caption>Confirm</template>
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
             small
             class="my-0"
             outlined
-            color="orange darken-2">
+            color="warning">
             Unverified
           </v-chip>
           terminal shortcuts that were created by members of this project and therefore could be malicious.

@@ -32,16 +32,16 @@ describe('HintColorizer.vue', () => {
     const colorizerComponent = wrapper.findComponent(HintColorizer)
     expect(colorizerComponent.classes()).toContain('hintColor-orange')
 
-    wrapper.setProps({ hintColor: 'cyan' })
+    wrapper.setProps({ hintColor: 'primary' })
 
     await Vue.nextTick()
-    expect(colorizerComponent.classes()).toContain('hintColor-cyan')
+    expect(colorizerComponent.classes()).toContain('hintColor-primary')
     expect(colorizerComponent.classes()).not.toContain('hintColor-orange')
 
     wrapper.setProps({ hintColor: 'default' })
 
     await Vue.nextTick()
-    expect(colorizerComponent.classes()).not.toContain('hintColor-cyan')
+    expect(colorizerComponent.classes()).not.toContain('hintColor-primary')
   })
 
   it('should not overwrite error color class for v-text-field', async () => {

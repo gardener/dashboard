@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
             :dark="k8sPatchAvailable"
             :ripple="canUpdate"
             depressed
-            color="cyan darken-2"
+            color="primary"
           >
             <v-icon small v-if="availableK8sUpdates">mdi-menu-up</v-icon>
             {{shootK8sVersion}}
@@ -44,8 +44,8 @@ SPDX-License-Identifier: Apache-2.0
       :confirmDisabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
+      confirmColor="warning"
+      defaultColor="warning"
       ref="gDialog"
       >
       <template v-slot:caption>Update Cluster</template>
@@ -75,13 +75,13 @@ SPDX-License-Identifier: Apache-2.0
           <p>
             Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           </p>
-          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+          <i class="warning--text">This action cannot be undone.</i>
         </template>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
           <p>
             Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
           </p>
-          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+          <i class="warning--text">This action cannot be undone.</i>
         </template>
       </template>
     </g-dialog>

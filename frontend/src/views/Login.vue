@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
                 <a :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon size="20">mdi-open-in-new</v-icon></a>
               </div>
               <div class="flex-grow-1 actions">
-                <div class="loginButton orange lighten-2 elevation-2" @click.stop="handleLogin(primaryLoginType)">
+                <div class="loginButton primary lighten-2 elevation-2" @click.stop="handleLogin(primaryLoginType)">
                   Login <v-icon dark class="ml-1">mdi-login-variant</v-icon>
                 </div>
                 <template v-if="showTokenLoginLink">
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
     <vue-snotify></vue-snotify>
     <v-dialog v-model="dialog" persistent max-width="480px">
       <v-card>
-        <v-card-title class="orange lighten-1">
+        <v-card-title class="primary lighten-1">
           <span class="headline white--text">Login</span>
         </v-card-title>
         <v-card-text>
@@ -311,15 +311,8 @@ $hexOutline: darken($hexArea,1);
   }
 }
 
-@import '~vue-snotify/styles/material.css';
-@import '~vuetify/src/styles/styles.sass';
-
 .snotify-rightTop {
   top: 75px;
-}
-
-.snotify-info {
-  background-color: map-get($cyan, 'darken-2');
 }
 
 .snotify {

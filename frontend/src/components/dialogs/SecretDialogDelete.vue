@@ -27,14 +27,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
-          <span class="red--text font-weight-bold">The operation can not be undone.</span>
+          <span class="error--text font-weight-bold">The operation can not be undone.</span>
         </v-container>
         <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="hide">Cancel</v-btn>
-        <v-btn text @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
+        <v-btn text @click.native="onDeleteSecret" color="error">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -520,7 +520,7 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
+export function compileMarkdown (text, linkColor = 'primary', transformToExternalLinks = true) {
   if (!text) {
     return undefined
   }

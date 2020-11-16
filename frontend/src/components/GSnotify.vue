@@ -95,15 +95,8 @@ export default {
 }
 </script>
 <style lang="scss">
-  @import '~vuetify/src/styles/styles.sass';
-  @import "~vue-snotify/styles/material.css";
-
   .snotify-rightTop {
     top: 75px;
-  }
-
-  .snotify-info {
-    background-color: map-get($cyan, 'darken-2');
   }
 
   .snotify {

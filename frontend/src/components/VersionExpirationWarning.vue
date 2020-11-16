@@ -122,7 +122,7 @@ export default {
       if (this.isOverallStatusWarning) {
         return 'warning'
       }
-      return 'cyan darken-2'
+      return 'primary'
     },
     listClass () {
       if ((this.k8sExpiration && this.expiredWorkerGroups.length) || this.expiredWorkerGroups.length > 1) {

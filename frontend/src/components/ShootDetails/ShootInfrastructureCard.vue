@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="cyan darken-2">
+    <v-toolbar flat dark dense color="primary">
       <v-toolbar-title class="subtitle-1">Infrastructure</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-cloud-outline</v-icon>
+          <v-icon color="primary">mdi-cloud-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Credential</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             <router-link v-if="canLinkToSecret"
-              class="cyan--text text--darken-2"
+              class="primary--text"
               :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
             >
               <span class="subtitle-1">{{shootSecretBindingName}}</span>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-spa</v-icon>
+            <v-icon color="primary">mdi-spa</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Seed</v-list-item-subtitle>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-ip-network</v-icon>
+          <v-icon color="primary">mdi-ip-network</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Pods CIDR</v-list-item-subtitle>
@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-earth</v-icon>
+            <v-icon color="primary">mdi-earth</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Ingress Domain</v-list-item-subtitle>
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-ip-network-outline</v-icon>
+            <v-icon color="primary">mdi-ip-network-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Available Load Balancer Classes</v-list-item-subtitle>

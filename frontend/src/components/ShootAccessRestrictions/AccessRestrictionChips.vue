@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             v-on="on"
             small
             outlined
-            color="cyan darken-2"
+            color="primary"
             class="mr-2 mb-1"
           >{{title}}</v-chip>
         </template>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             v-on="on"
             small
             outlined
-            color="cyan darken-2"
+            color="primary"
             class="mr-2"
           >{{title}}</v-chip>
         </template>

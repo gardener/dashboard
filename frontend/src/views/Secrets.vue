@@ -144,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-fab-transition>
       <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
         <template v-slot:activator>
-          <v-btn class="cyan darken-2" dark fab v-model="dialogState.speedDial">
+          <v-btn class="primary" dark fab v-model="dialogState.speedDial">
             <v-icon v-if="dialogState.speedDial">mdi-close</v-icon>
             <v-icon v-else>mdi-plus</v-icon>
           </v-btn>

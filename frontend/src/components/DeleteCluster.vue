@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     :caption="caption"
     icon="mdi-delete"
     :iconColor="iconColor"
-    dialogColor="red"
+    dialogColor="error"
     confirmButtonText="Delete"
     confirm-required
     :buttonText="buttonText"
@@ -34,11 +34,11 @@ SPDX-License-Identifier: Apache-2.0
         Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
       </p>
       <p>
-        <i class="red--text text--darken-2">This action cannot be undone.</i>
+        <i class="error--text">This action cannot be undone.</i>
       </p>
       <p v-if="isShootReconciliationDeactivated">
         <v-row class="fill-height" >
-          <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
+          <v-icon color="warning" class="mr-1">mdi-alert-box</v-icon>
           <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
         </v-row>
       </p>

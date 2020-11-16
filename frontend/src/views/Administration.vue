@@ -246,7 +246,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
-      defaultColor="red"
+      defaultColor="error"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       ref="gDialog">
@@ -256,7 +256,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:message>
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
-        <i class="red--text">The operation can not be undone.</i>
+        <i class="error--text">The operation can not be undone.</i>
       </template>
     </g-dialog>
 

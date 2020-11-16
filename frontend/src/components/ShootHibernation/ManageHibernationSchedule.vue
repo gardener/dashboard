@@ -27,13 +27,13 @@ SPDX-License-Identifier: Apache-2.0
             outlined
             fab
             icon
-            color="cyan darken-2">
-            <v-icon class="cyan--text text--darken-2">mdi-plus</v-icon>
+            color="primary">
+            <v-icon class="primary--text">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
             text
-            color="cyan darken-2">
+            color="primary">
             Add Hibernation Schedule
           </v-btn>
         </v-col>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col>
         <v-checkbox
           v-model="confirmNoSchedule"
-          color="cyan darken-2"
+          color="primary"
           class="my-0"
           :label="noScheduleCheckboxLabel"
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
