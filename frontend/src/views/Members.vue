@@ -47,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="userAccountTableHeaders"
         :items="sortedAndFilteredUserList"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
       >
         <template v-slot:item="{ item }">
           <project-user-row
@@ -97,6 +98,7 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="serviceAccountTableHeaders"
         :items="sortedAndFilteredServiceAccountList"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
       >
         <template v-slot:item="{ item }">
           <project-service-account-row

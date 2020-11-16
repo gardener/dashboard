@@ -7,20 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td>
-      <div class="d-flex flex-row my-2 align-center">
-        <div class="d-flex flex-column mr-3">
-          <v-avatar :size="40"><img :src="item.avatarUrl" /></v-avatar>
-        </div>
-        <div class="d-flex flex-column">
-          <div>
-            <span class="subtitle-1">{{item.displayName}}</span>
-          </div>
-          <span class="body-2">
+      <v-list-item>
+        <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>{{item.displayName}}</v-list-item-title>
+          <v-list-item-subtitle>
             <a v-if="item.isEmail" :href="`mailto:${item.username}`" class="cyan--text text--darken-2">{{item.username}}</a>
             <span v-else>{{item.username}}</span>
-          </span>
-        </div>
-      </div>
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
     </td>
     <td>
       <div class="d-flex justify-end">

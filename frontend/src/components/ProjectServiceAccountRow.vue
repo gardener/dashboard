@@ -7,12 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td>
-      <div class="d-flex flex-row my-2 align-center">
-        <div class="d-flex flex-row mr-3">
-          <v-avatar :size="40"><img :src="item.avatarUrl" ></v-avatar>
-        </div>
-        <div class="d-flex flex-column">
-          <div>
+      <v-list-item>
+        <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>
             <span class="subtitle-1">{{item.displayName}}</span>
             <v-tooltip top v-if="!isServiceAccountFromCurrentNamespace">
               <template v-slot:activator="{ on }">
@@ -20,11 +18,10 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
             </v-tooltip>
-          </div>
-
-          <span class="body-2">{{item.username}}</span>
-        </div>
-      </div>
+          </v-list-item-title>
+          <v-list-item-subtitle>{{item.username}}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
     </td>
     <td>
       <account-avatar :account-name="item.createdBy" :size="16"></account-avatar>
@@ -90,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>
-            <span>Change Service Account Roles</span>
+            <span>Change Service Account</span>
           </v-tooltip>
         </div>
         <div v-if="canManageServiceAccountMembers" class="ml-1">
