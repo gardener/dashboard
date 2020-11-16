@@ -23,7 +23,10 @@ function createConverter (options) {
 
   return {
     makeSanitizedHtml (text, options) {
-      return sanitizeHtml(converter.makeHtml(text), options)
+      return sanitizeHtml(converter.makeHtml(text), {
+        allowedTags: [...sanitizeHtml.defaults.allowedTags, 'details', 'summary'],
+        ...options
+      })
     }
   }
 }
