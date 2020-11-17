@@ -9,8 +9,6 @@
 import moment from 'moment-timezone'
 import semver from 'semver'
 import md5 from 'md5'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -508,9 +506,8 @@ export function textColorFromColor (color) {
 }
 
 function htmlToDocumentFragment (html) {
-  var template = document.createElement('template')
-  html = html.trim() // Never return a text node of whitespace as the result
-  template.innerHTML = html
+  const template = document.createElement('template')
+  template.innerHTML = html.trim() // Never return a text node of whitespace as the result
   return template.content
 }
 
@@ -520,15 +517,10 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
-  if (!text) {
+export function transformHtml (html, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
+  if (!html) {
     return undefined
   }
-  const html = DOMPurify.sanitize(marked(text, {
-    gfm: true,
-    breaks: true,
-    tables: true
-  }))
 
   const textColorClasses = textColorFromColor(linkColor)
   const documentFragment = htmlToDocumentFragment(html)
@@ -543,10 +535,10 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
     }
 
     if (transformToExternalLinks) {
-      linkElement.setAttribute('style', 'text-decoration: none')
+      linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')
       const linkText = linkElement.innerHTML
-      linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
+      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><i class="v-icon mdi mdi-open-in-new text-body-1"></i>`
     }
   })
 

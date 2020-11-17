@@ -137,7 +137,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-                <template v-if="slaDescriptionCompiledMarkdown">
+                <template v-if="slaDescriptionHtml">
                   <v-divider inset/>
                   <v-list-item>
                     <v-list-item-avatar>
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-avatar>
                     <v-list-item-content>
                       <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionCompiledMarkdown"></v-list-item-title>
+                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionHtml"></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </template>
@@ -205,9 +205,9 @@ SPDX-License-Identifier: Apache-2.0
                         :rules="[rules.costObject]"
                         :save="updateCostObject"
                       >
-                        <template v-if="costObjectDescriptionCompiledMarkdown" v-slot:info>
+                        <template v-if="costObjectDescriptionHtml" v-slot:info>
                           <v-alert icon="mdi-information-outline" dense text tile :color="color" class="mb-0" >
-                            <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                            <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"></div>
                           </v-alert>
                         </template>
                       </editable-text>
@@ -272,7 +272,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { compileMarkdown, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { transformHtml, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -362,9 +362,9 @@ export default {
     costObjectErrorMessage () {
       return get(this.costObjectSettings, 'errorMessage')
     },
-    costObjectDescriptionCompiledMarkdown () {
+    costObjectDescriptionHtml () {
       const description = get(this.costObjectSettings, 'description')
-      return compileMarkdown(description)
+      return transformHtml(description)
     },
     projectName () {
       return this.projectDetails.projectName
@@ -408,8 +408,8 @@ export default {
     sla () {
       return this.cfg.sla || {}
     },
-    slaDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.sla.description, this.color)
+    slaDescriptionHtml () {
+      return transformHtml(this.sla.description, this.color)
     },
     slaTitle () {
       return this.sla.title

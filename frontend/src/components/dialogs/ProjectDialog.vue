@@ -41,8 +41,8 @@ SPDX-License-Identifier: Apache-2.0
                   @blur="$v.costObject.$touch()"
                   >
                 </v-text-field>
-                <v-alert v-if="!!costObjectDescriptionCompiledMarkdown" dense type="info" outlined :color="color">
-                  <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" outlined :color="color">
+                  <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
               </v-col>
             </v-row>
@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccountUsername, compileMarkdown, getProjectDetails } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccountUsername, transformHtml, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -173,9 +173,9 @@ export default {
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
     },
-    costObjectDescriptionCompiledMarkdown () {
+    costObjectDescriptionHtml () {
       const description = get(this.costObjectSettings, 'description')
-      return compileMarkdown(description)
+      return transformHtml(description)
     },
     costObjectRegex () {
       return get(this.costObjectSettings, 'regex')
