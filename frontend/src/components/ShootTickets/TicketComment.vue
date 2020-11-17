@@ -143,8 +143,8 @@ export default {
       background-color: $gh-code-background-color;
     }
 
-    ::v-deep > pre {
-      overflow: auto;
+    ::v-deep img {
+      max-width: 100%;
     }
 
     ::v-deep > h1 {
