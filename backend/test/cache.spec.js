@@ -124,7 +124,7 @@ describe('cache', function () {
       let syncQuotasSpy
       let syncSeedsSpy
       let syncProjectsSpy
-      let syncControllerregistrationsSpy
+      let syncControllerRegistrationsSpy
 
       beforeEach(function () {
         syncCloudprofilesSpy = jest.spyOn(gardenerCore.cloudprofiles, 'syncList')
