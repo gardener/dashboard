@@ -313,10 +313,10 @@ export default {
         }
       }
     },
-    toggleFilter (key) {
-      const filters = this.getShootListFilters
-      this.setShootListFilter({ filter: key, value: !filters[key] })
-      this.$localStorage.setObject('shootListFilter', pick(filters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+    async toggleFilter (key) {
+      await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
+
+      this.$localStorage.setObject('shootListFilter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
 
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
