@@ -129,7 +129,7 @@ function ensureDataLoaded (store, localStorage) {
         case 'ShootList': {
           const isAdmin = store.getters.isAdmin
           const defaultFilter = {
-            onlyShootsWithIssues: true,
+            onlyShootsWithIssues: isAdmin,
             progressing: true,
             userIssues: isAdmin,
             deactivatedReconciliation: isAdmin,
