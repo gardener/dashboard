@@ -150,6 +150,7 @@ function ensureDataLoaded (store) {
     }
   }
 }
+
 function setNamespace (store, namespace) {
   const namespaces = store.getters.namespaces
   if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
