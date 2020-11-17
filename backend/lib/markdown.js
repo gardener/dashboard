@@ -24,7 +24,7 @@ function createConverter (options) {
   return {
     makeSanitizedHtml (text, options) {
       return sanitizeHtml(converter.makeHtml(text), {
-        allowedTags: [...sanitizeHtml.defaults.allowedTags, 'details', 'summary'],
+        allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
         ...options
       })
     }
