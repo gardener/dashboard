@@ -10,7 +10,6 @@ const express = require('express')
 const { extend } = require('@gardener-dashboard/request')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const { isHttpError } = require('@gardener-dashboard/request')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { version } = require('../../package')
 
