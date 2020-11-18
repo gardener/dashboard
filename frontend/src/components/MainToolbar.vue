@@ -35,23 +35,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-progress-circular size="18" indeterminate v-if="!dashboardVersion"></v-progress-circular>
               <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
               <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
-              <v-expansion-panels flat v-if="extensionCount && isAdmin">
-                <v-expansion-panel>
-                  <v-expansion-panel-header class="caption" @click.native.stop>
-                    {{extensionCount}} deployed extensions
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content class="extension-expansion-panel">
-                    <div
-                    v-for="extension in extensionList"
-                    :key="extension.id"
-                    class="extension-item">
-                      <div class="caption font-weight-bold">{{extension.name}}</div>
-                      <div class="caption" v-if="!!extension.version">Version: {{extension.version}}</div>
-                      <div class="caption" v-if="!!extension.kind">Kind: {{extension.kind}}</div>
-                    </div>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
             </div>
           </v-card-title>
           <v-divider></v-divider>
@@ -245,8 +228,6 @@ export default {
           this.setError({
             message: `Failed to fetch version information. ${err.message}`
           })
-          this.dashboardVersion = this.dashboardVersion || 'Unknown'
-          this.gardenerVersion = this.gardenerVersion || 'Unknown'
         }
       }
     }
@@ -271,15 +252,5 @@ export default {
   .operator {
     color: white;
     font-weight: bold;
-  }
-
-  .extension-expansion-panel {
-    max-height: 20vh;
-    overflow: scroll;
-  }
-
-  .extension-item {
-    text-align: left;
-    margin-bottom: 10px;
   }
 </style>

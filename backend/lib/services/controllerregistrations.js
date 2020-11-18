@@ -6,7 +6,9 @@
 
 'use strict'
 
+const { Forbidden } = require('http-errors')
 const { getControllerRegistrations } = require('../cache')
+const authorization = require('./authorization')
 const _ = require('lodash')
 
 function fromResource (controllerregistrations) {
@@ -19,7 +21,12 @@ function fromResource (controllerregistrations) {
   })
 }
 
-exports.list = function () {
+exports.list = async function ({ user }) {
+  const allowed = await authorization.canListControllerRegistrations(user)
+  if (!allowed) {
+    throw new Forbidden('You are not allowed to list controllerregistrations')
+  }
+
   const controllerregistrations = getControllerRegistrations()
   return fromResource(controllerregistrations)
 }
