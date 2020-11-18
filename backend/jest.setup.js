@@ -6,14 +6,9 @@
 
 'use strict'
 
-const { Test } = require('supertest')
-
 const http = require('http')
+const { Test } = require('supertest')
 const { createTerminus } = require('@godaddy/terminus')
-
-const HTTP_METHODS = ['get', 'put', 'patch', 'delete', 'post']
-
-jest.mock('fs')
 
 function createAgent (app) {
   const server = http.createServer(app)
@@ -34,7 +29,8 @@ function createAgent (app) {
       server.close()
     }
   }
-  for (const method of HTTP_METHODS) {
+
+  for (const method of ['get', 'put', 'patch', 'delete', 'post']) {
     agent[method] = function (url) {
       const test = new Test(server, method, url)
       test.set('x-requested-with', 'XMLHttpRequest')
@@ -43,5 +39,18 @@ function createAgent (app) {
   }
   return agent
 }
+
+jest.mock('./lib/config/gardener', () => {
+  const fixtures = require('./__fixtures__')
+  const configGardener = jest.requireActual('./lib/config/gardener')
+  const mockFiles = new Map()
+  for (const [path, data] of Object.entries(fixtures.mockFiles)) {
+    mockFiles.set(path, data)
+  }
+  return {
+    ...configGardener,
+    readConfig: jest.fn(path => mockFiles.get(path))
+  }
+})
 
 global.createAgent = createAgent

@@ -9,9 +9,9 @@
 const assert = require('assert').strict
 const _ = require('lodash')
 const yaml = require('js-yaml')
-const { existsSync, readFileSync } = require('fs')
+const fs = require('fs')
 const { homedir } = require('os')
-const { join: joinPath } = require('path')
+const { join } = require('path')
 
 const environmentVariableDefinitions = {
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
@@ -76,14 +76,15 @@ module.exports = {
     if (argv[2]) {
       return argv[2]
     }
-    return joinPath(homedir(), '.gardener', 'config.yaml')
+    return join(homedir(), '.gardener', 'config.yaml')
   },
   loadConfig (filename, { env } = process) {
     const config = this.getDefaults({ env })
     if (filename) {
       try {
-        if (this.existsSync(filename)) {
-          _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
+        const data = this.readConfig(filename)
+        if (data) {
+          _.merge(config, yaml.safeLoad(data))
         }
       } catch (err) { /* ignore */ }
     }
@@ -108,6 +109,7 @@ module.exports = {
 
     return config
   },
-  existsSync,
-  readFileSync
+  readConfig (path) {
+    return fs.readFileSync(path, 'utf8')
+  }
 }

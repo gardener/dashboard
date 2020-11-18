@@ -133,7 +133,8 @@ module.exports = {
     return {
       [GARDENER_CONFIG]: readFileSync(join(__dirname, 'config.yaml'), 'utf8'),
       '/etc/gardener/1/config.yaml': 'port: 1234',
-      '/etc/gardener/2/config.yaml': 'port: 1234\nlogLevel: info'
+      '/etc/gardener/2/config.yaml': 'port: 1234\nlogLevel: info',
+      '/etc/gardener/3/config.yaml': 'sessionSecret: ~'
     }
   },
   kube: {
