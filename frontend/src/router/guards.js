@@ -6,15 +6,16 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
+import defaults from 'lodash/defaults'
 import { getPrivileges, getConfiguration } from '@/utils/api'
 
-export default function createGuards (store, userManager) {
+export default function createGuards (store, userManager, localStorage) {
   return {
     beforeEach: [
       setLoading(store, true),
       ensureConfigurationLoaded(store),
       ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
-      ensureDataLoaded(store)
+      ensureDataLoaded(store, localStorage)
     ],
     afterEach: [
       setLoading(store, false)
@@ -83,7 +84,7 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
   }
 }
 
-function ensureDataLoaded (store) {
+function ensureDataLoaded (store, localStorage) {
   return async (to, from, next) => {
     const meta = to.meta || {}
     if (meta.public) {
@@ -126,9 +127,21 @@ function ensureDataLoaded (store) {
           break
         }
         case 'ShootList': {
+          const isAdmin = store.getters.isAdmin
+          const defaultFilter = {
+            onlyShootsWithIssues: isAdmin,
+            progressing: true,
+            userIssues: isAdmin,
+            deactivatedReconciliation: isAdmin,
+            hideTicketsWithLabel: isAdmin
+          }
+          const shootListFilters = defaults(localStorage.getObject('shootListFilter'), defaultFilter)
+          await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
+
           const promises = [
             store.dispatch('subscribeShoots')
           ]
+
           if (store.getters.canUseProjectTerminalShortcuts) {
             promises.push(store.dispatch('ensureProjectTerminalShortcutsLoaded'))
           }

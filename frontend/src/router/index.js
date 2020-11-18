@@ -13,6 +13,7 @@ import createGuards from './guards'
 Vue.use(Router)
 
 const userManager = Vue.auth
+const localStorage = Vue.localStorage
 
 export default function createRouter (store) {
   const zeroPoint = { x: 0, y: 0 }
@@ -47,7 +48,7 @@ export default function createRouter (store) {
   const router = new Router(routerOptions)
 
   /* navigation guards */
-  const guards = createGuards(store, userManager)
+  const guards = createGuards(store, userManager, localStorage)
   for (const guard of guards.beforeEach) {
     router.beforeEach(guard)
   }
