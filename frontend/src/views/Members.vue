@@ -48,6 +48,8 @@ SPDX-License-Identifier: Apache-2.0
         :headers="userAccountTableHeaders"
         :items="sortedAndFilteredUserList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="userAccountOptions"
+        must-sort
       >
         <template v-slot:item="{ item }">
           <project-user-row
@@ -99,6 +101,8 @@ SPDX-License-Identifier: Apache-2.0
         :headers="serviceAccountTableHeaders"
         :items="sortedAndFilteredServiceAccountList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="serviceAccountOptions"
+        must-sort
       >
         <template v-slot:item="{ item }">
           <project-service-account-row
@@ -159,7 +163,7 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import replace from 'lodash/replace'
-import sortBy from 'lodash/sortBy'
+import orderBy from 'lodash/orderBy'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
@@ -167,6 +171,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import escape from 'lodash/escape'
 import get from 'lodash/get'
+import head from 'lodash/head'
 
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
@@ -220,32 +225,32 @@ export default {
         {
           text: 'Name',
           align: 'start',
-          value: 'name',
-          sortable: false
+          value: 'displayName',
+          sortable: true
         },
         {
           text: 'Created By',
           align: 'start',
           value: 'createdBy',
-          sortable: false
+          sortable: true
         },
         {
           text: 'Created At',
           align: 'start',
-          value: 'createdAt',
-          sortable: false
+          value: 'creationTimestamp',
+          sortable: true
         },
         {
           text: 'Description',
           align: 'start',
           value: 'description',
-          sortable: false
+          sortable: true
         },
         {
           text: 'Roles',
           align: 'end',
           value: 'roles',
-          sortable: false
+          sortable: true
         },
         {
           text: 'Actions',
@@ -258,14 +263,14 @@ export default {
         {
           text: 'Name',
           align: 'start',
-          value: 'name',
-          sortable: false
+          value: 'username',
+          sortable: true
         },
         {
           text: 'Roles',
           align: 'end',
           value: 'roles',
-          sortable: false
+          sortable: true
         },
         {
           text: 'Actions',
@@ -273,7 +278,9 @@ export default {
           value: 'actions',
           sortable: false
         }
-      ]
+      ],
+      userAccountOptions: { itemsPerPage: 10 },
+      serviceAccountOptions: { itemsPerPage: 5 }
     }
   },
   computed: {
@@ -316,6 +323,21 @@ export default {
         }
       })
     },
+    sortedAndFilteredServiceAccountList () {
+      const sortBy = head(get(this.serviceAccountOptions, 'sortBy'))
+      const sortDesc = get(this.serviceAccountOptions, 'sortDesc', [false])
+      const sortOrder = head(sortDesc) ? 'desc' : 'asc'
+
+      const filterPredicate = ({ username }) => {
+        if (!this.serviceAccountFilter) {
+          return true
+        }
+        const { name } = parseServiceAccountUsername(username)
+        return includes(toLower(name), toLower(this.serviceAccountFilter))
+      }
+      const serviceAccountList = filter(this.serviceAccountList, filterPredicate)
+      return orderBy(serviceAccountList, [item => this.getSortVal(item, sortBy), 'displayname'], [sortOrder, 'asc'])
+    },
     userList () {
       const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
@@ -332,7 +354,11 @@ export default {
       })
     },
     sortedAndFilteredUserList () {
-      const predicate = ({ username }) => {
+      const sortBy = head(get(this.userAccountOptions, 'sortBy'))
+      const sortDesc = get(this.userAccountOptions, 'sortDesc', [false])
+      const sortOrder = head(sortDesc) ? 'desc' : 'asc'
+
+      const filterPredicate = ({ username }) => {
         if (isServiceAccountUsername(username)) {
           return false
         }
@@ -343,7 +369,8 @@ export default {
         const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
-      return sortBy(filter(this.userList, predicate), 'displayName')
+      const userList = filter(this.userList, filterPredicate)
+      return orderBy(userList, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
     },
     allEmails () {
       const emails = []
@@ -353,16 +380,6 @@ export default {
         }
       })
       return join(emails, ';')
-    },
-    sortedAndFilteredServiceAccountList () {
-      const predicate = ({ username }) => {
-        if (!this.serviceAccountFilter) {
-          return true
-        }
-        const { name } = parseServiceAccountUsername(username)
-        return includes(toLower(name), toLower(this.serviceAccountFilter))
-      }
-      return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
       return get(parseServiceAccountUsername(this.currentServiceAccountName), 'name')
@@ -530,6 +547,27 @@ export default {
     },
     isCurrentUser (username) {
       return this.username === username
+    },
+    getSortVal (item, sortBy) {
+      const roles = item.roles
+      switch (sortBy) {
+        case 'roles':
+          if (includes(roles, 'owner')) {
+            return 1
+          }
+          if (includes(roles, 'UAM')) {
+            return 2
+          }
+          if (includes(roles, 'admin')) {
+            return 3
+          }
+          if (includes(roles, 'viewer')) {
+            return 4
+          }
+          return 5
+        default:
+          return get(item, sortBy, 'username')
+      }
     }
   },
   mounted () {

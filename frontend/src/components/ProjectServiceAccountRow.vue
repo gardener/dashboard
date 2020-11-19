@@ -39,9 +39,11 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else class="font-weight-light text--disabled">Unknown</span>
       </div>
     </td>
-    <td style="max-width: 20vw">
-      <span v-if="item.description">{{item.description}}</span>
-      <span v-else class="font-weight-light text--disabled">Not defined</span>
+    <td>
+      <div class="description-column">
+        <span v-if="item.description">{{item.description}}</span>
+        <span v-else class="font-weight-light text--disabled">Not defined</span>
+      </div>
     </td>
     <td>
       <div class="d-flex justify-end">
@@ -170,10 +172,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .cursor-pointer {
-    cursor: pointer;
-  }
-  ::v-deep .popper {
-    text-align: initial;
+  .description-column {
+    max-width: 20vw;
+    max-height: 60px;
+    overflow: scroll;
   }
 </style>
