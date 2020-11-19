@@ -18,6 +18,8 @@ function createConverter (options) {
     tasklists: true,
     openLinksInNewWindow: true,
     emoji: true,
+    simplifiedAutoLink: true,
+    simpleLineBreaks: true,
     ...options
   })
 
