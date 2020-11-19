@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
             <div v-on="on">
               <v-btn
                 text
-                class="text-left teal--text"
+                class="text-left primary--text"
                 :disabled="!canCreateProject"
                 @click.native.stop="projectDialog = true"
               >

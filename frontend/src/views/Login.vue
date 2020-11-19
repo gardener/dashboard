@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="closeDialog">Cancel</v-btn>
-          <v-btn text color="teal darken-2" @click="submitToken">Ok</v-btn>
+          <v-btn text color="primary" @click="submitToken">Ok</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

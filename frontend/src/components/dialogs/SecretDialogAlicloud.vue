@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="alicloud"
-    color="grey darken-4"
+    color="primary"
     infraIcon="alicloud-white"
     backgroundSrc="/static/background_alicloud.svg"
     createTitle="Add new Alibaba Cloud Secret"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="grey darken-4"
+          color="primary"
           v-model="accessKeyId"
           ref="accessKeyId"
           label="Access Key Id"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="grey darken-4"
+          color="primary"
           v-model="accessKeySecret"
           label="Access Key Secret"
           :error-messages="getErrorMessages('accessKeySecret')"

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="aws"
-    color="orange darken-1"
+    color="primary"
     infraIcon="aws-white"
     backgroundSrc="/static/background_aws.svg"
     createTitle="Add new AWS Secret"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="orange darken-1"
+          color="primary"
           v-model="accessKeyId"
           ref="accessKeyId"
           label="Access Key Id"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="orange darken-1"
+          color="primary"
           v-model="secretAccessKey"
           label="Secret Access Key"
           :error-messages="getErrorMessages('secretAccessKey')"

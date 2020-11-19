@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="green darken-2">
+      <v-toolbar flat color="primary">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subtitle-1 white--text">
           Project Users
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-text-field v-if="userList.length > 3"
           class="searchField"
           prepend-inner-icon="mdi-magnify"
-          color="green darken-2"
+          color="primary"
           label="Search"
           hide-details
           flat
@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
 
     <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="blue-grey">
+      <v-toolbar flat color="primary">
         <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subtitle-1 white--text">
           Service Accounts
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-text-field v-if="serviceAccountList.length > 3"
           class="searchField"
           prepend-inner-icon="mdi-magnify"
-          color="blue-grey"
+          color="primary"
           label="Search"
           hide-details
           flat
@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
       <v-card>
-        <v-card-title class="teal darken-2 grey--text text--lighten-4">
+        <v-card-title class="primary grey--text text--lighten-4">
           <div class="headline">Kubeconfig <code class="serviceAccount_name">{{currentServiceAccountDisplayName}}</code></div>
           <v-spacer></v-spacer>
           <v-btn icon class="grey--text text--lighten-4" @click.native="kubeconfigDialog = false">
@@ -145,16 +145,16 @@ SPDX-License-Identifier: Apache-2.0
     <v-fab-transition v-if="canManageServiceAccountMembers || canManageMembers">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <template v-slot:activator>
-          <v-btn v-model="fab" color="teal darken-2" dark fab>
+          <v-btn v-model="fab" color="primary" dark fab>
             <v-icon v-if="fab">mdi-close</v-icon>
             <v-icon v-else>mdi-plus</v-icon>
           </v-btn>
         </template>
         <v-btn v-if="canManageServiceAccountMembers" fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
-          <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
+          <v-icon color="primary">mdi-monitor</v-icon>
         </v-btn>
         <v-btn v-if="canManageMembers" fab small color="grey lighten-2" @click="openUserAddDialog">
-          <v-icon color="green darken-2">mdi-account</v-icon>
+          <v-icon color="primary">mdi-account</v-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>

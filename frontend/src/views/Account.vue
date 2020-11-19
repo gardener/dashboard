@@ -9,18 +9,18 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="teal darken-2">
+          <v-toolbar flat dark dense class="primary">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list dense>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">{{icon}}</v-icon>
+                <v-icon color="primary">{{icon}}</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title class="label pb-2">User</v-list-item-title>
                 <v-list-item-subtitle class="content pb-2">
-                  <account-avatar :account-name="username" mail-to color="teal darken-2" :size="32"/>
+                  <account-avatar :account-name="username" mail-to color="primary" :size="32"/>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">mdi-timelapse</v-icon>
+                <v-icon color="primary">mdi-timelapse</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title class="label">Session</v-list-item-title>
@@ -67,13 +67,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="teal darken-2">
+          <v-toolbar flat dark dense class="primary">
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">mdi-key</v-icon>
+                <v-icon color="primary">mdi-key</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title>Token</v-list-item-title>
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-divider inset class="my-2"/>
               <v-list-item>
                 <v-list-item-avatar>
-                  <v-icon color="teal darken-2">mdi-file</v-icon>
+                  <v-icon color="primary">mdi-file</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
@@ -122,13 +122,13 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text class="pt-0">
                     <div class="grey--text text--darken-2">
                       The downloaded <tt>kubeconfig</tt> will initiate
-                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="teal darken-2">
+                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="primary">
                         OIDC
                       </external-link>
                       authentication via <tt>kubelogin</tt>.
                       If not already done, please install <tt>kubelogin</tt>
                       according to the
-                      <external-link url="https://github.com/int128/kubelogin#setup" color="teal darken-2">
+                      <external-link url="https://github.com/int128/kubelogin#setup" color="primary">
                         setup instructions
                       </external-link>.
                       For more information please refer to the <tt>kubelogin</tt> documentation.
@@ -142,8 +142,8 @@ SPDX-License-Identifier: Apache-2.0
                         <v-row >
                           <v-col cols="12">
                             <v-select
-                              color="teal darken-1"
-                              item-color="teal darken-1"
+                              color="primary"
+                              item-color="primary"
                               v-model="projectName"
                               :items="projectNames"
                               label="Project"
@@ -153,8 +153,8 @@ SPDX-License-Identifier: Apache-2.0
                           </v-col>
                           <v-col cols="12">
                             <v-select
-                              color="teal darken-1"
-                              item-color="teal darken-1"
+                              color="primary"
+                              item-color="primary"
                               v-model="grantType"
                               :items="grantTypes"
                               label="Grant Type"
@@ -164,7 +164,7 @@ SPDX-License-Identifier: Apache-2.0
                           </v-col>
                           <v-col cols="12">
                             <v-switch
-                              color="teal darken-1"
+                              color="primary"
                               v-model="skipOpenBrowser"
                               label="Skip Open Browser"
                               hint="If true, it does not open the browser on authentication"

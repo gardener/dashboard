@@ -290,7 +290,7 @@ export default {
   },
   data () {
     return {
-      color: 'blue-grey darken-2',
+      color: 'primary',
       edit: false,
       editOwner: false,
       ownerMessages: [],

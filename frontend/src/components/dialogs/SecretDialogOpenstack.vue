@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="openstack"
-    color="black"
+    color="primary"
     infraIcon="openstack-white"
     backgroundSrc="/static/background_openstack.svg"
     createTitle="Add new OpenStack Secret"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="domainName"
           ref="domainName"
           label="Domain Name"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="tenantName"
           label="Project / Tenant Name"
           :error-messages="getErrorMessages('tenantName')"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       <div>
         <hint-colorizer hintColor="warning">
           <v-text-field
-          color="black"
+          color="primary"
           v-model="username"
           label="Technical User"
           :error-messages="getErrorMessages('username')"
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
       <div>
         <hint-colorizer hintColor="warning">
           <v-text-field
-            color="black"
+            color="primary"
             v-model="password"
             label="Password"
             :error-messages="getErrorMessages('password')"

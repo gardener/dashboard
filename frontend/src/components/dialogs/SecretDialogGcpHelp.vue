@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About GCP Service Accounts"
-    color="green"
+    color="primary"
     backgroundSrc="/static/background_gcp.svg"
     :value="value"
     @input="onInput"
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
           Read the
           <a href="https://cloud.google.com/compute/docs/access/service-accounts"
               target="_blank"
-              class="green--text">
+              class="primary--text">
             Service Account Documentation<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to apply for credentials
           to service accounts.
         </p>

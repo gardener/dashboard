@@ -92,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0
                 :data-g-project-name="project.metadata.name"
               >
                 <v-list-item-avatar>
-                  <v-icon v-if="project.metadata.name === projectName" color="teal">mdi-check</v-icon>
+                  <v-icon v-if="project.metadata.name === projectName" color="primary">mdi-check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
@@ -110,7 +110,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-btn
                       text
                       block
-                      class="project-add text-left teal--text"
+                      class="project-add text-left primary--text"
                       :disabled="!canCreateProject"
                       @click.stop="openProjectDialog"
                     >
