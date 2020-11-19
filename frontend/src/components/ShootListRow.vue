@@ -6,119 +6,137 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr>
-    <td class="nowrap" v-if="this.headerVisible['project']">
-      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
-        {{ shootProjectName }}
-      </router-link>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['name']">
-      <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
-        <v-col class="grow pa-0 ma-0">
-          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-            {{ shootName }}
-          </router-link>
-        </v-col>
-        <v-col class="shrink" >
-          <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-            <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-            <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
-            <hibernation-schedule-warning
-              v-if="isShootHasNoHibernationScheduleWarning"
-              :name="shootName"
-              :namespace="shootNamespace"
-              :purpose="shootPurpose">
-            </hibernation-schedule-warning>
-          </div>
-        </v-col>
-      </v-row>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['infrastructure']">
-      <vendor :shootItem="shootItem"></vendor>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['seed']">
-      <shoot-seed-name :shootItem="shootItem" />
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['technicalId']">
-      <div class="d-flex align-center justify-start flex-nowrap fill-height">
-        <span>{{shootTechnicalId}}</span>
-        <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-      </div>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['createdBy']">
-      <account-avatar :account-name="shootCreatedBy"></account-avatar>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['createdAt']">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
-          </div>
-        </template>
-        {{ shootCreatedAt }}
-      </v-tooltip>
-    </td>
-    <td class="nowrap text-center" v-if="this.headerVisible['purpose']">
-      <purpose-tag :purpose="shootPurpose"></purpose-tag>
-    </td>
-    <td class="text-left nowrap" v-if="this.headerVisible['lastOperation']">
-      <div>
-        <shoot-status
-         :popperKey="`${shootNamespace}/${shootName}`"
-         :shootItem="shootItem">
-        </shoot-status>
-      </div>
-    </td>
-    <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :shoot-item="shootItem" chip></shoot-version>
-    </td>
-    <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
-      <status-tags :shootItem="shootItem"></status-tags>
-    </td>
-    <td v-if="this.headerVisible['accessRestrictions']">
-      <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
-    </td>
-    <td class="nowrap" v-if="this.headerVisible['ticket']">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-              <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
-            </router-link>
-          </div>
-        </template>
-        {{ shootLastUpdatedTicket }}
-      </v-tooltip>
-    </td>
-    <td v-if="this.headerVisible['ticketLabels']">
-      <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
-        None
+    <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
+      <template v-if="cell.header.value === 'project'">
+        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+          {{ shootProjectName }}
+        </router-link>
       </template>
-      <div class="labels" v-else>
-        <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
-      </div>
-    </td>
-    <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
-      <v-row class="fill-height" align="center" justify="end" >
-        <v-tooltip top v-if="canGetSecrets">
+      <template v-if="cell.header.value === 'name'">
+        <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
+          <v-col class="grow pa-0 ma-0">
+            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+              {{ shootName }}
+            </router-link>
+          </v-col>
+          <v-col class="shrink" >
+            <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
+              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
+              <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
+              <hibernation-schedule-warning
+                v-if="isShootHasNoHibernationScheduleWarning"
+                :name="shootName"
+                :namespace="shootNamespace"
+                :purpose="shootPurpose">
+              </hibernation-schedule-warning>
+            </div>
+          </v-col>
+        </v-row>
+      </template>
+      <template v-if="cell.header.value === 'infrastructure'">
+        <vendor :shootItem="shootItem"></vendor>
+      </template>
+      <template v-if="cell.header.value === 'seed'">
+        <shoot-seed-name :shootItem="shootItem" />
+      </template>
+      <template v-if="cell.header.value === 'technicalId'">
+        <div class="d-flex align-center justify-start flex-nowrap fill-height">
+          <span>{{shootTechnicalId}}</span>
+          <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
+        </div>
+      </template>
+      <template v-if="cell.header.value === 'createdBy'">
+        <account-avatar :account-name="shootCreatedBy"></account-avatar>
+      </template>
+      <template v-if="cell.header.value === 'createdAt'">
+        <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-                <v-icon size="22">mdi-key</v-icon>
-              </v-btn>
+              <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
             </div>
           </template>
-          <span>{{showClusterAccessActionTitle}}</span>
+          {{ shootCreatedAt }}
         </v-tooltip>
-        <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
-      </v-row>
+      </template>
+      <template v-if="cell.header.value === 'purpose'">
+        <purpose-tag :purpose="shootPurpose"></purpose-tag>
+      </template>
+      <template v-if="cell.header.value === 'lastOperation'">
+        <div>
+          <shoot-status
+          :popperKey="`${shootNamespace}/${shootName}`"
+          :shootItem="shootItem">
+          </shoot-status>
+        </div>
+      </template>
+      <template v-if="cell.header.value === 'k8sVersion'">
+        <shoot-version :shoot-item="shootItem" chip></shoot-version>
+      </template>
+      <template v-if="cell.header.value === 'readiness'">
+        <status-tags :shootItem="shootItem"></status-tags>
+      </template>
+      <template v-if="cell.header.value === 'accessRestrictions'">
+        <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+      </template>
+      <template v-if="cell.header.value === 'ticket'">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+                <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
+              </router-link>
+            </div>
+          </template>
+          {{ shootLastUpdatedTicket }}
+        </v-tooltip>
+      </template>
+      <template v-if="cell.header.value === 'ticketLabels'">
+        <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
+          None
+        </template>
+        <div class="labels" v-else>
+          <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
+        </div>
+      </template>
+      <template v-if="cell.header.customField === true">
+        <template v-if="cell.value">
+          <v-tooltip top v-if="cell.header.tooltip">
+            <template v-slot:activator="{ on }">
+              <span v-on="on">{{cell.value}}</span>
+            </template>
+            {{cell.header.tooltip}}
+          </v-tooltip>
+          <span v-else>{{cell.value}}</span>
+        </template>
+        <span class="grey--text" v-else-if="cell.header.defaultValue">
+          {{cell.header.defaultValue}}
+        </span>
+      </template>
+      <template v-if="cell.header.value === 'actions'">
+        <v-row class="fill-height" align="center" justify="end" >
+          <v-tooltip top v-if="canGetSecrets">
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                  <v-icon size="22">mdi-key</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>{{showClusterAccessActionTitle}}</span>
+          </v-tooltip>
+          <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
+        </v-row>
+      </template>
     </td>
   </tr>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
+import get from 'lodash/get'
+import map from 'lodash/map'
+import isObject from 'lodash/isObject'
 
 import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
@@ -180,13 +198,6 @@ export default {
       'canGetSecrets',
       'canDeleteShoots'
     ]),
-    headerVisible () {
-      const headerVisible = {}
-      forEach(this.visibleHeaders, (header) => {
-        headerVisible[header.value] = true
-      })
-      return headerVisible
-    },
     isInfoAvailable () {
       // operator not yet updated shoot resource
       if (this.shootLastOperation.type === undefined || this.shootLastOperation.state === undefined) {
@@ -231,6 +242,18 @@ export default {
     },
     shootTicketsLabels () {
       return this.ticketsLabels(this.shootMetadata)
+    },
+    cells () {
+      return map(this.visibleHeaders, header => {
+        let value = get(this.shootItem, header.path)
+        if (isObject(value)) { // only allow primitive types
+          value = undefined
+        }
+        return {
+          header,
+          value // currently only applicable for header.customField === true
+        }
+      })
     }
   },
   methods: {

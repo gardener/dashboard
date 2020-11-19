@@ -22,8 +22,11 @@ import {
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
+import isObject from 'lodash/isObject'
 import uniq from 'lodash/uniq'
 import uniqBy from 'lodash/uniqBy'
 import get from 'lodash/get'
@@ -39,6 +42,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
@@ -526,6 +530,42 @@ const getters = {
   },
   projectNamesFromProjectList (state, getters) {
     return map(getters.projectList, 'metadata.name')
+  },
+  customFieldsListShoot (state, getters) {
+    return map(getters.customFieldsShoot, (customFields, key) => {
+      return {
+        ...customFields,
+        key
+      }
+    })
+  },
+  customFieldsShoot (state, getters) {
+    let customFieldsShoot = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/customFieldsShoot"]')
+    if (!customFieldsShoot) {
+      return undefined
+    }
+
+    try {
+      customFieldsShoot = JSON.parse(customFieldsShoot)
+    } catch (error) {
+      console.error('could not parse custom fields', error.message)
+      return undefined
+    }
+
+    customFieldsShoot = pickBy(customFieldsShoot, customFields => {
+      return !isEmpty(get(customFields, 'path')) &&
+        !isEmpty(get(customFields, 'name'))
+    })
+
+    customFieldsShoot = mapKeys(customFieldsShoot, (customFields, key) => `Z_${key}`)
+    customFieldsShoot = mapValues(customFieldsShoot, customFields => {
+      const defaultValue = !isObject(customFields.defaultValue) ? customFields.defaultValue : undefined
+      return {
+        ...customFields,
+        defaultValue
+      }
+    })
+    return customFieldsShoot
   },
   costObjectSettings (state) {
     const costObject = state.cfg.costObject

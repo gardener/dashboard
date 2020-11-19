@@ -196,6 +196,26 @@ SPDX-License-Identifier: Apache-2.0
           <addon-configuration :shootItem="shootItem"></addon-configuration>
         </v-list-item-action>
       </v-list-item>
+      <template v-for="customField in customFields" >
+        <v-divider inset :key="`${customField.key}-divider`"></v-divider>
+        <v-list-item :key="customField.key">
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2" v-if="customField.icon">{{customField.icon}}</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>{{customField.name}}</v-list-item-subtitle>
+            <v-list-item-title class="pt-1">
+              <v-tooltip top v-if="customField.tooltip">
+                <template v-slot:activator="{ on }">
+                  <span v-on="on">{{customField.value}}</span>
+                </template>
+                {{customField.tooltip}}
+              </v-tooltip>
+              <span v-else>{{customField.value}}</span>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
     </v-list>
   </v-card>
 </template>
@@ -203,6 +223,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters } from 'vuex'
 import filter from 'lodash/filter'
+import get from 'lodash/get'
 import map from 'lodash/map'
 
 import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
@@ -252,7 +273,8 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
-      'canGetSecrets'
+      'canGetSecrets',
+      'customFieldsListShoot'
     ]),
     expirationTimestamp () {
       return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
@@ -286,6 +308,17 @@ export default {
     },
     slaTitle () {
       return this.sla.title
+    },
+    customFields () {
+      const customFields = filter(this.customFieldsListShoot, ['showDetails', true])
+      return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
+        name,
+        path,
+        icon,
+        tooltip,
+        defaultValue,
+        value: get(this.shootItem, path)
+      }))
     }
   }
 }

@@ -48,6 +48,7 @@ import {
   generateWorker
 } from '@/utils'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import startsWith from 'lodash/startsWith'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -370,8 +371,13 @@ const getRawVal = (item, column) => {
       const labels = store.getters.ticketsLabels(metadata)
       return join(map(labels, 'name'), ' ')
     }
-    default:
+    default: {
+      if (startsWith(column, 'Z_')) {
+        const path = get(store.getters.customFieldsShoot, [column, 'path'])
+        return get(item, path)
+      }
       return metadata[column]
+    }
   }
 }
 
@@ -447,7 +453,6 @@ const setSortedItems = (state, rootState) => {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
   const sortOrder = head(sortDesc) ? 'desc' : 'asc'
-
   let sortedShoots = shoots(state)
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {

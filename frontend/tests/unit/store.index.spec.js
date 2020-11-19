@@ -483,4 +483,62 @@ describe('Store', () => {
     item = firstItemMatchingVersionClassification(items)
     expect(item.version).toBe('1')
   })
+
+  it('should return custom fields for shoots', () => {
+    const custom1 = {
+      weight: 1,
+      defaultValue: 'Default',
+      path: 'metadata.name',
+      name: 'Column Name',
+      showColumn: true,
+      showDetails: true,
+      icon: 'mdi-icon'
+    }
+    const custom2 = {
+      name: 'Name',
+      path: 'path',
+      defaultValue: { foo: 'bar' } // will be mapped to undefined
+    }
+
+    const customFieldsShoot = {
+      custom1,
+      custom2,
+      custom3: { // ignored, missing required property path
+        name: 'name'
+      },
+      custom4: { // ignored, missing required property name
+        path: 'path'
+      },
+      custom5: {}, // ignored
+      custom6: null // ignored
+    }
+
+    const storeGetters = {
+      projectFromProjectList: {
+        metadata: {
+          annotations: {
+            'dashboard.gardener.cloud/customFieldsShoot': JSON.stringify(customFieldsShoot)
+          }
+        }
+      }
+    }
+
+    const customFields = getters.customFieldsShoot({}, storeGetters)
+    expect(customFields).toStrictEqual({
+      Z_custom1: {
+        weight: 1,
+        defaultValue: 'Default',
+        path: 'metadata.name',
+        name: 'Column Name',
+        showColumn: true,
+        showDetails: true,
+        icon: 'mdi-icon'
+      },
+      Z_custom2: {
+        name: 'Name',
+        path: 'path',
+        defaultValue: undefined
+      }
+    })
+  })
 })

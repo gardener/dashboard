@@ -135,7 +135,7 @@ function ensureDataLoaded (store, localStorage) {
             deactivatedReconciliation: isAdmin,
             hideTicketsWithLabel: isAdmin
           }
-          const shootListFilters = defaults(localStorage.getObject('shootListFilter'), defaultFilter)
+          const shootListFilters = defaults(localStorage.getObject('shootList_filter'), defaultFilter)
           await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
 
           const promises = [
