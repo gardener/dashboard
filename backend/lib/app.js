@@ -29,8 +29,10 @@ const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.ticket.gitHubRepoUrl')
 if (gitHubRepoUrl) {
   const url = new URL(gitHubRepoUrl)
+  const gitHubHostname = url.hostname
+  url.hostname = 'avatars.' + gitHubHostname
   imgSrc.push(url.origin)
-  url.hostname = 'avatars.' + url.hostname
+  url.hostname = 'media.' + gitHubHostname
   imgSrc.push(url.origin)
 }
 
@@ -54,7 +56,7 @@ app.use(noCache())
 app.use('/auth', auth.router)
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
-app.get('/config.json', api.frontendConfig)
+app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

@@ -61,7 +61,9 @@
     "p-event": "^4.1.0",
     "p-retry": "^4.2.0",
     "p-timeout": "^3.2.0",
+    "sanitize-html": "^2.1.1",
     "semver": "^7.1.2",
+    "showdown": "^1.9.1",
     "socket.io": "^2.3.0",
     "swagger-parser": "^8.0.1",
     "uuid": "^8.3.0"

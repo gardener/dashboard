@@ -137,7 +137,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-action>
         </v-list-item>
       </template>
-      <template v-if="slaDescriptionCompiledMarkdown">
+      <template v-if="slaDescriptionHtml">
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-            <v-list-item-title class="pt-1 markdown" v-html="slaDescriptionCompiledMarkdown"/>
+            <v-list-item-title class="pt-1 markdown" v-html="slaDescriptionHtml"/>
           </v-list-item-content>
         </v-list-item>
       </template>
@@ -222,7 +222,7 @@ import {
   isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
-  compileMarkdown
+  transformHtml
 } from '@/utils'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -281,8 +281,8 @@ export default {
     sla () {
       return this.cfg.sla || {}
     },
-    slaDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.sla.description)
+    slaDescriptionHtml () {
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title

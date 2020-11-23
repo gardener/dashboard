@@ -18,14 +18,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-title class="comment-header">
         <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
       </v-list-item-title>
-      <v-list-item-subtitle class="wrap-text comment-body" v-html="compiledMarkdown"></v-list-item-subtitle>
+      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
     </v-list-item-content>
     </v-list-item>
 </template>
 
 <script>
 import get from 'lodash/get'
-import { compileMarkdown, gravatarUrlIdenticon } from '@/utils'
+import { gravatarUrlIdenticon, transformHtml } from '@/utils'
 import TimeString from '@/components/TimeString'
 import { mapState } from 'vuex'
 
@@ -49,8 +49,8 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    compiledMarkdown () {
-      return compileMarkdown(get(this.comment, 'data.body', ''))
+    commentHtml () {
+      return transformHtml(get(this.comment, 'data.body', ''))
     },
     login () {
       return get(this.comment, 'data.user.login')
@@ -82,6 +82,8 @@ export default {
   @import '~vuetify/src/styles/styles.sass';
 
   $cyan-darken-1: map-get($cyan, 'darken-1');
+  $gh-code-background-color: map-get($grey, 'lighten-4');
+  $gh-code-color: map-get($grey, 'darken-4');
 
   .comment {
     padding: 0;
@@ -113,8 +115,36 @@ export default {
     /* does not work with firefox */
     word-break: break-word;
 
-    ::v-deep > pre {
+    ::v-deep pre {
+      padding: 8px;
+      border-radius: 3px;
+      white-space: pre;
       overflow: auto;
+      background-color: $gh-code-background-color;
+      & > code {
+        padding: 0;
+        color: $gh-code-color;
+        background-color: transparent;
+        background-attachment: scroll;
+        font-weight: normal;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        &:before {
+          content: none;
+        }
+      }
+    }
+
+    ::v-deep code {
+      padding: .2em .4em;
+      border-radius: 3px;
+      font-weight: normal;
+      color: $gh-code-color;
+      background-color: $gh-code-background-color;
+    }
+
+    ::v-deep img {
+      max-width: 100%;
     }
 
     ::v-deep > h1 {

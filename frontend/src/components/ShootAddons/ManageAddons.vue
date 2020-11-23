@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-action>
       <v-list-item-content  class="align-self-start">
         <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
-        <v-list-item-subtitle class="d-flex flex-column g-subtitle" v-html="addonDefinition.description"></v-list-item-subtitle>
+        <v-list-item-subtitle class="d-flex flex-column g-subtitle">{{addonDefinition.description}}</v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
   </v-list>

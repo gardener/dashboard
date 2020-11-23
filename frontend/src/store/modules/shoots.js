@@ -90,6 +90,9 @@ const getters = {
   getShootListFilters () {
     return state.shootListFilters
   },
+  onlyShootsWithIssues (state, getters) {
+    return get(getters.getShootListFilters, 'onlyShootsWithIssues', true)
+  },
   newShootResource () {
     return state.newShootResource
   },
@@ -536,7 +539,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     items = filter(items, predicate)
   }
-  if (rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+  if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
     if (get(state, 'shootListFilters.progressing', false)) {
       const predicate = item => {
         return !isStatusProgressing(get(item, 'metadata', {}))
@@ -658,13 +661,14 @@ const mutations = {
   },
   HANDLE_EVENTS (state, { rootState, events }) {
     let sortRequired = false
+    const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
     forEach(events, event => {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
           if (rootState.namespace !== '_all' ||
-            !rootState.onlyShootsWithIssues ||
-            rootState.onlyShootsWithIssues === shootHasIssue(event.object)) {
+            !onlyShootsWithIssues ||
+            onlyShootsWithIssues === shootHasIssue(event.object)) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
             if (putItem(state, event.object)) {
               sortRequired = true

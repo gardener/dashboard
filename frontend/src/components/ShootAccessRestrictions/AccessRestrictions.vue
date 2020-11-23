@@ -17,8 +17,8 @@ SPDX-License-Identifier: Apache-2.0
             ></v-switch>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="wrap-text" v-html="compileMarkdown(definition.input.title)"></v-list-item-title>
-            <v-list-item-subtitle v-if="definition.input.description" class="wrap-text" v-html="compileMarkdown(definition.input.description)"></v-list-item-subtitle>
+            <v-list-item-title class="wrap-text" v-html="transformHtml(definition.input.title)"></v-list-item-title>
+            <v-list-item-subtitle v-if="definition.input.description" class="wrap-text" v-html="transformHtml(definition.input.description)"></v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
         <template v-if="definition">
@@ -31,8 +31,8 @@ SPDX-License-Identifier: Apache-2.0
               ></v-checkbox>
             </v-list-item-action>
             <v-list-item-content>
-              <v-list-item-title class="wrap-text" :class="textClass(definition)" v-html="compileMarkdown(optionValue.input.title)"></v-list-item-title>
-              <v-list-item-subtitle v-if="optionValue.input.description" class="wrap-text pt-n3" :class="textClass(definition)" v-html="compileMarkdown(optionValue.input.description)"></v-list-item-subtitle>
+              <v-list-item-title class="wrap-text" :class="textClass(definition)" v-html="transformHtml(optionValue.input.title)"></v-list-item-title>
+              <v-list-item-subtitle v-if="optionValue.input.description" class="wrap-text pt-n3" :class="textClass(definition)" v-html="transformHtml(optionValue.input.description)"></v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </template>
@@ -52,7 +52,7 @@ import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
 
-import { compileMarkdown } from '@/utils'
+import { transformHtml } from '@/utils'
 
 export default {
   props: {
@@ -86,8 +86,8 @@ export default {
     }
   },
   methods: {
-    compileMarkdown (value) {
-      return compileMarkdown(value)
+    transformHtml (value) {
+      return transformHtml(value)
     },
     setAccessRestrictions ({ shootResource, cloudProfileName, region }) {
       this.shootResource = shootResource

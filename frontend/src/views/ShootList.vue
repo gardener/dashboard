@@ -238,9 +238,9 @@ export default {
       setSelectedShootInternal: 'setSelectedShoot',
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
-      setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
       setShootListFilters: 'setShootListFilters',
-      setShootListFilter: 'setShootListFilter'
+      setShootListFilter: 'setShootListFilter',
+      subscribeShoots: 'subscribeShoots'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -313,10 +313,13 @@ export default {
         }
       }
     },
-    toggleFilter (key) {
-      if (this.showOnlyShootsWithIssues) {
-        const filters = this.getShootListFilters
-        this.setShootListFilter({ filter: key, value: !filters[key] })
+    async toggleFilter (key) {
+      await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
+
+      this.$localStorage.setObject('shootListFilter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+
+      if (key === 'onlyShootsWithIssues') {
+        this.subscribeShoots()
       }
     },
     isFilterActive (key) {
@@ -343,11 +346,11 @@ export default {
       canPatchShoots: 'canPatchShoots',
       canDeleteShoots: 'canDeleteShoots',
       canCreateShoots: 'canCreateShoots',
-      canGetSecrets: 'canGetSecrets'
+      canGetSecrets: 'canGetSecrets',
+      onlyShootsWithIssues: 'onlyShootsWithIssues'
     }),
     ...mapState([
       'shootsLoading',
-      'onlyShootsWithIssues',
       'cfg',
       'namespace'
     ]),
@@ -378,7 +381,7 @@ export default {
         return this.onlyShootsWithIssues
       },
       set (value) {
-        this.setOnlyShootsWithIssues(value)
+        this.toggleFilter('onlyShootsWithIssues')
       }
     },
     items () {
@@ -420,12 +423,6 @@ export default {
     this.floatingButton = true
     this.loadColumnsChecked()
     this.setColumnVisibility()
-    this.setShootListFilters({
-      progressing: true,
-      userIssues: this.isAdmin,
-      deactivatedReconciliation: this.isAdmin,
-      hideTicketsWithLabel: this.isAdmin
-    })
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
                 placement="bottom"
                 :boundaries-selector="`#boundary_${uuid}`"
               >
-                <span v-html="compiledImageHelpText"></span>
+                <span v-html="imageHelpHtml"></span>
                 <template v-slot:popperRef>
                   <v-btn v-on="tooltip" v-if="terminalSession.imageHelpText" icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag">
                     <v-icon class="mr-0" small>mdi-help-circle-outline</v-icon>
@@ -205,8 +205,6 @@ import get from 'lodash/get'
 import assign from 'lodash/assign'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
 
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
@@ -218,7 +216,7 @@ import { FocusAddon } from '@/lib/xterm-addon-focus'
 import GPopper from '@/components/GPopper'
 
 import DragNDroppableComponent from '@/components/DragNDroppableComponent'
-import { targetText } from '@/utils'
+import { targetText, transformHtml } from '@/utils'
 import { terminalConfig } from '@/utils/api'
 import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
@@ -341,14 +339,8 @@ export default {
       const image = get(this.terminalSession, 'container.image', '')
       return image.substring(image.lastIndexOf('/') + 1)
     },
-    compiledImageHelpText () {
-      const options = {
-        gfm: true,
-        breaks: true,
-        tables: true
-      }
-      const dirty = marked(get(this.terminalSession, 'imageHelpText', ''), options)
-      return DOMPurify.sanitize(dirty)
+    imageHelpHtml () {
+      return transformHtml(get(this.terminalSession, 'imageHelpText', ''))
     },
     name () {
       // name is undefined in case of garden terminal
