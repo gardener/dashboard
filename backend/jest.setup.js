@@ -9,9 +9,11 @@
 const http = require('http')
 const { Test } = require('supertest')
 const { createTerminus } = require('@godaddy/terminus')
+const fixtures = require('./__fixtures__')
 
-function createAgent (app) {
-  const server = http.createServer(app)
+function createAgent () {
+  const app = require('./lib/app')
+  let server = http.createServer(app)
   const healthCheck = app.get('healthCheck')
   if (typeof healthCheck === 'function') {
     const signal = 'SIGTERM'
@@ -20,7 +22,7 @@ function createAgent (app) {
       '/healthz-transitive': () => healthCheck(true)
     }
     process.removeAllListeners(signal)
-    this.server = createTerminus(this.server, { signal, healthChecks })
+    server = createTerminus(server, { signal, healthChecks })
   }
 
   const agent = {
@@ -42,15 +44,29 @@ function createAgent (app) {
 
 jest.mock('./lib/config/gardener', () => {
   const fixtures = require('./__fixtures__')
-  const configGardener = jest.requireActual('./lib/config/gardener')
+  const originalGardener = jest.requireActual('./lib/config/gardener')
   const mockFiles = new Map()
-  for (const [path, data] of Object.entries(fixtures.mockFiles)) {
+  for (const [path, data] of fixtures.config.list()) {
     mockFiles.set(path, data)
   }
   return {
-    ...configGardener,
+    ...originalGardener,
     readConfig: jest.fn(path => mockFiles.get(path))
   }
 })
 
+jest.mock('./lib/cache', () => {
+  const fixtures = require('./__fixtures__')
+  const originalCache = jest.requireActual('./lib/cache')
+  const originalCacheTickets = jest.requireActual('./lib/cache/tickets')
+  const { cache } = originalCache
+  cache.cloudprofiles.replace(fixtures.cloudprofiles.list())
+  cache.seeds.replace(fixtures.seeds.list())
+  cache.quotas.replace(fixtures.quotas.list())
+  cache.projects.replace(fixtures.projects.list())
+  cache.getTicketCache = jest.fn(() => originalCacheTickets())
+  return originalCache
+})
+
 global.createAgent = createAgent
+global.fixtures = fixtures

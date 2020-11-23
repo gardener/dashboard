@@ -98,7 +98,8 @@
       "plugin:jest/recommended"
     ],
     "globals": {
-      "createAgent": true
+      "createAgent": true,
+      "fixtures": true
     },
     "parserOptions": {
       "ecmaVersion": 11
@@ -113,7 +114,7 @@
     "coverageDirectory": "coverage",
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
-      "/test/"
+      "/test-ignore/"
     ],
     "transformIgnorePatterns": [
       "/node_modules/",

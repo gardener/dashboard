@@ -12,14 +12,23 @@ const gardener = require('../lib/config/gardener')
 describe('config', function () {
   describe('gardener', function () {
     describe('#readConfig', function () {
-      const { readConfig } = jest.requireActual('../lib/config/gardener')
+      const originalGardener = jest.requireActual('../lib/config/gardener')
+
+      const path = 'path'
+      let readFileSyncStub
+
+      beforeEach(() => {
+        readFileSyncStub = jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('port: 1234')
+      })
+
+      afterEach(() => {
+        readFileSyncStub.mockRestore()
+      })
 
       it('should return the defaults for the test environment', function () {
-        const path = 'path'
-        const data = 'data'
-        const readFileSyncStub = jest.spyOn(fs, 'readFileSync').mockReturnValueOnce(data)
-        expect(readConfig(path)).toBe(data)
-        expect(readFileSyncStub.mock.calls).toEqual([[path, 'utf8']])
+        expect(originalGardener.readConfig(path)).toEqual({ port: 1234 })
+        expect(readFileSyncStub).toBeCalledTimes(1)
+        expect(readFileSyncStub.mock.calls[0]).toEqual([path, 'utf8'])
       })
     })
 

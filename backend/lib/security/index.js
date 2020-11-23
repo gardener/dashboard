@@ -6,24 +6,34 @@
 
 'use strict'
 
-const { split, join, noop, trim, isPlainObject } = require('lodash')
-const assert = require('assert').strict
 const { promisify } = require('util')
-const jwt = require('jsonwebtoken')
+const assert = require('assert').strict
+const { split, join, noop, trim } = require('lodash')
 const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
-const { JWK, JWE } = require('jose')
-const { v1: uuidv1 } = require('uuid')
-const base64url = require('base64url')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
-const { authentication } = require('./services')
+const { authentication } = require('../services')
 const { Forbidden, Unauthorized } = require('http-errors')
-const logger = require('./logger')
-const { sessionSecret, oidc = {} } = require('./config')
+const logger = require('../logger')
+const { sessionSecret, oidc = {} } = require('../config')
 
-const jwtSign = promisify(jwt.sign)
-const jwtVerify = promisify(jwt.verify)
+const {
+  encodeState,
+  decodeState,
+  sign,
+  verify,
+  decode,
+  encrypt,
+  decrypt
+} = require('./jose')(sessionSecret)
+
+const {
+  COOKIE_HEADER_PAYLOAD,
+  COOKIE_TOKEN,
+  COOKIE_SIGNATURE,
+  GARDENER_AUDIENCE
+} = require('./constants')
 
 const {
   issuer,
@@ -48,20 +58,7 @@ if (!secure && process.env.NODE_ENV === 'production') {
   logger.warn('The Gardener Dashboard is running in production but you don\'t use Transport Layer Security (TLS) to secure the connection and the data')
 }
 
-const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
-const COOKIE_SIGNATURE = 'gSgn'
-const COOKIE_TOKEN = 'gTkn'
-const GARDENER_AUDIENCE = 'gardener'
-
-const symetricKey = importSymmetricKey(sessionSecret)
-
 let clientPromise
-
-function importSymmetricKey (sessionSecret) {
-  const use = 'enc'
-  const decodedSessionSecret = decodeSecret(sessionSecret)
-  return JWK.asKey(decodedSessionSecret, { use })
-}
 
 /**
  * (Customizing HTTP Requests)[https://github.com/panva/node-openid-client/blob/master/docs/README.md#customizing-http-requests]
@@ -102,30 +99,6 @@ function getIssuerClient (url = issuer) {
     clientPromise = discoverClient(url)
   }
   return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
-}
-
-function encodeState (data = {}) {
-  return base64url.encode(JSON.stringify(data))
-}
-
-function decodeState (state) {
-  try {
-    return JSON.parse(base64url.decode(state))
-  } catch (err) {
-    return {}
-  }
-}
-
-function decodeSecret (input) {
-  let value = base64url.decode(input)
-  if (base64url(value) === input) {
-    return value
-  }
-  value = Buffer.from(input, 'base64')
-  if (value.toString('base64') === input) {
-    return value
-  }
-  return Buffer.from(input)
 }
 
 async function authorizationUrl (req, res) {
@@ -285,35 +258,7 @@ function clearCookies (res) {
   res.clearCookie(COOKIE_TOKEN)
 }
 
-function encrypt (text) {
-  return JWE.encrypt(text, symetricKey)
-}
-
-function decrypt (data) {
-  return JWE.decrypt(data, symetricKey).toString('ascii')
-}
-
-function sign (payload, secretOrPrivateKey, options) {
-  if (isPlainObject(secretOrPrivateKey)) {
-    options = secretOrPrivateKey
-    secretOrPrivateKey = undefined
-  }
-  if (!secretOrPrivateKey) {
-    secretOrPrivateKey = sessionSecret
-  }
-  const { expiresIn = '1d', jwtid = uuidv1(), ...rest } = options || {}
-  return jwtSign(payload, secretOrPrivateKey, { expiresIn, jwtid, ...rest })
-}
-
-function verify (token, options) {
-  return jwtVerify(token, sessionSecret, options)
-}
-
-function decode (token) {
-  return jwt.decode(token) || {}
-}
-
-exports = module.exports = {
+module.exports = {
   discoverIssuer,
   getIssuerClient,
   COOKIE_HEADER_PAYLOAD,

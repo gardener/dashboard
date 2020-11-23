@@ -82,9 +82,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).toEqual(
-      { name, namespace, secretRef, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project }
-    )
+    expect(res.body.metadata).toEqual({ secretName: name, secretNamespace: namespace, secretRef, resourceVersion, cloudProfileName, cloudProviderKind, hasCostObject, projectName: project })
     expect(res.body.data).toHaveProperty('key')
     expect(res.body.data).toHaveProperty('secret')
   })
@@ -102,9 +100,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).toEqual(
-      { name, namespace, secretRef, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project }
-    )
+    expect(res.body.metadata).toEqual({ secretName: name, secretNamespace: namespace, secretRef, cloudProfileName, cloudProviderKind, resourceVersion, hasCostObject, projectName: project })
     expect(res.body.data).toHaveProperty('key')
     expect(res.body.data).toHaveProperty('secret')
   })

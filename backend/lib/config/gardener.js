@@ -73,7 +73,7 @@ module.exports = {
     if (env.GARDENER_CONFIG) {
       return env.GARDENER_CONFIG
     }
-    if (argv[2]) {
+    if (argv[2] && env.NODE_ENV !== 'test') {
       return argv[2]
     }
     return join(homedir(), '.gardener', 'config.yaml')
@@ -82,10 +82,7 @@ module.exports = {
     const config = this.getDefaults({ env })
     if (filename) {
       try {
-        const data = this.readConfig(filename)
-        if (data) {
-          _.merge(config, yaml.safeLoad(data))
-        }
+        _.merge(config, this.readConfig(filename))
       } catch (err) { /* ignore */ }
     }
     this.assignEnvironmentVariables(config, env)
@@ -110,6 +107,6 @@ module.exports = {
     return config
   },
   readConfig (path) {
-    return fs.readFileSync(path, 'utf8')
+    return yaml.safeLoad(fs.readFileSync(path, 'utf8'))
   }
 }
