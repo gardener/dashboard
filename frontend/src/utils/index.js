@@ -517,13 +517,8 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-<<<<<<< HEAD
-export function compileMarkdown (text, linkColor = 'primary', transformToExternalLinks = true) {
-  if (!text) {
-=======
-export function transformHtml (html, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
+export function transformHtml (html, linkColor = 'primary', transformToExternalLinks = true) {
   if (!html) {
->>>>>>> master
     return undefined
   }
 

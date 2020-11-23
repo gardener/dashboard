@@ -399,13 +399,9 @@ export default {
       const { projectName } = this.projectDetails
       let message
       if (this.isCurrentUser(name)) {
-<<<<<<< HEAD
-        messageHtml = `Do you want to remove <span class="error--text font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
-=======
         message = this.$renderComponent(RemoveProjectMember, {
           projectName
         })
->>>>>>> master
       } else {
         message = this.$renderComponent(RemoveProjectMember, {
           projectName,
