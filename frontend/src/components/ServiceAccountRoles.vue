@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div d-flex flex-row>
     <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
       <template v-slot:activator="{ on }">
-        <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+        <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'actionButton'" outlined>
           {{displayName}}
         </v-chip>
       </template>

@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     icon="aws-white"
     secretDescriptorKey="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     icon="azure-white"
     secretDescriptorKey="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
     icon="gcp-white"
     secretDescriptorKey="project"
     description="Make sure that the new credentials have the correct permission on GCP."
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureName="OpenStack"
     icon="openstack-white"
     description="Make sure that the new credentials have the correct OpenStack permissions"
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="accessKeyID"
     icon="alicloud-white"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="metalHMAC"
     icon="metal-white"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="vsphereUsername"
     icon="vsphere-white"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
-    color="primary"
+    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -117,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
       infrastructureName="Digital Ocean"
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
-      color="primary"
+      color="accent"
       ></disabled-secret>
 
       <disabled-secret
@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
       infrastructureName="China Telecom"
       icon="china-telecom"
       description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
-      color="primary"
+      color="accent"
       ></disabled-secret>
 
       <disabled-secret
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
       infrastructureName="Nutanix"
       icon="mdi-xamarin"
       description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
-      color="primary"
+      color="accent"
       ></disabled-secret>
 
     </template>

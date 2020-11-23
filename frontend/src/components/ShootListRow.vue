@@ -7,14 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td class="nowrap" v-if="this.headerVisible['project']">
-      <router-link class="primary--text" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+      <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
         {{ shootProjectName }}
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
         <v-col class="grow pa-0 ma-0">
-          <router-link class="primary--text" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+          <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
             {{ shootName }}
           </router-link>
         </v-col>
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
-            <router-link class="primary--text" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+            <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
               <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
             </router-link>
           </div>

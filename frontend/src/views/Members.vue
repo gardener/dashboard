@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="primary">
+      <v-toolbar flat color="accent">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subtitle-1 white--text">
           Project Users
@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
 
     <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="primary">
+      <v-toolbar flat color="accent">
         <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subtitle-1 white--text">
           Service Accounts

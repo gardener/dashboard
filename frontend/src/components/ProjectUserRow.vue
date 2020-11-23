@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <span v-if="isCurrentUser">(me)</span>
         </v-list-item-title>
         <v-list-item-subtitle>
-          <a v-if="isEmail" :href="`mailto:${username}`" class="primary--text">{{username}}</a>
+          <a v-if="isEmail" :href="`mailto:${username}`">{{username}}</a>
           <span v-else>{{username}}</span>
         </v-list-item-subtitle>
       </v-list-item-content>
@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <div d-flex flex-row>
           <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
             <template v-slot:activator="{ on }">
-              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'actionButton'" outlined>
                 {{displayName}}
               </v-chip>
             </template>

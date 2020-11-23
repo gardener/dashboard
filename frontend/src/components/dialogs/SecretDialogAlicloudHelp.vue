@@ -17,17 +17,17 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
-          <a href="https://ram.console.aliyun.com/overview" target="_blank" class="grey--text  text--darken-2">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          <a href="https://ram.console.aliyun.com/overview" target="_blank">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
           The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
-          (<a class="primary--text" href="https://www.alibabacloud.com/help/doc-detail/59643.htm" target="_blank">official
+          (<a href="https://www.alibabacloud.com/help/doc-detail/59643.htm" target="_blank">official
           documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
         </p>
         <p>
           Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
-          (<a class="primary--text" href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
+          (<a href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
           documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>). Alternatively, you can assign following permissions to the RAM
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>

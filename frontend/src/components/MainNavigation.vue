@@ -10,17 +10,17 @@ SPDX-License-Identifier: Apache-2.0
       fixed
       app
       :mobile-breakpoint="400"
-      dark
+      color="secondary"
     >
       <div class="teaser">
-        <div class="content center">
+        <div class="content center secondary darken-2">
           <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text ma-2">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
             <img src="../assets/logo.svg" class="logo">
             <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2>Universal Kubernetes at Scale</h2>
+            <h2 class="primary--text">Universal Kubernetes at Scale</h2>
           </a>
         </div>
       </div>
@@ -469,7 +469,6 @@ export default {
         position: relative;
         height: $teaserHeight;
         overflow: hidden;
-        background-color: #212121;
         text-align: center;
 
         a {
@@ -502,7 +501,6 @@ export default {
           }
 
           h2 {
-            color: rgb(0, 137, 123);
             font-size: 15px;
             font-weight: 300;
             padding: 0px;

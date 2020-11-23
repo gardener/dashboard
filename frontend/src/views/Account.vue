@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="primary">
+          <v-toolbar flat dark dense class="accent">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list dense>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="primary">
+          <v-toolbar flat dark dense class="accent">
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="onDownload">
+                      <v-btn v-on="on" icon @click.native.stop="onDownload" color="actionButton">
                         <v-icon>mdi-download</v-icon>
                       </v-btn>
                     </template>
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel">
+                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel" color="actionButton">
                         <v-icon>{{expansionPanelIcon}}</v-icon>
                       </v-btn>
                     </template>
@@ -122,24 +122,24 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text class="pt-0">
                     <div class="grey--text text--darken-2">
                       The downloaded <tt>kubeconfig</tt> will initiate
-                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="primary">
+                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
                         OIDC
                       </external-link>
                       authentication via <tt>kubelogin</tt>.
                       If not already done, please install <tt>kubelogin</tt>
                       according to the
-                      <external-link url="https://github.com/int128/kubelogin#setup" color="primary">
+                      <external-link url="https://github.com/int128/kubelogin#setup">
                         setup instructions
                       </external-link>.
                       For more information please refer to the <tt>kubelogin</tt> documentation.
                       <br>
                       Below you can configure and preview the <tt>kubeconfig</tt> file before download.
                     </div>
-                    <v-tabs slider-color="grey lighten-1" background-color="grey lighten-3" class="mt-2 elevation-1" color="black">
+                    <v-tabs slider-color="grey lighten-1" class="mt-2 elevation-1">
                       <v-tab>Configure</v-tab>
                       <v-tab>Preview</v-tab>
                       <v-tab-item class="pa-4">
-                        <v-row >
+                        <v-row>
                           <v-col cols="12">
                             <v-select
                               color="primary"
@@ -246,7 +246,7 @@ export default {
       return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'
     },
     icon () {
-      return this.isAdmin ? 'mdi-account-suprvisor' : 'mdi-account'
+      return this.isAdmin ? 'mdi-account-supervisor' : 'mdi-account'
     },
     id () {
       return this.user.id
@@ -374,7 +374,6 @@ export default {
   .label {
     font-size: 14px !important;
     font-weight: 400 !important;
-    color: rgba(0,0,0,0.54) !important;
   }
   .content {
     font-size: 16px !important;

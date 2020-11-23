@@ -24,13 +24,11 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Please read the
           <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
-            target="_blank"
-            class="primary--text">
+            target="_blank">
             VMware vSphere Documentation</a>
             and the
           <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
-            target="_blank"
-            class="primary--text">
+            target="_blank">
           VMware NSX-T Data Center Documentation</a>.
         </p>
       </div>

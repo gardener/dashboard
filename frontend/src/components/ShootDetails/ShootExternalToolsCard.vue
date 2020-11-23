@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card v-if="items.length">
-    <v-toolbar flat dark dense color="primary">
+    <v-toolbar flat dark dense color="accent">
       <v-toolbar-title class="subtitle-1">External Tools</v-toolbar-title>
     </v-toolbar>
     <v-list>
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
             <v-list-item-title>
-              <external-link :url="expandUrl(url)" color="primary" :size="16">
+              <external-link :url="expandUrl(url)" :size="16">
                 {{expandUrl(url)}}
               </external-link>
             </v-list-item-title>

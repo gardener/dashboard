@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onDownload">
+            <v-btn v-on="on" icon @click.native.stop="onDownload" color="actionButton">
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </template>
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click="onKubeconfig">
+            <v-btn v-on="on" icon @click="onKubeconfig" color="actionButton">
               <v-icon>mdi-eye</v-icon>
             </v-btn>
           </template>

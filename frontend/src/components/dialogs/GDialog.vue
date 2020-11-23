@@ -140,6 +140,9 @@ export default {
     },
     confirmAlertColor () {
       const color = this.confirmValue ? this.confirmColor : this.defaultColor
+      if (this.$vuetify.theme.dark) {
+        return `${color || 'primary'} darken-3`
+      }
       return `${color || 'primary'} lighten-3`
     },
     titleColorClass () {
@@ -181,7 +184,7 @@ export default {
         case 'warning':
           return 'warning grey--text text--lighten-4'
         default:
-          return 'primary grey--text text--lighten-4'
+          return 'accent grey--text text--lighten-4'
       }
     },
     textColorClassForString (textColorClass) {

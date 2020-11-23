@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           <img src="../assets/logo.svg" height="200px">
         </div>
         <div v-if="landingPageUrl" class="footer">
-          <span class="primary--text text--darken-2">Discover what our service is about at the <a class="primary--text text--darken-2" :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
+          <span class="primary--text text--darken-2">Discover what our service is about at the <a :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
         </div>
       </v-container>
     </v-main>

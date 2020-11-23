@@ -28,7 +28,7 @@ export default {
     },
     color: {
       type: String,
-      default: 'primary'
+      default: 'anchor'
     },
     mailTo: {
       type: Boolean,
@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     textColor () {
-      const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
+      const iteratee = value => /^(darken|lighten|anchor)-\d$/.test(value) ? 'text--' + value : value + '--text'
       return map(split(this.color, ' '), iteratee)
     },
     avatarUrl () {

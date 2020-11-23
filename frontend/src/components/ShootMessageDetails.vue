@@ -79,7 +79,6 @@ SPDX-License-Identifier: Apache-2.0
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
-                        class="primary--text"
                         :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
                       >
                         <span>{{secretBindingName}}</span>

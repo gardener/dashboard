@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
       <template v-if="canPatchShoots">
         Please navigate to the cluster details page to
-        <router-link  class="primary--text" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
+        <router-link :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
         a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
       </template>
     </div>

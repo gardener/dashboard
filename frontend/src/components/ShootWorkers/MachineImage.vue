@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-slot:selection="{ item }">
         <vendor-icon v-model="item.icon"></vendor-icon>
-        <span class="black--text ml-2">
+        <span class="ml-2">
          {{item.name}} [{{item.version}}]
         </span>
       </template>

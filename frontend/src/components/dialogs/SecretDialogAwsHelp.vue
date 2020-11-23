@@ -17,12 +17,12 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
           credentials for AWS Identity and Access Management (IAM), use the
-          <a href="https://console.aws.amazon.com/iam/home" target="_blank" class="primary--text  text--darken-2">IAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          <a href="https://console.aws.amazon.com/iam/home" target="_blank">IAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
           The Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Copy the AWS IAM policy document below and attach it to the IAM user
-          (<a class="primary--text text--darken-1" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
+          (<a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
           documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
         </p>
         <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>

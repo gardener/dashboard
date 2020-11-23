@@ -92,7 +92,10 @@ export default {
       if (this.copySucceeded) {
         return 'success'
       }
-      return this.color
+      if (this.color) {
+        return this.color
+      }
+      return 'actionButton'
     }
   },
   methods: {

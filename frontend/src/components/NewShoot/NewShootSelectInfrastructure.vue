@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
       class="select_infra_card"
+      :color="$vuetify.theme.dark ? 'grey darken-2' : 'grey lighten-2'"
       :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
       @click="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
@@ -83,7 +84,6 @@ export default {
     margin: 10px 20px 10px 0px;
     min-width: 120px;
     filter: grayscale(70%);
-    background-color: #f9f9f9;
   }
 
   .select_infra_card:hover {

@@ -24,8 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Read the
           <a href="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure"
-          target="_blank"
-          class="primary--text">
+          target="_blank">
           IAM Console help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to manage your credentials and subscriptions.
         </p>
       </div>

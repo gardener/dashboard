@@ -517,7 +517,7 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function transformHtml (html, linkColor = 'primary', transformToExternalLinks = true) {
+export function transformHtml (html, linkColor = 'anchor', transformToExternalLinks = true) {
   if (!html) {
     return undefined
   }

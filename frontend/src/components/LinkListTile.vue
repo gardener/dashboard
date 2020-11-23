@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           {{appTitle}} is not running for hibernated clusters
         </v-tooltip>
-        <a v-else :href="url" target="_blank" class="primary--text">{{urlText}}</a>
+        <a v-else :href="url" target="_blank">{{urlText}}</a>
       </v-list-item-title>
     </v-list-item-content>
   </v-list-item>
