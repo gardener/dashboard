@@ -1980,6 +1980,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["socket.io-client", "npm:2.3.0"],
             ["splitpanes", "npm:2.2.1"],
             ["symbol-tree", "npm:3.2.4"],
+            ["tinycolor2", "npm:1.4.2"],
             ["url-template", "npm:2.0.8"],
             ["uuid", "npm:8.3.0"],
             ["vue", "npm:2.6.12"],
@@ -19486,6 +19487,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/tiny-emitter-npm-2.1.0-2a4d94f487-0055509c72.zip/node_modules/tiny-emitter/",
           "packageDependencies": [
             ["tiny-emitter", "npm:2.1.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["tinycolor2", [
+        ["npm:1.4.2", {
+          "packageLocation": "./.yarn/cache/tinycolor2-npm-1.4.2-462ba30c26-cf33d084cb.zip/node_modules/tinycolor2/",
+          "packageDependencies": [
+            ["tinycolor2", "npm:1.4.2"]
           ],
           "linkType": "HARD",
         }]

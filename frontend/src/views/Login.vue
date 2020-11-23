@@ -7,72 +7,71 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-app>
     <v-main>
-      <v-container fluid class="fill-height align-stretch">
-        <v-row>
-          <v-col cols="5" class="d-flex flex-column">
-            <div class="flex-grow-1">
-              <img src="../assets/logo.svg" class="logo">
-              <h1>Gardener</h1>
-              <h2>Universal Kubernetes at Scale</h2>
-            </div>
-            <div class="flex-grow-0 px-2">
-              <img :src="footerLogoUrl" height="24">
-            </div>
-          </v-col>
-          <v-col cols="7" class="d-flex flex-column">
-              <div class="flex-shrink-1">
-                <h1>Enterprise-Grade Kubernetes Service</h1>
-                <h2>Infrastructure agnostic and working across all major public clouds</h2>
-              </div>
-              <div v-if="landingPageUrl" class="flex-shrink-1 hint">
-                <span>Discover what our service is about at the</span>
-                <a :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon size="20">mdi-open-in-new</v-icon></a>
-              </div>
-              <div class="flex-grow-1 actions">
-                <div class="loginButton primary lighten-2 elevation-2" @click.stop="handleLogin(primaryLoginType)">
-                  Login <v-icon dark class="ml-1">mdi-login-variant</v-icon>
+       <v-container class="container--fluid fill-height primary">
+        <v-row
+          no-gutters
+          align="center"
+          justify="center"
+        >
+          <v-col
+            cols="12"
+            sm="8"
+            md="4"
+            lg="3"
+            xl="2"
+          >
+            <v-card class="elevation-5">
+              <v-tabs
+                background-color="primary lighten-2"
+                v-model="loginType"
+              >
+                <v-tab
+                  v-for="item in loginTypes"
+                  :key="item"
+                  :href="`#${item}`"
+                >
+                  {{ item }}
+                </v-tab>
+              </v-tabs>
+              <v-card-text>
+                <div class="d-flex flex-column align-center">
+                  <h1 class="my-4 primary--text">
+                    Login to Gardener
+                  </h1>
+                  <v-tabs-items v-model="loginType">
+                    <v-tab-item id="oidc">
+                      <span class="text-center my-4">Press Login Button to be redirected to configured OpenID Connect Provider.</span>
+                    </v-tab-item >
+                    <v-tab-item id="token">
+                      <span class="text-center my-4">Enter a bearer token trusted by the Kubernetes API server and press Login Button.</span>
+                      <v-text-field
+                        ref="token"
+                        v-model="token"
+                        color="grey"
+                        :append-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
+                        :type="showToken ? 'text' : 'password'"
+                        outline
+                        label="Token"
+                        @click:append="showToken = !showToken"
+                        required>
+                      </v-text-field>
+                    </v-tab-item>
+                  </v-tabs-items>
+                  <v-btn @click="handleLogin" color="primary" class="mt-4">Login</v-btn>
                 </div>
-                <template v-if="showTokenLoginLink">
-                  <div class="loginLink">
-                    <a @click.stop="handleLogin('token')">Login with Bearer Token</a>
-                  </div>
-                </template>
-              </div>
-              <div class=" flex-shrink-1 text-right pr-2">
-                &copy; {{ new Date().getFullYear() }}
-              </div>
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
+        <div :class="$vuetify.breakpoint.xs ? 'd-flex flex-grow-1 justify-center' : 'logo'">
+          <img src="../assets/logo.svg" height="200px">
+        </div>
+        <div v-if="landingPageUrl" class="footer">
+          <span class="primary--text text--darken-2">Discover what our service is about at the <a class="primary--text text--darken-2" :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
+        </div>
       </v-container>
     </v-main>
     <vue-snotify></vue-snotify>
-    <v-dialog v-model="dialog" persistent max-width="480px">
-      <v-card>
-        <v-card-title class="primary lighten-1">
-          <span class="headline white--text">Login</span>
-        </v-card-title>
-        <v-card-text>
-          <v-text-field
-            ref="token"
-            v-model="token"
-            color="grey"
-            :append-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="showToken ? 'text' : 'password'"
-            outline
-            label="Token"
-            hint="Enter a bearer token trusted by the Kubernetes API server"
-            persistent-hint
-            @click:append="showToken = !showToken"
-            required>
-          </v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="closeDialog">Cancel</v-btn>
-          <v-btn text color="primary" @click="submitToken">Ok</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-app>
 </template>
 
@@ -87,7 +86,12 @@ export default {
     return {
       dialog: false,
       showToken: false,
-      token: ''
+      token: '',
+
+      loginType: undefined,
+      loginTypes: [
+        'oidc', 'token'
+      ]
     }
   },
   computed: {
@@ -134,23 +138,24 @@ export default {
     ...mapActions([
       'unsetUser'
     ]),
-    handleLogin (loginType) {
-      if (loginType === 'token') {
-        this.dialog = true
-        setDelayedInputFocus(this, 'token')
-      } else {
-        try {
-          this.$auth.signinWithOidc(this.redirectPath)
-        } catch (err) {
-          this.showSnotifyLoginError(err.message)
-        }
+    handleLogin () {
+      switch (this.loginType) {
+        case 'oidc':
+          this.oidcLogin()
+          break
+        case 'token':
+          this.tokenLogin()
+          break
       }
     },
-    closeDialog () {
-      this.dialog = false
-      this.token = undefined
+    oidcLogin () {
+      try {
+        this.$auth.signinWithOidc(this.redirectPath)
+      } catch (err) {
+        this.showSnotifyLoginError(err.message)
+      }
     },
-    async submitToken () {
+    async tokenLogin () {
       try {
         const token = this.token
         this.token = undefined
@@ -174,149 +179,46 @@ export default {
       }
       this.$snotify.error(message, 'Login Error', config)
     }
+  },
+  mounted () {
+    this.loginType = this.primaryLoginType
+  },
+  watch: {
+    loginType (value) {
+      console.log(value)
+      if (value === 'token') {
+        setDelayedInputFocus(this, 'token')
+      }
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
 
-$bg1: #24232c;
-$bg2: #504e5a;
+  @import '~vuetify/src/styles/styles.sass';
+  @import "~vue-snotify/styles/material.css";
 
-$font1: #ffffff;
-$font2: #958071;
-
-$hexArea: lighten(#D8D7DA,9);
-$hexOutline: darken($hexArea,1);
-
-#app {
-  main {
-    .container {
-      padding: 0;
-      .row {
-        margin: 0;
-        .col:nth-child(1) {
-          background-color: #2c353d;
-          padding: 0;
-
-          .logo {
-            height: 20vw;
-            pointer-events: none;
-            display: block;
-            margin: auto;
-            margin-top: 100px;
-          }
-
-          h1 {
-            font-size: 4vw;
-            font-weight: 200;
-            width: 100%;
-            text-align: center;
-            color: $font1;
-            letter-spacing: 5px;
-          }
-
-          h2 {
-            font-size: 1.8vw;
-            font-weight: 300;
-            width: 100%;
-            color: #009F76;
-            text-align: center;
-          }
-        }
-
-        .col:nth-child(2) {
-          background-color: white;
-          padding: 100px 0px 0px 50px;
-          background:
-            radial-gradient(circle farthest-side at 0% 50%, $hexArea 23.5%, rgba(240, 166, 17, 0) 0) 21px 30px,
-            radial-gradient(circle farthest-side at 0% 50%, $hexOutline 24%, rgba(240, 166, 17, 0) 0) 19px 30px,
-            linear-gradient($hexArea 14%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 85%, $hexArea 0) 0 0,
-            linear-gradient(150deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
-            linear-gradient(30deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
-            linear-gradient(90deg, $hexOutline 2%, $hexArea 0, $hexArea 98%, $hexOutline 0%) 0 0 $hexOutline;
-          background-size: 40px 60px;
-
-          h1 {
-            font-size: 2.5vw;
-            width: 100%;
-            text-align: left;
-            font-family: 'Roboto', sans-serif;
-            color: $bg2;
-            white-space: nowrap;
-            font-weight: 400;
-          }
-
-          h2 {
-            font-size: 1.6vw;
-            width: 100%;
-            text-align: left;
-            font-weight: 400;
-          }
-
-          .hint {
-            padding-top: 48px;
-            font-size: 1.3vw;
-            width: 100%;
-            text-align: left;
-            font-weight: 500;
-
-            a {
-              color: #009688;
-              padding-left: 10px;
-              text-decoration: none;
-              &:hover {
-                color: #26A69A;
-              }
-            }
-
-          }
-
-          .actions {
-            position: relative;
-
-            .loginButton {
-              padding: 10px;
-              padding-left: 40px;
-              color: white;
-              font-size: 20px;
-              cursor: pointer;
-              bottom: 80px;
-              position: absolute;
-              right: 0px;
-              width: 40%;
-            }
-
-            .loginLink {
-              padding: 5px;
-              padding-left: 10px;
-              background-color: transparent;
-              font-size: 11px;
-              position: absolute;
-              right: 0px;
-              bottom: 50px;
-              width: 40%;
-
-              a {
-                color: #cfcfcf;
-                &:hover {
-                  color: #ffb74d;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  .logo {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
   }
-}
 
-.snotify-rightTop {
-  top: 75px;
-}
+  .footer {
+    position: absolute;
+    bottom: 10px;
+    left: 0px;
+    width: 100%;
+    text-align: center;
+  }
 
-.snotify {
-  width: 400px;
-}
+  .snotify-rightTop {
+    top: 75px;
+  }
+
+  .snotify {
+    width: 400px;
+  }
 
 </style>

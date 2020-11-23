@@ -1397,6 +1397,7 @@ __metadata:
     socket.io-client: ^2.3.0
     splitpanes: ^2.2.1
     symbol-tree: ^3.2.4
+    tinycolor2: ^1.4.2
     url-template: ^2.0.8
     uuid: ^8.3.0
     vue: ^2.6.11
@@ -16955,6 +16956,13 @@ resolve@1.1.7:
   version: 2.1.0
   resolution: "tiny-emitter@npm:2.1.0"
   checksum: 0055509c72e5fe35d6ab66fa6339342e0f29129e77ed2086e475fdf80be43a8651f2517be76513b46a042c8356396f4da5a35e2e23457252176808d5a892036a
+  languageName: node
+  linkType: hard
+
+"tinycolor2@npm:^1.4.2":
+  version: 1.4.2
+  resolution: "tinycolor2@npm:1.4.2"
+  checksum: cf33d084cb378d2988fad1b214e62f38be75ba1a9a6df98d4dadf77c31f82796d40822100e6d3e1973c9233ddf0ddbbbfdcac40e2288c958bca3c6d310e2ccb4
   languageName: node
   linkType: hard
 

@@ -7,16 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-      <v-img
-        class="white--text align-center justify-start"
-        height="130px"
-        :src="backgroundSrc"
-      >
+      <secret-background color="primary" name="background" class="secret-background"></secret-background>
+      <div class="secret-title white--text d-flex align-center justify-start">
         <v-card-title>
           <infra-icon v-model="infraIcon" :width="42"></infra-icon>
           <span class="headline ml-5">{{title}}</span>
         </v-card-title>
-      </v-img>
+      </div>
       <v-card-text>
         <v-container fluid>
           <div>
@@ -76,6 +73,7 @@ import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
 import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
+import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
 
 const validationErrors = {
   name: {
@@ -91,7 +89,8 @@ export default {
   components: {
     CloudProfile,
     GAlert,
-    InfraIcon
+    InfraIcon,
+    SecretBackground
   },
   props: {
     value: {
@@ -324,3 +323,19 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+  .secret-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 130px;
+    z-index: 100;
+  }
+  .secret-title {
+    position: relative;
+    width: 100%;
+    height: 130px;
+    z-index: 200;
+  }
+</style>

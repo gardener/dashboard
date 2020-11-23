@@ -56,6 +56,7 @@
     "socket.io-client": "^2.3.0",
     "splitpanes": "^2.2.1",
     "symbol-tree": "^3.2.4",
+    "tinycolor2": "^1.4.2",
     "url-template": "^2.0.8",
     "uuid": "^8.3.0",
     "vue": "^2.6.11",
