@@ -136,12 +136,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
+            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" class="menu-item" active-class="menu-item-active">
               <v-list-item-action>
                 <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
               </v-list-item-action>
               <v-list-item-content>
-                <v-list-item-title class="subtitle-1" >{{route.meta.menu.title}}</v-list-item-title>
+                <v-list-item-title class="white--text subtitle-1" >{{route.meta.menu.title}}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </template>
@@ -538,10 +538,6 @@ export default {
       }
       .v-list-item--active {
         background: rgba(255,255,255,0.1) !important;
-        color: white !important;
-        .icon {
-          color: white !important;
-        }
       }
     }
 
@@ -581,6 +577,22 @@ export default {
           }
         }
       }
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .menu-item:active {
+      background-color: rgba(255,255,255,0.4);
+    }
+
+    .menu-item-active {
+      color: white;
+    }
+
+    .menu-item-active:hover {
+      background-color: none !important;
     }
   }
 
