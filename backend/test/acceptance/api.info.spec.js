@@ -6,27 +6,16 @@
 
 'use strict'
 
+const { pick } = require('lodash')
 const createError = require('http-errors')
 const { version: dashboardVersion } = require('../../package')
 const { encodeBase64 } = require('../../lib/utils')
+const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('api', function () {
   let agent
-  const api = {
-    kube: {
-      request: () => {}
-    },
-    gardener: {
-      request: () => {}
-    }
-  }
 
   beforeAll(() => {
-    require('@gardener-dashboard/request')
-      .__setMockClients({
-        'https://kubernetes:6443': api.kube,
-        'https://gardener-apiserver.gardener': api.gardener
-      })
     agent = createAgent()
   })
 
@@ -35,9 +24,7 @@ describe('api', function () {
   })
 
   beforeEach(() => {
-    for (const client of Object.values(api)) {
-      client.request = jest.fn(() => Promise.reject(createError(501, 'Not Implemented')))
-    }
+    mockRequest.mockReset()
   })
 
   describe('info', function () {
@@ -56,7 +43,8 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(403)
 
-      expect(api.kube.request).not.toBeCalled()
+      expect(mockRequest).not.toBeCalled()
+
       expect(res.body.reason).toBe('Forbidden')
       expect(res.body.details).toHaveProperty('name', 'ForbiddenError')
       expect(res.body.message).toMatch('CSRF protection')
@@ -68,7 +56,8 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(api.kube.request).not.toBeCalled()
+      expect(mockRequest).not.toBeCalled()
+
       expect(res.body.reason).toBe('Unauthorized')
       expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
       expect(res.body.message).toMatch('authorization token')
@@ -83,7 +72,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(api.kube.request).not.toBeCalled()
+      expect(mockRequest).not.toBeCalled()
 
       expect(res.body.reason).toBe('Unauthorized')
       expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
@@ -99,7 +88,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(api.kube.request).not.toBeCalled()
+      expect(mockRequest).not.toBeCalled()
 
       expect(res.body.reason).toBe('Unauthorized')
       expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
@@ -110,8 +99,8 @@ describe('api', function () {
       const user = fixtures.user.create({ id, aud })
       const gardenerVersion = { major: '1', minor: '0' }
 
-      api.kube.request.mockResolvedValueOnce({ spec: { service, caBundle } })
-      api.gardener.request.mockResolvedValueOnce(gardenerVersion)
+      mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
+      mockRequest.mockResolvedValueOnce(gardenerVersion)
 
       const res = await agent
         .get('/api/info')
@@ -119,17 +108,18 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(api.kube.request).toBeCalledTimes(1)
-      expect(api.kube.request.mock.calls[0]).toEqual([
-        'apiservices/v1beta1.core.gardener.cloud',
-        expect.objectContaining({
-          method: 'get'
-        })
-      ])
-      expect(api.gardener.request).toBeCalledTimes(1)
-      expect(api.gardener.request.mock.calls[0]).toEqual([
-        'version'
-      ])
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls[0]).toEqual([{
+        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
+        ':method': 'get',
+        ':path': '/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.core.gardener.cloud'
+      }])
+      expect(mockRequest.mock.calls[1]).toEqual([{
+        ':scheme': 'https',
+        ':authority': `${service.name}.${service.namespace}`,
+        ':method': 'get',
+        ':path': '/version'
+      }])
 
       expect(res.body).toHaveProperty('version', dashboardVersion)
       expect(res.body.gardenerVersion).toEqual(gardenerVersion)
@@ -139,8 +129,8 @@ describe('api', function () {
     it('should return information without version', async function () {
       const user = fixtures.user.create({ id, aud })
 
-      api.kube.request.mockResolvedValueOnce({ spec: { service, caBundle } })
-      api.gardener.request.mockRejectedValueOnce(createError(404, 'Not found'))
+      mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
+      mockRequest.mockRejectedValueOnce(createError(404, 'Not found'))
 
       const res = await agent
         .get('/api/info')
@@ -148,17 +138,18 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(api.kube.request).toBeCalledTimes(1)
-      expect(api.kube.request.mock.calls[0]).toEqual([
-        'apiservices/v1beta1.core.gardener.cloud',
-        expect.objectContaining({
-          method: 'get'
-        })
-      ])
-      expect(api.gardener.request).toBeCalledTimes(1)
-      expect(api.gardener.request.mock.calls[0]).toEqual([
-        'version'
-      ])
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls[0]).toEqual([{
+        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
+        ':method': 'get',
+        ':path': '/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.core.gardener.cloud'
+      }])
+      expect(mockRequest.mock.calls[1]).toEqual([{
+        ':scheme': 'https',
+        ':authority': `${service.name}.${service.namespace}`,
+        ':method': 'get',
+        ':path': '/version'
+      }])
 
       expect(res.body).toHaveProperty('version', dashboardVersion)
       expect(res.body).not.toHaveProperty('gardenerVersion')

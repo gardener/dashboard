@@ -6,32 +6,59 @@
 
 'use strict'
 
+const { join } = require('path')
 const createError = require('http-errors')
 
 const request = jest.requireActual('@gardener-dashboard/request')
 
-const clientMap = new Map()
+const mockRequest = jest.fn(() => Promise.reject(createError(503, 'Service Unavailable')))
 
-function __setMockClients (clients) {
-  clientMap.clear()
-  for (const [url, client] of Object.entries(clients)) {
-    const origin = new URL(url).origin
-    clientMap.set(origin, client)
+const defaults = Symbol('defaults')
+const pseudoHeaders = Symbol('headers')
+
+class MockClient {
+  constructor ({ prefixUrl, ...options }) {
+    const { protocol, host, pathname = '/' } = new URL(prefixUrl)
+    this[pseudoHeaders] = {
+      ':scheme': protocol.replace(/:$/, ''),
+      ':authority': host,
+      ':path': pathname
+    }
+    this[defaults] = {
+      options
+    }
+  }
+
+  get defaults () {
+    return this[defaults]
+  }
+
+  request (path, { method = 'get', searchParams, headers = {}, json, body } = {}) {
+    headers = {
+      ...this.defaults.options.headers,
+      ...headers,
+      ':method': method,
+      ...this[pseudoHeaders]
+    }
+    if (!headers[':path'].endsWith('/')) {
+
+    }
+    headers[':path'] = join(headers[':path'], path)
+    if (searchParams) {
+      headers[':path'] += '?' + searchParams
+    }
+    if (json) {
+      return mockRequest(headers, json)
+    }
+    if (body) {
+      return mockRequest(headers, body)
+    }
+    return mockRequest(headers)
   }
 }
 
 module.exports = {
-  __setMockClients,
   ...request,
-  extend: jest.fn(options => {
-    const origin = new URL(options.prefixUrl).origin
-    if (clientMap.has(origin)) {
-      return clientMap.get(origin)
-    }
-    return {
-      request () {
-        return Promise.reject(createError(503, 'Service Unavailable'))
-      }
-    }
-  })
+  extend: jest.fn(options => new MockClient(options)),
+  mockRequest
 }

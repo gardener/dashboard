@@ -258,7 +258,7 @@ function clearCookies (res) {
   res.clearCookie(COOKIE_TOKEN)
 }
 
-module.exports = {
+exports = module.exports = {
   discoverIssuer,
   getIssuerClient,
   COOKIE_HEADER_PAYLOAD,

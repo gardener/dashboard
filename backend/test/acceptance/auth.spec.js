@@ -6,20 +6,46 @@
 
 'use strict'
 
-const { oidc = {} } = require('../../lib/config')
-const security = require('../../lib/security')
+const { pick } = require('lodash')
+const assert = require('assert').strict
 const setCookieParser = require('set-cookie-parser')
+const { mockRequest } = require('@gardener-dashboard/request')
+
+const security = require('../../lib/security')
+const {
+  COOKIE_HEADER_PAYLOAD,
+  COOKIE_SIGNATURE,
+  COOKIE_TOKEN,
+  decode
+} = security
+
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
-const { COOKIE_HEADER_PAYLOAD, COOKIE_SIGNATURE, COOKIE_TOKEN } = security
+
+function reviewToken ({ domain = 'example.org' } = {}) {
+  return (headers, json) => {
+    const { spec: { token } } = json
+    const { id: username, groups } = decode(token)
+    const authenticated = username.endsWith(domain)
+    const user = authenticated ? { username, groups } : {}
+    return Promise.resolve({
+      status: {
+        user,
+        authenticated
+      }
+    })
+  }
+}
 
 class Client {
   constructor ({
     user,
+    issuer,
     client_id: clientId,
     client_secret: clientSecret
   }) {
     this.user = user
+    this.issuer = issuer
     this.clientId = clientId
     this.clientSecret = clientSecret
   }
@@ -28,7 +54,7 @@ class Client {
     redirect_uri: redirectUri,
     scope
   }) {
-    const url = new URL(oidc.issuer)
+    const url = new URL(this.issuer)
     url.pathname = '/auth'
     const params = url.searchParams
     params.append('client_id', this.clientId)
@@ -39,8 +65,8 @@ class Client {
   }
 
   async callback (redirectUri, { code }, { response_type: responseType }) {
-    expect(code).toBe(OTAC)
-    expect(responseType).toBe('code')
+    assert.strictEqual(code, OTAC)
+    assert.strictEqual(responseType, 'code')
     const bearer = await this.user.bearer
     const expiresIn = Math.floor(Date.now() / 1000) + 86400
     return {
@@ -50,29 +76,37 @@ class Client {
   }
 }
 
-async function getIssuerClient (user) {
-  const client = new Client({ user, ...oidc })
-  client.CLOCK_TOLERANCE = oidc.clockTolerance || 30
-  return client
-}
+describe('auth', function () {
+  const { oidc } = fixtures.config.get()
+  const id = 'foo@example.org'
+  const user = fixtures.user.create({ id })
 
-module.exports = function ({ agent, sandbox, k8s, auth }) {
-  /* eslint no-unused-expressions: 0 */
+  let agent
+  let getIssuerClientStub
 
-  const { createUser } = auth
-  const username = 'foo@example.org'
-  const user = createUser({ id: username })
+  beforeAll(() => {
+    agent = createAgent()
+  })
+
+  afterAll(() => {
+    return agent.close()
+  })
+
+  beforeEach(() => {
+    mockRequest.mockReset()
+    const client = Object.assign(new Client({ user, ...oidc }), {
+      CLOCK_TOLERANCE: oidc.clockTolerance || 30
+    })
+    getIssuerClientStub = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
+  })
 
   it('should redirect to authorization url', async function () {
-    const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').callsFake(() => getIssuerClient(user))
-
     const res = await agent
       .get('/auth')
       .redirects(0)
-      .send()
+      .expect(302)
 
-    expect(getIssuerClientStub).to.be.calledOnce
-    expect(res).to.have.status(302)
+    expect(getIssuerClientStub).toBeCalledTimes(1)
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('client_id')).toBe(oidc.client_id)
     expect(url.searchParams.get('redirect_uri')).toBe(oidc.redirect_uri)
@@ -81,38 +115,55 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should fail to redirect to authorization url', async function () {
     const message = 'Issuer not available'
-    const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').throws('IssuerClientError', message)
+    getIssuerClientStub.mockRejectedValueOnce(new Error(message))
 
     const res = await agent
       .get('/auth')
       .redirects(0)
-      .send()
+      .expect(302)
 
-    expect(getIssuerClientStub).to.be.calledOnce
-    expect(res).to.have.status(302)
-    expect(res).to.redirectTo(`/login#error=${encodeURIComponent(message)}`)
+    expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
   })
 
   it('should redirect to home after successful authorization', async function () {
-    const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').callsFake(() => getIssuerClient(user))
-    k8s.stub.authorizeToken()
+    const bearer = await user.bearer
+
+    mockRequest.mockImplementationOnce(reviewToken())
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
       .redirects(0)
-      .send()
+      .expect(302)
 
-    expect(getIssuerClientStub).to.be.calledOnce
-    expect(res).to.have.status(302)
-    expect(res).to.redirectTo('/')
+    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest.mock.calls[0]).toEqual([
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
+        ':method': 'post',
+        ':path': '/apis/authentication.k8s.io/v1/tokenreviews'
+      },
+      {
+        apiVersion: 'authentication.k8s.io/v1',
+        kind: 'TokenReview',
+        metadata: {
+          name: expect.stringMatching(/token-\d+/)
+        },
+        spec: {
+          token: bearer
+        }
+      }
+    ])
+
+    expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(res.headers).toHaveProperty('location', '/')
   })
 
   it('should redirect to login after failed authorization', async function () {
-    const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').callsFake(() => getIssuerClient(user))
     const invalidOtac = 'ic82jd'
     let message
     try {
-      expect(invalidOtac).toBe(OTAC)
+      assert.strictEqual(invalidOtac, OTAC)
     } catch (err) {
       message = err.message
     }
@@ -120,22 +171,42 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const res = await agent
       .get(`/auth/callback?code=${invalidOtac}`)
       .redirects(0)
-      .send()
+      .expect(302)
 
-    expect(getIssuerClientStub).to.be.calledOnce
-    expect(res).to.have.status(302)
-    expect(res).to.redirectTo(`/login#error=${encodeURIComponent(message)}`)
+    expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
   })
 
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
-    k8s.stub.authorizeToken()
+
+    mockRequest.mockImplementationOnce(reviewToken())
 
     const res = await agent
       .post('/auth')
       .send({ token: bearer })
+      .expect('content-type', /json/)
+      .expect(200)
 
-    expect(res).to.have.status(200)
+    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest.mock.calls[0]).toEqual([
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
+        ':method': 'post',
+        ':path': '/apis/authentication.k8s.io/v1/tokenreviews'
+      },
+      {
+        apiVersion: 'authentication.k8s.io/v1',
+        kind: 'TokenReview',
+        metadata: {
+          name: expect.stringMatching(/token-\d+/)
+        },
+        spec: {
+          token: bearer
+        }
+      }
+    ])
+
     const {
       [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
       [COOKIE_SIGNATURE]: cookieSignature,
@@ -158,8 +229,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(cookieToken.httpOnly).toBe(true)
     expect(await security.verify(token)).toEqual(tokenPayload)
     expect(await security.decrypt(encryptedBearer)).toBe(bearer)
-    expect(res).to.be.json
-    expect(res.body.id).toBe(username)
+    expect(res.body.id).toBe(id)
   })
 
   it('should logout', async function () {
@@ -168,9 +238,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       .set('cookie', await user.cookie)
       .redirects(0)
       .send()
+      .expect(302)
 
-    expect(res).to.have.status(302)
-    expect(res).to.redirectTo('/login')
+    expect(res.headers).toHaveProperty('location', '/login')
     const {
       [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
       [COOKIE_SIGNATURE]: cookieSignature,
@@ -186,4 +256,4 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(cookieToken.value).toHaveLength(0)
     expect(cookieToken.expires).toEqual(ZERO_DATE)
   })
-}
+})
