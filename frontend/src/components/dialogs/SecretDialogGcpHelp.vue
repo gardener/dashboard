@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About GCP Service Accounts"
-    color="primary"
     backgroundSrc="/static/background_gcp.svg"
     :value="value"
     @input="onInput"

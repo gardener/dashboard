@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About Azure Secrets"
-    color="primary"
     backgroundSrc="/static/background_azure.svg"
     :value="value"
     @input="onInput"

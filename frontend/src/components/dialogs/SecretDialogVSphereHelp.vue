@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About VMware vSphere Secrets"
-    color="primary"
     backgroundSrc="/static/background_vsphere.svg"
     :value="value"
     @input="onInput"

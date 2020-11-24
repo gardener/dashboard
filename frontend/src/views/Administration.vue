@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-list-item-content>
                     <v-list-item-subtitle>Created By</v-list-item-subtitle>
                     <v-list-item-title>
-                      <account-avatar :account-name="createdBy" mail-to :color="color"></account-avatar>
+                      <account-avatar :account-name="createdBy" mail-to></account-avatar>
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -231,7 +231,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>Command Line Interface Access</v-list-item-title>
                     <v-list-item-subtitle class="wrap-text">
                       Go to
-                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }" :class="textColor">
+                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
                         My Account
                       </router-link>
                       to download the <tt>kubeconfig</tt> for this project.
@@ -272,7 +272,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { transformHtml, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -410,13 +410,10 @@ export default {
       return this.cfg.sla || {}
     },
     slaDescriptionHtml () {
-      return transformHtml(this.sla.description, this.color)
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title
-    },
-    textColor () {
-      return textColor(this.color)
     }
   },
   methods: {

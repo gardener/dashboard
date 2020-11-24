@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-content>
                 <v-list-item-title class="label pb-2">User</v-list-item-title>
                 <v-list-item-subtitle class="content pb-2">
-                  <account-avatar :account-name="username" mail-to color="primary" :size="32"/>
+                  <account-avatar :account-name="username" mail-to :size="32"/>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>

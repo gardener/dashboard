@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-      <secret-background color="primary" name="background" class="secret-background"></secret-background>
+      <secret-background color="accent" name="background" class="secret-background"></secret-background>
       <div class="secret-title white--text d-flex align-center justify-start">
         <v-card-title>
           <infra-icon v-model="infraIcon" :width="42"></infra-icon>
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           <div>
             <template v-if="isCreateMode">
               <v-text-field
-                :color="color"
+                color="primary"
                 ref="name"
                 v-model.trim="name"
                 label="Secret Name"
@@ -38,8 +38,7 @@ SPDX-License-Identifier: Apache-2.0
               ref="cloudProfile"
               v-model="cloudProfileName"
               :isCreateMode="isCreateMode"
-              :cloudProfiles="cloudProfiles"
-              :color="color">
+              :cloudProfiles="cloudProfiles">
             </cloud-profile>
           </div>
 
@@ -53,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="cancel">Cancel</v-btn>
-        <v-btn text @click.native="submit" :class="textColor" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-btn text @click.native="submit" color="primary" :disabled="!valid">{{submitButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -63,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
 import CloudProfile from '@/components/CloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
@@ -123,10 +122,6 @@ export default {
     },
     secret: {
       type: Object
-    },
-    color: {
-      type: String,
-      required: true
     },
     infraIcon: {
       type: String,
@@ -205,9 +200,6 @@ export default {
     },
     title () {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
-    },
-    textColor () {
-      return textColor(this.color)
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length

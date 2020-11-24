@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn :class="textColor" text @click.native.stop="hide">
+        <v-btn color="primary" text @click.native.stop="hide">
           Got it
         </v-btn>
       </v-card-actions>
@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { textColor } from '@/utils'
 
 export default {
   props: {
@@ -43,10 +42,6 @@ export default {
     },
     value: {
       type: Boolean,
-      required: true
-    },
-    color: {
-      type: String,
       required: true
     },
     backgroundSrc: {
@@ -62,9 +57,6 @@ export default {
       set (value) {
         this.$emit('input', value)
       }
-    },
-    textColor () {
-      return textColor(this.color)
     }
   },
   methods: {

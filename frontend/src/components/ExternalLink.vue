@@ -5,13 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <a :href="url" target="_blank" :class="textColor">
+  <a :href="url" target="_blank">
     <span :style="{ fontSize: size + 'px' }"><slot></slot></span><v-icon :size="size" :color="color">mdi-open-in-new</v-icon>
   </a>
 </template>
 
 <script>
-import { textColorFromColor } from '@/utils'
 
 export default {
   name: 'external-link',
@@ -25,15 +24,6 @@ export default {
     size: {
       type: Number,
       default: 14
-    },
-    color: {
-      type: String,
-      default: 'anchor'
-    }
-  },
-  computed: {
-    textColor () {
-      return textColorFromColor(this.color)
     }
   }
 }

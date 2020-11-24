@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About Alibaba Cloud Secrets"
-    color="primary"
     backgroundSrc="/static/background_alicloud.svg"
     :value="value"
     @input="onInput"

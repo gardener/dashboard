@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="openstack"
-    color="primary"
     infraIcon="openstack-white"
     backgroundSrc="/static/background_openstack.svg"
     createTitle="Add new OpenStack Secret"

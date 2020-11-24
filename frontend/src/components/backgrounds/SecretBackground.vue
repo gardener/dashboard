@@ -9,56 +9,62 @@ SPDX-License-Identifier: Apache-2.0
     :width="width"
     :height="height"
     :viewBox="viewBox"
-    aria-labelledby="Gardener Background"
+    :aria-labelledby="title"
     role="presentation"
   >
-    <title>Gardener Background</title>
-    <rect x="-391" y="-355" width="2228.91" height="921.613" fill="#06B88A"/>
-    <mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1438" height="567">
-    <rect width="1438" height="567" fill="#009F76"/>
-    </mask>
-    <g mask="url(#mask0)">
-    <g filter="url(#filter0_f)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M7.50124 -551.627C26.0185 -560.142 56.0758 -560.107 74.5043 -551.627L656.122 -284.342C674.639 -275.827 693.387 -253.375 697.932 -234.329L841.561 366.276C846.142 385.392 839.413 413.37 826.666 428.645L424.185 910.265C411.349 925.575 384.239 938 363.769 938H-281.745C-302.286 938 -329.397 925.523 -342.126 910.265L-744.642 428.645C-757.461 413.3 -764.136 385.305 -759.556 366.276L-615.909 -234.329C-611.328 -253.444 -592.563 -275.861 -574.134 -284.342L7.50124 -551.627Z" fill="#169672"/>
-    </g>
-    <g filter="url(#filter1_f)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M-69.3391 -86.4172C-58.6489 -91.204 -41.2966 -91.1845 -30.6577 -86.4172L305.114 63.8414C315.804 68.6283 326.628 81.2499 329.252 91.9569L412.169 429.597C414.814 440.343 410.929 456.071 403.57 464.658L171.215 735.409C163.805 744.015 148.154 751 136.336 751H-236.323C-248.182 751 -263.832 743.986 -271.181 735.409L-503.557 464.658C-510.957 456.032 -514.811 440.294 -512.166 429.597L-429.238 91.9569C-426.594 81.2109 -415.76 68.6087 -405.121 63.8414L-69.3391 -86.4172Z" fill="#138565"/>
-    </g>
-    <g filter="url(#filter2_f)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M1503.01 -445.902C1514.89 -451.377 1534.17 -451.355 1545.99 -445.902L1919.11 -274.024C1930.99 -268.549 1943.02 -254.111 1945.94 -241.864L2038.08 144.354C2041.02 156.646 2036.7 174.638 2028.52 184.46L1770.32 494.165C1762.09 504.01 1744.69 512 1731.56 512H1317.45C1304.27 512 1286.88 503.977 1278.72 494.165L1020.49 184.46C1012.27 174.593 1007.99 156.59 1010.93 144.354L1103.08 -241.864C1106.02 -254.156 1118.06 -268.571 1129.88 -274.024L1503.01 -445.902Z" fill="#10C995"/>
-    </g>
-    <g filter="url(#filter3_f)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M1428.35 -184.057C1433.68 -186.653 1442.34 -186.642 1447.65 -184.057L1615.17 -102.585C1620.51 -99.9899 1625.91 -93.1463 1627.22 -87.3409L1668.59 95.7313C1669.9 101.558 1667.97 110.086 1664.3 114.742L1548.37 261.546C1544.67 266.213 1536.86 270 1530.97 270H1345.04C1339.12 270 1331.31 266.197 1327.65 261.546L1211.71 114.742C1208.02 110.065 1206.1 101.531 1207.42 95.7313L1248.79 -87.3409C1250.11 -93.1675 1255.52 -100.001 1260.82 -102.585L1428.35 -184.057Z" fill="#07E1A4"/>
-    </g>
-    </g>
+    <title>{{title}}</title>
     <defs>
-    <filter id="filter0_f" x="-771" y="-568" width="1624" height="1516" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-    <feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur"/>
-    </filter>
-    <filter id="filter1_f" x="-523" y="-100" width="946" height="861" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-    <feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur"/>
-    </filter>
-    <filter id="filter2_f" x="1000" y="-460" width="1049" height="982" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-    <feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur"/>
-    </filter>
-    <filter id="filter3_f" x="1197" y="-196" width="482" height="476" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-    <feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur"/>
-    </filter>
+        <rect id="path-1" x="678.53732" y="7.51545827" width="218" height="154.043723"></rect>
+        <filter x="-14.0%" y="-17.9%" width="129.8%" height="142.2%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="2" dy="5" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="10" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-3" x="378.250973" y="-299.581654" width="590.576559" height="325.704389"></rect>
+        <filter x="-6.5%" y="-11.2%" width="113.0%" height="123.6%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="12.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-5" x="380.330859" y="-165.001545" width="590.576559" height="80.7497746"></rect>
+        <filter x="-1.2%" y="-6.2%" width="102.4%" height="117.3%" filterUnits="objectBoundingBox" id="filter-6">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-7" x="279.232323" y="-402.619197" width="604.887682" height="325.704389"></rect>
+        <filter x="-1.2%" y="-1.5%" width="102.3%" height="104.3%" filterUnits="objectBoundingBox" id="filter-8">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
     </defs>
-    </svg>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="aws_background">
+            <rect id="Rectangle-134-Copy" fill="#f2f2f2" x="0" y="-4" width="720" height="207"></rect>
+            <g id="Rectangle-140" transform="translate(787.537320, 84.537320) rotate(-45.000000) translate(-787.537320, -84.537320) ">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use :fill="color" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <g id="Rectangle-133-Copy-4" transform="translate(673.539252, -136.729460) rotate(-44.000000) translate(-673.539252, 136.729460) ">
+                <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                <use fill="#232f3e" fill-rule="evenodd" xlink:href="#path-3"></use>
+            </g>
+            <g id="Rectangle-133-Copy-3" transform="translate(675.619139, -124.626658) rotate(-44.000000) translate(-675.619139, 124.626658) ">
+                <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
+                <use fill="#ececec" fill-rule="evenodd" xlink:href="#path-5"></use>
+            </g>
+            <g id="Rectangle-133-Copy-2" transform="translate(581.676164, -239.767002) rotate(-44.000000) translate(-581.676164, 239.767002) ">
+                <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
+                <use fill="#000000" fill-rule="evenodd" xlink:href="#path-7"></use>
+            </g>
+            <rect id="Rectangle-133-Copy-5" :fill="color" transform="translate(151.747902, 52.975521) rotate(-44.000000) translate(-151.747902, -52.975521) " x="-67.0240475" y="-312.127463" width="437.543898" height="730.205969"></rect>
+        </g>
+    </g>
+  </svg>
 </template>
 
 <script>
-
-import tinycolor from 'tinycolor2'
 
 export default {
   props: {
@@ -73,31 +79,11 @@ export default {
     viewBox: {
       type: [Array, String],
       default: '0 0 100% 130'
-    },
-    color: {
-      type: String,
-      default: 'primary'
     }
   },
   computed: {
-    colorCode () {
-      console.log(this.$vuetify)
-      return this.$vuetify.theme.currentTheme[this.color]
-    },
-    mainColor () {
-      return tinycolor(this.colorCode).lighten(15).toString()
-    },
-    lighterColor () {
-      return tinycolor(this.colorCode).lighten(5).toString()
-    },
-    lightestColor () {
-      return tinycolor(this.colorCode).lighten(10).toString()
-    },
-    darkerColor () {
-      return tinycolor(this.colorCode).darken(5).toString()
-    },
-    darkestColor () {
-      return tinycolor(this.colorCode).darken(10).toString()
+    color () {
+      return this.$vuetify.theme.currentTheme.accent
     }
   }
 }

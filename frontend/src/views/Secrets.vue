@@ -14,7 +14,6 @@ SPDX-License-Identifier: Apache-2.0
     icon="aws-white"
     secretDescriptorKey="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -29,7 +28,6 @@ SPDX-License-Identifier: Apache-2.0
     icon="azure-white"
     secretDescriptorKey="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -44,7 +42,6 @@ SPDX-License-Identifier: Apache-2.0
     icon="gcp-white"
     secretDescriptorKey="project"
     description="Make sure that the new credentials have the correct permission on GCP."
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -58,7 +55,6 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureName="OpenStack"
     icon="openstack-white"
     description="Make sure that the new credentials have the correct OpenStack permissions"
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -73,7 +69,6 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="accessKeyID"
     icon="alicloud-white"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -88,7 +83,6 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="metalHMAC"
     icon="metal-white"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -103,7 +97,6 @@ SPDX-License-Identifier: Apache-2.0
     secretDescriptorKey="vsphereUsername"
     icon="vsphere-white"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
-    color="accent"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -117,24 +110,21 @@ SPDX-License-Identifier: Apache-2.0
       infrastructureName="Digital Ocean"
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
-      color="accent"
-      ></disabled-secret>
+        ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
       infrastructureName="China Telecom"
       icon="china-telecom"
       description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
-      color="accent"
-      ></disabled-secret>
+        ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
       infrastructureName="Nutanix"
       icon="mdi-xamarin"
       description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
-      color="accent"
-      ></disabled-secret>
+        ></disabled-secret>
 
     </template>
 
@@ -144,30 +134,30 @@ SPDX-License-Identifier: Apache-2.0
     <v-fab-transition>
       <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
         <template v-slot:activator>
-          <v-btn class="primary" dark fab v-model="dialogState.speedDial">
+          <v-btn class="primary" fab v-model="dialogState.speedDial">
             <v-icon v-if="dialogState.speedDial">mdi-close</v-icon>
             <v-icon v-else>mdi-plus</v-icon>
           </v-btn>
         </template>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="primary" @click="onAdd('vsphere')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab small dark @click="onAdd('vsphere')">
           <infra-icon value="vsphere-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small class="primary" @click="onAdd('metal')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab small dark @click="onAdd('metal')">
           <infra-icon value="metal-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small color="grey darken-4" @click="onAdd('alicloud')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab small dark @click="onAdd('alicloud')">
           <infra-icon value="alicloud-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="primary" @click="onAdd('openstack')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab small dark @click="onAdd('openstack')">
           <infra-icon value="openstack-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small color="green" @click="onAdd('gcp')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab small dark @click="onAdd('gcp')">
           <infra-icon value="gcp-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="primary" @click="onAdd('azure')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab small dark @click="onAdd('azure')">
           <infra-icon value="azure-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="primary" @click="onAdd('aws')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab small dark @click="onAdd('aws')">
           <infra-icon value="aws-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>

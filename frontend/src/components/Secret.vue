@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-card :class="cardClass">
 
     <!-- Header -->
-    <v-toolbar :class="toolbarClass" dark>
+    <v-toolbar color="accent" dark>
       <infra-icon v-model="icon" :width="32"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -81,10 +81,6 @@ export default {
       type: String,
       required: true
     },
-    color: {
-      type: String,
-      required: true
-    },
     description: {
       type: String,
       required: true
@@ -114,9 +110,6 @@ export default {
         cardClass = `${cardClass} card_disabled`
       }
       return cardClass
-    },
-    toolbarClass () {
-      return `${this.color} elevation-0`
     }
   },
   methods: {

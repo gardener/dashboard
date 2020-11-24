@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="aws"
-    color="primary"
     infraIcon="aws-white"
     backgroundSrc="/static/background_aws.svg"
     createTitle="Add new AWS Secret"
