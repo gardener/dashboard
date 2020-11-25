@@ -112,6 +112,9 @@
     "restoreMocks": true,
     "verbose": true,
     "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
       "/test-ignore/"

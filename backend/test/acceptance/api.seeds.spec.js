@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { pick, keyBy } = require('lodash')
+const { keyBy, pick } = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('api', function () {
@@ -24,17 +24,18 @@ describe('api', function () {
     mockRequest.mockReset()
   })
 
-  describe('cloudprofiles', function () {
+  describe('seeds', function () {
     const id = 'john.doe@example.org'
-    const user = fixtures.user.create({ id })
+    const user = fixtures.auth.createUser({ id })
 
-    it('should return all cloudprofiles', async function () {
+    it('should return all seeds', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.reviewSelfSubjectAccess())
 
       const res = await agent
-        .get('/api/cloudprofiles')
+        .get('/api/seeds')
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
+        .expect(200)
 
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls[0]).toEqual([
@@ -51,19 +52,17 @@ describe('api', function () {
             resourceAttributes: {
               group: 'core.gardener.cloud',
               name: undefined,
-              resource: 'cloudprofiles',
+              resource: 'seeds',
               verb: 'list'
             }
           })
         }
       ])
 
-      expect(res.body).toHaveLength(4)
-      const cloudProfiles = keyBy(res.body, 'metadata.name')
-      expect(cloudProfiles['infra1-profileName'].data.seedNames).toHaveLength(3)
-      expect(cloudProfiles['infra1-profileName2'].data.seedNames).toHaveLength(2)
-      expect(cloudProfiles['infra3-profileName'].data.seedNames).toHaveLength(1)
-      expect(cloudProfiles['infra3-profileName2'].data.seedNames).toHaveLength(2)
+      expect(res.body).toHaveLength(8)
+      const seeds = keyBy(res.body, 'metadata.name')
+      expect(seeds['infra1-seed'].metadata.unreachable).toBe(false)
+      expect(seeds['infra3-seed'].metadata.unreachable).toBe(true)
     })
   })
 })

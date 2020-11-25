@@ -14,7 +14,9 @@ const seeds = require('./seeds')
 const quotas = require('./quotas')
 const projects = require('./projects')
 const cloudprofiles = require('./cloudprofiles')
+const github = require('./github')
 const reconnector = require('./reconnector')
+const helper = require('./helper')
 const user = {
   create (...args) {
     return auth.createUser(...args)
@@ -31,6 +33,8 @@ const fixtures = {
   cloudprofiles,
   seeds,
   quotas,
-  reconnector
+  github,
+  reconnector,
+  helper
 }
 module.exports = fixtures

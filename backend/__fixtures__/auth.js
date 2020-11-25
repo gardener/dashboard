@@ -7,18 +7,15 @@
 'use strict'
 
 const { split, join, reduce } = require('lodash')
-const jose = require('../lib/security/jose')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
   COOKIE_SIGNATURE
 } = require('../lib/security/constants')
-const config = require('./config')
-const { gardenerHomeDirectory } = require('./helper')
+const jose = require('../lib/security/jose')
+const { sessionSecret } = require('./config').default
 
-const GARDENER_CONFIG = gardenerHomeDirectory()
-const { sessionSecret } = config.get(GARDENER_CONFIG)
-const { sign, encrypt } = jose(sessionSecret)
+const { sign, encrypt, decode } = jose(sessionSecret)
 
 async function getCookieValue (token) {
   const bearer = await token
@@ -44,6 +41,9 @@ function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
     : undefined
   const bearer = sign({ id, aud, ...rest }, secret)
   return {
+    isAdmin () {
+      return /^admin/.test(id)
+    },
     get cookie () {
       return getCookieValue(bearer)
     },
@@ -53,6 +53,72 @@ function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
   }
 }
 
+function reviewSelfSubjectRules () {
+  return (headers, json) => {
+    const [, token] = /^Bearer (.*)$/.exec(headers.authorization)
+    const payload = fixtures.auth.decode(token)
+    const resourceRules = []
+    const nonResourceRules = []
+    const incomplete = false
+    if (/example\.org$/.test(payload.id)) {
+      resourceRules.push({
+        verbs: ['get'],
+        apiGroups: ['core.gardener.cloud'],
+        resources: ['projects'],
+        resourceName: ['foo']
+      })
+      resourceRules.push({
+        verbs: ['create'],
+        apiGroups: ['core.gardener.cloud'],
+        resources: ['projects']
+      })
+    } else {
+      resourceRules.push({
+        verbs: ['get'],
+        apiGroups: ['core.gardener.cloud'],
+        resources: ['projects'],
+        resourceName: ['foo']
+      })
+    }
+    return {
+      ...json,
+      status: {
+        resourceRules,
+        nonResourceRules,
+        incomplete
+      }
+    }
+  }
+}
+
+function reviewSelfSubjectAccess ({ allowed = true } = {}) {
+  return (headers, json) => Promise.resolve({
+    ...json,
+    status: {
+      allowed
+    }
+  })
+}
+
+function reviewToken ({ domain = 'example.org' } = {}) {
+  return (headers, json) => {
+    const { spec: { token } } = json
+    const { id: username, groups } = decode(token)
+    const authenticated = username.endsWith(domain)
+    const user = authenticated ? { username, groups } : {}
+    return Promise.resolve({
+      status: {
+        user,
+        authenticated
+      }
+    })
+  }
+}
+
 module.exports = {
-  createUser
+  decode,
+  createUser,
+  reviewSelfSubjectAccess,
+  reviewSelfSubjectRules,
+  reviewToken
 }

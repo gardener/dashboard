@@ -15,27 +15,11 @@ const security = require('../../lib/security')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
-  COOKIE_TOKEN,
-  decode
+  COOKIE_TOKEN
 } = security
 
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
-
-function reviewToken ({ domain = 'example.org' } = {}) {
-  return (headers, json) => {
-    const { spec: { token } } = json
-    const { id: username, groups } = decode(token)
-    const authenticated = username.endsWith(domain)
-    const user = authenticated ? { username, groups } : {}
-    return Promise.resolve({
-      status: {
-        user,
-        authenticated
-      }
-    })
-  }
-}
 
 class Client {
   constructor ({
@@ -129,7 +113,7 @@ describe('auth', function () {
   it('should redirect to home after successful authorization', async function () {
     const bearer = await user.bearer
 
-    mockRequest.mockImplementationOnce(reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.reviewToken())
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
@@ -180,7 +164,7 @@ describe('auth', function () {
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
 
-    mockRequest.mockImplementationOnce(reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.reviewToken())
 
     const res = await agent
       .post('/auth')

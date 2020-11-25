@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { toHex, toBase64, gardenerHomeDirectory } = require('./helper')
+const { toHex, toBase64, gardenerConfigPath } = require('./helper')
 
 const ca = [
   '-----BEGIN CERTIFICATE-----',
@@ -14,9 +14,8 @@ const ca = [
   '-----END CERTIFICATE-----'
 ].join('\n')
 
-const configMap = new Map()
-
-configMap.set(gardenerHomeDirectory(), {
+const defaultConfigPath = gardenerConfigPath()
+const defaultConfig = {
   port: 3030,
   logLevel: 'info',
   logFormat: 'text',
@@ -103,7 +102,11 @@ configMap.set(gardenerHomeDirectory(), {
       }
     ]
   }
-})
+}
+
+const configMap = new Map()
+
+configMap.set(defaultConfigPath, defaultConfig)
 
 configMap.set('/etc/gardener/1/config.yaml', {
   port: 1234
@@ -119,8 +122,9 @@ configMap.set('/etc/gardener/3/config.yaml', {
 })
 
 module.exports = {
+  default: defaultConfig,
   get (key) {
-    return configMap.get(key || gardenerHomeDirectory())
+    return configMap.get(key || defaultConfigPath)
   },
   list () {
     return Array.from(configMap.entries())

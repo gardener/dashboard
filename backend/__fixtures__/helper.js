@@ -12,7 +12,7 @@ const fnv = require('fnv-plus')
 const uuid = require('uuid')
 const _ = require('lodash')
 
-function gardenerHomeDirectory () {
+function gardenerConfigPath () {
   return join(homedir(), '.gardener', 'config.yaml')
 }
 
@@ -46,11 +46,16 @@ function toBase64 (value) {
   return Buffer.from(value).toString('base64')
 }
 
+function formatTime (time) {
+  return new Date(time).toISOString().replace(/\.\d+Z/, 'Z')
+}
+
 module.exports = {
-  gardenerHomeDirectory,
+  gardenerConfigPath,
   cloneDeepAndSetUid,
   uuidv1,
   hash,
   toBase64,
-  toHex
+  toHex,
+  formatTime
 }

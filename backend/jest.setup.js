@@ -58,13 +58,14 @@ jest.mock('./lib/config/gardener', () => {
 jest.mock('./lib/cache', () => {
   const fixtures = require('./__fixtures__')
   const originalCache = jest.requireActual('./lib/cache')
-  const originalCacheTickets = jest.requireActual('./lib/cache/tickets')
+  const createTicketCache = jest.requireActual('./lib/cache/tickets')
   const { cache } = originalCache
   cache.cloudprofiles.replace(fixtures.cloudprofiles.list())
   cache.seeds.replace(fixtures.seeds.list())
   cache.quotas.replace(fixtures.quotas.list())
   cache.projects.replace(fixtures.projects.list())
-  cache.getTicketCache = jest.fn(() => originalCacheTickets())
+  cache.ticketCache = createTicketCache()
+  cache.resetTicketCache = () => (cache.ticketCache = createTicketCache())
   return originalCache
 })
 
