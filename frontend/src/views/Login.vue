@@ -5,49 +5,43 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-app>
+  <v-app >
+    <div class="login-background secondary"></div>
     <v-main>
-       <v-container class="container--fluid fill-height primary">
-        <v-row
-          no-gutters
-          align="center"
-          justify="center"
-        >
-          <v-col
-            cols="12"
-            sm="8"
-            md="4"
-            lg="3"
-            xl="2"
-          >
-            <v-card class="elevation-5">
-              <v-tabs
-                background-color="primary lighten-2"
-                v-model="loginType"
-              >
+      <v-container class="fill-height" fluid>
+        <v-row align="center" justify="center">
+          <v-col cols="12" sm="8" md="4" lg="4">
+            <v-card class="elevation-1 pa-3">
+              <v-card-title>
+                <div class="layout column align-center">
+                  <img src="../assets/logo.svg" alt="Login to Gardener" width="180" height="180">
+                  <h1 class="flex my-4 primary--text">Login to Gardener</h1>
+                </div>
+                <v-tabs
+                  color="primary"
+                  v-model="loginType"
+                >
                 <v-tab
                   v-for="item in loginTypes"
                   :key="item"
                   :href="`#${item}`"
                 >
                   {{ item }}
-                </v-tab>
-              </v-tabs>
-              <v-card-text>
+                  </v-tab>
+                </v-tabs>
+              </v-card-title>
+              <v-card-text class="login-form">
                 <div class="d-flex flex-column align-center">
-                  <h1 class="my-4 primary--text">
-                    Login to Gardener
-                  </h1>
                   <v-tabs-items v-model="loginType">
                     <v-tab-item id="oidc">
-                      <span class="text-center my-4">Press Login Button to be redirected to configured OpenID Connect Provider.</span>
+                      <span class="text-center my-4 d-flex">Press Login Button to be redirected to configured OpenID Connect Provider.</span>
                     </v-tab-item >
                     <v-tab-item id="token">
                       <span class="text-center my-4">Enter a bearer token trusted by the Kubernetes API server and press Login Button.</span>
                       <v-text-field
                         ref="token"
                         v-model="token"
-                        color="grey"
+                        color="primary"
                         :append-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
                         :type="showToken ? 'text' : 'password'"
                         outline
@@ -57,26 +51,26 @@ SPDX-License-Identifier: Apache-2.0
                       </v-text-field>
                     </v-tab-item>
                   </v-tabs-items>
-                  <v-btn @click="handleLogin" color="primary" class="mt-4">Login</v-btn>
                 </div>
               </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                  <v-btn @click="handleLogin" color="primary" class="mt-4">Login</v-btn>
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
-        <div :class="$vuetify.breakpoint.xs ? 'd-flex flex-grow-1 justify-center' : 'logo'">
-          <img src="../assets/logo.svg" height="200px">
-        </div>
-        <div v-if="landingPageUrl" class="footer">
-          <span class="primary--text text--darken-2">Discover what our service is about at the <a :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
-        </div>
       </v-container>
+      <div v-if="landingPageUrl" class="footer">
+        <span class="primary--text">Discover what our service is about at the <a :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
+      </div>
     </v-main>
     <vue-snotify></vue-snotify>
   </v-app>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import { setDelayedInputFocus } from '@/utils'
@@ -96,9 +90,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'color',
-      'cfg',
-      'user'
+      'cfg'
     ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
@@ -135,9 +127,6 @@ export default {
     })
   },
   methods: {
-    ...mapActions([
-      'unsetUser'
-    ]),
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -185,7 +174,6 @@ export default {
   },
   watch: {
     loginType (value) {
-      console.log(value)
       if (value === 'token') {
         setDelayedInputFocus(this, 'token')
       }
@@ -199,10 +187,17 @@ export default {
   @import '~vuetify/src/styles/styles.sass';
   @import "~vue-snotify/styles/material.css";
 
-  .logo {
+  .login-background {
+    height: 50%;
+    width: 100%;
     position: absolute;
-    right: 20px;
-    bottom: 20px;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+
+  .login-form {
+    min-height: 120px;
   }
 
   .footer {

@@ -7,10 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
+      <card-svg-title>
+        <template v-slot:svgComponent>
+            <member-background></member-background>
+        </template>
         <v-icon large dark>mdi-account-plus</v-icon>
         <span class="headline ml-5">{{ title}}</span>
-      </v-card-title>
+      </card-svg-title>
       <v-card-text>
         <template v-if="isUserDialog">
           <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
@@ -36,8 +39,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import MemberBackground from '@/components/backgrounds/MemberBackground.vue'
+import CardSvgTitle from '@/components/CardSvgTitle.vue'
+
 export default {
   name: 'help-member-dialog',
+  components: {
+    MemberBackground,
+    CardSvgTitle
+  },
   props: {
     value: {
       type: Boolean,
@@ -90,22 +100,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .help_user, .help_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .help_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .help_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>

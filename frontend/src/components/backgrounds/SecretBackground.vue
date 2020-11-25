@@ -6,13 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <svg xmlns="http://www.w3.org/2000/svg"
-    :width="width"
-    :height="height"
-    :viewBox="viewBox"
-    :aria-labelledby="title"
+    aria-labelledby="Secret Background"
     role="presentation"
   >
-    <title>{{title}}</title>
+    <title>Secret Background</title>
     <defs>
         <rect id="path-1" x="678.53732" y="7.51545827" width="218" height="154.043723"></rect>
         <filter x="-14.0%" y="-17.9%" width="129.8%" height="142.2%" filterUnits="objectBoundingBox" id="filter-2">
@@ -67,20 +64,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 export default {
-  props: {
-    width: {
-      type: [Number, String],
-      default: 200
-    },
-    height: {
-      type: [Number, String],
-      default: 130
-    },
-    viewBox: {
-      type: [Array, String],
-      default: '0 0 100% 130'
-    }
-  },
   computed: {
     color () {
       return this.$vuetify.theme.currentTheme.accent

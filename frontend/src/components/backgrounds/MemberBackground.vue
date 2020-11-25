@@ -1,8 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="720px" height="200px" viewBox="0 0 720 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
-    <title>add_user_background</title>
-    <desc>Created with Sketch.</desc>
+<!--
+SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<template>
+  <svg xmlns="http://www.w3.org/2000/svg"
+    aria-labelledby="Member Background"
+    role="presentation"
+  >
+    <title>Member Background</title>
     <defs>
         <rect id="path-1" x="-7.5985156" y="-97.5650236" width="777" height="223.388149"></rect>
         <filter x="-0.9%" y="-2.2%" width="101.8%" height="106.3%" filterUnits="objectBoundingBox" id="filter-2">
@@ -25,19 +32,51 @@
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="add_user_background">
-            <rect id="Rectangle" fill="#4FC3F7" x="-18" y="-16" width="777" height="290"></rect>
+            <rect id="Rectangle" :fill="desaturatedColor(20)" x="-18" y="-16" width="777" height="290"></rect>
             <g id="Rectangle" transform="translate(380.901484, 14.129051) rotate(5.000000) translate(-380.901484, -14.129051) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                <use fill="#81C784" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use :fill="desaturatedColor(10)" fill-rule="evenodd" xlink:href="#path-1"></use>
             </g>
             <g id="Rectangle" transform="translate(379.828952, -31.611851) rotate(5.000000) translate(-379.828952, 31.611851) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
-                <use fill="#4DD0E1" fill-rule="evenodd" xlink:href="#path-3"></use>
+                <use :fill="desaturatedColor(30)" fill-rule="evenodd" xlink:href="#path-3"></use>
             </g>
             <g id="Rectangle" transform="translate(310.812766, 37.216932) rotate(-9.000000) translate(-310.812766, -37.216932) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
-                <use fill="#388E3C" fill-rule="evenodd" xlink:href="#path-5"></use>
+                <use :fill="color" fill-rule="evenodd" xlink:href="#path-5"></use>
             </g>
         </g>
     </g>
-</svg>
+  </svg>
+</template>
+
+<script>
+import tinycolor from 'tinycolor2'
+
+export default {
+  props: {
+    width: {
+      type: [Number, String],
+      default: 200
+    },
+    height: {
+      type: [Number, String],
+      default: 130
+    },
+    viewBox: {
+      type: [Array, String],
+      default: '0 0 100% 130'
+    }
+  },
+  computed: {
+    color () {
+      return this.$vuetify.theme.currentTheme.accent
+    }
+  },
+  methods: {
+    desaturatedColor (value) {
+      return tinycolor(this.color).desaturate(value).toString()
+    }
+  }
+}
+</script>

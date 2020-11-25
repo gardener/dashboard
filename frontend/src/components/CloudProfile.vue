@@ -14,8 +14,8 @@ SPDX-License-Identifier: Apache-2.0
       item-text="metadata.displayName"
       label="Cloud Profile"
       :error-messages="getErrorMessages('value')"
-      :color="primary"
-      :item-color="primary"
+      color="primary"
+      item-color="primary"
       @input="onInput"
       @blur="$v.value.$touch()"
       ></v-select>

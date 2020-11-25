@@ -6,11 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template >
   <v-dialog v-model="visible" max-width="650" persistent>
-    <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
+    <v-card>
+      <card-svg-title>
+        <template v-slot:svgComponent>
+            <member-background></member-background>
+        </template>
         <v-icon large dark>mdi-account-plus</v-icon>
         <span class="headline ml-5">{{title}}</span>
-      </v-card-title>
+      </card-svg-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
           <v-row >
@@ -84,6 +87,8 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
+import MemberBackground from '@/components/backgrounds/MemberBackground.vue'
+import CardSvgTitle from '@/components/CardSvgTitle.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
@@ -100,7 +105,9 @@ const defaultServiceName = 'robot'
 export default {
   name: 'member-dialog',
   components: {
-    GAlert
+    GAlert,
+    MemberBackground,
+    CardSvgTitle
   },
   props: {
     value: {
@@ -270,15 +277,6 @@ export default {
       }
       return undefined
     },
-    cardClass () {
-      if (this.isUserDialog) {
-        return 'add_user'
-      }
-      if (this.isServiceDialog) {
-        return 'add_service'
-      }
-      return undefined
-    },
     memberUsernames () {
       return map(this.memberList, 'username')
     },
@@ -435,22 +433,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .add_user, .add_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .add_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .add_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>
