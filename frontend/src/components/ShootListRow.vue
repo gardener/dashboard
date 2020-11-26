@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0
           <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
         </div>
       </template>
-      <template v-if="cell.header.customField === true">
+      <template v-if="cell.header.customField">
         <template v-if="cell.value">
           <v-tooltip top v-if="cell.header.tooltip">
             <template v-slot:activator="{ on }">

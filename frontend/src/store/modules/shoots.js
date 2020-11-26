@@ -336,7 +336,7 @@ const actions = {
 }
 
 // Deep diff between two object, using lodash
-const difference = (object, base) => {
+function difference (object, base) {
   function changes (object, base) {
     return transform(object, function (result, value, key) {
       if (!isEqual(value, base[key])) {
@@ -347,7 +347,7 @@ const difference = (object, base) => {
   return changes(object, base)
 }
 
-const getRawVal = (item, column) => {
+function getRawVal (item, column) {
   const metadata = item.metadata
   const spec = item.spec
   switch (column) {
@@ -381,7 +381,7 @@ const getRawVal = (item, column) => {
   }
 }
 
-const getSortVal = (item, sortBy) => {
+function getSortVal (item, sortBy) {
   const value = getRawVal(item, sortBy)
   const status = item.status
   switch (sortBy) {
@@ -445,11 +445,11 @@ const getSortVal = (item, sortBy) => {
   }
 }
 
-const shoots = (state) => {
+function shoots (state) {
   return map(Object.keys(state.shoots), (key) => state.shoots[key])
 }
 
-const setSortedItems = (state, rootState) => {
+function setSortedItems (state, rootState) {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
   const sortOrder = head(sortDesc) ? 'desc' : 'asc'
@@ -508,41 +508,45 @@ const setSortedItems = (state, rootState) => {
   setFilteredAndSortedItems(state, rootState)
 }
 
-const setFilteredAndSortedItems = (state, rootState) => {
+function setFilteredAndSortedItems (state, rootState) {
+  function matchesShoot (searchValue) {
+    const searchableCustomFields = filter(store.getters.customFieldsListShoot, ['searchable', true])
+
+    return shoot => {
+      return some(searchValue, value => {
+        if (includes(getRawVal(shoot, 'name'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'infrastructure'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'seed'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'project'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'createdBy'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'purpose'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'k8sVersion'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'ticketLabels'), value)) {
+          return true
+        }
+
+        return some(searchableCustomFields, ({ key }) => includes(getRawVal(shoot, key), value))
+      })
+    }
+  }
+
   let items = state.sortedShoots
   if (state.searchValue) {
-    const predicate = item => {
-      let found = true
-      forEach(state.searchValue, value => {
-        if (includes(getRawVal(item, 'name'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'infrastructure'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'seed'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'project'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'createdBy'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'purpose'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'k8sVersion'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'ticketLabels'), value)) {
-          return
-        }
-        found = false
-      })
-      return found
-    }
-    items = filter(items, predicate)
+    items = filter(items, matchesShoot(state.searchValue))
   }
   if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
     if (get(state, 'shootListFilters.progressing', false)) {

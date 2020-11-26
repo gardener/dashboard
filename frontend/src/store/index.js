@@ -36,6 +36,7 @@ import some from 'lodash/some'
 import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
+import defaults from 'lodash/defaults'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
@@ -560,10 +561,17 @@ const getters = {
     customFieldsShoot = mapKeys(customFieldsShoot, (customFields, key) => `Z_${key}`)
     customFieldsShoot = mapValues(customFieldsShoot, customFields => {
       const defaultValue = !isObject(customFields.defaultValue) ? customFields.defaultValue : undefined
-      return {
+      const defaultProperties = {
+        showColumn: true,
+        columnSelectedByDefault: true,
+        showDetails: true,
+        sortable: true,
+        searchable: true
+      }
+      return defaults({
         ...customFields,
         defaultValue
-      }
+      }, defaultProperties)
     })
     return customFieldsShoot
   },

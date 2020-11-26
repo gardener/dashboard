@@ -532,12 +532,20 @@ describe('Store', () => {
         name: 'Column Name',
         showColumn: true,
         showDetails: true,
-        icon: 'mdi-icon'
+        icon: 'mdi-icon',
+        columnSelectedByDefault: true,
+        searchable: true,
+        sortable: true
       },
       Z_custom2: {
         name: 'Name',
         path: 'path',
-        defaultValue: undefined
+        columnSelectedByDefault: true,
+        defaultValue: undefined,
+        searchable: true,
+        showColumn: true,
+        showDetails: true,
+        sortable: true
       }
     })
   })

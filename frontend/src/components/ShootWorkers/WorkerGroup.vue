@@ -147,12 +147,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .cursor-pointer ::v-deep .v-chip__content {
-    cursor: pointer;
-  }
-
   ::v-deep .popper {
     text-align: initial;
   }
-
 </style>

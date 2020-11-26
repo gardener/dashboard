@@ -39,12 +39,29 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-item v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
+            <v-list-item v-for="header in headers" :key="header.text" @click.stop="setColumnChecked(header)">
               <v-list-item-action>
-                <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
+                <v-icon :color="checkboxColor(header.checked)" v-text="checkboxIcon(header.checked)"/>
               </v-list-item-action>
               <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>{{ item.text }}</v-list-item-title>
+                <v-list-item-title>
+                  <v-tooltip v-if="header.customField" right open-delay="500">
+                    <template v-slot:activator="{ on: tooltip }">
+                      <div v-on="tooltip">
+                        <v-badge
+                          inline
+                          icon="mdi-playlist-star"
+                          color="cyan darken-2"
+                          class="mt-0"
+                        >
+                          <span>{{ header.text }}</span>
+                        </v-badge>
+                      </div>
+                    </template>
+                    Custom Field
+                  </v-tooltip>
+                  <template v-else>{{ header.text }}</template>
+                </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item>
@@ -390,10 +407,10 @@ export default {
         name,
         key,
         path,
-        columnSelectedByDefault: defaultChecked = true,
+        columnSelectedByDefault: defaultChecked,
         tooltip,
         defaultValue,
-        sortable = true,
+        sortable,
         weight
       }, index) => {
         return {

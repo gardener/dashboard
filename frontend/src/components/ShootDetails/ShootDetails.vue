@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row class="d-flex">
       <v-col cols="12" md="6">
         <shoot-details-card :shootItem="shootItem"></shoot-details-card>
+        <shoot-custom-fields-card :shootItem="shootItem" class="mt-4"></shoot-custom-fields-card>
         <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
         <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
         <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
@@ -31,6 +32,7 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
+import ShootCustomFieldsCard from '@/components/ShootDetails/ShootCustomFieldsCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
@@ -47,6 +49,7 @@ export default {
   name: 'shoot-details',
   components: {
     ShootDetailsCard,
+    ShootCustomFieldsCard,
     ShootInfrastructureCard,
     ShootLifecycleCard,
     ShootAccessCard,
