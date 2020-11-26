@@ -21,27 +21,30 @@ describe('HintColorizer.vue', () => {
     vuetify = new Vuetify()
   })
 
-  it('should be able to apply classname', async () => {
-    const propsData = {
-      hintColor: 'orange'
-    }
-    const wrapper = mount(HintColorizer, {
+  const findHintElement = (wrapper) => {
+    return wrapper.find('.v-messages__message')
+  }
+
+  it('should be able to apply (theme-) color', async () => {
+    const template = '<hint-colorizer hint-color="orange"><v-select hint="test" persistent-hint></v-select></hint-colorizer>'
+    const wrapper = mount({
+      template,
       vuetify,
-      propsData
+      components: { HintColorizer }
     })
-    const colorizerComponent = wrapper.findComponent(HintColorizer)
-    expect(colorizerComponent.classes()).toContain('hintColor-orange')
 
-    wrapper.setProps({ hintColor: 'primary' })
+    const colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toBe('orange')
 
-    await Vue.nextTick()
-    expect(colorizerComponent.classes()).toContain('hintColor-primary')
-    expect(colorizerComponent.classes()).not.toContain('hintColor-orange')
-
-    wrapper.setProps({ hintColor: 'default' })
+    wrapper.findComponent(HintColorizer).setProps({ hintColor: 'primary' })
 
     await Vue.nextTick()
-    expect(colorizerComponent.classes()).not.toContain('hintColor-primary')
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that primarty has been replaced by color mvalue from theme
+
+    wrapper.findComponent(HintColorizer).setProps({ hintColor: 'default' })
+
+    await Vue.nextTick()
+    expect(colorizerHintElement.element.style.color).toBe('')
   })
 
   it('should not overwrite error color class for v-text-field', async () => {
@@ -50,11 +53,12 @@ describe('HintColorizer.vue', () => {
         errorMessage: undefined
       }
     }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage"></v-text-field></hint-colorizer>'
+    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage" hint="test" persistent-hint></v-text-field></hint-colorizer>'
     let wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
-    expect(wrapper.findComponent({ ref: 'hintColorizer' }).classes()).toContain('hintColor-orange')
+    let colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toBe('orange')
 
     data = () => {
       return {
@@ -64,7 +68,8 @@ describe('HintColorizer.vue', () => {
     wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
-    expect(wrapper.findComponent({ ref: 'hintColorizer' }).classes()).not.toContain('hintColor-orange')
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).not.toBe('orange')
   })
 
   it('should not overwrite error color class for v-select', async () => {
@@ -73,11 +78,12 @@ describe('HintColorizer.vue', () => {
         errorMessage: undefined
       }
     }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage"></v-select></hint-colorizer>'
+    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage" hint="test" persistent-hint></v-select></hint-colorizer>'
     let wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
-    expect(wrapper.findComponent({ ref: 'hintColorizer' }).classes()).toContain('hintColor-orange')
+    let colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toBe('orange')
 
     data = () => {
       return {
@@ -87,7 +93,8 @@ describe('HintColorizer.vue', () => {
     wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
-    expect(wrapper.findComponent({ ref: 'hintColorizer' }).classes()).not.toContain('hintColor-orange')
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).not.toBe('orange')
   })
 })
 
@@ -98,7 +105,7 @@ describe('VSelect', () => {
     vuetify = new Vuetify()
   })
 
-  it('should be able to overwrite v-select hint color class', () => {
+  it('should be able to find v-select hint element', () => {
     const hint = 'hint test'
     const propsData = {
       hint,
@@ -120,7 +127,7 @@ describe('VTextField', () => {
     vuetify = new Vuetify()
   })
 
-  it('should be able to overwrite v-text-field hint color class', () => {
+  it('should be able to find v-text-field hint element', () => {
     const hint = 'hint test'
     const propsData = {
       hint,
