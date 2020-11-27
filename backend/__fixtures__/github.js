@@ -8,7 +8,7 @@
 
 /* eslint-disable camelcase */
 
-const { filter, startsWith, cloneDeep, chain, split, findIndex } = require('lodash')
+const { cloneDeep } = require('lodash')
 const { formatTime } = require('./helper')
 const {
   gitHub: {

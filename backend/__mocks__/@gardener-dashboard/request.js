@@ -25,7 +25,10 @@ class MockClient {
       ':path': pathname
     }
     this[defaults] = {
-      options
+      options: {
+        prefixUrl,
+        ...options
+      }
     }
   }
 
