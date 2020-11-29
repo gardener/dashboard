@@ -30,7 +30,7 @@ describe('api', function () {
     const isAdmin = user.isAdmin()
 
     it('should return information about the user', async function () {
-      mockRequest.mockImplementationOnce(fixtures.auth.reviewSelfSubjectAccess({ allowed: isAdmin }))
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: isAdmin }))
 
       const res = await agent
         .get('/api/user/privileges')
@@ -80,7 +80,7 @@ describe('api', function () {
       const project = 'foo'
       const namespace = `garden-${project}`
 
-      mockRequest.mockImplementationOnce(fixtures.auth.reviewSelfSubjectRules())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectRules())
 
       const res = await agent
         .post('/api/user/subjectrules/')

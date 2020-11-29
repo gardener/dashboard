@@ -195,7 +195,9 @@ exports.list = async function ({ user, namespace }) {
 exports.create = async function ({ user, namespace, body }) {
   const client = user.client
 
-  body.metadata.secretRef = { namespace, name: body.metadata.name }
+  const metadata = body.metadata
+  metadata.namespace = namespace
+  metadata.secretRef = { namespace, name: metadata.name }
   const secret = await client.core.secrets.create(namespace, toSecretResource(body))
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))

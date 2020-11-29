@@ -7,7 +7,7 @@
 'use strict'
 
 const { uuidv1 } = require('./helper')
-const { cloneDeep, set } = require('lodash')
+const { cloneDeep, set, find } = require('lodash')
 
 function createUser (member) {
   const name = member.name || member
@@ -57,20 +57,20 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
 const projectList = [
   getProject({
     name: 'foo',
-    createdBy: 'bar@example.org',
-    owner: 'foo@example.org',
+    createdBy: 'foo@example.org',
+    owner: 'bar@example.org',
     members: [
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'foo@example.org',
-        roles: ['admin', 'owner']
+        roles: ['admin']
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'bar@example.org',
-        roles: ['admin']
+        roles: ['admin', 'owner']
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
@@ -161,6 +161,12 @@ const projectList = [
 module.exports = {
   create (...args) {
     return getProject(...args)
+  },
+  get (name) {
+    return find(this.list(), { metadata: { name } })
+  },
+  getByNamespace (namespace) {
+    return find(this.list(), { spec: { namespace } })
   },
   list () {
     return cloneDeep(projectList)

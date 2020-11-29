@@ -35,7 +35,7 @@ describe('openapi', function () {
       }
     }
 
-    mockRequest.mockImplementationOnce(fixtures.auth.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     mockRequest.mockResolvedValueOnce({
       definitions: {
         ...shootDefinitions,

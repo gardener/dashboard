@@ -113,7 +113,7 @@ describe('auth', function () {
   it('should redirect to home after successful authorization', async function () {
     const bearer = await user.bearer
 
-    mockRequest.mockImplementationOnce(fixtures.auth.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
@@ -164,7 +164,7 @@ describe('auth', function () {
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
 
-    mockRequest.mockImplementationOnce(fixtures.auth.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
     const res = await agent
       .post('/auth')

@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { split, join, reduce, pick } = require('lodash')
+const { split, join, reduce } = require('lodash')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
@@ -16,6 +16,10 @@ const jose = require('../lib/security/jose')
 const { sessionSecret } = require('./config').default
 
 const { sign, encrypt, decode } = jose(sessionSecret)
+
+const iat = 1577836800
+const expiresIn = '50y'
+const jwtid = 'jti'
 
 async function getCookieValue (token) {
   const bearer = await token
@@ -39,7 +43,8 @@ function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
   const secret = invalid === true
     ? 'invalid-secret'
     : undefined
-  const bearer = sign({ id, aud, ...rest }, secret)
+
+  const bearer = sign({ id, iat, aud, ...rest }, secret, { expiresIn, jwtid })
   return {
     isAdmin () {
       return /^admin/.test(id)
@@ -122,8 +127,5 @@ module.exports = {
     reviewSelfSubjectAccess,
     reviewSelfSubjectRules,
     reviewToken
-  },
-  reviewSelfSubjectAccess,
-  reviewSelfSubjectRules,
-  reviewToken
+  }
 }

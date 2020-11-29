@@ -29,7 +29,7 @@ describe('api', function () {
     const user = fixtures.user.create({ id })
 
     it('should return all cloudprofiles', async function () {
-      mockRequest.mockImplementationOnce(fixtures.auth.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .get('/api/cloudprofiles')
