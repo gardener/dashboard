@@ -6,6 +6,7 @@
 
 'use strict'
 
+const { find } = require('lodash')
 const { cloneDeepAndSetUid } = require('./helper')
 
 function getCloudProfile (cloudProfileName, kind, seedSelector = {}) {
@@ -47,6 +48,9 @@ const cloudProfileList = [
 module.exports = {
   create (...args) {
     return getCloudProfile(...args)
+  },
+  get (name) {
+    return find(this.list(), ['metadata.name', name])
   },
   list () {
     return cloneDeepAndSetUid(cloudProfileList)

@@ -14,6 +14,7 @@ const seeds = require('./seeds')
 const quotas = require('./quotas')
 const projects = require('./projects')
 const cloudprofiles = require('./cloudprofiles')
+const infrastructure = require('./infrastructure')
 const github = require('./github')
 const reconnector = require('./reconnector')
 const helper = require('./helper')
@@ -31,6 +32,7 @@ const fixtures = {
   shoots,
   projects,
   cloudprofiles,
+  infrastructure,
   seeds,
   quotas,
   github,

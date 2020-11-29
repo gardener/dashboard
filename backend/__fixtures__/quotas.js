@@ -31,8 +31,8 @@ const quotaList = [
 ]
 
 module.exports = {
-  create (...args) {
-    return getQuota(...args)
+  create (options) {
+    return getQuota(options)
   },
   list () {
     return cloneDeepAndSetUid(quotaList)

@@ -78,6 +78,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^26.4.2",
     "nodemon": "^2.0.2",
+    "path-to-regexp": "^6.2.0",
     "set-cookie-parser": "^2.3.5",
     "socket.io-client": "^2.3.0",
     "supertest": "^6.0.1"

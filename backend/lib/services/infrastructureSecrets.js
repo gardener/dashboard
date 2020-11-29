@@ -195,11 +195,12 @@ exports.list = async function ({ user, namespace }) {
 exports.create = async function ({ user, namespace, body }) {
   const client = user.client
 
+  body.metadata.secretRef = { namespace, name: body.metadata.name }
   const secret = await client.core.secrets.create(namespace, toSecretResource(body))
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
 
-  const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
+  const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   const cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
   const projectInfo = getProjectNameAndHasCostObject(namespace)
 
@@ -226,9 +227,10 @@ exports.patch = async function ({ user, namespace, name, body }) {
   }
 
   const secretRef = secretBinding.secretRef
+  _.set(body, 'metadata.secretRef', secretRef)
   const secret = await client.core.secrets.mergePatch(secretRef.namespace, secretRef.name, toSecretResource(body))
 
-  const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
+  const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   const cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
   const projectInfo = getProjectNameAndHasCostObject(secretRef.namespace)
 

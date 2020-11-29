@@ -1865,6 +1865,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["p-event", "npm:4.2.0"],
             ["p-retry", "npm:4.2.0"],
             ["p-timeout", "npm:3.2.0"],
+            ["path-to-regexp", "npm:6.2.0"],
             ["sanitize-html", "npm:2.1.1"],
             ["semver", "npm:7.3.2"],
             ["set-cookie-parser", "npm:2.4.6"],
@@ -15510,6 +15511,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/path-to-regexp-npm-0.1.7-2605347373-342fdb0ca4.zip/node_modules/path-to-regexp/",
           "packageDependencies": [
             ["path-to-regexp", "npm:0.1.7"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:6.2.0", {
+          "packageLocation": "./.yarn/cache/path-to-regexp-npm-6.2.0-efbac3c1ff-4116de71f5.zip/node_modules/path-to-regexp/",
+          "packageDependencies": [
+            ["path-to-regexp", "npm:6.2.0"]
           ],
           "linkType": "HARD",
         }]

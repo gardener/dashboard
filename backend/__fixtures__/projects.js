@@ -7,7 +7,7 @@
 'use strict'
 
 const { uuidv1 } = require('./helper')
-const { cloneDeep } = require('lodash')
+const { cloneDeep, set } = require('lodash')
 
 function createUser (member) {
   const name = member.name || member
@@ -25,7 +25,7 @@ function setRoleAndRoles (member) {
   member.roles = roles
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = '' }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members.forEach(setRoleAndRoles)
@@ -33,10 +33,10 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   createdBy = createUser(createdBy)
   const metadata = {
     name,
-    annotations: {
-      'billing.gardener.cloud/costObject': costObject
-    },
     uid: uuidv1()
+  }
+  if (costObject) {
+    set(metadata, 'annotations["billing.gardener.cloud/costObject"]', costObject)
   }
   return {
     metadata,

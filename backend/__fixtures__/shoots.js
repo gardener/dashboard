@@ -6,6 +6,9 @@
 
 'use strict'
 
+const { filter, find } = require('lodash')
+const createError = require('http-errors')
+const pathToRegexp = require('path-to-regexp')
 const { cloneDeepAndSetUid } = require('./helper')
 
 function getShoot ({
@@ -61,23 +64,23 @@ const shootList = [
     name: 'fooShoot',
     namespace: 'garden-foo',
     project: 'foo',
-    createdBy: 'fooCreator',
+    createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
-    secretBindingName: 'fooSecretName'
+    secretBindingName: 'foo-infra1'
   }),
   getShoot({
     name: 'barShoot',
     namespace: 'garden-foo',
     project: 'foo',
-    createdBy: 'barCreator',
+    createdBy: 'bar@example.org',
     purpose: 'barPurpose',
-    secretBindingName: 'barSecretName'
+    secretBindingName: 'foo-infra1'
   }),
   getShoot({
     name: 'dummyShoot',
     namespace: 'garden-foo',
     project: 'foo',
-    createdBy: 'fooCreator',
+    createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
     secretBindingName: 'barSecretName',
     seed: 'infra4-seed-without-secretRef'
@@ -90,5 +93,28 @@ module.exports = {
   },
   list () {
     return cloneDeepAndSetUid(shootList)
+  },
+  mocks: {
+    list () {
+      const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots'
+      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+      return headers => {
+        const { params: { namespace } = {} } = match(headers[':path']) || {}
+        const items = filter(shootList, ['metadata.namespace', namespace])
+        return Promise.resolve({ items })
+      }
+    },
+    get () {
+      const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name'
+      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+      return headers => {
+        const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+        const item = find(shootList, { metadata: { namespace, name } })
+        if (item) {
+          return Promise.resolve(item)
+        }
+        return Promise.reject(createError(404))
+      }
+    }
   }
 }

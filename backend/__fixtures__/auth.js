@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { split, join, reduce } = require('lodash')
+const { split, join, reduce, pick } = require('lodash')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
@@ -56,7 +56,7 @@ function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
 function reviewSelfSubjectRules () {
   return (headers, json) => {
     const [, token] = /^Bearer (.*)$/.exec(headers.authorization)
-    const payload = fixtures.auth.decode(token)
+    const payload = decode(token)
     const resourceRules = []
     const nonResourceRules = []
     const incomplete = false
@@ -118,6 +118,11 @@ function reviewToken ({ domain = 'example.org' } = {}) {
 module.exports = {
   decode,
   createUser,
+  mocks: {
+    reviewSelfSubjectAccess,
+    reviewSelfSubjectRules,
+    reviewToken
+  },
   reviewSelfSubjectAccess,
   reviewSelfSubjectRules,
   reviewToken
