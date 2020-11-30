@@ -232,16 +232,19 @@ export default {
       if (!value) {
         return
       }
-      let tableOptions = pick(value, ['sortBy', 'sortDesc', 'itemsPerPage'])
-      if (startsWith(tableOptions.sortBy, 'Z_')) {
-        this.$localStorage.setObject(`shootList_options_${this.projectName}`, pick(tableOptions, ['sortBy', 'sortDesc']))
-
-        // only update itemsPerPage value
-        const itemsPerPage = tableOptions.itemsPerPage
-        tableOptions = defaults(this.$localStorage.getObject('shootList_options'), this.defaultTableOptions)
-        tableOptions.itemsPerPage = itemsPerPage
-      }
-      this.$localStorage.setObject('shootList_options', tableOptions)
+  const { sortBy, sortDesc, itemsPerPage } = value
+  if (startsWith(sortBy, 'Z_')) {
+    this.$localStorage.setObject(`shootList_options_${this.projectName}`, { sortBy, sortDesc })
+    const currentTableOptions = this.$localStorage.getObject('shootList_options')
+    const tableOptions = {
+      ...this.defaultTableOptions,
+      ...currentTableOptions,
+      itemsPerPage
+    }
+    this.$localStorage.setObject('shootList_options', tableOptions)
+  } else {
+    this.$localStorage.setObject('shootList_options', { sortBy, sortDesc, itemsPerPage })
+  }
       this.setShootListSortParams(value)
     },
     search (value) {
