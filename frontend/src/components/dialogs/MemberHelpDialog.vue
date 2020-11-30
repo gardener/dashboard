@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.stop="hide" :class="buttonClass" tabindex="2">Ok</v-btn>
+        <v-btn text @click.stop="hide" class="primary--text" tabindex="2">Ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -81,14 +81,6 @@ export default {
         return 'help_user'
       } else if (this.isServiceDialog) {
         return 'help_service'
-      }
-      return ''
-    },
-    buttonClass () {
-      if (this.isUserDialog) {
-        return 'green--text darken-2'
-      } else if (this.isServiceDialog) {
-        return 'blue-grey--text'
       }
       return ''
     }

@@ -57,20 +57,19 @@ export default {
   props: {
     width: {
       type: [Number, String],
-      default: 200
+      default: 720
     },
     height: {
       type: [Number, String],
-      default: 130
-    },
-    viewBox: {
-      type: [Array, String],
-      default: '0 0 100% 130'
+      default: 200
     }
   },
   computed: {
     color () {
       return this.$vuetify.theme.currentTheme.accent
+    },
+    viewBox () {
+      return `0 0 ${this.width} ${this.height}`
     }
   },
   methods: {

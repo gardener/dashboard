@@ -47,7 +47,7 @@ describe('HintColorizer.vue', () => {
     expect(colorizerHintElement.element.style.color).toBe('')
   })
 
-  it('should not overwrite error color class for v-text-field', async () => {
+  it('should not overwrite error color for v-text-field', async () => {
     let data = () => {
       return {
         errorMessage: undefined
@@ -72,7 +72,7 @@ describe('HintColorizer.vue', () => {
     expect(colorizerHintElement.element.style.color).not.toBe('orange')
   })
 
-  it('should not overwrite error color class for v-select', async () => {
+  it('should not overwrite error color for v-select', async () => {
     let data = () => {
       return {
         errorMessage: undefined
