@@ -543,20 +543,17 @@ const getters = {
   customFieldsShoot (state, getters) {
     let customFieldsShoot = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/customFieldsShoot"]')
     if (!customFieldsShoot) {
-      return undefined
+      return
     }
 
     try {
       customFieldsShoot = JSON.parse(customFieldsShoot)
     } catch (error) {
       console.error('could not parse custom fields', error.message)
-      return undefined
+      return
     }
 
-    customFieldsShoot = pickBy(customFieldsShoot, customFields => {
-      return !isEmpty(get(customFields, 'path')) &&
-        !isEmpty(get(customFields, 'name'))
-    })
+    customFieldsShoot = pickBy(customFieldsShoot, ({ path, name }) => name && path)
 
     customFieldsShoot = mapKeys(customFieldsShoot, (customFields, key) => `Z_${key}`)
     customFieldsShoot = mapValues(customFieldsShoot, customFields => {
@@ -568,10 +565,11 @@ const getters = {
         sortable: true,
         searchable: true
       }
-      return defaults({
+      return {
+        ...defaultProperties,
         ...customFields,
         defaultValue
-      }, defaultProperties)
+      }
     })
     return customFieldsShoot
   },

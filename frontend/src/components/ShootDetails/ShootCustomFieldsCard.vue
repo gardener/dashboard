@@ -43,6 +43,7 @@ import map from 'lodash/map'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
+  name: 'shoot-custom-fields-card',
   props: {
     shootItem: {
       type: Object

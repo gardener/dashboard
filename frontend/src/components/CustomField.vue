@@ -160,8 +160,6 @@ export default {
       type: Boolean
     }
   },
-  computed: {
-  }
 }
 </script>
 

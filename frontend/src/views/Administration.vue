@@ -186,7 +186,7 @@ SPDX-License-Identifier: Apache-2.0
                           :show-details="showDetails"
                           :searchable="searchable"
                         ></custom-field>
-                        <span v-if="!customFieldsListShoot || customFieldsListShoot.length === 0" class="font-weight-light text--disabled">Not defined</span>
+                        <span v-if="!customFieldsListShoot || !customFieldsListShoot.length" class="font-weight-light text--disabled">Not defined</span>
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>

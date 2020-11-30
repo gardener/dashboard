@@ -202,10 +202,12 @@ import zipObject from 'lodash/zipObject'
 import ShootListRow from '@/components/ShootListRow'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
-function mapHeader (headers, key) {
-  const keys = map(headers, 'value')
-  const checkedValues = map(headers, key)
-  return zipObject(keys, checkedValues)
+function mapHeader (headers, valueKey) {
+  const obj = {}
+  for (const { value: key, [valueKey]: value } of headers) {
+    obj[key] = value
+  }
+  return obj
 }
 
 export default {
@@ -291,17 +293,28 @@ export default {
       }
     },
     resetTableSettings () {
-      this.checkedColumns = { ...this.defaultStandardCheckedColumns, ...this.defaultCustomCheckedColumns }
+      this.checkedColumns = { 
+        ...this.defaultStandardCheckedColumns, 
+        ...this.defaultCustomCheckedColumns 
+      }
       this.saveCheckedColumns()
 
       this.options = this.defaultTableOptions
     },
     updateTableSettings () {
-      this.checkedColumns = { ...this.$localStorage.getObject('shootList_checkedColumns'), ...this.$localStorage.getObject(`shootList_checkedColumns_${this.projectName}`) }
-
+      const checkedColumns = this.$localStorage.getObject('shootList_checkedColumns')
+      const projectSpecificCheckedColumns = this.$localStorage.getObject(`shootList_checkedColumns_${this.projectName}`) 
+      this.checkedColumns = { 
+        ...checkedColumns, 
+        ...projectSpecificCheckedColumns
+      }
       const projectSpecificTableOptions = this.$localStorage.getObject(`shootList_options_${this.projectName}`)
       const tableOptions = this.$localStorage.getObject('shootList_options')
-      this.options = defaults(projectSpecificTableOptions, tableOptions, this.defaultTableOptions)
+      this.options = {
+        ...this.defaultTableOptions,
+        ...tableOptions,
+        ...projectSpecificTableOptions
+      }
     },
     defaultTableOptions () {
       return { itemsPerPage: 10 }
