@@ -35,35 +35,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import map from 'lodash/map'
-
-import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'shoot-custom-fields-card',
+  name: 'custom-fields-card',
   props: {
-    shootItem: {
-      type: Object
-    }
-  },
-  mixins: [shootItem],
-  computed: {
-    ...mapGetters([
-      'customFieldsListShoot'
-    ]),
-    customFields () {
-      const customFields = filter(this.customFieldsListShoot, ['showDetails', true])
-      return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
-        name,
-        path,
-        icon,
-        tooltip,
-        defaultValue,
-        value: get(this.shootItem, path)
-      }))
+    customFields: {
+      type: Array
     }
   }
 }
