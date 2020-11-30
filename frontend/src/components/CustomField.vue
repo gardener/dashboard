@@ -159,7 +159,7 @@ export default {
     showDetails: {
       type: Boolean
     }
-  },
+  }
 }
 </script>
 

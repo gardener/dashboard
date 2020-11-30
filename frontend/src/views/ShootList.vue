@@ -198,7 +198,6 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
-import zipObject from 'lodash/zipObject'
 import ShootListRow from '@/components/ShootListRow'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
@@ -293,9 +292,9 @@ export default {
       }
     },
     resetTableSettings () {
-      this.checkedColumns = { 
-        ...this.defaultStandardCheckedColumns, 
-        ...this.defaultCustomCheckedColumns 
+      this.checkedColumns = {
+        ...this.defaultStandardCheckedColumns,
+        ...this.defaultCustomCheckedColumns
       }
       this.saveCheckedColumns()
 
@@ -303,9 +302,9 @@ export default {
     },
     updateTableSettings () {
       const checkedColumns = this.$localStorage.getObject('shootList_checkedColumns')
-      const projectSpecificCheckedColumns = this.$localStorage.getObject(`shootList_checkedColumns_${this.projectName}`) 
-      this.checkedColumns = { 
-        ...checkedColumns, 
+      const projectSpecificCheckedColumns = this.$localStorage.getObject(`shootList_checkedColumns_${this.projectName}`)
+      this.checkedColumns = {
+        ...checkedColumns,
         ...projectSpecificCheckedColumns
       }
       const projectSpecificTableOptions = this.$localStorage.getObject(`shootList_options_${this.projectName}`)

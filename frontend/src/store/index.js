@@ -36,12 +36,12 @@ import some from 'lodash/some'
 import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
-import defaults from 'lodash/defaults'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
+import omitBy from 'lodash/omitBy'
 import pick from 'lodash/pick'
 import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
@@ -553,6 +553,7 @@ const getters = {
       return
     }
 
+    customFieldsShoot = omitBy(customFieldsShoot, isEmpty)
     customFieldsShoot = pickBy(customFieldsShoot, ({ path, name }) => name && path)
 
     customFieldsShoot = mapKeys(customFieldsShoot, (customFields, key) => `Z_${key}`)
