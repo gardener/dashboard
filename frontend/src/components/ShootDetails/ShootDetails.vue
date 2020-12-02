@@ -69,7 +69,7 @@ export default {
     ...mapGetters([
       'ticketsByNamespaceAndName',
       'canGetSecrets',
-      'customFieldsListShoot'
+      'shootCustomFieldList'
     ]),
     info () {
       return get(this, 'shootItem.info', {})
@@ -83,7 +83,7 @@ export default {
       return this.ticketsByNamespaceAndName({ name, namespace })
     },
     customFields () {
-      const customFields = filter(this.customFieldsListShoot, ['showDetails', true])
+      const customFields = filter(this.shootCustomFieldList, ['showDetails', true])
       return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
         name,
         path,

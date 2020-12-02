@@ -373,7 +373,7 @@ function getRawVal (item, column) {
     }
     default: {
       if (startsWith(column, 'Z_')) {
-        const path = get(store.getters.customFieldsShoot, [column, 'path'])
+        const path = get(store.getters.shootCustomFields, [column, 'path'])
         return get(item, path)
       }
       return metadata[column]
@@ -510,7 +510,7 @@ function setSortedItems (state, rootState) {
 
 function setFilteredAndSortedItems (state, rootState) {
   function matchesShoot (searchValue) {
-    const searchableCustomFields = filter(store.getters.customFieldsListShoot, ['searchable', true])
+    const searchableCustomFields = filter(store.getters.shootCustomFieldList, ['searchable', true])
 
     return shoot => {
       return some(searchValue, value => {

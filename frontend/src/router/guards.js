@@ -6,7 +6,6 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import defaults from 'lodash/defaults'
 import { getPrivileges, getConfiguration } from '@/utils/api'
 
 export default function createGuards (store, userManager, localStorage) {
@@ -135,7 +134,10 @@ function ensureDataLoaded (store, localStorage) {
             deactivatedReconciliation: isAdmin,
             hideTicketsWithLabel: isAdmin
           }
-          const shootListFilters = defaults(localStorage.getObject('shootList_filter'), defaultFilter)
+          const shootListFilters = {
+            ...defaultFilter,
+            ...localStorage.getObject('project/_all/shoot-list/filter')
+          }
           await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
 
           const promises = [

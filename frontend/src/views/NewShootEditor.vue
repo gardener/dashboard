@@ -76,7 +76,7 @@ export default {
     ]),
     onDismissModificationWarning () {
       this.modificationWarning = false
-      this.$localStorage.setItem('showNewShootEditorWarning', 'false')
+      this.$localStorage.setItem('projects/shoot-editor/warning', 'false')
     },
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -114,7 +114,7 @@ export default {
     }
   },
   mounted () {
-    const modificationWarning = this.$localStorage.getItem('showNewShootEditorWarning')
+    const modificationWarning = this.$localStorage.getItem('projects/new-shoot-editor/warning')
     this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {

@@ -532,47 +532,47 @@ const getters = {
   projectNamesFromProjectList (state, getters) {
     return map(getters.projectList, 'metadata.name')
   },
-  customFieldsListShoot (state, getters) {
-    return map(getters.customFieldsShoot, (customFields, key) => {
+  shootCustomFieldList (state, getters) {
+    return map(getters.shootCustomFields, (customFields, key) => {
       return {
         ...customFields,
         key
       }
     })
   },
-  customFieldsShoot (state, getters) {
-    let customFieldsShoot = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/customFieldsShoot"]')
-    if (!customFieldsShoot) {
+  shootCustomFields (state, getters) {
+    let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    if (!shootCustomFields) {
       return
     }
 
     try {
-      customFieldsShoot = JSON.parse(customFieldsShoot)
+      shootCustomFields = JSON.parse(shootCustomFields)
     } catch (error) {
       console.error('could not parse custom fields', error.message)
       return
     }
 
-    customFieldsShoot = omitBy(customFieldsShoot, isEmpty)
-    customFieldsShoot = pickBy(customFieldsShoot, ({ path, name }) => name && path)
+    shootCustomFields = omitBy(shootCustomFields, isEmpty) // omit null values
+    shootCustomFields = pickBy(shootCustomFields, ({ path, name }) => name && path)
 
-    customFieldsShoot = mapKeys(customFieldsShoot, (customFields, key) => `Z_${key}`)
-    customFieldsShoot = mapValues(customFieldsShoot, customFields => {
+    const defaultProperties = {
+      showColumn: true,
+      columnSelectedByDefault: true,
+      showDetails: true,
+      sortable: true,
+      searchable: true
+    }
+    shootCustomFields = mapKeys(shootCustomFields, (customFields, key) => `Z_${key}`)
+    shootCustomFields = mapValues(shootCustomFields, customFields => {
       const defaultValue = !isObject(customFields.defaultValue) ? customFields.defaultValue : undefined
-      const defaultProperties = {
-        showColumn: true,
-        columnSelectedByDefault: true,
-        showDetails: true,
-        sortable: true,
-        searchable: true
-      }
       return {
         ...defaultProperties,
         ...customFields,
         defaultValue
       }
     })
-    return customFieldsShoot
+    return shootCustomFields
   },
   costObjectSettings (state) {
     const costObject = state.cfg.costObject

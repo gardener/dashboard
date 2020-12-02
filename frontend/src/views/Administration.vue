@@ -149,7 +149,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-content>
                   </v-list-item>
                 </template>
-                <template v-if="customFieldsListShoot">
+                <template v-if="shootCustomFieldList">
                   <v-divider inset/>
                   <v-list-item>
                     <v-list-item-avatar>
@@ -158,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-content>
                       <v-list-item-subtitle>Custom Fields for Shoots</v-list-item-subtitle>
                       <v-list-item-title class="d-flex flex-wrap align-center pt-1">
-                        <custom-field
+                        <shoot-custom-field
                           class="mr-2 mb-2"
                           v-for="{
                             key,
@@ -172,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0
                             columnSelectedByDefault,
                             showDetails,
                             searchable
-                          } in customFieldsListShoot"
+                          } in shootCustomFieldList"
                           :color="color"
                           :key="key"
                           :name="name"
@@ -185,8 +185,8 @@ SPDX-License-Identifier: Apache-2.0
                           :column-selected-by-default="columnSelectedByDefault"
                           :show-details="showDetails"
                           :searchable="searchable"
-                        ></custom-field>
-                        <span v-if="!customFieldsListShoot || !customFieldsListShoot.length" class="font-weight-light text--disabled">Not defined</span>
+                        ></shoot-custom-field>
+                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text--disabled">Not defined</span>
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -313,7 +313,7 @@ import EditableAccount from '@/components/editable/EditableAccount'
 import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
-import CustomField from '@/components/CustomField'
+import ShootCustomField from '@/components/ShootCustomField'
 import { errorDetailsFromError } from '@/utils/error'
 import { transformHtml, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
@@ -330,7 +330,7 @@ export default {
     AccountAvatar,
     GDialog,
     TimeString,
-    CustomField
+    ShootCustomField
   },
   data () {
     return {
@@ -374,7 +374,7 @@ export default {
       'projectFromProjectList',
       'costObjectSettings',
       'isKubeconfigEnabled',
-      'customFieldsListShoot'
+      'shootCustomFieldList'
     ]),
     project () {
       return this.projectFromProjectList

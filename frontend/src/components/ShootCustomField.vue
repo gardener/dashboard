@@ -121,7 +121,6 @@ SPDX-License-Identifier: Apache-2.0
 import GPopper from '@/components/GPopper'
 
 export default {
-  name: 'worker-group',
   components: {
     GPopper
   },
@@ -130,10 +129,12 @@ export default {
       type: String
     },
     name: {
-      type: String
+      type: String,
+      required: true
     },
     path: {
-      type: String
+      type: String,
+      required: true
     },
     icon: {
       type: String

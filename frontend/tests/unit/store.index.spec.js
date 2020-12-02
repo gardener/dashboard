@@ -500,7 +500,7 @@ describe('Store', () => {
       defaultValue: { foo: 'bar' } // will be mapped to undefined
     }
 
-    const customFieldsShoot = {
+    const shootCustomFields = {
       custom1,
       custom2,
       custom3: { // ignored, missing required property path
@@ -517,13 +517,13 @@ describe('Store', () => {
       projectFromProjectList: {
         metadata: {
           annotations: {
-            'dashboard.gardener.cloud/customFieldsShoot': JSON.stringify(customFieldsShoot)
+            'dashboard.gardener.cloud/shootCustomFields': JSON.stringify(shootCustomFields)
           }
         }
       }
     }
 
-    const customFields = getters.customFieldsShoot({}, storeGetters)
+    const customFields = getters.shootCustomFields({}, storeGetters)
     expect(customFields).toStrictEqual({
       Z_custom1: {
         weight: 1,
