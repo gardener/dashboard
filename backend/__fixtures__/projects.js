@@ -6,8 +6,13 @@
 
 'use strict'
 
-const { uuidv1 } = require('./helper')
-const { cloneDeep, set, find } = require('lodash')
+const { cloneDeep, merge, get, set, find, includes, intersection } = require('lodash')
+const createError = require('http-errors')
+const pathToRegexp = require('path-to-regexp')
+const { getMockWatch } = require('@gardener-dashboard/kube-client')
+
+const { nextTick } = require('./helper')
+const { getTokenPayload } = require('./auth')
 
 function createUser (member) {
   const name = member.name || member
@@ -19,13 +24,32 @@ function createUser (member) {
   return user
 }
 
+function isMember (item, payload) {
+  const users = []
+  const groups = []
+  for (const { kind, namespace, name } of item.spec.members) {
+    switch (kind) {
+      case 'User':
+        users.push(name)
+        break
+      case 'ServiceAccount':
+        users.push(`system:serviceaccount:${namespace}:${name}`)
+        break
+      case 'Group':
+        groups.push(name)
+        break
+    }
+  }
+  return includes(users, payload.id) || intersection(groups, payload.groups).length
+}
+
 function setRoleAndRoles (member) {
   const [role, ...roles] = member.roles
   member.role = role
   member.roles = roles
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject }) {
+function getProject ({ name, namespace, uid, resourceVersion = '42', createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members.forEach(setRoleAndRoles)
@@ -33,7 +57,10 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   createdBy = createUser(createdBy)
   const metadata = {
     name,
-    uid: uuidv1()
+    resourceVersion
+  }
+  if (uid) {
+    metadata.uid = uid
   }
   if (costObject) {
     set(metadata, 'annotations["billing.gardener.cloud/costObject"]', costObject)
@@ -56,6 +83,7 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
 
 const projectList = [
   getProject({
+    uid: 1,
     name: 'foo',
     createdBy: 'foo@example.org',
     owner: 'bar@example.org',
@@ -90,6 +118,7 @@ const projectList = [
     costObject: '9999999999'
   }),
   getProject({
+    uid: 2,
     name: 'bar',
     createdBy: 'foo@example.org',
     owner: 'bar@example.org',
@@ -111,6 +140,7 @@ const projectList = [
     purpose: 'bar-purpose'
   }),
   getProject({
+    uid: 3,
     name: 'GroupMember1',
     createdBy: 'new@example.org',
     owner: 'new@example.org',
@@ -124,6 +154,7 @@ const projectList = [
     ]
   }),
   getProject({
+    uid: 4,
     name: 'GroupMember2',
     createdBy: 'new@example.org',
     owner: 'new@example.org',
@@ -137,19 +168,22 @@ const projectList = [
     ]
   }),
   getProject({
-    name: 'new',
-    createdBy: 'new@example.org',
-    description: 'new-description',
-    purpose: 'new-purpose',
+    uid: 5,
+    name: 'initial',
+    createdBy: 'admin@example.org',
+    description: 'initial-description',
+    purpose: 'initial-purpose',
     phase: 'Initial'
   }),
   getProject({
+    uid: 6,
     name: 'secret',
     createdBy: 'admin@example.org',
     description: 'secret-description',
     purpose: 'secret-purpose'
   }),
   getProject({
+    uid: 7,
     name: 'trial',
     createdBy: 'admin@example.org',
     description: 'trial-description',
@@ -158,9 +192,9 @@ const projectList = [
   })
 ]
 
-module.exports = {
-  create (...args) {
-    return getProject(...args)
+const projects = {
+  create (options) {
+    return getProject(options)
   },
   get (name) {
     return find(this.list(), { metadata: { name } })
@@ -170,5 +204,90 @@ module.exports = {
   },
   list () {
     return cloneDeep(projectList)
+  }
+}
+
+module.exports = {
+  ...projects,
+  mocks: {
+    list () {
+      // eslint-disable-next-line no-unused-vars
+      const path = '/apis/core.gardener.cloud/v1beta1/projects'
+      return () => {
+        const items = projects.list()
+        return Promise.resolve({ items })
+      }
+    },
+    create ({ uid = 21, resourceVersion = '42', phase = 'Ready' } = {}) {
+      const path = '/apis/core.gardener.cloud/v1beta1/projects'
+      return (headers, json) => {
+        const payload = getTokenPayload(headers)
+        const item = cloneDeep(json)
+        const name = json.metadata.name
+        const user = createUser(payload.id)
+        set(item, 'metadata.resourceVersion', resourceVersion)
+        set(item, 'metadata.uid', uid)
+        set(item, 'spec.namespace', `garden-${name}`)
+        set(item, 'spec.createdBy', user)
+        set(item, 'spec.owner', user)
+        set(item, 'spec.members', [{
+          ...user,
+          role: 'owner',
+          roles: ['admin', 'uam']
+        }])
+        set(item, 'status.phase', 'Initial')
+        ;(async () => {
+          try {
+            const key = [path, name].join('/')
+            const mockWatch = await getMockWatch(key)
+            // emit ADDED
+            await nextTick()
+            let object = cloneDeep(item)
+            mockWatch.emit('event', { type: 'ADDED', object })
+            // emit MODIFIED
+            await nextTick()
+            object = cloneDeep(item)
+            set(object, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+            set(object, 'status.phase', phase)
+            mockWatch.emit('event', { type: 'MODIFIED', object })
+          } catch (err) { /* ignore error */ }
+        })()
+        return Promise.resolve(item)
+      }
+    },
+    get () {
+      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
+      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+      return headers => {
+        const { params: { name } = {} } = match(headers[':path']) || {}
+        const payload = getTokenPayload(headers)
+        const item = projects.get(name)
+        if (isMember(item, payload)) {
+          return Promise.resolve(item)
+        }
+        return Promise.reject(createError(403))
+      }
+    },
+    patch () {
+      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
+      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+      return (headers, json) => {
+        const { params: { name } = {} } = match(headers[':path']) || {}
+        const item = projects.get(name)
+        const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+        merge(item, json)
+        set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+        return Promise.resolve(item)
+      }
+    },
+    delete () {
+      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
+      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+      return headers => {
+        const { params: { name } = {} } = match(headers[':path']) || {}
+        const item = projects.get(name)
+        return Promise.resolve(item)
+      }
+    }
   }
 }

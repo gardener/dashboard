@@ -32,6 +32,10 @@ class MockClient {
     }
   }
 
+  get pseudoHeaders () {
+    return this[pseudoHeaders]
+  }
+
   get defaults () {
     return this[defaults]
   }
@@ -42,9 +46,6 @@ class MockClient {
       ...headers,
       ':method': method,
       ...this[pseudoHeaders]
-    }
-    if (!headers[':path'].endsWith('/')) {
-
     }
     headers[':path'] = join(headers[':path'], path)
     if (searchParams) {

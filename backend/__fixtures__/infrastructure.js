@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, find, filter, has, set, chain } = require('lodash')
+const { cloneDeep, find, filter, has, get, set, chain, merge } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
@@ -149,7 +149,7 @@ const secrets = {
         return Promise.resolve(item)
       }
     },
-    patch ({ resourceVersion = '43' } = {}) {
+    patch () {
       const path = '/api/v1/namespaces/:namespace/secrets/:name'
       const match = pathToRegexp.match(path, { decode: decodeURIComponent })
       return (headers, json) => {
@@ -158,7 +158,9 @@ const secrets = {
         }
         const { params: { namespace, name } = {} } = match(headers[':path']) || {}
         const item = secrets.get(namespace, name)
-        set(item, 'metadata.resourceVersion', resourceVersion)
+        const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+        merge(item, json)
+        set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
         return Promise.resolve(item)
       }
     },
@@ -205,7 +207,7 @@ const secretBindings = {
         return Promise.resolve(item)
       }
     },
-    get (options) {
+    get () {
       const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings/:name'
       const match = pathToRegexp.match(path, { decode: decodeURIComponent })
       return headers => {

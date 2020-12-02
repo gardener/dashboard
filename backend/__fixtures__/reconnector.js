@@ -7,7 +7,7 @@
 'use strict'
 
 const { EventEmitter } = require('events')
-const WatchBuilder = require('@gardener-dashboard/kube-client/lib/WatchBuilder')
+const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 
 class Reconnector extends EventEmitter {
   constructor () {
@@ -42,7 +42,7 @@ class Reconnector extends EventEmitter {
   }
 }
 
-function createReconnector (events = [], name) {
+function createReconnector (name, events = []) {
   const reconnector = new Reconnector()
   for (const args of events) {
     reconnector.pushEvent(...args)

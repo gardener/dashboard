@@ -50,6 +50,10 @@ function formatTime (time) {
   return new Date(time).toISOString().replace(/\.\d+Z/, 'Z')
 }
 
+function nextTick () {
+  return new Promise(resolve => process.nextTick(resolve))
+}
+
 module.exports = {
   gardenerConfigPath,
   cloneDeepAndSetUid,
@@ -57,5 +61,6 @@ module.exports = {
   hash,
   toBase64,
   toHex,
-  formatTime
+  formatTime,
+  nextTick
 }

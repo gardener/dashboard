@@ -58,10 +58,14 @@ function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
   }
 }
 
+function getTokenPayload ({ authorization } = {}) {
+  const [, token] = /^Bearer (.*)$/.exec(authorization)
+  return decode(token)
+}
+
 function reviewSelfSubjectRules () {
   return (headers, json) => {
-    const [, token] = /^Bearer (.*)$/.exec(headers.authorization)
-    const payload = decode(token)
+    const payload = getTokenPayload(headers)
     const resourceRules = []
     const nonResourceRules = []
     const incomplete = false
@@ -97,12 +101,27 @@ function reviewSelfSubjectRules () {
 }
 
 function reviewSelfSubjectAccess ({ allowed = true } = {}) {
-  return (headers, json) => Promise.resolve({
-    ...json,
-    status: {
-      allowed
+  return (headers, json) => {
+    const { id } = getTokenPayload(headers)
+    const { resourceAttributes, nonResourceAttributes } = json.spec
+    if (resourceAttributes) {
+      const { resource } = resourceAttributes
+      switch (resource) {
+        case 'secrets':
+          allowed = id === 'admin@example.org'
+          break
+      }
     }
-  })
+    if (nonResourceAttributes) {
+      // TODO
+    }
+    return Promise.resolve({
+      ...json,
+      status: {
+        allowed
+      }
+    })
+  }
 }
 
 function reviewToken ({ domain = 'example.org' } = {}) {
@@ -121,8 +140,8 @@ function reviewToken ({ domain = 'example.org' } = {}) {
 }
 
 module.exports = {
-  decode,
   createUser,
+  getTokenPayload,
   mocks: {
     reviewSelfSubjectAccess,
     reviewSelfSubjectRules,

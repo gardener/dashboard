@@ -4,8 +4,6 @@
 
 'use strict'
 
-const _ = require('lodash')
-const { pick } = _
 const { mockRequest } = require('@gardener-dashboard/request')
 const fixtures = require('../../__fixtures__')
 
@@ -31,7 +29,7 @@ describe('api', function () {
     // project
     const project = fixtures.projects.getByNamespace(namespace)
     // user
-    const id = project.spec.owner
+    const id = project.spec.owner.name
     const user = fixtures.auth.createUser({ id })
     // cloudProfile
     const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
