@@ -17,7 +17,6 @@ SPDX-License-Identifier: Apache-2.0
             rounded
             @click="showUpdateDialog"
             :outlined="!k8sPatchAvailable"
-            :dark="k8sPatchAvailable"
             :ripple="canUpdate"
             depressed
             color="primary"

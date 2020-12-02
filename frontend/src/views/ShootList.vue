@@ -150,11 +150,11 @@ SPDX-License-Identifier: Apache-2.0
 
       <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
-          <v-card-title class="primary grey--text text--lighten-4">
-            <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
+          <v-card-title class="accent accentTitle--text">
+            <div class="headline">Cluster Access <code class="accent lighten-1 accentTitle--text">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon>mdi-close</v-icon>
+              <v-icon color="accentTitle">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
           <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
@@ -162,8 +162,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-dialog>
     </v-card>
     <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="primary" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
-        <v-icon dark ref="add">mdi-plus</v-icon>
+      <v-btn v-if="projectScope" class="primary" fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
+        <v-icon ref="add">mdi-plus</v-icon>
       </v-btn>
     </v-fab-transition>
   </v-container>
@@ -446,10 +446,6 @@ export default {
   .dashboard {
     padding-top: 10px;
     padding-bottom: 10px;
-  }
-
-  .cluster_name {
-    color: rgb(0, 137, 123);
   }
 
   .shootListTable table.table {

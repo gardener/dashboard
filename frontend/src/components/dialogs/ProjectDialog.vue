@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:svgComponent>
             <project-background></project-background>
         </template>
-        <v-icon large dark>mdi-cube</v-icon>
+        <v-icon large>mdi-cube</v-icon>
         <span class="headline ml-5">Create Project</span>
       </card-svg-title>
       <v-card-text class="dialog-content">

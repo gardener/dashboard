@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About OpenStack Secrets"
-    backgroundSrc="/static/background_openstack.svg"
     :value="value"
     @input="onInput"
   >

@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="gcp"
-    infraIcon="gcp-white"
-    backgroundSrc="/static/background_gcp.svg"
+    infraIcon="gcp"
     createTitle="Add new Google Secret"
     replaceTitle="Replace Google Secret"
     @input="onInput">

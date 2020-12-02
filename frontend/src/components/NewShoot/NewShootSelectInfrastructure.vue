@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
+          <infra-icon :value="infrastructureKind" :size="60"></infra-icon>
         </div>
         <div class="mt-2" >
           <span class="subtitle-1">{{infrastructureKind}}</span>
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import InfraIcon from '@/components/VendorIcon'
+import InfraIcon from '@/components/InfraIcon'
 import { mapGetters } from 'vuex'
 
 export default {

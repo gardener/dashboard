@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="metal"
-    infraIcon="metal-white"
-    backgroundSrc="/static/background_metal.svg"
+    infraIcon="metal"
     createTitle="Add new Metal Secret"
     replaceTitle="Replace Metal Secret"
     @input="onInput">

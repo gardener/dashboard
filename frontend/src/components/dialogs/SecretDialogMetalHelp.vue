@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About Metal Secrets"
-    backgroundSrc="/static/background_metal.svg"
     :value="value"
     @input="onInput"
   >

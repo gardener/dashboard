@@ -32,14 +32,14 @@ SPDX-License-Identifier: Apache-2.0
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="add_user_background">
-            <rect id="Rectangle" :fill="desaturatedColor(20)" x="-18" y="-16" width="777" height="290"></rect>
+            <rect id="Rectangle" :fill="adjustColor(20)" x="-18" y="-16" width="777" height="290"></rect>
             <g id="Rectangle" transform="translate(380.901484, 14.129051) rotate(5.000000) translate(-380.901484, -14.129051) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                <use :fill="desaturatedColor(10)" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use :fill="adjustColor(10)" fill-rule="evenodd" xlink:href="#path-1"></use>
             </g>
             <g id="Rectangle" transform="translate(379.828952, -31.611851) rotate(5.000000) translate(-379.828952, 31.611851) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
-                <use :fill="desaturatedColor(30)" fill-rule="evenodd" xlink:href="#path-3"></use>
+                <use :fill="adjustColor(30)" fill-rule="evenodd" xlink:href="#path-3"></use>
             </g>
             <g id="Rectangle" transform="translate(310.812766, 37.216932) rotate(-9.000000) translate(-310.812766, -37.216932) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
@@ -73,8 +73,12 @@ export default {
     }
   },
   methods: {
-    desaturatedColor (value) {
-      return tinycolor(this.color).desaturate(value).toString()
+    adjustColor (value) {
+      const color = tinycolor(this.color)
+      if (color.isLight()) {
+        return color.darken(value).toString()
+      }
+      return color.lighten(value).toString()
     }
   }
 }

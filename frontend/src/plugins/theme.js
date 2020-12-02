@@ -10,19 +10,20 @@ const theme = {
   themes: {
     light: {
       primary: colors.cyan.darken2,
-      secondary: '#333333',
+      secondary: colors.grey.darken3,
       accent: colors.cyan.darken2,
+      accentTitle: colors.grey.lighten3,
       anchor: colors.cyan.darken2,
-      actionButton: colors.black
+      actionButton: colors.shades.black
     },
     dark: {
-      primary: '#00cc99',
-      secondary: '#1a1a1a',
-      accent: '#00664d',
-      anchor: '#00cccc',
-      actionButton: '#FFFFFF',
-      error: '#b71c1c',
-      warning: '#b5691c'
+      primary: colors.cyan.darken2,
+      secondary: colors.grey.darken3,
+      accent: colors.cyan.darken4,
+      anchor: colors.cyan.darken2,
+      actionButton: colors.shades.white,
+      error: colors.red.darken4,
+      warning: colors.orange.darken4
     }
   },
   dark: false

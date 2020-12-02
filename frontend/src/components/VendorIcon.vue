@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <span>
     <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
     <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else :class="contentClass" class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
+    <v-icon v-else :class="contentClass" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </span>
 </template>
 
@@ -34,32 +34,8 @@ export default {
   computed: {
     iconSrc () {
       switch (this.value) {
-        case 'azure':
-          return require('@/assets/azure.svg')
-        case 'azure-white':
-          return require('@/assets/azure-white.svg')
-        case 'aws':
-          return require('@/assets/aws.svg')
-        case 'aws-white':
-          return require('@/assets/aws-white.svg')
-        case 'gcp':
-          return require('@/assets/gcp.svg')
-        case 'gcp-white':
-          return require('@/assets/gcp-white.svg')
-        case 'openstack':
-          return require('@/assets/openstack.svg')
-        case 'openstack-white':
-          return require('@/assets/openstack-white.svg')
-        case 'alicloud':
-          return require('@/assets/alicloud.svg')
-        case 'alicloud-white':
-          return require('@/assets/alicloud-white.svg')
         case 'digital-ocean':
           return require('@/assets/digital-ocean.svg')
-        case 'vsphere':
-          return require('@/assets/vsphere.svg')
-        case 'vsphere-white':
-          return require('@/assets/vsphere-white.svg')
         case 'china-telecom':
           return require('@/assets/china-telecom.svg')
         case 'coreos':
@@ -70,10 +46,6 @@ export default {
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
-        case 'metal':
-          return require('@/assets/metal.svg')
-        case 'metal-white':
-          return require('@/assets/metal-white.svg')
         case 'gardenlinux':
           return require('@/assets/logo.svg')
       }

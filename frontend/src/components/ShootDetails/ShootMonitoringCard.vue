@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="accent">
+    <v-toolbar flat dense color="accent accentTitle--text">
       <v-toolbar-title class="subtitle-1">Logging and Monitoring</v-toolbar-title>
     </v-toolbar>
     <v-list>

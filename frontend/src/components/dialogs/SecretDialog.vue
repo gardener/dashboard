@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:svgComponent>
             <secret-background></secret-background>
         </template>
-        <infra-icon v-model="infraIcon" :width="42"></infra-icon>
-        <span class="headline ml-5">{{title}}</span>
+        <infra-icon v-model="infraIcon" iconColor="accentTitle" :size="42" class="mt-2"></infra-icon>
+        <span class="headline ml-5 accentTitle--text">{{title}}</span>
       </card-svg-title>
       <v-card-text>
         <v-container fluid>
@@ -70,7 +70,7 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
-import InfraIcon from '@/components/VendorIcon'
+import InfraIcon from '@/components/InfraIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
 import CardSvgTitle from '@/components/CardSvgTitle.vue'
@@ -107,10 +107,6 @@ export default {
       required: true
     },
     cloudProviderKind: {
-      type: String,
-      required: true
-    },
-    backgroundSrc: {
       type: String,
       required: true
     },

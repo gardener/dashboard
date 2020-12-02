@@ -70,7 +70,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-alert
                 v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
-                dark
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError ? true : false"
               >

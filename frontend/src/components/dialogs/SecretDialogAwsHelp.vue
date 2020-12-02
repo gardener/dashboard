@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About AWS Secrets"
-    backgroundSrc="/static/background_aws.svg"
     :value="value"
     @input="onInput"
   >

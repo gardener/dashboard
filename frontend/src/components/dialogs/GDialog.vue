@@ -180,11 +180,11 @@ export default {
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
         case 'error':
-          return 'error grey--text text--lighten-4'
+          return 'error accentTitle--text'
         case 'warning':
-          return 'warning grey--text text--lighten-4'
+          return 'warning accentTitle--text'
         default:
-          return 'accent grey--text text--lighten-4'
+          return 'accent accentTitle--text'
       }
     },
     textColorClassForString (textColorClass) {

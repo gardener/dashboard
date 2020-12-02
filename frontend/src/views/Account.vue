@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="accent">
+          <v-toolbar flat dense class="accent accentTitle--text">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list dense>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="accent">
+          <v-toolbar flat dense class="accent accentTitle--text">
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>

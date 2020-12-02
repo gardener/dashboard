@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="toolbarColor">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -158,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col v-if="canDeleteProject" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="toolbarColor">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -187,7 +187,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="costObjectSettingEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="toolbarColor">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Billing</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -219,7 +219,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="isKubeconfigEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="toolbarColor">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -291,7 +291,7 @@ export default {
   data () {
     return {
       color: 'primary',
-      toolbarColor: 'accent',
+      toolbarColor: 'accent accentTitle--text',
       edit: false,
       editOwner: false,
       ownerMessages: [],

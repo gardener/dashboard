@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     v-if="hasCloudProfileForCloudProviderKind('aws')"
     infrastructureKey="aws"
     infrastructureName="Amazon Web Services"
-    icon="aws-white"
+    icon="aws"
     secretDescriptorKey="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
     @add="onAdd"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="azure"
     infrastructureName="Microsoft Azure Cloud"
-    icon="azure-white"
+    icon="azure"
     secretDescriptorKey="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
     @add="onAdd"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="gcp"
     infrastructureName="Google Cloud Platform"
-    icon="gcp-white"
+    icon="gcp"
     secretDescriptorKey="project"
     description="Make sure that the new credentials have the correct permission on GCP."
     @add="onAdd"
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="openstack"
     infrastructureName="OpenStack"
-    icon="openstack-white"
+    icon="openstack"
     description="Make sure that the new credentials have the correct OpenStack permissions"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="alicloud"
     infrastructureName="Alibaba Cloud"
     secretDescriptorKey="accessKeyID"
-    icon="alicloud-white"
+    icon="alicloud"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="metal"
     infrastructureName="Metal Cloud"
     secretDescriptorKey="metalHMAC"
-    icon="metal-white"
+    icon="metal"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="vsphere"
     infrastructureName="VMware vSphere"
     secretDescriptorKey="vsphereUsername"
-    icon="vsphere-white"
+    icon="vsphere"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
 
     <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
-    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
+    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
 
     <v-fab-transition>
       <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
@@ -139,26 +139,26 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon v-else>mdi-plus</v-icon>
           </v-btn>
         </template>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab small dark @click="onAdd('vsphere')">
-          <infra-icon value="vsphere-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab small @click="onAdd('vsphere')">
+          <infra-icon value="vsphere"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab small dark @click="onAdd('metal')">
-          <infra-icon value="metal-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab small @click="onAdd('metal')">
+          <infra-icon value="metal"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab small dark @click="onAdd('alicloud')">
-          <infra-icon value="alicloud-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab small @click="onAdd('alicloud')">
+          <infra-icon value="alicloud"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab small dark @click="onAdd('openstack')">
-          <infra-icon value="openstack-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab small @click="onAdd('openstack')">
+          <infra-icon value="openstack"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab small dark @click="onAdd('gcp')">
-          <infra-icon value="gcp-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab small @click="onAdd('gcp')">
+          <infra-icon value="gcp"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab small dark @click="onAdd('azure')">
-          <infra-icon value="azure-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab small @click="onAdd('azure')">
+          <infra-icon value="azure"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab small dark @click="onAdd('aws')">
-          <infra-icon value="aws-white" :width="20"></infra-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab small @click="onAdd('aws')">
+          <infra-icon value="aws"></infra-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>
@@ -171,9 +171,9 @@ import { isOwnSecret } from '@/utils'
 import get from 'lodash/get'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
+import InfraIcon from '@/components/InfraIcon'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
-import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 
@@ -183,8 +183,8 @@ export default {
     DeleteDialog,
     Secret,
     DisabledSecret,
-    InfraIcon,
-    SecretDialogWrapper
+    SecretDialogWrapper,
+    InfraIcon
   },
   data () {
     return {
@@ -230,10 +230,6 @@ export default {
       'cloudProfilesByCloudProviderKind',
       'getInfrastructureSecretByName'
     ]),
-    backgroundForSelectedSecret () {
-      const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
-      return this.backgroundForCloudProviderKind(kind)
-    },
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
@@ -263,25 +259,6 @@ export default {
     onDelete (row) {
       this.selectedSecret = row // pragma: whitelist secret
       this.dialogState.deleteConfirm = true
-    },
-    backgroundForCloudProviderKind (kind) {
-      switch (kind) {
-        case 'azure':
-          return '/static/background_azure.svg'
-        case 'aws':
-          return '/static/background_aws.svg'
-        case 'gcp':
-          return '/static/background_gcp.svg'
-        case 'openstack':
-          return '/static/background_openstack.svg'
-        case 'alicloud':
-          return '/static/background_alicloud.svg'
-        case 'metal':
-          return '/static/background_metal.svg'
-        case 'vsphere':
-          return '/static/background_vsphere.svg'
-      }
-      return '/static/background_aws.svg'
     },
     hideDialogs () {
       merge(this.dialogState, this.initialDialogState)

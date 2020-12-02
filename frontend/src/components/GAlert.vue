@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
+  <v-alert :color="color" :tile="tile" dismissible v-model="alertVisible">
     <div class="subtitle-1">
       {{message}}
-      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
+      <v-btn outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
         Details
       </v-btn>
     </div>
@@ -36,10 +36,6 @@ export default {
     },
     tile: {
       type: Boolean
-    },
-    dark: {
-      type: Boolean,
-      default: true
     }
   },
   data () {

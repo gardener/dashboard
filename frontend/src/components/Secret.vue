@@ -8,15 +8,15 @@ SPDX-License-Identifier: Apache-2.0
   <v-card :class="cardClass">
 
     <!-- Header -->
-    <v-toolbar color="accent" dark>
-      <infra-icon v-model="icon" :width="32"></infra-icon>
+    <v-toolbar color="accent accentTitle--text">
+      <infra-icon v-model="icon" iconColor="accentTitle" :size="32" class="mt-2"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
-        <v-icon class="white--text">mdi-plus</v-icon>
+      <v-btn color="accentTitle" v-if="!disabled" icon @click.native.stop="onAdd()">
+        <v-icon>mdi-plus</v-icon>
       </v-btn>
-      <v-btn v-if="!disabled" icon @click.native.stop="onToogleHelp()">
-        <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+      <v-btn color="accentTitle" v-if="!disabled" icon @click.native.stop="onToogleHelp()">
+        <v-icon>mdi-help-circle-outline</v-icon>
       </v-btn>
     </v-toolbar>
     <div class="description_container" v-if="!hasRows">
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
-import InfraIcon from '@/components/VendorIcon'
+import InfraIcon from '@/components/InfraIcon'
 import { isOwnSecret } from '@/utils'
 
 export default {

@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import join from 'lodash/join'
-import InfraIcon from '@/components/VendorIcon'
+import InfraIcon from '@/components/InfraIcon'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

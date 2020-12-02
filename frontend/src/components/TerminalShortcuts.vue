@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
                         <v-icon>mdi-grid-large</v-icon>
                       </v-avatar>
                     </template>
-                    <icon-base width="24" height="23" :iconColor="$vuetify.theme.currentTheme.primary" viewBox="-4 0 56 54">
+                    <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">
                       <terminal-shortcut-icon></terminal-shortcut-icon>
                     </icon-base>
                   </v-badge>
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip top>
               <template v-slot:activator="{ on: tooltip }">
                 <span v-on="tooltip" >
-                  <icon-base width="24" height="23" :iconColor="$vuetify.theme.currentTheme.primary" viewBox="-4 0 56 54">
+                  <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">
                     <terminal-shortcut-icon></terminal-shortcut-icon>
                   </icon-base>
                 </span>

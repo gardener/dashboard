@@ -59,10 +59,6 @@ export default {
     secret: {
       type: Object,
       required: true
-    },
-    backgroundSrc: {
-      type: String,
-      required: true
     }
   },
   data () {

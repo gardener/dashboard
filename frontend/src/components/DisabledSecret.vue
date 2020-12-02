@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card class="mr-extra card_disabled">
-    <v-toolbar :class="toolbarClass" dark>
-      <infra-icon v-model="icon" :width="32"></infra-icon>
+    <v-toolbar :class="toolbarClass">
+      <vendor-icon v-model="icon" :width="32"></vendor-icon>
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn disabled icon>
@@ -26,11 +26,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import InfraIcon from '@/components/VendorIcon'
+import VendorIcon from '@/components/VendorIcon'
 
 export default {
   components: {
-    InfraIcon
+    VendorIcon
   },
   props: {
     icon: {

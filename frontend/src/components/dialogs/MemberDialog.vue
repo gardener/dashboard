@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:svgComponent>
             <member-background></member-background>
         </template>
-        <v-icon large dark>mdi-account-plus</v-icon>
+        <v-icon large>mdi-account-plus</v-icon>
         <span class="headline ml-5">{{title}}</span>
       </card-svg-title>
       <v-card-text>

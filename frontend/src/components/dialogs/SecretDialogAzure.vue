@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="azure"
-    infraIcon="azure-white"
-    backgroundSrc="/static/background_azure.svg"
+    infraIcon="azure"
     createTitle="Add new Azure Secret"
     replaceTitle="Replace Azure Secret"
     @input="onInput">
