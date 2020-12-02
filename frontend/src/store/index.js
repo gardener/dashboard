@@ -541,6 +541,10 @@ const getters = {
     })
   },
   shootCustomFields (state, getters) {
+    function someObjectValuesAreObject () {
+      return object => some(object, isObject)
+    }
+
     let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
     if (!shootCustomFields) {
       return
@@ -554,6 +558,7 @@ const getters = {
     }
 
     shootCustomFields = omitBy(shootCustomFields, isEmpty) // omit null values
+    shootCustomFields = omitBy(shootCustomFields, someObjectValuesAreObject())
     shootCustomFields = pickBy(shootCustomFields, ({ path, name }) => name && path)
 
     const defaultProperties = {
@@ -565,11 +570,9 @@ const getters = {
     }
     shootCustomFields = mapKeys(shootCustomFields, (customFields, key) => `Z_${key}`)
     shootCustomFields = mapValues(shootCustomFields, customFields => {
-      const defaultValue = !isObject(customFields.defaultValue) ? customFields.defaultValue : undefined
       return {
         ...defaultProperties,
-        ...customFields,
-        defaultValue
+        ...customFields
       }
     })
     return shootCustomFields

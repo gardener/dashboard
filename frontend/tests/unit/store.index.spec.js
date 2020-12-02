@@ -496,8 +496,7 @@ describe('Store', () => {
     }
     const custom2 = {
       name: 'Name',
-      path: 'path',
-      defaultValue: { foo: 'bar' } // will be mapped to undefined
+      path: 'path'
     }
 
     const shootCustomFields = {
@@ -510,7 +509,11 @@ describe('Store', () => {
         path: 'path'
       },
       custom5: {}, // ignored
-      custom6: null // ignored
+      custom6: null, // ignored
+      custom7: { // ignored
+        name: 'Foo',
+        path: { foo: 'bar' } // no objects allowed as values of custom field properties
+      }
     }
 
     const storeGetters = {
@@ -522,6 +525,7 @@ describe('Store', () => {
         }
       }
     }
+    console.log(storeGetters)
 
     const customFields = getters.shootCustomFields({}, storeGetters)
     expect(customFields).toStrictEqual({
@@ -541,7 +545,6 @@ describe('Store', () => {
         name: 'Name',
         path: 'path',
         columnSelectedByDefault: true,
-        defaultValue: undefined,
         searchable: true,
         showColumn: true,
         showDetails: true,
