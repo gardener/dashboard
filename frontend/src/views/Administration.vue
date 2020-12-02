@@ -171,7 +171,8 @@ SPDX-License-Identifier: Apache-2.0
                             weight,
                             columnSelectedByDefault,
                             showDetails,
-                            searchable
+                            searchable,
+                            sortable
                           } in shootCustomFieldList"
                           :color="color"
                           :key="key"
@@ -185,6 +186,7 @@ SPDX-License-Identifier: Apache-2.0
                           :column-selected-by-default="columnSelectedByDefault"
                           :show-details="showDetails"
                           :searchable="searchable"
+                          :sortable="sortable"
                         ></shoot-custom-field>
                         <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text--disabled">Not defined</span>
                       </v-list-item-title>

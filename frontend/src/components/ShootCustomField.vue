@@ -102,6 +102,14 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
+      <v-list-item class="px-0" v-if="showColumn">
+        <v-list-item-content class="pt-1">
+          <v-list-item-subtitle>Sortable</v-list-item-subtitle>
+          <v-list-item-title>
+              {{searchable ? 'Yes' : 'No'}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <v-divider></v-divider>
       <v-subheader class="px-0">Cluster Details Settings</v-subheader>
       <v-list-item class="px-0">
@@ -155,6 +163,9 @@ export default {
       type: Boolean
     },
     searchable: {
+      type: Boolean
+    },
+    sortable: {
       type: Boolean
     },
     showDetails: {
