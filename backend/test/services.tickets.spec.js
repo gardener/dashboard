@@ -16,7 +16,6 @@ const { filter, map, unset, find, cloneDeep } = require('lodash')
 
 describe('services', function () {
   describe('tickets', function () {
-    let debugSpy
     let getIssueStub
     let removeIssueSpy
     let createCommentStub
@@ -48,7 +47,6 @@ describe('services', function () {
     beforeEach(function () {
       ticketCache.issues = cloneDeep(issues)
       jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
-      debugSpy = jest.spyOn(logger, 'debug')
       createCommentStub = jest.spyOn(github, 'createComment').mockReturnValue()
       closeIssueStub = jest.spyOn(github, 'closeIssue').mockReturnValue()
       getIssueStub = jest.spyOn(github, 'getIssue').mockImplementation(({ number }) => {
@@ -63,7 +61,7 @@ describe('services', function () {
       it('should not remove any issues', async function () {
         await deleteTickets({ projectName: 'foo', name: 'foo' })
         expect(getIssueStub).not.toBeCalled()
-        expect(debugSpy).not.toBeCalled()
+        expect(logger.debug).not.toBeCalled()
         expect(createCommentStub).not.toBeCalled()
         expect(closeIssueStub).not.toBeCalled()
         expect(removeIssueSpy).not.toBeCalled()
@@ -76,7 +74,7 @@ describe('services', function () {
           [{ number: issue1.id }],
           [{ number: issue3.id }]
         ])
-        expect(debugSpy).toBeCalledTimes(2)
+        expect(logger.debug).toBeCalledTimes(2)
         expect(createCommentStub).toBeCalledTimes(1)
         expect(createCommentStub.mock.calls[0]).toEqual([{ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_'])
         expect(closeIssueStub).toBeCalledTimes(1)

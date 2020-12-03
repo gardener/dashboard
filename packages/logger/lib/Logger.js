@@ -17,6 +17,16 @@ const LEVELS = {
   error: 5
 }
 
+class Stream {
+  constructor (logger) {
+    this.logger = logger
+  }
+
+  write (msg) {
+    this.logger.http(msg.replace(/[\n\s]*$/, ''))
+  }
+}
+
 class Logger {
   constructor ({ logLevel = process.env.LOG_LEVEL, logHttpRequestBody = process.env.LOG_HTTP_REQUEST_BODY } = {}) {
     this.logLevel = 2
@@ -25,6 +35,7 @@ class Logger {
     this.setLogHttpRequestBody(logHttpRequestBody)
     this.silent = /^test/.test(process.env.NODE_ENV)
     this.console = global.console
+    this.stream = new Stream()
   }
 
   setLogLevel (value) {
@@ -48,17 +59,6 @@ class Logger {
   get ts () {
     const ts = new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
     return chalk.whiteBright(ts)
-  }
-
-  get stream () {
-    const logger = this
-    return {
-      write (msg, encoding) {
-        if (msg) {
-          logger.http(msg.replace(/[\n\s]*$/, ''))
-        }
-      }
-    }
   }
 
   connect ({ url, user, headers }) {

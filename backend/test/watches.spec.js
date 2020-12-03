@@ -45,54 +45,50 @@ describe('watches', function () {
   beforeEach(function () {
     emitter = new EventEmitter()
     emitter.resourceName = resourceName
+    jest.clearAllMocks()
   })
 
   describe('common', function () {
     it('should log "connect" events', async function () {
-      const spy = jest.spyOn(logger, 'debug')
       registerHandler(emitter, () => {})
       emitter.emit('connect')
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy.mock.calls[0]).toEqual(['watch %s connected', resourceName])
+      expect(logger.debug).toHaveBeenCalledTimes(1)
+      expect(logger.debug.mock.calls[0]).toEqual(['watch %s connected', resourceName])
     })
 
     it('should log "disconnect" events', async function () {
-      const spy = jest.spyOn(logger, 'error')
       registerHandler(emitter, () => {})
       const error = new Error('error')
       emitter.emit('disconnect', error)
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy.mock.calls[0]).toEqual(['watch %s disconnected', resourceName, error])
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error.mock.calls[0]).toEqual(['watch %s disconnected', resourceName, error])
     })
 
     it('should log "reconnect" events', async function () {
-      const spy = jest.spyOn(logger, 'debug')
       registerHandler(emitter, () => {})
       const attempt = 7
       const delay = 1234
       emitter.emit('reconnect', attempt, delay)
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy.mock.calls[0]).toEqual(['watch %s reconnect attempt %d after %d', resourceName, attempt, delay])
+      expect(logger.debug).toHaveBeenCalledTimes(1)
+      expect(logger.debug.mock.calls[0]).toEqual(['watch %s reconnect attempt %d after %d', resourceName, attempt, delay])
     })
 
     it('should log "error" events', async function () {
-      const spy = jest.spyOn(logger, 'error')
       registerHandler(emitter, () => {})
       const error = new Error('error')
       emitter.emit('error', error)
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy.mock.calls[0]).toEqual(['watch %s error occurred', resourceName, error])
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error.mock.calls[0]).toEqual(['watch %s error occurred', resourceName, error])
     })
 
     it('should log "event" events with type "ERROR"', async function () {
-      const spy = jest.spyOn(logger, 'error')
       registerHandler(emitter, () => {})
       const code = 777
       const reason = 'Not found'
       const message = 'Something was not found'
       emitter.emit('event', { type: 'ERROR', object: { code, reason, message } })
-      expect(spy).toHaveBeenCalledTimes(1)
-      expect(spy.mock.calls[0]).toEqual(['ERROR: Code "%s", Reason "%s", message "%s, watch: %s"', code, reason, message, emitter.resourceName])
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error.mock.calls[0]).toEqual(['ERROR: Code "%s", Reason "%s", message "%s, watch: %s"', code, reason, message, emitter.resourceName])
     })
   })
 
@@ -181,7 +177,6 @@ describe('watches', function () {
     const { shoots } = dashboardClient['core.gardener.cloud']
 
     let watchStub
-    let errorSpy
     let deleteTicketsStub
     let bootstrapResourceStub
     let isResourcePendingStub
@@ -191,7 +186,6 @@ describe('watches', function () {
     beforeEach(function () {
       shootsWithIssues = new Set()
       watchStub = jest.spyOn(shoots, 'watchListAllNamespaces').mockReturnValue(emitter)
-      errorSpy = jest.spyOn(logger, 'error')
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
       isResourcePendingStub = jest.spyOn(bootstrapper, 'isResourcePending').mockImplementation(_.matches(foobar))
@@ -226,7 +220,7 @@ describe('watches', function () {
       emitter.emit('event', { type: 'MODIFIED', object: foobar })
       emitter.emit('event', { type: 'DELETED', object: foobar })
 
-      expect(errorSpy).not.toBeCalled()
+      expect(logger.error).not.toBeCalled()
       expect(bootstrapResourceStub).toBeCalledTimes(2)
       expect(isResourcePendingStub).toBeCalledTimes(2)
       expect(isResourcePendingStub.mock.calls).toEqual([[foobar], [foobar]])
@@ -331,7 +325,7 @@ describe('watches', function () {
       emitter.emit('event', { type: 'DELETED', object: foobar })
       emitter.emit('event', { type: 'DELETED', object: foobaz })
 
-      expect(errorSpy).toBeCalledTimes(1)
+      expect(logger.error).toBeCalledTimes(1)
       expect(isResourcePendingStub).toBeCalledTimes(2)
       expect(isResourcePendingStub.mock.calls).toEqual([[foobar], [foobaz]])
       expect(removePendingResourceStub).toBeCalledTimes(1)
@@ -404,9 +398,6 @@ describe('watches', function () {
 
     const gitHubConfig = config.gitHub
 
-    let warnSpy
-    let infoSpy
-    let errorSpy
     let getTicketCacheStub
     let gitHubStub
     let loadOpenIssuesStub
@@ -414,11 +405,9 @@ describe('watches', function () {
     beforeEach(function () {
       gitHubStub = jest.fn()
       Object.defineProperty(config, 'gitHub', { get: gitHubStub })
-      infoSpy = jest.spyOn(logger, 'info')
-      warnSpy = jest.spyOn(logger, 'warn')
-      errorSpy = jest.spyOn(logger, 'error')
       getTicketCacheStub = jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
       loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
+      jest.clearAllMocks()
     })
 
     afterEach(function () {
@@ -428,7 +417,7 @@ describe('watches', function () {
     it('should log missing gitHub config', async function () {
       gitHubStub.mockReturnValue(false)
       watches.tickets(io)
-      expect(warnSpy).toBeCalledTimes(1)
+      expect(logger.warn).toBeCalledTimes(1)
     })
 
     it('should watch tickets', async function () {
@@ -441,7 +430,7 @@ describe('watches', function () {
       expect(getTicketCacheStub).toBeCalledTimes(1)
       await promise
       expect(loadOpenIssuesStub).toBeCalledTimes(2)
-      expect(infoSpy).toBeCalledTimes(2)
+      expect(logger.info).toBeCalledTimes(2)
     })
 
     it('should fail to fetch tickets', async function () {
@@ -452,7 +441,7 @@ describe('watches', function () {
       expect(getTicketCacheStub).toBeCalledTimes(1)
       expect(loadOpenIssuesStub).toBeCalledTimes(1)
       await promise
-      expect(errorSpy).toBeCalledTimes(1)
+      expect(logger.error).toBeCalledTimes(1)
     })
   })
 })

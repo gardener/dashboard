@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeepAndSetUid } = require('./helper')
+const { cloneDeep, find } = require('lodash')
 
 function getSeed ({
   name,
@@ -68,11 +68,16 @@ const seedList = [
   getSeed({ name: 'infra3-seed-invisible', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: false })
 ]
 
-module.exports = {
-  create (...args) {
-    return getSeed(...args)
+const seeds = {
+  create (options) {
+    return getSeed(options)
+  },
+  get (name) {
+    return find(seeds.list(), ['metadata.name', name])
   },
   list () {
-    return cloneDeepAndSetUid(seedList)
+    return cloneDeep(seedList)
   }
 }
+
+module.exports = seeds

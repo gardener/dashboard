@@ -6,6 +6,7 @@
 
 'use strict'
 
+const { mapKeys, toLower } = require('lodash')
 const { join } = require('path')
 const createError = require('http-errors')
 
@@ -43,10 +44,11 @@ class MockClient {
   request (path, { method = 'get', searchParams, headers = {}, json, body } = {}) {
     headers = {
       ...this.defaults.options.headers,
-      ...headers,
+      ...mapKeys(headers, (value, key) => toLower(key)),
       ':method': method,
       ...this[pseudoHeaders]
     }
+
     headers[':path'] = join(headers[':path'], path)
     if (searchParams) {
       headers[':path'] += '?' + searchParams

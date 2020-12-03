@@ -11,6 +11,7 @@ const auth = require('./auth')
 const kube = require('./kube')
 const shoots = require('./shoots')
 const seeds = require('./seeds')
+const secrets = require('./secrets')
 const quotas = require('./quotas')
 const projects = require('./projects')
 const cloudprofiles = require('./cloudprofiles')
@@ -30,10 +31,11 @@ const fixtures = {
   user,
   kube,
   shoots,
+  seeds,
+  secrets,
   projects,
   cloudprofiles,
   infrastructure,
-  seeds,
   quotas,
   github,
   reconnector,

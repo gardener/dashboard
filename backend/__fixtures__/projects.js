@@ -24,25 +24,6 @@ function createUser (member) {
   return user
 }
 
-function isMember (item, payload) {
-  const users = []
-  const groups = []
-  for (const { kind, namespace, name } of item.spec.members) {
-    switch (kind) {
-      case 'User':
-        users.push(name)
-        break
-      case 'ServiceAccount':
-        users.push(`system:serviceaccount:${namespace}:${name}`)
-        break
-      case 'Group':
-        groups.push(name)
-        break
-    }
-  }
-  return includes(users, payload.id) || intersection(groups, payload.groups).length
-}
-
 function setRoleAndRoles (member) {
   const [role, ...roles] = member.roles
   member.role = role
@@ -197,10 +178,38 @@ const projects = {
     return getProject(options)
   },
   get (name) {
-    return find(this.list(), { metadata: { name } })
+    return find(projects.list(), { metadata: { name } })
   },
   getByNamespace (namespace) {
-    return find(this.list(), { spec: { namespace } })
+    return find(projects.list(), { spec: { namespace } })
+  },
+  isMember (item, { id, groups = [] }) {
+    if (typeof item === 'string') {
+      if (/garden/.test(item)) {
+        item = projects.getByNamespace(item)
+      } else {
+        item = projects.get(item)
+      }
+    }
+    const members = get(item, 'spec.members', [])
+    const userList = [
+      'admin@example.org'
+    ]
+    const groupList = []
+    for (const { kind, namespace, name } of members) {
+      switch (kind) {
+        case 'User':
+          userList.push(name)
+          break
+        case 'ServiceAccount':
+          userList.push(`system:serviceaccount:${namespace}:${name}`)
+          break
+        case 'Group':
+          groupList.push(name)
+          break
+      }
+    }
+    return includes(userList, id) || intersection(groupList, groups).length
   },
   list () {
     return cloneDeep(projectList)
@@ -262,10 +271,10 @@ module.exports = {
         const { params: { name } = {} } = match(headers[':path']) || {}
         const payload = getTokenPayload(headers)
         const item = projects.get(name)
-        if (isMember(item, payload)) {
-          return Promise.resolve(item)
+        if (!projects.isMember(item, payload)) {
+          return Promise.reject(createError(403))
         }
-        return Promise.reject(createError(403))
+        return Promise.resolve(item)
       }
     },
     patch () {

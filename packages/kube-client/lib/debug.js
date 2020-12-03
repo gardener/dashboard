@@ -93,7 +93,6 @@ function beforeRequest (options) {
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = uuidv1()
   }
-
   logger.request({
     url,
     method,

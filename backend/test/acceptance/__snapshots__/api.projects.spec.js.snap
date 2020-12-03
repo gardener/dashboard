@@ -73,8 +73,8 @@ Array [
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/bar",
       ":scheme": "https",
-      "Content-Type": "application/merge-patch+json",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
+      "content-type": "application/merge-patch+json",
     },
     Object {
       "metadata": Object {
@@ -124,8 +124,8 @@ Array [
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
       ":scheme": "https",
-      "Content-Type": "application/merge-patch+json",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
+      "content-type": "application/merge-patch+json",
     },
     Object {
       "spec": Object {
@@ -459,8 +459,8 @@ Array [
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
       ":scheme": "https",
-      "Content-Type": "application/merge-patch+json",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
+      "content-type": "application/merge-patch+json",
     },
     Object {
       "metadata": Object {

@@ -1275,6 +1275,7 @@ __metadata:
     eslint-plugin-promise: ^4.2.1
     eslint-plugin-standard: ^4.0.1
     express: ^4.17.1
+    fast-json-patch: ^3.0.0-1
     fnv-plus: ^1.2.12
     helmet: ^3.21.2
     http-errors: ^1.8.0
@@ -7661,6 +7662,13 @@ __metadata:
     merge2: ^1.2.3
     micromatch: ^3.1.10
   checksum: 9dc5c93807e43257b39fc53aa8ed10ffa253e997dd1d473377a7e9daa4b6c675c730b72f1aa132b80f068c4ece012ff9236a88085fc0229b180fe7c85afcae84
+  languageName: node
+  linkType: hard
+
+"fast-json-patch@npm:^3.0.0-1":
+  version: 3.0.0-1
+  resolution: "fast-json-patch@npm:3.0.0-1"
+  checksum: 17cf1ffba2a95fd212c3538a2d5de7d13594f3bf1a9e3435629265af0fb1694e1cc714615589246bb670530ad0a65357597aa76fb3362d8041cb1dcd1618ed87
   languageName: node
   linkType: hard
 

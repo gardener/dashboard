@@ -752,6 +752,7 @@ describe('services', function () {
             return seedClient
           }
         })
+        jest.clearAllMocks()
       })
 
       afterEach(function () {
@@ -820,7 +821,6 @@ describe('services', function () {
           disabled: false,
           seedDisabled: false
         }
-        const debugSpy = jest.spyOn(logger, 'debug')
 
         const seed = getSeed(seedName)
         terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
@@ -830,7 +830,7 @@ describe('services', function () {
         const stats = bootstrapper.getStats()
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
-        expect(debugSpy).toBeCalledWith(`Seed ${seedName} is not reachable from the dashboard, bootstrapping aborted`)
+        expect(logger.debug).toBeCalledWith(`Seed ${seedName} is not reachable from the dashboard, bootstrapping aborted`)
       })
 
       it('should bootstrap a shoot cluster', async function () {
@@ -863,8 +863,6 @@ describe('services', function () {
         }
         terminalStub.mockReturnValue(createTerminalConfig({ bootstrap }))
 
-        const infoSpy = jest.spyOn(logger, 'info')
-
         const bootstrapper = new Bootstrapper()
         // bootstrap dummy whose seed does not have .spec.secretRef set
         bootstrapper.bootstrapResource(shootList[2])
@@ -873,7 +871,7 @@ describe('services', function () {
         expect(bootstrapper.isResourcePending(shootList[0])).toBe(false)
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
-        expect(infoSpy).toBeCalledTimes(1)
+        expect(logger.info).toBeCalledTimes(1)
       })
 
       it('should not bootstrap unreachable shoot cluster', async function () {
@@ -882,8 +880,6 @@ describe('services', function () {
           shootDisabled: false
         }
         terminalStub.mockReturnValue(createTerminalConfig({ bootstrap }))
-
-        const debugSpy = jest.spyOn(logger, 'debug')
 
         const bootstrapper = new Bootstrapper()
         // bootstrap unreachable whose seed is flagged as unreachable
@@ -895,7 +891,7 @@ describe('services', function () {
         expect(bootstrapper.isResourcePending(shootList[0])).toBe(false)
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
-        expect(debugSpy).toBeCalledWith(`Seed ${unreachableSeedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
+        expect(logger.debug).toBeCalledWith(`Seed ${unreachableSeedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
       })
     })
   })

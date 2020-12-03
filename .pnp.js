@@ -1849,6 +1849,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-promise", "npm:4.2.1"],
             ["eslint-plugin-standard", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:4.0.1"],
             ["express", "npm:4.17.1"],
+            ["fast-json-patch", "npm:3.0.0-1"],
             ["fnv-plus", "npm:1.3.1"],
             ["helmet", "npm:3.23.3"],
             ["http-errors", "npm:1.8.0"],
@@ -9258,6 +9259,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["is-glob", "npm:4.0.1"],
             ["merge2", "npm:1.4.1"],
             ["micromatch", "npm:3.1.10"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["fast-json-patch", [
+        ["npm:3.0.0-1", {
+          "packageLocation": "./.yarn/cache/fast-json-patch-npm-3.0.0-1-52b13bb47f-17cf1ffba2.zip/node_modules/fast-json-patch/",
+          "packageDependencies": [
+            ["fast-json-patch", "npm:3.0.0-1"]
           ],
           "linkType": "HARD",
         }]
