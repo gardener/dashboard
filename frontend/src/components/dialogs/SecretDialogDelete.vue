@@ -7,23 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-img
-        class="white--text"
-        height="130px"
-        :src="backgroundSrc"
-      >
-        <v-container class="fill-height" >
-          <v-row class="fill-height" align="center" justify="start" >
-            <v-col cols="1">
-              <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
-            </v-col>
-            <v-col>
-              <div class="credential_title">Confirm Delete</div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-img>
-
+      <card-svg-title>
+        <template v-slot:svgComponent>
+            <secret-background color="error"></secret-background>
+        </template>
+        <v-icon x-large class="accentTitle--text icon">mdi-alert-outline</v-icon>
+        <span class="headline ml-5 accentTitle--text">Confirm Delete</span>
+      </card-svg-title>
       <v-card-text>
         <v-container fluid>
           Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
@@ -44,12 +34,16 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
 import GAlert from '@/components/GAlert'
+import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
 import { errorDetailsFromError } from '@/utils/error'
+import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 export default {
   name: 'secret-dialog-delete',
   components: {
-    GAlert
+    GAlert,
+    SecretBackground,
+    CardSvgTitle
   },
   props: {
     value: {

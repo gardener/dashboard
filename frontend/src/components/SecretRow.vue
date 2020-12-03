@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-btn :disabled="!isOwnSecret" icon @click.native.stop="onUpdate">
-              <v-icon class="primary--text">mdi-pencil</v-icon>
+              <v-icon class="actionButton--text">mdi-pencil</v-icon>
             </v-btn>
           </div>
         </template>

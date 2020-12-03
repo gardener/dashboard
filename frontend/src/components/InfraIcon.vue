@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span style="vertical-align:middle">
+  <span style="vertical-align:middle" :class="contentClass">
     <infra-icon-aws v-if="value==='aws'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-aws>
     <infra-icon-azure v-if="value==='azure'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-azure>
     <infra-icon-gcp v-if="value==='gcp'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-gcp>
@@ -47,6 +47,10 @@ export default {
     },
     iconColor: {
       type: String
+    },
+    contentClass: {
+      type: String,
+      default: ''
     }
   },
   computed: {

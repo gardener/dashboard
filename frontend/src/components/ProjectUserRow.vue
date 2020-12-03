@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onEdit">
+            <v-btn v-on="on" color="actionButton" icon @click.native.stop="onEdit">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>

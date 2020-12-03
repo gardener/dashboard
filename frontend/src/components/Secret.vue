@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <!-- Header -->
     <v-toolbar color="accent accentTitle--text">
-      <infra-icon v-model="icon" iconColor="accentTitle" :size="32" class="mt-2"></infra-icon>
+      <infra-icon v-model="icon" iconColor="accentTitle" :size="32"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn color="accentTitle" v-if="!disabled" icon @click.native.stop="onAdd()">

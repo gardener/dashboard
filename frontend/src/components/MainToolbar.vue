@@ -102,6 +102,12 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
+            <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
+            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
+            <span class="primary--text text-button">Dark</span>
+          </v-card-actions>
+          <v-divider></v-divider>
+          <v-card-actions class="px-3">
             <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
               <v-icon class="mr-3">mdi-exit-to-app</v-icon>
               Logout
@@ -188,6 +194,15 @@ export default {
       return {
         name: 'Account',
         query
+      }
+    },
+    darkMode: {
+      get () {
+        return this.$localStorage.getObject('dark_mode') || false
+      },
+      set (value) {
+        this.$localStorage.setObject('dark_mode', value)
+        this.$vuetify.theme.dark = value
       }
     }
   },

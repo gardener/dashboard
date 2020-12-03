@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:svgComponent>
             <secret-background></secret-background>
         </template>
-        <infra-icon v-model="infraIcon" iconColor="accentTitle" :size="42" class="mt-2"></infra-icon>
+        <infra-icon v-model="infraIcon" iconColor="accentTitle" :size="42"></infra-icon>
         <span class="headline ml-5 accentTitle--text">{{title}}</span>
       </card-svg-title>
       <v-card-text>

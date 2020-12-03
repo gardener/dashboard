@@ -12,16 +12,17 @@ const theme = {
       primary: colors.cyan.darken2,
       secondary: colors.grey.darken3,
       accent: colors.cyan.darken2,
-      accentTitle: colors.grey.lighten3,
+      accentTitle: colors.grey.lighten4,
       anchor: colors.cyan.darken2,
       actionButton: colors.shades.black
     },
     dark: {
       primary: colors.cyan.darken2,
-      secondary: colors.grey.darken3,
+      secondary: colors.grey.darken4,
       accent: colors.cyan.darken4,
+      accentTitle: colors.grey.lighten4,
       anchor: colors.cyan.darken2,
-      actionButton: colors.shades.white,
+      actionButton: colors.grey.lighten4,
       error: colors.red.darken4,
       warning: colors.orange.darken4
     }

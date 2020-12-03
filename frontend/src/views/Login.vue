@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
         <span class="primary--text">Discover what our service is about at the <a :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
       </div>
     </v-main>
-    <vue-snotify></vue-snotify>
+    <g-snotify></g-snotify>
   </v-app>
 </template>
 
@@ -74,8 +74,12 @@ import { mapState } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import { setDelayedInputFocus } from '@/utils'
+import GSnotify from '@/components/GSnotify.vue'
 
 export default {
+  components: {
+    GSnotify
+  },
   data () {
     return {
       dialog: false,
@@ -184,9 +188,6 @@ export default {
 
 <style lang="scss" scoped>
 
-  @import '~vuetify/src/styles/styles.sass';
-  @import "~vue-snotify/styles/material.css";
-
   .login-background {
     height: 50%;
     width: 100%;
@@ -206,14 +207,6 @@ export default {
     left: 0px;
     width: 100%;
     text-align: center;
-  }
-
-  .snotify-rightTop {
-    top: 75px;
-  }
-
-  .snotify {
-    width: 400px;
   }
 
 </style>

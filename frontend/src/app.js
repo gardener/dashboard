@@ -20,6 +20,9 @@ const App = Vue.extend({
         this.$bus.$emit('esc-pressed')
       }
     })
+
+    const darkMode = this.$localStorage.getObject('dark_mode') || false
+    this.$vuetify.theme.dark = darkMode
   },
   render (createElement) {
     return createElement('router-view')

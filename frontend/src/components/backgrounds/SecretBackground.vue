@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
             <rect id="Rectangle-134-Copy" fill="#f2f2f2" x="0" y="-4" width="720" height="207"></rect>
             <g id="Rectangle-140" transform="translate(787.537320, 84.537320) rotate(-45.000000) translate(-787.537320, -84.537320) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                <use :fill="color" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use :fill="colorCode" fill-rule="evenodd" xlink:href="#path-1"></use>
             </g>
             <g id="Rectangle-133-Copy-4" transform="translate(673.539252, -136.729460) rotate(-44.000000) translate(-673.539252, 136.729460) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
@@ -55,18 +55,25 @@ SPDX-License-Identifier: Apache-2.0
                 <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
                 <use fill="#000000" fill-rule="evenodd" xlink:href="#path-7"></use>
             </g>
-            <rect id="Rectangle-133-Copy-5" :fill="color" transform="translate(151.747902, 52.975521) rotate(-44.000000) translate(-151.747902, -52.975521) " x="-67.0240475" y="-312.127463" width="437.543898" height="730.205969"></rect>
+            <rect id="Rectangle-133-Copy-5" :fill="colorCode" transform="translate(151.747902, 52.975521) rotate(-44.000000) translate(-151.747902, -52.975521) " x="-67.0240475" y="-312.127463" width="437.543898" height="730.205969"></rect>
         </g>
     </g>
   </svg>
 </template>
 
 <script>
+import get from 'lodash/get'
 
 export default {
+  props: {
+    color: {
+      type: String
+    }
+  },
   computed: {
-    color () {
-      return this.$vuetify.theme.currentTheme.accent
+    colorCode () {
+      const color = this.color || 'accent'
+      return get(this, ['$vuetify', 'theme', 'currentTheme', color], color)
     }
   }
 }

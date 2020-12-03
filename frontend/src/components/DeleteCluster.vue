@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     :caption="caption"
     icon="mdi-delete"
-    :iconColor="iconColor"
+    iconColor="error"
     dialogColor="error"
     confirmButtonText="Delete"
     confirm-required
@@ -65,9 +65,6 @@ export default {
     small: {
       type: Boolean,
       default: false
-    },
-    iconColor: {
-      type: String
     },
     text: {
       type: Boolean

@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <copy-btn :color="color" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
+                    <copy-btn color="actionButton" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="actionButton"
                         :value="description"
                         :save="updateDescription"
                       />
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
-                        :color="color"
+                        color="actionButton"
                         :value="owner"
                         :items="userList"
                         :rules="[rules.owner]"
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="actionButton"
                         :value="purpose"
                         :save="updatePurpose"
                       />
@@ -173,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-tooltip v-if="canDeleteProject" top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                          <v-btn color="error" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
                             <v-icon>mdi-delete</v-icon>
                           </v-btn>
                         </div>
@@ -200,7 +200,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="actionButton"
                         :value="costObject"
                         :rules="[rules.costObject]"
                         :save="updateCostObject"

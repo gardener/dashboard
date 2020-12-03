@@ -8,10 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid class="shootlist">
     <v-card class="mr-extra">
       <v-toolbar flat height="72" color="accent">
-        <img src="../assets/certified_kubernetes_white.svg" height="60" class="ml-1 mr-3">
+        <icon-base width="44" height="60" viewBox="0 0 298 403" class="mr-2" iconColor="accentTitle">
+          <certified-kubernetes></certified-kubernetes>
+        </icon-base>
         <v-toolbar-title class="white--text">
-          <div class="headline">Kubernetes Clusters</div>
-          <div class="subtitle-1">{{headlineSubtitle}}</div>
+          <div class="headline accentTitle--text">Kubernetes Clusters</div>
+          <div class="subtitle-1 accentTitle--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
@@ -31,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip open-delay="500" top>
               <template v-slot:activator="{ on: tooltip }">
                 <v-btn v-on="{ ...menu, ...tooltip}" icon>
-                  <v-icon class="cursor-pointer" color="white">mdi-dots-vertical</v-icon>
+                  <v-icon class="cursor-pointer" color="accentTitle">mdi-dots-vertical</v-icon>
                 </v-btn>
               </template>
               Table Options
@@ -177,13 +179,17 @@ import get from 'lodash/get'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
+import IconBase from '@/components/icons/IconBase'
+import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
-    ShootAccessCard
+    ShootAccessCard,
+    IconBase,
+    CertifiedKubernetes
   },
   data () {
     return {
