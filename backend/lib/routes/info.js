@@ -31,12 +31,14 @@ async function fetchGardenerVersion () {
     const {
       spec: {
         service,
+        insecureSkipTLSVerify,
         caBundle
       }
     } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1beta1.core.gardener.cloud')
     const client = extend({
       prefixUrl: `https://${service.name}.${service.namespace}`,
       ca: decodeBase64(caBundle),
+      rejectUnauthorized: !insecureSkipTLSVerify,
       resolveBodyOnly: true,
       responseType: 'json'
     })
