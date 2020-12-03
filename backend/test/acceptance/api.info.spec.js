@@ -6,10 +6,7 @@
 
 'use strict'
 
-const { pick } = require('lodash')
 const createError = require('http-errors')
-const { version: dashboardVersion } = require('../../package')
-const { encodeBase64 } = require('../../lib/utils')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('api', function () {
@@ -34,7 +31,7 @@ describe('api', function () {
       name: 'gardener-apiserver',
       namespace: 'gardener'
     }
-    const caBundle = encodeBase64('ca')
+    const caBundle = fixtures.helper.toBase64('ca')
 
     it('should reject requests csrf protection error', async function () {
       const res = await agent
@@ -45,9 +42,9 @@ describe('api', function () {
 
       expect(mockRequest).not.toBeCalled()
 
-      expect(res.body.reason).toBe('Forbidden')
-      expect(res.body.details).toHaveProperty('name', 'ForbiddenError')
-      expect(res.body.message).toMatch('CSRF protection')
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
     })
 
     it('should reject requests without authorization header', async function () {
@@ -58,9 +55,9 @@ describe('api', function () {
 
       expect(mockRequest).not.toBeCalled()
 
-      expect(res.body.reason).toBe('Unauthorized')
-      expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
-      expect(res.body.message).toMatch('authorization token')
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
     })
 
     it('should reject requests with invalid signature', async function () {
@@ -74,9 +71,9 @@ describe('api', function () {
 
       expect(mockRequest).not.toBeCalled()
 
-      expect(res.body.reason).toBe('Unauthorized')
-      expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
-      expect(res.body.message).toMatch('invalid signature')
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
     })
 
     it('should reject requests with invalid audience', async function () {
@@ -90,9 +87,9 @@ describe('api', function () {
 
       expect(mockRequest).not.toBeCalled()
 
-      expect(res.body.reason).toBe('Unauthorized')
-      expect(res.body.details).toHaveProperty('name', 'UnauthorizedError')
-      expect(res.body.message).toMatch('audience invalid')
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
     })
 
     it('should return information with version', async function () {
@@ -109,21 +106,9 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls[0]).toEqual([{
-        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
-        ':method': 'get',
-        ':path': '/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.core.gardener.cloud'
-      }])
-      expect(mockRequest.mock.calls[1]).toEqual([{
-        ':scheme': 'https',
-        ':authority': `${service.name}.${service.namespace}`,
-        ':method': 'get',
-        ':path': '/version'
-      }])
+      expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toHaveProperty('version', dashboardVersion)
-      expect(res.body.gardenerVersion).toEqual(gardenerVersion)
-      expect(res.body).not.toHaveProperty('user')
+      expect(res.body).toMatchSnapshot()
     })
 
     it('should return information without version', async function () {
@@ -139,21 +124,9 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls[0]).toEqual([{
-        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
-        ':method': 'get',
-        ':path': '/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.core.gardener.cloud'
-      }])
-      expect(mockRequest.mock.calls[1]).toEqual([{
-        ':scheme': 'https',
-        ':authority': `${service.name}.${service.namespace}`,
-        ':method': 'get',
-        ':path': '/version'
-      }])
+      expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toHaveProperty('version', dashboardVersion)
-      expect(res.body).not.toHaveProperty('gardenerVersion')
-      expect(res.body).not.toHaveProperty('user')
+      expect(res.body).toMatchSnapshot()
     })
   })
 })

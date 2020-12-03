@@ -9,7 +9,6 @@
 const services = require('../../lib/services')
 const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 const { mockRequest } = require('@gardener-dashboard/request')
-const fixtures = require('../../__fixtures__')
 
 describe('api', function () {
   let agent
@@ -27,22 +26,19 @@ describe('api', function () {
   })
 
   describe('projects', function () {
-    const id = 'foo@example.org'
     const user = fixtures.auth.createUser({
-      id, groups: ['group1']
+      id: 'foo@example.org',
+      groups: ['group1']
     })
-    const name = 'foo'
-    const namespace = `garden-${name}`
+    const namespace = 'garden-foo'
     const annotations = {
       'billing.gardener.cloud/costObject': '8888888888'
     }
     const description = 'description'
     const purpose = 'purpose'
 
-    const timeout = 30
-
     beforeAll(() => {
-      services.projects.projectInitializationTimeout = timeout
+      services.projects.projectInitializationTimeout = 30
     })
 
     beforeEach(() => {
@@ -65,8 +61,7 @@ describe('api', function () {
     })
 
     it('should return all projects', async function () {
-      const id = 'admin@example.org'
-      const user = fixtures.auth.createUser({ id })
+      const user = fixtures.auth.createUser({ id: 'admin@example.org' })
 
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
@@ -98,8 +93,7 @@ describe('api', function () {
     })
 
     it('should reject request with authorization error', async function () {
-      const id = 'baz@example.org'
-      const user = fixtures.auth.createUser({ id })
+      const user = fixtures.auth.createUser({ id: 'baz@example.org' })
 
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
 
@@ -118,10 +112,6 @@ describe('api', function () {
     })
 
     it('should create a project', async function () {
-      const name = 'xyz'
-      const metadata = { name, annotations }
-      const data = { purpose, description }
-
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.create({
         phase: 'Ready'
       }))
@@ -129,7 +119,16 @@ describe('api', function () {
       const res = await agent
         .post('/api/namespaces')
         .set('cookie', await user.cookie)
-        .send({ metadata, data })
+        .send({
+          metadata: {
+            name: 'xyz',
+            annotations
+          },
+          data: {
+            purpose,
+            description
+          }
+        })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -141,10 +140,6 @@ describe('api', function () {
     })
 
     it('should timeout when creating a project', async function () {
-      const name = 'my-project'
-      const metadata = { name, annotations }
-      const data = { purpose, description }
-
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.create({
         phase: 'Pending'
       }))
@@ -152,7 +147,16 @@ describe('api', function () {
       const res = await agent
         .post('/api/namespaces')
         .set('cookie', await user.cookie)
-        .send({ metadata, data })
+        .send({
+          metadata: {
+            name: 'my-project',
+            annotations
+          },
+          data: {
+            purpose,
+            description
+          }
+        })
         .expect('content-type', /json/)
         .expect(504)
 
@@ -166,16 +170,21 @@ describe('api', function () {
     })
 
     it('should update a project', async function () {
-      const owner = 'baz@example.org'
-      const metadata = { annotations }
-      const data = { owner, description, purpose }
-
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
 
       const res = await agent
         .put(`/api/namespaces/${namespace}`)
         .set('cookie', await user.cookie)
-        .send({ metadata, data })
+        .send({
+          metadata: {
+            annotations
+          },
+          data: {
+            owner: 'baz@example.org',
+            purpose,
+            description
+          }
+        })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -186,14 +195,16 @@ describe('api', function () {
     })
 
     it('should patch a project', async function () {
-      const description = 'foobar'
-
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
 
       const res = await agent
         .patch(`/api/namespaces/${namespace}`)
         .set('cookie', await user.cookie)
-        .send({ data: { description } })
+        .send({
+          data: {
+            description: 'foobar'
+          }
+        })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -204,8 +215,7 @@ describe('api', function () {
     })
 
     it('should delete a project', async function () {
-      const name = 'bar'
-      const namespace = `garden-${name}`
+      const namespace = 'garden-bar'
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())

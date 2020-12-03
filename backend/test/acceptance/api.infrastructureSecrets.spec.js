@@ -5,7 +5,6 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const fixtures = require('../../__fixtures__')
 
 describe('api', function () {
   let agent
@@ -25,7 +24,7 @@ describe('api', function () {
   describe('infrastructureSecrets', function () {
     const namespace = 'garden-foo'
     const name = 'foo-infra3'
-    const secretBinding = fixtures.infrastructure.secretBindings.get(namespace, name)
+    const secretBinding = fixtures.secretbindings.get(namespace, name)
     // project
     const project = fixtures.projects.getByNamespace(namespace)
     // user
@@ -36,8 +35,8 @@ describe('api', function () {
 
     it('should return three infrastructure secrets', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secrets.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
@@ -55,8 +54,8 @@ describe('api', function () {
       const namespace = 'garden-baz'
 
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secrets.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
@@ -80,8 +79,8 @@ describe('api', function () {
         secret: 'mySecret'
       }
 
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secrets.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
@@ -103,8 +102,8 @@ describe('api', function () {
         secret: 'mySecret'
       }
 
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secrets.mocks.patch())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
@@ -123,7 +122,7 @@ describe('api', function () {
     it('should not patch a shared infrastructure secret', async function () {
       const name = 'trial-infra1'
 
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
 
       const res = await agent
         .put(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
@@ -141,10 +140,10 @@ describe('api', function () {
     })
 
     it('should delete an own infrastructure secret', async function () {
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
       const res = await agent
         .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
@@ -161,7 +160,7 @@ describe('api', function () {
     it('should not delete a shared infrastructure secret', async function () {
       const name = 'trial-infra1'
 
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
 
       const res = await agent
         .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
@@ -180,7 +179,7 @@ describe('api', function () {
     it('should not delete infrastructure secret if referenced by shoot', async function () {
       const name = 'foo-infra1'
 
-      mockRequest.mockImplementationOnce(fixtures.infrastructure.secretBindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
 
       const res = await agent

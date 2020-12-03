@@ -6,7 +6,6 @@
 
 'use strict'
 
-const { pick, keyBy } = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('api', function () {
@@ -25,8 +24,7 @@ describe('api', function () {
   })
 
   describe('cloudprofiles', function () {
-    const id = 'john.doe@example.org'
-    const user = fixtures.user.create({ id })
+    const user = fixtures.user.create({ id: 'john.doe@example.org' })
 
     it('should return all cloudprofiles', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -37,33 +35,9 @@ describe('api', function () {
         .expect('content-type', /json/)
 
       expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls[0]).toEqual([
-        {
-          ...pick(fixtures.kube, [':scheme', ':authority']),
-          authorization: `Bearer ${await user.bearer}`,
-          ':method': 'post',
-          ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'
-        },
-        {
-          apiVersion: 'authorization.k8s.io/v1',
-          kind: 'SelfSubjectAccessReview',
-          spec: expect.objectContaining({
-            resourceAttributes: {
-              group: 'core.gardener.cloud',
-              name: undefined,
-              resource: 'cloudprofiles',
-              verb: 'list'
-            }
-          })
-        }
-      ])
+      expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toHaveLength(4)
-      const cloudProfiles = keyBy(res.body, 'metadata.name')
-      expect(cloudProfiles['infra1-profileName'].data.seedNames).toHaveLength(3)
-      expect(cloudProfiles['infra1-profileName2'].data.seedNames).toHaveLength(2)
-      expect(cloudProfiles['infra3-profileName'].data.seedNames).toHaveLength(1)
-      expect(cloudProfiles['infra3-profileName2'].data.seedNames).toHaveLength(2)
+      expect(res.body).toMatchSnapshot()
     })
   })
 })

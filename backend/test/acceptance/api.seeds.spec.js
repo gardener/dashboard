@@ -6,7 +6,6 @@
 
 'use strict'
 
-const { keyBy, pick } = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('api', function () {
@@ -25,8 +24,7 @@ describe('api', function () {
   })
 
   describe('seeds', function () {
-    const id = 'john.doe@example.org'
-    const user = fixtures.auth.createUser({ id })
+    const user = fixtures.auth.createUser({ id: 'john.doe@example.org' })
 
     it('should return all seeds', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -38,31 +36,9 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls[0]).toEqual([
-        {
-          ...pick(fixtures.kube, [':scheme', ':authority']),
-          authorization: `Bearer ${await user.bearer}`,
-          ':method': 'post',
-          ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'
-        },
-        {
-          apiVersion: 'authorization.k8s.io/v1',
-          kind: 'SelfSubjectAccessReview',
-          spec: expect.objectContaining({
-            resourceAttributes: {
-              group: 'core.gardener.cloud',
-              name: undefined,
-              resource: 'seeds',
-              verb: 'list'
-            }
-          })
-        }
-      ])
+      expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toHaveLength(8)
-      const seeds = keyBy(res.body, 'metadata.name')
-      expect(seeds['infra1-seed'].metadata.unreachable).toBe(false)
-      expect(seeds['infra3-seed'].metadata.unreachable).toBe(true)
+      expect(res.body).toMatchSnapshot()
     })
   })
 })
