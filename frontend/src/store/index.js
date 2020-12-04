@@ -22,8 +22,11 @@ import {
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
+import isObject from 'lodash/isObject'
 import uniq from 'lodash/uniq'
 import uniqBy from 'lodash/uniqBy'
 import get from 'lodash/get'
@@ -39,6 +42,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
@@ -526,6 +530,53 @@ const getters = {
   },
   projectNamesFromProjectList (state, getters) {
     return map(getters.projectList, 'metadata.name')
+  },
+  shootCustomFieldList (state, getters) {
+    return map(getters.shootCustomFields, (customFields, key) => {
+      return {
+        ...customFields,
+        key
+      }
+    })
+  },
+  shootCustomFields (state, getters) {
+    let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    if (!shootCustomFields) {
+      return
+    }
+
+    try {
+      shootCustomFields = JSON.parse(shootCustomFields)
+    } catch (error) {
+      console.error('could not parse custom fields', error.message)
+      return
+    }
+
+    shootCustomFields = pickBy(shootCustomFields, customField => {
+      if (isEmpty(customField)) {
+        return false // omit null values
+      }
+      if (some(customField, isObject)) {
+        return false // omit custom fields with object values
+      }
+      return customField.name && customField.path
+    })
+
+    const defaultProperties = {
+      showColumn: true,
+      columnSelectedByDefault: true,
+      showDetails: true,
+      sortable: true,
+      searchable: true
+    }
+    shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
+    shootCustomFields = mapValues(shootCustomFields, customField => {
+      return {
+        ...defaultProperties,
+        ...customField
+      }
+    })
+    return shootCustomFields
   },
   costObjectSettings (state) {
     const costObject = state.cfg.costObject

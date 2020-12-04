@@ -41,19 +41,36 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-item v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
+            <v-list-item v-for="header in headers" :key="header.text" @click.stop="setSelectedColumn(header)">
               <v-list-item-action>
-                <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
+                <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
               </v-list-item-action>
               <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>{{ item.text }}</v-list-item-title>
+                <v-list-item-title>
+                  <v-tooltip v-if="header.customField" top open-delay="500">
+                    <template v-slot:activator="{ on: tooltip }">
+                      <div v-on="tooltip">
+                        <v-badge
+                          inline
+                          icon="mdi-playlist-star"
+                          color="primary"
+                          class="mt-0"
+                        >
+                          <span>{{ header.text }}</span>
+                        </v-badge>
+                      </div>
+                    </template>
+                    Custom Field
+                  </v-tooltip>
+                  <template v-else>{{ header.text }}</template>
+                </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item>
               <v-list-item-content>
                 <v-tooltip top style="width: 100%">
                   <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" block text class="text-center primary--text" @click.stop="resetColumnsChecked">
+                    <v-btn v-on="on" block text class="text-center primary--text" @click.stop="resetTableSettings">
                       Reset
                     </v-btn>
                   </template>
@@ -173,15 +190,27 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import zipObject from 'lodash/zipObject'
-import map from 'lodash/map'
+import filter from 'lodash/filter'
 import get from 'lodash/get'
-import pick from 'lodash/pick'
+import isEmpty from 'lodash/isEmpty'
 import join from 'lodash/join'
+import map from 'lodash/map'
+import pick from 'lodash/pick'
+import sortBy from 'lodash/sortBy'
+import startsWith from 'lodash/startsWith'
+import upperCase from 'lodash/upperCase'
 import ShootListRow from '@/components/ShootListRow'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
+
+function mapHeader (headers, valueKey) {
+  const obj = {}
+  for (const { value: key, [valueKey]: value } of headers) {
+    obj[key] = value
+  }
+  return obj
+}
 
 export default {
   name: 'shoot-list',
@@ -195,48 +224,41 @@ export default {
     return {
       floatingButton: false,
       search: '',
-      allHeaders: [
-        { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'SEED', value: 'seed', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'TECHNICAL ID', value: 'technicalId', align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-        { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'READINESS', value: 'readiness', sortable: true, align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: false },
-        { text: 'TICKET', value: 'ticket', sortable: true, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
-        { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
-      ],
       dialog: null,
       tableMenu: false,
-      options: this.$localStorage.getObject('dataTable_options') || { itemsPerPage: 10 },
+      options: undefined,
       cachedItems: null,
-      clearSelectedShootTimerID: undefined
+      clearSelectedShootTimerID: undefined,
+      selectedColumns: undefined
     }
   },
   watch: {
     options (value) {
-      if (value) {
-        this.$localStorage.setObject('dataTable_options', pick(value, ['sortBy', 'sortDesc', 'itemsPerPage']))
-        this.setShootListSortParams(value)
+      if (!value) {
+        return
       }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+
+      if (startsWith(sortBy, 'Z_')) {
+        this.$localStorage.setObject(`project/${this.projectName}/shoot-list/options`, { sortBy, sortDesc })
+
+        const currentTableOptions = this.$localStorage.getObject('projects/shoot-list/options')
+        const tableOptions = {
+          ...this.defaultTableOptions,
+          ...currentTableOptions,
+          itemsPerPage
+        }
+        this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
+      } else {
+        this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
+      }
+      this.setShootListSortParams(value)
     },
     search (value) {
       this.setShootListSearchValue(value)
-    },
-    canGetSecrets () {
-      this.setColumnVisibility()
-    },
-    canDeleteShoots () {
-      this.setColumnVisibility()
-    },
-    projectScope () {
-      this.setColumnVisibility()
     }
   },
   methods: {
@@ -264,65 +286,51 @@ export default {
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
     },
-    checkboxColor (checked) {
-      return checked ? 'primary' : ''
+    checkboxColor (selected) {
+      return selected ? 'primary' : ''
     },
-    checkboxIcon (checked) {
-      return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
+    checkboxIcon (selected) {
+      return selected ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
     },
-    setColumnChecked (header) {
-      header.checked = !header.checked
-      this.saveColumnsChecked()
+    setSelectedColumn (header) {
+      this.$set(this.selectedColumns, header.value, !header.selected)
+      this.saveSelectedColumns()
     },
-    saveColumnsChecked () {
-      const keys = map(this.allHeaders, 'value')
-      const checkedValues = map(this.allHeaders, 'checked')
-      const checkedColumns = zipObject(keys, checkedValues)
-
-      this.$localStorage.setObject('dataTable_checkedColumns', checkedColumns)
-    },
-    resetColumnsChecked () {
-      for (const header of this.allHeaders) {
-        header.checked = header.defaultChecked
-      }
-      this.saveColumnsChecked()
-
-      this.options = { itemsPerPage: 10 }
-    },
-    loadColumnsChecked () {
-      const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
-      for (const header of this.allHeaders) {
-        header.checked = get(checkedColumns, header.value, header.defaultChecked)
+    saveSelectedColumns () {
+      this.$localStorage.setObject('projects/shoot-list/selected-columns', this.currentStandardSelectedColumns)
+      if (isEmpty(this.currentCustomSelectedColumns)) {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/selected-columns`)
+      } else {
+        this.$localStorage.setObject(`project/${this.projectName}/shoot-list/selected-columns`, this.currentCustomSelectedColumns)
       }
     },
-    setColumnVisibility () {
-      for (const header of this.allHeaders) {
-        switch (header.value) {
-          case 'ticketLabels':
-          case 'ticket':
-            header.hidden = !this.gitHubRepoUrl
-            break
-          case 'actions':
-            header.hidden = !(this.canDeleteShoots || this.canGetSecrets)
-            break
-          case 'project':
-            header.hidden = !!this.projectScope
-            break
-          case 'accessRestrictions': {
-            header.hidden = !this.cfg.accessRestriction
-            break
-          }
-          default:
-            if (get(header, 'adminOnly', false)) {
-              header.hidden = !this.isAdmin
-            }
-        }
+    resetTableSettings () {
+      this.selectedColumns = {
+        ...this.defaultStandardSelectedColumns,
+        ...this.defaultCustomSelectedColumns
+      }
+      this.saveSelectedColumns()
+      this.options = this.defaultTableOptions
+    },
+    updateTableSettings () {
+      const selectedColumns = this.$localStorage.getObject('projects/shoot-list/selected-columns')
+      const projectSpecificSelectedColumns = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/selected-columns`)
+      this.selectedColumns = {
+        ...selectedColumns,
+        ...projectSpecificSelectedColumns
+      }
+      const projectSpecificTableOptions = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/options`)
+      const tableOptions = this.$localStorage.getObject('projects/shoot-list/options')
+      this.options = {
+        ...this.defaultTableOptions,
+        ...tableOptions,
+        ...projectSpecificTableOptions
       }
     },
     async toggleFilter (key) {
       await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
 
-      this.$localStorage.setObject('shootListFilter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
 
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
@@ -353,13 +361,23 @@ export default {
       canDeleteShoots: 'canDeleteShoots',
       canCreateShoots: 'canCreateShoots',
       canGetSecrets: 'canGetSecrets',
-      onlyShootsWithIssues: 'onlyShootsWithIssues'
+      onlyShootsWithIssues: 'onlyShootsWithIssues',
+      projectFromProjectList: 'projectFromProjectList',
+      projectName: 'projectName',
+      shootCustomFieldList: 'shootCustomFieldList'
     }),
     ...mapState([
       'shootsLoading',
       'cfg',
       'namespace'
     ]),
+    defaultTableOptions () {
+      return {
+        sortBy: ['name'],
+        sortDesc: [false],
+        itemsPerPage: 10
+      }
+    },
     clusterAccessDialog: {
       get () {
         return this.dialog === 'access'
@@ -373,11 +391,81 @@ export default {
     currentName () {
       return get(this.selectedItem, 'metadata.name')
     },
+    currentStandardSelectedColumns () {
+      return mapHeader(this.standardHeaders, 'selected')
+    },
+    currentCustomSelectedColumns () {
+      return mapHeader(this.customHeaders, 'selected')
+    },
+    defaultStandardSelectedColumns () {
+      return mapHeader(this.standardHeaders, 'defaultSelected')
+    },
+    defaultCustomSelectedColumns () {
+      return mapHeader(this.customHeaders, 'defaultSelected')
+    },
+    standardHeaders () {
+      const headers = [
+        { text: 'PROJECT', value: 'project', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: !!this.projectScope },
+        { text: 'NAME', value: 'name', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: false },
+        { text: 'INFRASTRUCTURE', value: 'infrastructure', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: false },
+        { text: 'SEED', value: 'seed', align: 'left', class: 'nowrap', selected: false, defaultSelected: false, hidden: false },
+        { text: 'TECHNICAL ID', value: 'technicalId', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: !this.isAdmin },
+        { text: 'CREATED BY', value: 'createdBy', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: false },
+        { text: 'CREATED AT', value: 'createdAt', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: false },
+        { text: 'PURPOSE', value: 'purpose', class: 'nowrap text-center', align: 'center', selected: false, defaultSelected: true, hidden: false },
+        { text: 'STATUS', value: 'lastOperation', class: 'nowrap text-left', align: 'left', selected: false, defaultSelected: true, hidden: false },
+        { text: 'VERSION', value: 'k8sVersion', class: 'nowrap text-center', align: 'center', selected: false, defaultSelected: true, hidden: false },
+        { text: 'READINESS', value: 'readiness', class: 'nowrap text-center', sortable: true, align: 'center', selected: false, defaultSelected: true, hidden: false },
+        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', selected: false, defaultSelected: false, hidden: !this.cfg.accessRestriction || !this.isAdmin },
+        { text: 'TICKET', value: 'ticket', class: 'nowrap', sortable: true, align: 'left', selected: false, defaultSelected: false, hidden: !this.gitHubRepoUrl || !this.isAdmin },
+        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', selected: false, defaultSelected: true, hidden: !this.gitHubRepoUrl || !this.isAdmin },
+        { text: 'ACTIONS', value: 'actions', class: 'nowrap text-right action-button-group', sortable: false, align: 'right', selected: false, defaultSelected: true, hidden: !(this.canDeleteShoots || this.canGetSecrets) }
+      ]
+      return map(headers, (header, index) => ({
+        ...header,
+        weight: (index + 1) * 100,
+        selected: get(this.selectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    customHeaders () {
+      const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
+
+      return map(customHeaders, ({
+        align = 'left',
+        name,
+        key,
+        path,
+        columnSelectedByDefault: defaultSelected,
+        tooltip,
+        defaultValue,
+        sortable,
+        weight
+      }, index) => {
+        return {
+          customField: true,
+          text: upperCase(name),
+          value: key,
+          sortable,
+          align,
+          selected: get(this.selectedColumns, key, defaultSelected),
+          defaultSelected,
+          hidden: false,
+          path,
+          tooltip,
+          defaultValue,
+          weight: weight || index
+        }
+      })
+    },
+    allHeaders () {
+      const allHeaders = [...this.standardHeaders, ...this.customHeaders]
+      return sortBy(allHeaders, ['weight', 'text'])
+    },
     headers () {
-      return this.allHeaders.filter(e => e.hidden === false)
+      return filter(this.allHeaders, ['hidden', false])
     },
     visibleHeaders () {
-      return this.headers.filter(e => e.checked === true)
+      return filter(this.headers, ['selected', true])
     },
     projectScope () {
       return this.namespace !== '_all'
@@ -427,16 +515,16 @@ export default {
   },
   mounted () {
     this.floatingButton = true
-    this.loadColumnsChecked()
-    this.setColumnVisibility()
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
+      vm.updateTableSettings()
     })
   },
   beforeRouteUpdate (to, from, next) {
     this.search = null
+    this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {

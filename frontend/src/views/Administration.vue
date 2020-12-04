@@ -149,6 +149,50 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-content>
                   </v-list-item>
                 </template>
+                <template v-if="shootCustomFieldList">
+                  <v-divider inset/>
+                  <v-list-item>
+                    <v-list-item-avatar>
+                      <v-icon :color="color">mdi-playlist-star</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-subtitle>Custom Fields for Shoots</v-list-item-subtitle>
+                      <v-list-item-title class="d-flex flex-wrap align-center pt-1">
+                        <shoot-custom-field
+                          class="mr-2 mb-2"
+                          v-for="{
+                            key,
+                            name,
+                            path,
+                            icon,
+                            tooltip,
+                            defaultValue,
+                            showColumn,
+                            weight,
+                            columnSelectedByDefault,
+                            showDetails,
+                            searchable,
+                            sortable
+                          } in shootCustomFieldList"
+                          :color="color"
+                          :key="key"
+                          :name="name"
+                          :path="path"
+                          :icon="icon"
+                          :tooltip="tooltip"
+                          :default-value="defaultValue"
+                          :show-column="showColumn"
+                          :weight="weight"
+                          :column-selected-by-default="columnSelectedByDefault"
+                          :show-details="showDetails"
+                          :searchable="searchable"
+                          :sortable="sortable"
+                        ></shoot-custom-field>
+                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text--disabled">Not defined</span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
               </v-list>
             </v-card>
           </v-col>
@@ -271,6 +315,7 @@ import EditableAccount from '@/components/editable/EditableAccount'
 import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
+import ShootCustomField from '@/components/ShootCustomField'
 import { errorDetailsFromError } from '@/utils/error'
 import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
@@ -286,7 +331,8 @@ export default {
     EditableText,
     AccountAvatar,
     GDialog,
-    TimeString
+    TimeString,
+    ShootCustomField
   },
   data () {
     return {
@@ -330,7 +376,8 @@ export default {
       'canDeleteProject',
       'projectFromProjectList',
       'costObjectSettings',
-      'isKubeconfigEnabled'
+      'isKubeconfigEnabled',
+      'shootCustomFieldList'
     ]),
     project () {
       return this.projectFromProjectList

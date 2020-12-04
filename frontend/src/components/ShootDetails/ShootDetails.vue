@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row class="d-flex">
       <v-col cols="12" md="6">
         <shoot-details-card :shootItem="shootItem"></shoot-details-card>
+        <custom-fields-card :custom-fields="customFields" class="mt-4"></custom-fields-card>
         <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
         <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
         <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
@@ -28,9 +29,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
+import filter from 'lodash/filter'
 import get from 'lodash/get'
+import map from 'lodash/map'
 
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
+import CustomFieldsCard from '@/components/ShootDetails/CustomFieldsCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
@@ -47,6 +51,7 @@ export default {
   name: 'shoot-details',
   components: {
     ShootDetailsCard,
+    CustomFieldsCard,
     ShootInfrastructureCard,
     ShootLifecycleCard,
     ShootAccessCard,
@@ -63,7 +68,8 @@ export default {
   computed: {
     ...mapGetters([
       'ticketsByNamespaceAndName',
-      'canGetSecrets'
+      'canGetSecrets',
+      'shootCustomFieldList'
     ]),
     info () {
       return get(this, 'shootItem.info', {})
@@ -75,6 +81,17 @@ export default {
       const namespace = this.shootNamespace
       const name = this.shootName
       return this.ticketsByNamespaceAndName({ name, namespace })
+    },
+    customFields () {
+      const customFields = filter(this.shootCustomFieldList, ['showDetails', true])
+      return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
+        name,
+        path,
+        icon,
+        tooltip,
+        defaultValue,
+        value: get(this.shootItem, path)
+      }))
     }
   },
   methods: {
