@@ -24,11 +24,11 @@ SPDX-License-Identifier: Apache-2.0
                     overlap
                     bordered
                     bottom
-                    color="primary"
+                    color="transparent"
                   >
                     <template v-slot:badge>
                       <v-avatar>
-                        <v-icon>mdi-grid-large</v-icon>
+                        <v-icon color="primary">mdi-grid-large</v-icon>
                       </v-avatar>
                     </template>
                     <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">

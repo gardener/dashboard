@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel">
+            <v-btn color="actionButton" v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel">
               <v-icon>{{expansionPanelIcon}}</v-icon>
             </v-btn>
           </template>
