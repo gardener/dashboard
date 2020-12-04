@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-main>
     <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
-      <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
+      <div class="alertBannerMessage" v-html="alertBannerMessageHtml"></div>
     </v-alert>
     <router-view :key="key"></router-view>
   </v-main>
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import set from 'lodash/set'
 import { mapGetters, mapActions } from 'vuex'
-import { compileMarkdown } from '@/utils'
+import { transformHtml } from '@/utils'
 
 function setElementStyle (element, key, value) {
   if (element) {
@@ -49,8 +49,8 @@ export default {
         }
       }
     },
-    alertBannerMessageCompiledMarkdown () {
-      return compileMarkdown(this.alertBannerMessage)
+    alertBannerMessageHtml () {
+      return transformHtml(this.alertBannerMessage)
     },
     key () {
       if (this.$route.name !== 'ShootItemTerminal') {

@@ -38,6 +38,7 @@ const {
 
 const { getSeed, findProjectByNamespace } = require('../../cache')
 const logger = require('../../logger')
+const markdown = require('../../markdown')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -46,6 +47,8 @@ const TargetEnum = {
   CONTROL_PLANE: 'cp',
   SHOOT: 'shoot'
 }
+
+const converter = exports.converter = markdown.createConverter()
 
 exports.create = function ({ user, body }) {
   const { coordinate: { namespace, name, target } } = body
@@ -86,8 +89,8 @@ function toTerminalMetadata (terminal) {
 function imageHelpText (terminal) {
   const containerImage = _.get(terminal, 'spec.host.pod.container.image')
   const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
-
-  return findImageDescription(containerImage, containerImageDescriptions)
+  const containerImageDescription = findImageDescription(containerImage, containerImageDescriptions)
+  return converter.makeSanitizedHtml(containerImageDescription)
 }
 
 function findImageDescription (containerImage, containerImageDescriptions) {

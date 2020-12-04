@@ -57,10 +57,10 @@ SPDX-License-Identifier: Apache-2.0
         ></purpose>
       </v-col>
     </v-row>
-    <v-row  v-if="slaDescriptionCompiledMarkdown">
+    <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
-        <p class="subtitle-1" v-html="slaDescriptionCompiledMarkdown" />
+        <p class="subtitle-1" v-html="slaDescriptionHtml" />
       </v-col>
     </v-row>
 </v-container>
@@ -78,7 +78,7 @@ import HintColorizer from '@/components/HintColorizer'
 
 import asyncRef from '@/mixins/asyncRef'
 
-import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
+import { getValidationErrors, transformHtml, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 
 const Purpose = () => import('@/components/Purpose')
@@ -167,8 +167,8 @@ export default {
     sla () {
       return this.cfg.sla || {}
     },
-    slaDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.sla.description)
+    slaDescriptionHtml () {
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title

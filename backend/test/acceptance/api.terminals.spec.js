@@ -9,6 +9,7 @@
 const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 const { Terminal } = require('@gardener-dashboard/kube-client/lib/resources/GardenerDashboard')
 const { ServiceAccount } = require('@gardener-dashboard/kube-client/lib/resources/Core')
+const { converter } = require('../../lib/services/terminals')
 const common = require('../support/common')
 const pEvent = require('p-event')
 
@@ -92,6 +93,12 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     return watchStub
   }
 
+  let makeSanitizedHtmlStub
+
+  beforeEach(function () {
+    makeSanitizedHtmlStub = sandbox.stub(converter, 'makeSanitizedHtml').callsFake(text => text)
+  })
+
   it('should list the project terminal shortcuts', async function () {
     const user = auth.createUser({ id, aud })
     const bearer = await user.bearer
@@ -145,13 +152,11 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
 
     const shortcuts = [{
-        invalidShortcut: 'foo'
-      }
-    ]
+      invalidShortcut: 'foo'
+    }]
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.listProjectTerminalShortcuts({ bearer, namespace, shortcuts })
-
 
     const res = await agent
       .post('/api/terminals')
@@ -232,6 +237,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         imageHelpText: 'Dummy Image Description'
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(1)
+      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('Dummy Image Description')
     })
 
     it('should reuse a terminal session', async function () {
@@ -278,6 +285,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         imageHelpText: 'Foo Image Description'
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(1)
+      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('Foo Image Description')
     })
 
     it('should fetch a terminal resource', async function () {
@@ -338,6 +347,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           }
         }
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
 
     it('should read the terminal config', async function () {
@@ -366,6 +376,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           image: 'dummyImage:1.0.0'
         }
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
 
     it('should keep a terminal resource alive', async function () {
@@ -388,6 +399,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql({ ok: true })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
 
     it('should delete a terminal resource', async function () {
@@ -413,6 +425,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         name,
         namespace
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
   })
 
@@ -458,6 +471,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         imageHelpText: 'Dummy Image Description'
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(1)
+      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('Dummy Image Description')
     })
 
     it('should read the terminal config', async function () {
@@ -487,6 +502,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           image: 'dummyImage:1.0.0'
         }
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
 
     it('should keep a terminal resource alive', async function () {
@@ -509,6 +525,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql({ ok: true })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
   })
 
@@ -555,6 +572,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         imageHelpText: 'Dummy Image Description'
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(1)
+      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('Dummy Image Description')
     })
 
     it('should reuse a terminal session', async function () {
@@ -606,8 +625,9 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         imageHelpText: 'Foo Image Description'
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(1)
+      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('Foo Image Description')
     })
-
 
     it('should read the terminal config', async function () {
       const user = auth.createUser({ id, aud })
@@ -633,7 +653,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.be.json
       expect(res.body).to.eql({
         container: {
-          image: 'dummyImage:1.0.0',
+          image: 'dummyImage:1.0.0'
         },
         nodes: [{
           data: {
@@ -646,6 +666,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           }
         }]
       })
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
 
     it('should list terminal resources', async function () {
@@ -682,6 +703,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           identifier: '2'
         }
       }])
+      expect(makeSanitizedHtmlStub).to.have.callCount(0)
     })
   })
 }

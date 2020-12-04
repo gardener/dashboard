@@ -18,7 +18,7 @@ const VueStorage = {
       removeItem (key) {
         window.localStorage.removeItem(key)
       },
-      setObject  (key, value) {
+      setObject (key, value) {
         this.setItem(key, JSON.stringify(value))
       },
       getObject (key) {

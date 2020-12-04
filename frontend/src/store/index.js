@@ -22,8 +22,11 @@ import {
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
+import isObject from 'lodash/isObject'
 import uniq from 'lodash/uniq'
 import uniqBy from 'lodash/uniqBy'
 import get from 'lodash/get'
@@ -39,6 +42,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
@@ -81,7 +85,6 @@ const state = {
     incomplete: false,
     evaluationError: null
   },
-  onlyShootsWithIssues: true,
   sidebar: true,
   user: null,
   redirectPath: null,
@@ -132,8 +135,11 @@ class Shortcut {
   }
 }
 
-const getFilterValue = (state) => {
-  return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
+function getFilterValue (state, getters) {
+  if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
+    return 'issues'
+  }
+  return null
 }
 
 const vendorNameFromImageName = imageName => {
@@ -524,6 +530,53 @@ const getters = {
   },
   projectNamesFromProjectList (state, getters) {
     return map(getters.projectList, 'metadata.name')
+  },
+  shootCustomFieldList (state, getters) {
+    return map(getters.shootCustomFields, (customFields, key) => {
+      return {
+        ...customFields,
+        key
+      }
+    })
+  },
+  shootCustomFields (state, getters) {
+    let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    if (!shootCustomFields) {
+      return
+    }
+
+    try {
+      shootCustomFields = JSON.parse(shootCustomFields)
+    } catch (error) {
+      console.error('could not parse custom fields', error.message)
+      return
+    }
+
+    shootCustomFields = pickBy(shootCustomFields, customField => {
+      if (isEmpty(customField)) {
+        return false // omit null values
+      }
+      if (some(customField, isObject)) {
+        return false // omit custom fields with object values
+      }
+      return customField.name && customField.path
+    })
+
+    const defaultProperties = {
+      showColumn: true,
+      columnSelectedByDefault: true,
+      showDetails: true,
+      sortable: true,
+      searchable: true
+    }
+    shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
+    shootCustomFields = mapValues(shootCustomFields, customField => {
+      return {
+        ...defaultProperties,
+        ...customField
+      }
+    })
+    return shootCustomFields
   },
   costObjectSettings (state) {
     const costObject = state.cfg.costObject
@@ -925,6 +978,9 @@ const getters = {
   },
   isKubeconfigEnabled (state) {
     return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
+  },
+  onlyShootsWithIssues (state, getters) {
+    return getters['shoots/onlyShootsWithIssues']
   }
 }
 
@@ -1070,9 +1126,9 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  async subscribeShoots ({ dispatch, commit, state }) {
+  async subscribeShoots ({ dispatch, commit, state, getters }) {
     try {
-      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state, getters) })
     } catch (err) { /* ignore error */ }
   },
   async subscribeComments ({ dispatch, commit }, { name, namespace }) {
@@ -1097,17 +1153,19 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListFilters ({ dispatch, commit }, value) {
-    return dispatch('shoots/setShootListFilters', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilters ({ dispatch, getters }, value) {
+    try {
+      await dispatch('shoots/setShootListFilters', value)
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
-  setShootListFilter ({ dispatch, commit }, { filter, value }) {
-    return dispatch('shoots/setShootListFilter', { filter, value })
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilter ({ dispatch, getters }, { filter, value }) {
+    try {
+      await dispatch('shoots/setShootListFilter', { filter, value })
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   setShootListSearchValue ({ dispatch }, searchValue) {
     return dispatch('shoots/setListSearchValue', searchValue)
@@ -1255,10 +1313,6 @@ const actions = {
       }
     }
   },
-  setOnlyShootsWithIssues ({ commit }, value) {
-    commit('SET_ONLYSHOOTSWITHISSUES', value)
-    return state.onlyShootsWithIssues
-  },
   setUser ({ dispatch, commit }, value) {
     commit('SET_USER', value)
     return state.user
@@ -1347,11 +1401,6 @@ const mutations = {
   },
   SET_PROJECT_TERMINAL_SHORTCUTS (state, value) {
     state.projectTerminalShortcuts = value
-  },
-  SET_ONLYSHOOTSWITHISSUES (state, value) {
-    state.onlyShootsWithIssues = value
-    // subscribe again for shoots as the filter has changed
-    EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
   },
   SET_USER (state, value) {
     state.user = value

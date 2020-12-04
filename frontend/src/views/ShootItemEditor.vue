@@ -85,7 +85,7 @@ export default {
   methods: {
     onDismissModificationWarning () {
       this.modificationWarning = false
-      this.$localStorage.setItem('showShootEditorWarning', 'false')
+      this.$localStorage.setItem('projects/shoot-editor/warning', 'false')
     },
     onClean (clean) {
       this.clean = clean
@@ -144,7 +144,7 @@ export default {
     }
   },
   mounted () {
-    const modificationWarning = this.$localStorage.getItem('showShootEditorWarning')
+    const modificationWarning = this.$localStorage.getItem('projects/shoot-editor/warning')
     this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {
