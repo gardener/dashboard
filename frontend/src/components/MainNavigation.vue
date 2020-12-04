@@ -85,6 +85,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="project in visibleProjectList"
                 @click="onProjectClick($event, project)"
+                class="project-list-tile"
                 :class="{'highlighted-item' : isHighlightedProject(project)}"
                 :key="project.metadata.name"
                 :data-g-project-name="project.metadata.name"
