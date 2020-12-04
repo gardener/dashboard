@@ -11,13 +11,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4" lg="4">
-            <v-card class="elevation-1 pa-3">
-              <v-card-title>
-                <div class="layout column align-center">
+            <v-card class="elevation-1">
+              <v-card-title class="pa-0">
+                <div class="layout column align-center secondary darken-1 pa-3">
                   <img src="../assets/logo.svg" alt="Login to Gardener" width="180" height="180">
-                  <h1 class="flex my-4 primary--text">Login to Gardener</h1>
+                  <span class="flex my-4 primary--text text-h4">Universal Kubernetes at Scale</span>
                 </div>
                 <v-tabs
+                  centered
                   color="primary"
                   v-model="loginType"
                 >
@@ -30,14 +31,13 @@ SPDX-License-Identifier: Apache-2.0
                   </v-tab>
                 </v-tabs>
               </v-card-title>
-              <v-card-text class="login-form">
-                <div class="d-flex flex-column align-center">
-                  <v-tabs-items v-model="loginType">
+              <v-card-text class="login-form d-flex align-center py-0">
+                <v-tabs-items v-model="loginType">
                     <v-tab-item id="oidc">
-                      <span class="text-center my-4 d-flex">Press Login Button to be redirected to configured OpenID Connect Provider.</span>
+                      <span class="text-center d-flex text-subtitle-1">Press Login to be redirected to configured OpenID Connect Provider.</span>
                     </v-tab-item >
                     <v-tab-item id="token">
-                      <span class="text-center my-4">Enter a bearer token trusted by the Kubernetes API server and press Login Button.</span>
+                      <span class="text-center d-flex text-subtitle-1">Enter a bearer token trusted by the Kubernetes API server and press Login.</span>
                       <v-text-field
                         ref="token"
                         v-model="token"
@@ -51,17 +51,17 @@ SPDX-License-Identifier: Apache-2.0
                       </v-text-field>
                     </v-tab-item>
                   </v-tabs-items>
-                </div>
               </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                  <v-btn @click="handleLogin" color="primary" class="mt-4">Login</v-btn>
+              <v-card-actions class="pa-3">
+                <div class="d-flex justify-center flex-grow-1">
+                  <v-btn @click="handleLogin" color="primary">Login</v-btn>
+                </div>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
-      <div v-if="landingPageUrl" class="footer">
+      <div v-if="landingPageUrl" class="footer caption">
         <span class="primary--text">Discover what our service is about at the <a :href="landingPageUrl" target="_blank">Gardener Landing Page</a></span>
       </div>
     </v-main>
@@ -198,7 +198,7 @@ export default {
   }
 
   .login-form {
-    min-height: 120px;
+    min-height: 130px;
   }
 
   .footer {
