@@ -48,6 +48,7 @@ import {
   generateWorker
 } from '@/utils'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import startsWith from 'lodash/startsWith'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -335,7 +336,7 @@ const actions = {
 }
 
 // Deep diff between two object, using lodash
-const difference = (object, base) => {
+function difference (object, base) {
   function changes (object, base) {
     return transform(object, function (result, value, key) {
       if (!isEqual(value, base[key])) {
@@ -346,7 +347,7 @@ const difference = (object, base) => {
   return changes(object, base)
 }
 
-const getRawVal = (item, column) => {
+function getRawVal (item, column) {
   const metadata = item.metadata
   const spec = item.spec
   switch (column) {
@@ -370,12 +371,17 @@ const getRawVal = (item, column) => {
       const labels = store.getters.ticketsLabels(metadata)
       return join(map(labels, 'name'), ' ')
     }
-    default:
+    default: {
+      if (startsWith(column, 'Z_')) {
+        const path = get(store.getters.shootCustomFields, [column, 'path'])
+        return get(item, path)
+      }
       return metadata[column]
+    }
   }
 }
 
-const getSortVal = (item, sortBy) => {
+function getSortVal (item, sortBy) {
   const value = getRawVal(item, sortBy)
   const status = item.status
   switch (sortBy) {
@@ -439,15 +445,14 @@ const getSortVal = (item, sortBy) => {
   }
 }
 
-const shoots = (state) => {
+function shoots (state) {
   return map(Object.keys(state.shoots), (key) => state.shoots[key])
 }
 
-const setSortedItems = (state, rootState) => {
+function setSortedItems (state, rootState) {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
   const sortOrder = head(sortDesc) ? 'desc' : 'asc'
-
   let sortedShoots = shoots(state)
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
@@ -503,41 +508,45 @@ const setSortedItems = (state, rootState) => {
   setFilteredAndSortedItems(state, rootState)
 }
 
-const setFilteredAndSortedItems = (state, rootState) => {
+function setFilteredAndSortedItems (state, rootState) {
+  function matchesShoot (searchValue) {
+    const searchableCustomFields = filter(store.getters.shootCustomFieldList, ['searchable', true])
+
+    return shoot => {
+      return some(searchValue, value => {
+        if (includes(getRawVal(shoot, 'name'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'infrastructure'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'seed'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'project'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'createdBy'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'purpose'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'k8sVersion'), value)) {
+          return true
+        }
+        if (includes(getRawVal(shoot, 'ticketLabels'), value)) {
+          return true
+        }
+
+        return some(searchableCustomFields, ({ key }) => includes(getRawVal(shoot, key), value))
+      })
+    }
+  }
+
   let items = state.sortedShoots
   if (state.searchValue) {
-    const predicate = item => {
-      let found = true
-      forEach(state.searchValue, value => {
-        if (includes(getRawVal(item, 'name'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'infrastructure'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'seed'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'project'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'createdBy'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'purpose'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'k8sVersion'), value)) {
-          return
-        }
-        if (includes(getRawVal(item, 'ticketLabels'), value)) {
-          return
-        }
-        found = false
-      })
-      return found
-    }
-    items = filter(items, predicate)
+    items = filter(items, matchesShoot(state.searchValue))
   }
   if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
     if (get(state, 'shootListFilters.progressing', false)) {

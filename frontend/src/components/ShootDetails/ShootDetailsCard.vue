@@ -293,24 +293,6 @@ export default {
 
 <style lang="scss" scoped>
 
-  .cardTitle {
-    line-height: 10px;
-  }
-
-  .listItem {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .avatar {
-    padding-right: 33px;
-  }
-
   .markdown {
     ::v-deep > p {
       margin: 0px;
