@@ -41,7 +41,6 @@ import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import omitBy from 'lodash/omitBy'
 import pick from 'lodash/pick'
 import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
@@ -541,10 +540,6 @@ const getters = {
     })
   },
   shootCustomFields (state, getters) {
-    function someObjectValuesAreObject (object) {
-      return some(object, isObject)
-    }
-
     let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
     if (!shootCustomFields) {
       return
@@ -557,9 +552,15 @@ const getters = {
       return
     }
 
-    shootCustomFields = omitBy(shootCustomFields, isEmpty) // omit null values
-    shootCustomFields = omitBy(shootCustomFields, someObjectValuesAreObject)
-    shootCustomFields = pickBy(shootCustomFields, ({ path, name }) => name && path)
+    shootCustomFields = pickBy(shootCustomFields, customField => {
+      if (isEmpty(customField)) {
+        return false // omit null values
+      }
+      if (some(customField, isObject)) {
+        return false // omit custom fields with object values
+      }
+      return customField.name && customField.path
+    })
 
     const defaultProperties = {
       showColumn: true,
