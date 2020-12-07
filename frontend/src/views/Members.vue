@@ -46,10 +46,12 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table
         v-else
         :headers="userAccountTableHeaders"
-        :items="sortedAndFilteredUserList"
+        :items="userList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :options.sync="userAccountOptions"
         must-sort
+        :custom-sort="sortAccounts"
+        :search="userFilter"
       >
         <template v-slot:item="{ item }">
           <project-user-row
@@ -99,10 +101,12 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table
         v-else
         :headers="serviceAccountTableHeaders"
-        :items="sortedAndFilteredServiceAccountList"
+        :items="serviceAccountList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :options.sync="serviceAccountOptions"
         must-sort
+        :custom-sort="sortAccounts"
+        :search="serviceAccountFilter"
       >
         <template v-slot:item="{ item }">
           <project-service-account-row
@@ -162,7 +166,6 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState, mapActions, mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
-import replace from 'lodash/replace'
 import orderBy from 'lodash/orderBy'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
@@ -325,21 +328,6 @@ export default {
         }
       })
     },
-    sortedAndFilteredServiceAccountList () {
-      const sortBy = head(get(this.serviceAccountOptions, 'sortBy'))
-      const sortDesc = get(this.serviceAccountOptions, 'sortDesc', [false])
-      const sortOrder = head(sortDesc) ? 'desc' : 'asc'
-
-      const filterPredicate = ({ username }) => {
-        if (!this.serviceAccountFilter) {
-          return true
-        }
-        const { name } = parseServiceAccountUsername(username)
-        return includes(toLower(name), toLower(this.serviceAccountFilter))
-      }
-      const serviceAccountList = filter(this.serviceAccountList, filterPredicate)
-      return orderBy(serviceAccountList, [item => this.getSortVal(item, sortBy), 'displayname'], [sortOrder, 'asc'])
-    },
     userList () {
       const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
@@ -354,25 +342,6 @@ export default {
           isCurrentUser: this.isCurrentUser(username)
         }
       })
-    },
-    sortedAndFilteredUserList () {
-      const sortBy = head(get(this.userAccountOptions, 'sortBy'))
-      const sortDesc = get(this.userAccountOptions, 'sortDesc', [false])
-      const sortOrder = head(sortDesc) ? 'desc' : 'asc'
-
-      const filterPredicate = ({ username }) => {
-        if (isServiceAccountUsername(username)) {
-          return false
-        }
-
-        if (!this.userFilter) {
-          return true
-        }
-        const name = replace(username, /@.*$/, '')
-        return includes(toLower(name), toLower(this.userFilter))
-      }
-      const userList = filter(this.userList, filterPredicate)
-      return orderBy(userList, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
     },
     allEmails () {
       const emails = []
@@ -564,7 +533,7 @@ export default {
           if (includes(roles, 'owner')) {
             return 1
           }
-          if (includes(roles, 'UAM')) {
+          if (includes(roles, 'uam')) {
             return 2
           }
           if (includes(roles, 'admin')) {
@@ -575,8 +544,14 @@ export default {
           }
           return 5
         default:
-          return get(item, sortBy, 'username')
+          return get(item, sortBy)
       }
+    },
+    sortAccounts (items, sortByArr, sortDescArr) {
+      const sortBy = head(sortByArr)
+      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
+      const sortedItems = orderBy(items, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
+      return sortedItems
     }
   },
   mounted () {

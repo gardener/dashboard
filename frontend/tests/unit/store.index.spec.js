@@ -525,7 +525,6 @@ describe('Store', () => {
         }
       }
     }
-    console.log(storeGetters)
 
     const customFields = getters.shootCustomFields({}, storeGetters)
     expect(customFields).toStrictEqual({
