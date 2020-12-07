@@ -7,8 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="fill-height">
     <shoot-editor
-      :modificationWarning="modificationWarning"
-      @dismissModificationWarning="onDismissModificationWarning"
+      alert-banner-identifier="newShootEditorWarning"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       :shootContent="newShootResource"
@@ -54,7 +53,6 @@ export default {
   ],
   data () {
     return {
-      modificationWarning: true,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false
@@ -74,10 +72,6 @@ export default {
       'setNewShootResource',
       'createShoot'
     ]),
-    onDismissModificationWarning () {
-      this.modificationWarning = false
-      this.$localStorage.setItem('projects/shoot-editor/warning', 'false')
-    },
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Leave',
@@ -112,10 +106,6 @@ export default {
       const shootResource = await this.getShootResource()
       return !isEqual(this.initialNewShootResource, shootResource)
     }
-  },
-  mounted () {
-    const modificationWarning = this.$localStorage.getItem('projects/new-shoot-editor/warning')
-    this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {

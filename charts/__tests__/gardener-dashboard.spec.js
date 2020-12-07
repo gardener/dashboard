@@ -401,6 +401,58 @@ describe('gardener-dashboard', function () {
         })
       })
 
+      describe('alert', function () {
+        it('should render the template', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            frontendConfig: {
+              alert: {
+                message: 'foo',
+                type: 'warning'
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const alert = config.frontend.alert
+          expect(alert).toEqual({
+            message: 'foo',
+            type: 'warning'
+          })
+        })
+
+        it('should render the template with identifier', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            frontendConfig: {
+              alert: {
+                message: 'foo',
+                type: 'warning',
+                identifier: 'bar'
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const alert = config.frontend.alert
+          expect(alert).toEqual({
+            message: 'foo',
+            type: 'warning',
+            identifier: 'bar'
+          })
+        })
+      })
+
       describe('terminal', function () {
         describe('shortcuts', function () {
           it('should render the template', async function () {

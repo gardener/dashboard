@@ -33,6 +33,7 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
+import camelCase from 'lodash/camelCase'
 import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
@@ -90,7 +91,6 @@ const state = {
   redirectPath: null,
   loading: false,
   alert: null,
-  alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null,
   localTimezone: moment.tz.guess(),
@@ -849,17 +849,24 @@ const getters = {
     const user = state.user
     return user ? user.name || fullDisplayName(user.id) : ''
   },
-  alertMessage (state) {
-    return get(state, 'alert.message', '')
-  },
   alertType (state) {
     return get(state, 'alert.type', 'error')
   },
   alertBannerMessage (state) {
-    return get(state, 'alertBanner.message', '')
+    return get(state, 'cfg.alert.message')
   },
   alertBannerType (state) {
-    return get(state, 'alertBanner.type', 'error')
+    return get(state, 'cfg.alert.type', 'error')
+  },
+  alertBannerIdentifier (state, getters) {
+    if (!getters.alertBannerMessage) {
+      return
+    }
+    const defaultIdentifier = hash(getters.alertBannerMessage)
+    const configIdentifier = get(state, 'cfg.alert.identifier')
+    const identifier = camelCase(configIdentifier) || defaultIdentifier
+    // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
+    return `cfg.${identifier}`
   },
   currentNamespaces (state, getters) {
     if (state.namespace === '_all') {
@@ -1257,10 +1264,6 @@ const actions = {
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
 
-    if (get(value, 'alert')) {
-      commit('SET_ALERT_BANNER', get(value, 'alert'))
-    }
-
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
     })
@@ -1354,10 +1357,6 @@ const actions = {
     commit('SET_ALERT', value)
     return state.alert
   },
-  setAlertBanner ({ commit }, value) {
-    commit('SET_ALERT_BANNER', value)
-    return state.alertBanner
-  },
   setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
     return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
   },
@@ -1416,9 +1415,6 @@ const mutations = {
   },
   SET_ALERT (state, value) {
     state.alert = value
-  },
-  SET_ALERT_BANNER (state, value) {
-    state.alertBanner = value
   },
   setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)

@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:caption>{{captionText}}</template>
     <template v-slot:message>
       <div v-html="messageHtml"></div>
+      <v-checkbox v-if="showDoNotAskAgain" v-model="doNotAskAgain" label="Do not ask me again"></v-checkbox>
     </template>
   </g-dialog>
 </template>
@@ -36,11 +37,13 @@ export default {
       messageHtml: undefined,
       dialogColor: undefined,
       maxWidth: undefined,
-      confirmValue: undefined
+      confirmValue: undefined,
+      showDoNotAskAgain: false,
+      doNotAskAgain: false
     }
   },
   methods: {
-    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth, confirmValue } = {}) {
+    async waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth, confirmValue, showDoNotAskAgain = false } = {}) {
       this.confirmButtonText = confirmButtonText || 'Confirm'
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
@@ -48,8 +51,20 @@ export default {
       this.dialogColor = dialogColor || 'orange'
       this.maxWidth = maxWidth || '400'
       this.confirmValue = confirmValue
+      this.showDoNotAskAgain = showDoNotAskAgain
 
-      return this.$refs.gDialog.confirmWithDialog()
+      const confirmed = await this.$refs.gDialog.confirmWithDialog()
+      if (!confirmed) {
+        return undefined
+      }
+
+      if (this.showDoNotAskAgain) {
+        return {
+          confirmed,
+          doNotAskAgain: this.doNotAskAgain
+        }
+      }
+      return confirmed
     }
   }
 }

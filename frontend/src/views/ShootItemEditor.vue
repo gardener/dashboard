@@ -7,8 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="fill-height">
     <shoot-editor
-      :modificationWarning="modificationWarning"
-      @dismissModificationWarning="onDismissModificationWarning"
+      alert-banner-identifier="shootEditorWarning"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       :shootContent="shootContent"
@@ -55,7 +54,6 @@ export default {
   data () {
     const vm = this
     return {
-      modificationWarning: true,
       clean: true,
       hasConflict: false,
       errorMessage: undefined,
@@ -83,10 +81,6 @@ export default {
     }
   },
   methods: {
-    onDismissModificationWarning () {
-      this.modificationWarning = false
-      this.$localStorage.setItem('projects/shoot-editor/warning', 'false')
-    },
     onClean (clean) {
       this.clean = clean
     },
@@ -142,10 +136,6 @@ export default {
     focus () {
       this.$shootEditor.dispatch('focus')
     }
-  },
-  mounted () {
-    const modificationWarning = this.$localStorage.getItem('projects/shoot-editor/warning')
-    this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {
     if (this.clean) {

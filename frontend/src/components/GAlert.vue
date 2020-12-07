@@ -5,69 +5,118 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
-    <div class="subtitle-1">
-      {{message}}
-      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
-        Details
-      </v-btn>
-    </div>
-    <transition name="fade">
-      <div v-if="!!detailedMessageVisible">
-        <code>{{detailedMessage}}</code>
-      </div>
-    </transition>
-  </v-alert>
+  <div>
+    <v-alert
+      class="alertBanner"
+      :type="type"
+      v-model="alertVisible"
+      :color="color"
+      :transition="transition"
+    >
+      <v-row align="center">
+        <v-col class="grow pa-0">
+          <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
+          <slot v-else name="message"></slot>
+        </v-col>
+        <v-col class="shrink py-0">
+          <v-btn small icon @click="closeBanner"><v-icon>mdi-close-circle</v-icon></v-btn>
+        </v-col>
+      </v-row>
+    </v-alert>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
+  </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import { transformHtml } from '@/utils'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
+
+const LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES = 'global/alert-banner/hidden-messages'
+
 export default {
-  name: 'galert',
+  components: {
+    ConfirmDialog
+  },
   props: {
-    message: {
+    message: { // alternatively, use message slot
       type: String
     },
-    detailedMessage: {
+    type: {
+      type: String,
+      default: 'error'
+    },
+    identifier: {
       type: String
     },
     color: {
-      type: String,
-      required: true
+      type: String
     },
-    tile: {
-      type: Boolean
-    },
-    dark: {
-      type: Boolean,
-      default: true
+    transition: {
+      type: String
     }
   },
   data () {
     return {
-      detailedMessageVisible: false
+      alertVisible: false
     }
   },
   computed: {
-    alertVisible: {
-      get () {
-        return !!this.message
-      },
-      set (value) {
-        if (!value) {
-          this.$emit('update:message', undefined)
-          this.$emit('update:detailedMessage', undefined)
-        }
+    messageHtml () {
+      return transformHtml(this.message)
+    }
+  },
+  methods: {
+    ...mapActions([
+      'setAlertBanner'
+    ]),
+    async closeBanner () {
+      const result = await this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Hide',
+        captionText: 'Confirm Hide Message',
+        messageHtml: 'Do you want to hide this message?',
+        showDoNotAskAgain: true
+      })
+      if (!result) {
+        return
       }
+      const { doNotAskAgain } = result
+      if (doNotAskAgain) {
+        const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
+        permanentlyHiddenIds[this.identifier] = true
+        this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
+      }
+      this.setAlertVisibility(false)
+    },
+    getPermanentlyHiddenIds () {
+      return this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
+    },
+    isPermanentlyHidden (identifier) {
+      const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
+      return permanentlyHiddenIds[this.identifier] === true
+    },
+    updateAlertVisibility () {
+      const visible = !this.isPermanentlyHidden(this.identifier)
+      this.setAlertVisibility(visible)
+    },
+    setAlertVisibility (visible) {
+      this.alertVisible = visible
+      this.$emit('value', visible)
+    }
+  },
+  mounted () {
+    this.updateAlertVisibility()
+  },
+  watch: {
+    identifier (value) {
+      this.updateAlertVisibility()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
-  }
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
+  .alertBanner {
+    margin-top: 0px;
   }
 </style>

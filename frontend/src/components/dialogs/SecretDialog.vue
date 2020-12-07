@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
 
           <slot name="data-slot"></slot>
-          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+          <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
@@ -73,7 +73,7 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
@@ -90,7 +90,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    GAlert,
+    GMessage,
     InfraIcon
   },
   props: {
