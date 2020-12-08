@@ -20,7 +20,6 @@ const cloudprofiles = require('./cloudprofiles')
 const nodes = require('./nodes')
 const terminals = require('./terminals')
 const github = require('./github')
-const reconnector = require('./reconnector')
 const helper = require('./helper')
 const user = {
   create (...args) {
@@ -44,7 +43,6 @@ const fixtures = {
   nodes,
   terminals,
   github,
-  reconnector,
   helper
 }
 module.exports = fixtures

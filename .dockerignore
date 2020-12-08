@@ -35,15 +35,13 @@
 
 # include workspace backend
 !backend/package.json
-!backend/.mocharc.yaml
-!backend/.babelrc
-!backend/.eslintrc.js
-!backend/.nycrc
-!backend/*.config.js
+!backend/jest.setup.js
 !backend/server.js
 !backend/lib
-!backend/bin
 !backend/test
+!backend/__tests__
+!backend/__fixtures__
+!backend/__mocks__
 
 # include workspace frontend
 !frontend/package.json

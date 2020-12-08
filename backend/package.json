@@ -22,7 +22,6 @@
   },
   "main": "server.js",
   "files": [
-    "bin",
     "lib",
     "server.js"
   ],
