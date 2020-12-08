@@ -73,7 +73,7 @@ export default {
     async closeBanner () {
       const result = await this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Hide',
-        captionText: 'Confirm Hide Message',
+        captionText: 'Hide Message',
         messageHtml: 'Do you want to hide this message?',
         showDoNotAskAgain: true
       })
