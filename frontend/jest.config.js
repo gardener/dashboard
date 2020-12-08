@@ -5,7 +5,7 @@
 module.exports = {
   preset: '@vue/cli-plugin-unit-jest',
   verbose: true,
-  transformIgnorePatterns: ['/node_modules/', '\\.pnp\\.[^\\/]+$'],
+  transformIgnorePatterns: ['\\.pnp\\.[^\\/]+$'],
   snapshotSerializers: [require.resolve('jest-serializer-vue')],
   testEnvironment: require.resolve('jest-environment-jsdom-fifteen'),
   coverageThreshold: {
