@@ -148,10 +148,6 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-list>
 
-      <v-footer fixed>
-        <img :src="footerLogoUrl" height="20px">
-      </v-footer>
-
       <project-create-dialog v-model="projectDialog"></project-create-dialog>
 
     </v-navigation-drawer>
@@ -204,9 +200,6 @@ export default {
       'canCreateProject',
       'projectList'
     ]),
-    footerLogoUrl () {
-      return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
-    },
     isActive: {
       get () {
         return this.sidebar
