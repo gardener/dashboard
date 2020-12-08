@@ -146,7 +146,6 @@ async function listTerminals ({ user, namespace, identifier }) {
   const query = {
     labelSelector: selectors.join(',')
   }
-
   const terminals = await client['dashboard.gardener.cloud'].terminals.list(namespace, query)
   return _
     .chain(terminals)
@@ -158,7 +157,6 @@ async function listTerminals ({ user, namespace, identifier }) {
 
 async function findExistingTerminalResource ({ user, namespace, body }) {
   const { identifier } = body
-
   const existingTerminalList = await listTerminals({ user, namespace, identifier })
   return _.first(existingTerminalList)
 }
@@ -323,7 +321,6 @@ async function getGardenTerminalHostCluster (client, { body }) {
     await getGardenTerminalHostClusterSecretRef(client),
     await getGardenHostClusterKubeApiServer(client)
   ])
-
   hostCluster.namespace = undefined // this will create a temporary namespace
   hostCluster.secretRef = secretRef
   hostCluster.kubeApiServer = kubeApiServer

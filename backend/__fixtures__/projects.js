@@ -9,7 +9,7 @@
 const { cloneDeep, merge, get, set, find, includes, intersection } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
-const { getMockWatch } = require('@gardener-dashboard/kube-client')
+const { createMockWatch } = require('@gardener-dashboard/kube-client')
 
 const { nextTick } = require('./helper')
 const { getTokenPayload } = require('./auth')
@@ -228,6 +228,7 @@ module.exports = {
       }
     },
     create ({ uid = 21, resourceVersion = '42', phase = 'Ready' } = {}) {
+      // eslint-disable-next-line no-unused-vars
       const path = '/apis/core.gardener.cloud/v1beta1/projects'
       return (headers, json) => {
         const payload = getTokenPayload(headers)
@@ -245,22 +246,18 @@ module.exports = {
           roles: ['admin', 'uam']
         }])
         set(item, 'status.phase', 'Initial')
-        ;(async () => {
-          try {
-            const key = [path, name].join('/')
-            const mockWatch = await getMockWatch(key)
-            // emit ADDED
-            await nextTick()
-            let object = cloneDeep(item)
-            mockWatch.emit('event', { type: 'ADDED', object })
-            // emit MODIFIED
-            await nextTick()
-            object = cloneDeep(item)
-            set(object, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
-            set(object, 'status.phase', phase)
-            mockWatch.emit('event', { type: 'MODIFIED', object })
-          } catch (err) { /* ignore error */ }
-        })()
+        createMockWatch('projects').mockImplementation(async mockWatch => {
+          // emit ADDED
+          await nextTick()
+          let object = cloneDeep(item)
+          mockWatch.emit('event', { type: 'ADDED', object })
+          // emit MODIFIED
+          await nextTick()
+          object = cloneDeep(item)
+          set(object, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+          set(object, 'status.phase', phase)
+          mockWatch.emit('event', { type: 'MODIFIED', object })
+        })
         return Promise.resolve(item)
       }
     },

@@ -7,8 +7,8 @@
 'use strict'
 
 const yaml = require('js-yaml')
-const createError = require('http-errors')
 const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsWith, endsWith, isEmpty } = require('lodash')
+const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { toBase64 } = require('./helper')
 const seeds = require('./seeds')
@@ -106,6 +106,40 @@ const secrets = {
       ? filter(items, ['metadata.namespace', namespace])
       : items
   },
+  getTerminalShortcutsSecret (namespace, options = {}) {
+    const {
+      valid = false,
+      invalid = false,
+      target = 'cp'
+    } = options
+    const shortcuts = []
+    if (valid) {
+      shortcuts.push({
+        title: 'title',
+        description: 'description',
+        target,
+        container: {
+          image: 'image:latest',
+          command: ['cmd'],
+          args: ['a', 'b']
+        }
+      })
+    }
+    if (invalid) {
+      shortcuts.push({
+        invalidShortcut: 'foo'
+      })
+    }
+    if (shortcuts.length) {
+      return getSecret({
+        name: 'terminal.shortcuts',
+        namespace,
+        data: {
+          shortcuts: yaml.safeDump(shortcuts)
+        }
+      })
+    }
+  },
   getShootSecret (namespace, name) {
     const shootName = name.substring(0, name.length - 11)
     const projectName = namespace.replace(/^garden-/, '')
@@ -182,7 +216,7 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
-  get () {
+  get (options) {
     const path = '/api/v1/namespaces/:namespace/secrets/:name'
     const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
@@ -201,6 +235,12 @@ const mocks = {
           const item = secrets.getServiceAccountSecret(namespace, name)
           return Promise.resolve(item)
         }
+        if (name === 'terminal.shortcuts') {
+          const item = secrets.getTerminalShortcutsSecret(namespace, options)
+          if (item) {
+            return Promise.resolve(item)
+          }
+        }
         const item = secrets.get(namespace, name)
         if (item) {
           return Promise.resolve(item)
@@ -208,6 +248,11 @@ const mocks = {
       } else if (endsWith(hostname, 'seed.cluster')) {
         if (name === 'monitoring-ingress-credentials') {
           const item = secrets.getMonitoringSecret(namespace, name)
+          return Promise.resolve(item)
+        }
+      } else if (endsWith(hostname, 'shoot.cluster')) {
+        if (startsWith(namespace, 'term-host-') && /-token-[a-f0-9]{5}$/.test(name)) {
+          const item = secrets.getServiceAccountSecret(namespace, name)
           return Promise.resolve(item)
         }
       }

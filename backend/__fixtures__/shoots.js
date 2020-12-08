@@ -14,6 +14,46 @@ const { applyPatch } = require('fast-json-patch')
 const { getTokenPayload } = require('./auth')
 const projects = require('./projects')
 
+const shootList = [
+  getShoot({
+    uid: 1,
+    name: 'fooShoot',
+    namespace: 'garden-foo',
+    project: 'foo',
+    createdBy: 'foo@example.org',
+    purpose: 'fooPurpose',
+    secretBindingName: 'foo-infra1'
+  }),
+  getShoot({
+    uid: 2,
+    name: 'barShoot',
+    namespace: 'garden-foo',
+    project: 'foo',
+    createdBy: 'bar@example.org',
+    purpose: 'barPurpose',
+    secretBindingName: 'foo-infra1'
+  }),
+  getShoot({
+    uid: 3,
+    name: 'dummyShoot',
+    namespace: 'garden-foo',
+    project: 'foo',
+    createdBy: 'foo@example.org',
+    purpose: 'fooPurpose',
+    secretBindingName: 'barSecretName',
+    seed: 'infra4-seed-without-secretRef'
+  }),
+  getShoot({
+    uid: 4,
+    name: 'infra1-seed',
+    namespace: 'garden',
+    project: 'garden',
+    createdBy: 'admin@example.org',
+    secretBindingName: 'soil-infra1',
+    seed: 'soil-infra1'
+  })
+]
+
 function getShoot ({
   namespace,
   name,
@@ -61,46 +101,6 @@ function getShoot ({
   }
   return shoot
 }
-
-const shootList = [
-  getShoot({
-    uid: 1,
-    name: 'fooShoot',
-    namespace: 'garden-foo',
-    project: 'foo',
-    createdBy: 'foo@example.org',
-    purpose: 'fooPurpose',
-    secretBindingName: 'foo-infra1'
-  }),
-  getShoot({
-    uid: 2,
-    name: 'barShoot',
-    namespace: 'garden-foo',
-    project: 'foo',
-    createdBy: 'bar@example.org',
-    purpose: 'barPurpose',
-    secretBindingName: 'foo-infra1'
-  }),
-  getShoot({
-    uid: 3,
-    name: 'dummyShoot',
-    namespace: 'garden-foo',
-    project: 'foo',
-    createdBy: 'foo@example.org',
-    purpose: 'fooPurpose',
-    secretBindingName: 'barSecretName',
-    seed: 'infra4-seed-without-secretRef'
-  }),
-  getShoot({
-    uid: 4,
-    name: 'infra1-seed',
-    namespace: 'garden',
-    project: 'garden',
-    createdBy: 'admin@example.org',
-    secretBindingName: 'soil-infra1',
-    seed: 'soil-infra1'
-  })
-]
 
 const shoots = {
   create (options) {
@@ -165,7 +165,7 @@ const mocks = {
       }
       const item = shoots.get(namespace, name)
       if (!item) {
-        return Promise.reject(createError(404))
+        return Promise.reject(createError(404, `Shoot ${namespace}/${name} not found`))
       }
       return Promise.resolve(item)
     }

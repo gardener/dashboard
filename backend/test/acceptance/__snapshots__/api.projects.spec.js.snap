@@ -445,7 +445,7 @@ exports[`api projects should timeout when creating a project 2`] = `
 Object {
   "code": 504,
   "details": Any<Object>,
-  "message": "Resource \\"my-project\\" could not be initialized within 30 ms",
+  "message": "Resource \\"projects\\" could not be initialized within 30 ms",
   "reason": "Gateway Timeout",
   "status": "Failure",
 }

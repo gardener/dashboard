@@ -17,6 +17,8 @@ const quotas = require('./quotas')
 const projects = require('./projects')
 const serviceaccounts = require('./serviceaccounts')
 const cloudprofiles = require('./cloudprofiles')
+const nodes = require('./nodes')
+const terminals = require('./terminals')
 const github = require('./github')
 const reconnector = require('./reconnector')
 const helper = require('./helper')
@@ -39,6 +41,8 @@ const fixtures = {
   serviceaccounts,
   cloudprofiles,
   quotas,
+  nodes,
+  terminals,
   github,
   reconnector,
   helper
