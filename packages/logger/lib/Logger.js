@@ -35,7 +35,7 @@ class Logger {
     this.setLogHttpRequestBody(logHttpRequestBody)
     this.silent = /^test/.test(process.env.NODE_ENV)
     this.console = global.console
-    this.stream = new Stream()
+    this.stream = new Stream(this)
   }
 
   setLogLevel (value) {
