@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr>
-    <td>
+    <td v-if="selectedHeaders.displayName">
       <v-list-item>
         <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
         <v-list-item-content>
@@ -23,10 +23,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-content>
       </v-list-item>
     </td>
-    <td>
+    <td v-if="selectedHeaders.createdBy">
       <account-avatar :account-name="item.createdBy" :size="16"></account-avatar>
     </td>
-    <td>
+    <td v-if="selectedHeaders.creationTimestamp">
       <div>
         <v-tooltip top v-if="item.creationTimestamp">
           <template v-slot:activator="{ on }">
@@ -39,18 +39,18 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else class="font-weight-light text--disabled">Unknown</span>
       </div>
     </td>
-    <td>
+    <td v-if="selectedHeaders.description">
       <div class="description-column">
         <span v-if="item.description">{{item.description}}</span>
         <span v-else class="font-weight-light text--disabled">Not defined</span>
       </div>
     </td>
-    <td>
+    <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
         <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
       </div>
     </td>
-    <td width="250px">
+    <td width="250px" v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end">
         <div v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
           <v-tooltip top>
@@ -116,7 +116,8 @@ import AccountAvatar from '@/components/AccountAvatar'
 import MemberAccountRoles from '@/components/MemberAccountRoles'
 import {
   isForeignServiceAccount,
-  parseServiceAccountUsername
+  parseServiceAccountUsername,
+  mapTableHeader
 } from '@/utils'
 
 export default {
@@ -128,6 +129,11 @@ export default {
   },
   props: {
     item: {
+      type: Object,
+      required: true
+    },
+    headers: {
+      type: Array,
       required: true
     }
   },
@@ -149,6 +155,9 @@ export default {
     serviceAccountNamespace () {
       const { namespace } = parseServiceAccountUsername(this.item.username)
       return namespace
+    },
+    selectedHeaders () {
+      return mapTableHeader(this.headers, 'selected')
     }
   },
   methods: {

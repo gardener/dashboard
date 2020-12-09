@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-content>
       </v-list-item>
     </v-list>
-    <v-list subheader dense v-if="filters.length">
+    <v-list subheader dense v-if="filters && filters.length">
       <v-subheader>Filter Table</v-subheader>
       <v-list-item
         v-for="filter in filters"

@@ -86,16 +86,9 @@ import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import ShootListRow from '@/components/ShootListRow'
-import TableColumnSelection from '../components/TableColumnSelection.vue'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
+import { mapTableHeader } from '@/utils'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
-
-function mapHeader (headers, valueKey) {
-  const obj = {}
-  for (const { value: key, [valueKey]: value } of headers) {
-    obj[key] = value
-  }
-  return obj
-}
 
 export default {
   name: 'shoot-list',
@@ -269,34 +262,142 @@ export default {
       return get(this.selectedItem, 'metadata.name')
     },
     currentStandardSelectedColumns () {
-      return mapHeader(this.standardHeaders, 'selected')
+      return mapTableHeader(this.standardHeaders, 'selected')
     },
     currentCustomSelectedColumns () {
-      return mapHeader(this.customHeaders, 'selected')
+      return mapTableHeader(this.customHeaders, 'selected')
     },
     defaultStandardSelectedColumns () {
-      return mapHeader(this.standardHeaders, 'defaultSelected')
+      return mapTableHeader(this.standardHeaders, 'defaultSelected')
     },
     defaultCustomSelectedColumns () {
-      return mapHeader(this.customHeaders, 'defaultSelected')
+      return mapTableHeader(this.customHeaders, 'defaultSelected')
     },
     standardHeaders () {
       const headers = [
-        { text: 'PROJECT', value: 'project', class: 'nowrap', align: 'left', defaultSelected: true, hidden: !!this.projectScope },
-        { text: 'NAME', value: 'name', class: 'nowrap', align: 'left', defaultSelected: true, hidden: false },
-        { text: 'INFRASTRUCTURE', value: 'infrastructure', class: 'nowrap', align: 'left', defaultSelected: true, hidden: false },
-        { text: 'SEED', value: 'seed', align: 'left', class: 'nowrap', defaultSelected: false, hidden: false },
-        { text: 'TECHNICAL ID', value: 'technicalId', class: 'nowrap', align: 'left', defaultSelected: false, hidden: !this.isAdmin },
-        { text: 'CREATED BY', value: 'createdBy', class: 'nowrap', align: 'left', defaultSelected: false, hidden: false },
-        { text: 'CREATED AT', value: 'createdAt', class: 'nowrap', align: 'left', defaultSelected: false, hidden: false },
-        { text: 'PURPOSE', value: 'purpose', class: 'nowrap text-center', align: 'center', defaultSelected: true, hidden: false },
-        { text: 'STATUS', value: 'lastOperation', class: 'nowrap text-left', align: 'left', defaultSelected: true, hidden: false },
-        { text: 'VERSION', value: 'k8sVersion', class: 'nowrap text-center', align: 'center', defaultSelected: true, hidden: false },
-        { text: 'READINESS', value: 'readiness', class: 'nowrap text-center', sortable: true, align: 'center', defaultSelected: true, hidden: false },
-        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', defaultSelected: false, hidden: !this.cfg.accessRestriction || !this.isAdmin },
-        { text: 'TICKET', value: 'ticket', class: 'nowrap', sortable: true, align: 'left', defaultSelected: false, hidden: !this.gitHubRepoUrl || !this.isAdmin },
-        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', defaultSelected: true, hidden: !this.gitHubRepoUrl || !this.isAdmin },
-        { text: 'ACTIONS', value: 'actions', class: 'nowrap text-right action-button-group', sortable: false, align: 'right', defaultSelected: true, hidden: !(this.canDeleteShoots || this.canGetSecrets) }
+        {
+          text: 'PROJECT',
+          value: 'project',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: !!this.projectScope
+        },
+        {
+          text: 'NAME',
+          value: 'name',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'INFRASTRUCTURE',
+          value: 'infrastructure',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'SEED',
+          value: 'seed',
+          align: 'left',
+          class: 'nowrap',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'TECHNICAL ID',
+          value: 'technicalId',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.isAdmin
+        },
+        {
+          text: 'CREATED BY',
+          value: 'createdBy',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'CREATED AT',
+          value: 'createdAt',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'PURPOSE',
+          value: 'purpose',
+          class: 'nowrap text-center',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'STATUS',
+          value: 'lastOperation',
+          class: 'nowrap text-left',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'VERSION',
+          value: 'k8sVersion',
+          class: 'nowrap text-center',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'READINESS',
+          value: 'readiness',
+          class: 'nowrap text-center',
+          sortable: true,
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'ACCESS RESTRICTIONS',
+          value: 'accessRestrictions',
+          sortable: false,
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.cfg.accessRestriction || !this.isAdmin
+        },
+        {
+          text: 'TICKET',
+          value: 'ticket',
+          class: 'nowrap',
+          sortable: true,
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'TICKET LABELS',
+          value: 'ticketLabels',
+          sortable: false,
+          align: 'left',
+          defaultSelected: true,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'ACTIONS',
+          value: 'actions',
+          class: 'nowrap text-right action-button-group',
+          sortable: false,
+          align: 'right',
+          defaultSelected: true,
+          hidden: !(this.canDeleteShoots || this.canGetSecrets)
+        }
       ]
       return map(headers, (header, index) => ({
         ...header,
@@ -346,11 +447,41 @@ export default {
     },
     allFilters () {
       return [
-        { text: 'Show only clusters with issues', value: 'onlyShootsWithIssues', selected: this.onlyShootsWithIssues, hidden: this.projectScope },
-        { text: 'Hide progressing clusters', value: 'progressing', selected: this.isFilterActive('progressing'), hidden: this.projectScope || !this.isAdmin, disabled: this.filtersDisabled },
-        { text: 'Hide user issues', value: 'userIssues', selected: this.isFilterActive('userIssues'), hidden: this.projectScope || !this.isAdmin, disabled: this.filtersDisabled },
-        { text: 'Hide clusters with deactivated reconciliation', value: 'deactivatedReconciliation', selected: this.isFilterActive('deactivatedReconciliation'), hidden: this.projectScope || !this.isAdmin, disabled: this.filtersDisabled },
-        { text: 'Hide clusters with configured ticket labels', value: 'hideTicketsWithLabel', selected: this.isFilterActive('hideTicketsWithLabel'), hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length, helpTooltip: this.hideTicketsWithLabelTooltip, disabled: this.filtersDisabled }
+        {
+          text: 'Show only clusters with issues',
+          value: 'onlyShootsWithIssues',
+          selected: this.onlyShootsWithIssues,
+          hidden: this.projectScope
+        },
+        {
+          text: 'Hide progressing clusters',
+          value: 'progressing',
+          selected: this.isFilterActive('progressing'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide user issues',
+          value: 'userIssues',
+          selected: this.isFilterActive('userIssues'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with deactivated reconciliation',
+          value: 'deactivatedReconciliation',
+          selected: this.isFilterActive('deactivatedReconciliation'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with configured ticket labels',
+          value: 'hideTicketsWithLabel',
+          selected: this.isFilterActive('hideTicketsWithLabel'),
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length,
+          helpTooltip: this.hideTicketsWithLabelTooltip,
+          disabled: this.filtersDisabled
+        }
       ]
     },
     selectableFilters () {

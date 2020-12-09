@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr>
-    <td>
+    <td v-if="selectedHeaders.username">
       <v-list-item>
         <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
         <v-list-item-content>
@@ -18,12 +18,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-content>
       </v-list-item>
     </td>
-    <td>
+    <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
         <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
       </div>
     </td>
-    <td width="250px">
+    <td width="250px" v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end">
         <div v-if="canManageMembers" class="ml-1">
           <v-tooltip top>
@@ -56,6 +56,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import MemberAccountRoles from '@/components/MemberAccountRoles'
+import { mapTableHeader } from '@/utils'
 
 export default {
   name: 'project-user-row',
@@ -64,13 +65,21 @@ export default {
   },
   props: {
     item: {
+      type: Object,
+      required: true
+    },
+    headers: {
+      type: Array,
       required: true
     }
   },
   computed: {
     ...mapGetters([
       'canManageMembers'
-    ])
+    ]),
+    selectedHeaders () {
+      return mapTableHeader(this.headers, 'selected')
+    }
   },
   methods: {
     onDelete (username) {

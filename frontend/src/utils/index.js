@@ -779,6 +779,14 @@ export function sortedRoleDisplayNames (roleNames) {
   return sortBy(displayNames, 'displayName')
 }
 
+export function mapTableHeader (headers, valueKey) {
+  const obj = {}
+  for (const { value: key, [valueKey]: value } of headers) {
+    obj[key] = value
+  }
+  return obj
+}
+
 export default {
   store,
   canI,

@@ -34,6 +34,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn icon @click.native.stop="openUserHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
+        <table-column-selection
+          :headers="userAccountTableHeaders"
+          @setSelectedColumn="setSelectedColumnUserAccount"
+          @resetTableSettings="resetTableSettingsUserAccount"
+        ></table-column-selection>
       </v-toolbar>
 
       <v-card-text v-if="!userList.length">
@@ -45,10 +50,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table
         v-else
-        :headers="userAccountTableHeaders"
+        :headers="visibleUserAccountTableHeaders"
         :items="userList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
-        :options.sync="userAccountOptions"
+        :options.sync="userAccountTableOptions"
         must-sort
         :custom-sort="sortAccounts"
         :search="userFilter"
@@ -56,6 +61,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:item="{ item }">
           <project-user-row
             :item="item"
+            :headers="userAccountTableHeaders"
             :key="user.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
@@ -89,6 +95,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
+        <table-column-selection
+          :headers="serviceAccountTableHeaders"
+          @setSelectedColumn="setSelectedColumnServiceAccount"
+          @resetTableSettings="resetTableSettingsServiceAccount"
+        ></table-column-selection>
       </v-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
@@ -100,10 +111,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table
         v-else
-        :headers="serviceAccountTableHeaders"
+        :headers="visibleServiceAccountTableHeaders"
         :items="serviceAccountList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
-        :options.sync="serviceAccountOptions"
+        :options.sync="serviceAccountTableOptions"
         must-sort
         :custom-sort="sortAccounts"
         :search="serviceAccountFilter"
@@ -111,6 +122,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:item="{ item }">
           <project-service-account-row
             :item="item"
+            :headers="serviceAccountTableHeaders"
             :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
@@ -183,6 +195,7 @@ import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
 import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
 
 import {
   displayName,
@@ -193,7 +206,8 @@ import {
   isServiceAccountUsername,
   getTimestampFormatted,
   getProjectDetails,
-  sortedRoleDisplayNames
+  sortedRoleDisplayNames,
+  mapTableHeader
 } from '@/utils'
 
 import { getMember } from '@/utils/api'
@@ -206,7 +220,8 @@ export default {
     CodeBlock,
     ProjectUserRow,
     ProjectServiceAccountRow,
-    ConfirmDialog
+    ConfirmDialog,
+    TableColumnSelection
   },
   data () {
     return {
@@ -226,66 +241,20 @@ export default {
       floatingButton: false,
       currentServiceAccountName: undefined,
       currentServiceAccountKubeconfig: undefined,
-      serviceAccountTableHeaders: [
-        {
-          text: 'Name',
-          align: 'start',
-          value: 'displayName',
-          sortable: true
-        },
-        {
-          text: 'Created By',
-          align: 'start',
-          value: 'createdBy',
-          sortable: true
-        },
-        {
-          text: 'Created At',
-          align: 'start',
-          value: 'creationTimestamp',
-          sortable: true
-        },
-        {
-          text: 'Description',
-          align: 'start',
-          value: 'description',
-          sortable: true
-        },
-        {
-          text: 'Roles',
-          align: 'end',
-          value: 'roles',
-          sortable: true
-        },
-        {
-          text: 'Actions',
-          align: 'end',
-          value: 'actions',
-          sortable: false
-        }
-      ],
-      userAccountTableHeaders: [
-        {
-          text: 'Name',
-          align: 'start',
-          value: 'username',
-          sortable: true
-        },
-        {
-          text: 'Roles',
-          align: 'end',
-          value: 'roles',
-          sortable: true
-        },
-        {
-          text: 'Actions',
-          align: 'end',
-          value: 'actions',
-          sortable: false
-        }
-      ],
-      userAccountOptions: { itemsPerPage: 10 },
-      serviceAccountOptions: { itemsPerPage: 5 }
+      userAccountTableOptions: undefined,
+      serviceAccountTableOptions: undefined,
+      defaultUserAccountTableOptions: {
+        itemsPerPage: 10,
+        sortBy: ['username'],
+        sortDesc: [false]
+      },
+      defaultServiceAccountTableOptions: {
+        itemsPerPage: 5,
+        sortBy: ['displayName'],
+        sortDesc: [false]
+      },
+      userAccountSelectedColumns: {},
+      serviceAccountSelectedColumns: {}
     }
   },
   computed: {
@@ -314,20 +283,6 @@ export default {
     costObject () {
       return this.projectDetails.costObject
     },
-    serviceAccountList () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
-      return map(serviceAccounts, serviceAccount => {
-        const { username } = serviceAccount
-        return {
-          ...serviceAccount,
-          avatarUrl: gravatarUrlGeneric(username),
-          displayName: displayName(username),
-          created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
-          isCurrentUser: this.isCurrentUser(username)
-        }
-      })
-    },
     userList () {
       const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
@@ -352,8 +307,107 @@ export default {
       })
       return join(emails, ';')
     },
+    userAccountTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'username',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ROLES',
+          align: 'end',
+          value: 'roles',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
+        }
+      ]
+      return map(headers, header => ({
+        ...header,
+        selected: get(this.userAccountSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleUserAccountTableHeaders () {
+      return filter(this.userAccountTableHeaders, ['selected', true])
+    },
+    serviceAccountList () {
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
+      return map(serviceAccounts, serviceAccount => {
+        const { username } = serviceAccount
+        return {
+          ...serviceAccount,
+          avatarUrl: gravatarUrlGeneric(username),
+          displayName: displayName(username),
+          created: getTimestampFormatted(serviceAccount.creationTimestamp),
+          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
+          isCurrentUser: this.isCurrentUser(username)
+        }
+      })
+    },
     currentServiceAccountDisplayName () {
       return get(parseServiceAccountUsername(this.currentServiceAccountName), 'name')
+    },
+    serviceAccountTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'displayName',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'CREATED BY',
+          align: 'start',
+          value: 'createdBy',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'CREATED AT',
+          align: 'start',
+          value: 'creationTimestamp',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'DESCRIPTION',
+          align: 'start',
+          value: 'description',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ROLES',
+          align: 'end',
+          value: 'roles',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
+        }
+      ]
+      return map(headers, header => ({
+        ...header,
+        selected: get(this.serviceAccountSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleServiceAccountTableHeaders () {
+      return filter(this.serviceAccountTableHeaders, ['selected', true])
     }
   },
   methods: {
@@ -552,6 +606,67 @@ export default {
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       const sortedItems = orderBy(items, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
       return sortedItems
+    },
+    setSelectedColumnUserAccount (header) {
+      this.$set(this.userAccountSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumnsUserAccount()
+    },
+    resetTableSettingsUserAccount () {
+      this.userAccountSelectedColumns = mapTableHeader(this.userAccountTableHeaders, 'defaultSelected')
+      this.userAccountTableOptions = this.defaultUserAccountTableOptions
+      this.saveSelectedColumnsUserAccount()
+    },
+    saveSelectedColumnsUserAccount () {
+      this.$localStorage.setObject('members/useraccount-list/selected-columns', mapTableHeader(this.userAccountTableHeaders, 'selected'))
+    },
+    setSelectedColumnServiceAccount (header) {
+      this.$set(this.serviceAccountSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumnsServiceAccount()
+    },
+    resetTableSettingsServiceAccount () {
+      this.serviceAccountSelectedColumns = mapTableHeader(this.serviceAccountTableHeaders, 'defaultSelected')
+      this.serviceAccountTableOptions = this.defaultServiceAccountTableOptions
+      this.saveSelectedColumnsServiceAccount()
+    },
+    saveSelectedColumnsServiceAccount () {
+      this.$localStorage.setObject('members/serviceaccount-list/selected-columns', mapTableHeader(this.serviceAccountTableHeaders, 'selected'))
+    },
+    updateTableSettings () {
+      this.userAccountSelectedColumns = this.$localStorage.getObject('members/useraccount-list/selected-columns') || {}
+      const userAccountTableOptions = this.$localStorage.getObject('members/useraccount-list/options')
+      this.userAccountTableOptions = {
+        ...this.defaultUserAccountTableOptions,
+        ...userAccountTableOptions
+      }
+
+      this.serviceAccountSelectedColumns = this.$localStorage.getObject('members/serviceaccount-list/selected-columns') || {}
+      const serviceAccountTableOptions = this.$localStorage.getObject('members/serviceaccount-list/options')
+      this.serviceAccountTableOptions = {
+        ...this.defaultServiceAccountTableOptions,
+        ...serviceAccountTableOptions
+      }
+    }
+  },
+  watch: {
+    userAccountTableOptions (value) {
+      if (!value) {
+        return
+      }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+      this.$localStorage.setObject('members/useraccount-list/options', { sortBy, sortDesc, itemsPerPage })
+    },
+    serviceAccountTableOptions (value) {
+      if (!value) {
+        return
+      }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+      this.$localStorage.setObject('members/serviceaccount-list/options', { sortBy, sortDesc, itemsPerPage })
     }
   },
   mounted () {
@@ -568,6 +683,15 @@ export default {
       this.kubeconfigDialog = false
       this.fab = false
     })
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.updateTableSettings()
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.updateTableSettings()
+    next()
   }
 }
 </script>
