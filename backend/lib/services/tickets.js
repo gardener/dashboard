@@ -21,10 +21,15 @@ function fromLabel (item) {
   ])
 }
 
-const converter = exports.converter = markdown.createConverter({
-  ghMentions: true,
-  ghMentionsLink: new URL(config.gitHub.apiUrl).origin + '/{u}'
-})
+const apiUrl = _.get(config, 'gitHub.apiUrl')
+const options = {}
+
+if (apiUrl) {
+  options.ghMentions = true
+  options.ghMentionsLink = new URL(apiUrl).origin + '/{u}'
+}
+
+const converter = exports.converter = markdown.createConverter(options)
 
 function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
