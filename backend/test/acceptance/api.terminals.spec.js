@@ -7,11 +7,9 @@
 'use strict'
 
 const { cloneDeep, padStart } = require('lodash')
-const { WatchBuilder, createMockWatch } = require('@gardener-dashboard/kube-client')
 const { mockRequest } = require('@gardener-dashboard/request')
+const { WatchBuilder, createMockWatch } = require('@gardener-dashboard/kube-client')
 const { converter } = require('../../lib/services/terminals')
-const fixtures = require('../../__fixtures__')
-const { fromBase64, hash } = fixtures.helper
 
 function getTerminalName (target, identifier) {
   return [
@@ -19,13 +17,6 @@ function getTerminalName (target, identifier) {
     target,
     padStart(identifier, 5, '0')
   ].join('-')
-}
-
-function getKubeApiServer (seed, { namespace = 'garden', name } = {}) {
-  return [
-    !name ? 'k-g' : 'k-' + hash(name, namespace),
-    seed.spec.dns.ingressDomain
-  ].join('.')
 }
 
 describe('api', function () {
@@ -44,7 +35,6 @@ describe('api', function () {
   })
 
   describe('terminals', function () {
-    /* eslint-disable no-unused-vars */
     const admin = fixtures.auth.createUser({ id: 'admin@example.org' })
     const namespace = 'garden-foo'
 
@@ -251,7 +241,6 @@ describe('api', function () {
           .expect(200)
 
         expect(WatchBuilder.create).toBeCalledTimes(2)
-        expect(WatchBuilder.create.mock.calls).toMatchSnapshot()
 
         expect(mockRequest).toBeCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()

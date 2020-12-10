@@ -9,13 +9,10 @@
 const assert = require('assert').strict
 const pEvent = require('p-event')
 const { filter, map, pick, groupBy, find, includes } = require('lodash')
-
-const kubernetesClient = require('@gardener-dashboard/kube-client')
+const kubeClient = require('@gardener-dashboard/kube-client')
 const cache = require('../../lib/cache')
 const { projects, shoots, authorization, tickets } = require('../../lib/services')
 const watches = require('../../lib/watches')
-
-const fixtures = require('../../__fixtures__')
 
 jest.mock('../../lib/watches')
 
@@ -47,7 +44,7 @@ describe('socket.io', function () {
   })
 
   beforeEach(async function () {
-    createClientStub = jest.spyOn(kubernetesClient, 'createClient').mockReturnValue(client)
+    createClientStub = jest.spyOn(kubeClient, 'createClient').mockReturnValue(client)
     isAdminStub = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
   })
 

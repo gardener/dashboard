@@ -6,8 +6,8 @@
 
 'use strict'
 
-const kubeconfig = require('@gardener-dashboard/kube-config')
 const { mockRequest } = require('@gardener-dashboard/request')
+const kubeconfig = require('@gardener-dashboard/kube-config')
 const logger = require('../../lib/logger')
 
 describe('api', function () {

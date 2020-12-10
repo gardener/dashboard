@@ -28,7 +28,7 @@
   "scripts": {
     "serve": "nodemon --ext js --watch lib server.js",
     "start": "node server.js",
-    "lint": "eslint --ext .js server.js lib",
+    "lint": "eslint --ext .js server.js .",
     "test": "jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -106,8 +106,23 @@
       "ecmaVersion": 11
     },
     "rules": {
-      "no-console": "error"
-    }
+      "no-console": "error",
+      "no-debugger": "error"
+    },
+    "ignorePatterns": [
+      "my*.js"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.js",
+          "**/test/**/*.spec.js"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
   },
   "jest": {
     "restoreMocks": true,

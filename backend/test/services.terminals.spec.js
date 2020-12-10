@@ -7,16 +7,15 @@
 'use strict'
 
 const _ = require('lodash')
+const yaml = require('js-yaml')
 const pEvent = require('p-event')
 const assert = require('assert').strict
+const { Forbidden } = require('http-errors')
+const { Resources } = require('@gardener-dashboard/kube-client')
+const logger = require('../lib/logger')
 const config = require('../lib/config')
 const { getSeed, cache } = require('../lib/cache')
-const { Resources } = require('@gardener-dashboard/kube-client')
-const { Forbidden } = require('http-errors')
-const logger = require('../lib/logger')
-const yaml = require('js-yaml')
 const { encodeBase64 } = require('../lib/utils')
-const fixtures = require('../__fixtures__')
 
 const {
   ensureTerminalAllowed,

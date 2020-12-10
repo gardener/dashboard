@@ -6,9 +6,8 @@
 
 'use strict'
 
-const services = require('../../lib/services')
-const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 const { mockRequest } = require('@gardener-dashboard/request')
+const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 
 describe('api', function () {
   let agent
@@ -38,7 +37,7 @@ describe('api', function () {
     const purpose = 'purpose'
 
     beforeAll(() => {
-      services.projects.projectInitializationTimeout = 30
+      require('../../lib/services/projects').projectInitializationTimeout = 30
     })
 
     beforeEach(() => {
