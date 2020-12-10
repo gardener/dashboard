@@ -7,7 +7,6 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const { WatchBuilder } = require('@gardener-dashboard/kube-client')
 
 describe('api', function () {
   let agent
@@ -21,6 +20,7 @@ describe('api', function () {
   })
 
   beforeEach(() => {
+    fixtures.resetAll()
     mockRequest.mockReset()
   })
 
@@ -37,11 +37,7 @@ describe('api', function () {
     const purpose = 'purpose'
 
     beforeAll(() => {
-      require('../../lib/services/projects').projectInitializationTimeout = 30
-    })
-
-    beforeEach(() => {
-      WatchBuilder.create.mockClear()
+      require('../../lib/services/projects').projectInitializationTimeout = 10
     })
 
     it('should return three projects', async function () {
@@ -111,7 +107,8 @@ describe('api', function () {
     })
 
     it('should create a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create({
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.watch({
         phase: 'Ready'
       }))
 
@@ -131,15 +128,15 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(WatchBuilder.create).toBeCalledTimes(1)
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
     })
 
     it('should timeout when creating a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create({
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.watch({
         phase: 'Pending'
       }))
 
@@ -159,8 +156,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(504)
 
-      expect(WatchBuilder.create).toBeCalledTimes(1)
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({

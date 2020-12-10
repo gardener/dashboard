@@ -71,6 +71,12 @@ function nextTick () {
   return new Promise(resolve => process.nextTick(resolve))
 }
 
+function delay (milliseconds) {
+  return typeof milliseconds === 'number'
+    ? new Promise(resolve => setTimeout(resolve, milliseconds))
+    : nextTick()
+}
+
 function createUrl (headers) {
   const {
     ':path': path,
@@ -80,32 +86,43 @@ function createUrl (headers) {
   return new URL(path, scheme + '://' + authority)
 }
 
-function parseLabelSelector (obj) {
-  let labelSelector
-  if (typeof obj === 'string') {
-    labelSelector = obj
-  } else {
-    if (obj && obj[':path']) {
-      obj = createUrl(obj)
+function parseSelector (name) {
+  return obj => {
+    let selector
+    if (typeof obj === 'string') {
+      selector = obj
+    } else {
+      if (obj && obj[':path']) {
+        obj = createUrl(obj)
+      }
+      if (obj instanceof URL) {
+        obj = obj.searchParams
+      }
+      if (obj instanceof URLSearchParams) {
+        selector = obj.get(name)
+      }
     }
-    if (obj instanceof URL) {
-      obj = obj.searchParams
-    }
-    if (obj instanceof URLSearchParams) {
-      labelSelector = obj.get('labelSelector')
-    }
+    return _
+      .chain(selector)
+      .split(',')
+      .map(value => value.split('='))
+      .fromPairs()
+      .value()
   }
-  return _
-    .chain(labelSelector)
-    .split(',')
-    .map(value => value.split('='))
-    .fromPairs()
-    .value()
+}
+
+const parseLabelSelector = parseSelector('labelSelector')
+
+function parseFieldSelector (obj) {
+  const fields = parseSelector('fieldSelector')(obj)
+  const iteratee = (accumulator, value, key) => _.set(accumulator, key, value)
+  return _.reduce(fields, iteratee, {})
 }
 
 module.exports = {
   createUrl,
   parseLabelSelector,
+  parseFieldSelector,
   gardenerConfigPath,
   cloneDeepAndSetUid,
   uuidv1,
@@ -117,5 +134,6 @@ module.exports = {
   fromHex,
   toHex,
   formatTime,
-  nextTick
+  nextTick,
+  delay
 }

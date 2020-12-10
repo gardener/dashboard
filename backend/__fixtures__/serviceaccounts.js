@@ -4,17 +4,21 @@
 
 'use strict'
 
+const { PassThrough } = require('stream')
 const { cloneDeep, merge, get, set, filter, find } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
-const { toHex } = require('./helper')
+const { toHex, parseFieldSelector } = require('./helper')
 const { getTokenPayload } = require('./auth')
 
 const serviceAccountList = [
   getServiceAccount({ namespace: 'garden-foo', name: 'robot', createdBy: 'foo@example.org' }),
   getServiceAccount({ namespace: 'garden-foo', name: 'robot-nomember' }),
-  getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' })
+  getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' }),
+  getServiceAccount({ namespace: 'term-host-1', name: 'term-attach-1' }),
+  getServiceAccount({ namespace: 'term-host-2', name: 'term-attach-2' }),
+  getServiceAccount({ namespace: 'term-host-3', name: 'term-attach-3' })
 ]
 
 function getServiceAccount ({
@@ -74,6 +78,28 @@ const mocks = {
         return Promise.reject(createError(404))
       }
       return Promise.resolve(item)
+    }
+  },
+  watch () {
+    const path = '/api/v1/namespaces/:namespace/serviceaccounts'
+    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+    return headers => {
+      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const fieldSelector = parseFieldSelector(headers)
+      const items = filter(serviceaccounts.list(namespace), fieldSelector)
+      const stream = new PassThrough()
+      process.nextTick(() => {
+        for (const item of items) {
+          const event = {
+            type: 'ADDED',
+            object: cloneDeep(item)
+          }
+          const chunk = JSON.stringify(event) + '\n'
+          stream.write(chunk)
+        }
+        stream.end()
+      })
+      return stream
     }
   },
   create ({ uid = 21, resourceVersion = '42', creationTimestamp = 'now' } = {}) {

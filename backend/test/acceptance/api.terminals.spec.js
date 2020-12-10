@@ -6,9 +6,8 @@
 
 'use strict'
 
-const { cloneDeep, padStart } = require('lodash')
+const { padStart } = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
-const { WatchBuilder, createMockWatch } = require('@gardener-dashboard/kube-client')
 const { converter } = require('../../lib/services/terminals')
 
 function getTerminalName (target, identifier) {
@@ -132,8 +131,6 @@ describe('api', function () {
       const identifier = '1'
 
       const name = getTerminalName(target, identifier)
-      const terminal = fixtures.terminals.get(namespace, name)
-      const hostNamespace = terminal.spec.host.namespace
 
       it('should create a terminal resource', async function () {
         const identifier = '21'
@@ -202,30 +199,11 @@ describe('api', function () {
       })
 
       it('should fetch a terminal resource', async function () {
-        const serviceAccountName = terminal.status.attachServiceAccountName
-        const serviceAccount = fixtures.serviceaccounts.create({
-          namespace: hostNamespace,
-          name: serviceAccountName,
-          createdBy: 'admin@example.org'
-        })
-
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.watch())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.watch())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-
-        createMockWatch('terminals').mockImplementation(mockWatch => {
-          mockWatch.emit('event', {
-            type: 'ADDED',
-            object: cloneDeep(terminal)
-          })
-        })
-
-        createMockWatch('serviceaccounts').mockImplementation(mockWatch => {
-          mockWatch.emit('event', {
-            type: 'ADDED',
-            object: cloneDeep(serviceAccount)
-          })
-        })
 
         const res = await agent
           .post('/api/terminals')
@@ -240,9 +218,7 @@ describe('api', function () {
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(WatchBuilder.create).toBeCalledTimes(2)
-
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toBeCalledTimes(5)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()

@@ -6,12 +6,13 @@
 
 'use strict'
 
+const { PassThrough } = require('stream')
 const { cloneDeep, merge, find, filter, get, set, isEmpty, split, padStart } = require('lodash')
 const hash = require('object-hash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
-const { parseLabelSelector } = require('./helper')
+const { parseLabelSelector, parseFieldSelector } = require('./helper')
 
 const terminalList = [
   getTerminal({
@@ -147,6 +148,28 @@ const mocks = {
         return Promise.resolve(item)
       }
       return Promise.reject(createError(404))
+    }
+  },
+  watch () {
+    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals'
+    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
+    return headers => {
+      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const fieldSelector = parseFieldSelector(headers)
+      const items = filter(terminals.list(namespace), fieldSelector)
+      const stream = new PassThrough()
+      process.nextTick(() => {
+        for (const item of items) {
+          const event = {
+            type: 'ADDED',
+            object: cloneDeep(item)
+          }
+          const chunk = JSON.stringify(event) + '\n'
+          stream.write(chunk)
+        }
+        stream.end()
+      })
+      return stream
     }
   },
   patch () {

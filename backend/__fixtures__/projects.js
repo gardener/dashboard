@@ -6,12 +6,12 @@
 
 'use strict'
 
-const { cloneDeep, merge, get, set, find, includes, intersection } = require('lodash')
+const { PassThrough } = require('stream')
+const { cloneDeep, merge, get, set, filter, find, includes, intersection } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
-const { createMockWatch } = require('@gardener-dashboard/kube-client')
 
-const { nextTick } = require('./helper')
+const { delay, parseFieldSelector } = require('./helper')
 const { getTokenPayload } = require('./auth')
 
 function createUser (member) {
@@ -174,6 +174,7 @@ const projectList = [
 ]
 
 const projects = {
+  items: [...projectList],
   create (options) {
     return getProject(options)
   },
@@ -212,7 +213,10 @@ const projects = {
     return includes(userList, id) || intersection(groupList, groups).length
   },
   list () {
-    return cloneDeep(projectList)
+    return cloneDeep(this.items)
+  },
+  reset () {
+    this.items = [...projectList]
   }
 }
 
@@ -246,19 +250,34 @@ module.exports = {
           roles: ['admin', 'uam']
         }])
         set(item, 'status.phase', 'Initial')
-        createMockWatch('projects').mockImplementation(async mockWatch => {
-          // emit ADDED
-          await nextTick()
-          let object = cloneDeep(item)
-          mockWatch.emit('event', { type: 'ADDED', object })
-          // emit MODIFIED
-          await nextTick()
-          object = cloneDeep(item)
-          set(object, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
-          set(object, 'status.phase', phase)
-          mockWatch.emit('event', { type: 'MODIFIED', object })
-        })
+        projects.items.push(item)
         return Promise.resolve(item)
+      }
+    },
+    watch ({ phase = 'Ready', milliseconds } = {}) {
+      // eslint-disable-next-line no-unused-vars
+      const path = '/apis/core.gardener.cloud/v1beta1/projects'
+      return headers => {
+        const fieldSelector = parseFieldSelector(headers)
+        const stream = new PassThrough()
+        process.nextTick(async () => {
+          const items = filter(projects.list(), fieldSelector)
+          for (const item of items) {
+            const chunk = JSON.stringify({ type: 'ADDED', object: item }) + '\n'
+            stream.write(chunk)
+          }
+          await delay(milliseconds)
+          const initialItems = filter(items, ['status.phase', 'Initial'])
+          for (const item of initialItems) {
+            const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+            set(item, 'status.phase', phase)
+            set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+            const chunk = JSON.stringify({ type: 'MODIFIED', object: item }) + '\n'
+            stream.write(chunk)
+          }
+          stream.end()
+        })
+        return stream
       }
     },
     get () {

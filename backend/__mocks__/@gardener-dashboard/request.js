@@ -44,22 +44,21 @@ class MockClient {
   request (path, { method = 'get', searchParams, headers = {}, json, body } = {}) {
     headers = {
       ...this.defaults.options.headers,
-      ...mapKeys(headers, (value, key) => toLower(key)),
+      ...mapKeys(headers, (_, key) => toLower(key)),
       ':method': method,
       ...this[pseudoHeaders]
     }
-
     headers[':path'] = join(headers[':path'], path)
     if (searchParams) {
       headers[':path'] += '?' + searchParams
     }
+    const args = [headers]
     if (json) {
-      return mockRequest(headers, json)
+      args.push(json)
+    } else if (body) {
+      args.push(body)
     }
-    if (body) {
-      return mockRequest(headers, body)
-    }
-    return mockRequest(headers)
+    return mockRequest(...args)
   }
 }
 

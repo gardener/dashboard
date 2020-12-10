@@ -531,9 +531,26 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?watch=true&fieldSelector=metadata.name%3Dterm-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
       ":path": "/api/v1/namespaces/garden/secrets/host.kubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "api.host.garden.shoot.cluster",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/term-host-1/serviceaccounts?watch=true&fieldSelector=metadata.name%3Dterm-attach-1",
+      ":scheme": "https",
     },
   ],
   Array [

@@ -27,6 +27,10 @@ const user = {
   }
 }
 
+function resetAll () {
+  projects.reset()
+}
+
 const fixtures = {
   config,
   auth,
@@ -43,6 +47,7 @@ const fixtures = {
   nodes,
   terminals,
   github,
-  helper
+  helper,
+  resetAll
 }
 module.exports = fixtures
