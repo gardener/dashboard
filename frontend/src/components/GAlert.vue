@@ -11,16 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     v-model="alertVisible"
     :color="color"
     :transition="transition"
+    @input="closeBanner"
+    dismissible
   >
-    <v-row align="center">
-      <v-col class="grow pa-0">
-        <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
-        <slot v-else name="message"></slot>
-      </v-col>
-      <v-col class="shrink py-0">
-        <v-btn small icon @click="closeBanner"><v-icon>mdi-close-circle</v-icon></v-btn>
-      </v-col>
-    </v-row>
+    <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
+    <slot v-else name="message"></slot>
   </v-alert>
 </template>
 
