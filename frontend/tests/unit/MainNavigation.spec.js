@@ -120,9 +120,6 @@ describe('MainNavigation.vue', () => {
     const projectSelector = wrapper.find('.v-navigation-drawer .project-selector')
     expect(projectSelector.element).not.toBeUndefined()
 
-    const footer = wrapper.find('.v-navigation-drawer .v-footer')
-    expect(footer.element).not.toBeUndefined()
-
     const listTitle = wrapper.find('.v-navigation-drawer .v-list .v-list-item__title')
     expect(listTitle.element).not.toBeUndefined()
 

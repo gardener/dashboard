@@ -15,9 +15,6 @@ SPDX-License-Identifier: Apache-2.0
               <h1>Gardener</h1>
               <h2>Universal Kubernetes at Scale</h2>
             </div>
-            <div class="flex-grow-0 px-2">
-              <img :src="footerLogoUrl" height="24">
-            </div>
           </v-col>
           <v-col cols="7" class="d-flex flex-column">
               <div class="flex-shrink-1">
@@ -107,9 +104,6 @@ export default {
     },
     landingPageUrl () {
       return this.cfg.landingPageUrl
-    },
-    footerLogoUrl () {
-      return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
     },
     drawerWidth () {
       return Math.floor(this.windowSize.width * 0.4)
