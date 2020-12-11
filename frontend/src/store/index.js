@@ -340,14 +340,7 @@ const getters = {
     return state.controllerRegistrations.all
   },
   networkingTypeList (state, getters) {
-    const extensions = getters.controllerRegistrationList
-    const networkExtensions = filter(extensions, ({ resources }) => {
-      return find(resources, { kind: 'Network' })
-    })
-
-    return flatMap(networkExtensions, ({ resources }) => {
-      return map(resources, 'type')
-    })
+    return state.controllerRegistrations.networkingTypes
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -1014,6 +1007,13 @@ const actions = {
   async fetchControllerRegistrations ({ dispatch }) {
     try {
       await dispatch('controllerRegistrations/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
+  async fetchNetworkingTypes ({ dispatch }) {
+    try {
+      await dispatch('controllerRegistrations/getNetworkingTypes')
     } catch (err) {
       dispatch('setError', err)
     }

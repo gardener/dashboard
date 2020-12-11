@@ -319,3 +319,7 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 export function getControllerRegistrations () {
   return getResource('/api/controllerregistrations')
 }
+
+export function getNetworkingTypes () {
+  return getResource('/api/controllerregistrations/resources/kind/network/types')
+}

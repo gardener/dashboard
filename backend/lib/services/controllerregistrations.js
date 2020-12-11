@@ -30,3 +30,14 @@ exports.list = async function ({ user }) {
   const controllerregistrations = getControllerRegistrations()
   return fromResource(controllerregistrations)
 }
+
+exports.listNetworkingTpes = async function () {
+  const controllerregistrations = getControllerRegistrations()
+  const networkExtensions = _.filter(controllerregistrations, ({ spec }) => {
+    return _.find(spec.resources, { kind: 'Network' })
+  })
+
+  return _.flatMap(networkExtensions, ({ spec }) => {
+    return _.map(spec.resources, 'type')
+  })
+}

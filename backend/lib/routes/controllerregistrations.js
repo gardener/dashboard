@@ -20,3 +20,12 @@ router.route('/')
       next(err)
     }
   })
+
+router.route('/resources/kind/network/types')
+  .get(async (req, res, next) => {
+    try {
+      res.send(await controllerregistrations.listNetworkingTpes())
+    } catch (err) {
+      next(err)
+    }
+  })
