@@ -23,21 +23,16 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
       </v-row>
     </v-alert>
-    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
 import { transformHtml } from '@/utils'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 
 const LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES = 'global/alert-banner/hidden-messages'
 
 export default {
-  components: {
-    ConfirmDialog
-  },
   props: {
     message: { // alternatively, use message slot
       type: String
@@ -71,21 +66,10 @@ export default {
       'setAlertBanner'
     ]),
     async closeBanner () {
-      const result = await this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Hide',
-        captionText: 'Hide Message',
-        messageHtml: 'Do you want to hide this message?',
-        showDoNotAskAgain: true
-      })
-      if (!result) {
-        return
-      }
-      const { doNotAskAgain } = result
-      if (doNotAskAgain) {
-        const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
-        permanentlyHiddenIds[this.identifier] = true
-        this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
-      }
+      const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
+      permanentlyHiddenIds[this.identifier] = true
+      this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
+
       this.setAlertVisibility(false)
     },
     getPermanentlyHiddenIds () {
