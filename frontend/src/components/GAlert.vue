@@ -5,25 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <v-alert
-      class="alertBanner"
-      :type="type"
-      v-model="alertVisible"
-      :color="color"
-      :transition="transition"
-    >
-      <v-row align="center">
-        <v-col class="grow pa-0">
-          <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
-          <slot v-else name="message"></slot>
-        </v-col>
-        <v-col class="shrink py-0">
-          <v-btn small icon @click="closeBanner"><v-icon>mdi-close-circle</v-icon></v-btn>
-        </v-col>
-      </v-row>
-    </v-alert>
-  </div>
+  <v-alert
+    class="alertBanner"
+    :type="type"
+    v-model="alertVisible"
+    :color="color"
+    :transition="transition"
+  >
+    <v-row align="center">
+      <v-col class="grow pa-0">
+        <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
+        <slot v-else name="message"></slot>
+      </v-col>
+      <v-col class="shrink py-0">
+        <v-btn small icon @click="closeBanner"><v-icon>mdi-close-circle</v-icon></v-btn>
+      </v-col>
+    </v-row>
+  </v-alert>
 </template>
 
 <script>
@@ -41,7 +39,7 @@ export default {
       type: String,
       default: 'error'
     },
-    identifier: {
+    identifier: { // pass identifier to permanently hide the message on close
       type: String
     },
     color: {
@@ -66,17 +64,23 @@ export default {
       'setAlertBanner'
     ]),
     async closeBanner () {
-      const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
-      permanentlyHiddenIds[this.identifier] = true
-      this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
+      if (this.identifier) { // hide permanently
+        this.hidePermanently(this.identifier)
+      }
 
       this.setAlertVisibility(false)
     },
-    getPermanentlyHiddenIds () {
-      return this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
+    hidePermanently (identifier) {
+      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
+      permanentlyHiddenIds[identifier] = true
+      this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
     },
     isPermanentlyHidden (identifier) {
-      const permanentlyHiddenIds = this.getPermanentlyHiddenIds()
+      if (!identifier) {
+        return false
+      }
+
+      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
       return permanentlyHiddenIds[this.identifier] === true
     },
     updateAlertVisibility () {
