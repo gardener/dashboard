@@ -321,5 +321,5 @@ export function getControllerRegistrations () {
 }
 
 export function getNetworkingTypes () {
-  return getResource('/api/controllerregistrations/resources/kind/network/types')
+  return getResource('/api/controllerregistrations/network-types')
 }

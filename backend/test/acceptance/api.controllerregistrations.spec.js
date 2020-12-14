@@ -76,7 +76,7 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
     common.stub.getControllerRegistrations(sandbox)
 
     const res = await agent
-      .get('/api/controllerregistrations/resources/kind/network/types')
+      .get('/api/controllerregistrations/network-types')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
