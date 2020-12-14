@@ -103,7 +103,7 @@ class MemberManager {
       return
     }
 
-    if (!item.kind === 'ServiceAccount') {
+    if (item.kind !== 'ServiceAccount') {
       throw new UnprocessableEntity('Member is not a ServiceAccount')
     }
 
@@ -188,13 +188,15 @@ class MemberManager {
       throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-    if (_.size(_.get(item, 'extensions.secrets')) > 1) {
-      throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
-    }
 
     const name = _
       .chain(item)
-      .get('extensions.secrets')
+      .get('extensions.secrets', [])
+      .tap(secrets => {
+        if (secrets.length > 1) {
+          throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
+        }
+      })
       .head()
       .get('name')
       .value()
