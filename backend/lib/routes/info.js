@@ -49,6 +49,5 @@ async function fetchGardenerVersion () {
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    return undefined
   }
 }

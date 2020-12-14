@@ -21,7 +21,7 @@ router.route('/')
     }
   })
 
-router.route('/resources/kind/network/types')
+router.route('/network-types')
   .get(async (req, res, next) => {
     try {
       res.send(await controllerregistrations.listNetworkingTpes())

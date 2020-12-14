@@ -33,11 +33,11 @@ exports.list = async function ({ user }) {
 
 exports.listNetworkingTpes = async function () {
   const controllerregistrations = getControllerRegistrations()
-  const networkExtensions = _.filter(controllerregistrations, ({ spec }) => {
-    return _.find(spec.resources, { kind: 'Network' })
-  })
-
-  return _.flatMap(networkExtensions, ({ spec }) => {
-    return _.map(spec.resources, 'type')
-  })
+  return _
+    .chain(controllerregistrations)
+    .map('spec.resources')
+    .flatMap()
+    .filter(['kind', 'Network'])
+    .map('type')
+    .value()
 }
