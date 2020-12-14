@@ -35,8 +35,7 @@ exports.listNetworkingTpes = async function () {
   const controllerregistrations = getControllerRegistrations()
   return _
     .chain(controllerregistrations)
-    .map('spec.resources')
-    .flatMap()
+    .flatMap('spec.resources')
     .filter(['kind', 'Network'])
     .map('type')
     .value()
