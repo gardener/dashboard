@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-card class="mr-extra mt-6">
+    <v-card class="mt-6">
       <v-toolbar flat color="accent accentTitle--text">
         <v-icon class="pr-2" color="accentTitle">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subtitle-1">
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="userList.length > 3"
-          class="searchField"
+          class="mr-3"
           prepend-inner-icon="mdi-magnify"
           color="primary"
           label="Search"
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list>
     </v-card>
 
-    <v-card class="mr-extra mt-6">
+    <v-card class="mt-6">
       <v-toolbar flat color="accent  accentTitle--text">
         <v-icon color="accentTitle" class="pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subtitle-1">
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="serviceAccountList.length > 3"
-          class="searchField"
+          class="mr-3"
           prepend-inner-icon="mdi-magnify"
           color="accent accentTitle--text"
           label="Search"
@@ -142,22 +142,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
     </v-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-    <v-fab-transition v-if="canManageServiceAccountMembers || canManageMembers">
-      <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
-        <template v-slot:activator>
-          <v-btn v-model="fab" color="primary" fab>
-            <v-icon v-if="fab">mdi-close</v-icon>
-            <v-icon v-else>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-        <v-btn v-if="canManageServiceAccountMembers" fab small @click="openServiceAccountAddDialog">
-          <v-icon color="primary">mdi-monitor</v-icon>
-        </v-btn>
-        <v-btn v-if="canManageMembers" fab small @click="openUserAddDialog">
-          <v-icon color="primary">mdi-account</v-icon>
-        </v-btn>
-      </v-speed-dial>
-    </v-fab-transition>
   </v-container>
 </template>
 
@@ -489,14 +473,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .searchField {
-    margin-right: 20px !important;
-  }
-
-  .v-input__slot {
-    margin: 0px;
-  }
-</style>

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card class="mr-extra card_disabled">
+  <v-card class="card_disabled">
     <v-toolbar :class="toolbarClass">
       <vendor-icon v-model="icon" :width="32"></vendor-icon>
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>

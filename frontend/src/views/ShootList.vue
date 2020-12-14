@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid class="shootlist">
-    <v-card class="mr-extra">
+    <v-card>
       <v-toolbar flat height="72" color="accent">
         <icon-base width="44" height="60" viewBox="0 0 298 403" class="mr-2" iconColor="accentTitle">
           <certified-kubernetes></certified-kubernetes>
@@ -26,8 +26,11 @@ SPDX-License-Identifier: Apache-2.0
           solo
           v-model="search"
           @keyup.esc="search=''"
-          class="search_textfield"
+          class="mr-3"
         ></v-text-field>
+        <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
+          <v-icon color="accentTitle">mdi-plus</v-icon>
+        </v-btn>
         <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute>
           <template v-slot:activator="{ on: menu }">
             <v-tooltip open-delay="500" top>
@@ -180,11 +183,6 @@ SPDX-License-Identifier: Apache-2.0
         </v-card>
       </v-dialog>
     </v-card>
-    <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="primary" fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
-        <v-icon ref="add">mdi-plus</v-icon>
-      </v-btn>
-    </v-fab-transition>
   </v-container>
 </template>
 
@@ -563,14 +561,6 @@ export default {
 
   .disabled_filter {
     opacity: 0.5;
-  }
-
-  .search_textfield {
-    min-width: 125px;
-  }
-
-  .v-input__slot {
-    margin: 0px;
   }
 
 </style>

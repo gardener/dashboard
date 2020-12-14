@@ -105,11 +105,10 @@ export default {
       return this.rows.length > 0
     },
     cardClass () {
-      let cardClass = 'mr-extra'
       if (this.disabled) {
-        cardClass = `${cardClass} card_disabled`
+        return 'card_disabled'
       }
-      return cardClass
+      return undefined
     }
   },
   methods: {

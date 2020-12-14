@@ -9,10 +9,10 @@ import colors from 'vuetify/lib/util/colors'
 const theme = {
   themes: {
     light: {
-      primary: colors.blue.darken2,
+      primary: colors.cyan.darken2,
       secondary: colors.grey.darken3,
-      accent: colors.green.darken2,
-      accentTitle: colors.yellow.darken2,
+      accent: colors.cyan.darken2,
+      accentTitle: colors.grey.lighten4,
       anchor: colors.cyan.darken2,
       actionButton: colors.shades.black
     },

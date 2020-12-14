@@ -130,38 +130,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
-
-    <v-fab-transition>
-      <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
-        <template v-slot:activator>
-          <v-btn class="primary" fab v-model="dialogState.speedDial">
-            <v-icon v-if="dialogState.speedDial">mdi-close</v-icon>
-            <v-icon v-else>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab small @click="onAdd('vsphere')">
-          <infra-icon value="vsphere"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab small @click="onAdd('metal')">
-          <infra-icon value="metal"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab small @click="onAdd('alicloud')">
-          <infra-icon value="alicloud"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab small @click="onAdd('openstack')">
-          <infra-icon value="openstack"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab small @click="onAdd('gcp')">
-          <infra-icon value="gcp"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab small @click="onAdd('azure')">
-          <infra-icon value="azure"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab small @click="onAdd('aws')">
-          <infra-icon value="aws"></infra-icon>
-        </v-btn>
-      </v-speed-dial>
-    </v-fab-transition>
   </v-container>
 </template>
 
