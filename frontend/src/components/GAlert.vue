@@ -84,7 +84,6 @@ export default {
     },
     setAlertVisibility (visible) {
       this.alertVisible = visible
-      this.$emit('value', visible)
     }
   },
   mounted () {

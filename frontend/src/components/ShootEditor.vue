@@ -12,7 +12,6 @@ SPDX-License-Identifier: Apache-2.0
         :identifier="alertBannerIdentifier"
         color="cyan darken-2"
         transition="slide-y-transition"
-        @input="onDismissModificationWarning"
       >
         <template v-slot:message>
           <slot name="modificationWarning"></slot>
@@ -167,7 +166,6 @@ export default {
   },
   data () {
     return {
-      modificationWarningVisible: false,
       conflictPath: null,
       snackbar: false,
       snackbarTimeout: 3000,
@@ -251,9 +249,6 @@ export default {
       const namespace = this.namespace
       const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
-    },
-    onDismissModificationWarning (visible) {
-      this.modificationWarningVisible = visible
     },
     undo () {
       if (this.$instance) {
