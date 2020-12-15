@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     :title="name"
-    toolbarColor="primary"
     :popperKey="`lbclass_${name}`"
   >
     <template v-slot:popperRef>

@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     title="No Hibernation Schedule"
-    toolbarColor="primary"
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
     <div class="message">

@@ -17,7 +17,6 @@ SPDX-License-Identifier: Apache-2.0
       <g-popper
         v-if="snackbarDetailsText"
         title="Details"
-        toolbarColor="primary"
         :popperKey="`popper_snackbar_${uuid}`"
         placement="bottom"
         :boundariesSelector="`#boundary_${uuid}`"
@@ -63,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
               <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
               <g-popper
                 :title="`${imageShortText} Help`"
-                toolbar-color="primary"
                 :popper-key="`popper_${uuid}`"
                 placement="bottom"
                 :boundaries-selector="`#boundary_${uuid}`"

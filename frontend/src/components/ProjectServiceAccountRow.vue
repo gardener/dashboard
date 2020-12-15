@@ -14,7 +14,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-title v-if="isServiceAccountFromCurrentNamespace" class="cursor-pointer">
           <g-popper
             :title="displayName"
-            toolbarColor="primary"
             :popperKey="`serviceAccount_sa_${username}`"
           >
             <template v-slot:popperRef>
