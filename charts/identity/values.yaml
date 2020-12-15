@@ -8,8 +8,8 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/dexidp/dex
-  tag: v2.24.0
+  repository: ghcr.io/dexidp/dex
+  tag: v2.27.0
   pullPolicy: IfNotPresent
 
 containerPort: 5556
