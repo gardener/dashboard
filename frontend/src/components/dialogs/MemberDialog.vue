@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650" persistent>
     <v-card>
-      <card-svg-title>
-        <template v-slot:svgComponent>
-            <member-background></member-background>
-        </template>
-        <v-icon large>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{title}}</span>
-      </card-svg-title>
+      <v-card-title class="accent">
+        <v-icon large class="accentTitle--text">mdi-account-plus</v-icon>
+        <span class="headline ml-5 accentTitle--text">{{title}}</span>
+      </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
           <v-row >
@@ -87,8 +84,6 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
-import MemberBackground from '@/components/backgrounds/MemberBackground.vue'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
@@ -105,9 +100,7 @@ const defaultServiceName = 'robot'
 export default {
   name: 'member-dialog',
   components: {
-    GAlert,
-    MemberBackground,
-    CardSvgTitle
+    GAlert
   },
   props: {
     value: {

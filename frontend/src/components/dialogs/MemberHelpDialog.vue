@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card :class="cardClass">
-      <card-svg-title>
-        <template v-slot:svgComponent>
-            <member-background></member-background>
-        </template>
-        <v-icon large dark>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{ title}}</span>
-      </card-svg-title>
+      <v-card-title class="accent">
+        <v-icon large class="accentTitle--text">mdi-account-plus</v-icon>
+        <span class="headline ml-5 accentTitle--text">{{ title}}</span>
+      </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
           <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
@@ -39,15 +36,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import MemberBackground from '@/components/backgrounds/MemberBackground.vue'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 export default {
   name: 'help-member-dialog',
-  components: {
-    MemberBackground,
-    CardSvgTitle
-  },
   props: {
     value: {
       type: Boolean,

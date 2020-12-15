@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span style="vertical-align:middle" :class="contentClass">
+  <div class="d-flex align-center" :class="contentClass">
     <infra-icon-aws v-if="value==='aws'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-aws>
     <infra-icon-azure v-if="value==='azure'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-azure>
     <infra-icon-gcp v-if="value==='gcp'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-gcp>
@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <infra-icon-alicloud v-if="value==='alicloud'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-alicloud>
     <infra-icon-metal v-if="value==='metal'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-metal>
     <infra-icon-vsphere v-if="value==='vsphere'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-vsphere>
-  </span>
+  </div>
 </template>
 
 <script>

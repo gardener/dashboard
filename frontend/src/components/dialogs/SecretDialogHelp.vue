@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-      <card-svg-title svg-title>
-        <template v-slot:svgComponent>
-            <secret-background></secret-background>
-        </template>
+      <v-card-title class="accent">
         <v-icon color="accentTitle" large>mdi-help-circle-outline</v-icon>
         <span class="headline ml-5 accentTitle--text">{{title}}</span>
-      </card-svg-title>
+      </v-card-title>
       <v-card-text class="secret-dialog pa-4">
         <slot name="help-content"></slot>
       </v-card-text>
@@ -29,14 +26,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 export default {
-  components: {
-    SecretBackground,
-    CardSvgTitle
-  },
   props: {
     title: {
       type: String,

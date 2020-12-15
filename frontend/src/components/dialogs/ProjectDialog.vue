@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <card-svg-title>
-        <template v-slot:svgComponent>
-            <project-background></project-background>
-        </template>
-        <v-icon large>mdi-cube</v-icon>
-        <span class="headline ml-5">Create Project</span>
-      </card-svg-title>
+      <v-card-title class="accent">
+        <v-icon large class="accentTitle--text">mdi-cube</v-icon>
+        <span class="headline ml-5 accentTitle--text">Create Project</span>
+      </v-card-title>
       <v-card-text class="dialog-content">
         <form>
           <v-container fluid >
@@ -112,17 +109,13 @@ import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
 import GAlert from '@/components/GAlert'
-import ProjectBackground from '@/components/backgrounds/ProjectBackground.vue'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 const defaultProjectName = ''
 
 export default {
   name: 'project-dialog',
   components: {
-    GAlert,
-    ProjectBackground,
-    CardSvgTitle
+    GAlert
   },
   props: {
     value: {

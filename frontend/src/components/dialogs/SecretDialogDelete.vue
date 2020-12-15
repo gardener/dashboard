@@ -7,17 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <card-svg-title>
-        <template v-slot:svgComponent>
-            <secret-background color="error"></secret-background>
-        </template>
+      <v-card-title class="error">
         <v-icon x-large class="accentTitle--text icon">mdi-alert-outline</v-icon>
         <span class="headline ml-5 accentTitle--text">Confirm Delete</span>
-      </card-svg-title>
+      </v-card-title>
       <v-card-text>
         <v-container fluid>
-          Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
-          <span class="error--text font-weight-bold">The operation can not be undone.</span>
+          <span class="subtitle-1">
+            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
+            <span class="error--text font-weight-bold">The operation can not be undone.</span>
+          </span>
         </v-container>
         <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       </v-card-text>
@@ -34,16 +33,12 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
 import GAlert from '@/components/GAlert'
-import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
 import { errorDetailsFromError } from '@/utils/error'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 export default {
   name: 'secret-dialog-delete',
   components: {
-    GAlert,
-    SecretBackground,
-    CardSvgTitle
+    GAlert
   },
   props: {
     value: {

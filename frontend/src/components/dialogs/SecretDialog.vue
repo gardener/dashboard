@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-      <card-svg-title>
-        <template v-slot:svgComponent>
-            <secret-background></secret-background>
-        </template>
+      <v-card-title class="accent">
         <infra-icon v-model="infraIcon" iconColor="accentTitle" :size="42"></infra-icon>
         <span class="headline ml-5 accentTitle--text">{{title}}</span>
-      </card-svg-title>
+      </v-card-title>
       <v-card-text>
         <v-container fluid>
           <div>
@@ -72,8 +69,6 @@ import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
 import InfraIcon from '@/components/InfraIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import SecretBackground from '@/components/backgrounds/SecretBackground.vue'
-import CardSvgTitle from '@/components/CardSvgTitle.vue'
 
 const validationErrors = {
   name: {
@@ -89,9 +84,7 @@ export default {
   components: {
     CloudProfile,
     GAlert,
-    InfraIcon,
-    SecretBackground,
-    CardSvgTitle
+    InfraIcon
   },
   props: {
     value: {

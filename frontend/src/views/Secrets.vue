@@ -139,7 +139,6 @@ import { isOwnSecret } from '@/utils'
 import get from 'lodash/get'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
-import InfraIcon from '@/components/InfraIcon'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
 import isEmpty from 'lodash/isEmpty'
@@ -151,8 +150,7 @@ export default {
     DeleteDialog,
     Secret,
     DisabledSecret,
-    SecretDialogWrapper,
-    InfraIcon
+    SecretDialogWrapper
   },
   data () {
     return {
