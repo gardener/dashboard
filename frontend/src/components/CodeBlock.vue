@@ -25,7 +25,7 @@ import CopyBtn from '@/components/CopyBtn'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
-import hljs from 'highlight.js/lib/highlight.js'
+import hljs from 'highlight.js/lib/core'
 
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'

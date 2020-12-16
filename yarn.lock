@@ -1352,7 +1352,7 @@ __metadata:
     eslint-plugin-vuetify: ^1.0.0-beta.7
     fontsource-roboto: "*"
     get-contrast: ^2.0.0
-    highlight.js: ^9.18.1
+    highlight.js: ^10.4.1
     jest-environment-jsdom-fifteen: ^1.0.2
     jest-serializer-vue: ^2.0.2
     js-yaml: ^3.13.1
@@ -8654,7 +8654,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:^9.18.1, highlight.js@npm:^9.6.0":
+"highlight.js@npm:^10.4.1":
+  version: 10.4.1
+  resolution: "highlight.js@npm:10.4.1"
+  checksum: 067a8cc822a4bfe3ae9cab8b827a64e059052b27606fcc91f06304b2518e0b8c6ff8875b19f2989ff329f1f07f5989dd52aee67eae005d63c77591ca08e419ec
+  languageName: node
+  linkType: hard
+
+"highlight.js@npm:^9.6.0":
   version: 9.18.3
   resolution: "highlight.js@npm:9.18.3"
   checksum: b6b518f937ce65779cbebb219f94ed685cdbad142f222a183afa5d0dd24dfb6b1aeaef40087ff74a2ea978c3ae9b814452bfdef685c98971e4b840f306ccdb82
