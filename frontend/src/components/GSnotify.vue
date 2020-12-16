@@ -21,12 +21,19 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'alertMessage',
       'alertType',
       'isWebsocketConnectionError',
       'websocketConnectAttempt'
     ])
   },
   watch: {
+    alertMessage (value) {
+      if (value) {
+        this.showSnotifyToast(value, this.alertType)
+        this.setAlert(null)
+      }
+    },
     isWebsocketConnectionError (value) {
       if (value === true) {
         this.showWebsocketConnectionError()
