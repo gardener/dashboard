@@ -29,8 +29,8 @@ SPDX-License-Identifier: Apache-2.0
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
-          @setSelectedColumn="setSelectedColumn"
-          @resetTableSettings="resetTableSettings"
+          @setSelectedHeader="setSelectedHeader"
+          @reset="resetTableSettings"
           @toggleFilter="toggleFilter"
         ></table-column-selection>
       </v-toolbar>
@@ -161,7 +161,7 @@ export default {
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
     },
-    setSelectedColumn (header) {
+    setSelectedHeader (header) {
       this.$set(this.selectedColumns, header.value, !header.selected)
       this.saveSelectedColumns()
     },

@@ -199,7 +199,6 @@ class MemberManager {
       .head()
       .get('name')
       .value()
-    console.log('TEST', namespace, name)
     return await this.client.core.secrets.delete(namespace, name)
   }
 

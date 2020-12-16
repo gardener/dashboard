@@ -82,11 +82,11 @@ export default {
     }
   },
   methods: {
-    onDelete (username) {
-      this.$emit('delete', this.item.username)
+    onDelete () {
+      this.$emit('delete', this.item)
     },
-    onEdit (username) {
-      this.$emit('edit', this.item.username, this.item.roles)
+    onEdit () {
+      this.$emit('edit', this.item)
     }
   }
 }

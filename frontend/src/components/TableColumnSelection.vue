@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-list subheader dense>
       <v-subheader>Column Selection</v-subheader>
-      <v-list-item v-for="header in headers" :key="header.value" @click.stop="setSelectedColumn(header)">
+      <v-list-item v-for="header in headers" :key="header.value" @click.stop="onSetSelectedHeader(header)">
         <v-list-item-action>
           <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
         </v-list-item-action>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-tooltip top style="width: 100%">
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="resetTableSettings">
+              <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="onReset">
                 Reset
               </v-btn>
             </template>
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="filter.value"
         :disabled="filter.disabled"
         :class="{ 'disabled_filter' : filter.disabled}"
-        @click.stop="toggleFilter(filter)">
+        @click.stop="onToggleFilter(filter)">
         <v-list-item-action>
           <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
         </v-list-item-action>
@@ -101,13 +101,13 @@ export default {
     }
   },
   methods: {
-    setSelectedColumn (header) {
-      this.$emit('setSelectedColumn', header)
+    onSetSelectedHeader (header) {
+      this.$emit('setSelectedHeader', header)
     },
-    resetTableSettings () {
-      this.$emit('resetTableSettings')
+    onReset () {
+      this.$emit('reset')
     },
-    toggleFilter (filter) {
+    onToggleFilter (filter) {
       this.$emit('toggleFilter', filter)
     },
     checkboxColor (selected) {

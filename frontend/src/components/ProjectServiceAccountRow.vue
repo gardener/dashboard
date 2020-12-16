@@ -96,12 +96,10 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
-                <v-icon v-if="isServiceAccountFromCurrentNamespace">mdi-delete</v-icon>
-                <v-icon v-else>mdi-close</v-icon>
+                <v-icon>{{ isServiceAccountFromCurrentNamespace ? 'mdi-delete' : 'mdi-close' }}</v-icon>
               </v-btn>
             </template>
-            <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
-            <span v-else>Remove Foreign Service Account from Project</span>
+            <span>{{ isServiceAccountFromCurrentNamespace ? 'Delete Service Account' : 'Remove Foreign Service Account from Project' }}</span>
           </v-tooltip>
         </div>
       </div>
@@ -162,19 +160,19 @@ export default {
   },
   methods: {
     onDownload () {
-      this.$emit('download', this.item.username)
+      this.$emit('download', this.item)
     },
     onKubeconfig () {
-      this.$emit('kubeconfig', this.item.username)
+      this.$emit('kubeconfig', this.item)
     },
     onRotateSecret () {
-      this.$emit('rotateSecret', this.item.username)
+      this.$emit('rotateSecret', this.item)
     },
-    onEdit (username) {
-      this.$emit('edit', this.item.username, this.item.roles, this.item.description)
+    onEdit () {
+      this.$emit('edit', this.item)
     },
-    onDelete (username) {
-      this.$emit('delete', this.item.username)
+    onDelete () {
+      this.$emit('delete', this.item)
     }
   }
 }

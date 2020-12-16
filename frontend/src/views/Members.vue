@@ -36,8 +36,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <table-column-selection
           :headers="userAccountTableHeaders"
-          @setSelectedColumn="setSelectedColumnUserAccount"
-          @resetTableSettings="resetTableSettingsUserAccount"
+          @setSelectedHeader="setSelectedHeaderUserAccount"
+          @reset="resetTableSettingsUserAccount"
         ></table-column-selection>
       </v-toolbar>
 
@@ -97,8 +97,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <table-column-selection
           :headers="serviceAccountTableHeaders"
-          @setSelectedColumn="setSelectedColumnServiceAccount"
-          @resetTableSettings="resetTableSettingsServiceAccount"
+          @setSelectedHeader="setSelectedHeaderServiceAccount"
+          @reset="resetTableSettingsServiceAccount"
         ></table-column-selection>
       </v-toolbar>
 
@@ -458,27 +458,27 @@ export default {
         this.setError(err)
       }
     },
-    async onDownload (name) {
-      const kubeconfig = await this.downloadKubeconfig(name)
+    async onDownload ({ username }) {
+      const kubeconfig = await this.downloadKubeconfig(username)
       if (kubeconfig) {
         download(kubeconfig, 'kubeconfig.yaml', 'text/yaml')
       }
     },
-    async onKubeconfig (name) {
-      const kubeconfig = await this.downloadKubeconfig(name)
+    async onKubeconfig ({ username }) {
+      const kubeconfig = await this.downloadKubeconfig(username)
       if (kubeconfig) {
-        this.currentServiceAccountName = name
+        this.currentServiceAccountName = username
         this.currentServiceAccountKubeconfig = kubeconfig
         this.kubeconfigDialog = true
       }
     },
-    async onRemoveUser (name) {
-      const removalConfirmed = await this.confirmRemoveUser(name)
+    async onRemoveUser ({ username }) {
+      const removalConfirmed = await this.confirmRemoveUser(username)
       if (!removalConfirmed) {
         return
       }
-      await this.deleteMember(name)
-      if (this.isCurrentUser(name) && !this.isAdmin) {
+      await this.deleteMember(username)
+      if (this.isCurrentUser(username) && !this.isAdmin) {
         if (this.projectList.length > 0) {
           const p1 = this.projectList[0]
           this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
@@ -507,21 +507,21 @@ export default {
         dialogColor: 'red'
       })
     },
-    async onDeleteServiceAccount (serviceAccountName) {
+    async onDeleteServiceAccount ({ username }) {
       let deletionConfirmed
-      if (isForeignServiceAccount(this.namespace, serviceAccountName)) {
-        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(serviceAccountName)
+      if (isForeignServiceAccount(this.namespace, username)) {
+        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(username)
       } else {
-        deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
+        deletionConfirmed = await this.confirmDeleteServiceAccount(username)
       }
       if (deletionConfirmed) {
-        return this.deleteMember(serviceAccountName)
+        return this.deleteMember(username)
       }
     },
-    async onRotateServiceAccountSecret (serviceAccountName) {
-      const rotationConfirmed = await this.confirmRotateServiceAccountSecret(serviceAccountName)
+    async onRotateServiceAccountSecret ({ username }) {
+      const rotationConfirmed = await this.confirmRotateServiceAccountSecret(username)
       if (rotationConfirmed) {
-        return this.rotateServiceAccountSecret(serviceAccountName)
+        return this.rotateServiceAccountSecret(username)
       }
     },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
@@ -563,12 +563,12 @@ export default {
         confirmValue: memberName
       })
     },
-    onEditUser (username, roles) {
+    onEditUser ({ username, roles }) {
       this.memberName = username
       this.memberRoles = roles
       this.openUserUpdateDialog()
     },
-    onEditServiceAccount (username, roles, description) {
+    onEditServiceAccount ({ username, roles, description }) {
       this.memberName = username
       this.memberRoles = roles
       this.serviceAccountDescription = description
@@ -607,7 +607,7 @@ export default {
       const sortedItems = orderBy(items, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
       return sortedItems
     },
-    setSelectedColumnUserAccount (header) {
+    setSelectedHeaderUserAccount (header) {
       this.$set(this.userAccountSelectedColumns, header.value, !header.selected)
       this.saveSelectedColumnsUserAccount()
     },
@@ -619,7 +619,7 @@ export default {
     saveSelectedColumnsUserAccount () {
       this.$localStorage.setObject('members/useraccount-list/selected-columns', mapTableHeader(this.userAccountTableHeaders, 'selected'))
     },
-    setSelectedColumnServiceAccount (header) {
+    setSelectedHeaderServiceAccount (header) {
       this.$set(this.serviceAccountSelectedColumns, header.value, !header.selected)
       this.saveSelectedColumnsServiceAccount()
     },
