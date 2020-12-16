@@ -6,28 +6,26 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-column fill-height position-relative">
-    <div v-if="!clean && !!modificationWarning" class="flex-shrink-1">
-      <v-alert
-        tile
+    <div v-if="!clean" class="flex-shrink-1">
+      <g-alert
         type="warning"
-        dismissible
+        :identifier="alertBannerIdentifier"
         color="cyan darken-2"
         transition="slide-y-transition"
-        class="ma-0"
-        :value="modificationWarning"
-        @input="onDismissModificationWarning"
       >
-        <slot name="modificationWarning"></slot>
-      </v-alert>
+        <template v-slot:message>
+          <slot name="modificationWarning"></slot>
+        </template>
+      </g-alert>
     </div>
     <div ref="container" :style="containerStyles"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
-      <g-alert
+      <g-message
         color="error"
         class="ma-0"
         :message.sync="errorMessageInternal"
         :detailedMessage.sync="detailedErrorMessageInternal"
-      ></g-alert>
+      ></g-message>
     </div>
     <v-divider></v-divider>
     <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
@@ -119,6 +117,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import GMessage from '@/components/GMessage'
 import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
@@ -144,15 +143,16 @@ import isEqual from 'lodash/isEqual'
 export default {
   components: {
     CopyBtn,
+    GMessage,
     GAlert
   },
   name: 'shoot-editor',
   props: {
+    alertBannerIdentifier: {
+      type: String
+    },
     shootContent: {
       type: Object
-    },
-    modificationWarning: {
-      type: Boolean
     },
     errorMessage: {
       type: String
@@ -249,9 +249,6 @@ export default {
       const namespace = this.namespace
       const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
-    },
-    onDismissModificationWarning () {
-      this.$emit('dismissModificationWarning')
     },
     undo () {
       if (this.$instance) {

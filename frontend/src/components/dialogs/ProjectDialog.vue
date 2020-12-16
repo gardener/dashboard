@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
                   >
                 </v-text-field>
                 <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" outlined :color="color">
-                  <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"></div>
+                  <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
               </v-col>
             </v-row>
@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
                   ></v-text-field>
               </v-col>
             </v-row>
-            <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+            <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
           </v-container>
         </form>
         <v-snackbar :value="loading" bottom right absolute :timeout="-1">
@@ -108,14 +108,14 @@ import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 
 const defaultProjectName = ''
 
 export default {
   name: 'project-dialog',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {

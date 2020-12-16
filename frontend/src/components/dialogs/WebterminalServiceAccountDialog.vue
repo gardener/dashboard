@@ -43,12 +43,12 @@ SPDX-License-Identifier: Apache-2.0
           </v-list>
         </div>
       </div>
-      <g-alert
+      <g-message
         color="error"
         class="ma-0"
         :message.sync="errorMessage"
         :detailedMessage.sync="detailedErrorMessage"
-      ></g-alert>
+      ></g-message>
     </template>
   </g-dialog>
 </template>
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GDialog from '@/components/dialogs/GDialog'
 import AccountAvatar from '@/components/AccountAvatar'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import ServiceAccountRoles from '@/components/ServiceAccountRoles'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { mapActions } from 'vuex'
@@ -67,7 +67,7 @@ export default {
   name: 'WebterminalServiceAccountDialog',
   components: {
     GDialog,
-    GAlert,
+    GMessage,
     AccountAvatar,
     ServiceAccountRoles
   },
