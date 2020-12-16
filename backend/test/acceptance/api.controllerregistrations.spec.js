@@ -59,7 +59,7 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
     k8s.stub.getControllerRegistrations({ bearer, verb: 'list' })
 
     const res = await agent
-      .get('/api/controllerregistrations')
+      .get('/api/gardener-extensions')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
@@ -76,7 +76,7 @@ module.exports = function ({ agent, sandbox, auth, k8s }) {
     common.stub.getControllerRegistrations(sandbox)
 
     const res = await agent
-      .get('/api/controllerregistrations/network-types')
+      .get('/api/networking-types')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)

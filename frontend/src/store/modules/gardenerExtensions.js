@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { getControllerRegistrations, getNetworkingTypes } from '@/utils/api'
+import { getGardenerExtensions } from '@/utils/api'
 
 // initial state
 const state = {
-  all: [],
-  networkingTypes: []
+  all: []
 }
 
 // getters
@@ -22,14 +21,9 @@ const getters = {
 // actions
 const actions = {
   async getAll ({ commit, state }) {
-    const { data } = await getControllerRegistrations()
+    const { data } = await getGardenerExtensions()
     commit('RECEIVE', data)
     return state.all
-  },
-  async getNetworkingTypes ({ commit, state }) {
-    const { data } = await getNetworkingTypes()
-    commit('RECEIVE_NETWORKING_TYPES', data)
-    return state.networkingTypes
   }
 }
 
@@ -37,9 +31,6 @@ const actions = {
 const mutations = {
   RECEIVE (state, items) {
     state.all = items
-  },
-  RECEIVE_NETWORKING_TYPES (state, items) {
-    state.networkingTypes = items
   }
 }
 

@@ -316,10 +316,10 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 
 /* Controller Registrations */
 
-export function getControllerRegistrations () {
-  return getResource('/api/controllerregistrations')
+export function getGardenerExtensions () {
+  return getResource('/api/gardener-extensions')
 }
 
 export function getNetworkingTypes () {
-  return getResource('/api/controllerregistrations/network-types')
+  return getResource('/api/networking-types')
 }

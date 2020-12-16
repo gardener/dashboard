@@ -14,17 +14,7 @@ const router = module.exports = express.Router()
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const user = req.user
-      res.send(await controllerregistrations.list({ user }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/network-types')
-  .get(async (req, res, next) => {
-    try {
-      res.send(await controllerregistrations.listNetworkingTpes())
+      res.send(await controllerregistrations.listNetworkingTypes())
     } catch (err) {
       next(err)
     }
