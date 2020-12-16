@@ -56,6 +56,8 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
+import gardenerExtensions from './modules/gardenerExtensions'
+import networkingTypes from './modules/networkingTypes'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
@@ -334,6 +336,13 @@ const getters = {
       const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
+  },
+  gardenerExtensionsist (state) {
+    return state.gardenerExtensions.all
+  },
+  networkingTypeList (state, getters) {
+    const networkList = state.networkingTypes.all
+    return sortBy(networkList)
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -1007,6 +1016,20 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  async fetchGardenerExtensions ({ dispatch }) {
+    try {
+      await dispatch('gardenerExtensions/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
+  async fetchNetworkingTypes ({ dispatch }) {
+    try {
+      await dispatch('networkingTypes/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
   async fetchSeeds ({ dispatch }) {
     try {
       await dispatch('seeds/getAll')
@@ -1440,6 +1463,8 @@ const modules = {
   members,
   draggable,
   cloudProfiles,
+  gardenerExtensions,
+  networkingTypes,
   seeds,
   shoots,
   infrastructureSecrets,

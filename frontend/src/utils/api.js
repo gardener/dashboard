@@ -313,3 +313,13 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
   }
   return invokeTerminalMethod('listProjectTerminalShortcuts', body)
 }
+
+/* Controller Registrations */
+
+export function getGardenerExtensions () {
+  return getResource('/api/gardener-extensions')
+}
+
+export function getNetworkingTypes () {
+  return getResource('/api/networking-types')
+}
