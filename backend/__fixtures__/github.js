@@ -68,8 +68,6 @@ function getIssue ({
 function getComment ({
   id,
   number,
-  namespace = 'garden-test',
-  name = 'test',
   body,
   created_at,
   updated_at
@@ -105,26 +103,31 @@ const commentList = [
   getComment({ id: 2, number: 2 })
 ]
 
+const issues = {
+  create (...args) {
+    return getIssue(...args)
+  },
+  list () {
+    return cloneDeep(issueList)
+  }
+}
+
+const comments = {
+  create (...args) {
+    return getComment(...args)
+  },
+  list () {
+    return cloneDeep(commentList)
+  }
+}
+
 module.exports = {
   server,
   ':scheme': scheme,
   ':authority': authority,
   authorization,
   repo,
-  issues: {
-    create (...args) {
-      return getIssue(...args)
-    },
-    list () {
-      return cloneDeep(issueList)
-    }
-  },
-  comments: {
-    create (...args) {
-      return getComment(...args)
-    },
-    list () {
-      return cloneDeep(commentList)
-    }
-  }
+  issues,
+  comments
+
 }

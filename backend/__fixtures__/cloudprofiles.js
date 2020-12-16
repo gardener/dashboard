@@ -6,46 +6,66 @@
 
 'use strict'
 
-const { find } = require('lodash')
-const { cloneDeepAndSetUid } = require('./helper')
+const { cloneDeep, find } = require('lodash')
 
-function getCloudProfile (cloudProfileName, kind, seedSelector = {}) {
-  const spec = {
-    type: kind,
-    seedSelector,
-    kubernetes: {
-      versions: [
-        {
-          version: '1.9.0'
-        },
-        {
-          version: '1.8.5'
-        }
-      ]
-    }
-  }
-
+function getCloudProfile ({ uid, name, kind, seedSelector = {} }) {
   return {
     metadata: {
-      name: cloudProfileName
+      name,
+      uid
     },
-    spec
+    spec: {
+      type: kind,
+      seedSelector,
+      kubernetes: {
+        versions: [
+          {
+            version: '1.9.0'
+          },
+          {
+            version: '1.8.5'
+          }
+        ]
+      }
+    }
   }
 }
 
 const cloudProfileList = [
-  getCloudProfile('infra1-profileName', 'infra1'),
-  getCloudProfile('infra1-profileName2', 'infra1', {
-    providerTypes: ['infra2', 'infra3']
+  getCloudProfile({
+    uid: 1,
+    name: 'infra1-profileName',
+    kind: 'infra1'
   }),
-  getCloudProfile('infra2-profileName', 'infra2'),
-  getCloudProfile('infra3-profileName', 'infra3', {
-    matchLabels: { foo: 'bar' }
+  getCloudProfile({
+    uid: 2,
+    name: 'infra1-profileName2',
+    kind: 'infra1',
+    seedSelector: {
+      providerTypes: ['infra2', 'infra3']
+    }
   }),
-  getCloudProfile('infra3-profileName2', 'infra3')
+  getCloudProfile({
+    uid: 3,
+    name: 'infra2-profileName',
+    kind: 'infra2'
+  }),
+  getCloudProfile({
+    uid: 4,
+    name: 'infra3-profileName',
+    kind: 'infra3',
+    seedSelector: {
+      matchLabels: { foo: 'bar' }
+    }
+  }),
+  getCloudProfile({
+    uid: 5,
+    name: 'infra3-profileName2',
+    kind: 'infra3'
+  })
 ]
 
-module.exports = {
+const cloudprofiles = {
   create (...args) {
     return getCloudProfile(...args)
   },
@@ -53,6 +73,9 @@ module.exports = {
     return find(this.list(), ['metadata.name', name])
   },
   list () {
-    return cloneDeepAndSetUid(cloudProfileList)
-  }
+    return cloneDeep(cloudProfileList)
+  },
+  reset () {}
 }
+
+module.exports = cloudprofiles

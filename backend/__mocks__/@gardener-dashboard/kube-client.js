@@ -9,6 +9,7 @@
 const { EventEmitter } = require('events')
 const kubeClient = jest.requireActual('@gardener-dashboard/kube-client')
 const { WatchBuilder } = kubeClient
+const NEWLINE = 10
 
 WatchBuilder.create = jest.fn((resource, url, searchParams, name) => {
   const mockWatch = new EventEmitter()
@@ -39,7 +40,7 @@ WatchBuilder.create = jest.fn((resource, url, searchParams, name) => {
         ? Buffer.concat([data, chunk], data.length + chunk.length)
         : chunk
       let index
-      while ((index = data.indexOf(10)) !== -1) {
+      while ((index = data.indexOf(NEWLINE)) !== -1) {
         const event = JSON.parse(data.slice(0, index))
         mockWatch.emit('event', event)
         data = data.slice(index + 1)

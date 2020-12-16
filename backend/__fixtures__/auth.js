@@ -39,112 +39,108 @@ async function getCookieValue (token) {
   }, '')
 }
 
-function createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
-  const secret = invalid === true
-    ? 'invalid-secret'
-    : undefined
+const auth = {
+  createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
+    const secret = invalid === true
+      ? 'invalid-secret'
+      : undefined
 
-  const bearer = sign({ id, iat, aud, ...rest }, secret, { expiresIn, jwtid })
-  return {
-    isAdmin () {
-      return /^admin/.test(id)
-    },
-    get cookie () {
-      return getCookieValue(bearer)
-    },
-    get bearer () {
-      return bearer
-    }
-  }
-}
-
-function getTokenPayload ({ authorization } = {}) {
-  const [, token] = /^Bearer (.*)$/.exec(authorization)
-  return decode(token)
-}
-
-function reviewSelfSubjectRules () {
-  return (headers, json) => {
-    const payload = getTokenPayload(headers)
-    const resourceRules = []
-    const nonResourceRules = []
-    const incomplete = false
-    if (/example\.org$/.test(payload.id)) {
-      resourceRules.push({
-        verbs: ['get'],
-        apiGroups: ['core.gardener.cloud'],
-        resources: ['projects'],
-        resourceName: ['foo']
-      })
-      resourceRules.push({
-        verbs: ['create'],
-        apiGroups: ['core.gardener.cloud'],
-        resources: ['projects']
-      })
-    } else {
-      resourceRules.push({
-        verbs: ['get'],
-        apiGroups: ['core.gardener.cloud'],
-        resources: ['projects'],
-        resourceName: ['foo']
-      })
-    }
+    const bearer = sign({ id, iat, aud, ...rest }, secret, { expiresIn, jwtid })
     return {
-      ...json,
-      status: {
-        resourceRules,
-        nonResourceRules,
-        incomplete
+      isAdmin () {
+        return /^admin/.test(id)
+      },
+      get cookie () {
+        return getCookieValue(bearer)
+      },
+      get bearer () {
+        return bearer
       }
     }
+  },
+  getTokenPayload ({ authorization } = {}) {
+    const [, token] = /^Bearer (.*)$/.exec(authorization)
+    return decode(token)
   }
 }
 
-function reviewSelfSubjectAccess ({ allowed = true } = {}) {
-  return (headers, json) => {
-    const { id } = getTokenPayload(headers)
-    const { resourceAttributes, nonResourceAttributes } = json.spec
-    if (resourceAttributes) {
-      const { resource } = resourceAttributes
-      switch (resource) {
-        case 'secrets':
-          allowed = id === 'admin@example.org'
-          break
+const mocks = {
+  reviewSelfSubjectRules () {
+    return (headers, json) => {
+      const payload = auth.getTokenPayload(headers)
+      const resourceRules = []
+      const nonResourceRules = []
+      const incomplete = false
+      if (/example\.org$/.test(payload.id)) {
+        resourceRules.push({
+          verbs: ['get'],
+          apiGroups: ['core.gardener.cloud'],
+          resources: ['projects'],
+          resourceName: ['foo']
+        })
+        resourceRules.push({
+          verbs: ['create'],
+          apiGroups: ['core.gardener.cloud'],
+          resources: ['projects']
+        })
+      } else {
+        resourceRules.push({
+          verbs: ['get'],
+          apiGroups: ['core.gardener.cloud'],
+          resources: ['projects'],
+          resourceName: ['foo']
+        })
+      }
+      return {
+        ...json,
+        status: {
+          resourceRules,
+          nonResourceRules,
+          incomplete
+        }
       }
     }
-    if (nonResourceAttributes) {
-      // TODO
+  },
+  reviewSelfSubjectAccess ({ allowed = true } = {}) {
+    return (headers, json) => {
+      const { id } = auth.getTokenPayload(headers)
+      const { resourceAttributes, nonResourceAttributes } = json.spec
+      if (resourceAttributes) {
+        const { resource } = resourceAttributes
+        switch (resource) {
+          case 'secrets':
+            allowed = id === 'admin@example.org'
+            break
+        }
+      }
+      if (nonResourceAttributes) {
+        // TODO
+      }
+      return Promise.resolve({
+        ...json,
+        status: {
+          allowed
+        }
+      })
     }
-    return Promise.resolve({
-      ...json,
-      status: {
-        allowed
-      }
-    })
-  }
-}
-
-function reviewToken ({ domain = 'example.org' } = {}) {
-  return (headers, json) => {
-    const { spec: { token } } = json
-    const { id: username, groups } = decode(token)
-    const authenticated = username.endsWith(domain)
-    const user = authenticated ? { username, groups } : {}
-    return Promise.resolve({
-      status: {
-        user,
-        authenticated
-      }
-    })
+  },
+  reviewToken ({ domain = 'example.org' } = {}) {
+    return (headers, json) => {
+      const { spec: { token } } = json
+      const { id: username, groups } = decode(token)
+      const authenticated = username.endsWith(domain)
+      const user = authenticated ? { username, groups } : {}
+      return Promise.resolve({
+        status: {
+          user,
+          authenticated
+        }
+      })
+    }
   }
 }
 
 module.exports = {
-  createUser,
-  getTokenPayload,
-  mocks: {
-    reviewSelfSubjectAccess,
-    reviewSelfSubjectRules,
-    reviewToken
-  }
+  ...auth,
+  mocks
 }
