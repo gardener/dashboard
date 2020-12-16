@@ -66,6 +66,7 @@ function createComment ({ number }, body) {
 }
 
 module.exports = {
+  octokit,
   searchIssues,
   closeIssue,
   getIssue,

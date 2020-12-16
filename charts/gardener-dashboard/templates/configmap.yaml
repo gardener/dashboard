@@ -230,6 +230,9 @@ data:
       alert:
         type: {{ .Values.frontendConfig.alert.type }}
         message: {{ .Values.frontendConfig.alert.message }}
+        {{- if .Values.frontendConfig.alert.identifier }}
+        identifier: {{ .Values.frontendConfig.alert.identifier }}
+        {{- end }}
       {{- end }}
       {{- if .Values.frontendConfig.costObject }}
       costObject:

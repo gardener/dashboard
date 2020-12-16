@@ -9,16 +9,8 @@
 const projects = require('../lib/services/projects')
 const cache = require('../lib/cache')
 const authorization = require('../lib/services/authorization')
-const nextTick = () => new Promise(process.nextTick)
 
 describe('services', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-
-  afterEach(function () {
-    sandbox.restore()
-  })
-
   describe('projects', function () {
     const projectList = [
       {
@@ -85,43 +77,37 @@ describe('services', function () {
     }
 
     beforeEach(function () {
-      sandbox.stub(cache, 'getProjects').returns(projectList)
-      sandbox.stub(authorization, 'isAdmin').callsFake(async (user) => {
-        await nextTick()
-        if (user.id === 'admin@bar.com') {
-          return true
-        }
-        return false
-      })
+      jest.spyOn(cache, 'getProjects').mockReturnValue(projectList)
+      jest.spyOn(authorization, 'isAdmin').mockImplementation(user => Promise.resolve(user.id === 'admin@bar.com'))
     })
 
     describe('#list', function () {
       it('should return all ready projects if user is admin', async function () {
         const userProjects = await projects.list({ user: createUser('admin@bar.com') })
-        expect(userProjects).to.have.length(2)
+        expect(userProjects).toHaveLength(2)
       })
 
       it('should return project for user member', async function () {
         const userProjects = await projects.list({ user: createUser('system:serviceaccount:garden-foo:robot-user') })
-        expect(userProjects).to.have.length(1)
-        expect(userProjects[0].metadata.name).to.eql('foo')
+        expect(userProjects).toHaveLength(1)
+        expect(userProjects[0].metadata.name).toBe('foo')
       })
 
       it('should return project for serviceaccount user member', async function () {
         const userProjects = await projects.list({ user: createUser('system:serviceaccount:garden-foo:robot-user') })
-        expect(userProjects).to.have.length(1)
-        expect(userProjects[0].metadata.name).to.eql('foo')
+        expect(userProjects).toHaveLength(1)
+        expect(userProjects[0].metadata.name).toBe('foo')
       })
 
       it('should return project for serviceaccount member', async function () {
         const userProjects = await projects.list({ user: createUser('system:serviceaccount:garden-foo:robot-sa') })
-        expect(userProjects).to.have.length(1)
-        expect(userProjects[0].metadata.name).to.eql('foo')
+        expect(userProjects).toHaveLength(1)
+        expect(userProjects[0].metadata.name).toBe('foo')
       })
 
       it('should not return project if not in member list', async function () {
         const userProjects = await projects.list({ user: createUser('other@bar.com') })
-        expect(userProjects).to.have.length(0)
+        expect(userProjects).toHaveLength(0)
       })
     })
   })

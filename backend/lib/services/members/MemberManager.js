@@ -188,7 +188,6 @@ class MemberManager {
       throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-
     const name = _
       .chain(item)
       .get('extensions.secrets', [])
@@ -200,6 +199,7 @@ class MemberManager {
       .head()
       .get('name')
       .value()
+    console.log('TEST', namespace, name)
     return await this.client.core.secrets.delete(namespace, name)
   }
 

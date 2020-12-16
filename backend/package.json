@@ -22,17 +22,15 @@
   },
   "main": "server.js",
   "files": [
-    "bin",
     "lib",
     "server.js"
   ],
   "scripts": {
     "serve": "nodemon --ext js --watch lib server.js",
     "start": "node server.js",
-    "lint": "eslint --ext .js server.js lib",
-    "sync-version": "bin/sync-version",
-    "test": "mocha",
-    "test-coverage": "nyc mocha"
+    "lint": "eslint --ext .js server.js .",
+    "test": "jest",
+    "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
     "@gardener-dashboard/kube-client": "workspace:*",
@@ -69,29 +67,89 @@
     "uuid": "^8.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "@babel/register": "^7.4.4",
-    "chai": "^4.1.2",
-    "chai-http": "^4.0.0",
     "dockerfile-ast": "^0.0.19",
-    "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-friendly-formatter": "^4.0.1",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-mocha": "^6.2.2",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "mocha": "^7",
-    "nock": "^11.0.0-beta.20",
+    "eslint": "^7.7.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "fast-json-patch": "^3.0.0-1",
+    "jest": "^26.4.2",
     "nodemon": "^2.0.2",
-    "nyc": "^15.0.0",
+    "path-to-regexp": "^6.2.0",
     "set-cookie-parser": "^2.3.5",
-    "sinon": "^8.0.4",
-    "sinon-chai": "^3.2.0",
-    "socket.io-client": "^2.3.0"
+    "socket.io-client": "^2.3.0",
+    "supertest": "^6.0.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2020": true,
+      "node": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {
+      "createAgent": true,
+      "fixtures": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 11
+    },
+    "rules": {
+      "no-console": "error",
+      "no-debugger": "error"
+    },
+    "ignorePatterns": [
+      "my*.js"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.js",
+          "**/test/**/*.spec.js"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
+  },
+  "jest": {
+    "restoreMocks": true,
+    "verbose": true,
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/test-ignore/"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "\\.pnp\\.[^\\/]+$"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 62,
+        "functions": 90,
+        "lines": 87,
+        "statements": 87
+      }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "engines": {
     "node": "^14.15.0",

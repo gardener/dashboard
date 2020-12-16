@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
-      <g-alert ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-alert>
+      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-message>
     </v-container>
     <v-divider></v-divider>
     <div class="d-flex align-center justify-end toolbar">
@@ -129,7 +129,7 @@ import unset from 'lodash/unset'
 
 import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import NewShootDetails from '@/components/NewShoot/NewShootDetails'
 import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
 import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
@@ -159,7 +159,7 @@ export default {
     MaintenanceTime,
     ManageHibernationSchedule,
     ManageWorkers,
-    GAlert,
+    GMessage,
     ConfirmDialog
   },
   mixins: [

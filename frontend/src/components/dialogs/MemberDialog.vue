@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
               ></v-text-field>
             </v-col>
           </v-row>
-          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+          <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
       <v-card-actions>
@@ -83,7 +83,7 @@ import toLower from 'lodash/toLower'
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
@@ -100,7 +100,7 @@ const defaultServiceName = 'robot'
 export default {
   name: 'member-dialog',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {

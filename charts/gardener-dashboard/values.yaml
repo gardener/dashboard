@@ -128,6 +128,7 @@ frontendConfig:
   # alert:
   #   type: error
   #   message: This is an **alert** banner
+  #   # identifer: alert-identifier # Optional. If not set, a hash of the alert.message will be used as identifier. The identifier is used to store the user's decision to not show the alert message with this identifier again.
 
   # terminal:
   #   shortcuts:

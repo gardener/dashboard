@@ -6,30 +6,39 @@
 
 'use strict'
 
-const _ = require('lodash')
-const common = require('../support/common')
+const { mockRequest } = require('@gardener-dashboard/request')
 
-module.exports = function ({ agent, sandbox, auth, k8s }) {
-  /* eslint no-unused-expressions: 0 */
-  const username = 'john.doe@example.org'
-  const id = username
-  const user = auth.createUser({ id })
+describe('api', function () {
+  let agent
 
-  it('should return all seeds', async function () {
-    const bearer = await user.bearer
-
-    common.stub.getSeeds(sandbox)
-    k8s.stub.getSeeds({ bearer })
-    const res = await agent
-      .get('/api/seeds')
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.have.length(8)
-    let predicate = item => item.metadata.name === 'infra1-seed'
-    expect(_.find(res.body, predicate).metadata.unreachable).to.be.false
-    predicate = item => item.metadata.name === 'infra3-seed'
-    expect(_.find(res.body, predicate).metadata.unreachable).to.be.true
+  beforeAll(() => {
+    agent = createAgent()
   })
-}
+
+  afterAll(() => {
+    return agent.close()
+  })
+
+  beforeEach(() => {
+    mockRequest.mockReset()
+  })
+
+  describe('seeds', function () {
+    const user = fixtures.auth.createUser({ id: 'john.doe@example.org' })
+
+    it('should return all seeds', async function () {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get('/api/seeds')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+  })
+})
