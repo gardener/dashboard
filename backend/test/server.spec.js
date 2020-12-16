@@ -66,19 +66,18 @@ function createApplication (port) {
 }
 
 describe('server', function () {
-  /* eslint no-unused-expressions: 0 */
   const port = 1234
 
   it('should create a server', async function () {
     const app = createApplication(port)
     const server = createServer(app)
-    expect(server).to.be.instanceof(Server)
-    expect(server).to.equal(app.io.server)
+    expect(server).toBeInstanceOf(Server)
+    expect(server).toBe(app.io.server)
     try {
       await server.startListening()
-      expect(app.synchronizing).to.be.true
-      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %d ms'])
-      expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
+      expect(app.synchronizing).toBe(true)
+      expect(app.log[0].slice(0, 2)).toEqual(['debug', 'Initial cache synchronization succeeded after %d ms'])
+      expect(app.log[1].slice(0, 3)).toEqual(['info', 'Server listening on port %d', port])
     } finally {
       server.close()
     }

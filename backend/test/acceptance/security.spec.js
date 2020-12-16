@@ -6,21 +6,19 @@
 
 'use strict'
 
-const { oidc: { rejectUnauthorized, ca } = {} } = require('../../lib/config')
 const security = require('../../lib/security')
-const { custom } = require('openid-client')
 
-module.exports = function ({ agent, oidc }) {
-  /* eslint no-unused-expressions: 0 */
+describe('security', function () {
+  const { rejectUnauthorized, ca } = fixtures.config.get().oidc
 
   it('should return the oidc issuer client', async function () {
-    oidc.stub.getIssuerClient()
     const client = await security.getIssuerClient()
-    expect(client[custom.http_options]()).to.include({
+    const { custom } = require('openid-client')
+    expect(client[custom.http_options]()).toMatchObject({
       followRedirect: false,
       rejectUnauthorized,
       ca
     })
-    expect(client[custom.clock_tolerance]).to.equal(42)
+    expect(client[custom.clock_tolerance]).toBe(42)
   })
-}
+})

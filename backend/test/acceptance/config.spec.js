@@ -6,17 +6,32 @@
 
 'use strict'
 
-module.exports = function ({ agent }) {
-  /* eslint no-unused-expressions: 0 */
+const { mockRequest } = require('@gardener-dashboard/request')
+
+describe('config', function () {
+  let agent
+
+  beforeAll(() => {
+    agent = createAgent()
+  })
+
+  afterAll(() => {
+    return agent.close()
+  })
+
+  beforeEach(() => {
+    mockRequest.mockReset()
+  })
 
   it('should return the frontend configuration', async function () {
     const res = await agent
       .get('/config.json')
+      .expect('content-type', /json/)
+      .expect(200)
 
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.have.property('helpMenuItems').that.is.an('array')
-    expect(res.body.helpMenuItems).to.have.length(3)
-    expect(res.body.landingPageUrl).to.equal('https://gardener.cloud/')
+    expect(mockRequest).not.toBeCalled()
+    expect(Array.isArray(res.body.helpMenuItems)).toBe(true)
+    expect(res.body.helpMenuItems).toHaveLength(3)
+    expect(res.body.landingPageUrl).toBe('https://gardener.cloud/')
   })
-}
+})

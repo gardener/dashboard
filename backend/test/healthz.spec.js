@@ -11,47 +11,31 @@ const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { healthCheck } = require('../lib/healthz')
 
 describe('healthz', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
   const healthz = dashboardClient.healthz
-  let getHealthzStub
 
   beforeEach(function () {
-    getHealthzStub = sandbox.stub(healthz, 'get')
-  })
-
-  afterEach(function () {
-    sandbox.restore()
+    healthz.get = jest.fn()
   })
 
   it('should successfully check transitive healthz', async function () {
     await healthCheck(true)
-    expect(getHealthzStub).to.be.calledOnce
+    expect(healthz.get).toBeCalledTimes(1)
   })
 
   it('should successfully check non-transitive healthz', async function () {
     await healthCheck(false)
-    expect(getHealthzStub).not.to.be.called
+    expect(healthz.get).not.toBeCalled()
   })
 
   it('should throw a HTTP Error', async function () {
-    getHealthzStub.throws(createHttpError({ statusCode: 500, body: 'body' }))
-    try {
-      await healthCheck(true)
-    } catch (err) {
-      expect(err.message).to.match(/^Kubernetes apiserver is not healthy/)
-      expect(err.message).to.match(/(Status code: 500)/)
-    }
-    expect(getHealthzStub).to.be.calledOnce
+    healthz.get.mockRejectedValue(createHttpError({ statusCode: 500, body: 'body' }))
+    await expect(healthCheck(true)).rejects.toThrow(/^Kubernetes apiserver is not healthy.*\(Status code: 500\)/)
+    expect(healthz.get).toBeCalledTimes(1)
   })
 
   it('should throw an Error', async function () {
-    getHealthzStub.throws(new Error('Failed'))
-    try {
-      await healthCheck(true)
-    } catch (err) {
-      expect(err.message).to.match(/^Could not reach Kubernetes apiserver/)
-    }
-    expect(getHealthzStub).to.be.calledOnce
+    healthz.get.mockRejectedValue(new Error('Failed'))
+    await expect(healthCheck(true)).rejects.toThrow(/^Could not reach Kubernetes apiserver/)
+    expect(healthz.get).toBeCalledTimes(1)
   })
 })

@@ -12,7 +12,7 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend } = require('@gardener-dashboard/request')
+const { extend } = jest.requireActual('@gardener-dashboard/request')
 const client = extend({
   prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
   resolveBodyOnly: true,
@@ -49,15 +49,12 @@ async function getDashboardDockerfile () {
 }
 
 describe('dockerfile', function () {
-  /* eslint-disable no-unused-expressions */
-
-  this.timeout(15000)
-  this.slow(5000)
+  const timeout = 15 * 1000
 
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
-    expect(dashboardDockerfile.getFROMs()).to.have.length(2)
+    expect(dashboardDockerfile.getFROMs()).toHaveLength(2)
     const buildStages = _
       .chain(dashboardDockerfile.getFROMs())
       .map(from => [from.getBuildStage(), from])
@@ -65,14 +62,16 @@ describe('dockerfile', function () {
       .value()
     const imageTag = buildStages.builder.getImageTag()
     const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine/.exec(imageTag) || []
-    expect(_.keys(activeNodeReleases), `Node release ${nodeRelease} is not in the range of active LTS releases`).to.include(nodeRelease)
+    expect(_.keys(activeNodeReleases)).toContain(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
-    expect(endOfLife, `Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.`).to.be.above(new Date())
+    // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
+    expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
     const dashboardReleaseBaseImage = buildStages.release.getImage()
     const [, alpineVersion] = /alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
     const nodeDockerfile = await getNodeDockerfile(nodeRelease, alpineVersion)
-    expect(nodeDockerfile.getFROMs()).to.have.length(1)
+    expect(nodeDockerfile.getFROMs()).toHaveLength(1)
     const nodeBaseImage = _.first(nodeDockerfile.getFROMs()).getImage()
-    expect(dashboardReleaseBaseImage.endsWith(nodeBaseImage), 'Alpine base images of "dashboard-release" image and "node" image do not match!').to.be.true
-  })
+    // Alpine base images of "dashboard-release" image and "node" image do not match!
+    expect(dashboardReleaseBaseImage.endsWith(nodeBaseImage)).toBe(true)
+  }, timeout)
 })

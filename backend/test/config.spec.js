@@ -6,52 +6,68 @@
 
 'use strict'
 
+const fs = require('fs')
 const gardener = require('../lib/config/gardener')
-const path = require('path')
-const testConfigPath = path.resolve(__dirname, '../lib/config/test.yaml')
 
 describe('config', function () {
-  /* eslint no-unused-expressions: 0 */
   describe('gardener', function () {
+    describe('#readConfig', function () {
+      const originalGardener = jest.requireActual('../lib/config/gardener')
+
+      const path = 'path'
+      let readFileSyncStub
+
+      beforeEach(() => {
+        readFileSyncStub = jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('port: 1234')
+      })
+
+      afterEach(() => {
+        readFileSyncStub.mockRestore()
+      })
+
+      it('should return the defaults for the test environment', function () {
+        expect(originalGardener.readConfig(path)).toEqual({ port: 1234 })
+        expect(readFileSyncStub).toBeCalledTimes(1)
+        expect(readFileSyncStub.mock.calls[0]).toEqual([path, 'utf8'])
+      })
+    })
+
     describe('#getDefaults', function () {
       it('should return the defaults for the test environment', function () {
         const env = { NODE_ENV: 'test' }
         const defaults = gardener.getDefaults({ env })
-        expect(defaults).to.eql({
+        expect(defaults).toEqual({
           isProd: false,
           logLevel: 'debug',
           port: 3030
         })
       })
     })
+
     describe('#getFilename', function () {
-      it('should return no filename in test environment', function () {
-        const env = { NODE_ENV: 'test' }
-        const filename = gardener.getFilename({ env })
-        expect(filename).to.equal(testConfigPath)
-      })
       it('should return the filename from GARDENER_CONFIG environment variable', function () {
         const GARDENER_CONFIG = '.gardener/config.yaml'
         const env = { GARDENER_CONFIG }
         const filename = gardener.getFilename({ env })
-        expect(filename).to.equal(GARDENER_CONFIG)
+        expect(filename).toBe(GARDENER_CONFIG)
       })
+
       it('should return the filename from command line arguments', function () {
         const env = {}
         const argv = ['node', 'bar', '.gardener/config.yaml']
         const filename = gardener.getFilename({ env, argv })
-        expect(filename).to.equal(argv[2])
+        expect(filename).toBe(argv[2])
       })
+
       it('should return the default filename in the users homedir', function () {
         const env = {}
         const argv = ['node', 'bar']
         const filename = gardener.getFilename({ env, argv })
-        expect(filename).to.include('/.gardener/config.yaml')
+        expect(filename).toMatch(/\/\.gardener\/config\.yaml$/)
       })
     })
 
     describe('#loadConfig', function () {
-      const sandbox = sinon.createSandbox()
       const requiredEnvironmentVariables = {
         API_SERVER_URL: 'apiServerUrl',
         SESSION_SECRET: 'secret', // pragma: whitelist secret
@@ -61,17 +77,18 @@ describe('config', function () {
         OIDC_REDIRECT_URI: 'redirect_uri'
       }
 
-      afterEach(function () {
-        sandbox.restore()
+      beforeEach(() => {
+        gardener.readConfig.mockClear()
       })
 
       it('should return the config in test environment', function () {
         const env = Object.assign({
           NODE_ENV: 'test'
         }, requiredEnvironmentVariables)
+
         const config = gardener.loadConfig(undefined, { env })
         const defaults = gardener.getDefaults({ env })
-        expect(config).to.include(defaults)
+        expect(config).toMatchObject(defaults)
       })
 
       it('should return the config in production environment', function () {
@@ -79,15 +96,12 @@ describe('config', function () {
           NODE_ENV: 'production'
         }, requiredEnvironmentVariables)
 
-        const filename = 'filename'
-        const fileData = 'port: 1234'
-        const existsSyncStub = sandbox.stub(gardener, 'existsSync')
-        existsSyncStub.withArgs(filename).returns(true)
-        const readFileSyncStub = sandbox.stub(gardener, 'readFileSync')
-        readFileSyncStub.withArgs(filename, 'utf8').returns(fileData)
+        const filename = '/etc/gardener/1/config.yaml'
         const config = gardener.loadConfig(filename, { env })
-        expect(config.port).to.equal(1234)
-        expect(config.logLevel).to.equal('warn')
+        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
+        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
+        expect(config.port).toBe(1234)
+        expect(config.logLevel).toBe('warn')
       })
 
       it('should return the config with port and logLevel overridden by environment variables', function () {
@@ -97,15 +111,12 @@ describe('config', function () {
           LOG_LEVEL: 'error'
         }, requiredEnvironmentVariables)
 
-        const filename = 'filename'
-        const fileData = 'port: 1234\nlogLevel: info'
-        const existsSyncStub = sandbox.stub(gardener, 'existsSync')
-        existsSyncStub.withArgs(filename).returns(true)
-        const readFileSyncStub = sandbox.stub(gardener, 'readFileSync')
-        readFileSyncStub.withArgs(filename, 'utf8').returns(fileData)
+        const filename = '/etc/gardener/2/config.yaml'
         const config = gardener.loadConfig(filename, { env })
-        expect(config.port).to.equal(3456)
-        expect(config.logLevel).to.equal('error')
+        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
+        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
+        expect(config.port).toBe(3456)
+        expect(config.logLevel).toBe('error')
       })
 
       it('should return the config in development environment', function () {
@@ -113,15 +124,12 @@ describe('config', function () {
           NODE_ENV: 'development'
         }, requiredEnvironmentVariables)
 
-        const filename = 'filename'
-        const fileData = 'sessionSecret: ~'
-        const existsSyncStub = sandbox.stub(gardener, 'existsSync')
-        existsSyncStub.withArgs(filename).returns(true)
-        const readFileSyncStub = sandbox.stub(gardener, 'readFileSync')
-        readFileSyncStub.withArgs(filename, 'utf8').returns(fileData)
+        const filename = '/etc/gardener/3/config.yaml'
         const config = gardener.loadConfig(filename, { env })
-        expect(config.sessionSecret).to.equal(env.SESSION_SECRET)
-        expect(config.logLevel).to.equal('debug')
+        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
+        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
+        expect(config.sessionSecret).toBe(env.SESSION_SECRET)
+        expect(config.logLevel).toBe('debug')
       })
     })
   })

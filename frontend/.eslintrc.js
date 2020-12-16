@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-const production = process.env.NODE_ENV === 'production'
+const development = process.env.NODE_ENV === 'development'
 
 module.exports = {
   root: true,
@@ -20,8 +20,8 @@ module.exports = {
     'vuetify'
   ],
   rules: {
-    'no-console': [ production ? 'error' : 'off', { allow: ['error'] }],
-    'no-debugger': production ? 'error' : 'off',
+    'no-console': [ development ? 'off' : 'error', { allow: ['error'] }],
+    'no-debugger': development ? 'off' : 'error',
     'vuetify/no-deprecated-classes': 'error',
     'vuetify/grid-unknown-attributes': 'error',
     'vuetify/no-legacy-grid': 'error'
