@@ -1930,7 +1930,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.0-beta.7"],
             ["fontsource-roboto", "npm:3.0.3"],
             ["get-contrast", "npm:2.0.0"],
-            ["highlight.js", "npm:9.18.3"],
+            ["highlight.js", "npm:10.4.1"],
             ["jest-environment-jsdom-fifteen", "npm:1.0.2"],
             ["jest-serializer-vue", "npm:2.0.2"],
             ["js-yaml", "npm:3.14.0"],
@@ -10359,6 +10359,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["highlight.js", [
+        ["npm:10.4.1", {
+          "packageLocation": "./.yarn/cache/highlight.js-npm-10.4.1-7888d5927d-067a8cc822.zip/node_modules/highlight.js/",
+          "packageDependencies": [
+            ["highlight.js", "npm:10.4.1"]
+          ],
+          "linkType": "HARD",
+        }],
         ["npm:9.18.3", {
           "packageLocation": "./.yarn/cache/highlight.js-npm-9.18.3-bd1987a7b4-b6b518f937.zip/node_modules/highlight.js/",
           "packageDependencies": [
