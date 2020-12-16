@@ -11,15 +11,6 @@ const { getControllerRegistrations } = require('../cache')
 const authorization = require('./authorization')
 const _ = require('lodash')
 
-function extensionListFromResource (controllerregistrations) {
-  return _.map(controllerregistrations, ({ metadata, spec }) => {
-    return {
-      name: metadata.name,
-      version: _.get(spec, 'deployment.providerConfig.values.image.tag')
-    }
-  })
-}
-
 exports.listExtensions = async function ({ user }) {
   const allowed = await authorization.canListControllerRegistrations(user)
   if (!allowed) {
@@ -27,7 +18,12 @@ exports.listExtensions = async function ({ user }) {
   }
 
   const controllerregistrations = getControllerRegistrations()
-  return extensionListFromResource(controllerregistrations)
+  return _.map(controllerregistrations, ({ metadata, spec }) => {
+    return {
+      name: metadata.name,
+      version: _.get(spec, 'deployment.providerConfig.values.image.tag')
+    }
+  })
 }
 
 exports.listNetworkingTypes = async function () {
