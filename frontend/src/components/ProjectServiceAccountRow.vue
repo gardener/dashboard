@@ -10,13 +10,19 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item>
         <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title>
+          <v-list-item-title class="d-flex">
             <span class="subtitle-1">{{item.displayName}}</span>
             <v-tooltip top v-if="!isServiceAccountFromCurrentNamespace">
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
               </template>
               <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
+            </v-tooltip>
+            <v-tooltip top v-if="!item.hasServiceAccountResource && isServiceAccountFromCurrentNamespace">
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on" small class="ml-1" color="warning">mdi-alert-circle-outline</v-icon>
+              </template>
+              <span>Service Account Resource missing</span>
             </v-tooltip>
           </v-list-item-title>
           <v-list-item-subtitle>{{item.username}}</v-list-item-subtitle>
@@ -55,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.native.stop="onDownload">
+              <v-btn v-on="on" icon @click.native.stop="onDownload" :disabled="!item.hasServiceAccountResource">
                 <v-icon>mdi-download</v-icon>
               </v-btn>
             </template>
@@ -65,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click="onKubeconfig">
+              <v-btn v-on="on" icon @click="onKubeconfig" :disabled="!item.hasServiceAccountResource">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
             </template>
@@ -75,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="isServiceAccountFromCurrentNamespace && canDeleteSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click="onRotateSecret">
+              <v-btn v-on="on" icon @click="onRotateSecret" :disabled="!item.hasServiceAccountResource">
                 <v-icon>mdi-refresh</v-icon>
               </v-btn>
             </template>
@@ -89,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>
-            <span>Change Service Account</span>
+            <span>Edit Service Account</span>
           </v-tooltip>
         </div>
         <div v-if="canManageServiceAccountMembers" class="ml-1">

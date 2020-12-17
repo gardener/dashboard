@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>
-            <span>Change User Roles</span>
+            <span>Edit User Roles</span>
           </v-tooltip>
         </div>
         <div v-if="canManageMembers" class="ml-1">

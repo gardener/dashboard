@@ -8,6 +8,7 @@
 
 const _ = require('lodash')
 const { UnprocessableEntity, NotFound } = require('http-errors')
+const createError = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
 const SubjectList = require('../lib/services/members/SubjectList')
 
@@ -77,6 +78,12 @@ describe('services', function () {
         roles: [
           'viewer'
         ]
+      },
+      {
+        kind: 'ServiceAccount',
+        name: 'robot-no-sa-res',
+        namespace: 'garden-foo',
+        role: 'myrole'
       },
       {
         kind: 'ServiceAccount',
@@ -181,7 +188,12 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: jest.fn().mockResolvedValue(),
+        delete: jest.fn().mockImplementation((namespace, name) => {
+          if (!_.find(serviceAccounts, { metadata: { name, namespace } })) {
+            return Promise.reject(createError(404))
+          }
+          return Promise.resolve()
+        }),
         mergePatch: jest.fn().mockResolvedValue()
       }
       client.core.secrets = {
@@ -222,7 +234,7 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).toHaveLength(8)
+          expect(frontendMemberList).toHaveLength(9)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
@@ -232,7 +244,8 @@ describe('services', function () {
             roles: ['otherrole', 'admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined
+            description: undefined,
+            hasServiceAccountResource: true
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
@@ -243,7 +256,12 @@ describe('services', function () {
             roles: [],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined
+            description: undefined,
+            hasServiceAccountResource: true
+          })
+          expect(frontendMemberList).toContainEqual({
+            username: 'system:serviceaccount:garden-foo:robot-no-sa-res',
+            roles: ['myrole']
           })
         })
 
@@ -255,7 +273,8 @@ describe('services', function () {
             roles: ['admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: 'description'
+            description: 'description',
+            hasServiceAccountResource: true
           })
         })
       })
@@ -389,6 +408,12 @@ describe('services', function () {
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
           expect(client.core.serviceaccounts.delete).not.toBeCalled()
+        })
+
+        it('should not fail if service account has already been deleted', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-no-sa-res'
+          const item = memberManager.subjectList.get(id)
+          await expect(memberManager.deleteServiceAccount(item)).resolves.not.toThrow(NotFound)
         })
       })
 

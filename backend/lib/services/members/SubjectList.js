@@ -27,7 +27,8 @@ class SubjectList {
         createdBy,
         description,
         creationTimestamp,
-        secrets
+        secrets,
+        hasServiceAccountResource: true
       })
       return item
     }
@@ -43,7 +44,9 @@ class SubjectList {
     const extendItem = item => {
       const id = item.id
       if (serviceAccountItems[id]) {
-        item.extend(serviceAccountItems[id].extensions)
+        item.extend({
+          ...serviceAccountItems[id].extensions
+        })
         delete serviceAccountItems[id]
       }
     }

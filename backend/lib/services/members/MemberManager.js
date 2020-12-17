@@ -7,7 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity } = require('http-errors')
+const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
 
 const config = require('../../config')
@@ -177,8 +177,14 @@ class MemberManager {
     if (namespace !== this.namespace) {
       return // foreign service account => early exit, nothing to delete
     }
-
-    await this.client.core.serviceaccounts.delete(namespace, name)
+    try {
+      await this.client.core.serviceaccounts.delete(namespace, name)
+    } catch (err) {
+      if (isHttpError(err) && err.statusCode === 404) {
+        return // do not fail request if service account has already been deleted
+      }
+      throw err
+    }
     this.subjectList.delete(item.id)
   }
 
