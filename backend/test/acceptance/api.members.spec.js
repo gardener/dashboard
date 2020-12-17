@@ -399,7 +399,7 @@ describe('api', function () {
 
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
       const res = await agent
         .post(`/api/namespaces/${namespace}/members/${name}`)
@@ -407,11 +407,11 @@ describe('api', function () {
         .send({
           method: 'rotateSecret'
         })
+        .expect(200)
 
       expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toMatchSnapshot()
     })
   })
 })

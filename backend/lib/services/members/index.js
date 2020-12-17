@@ -35,5 +35,5 @@ exports.remove = async function ({ user, namespace, name }) {
 
 exports.rotateSecret = async function ({ user, namespace, name }) {
   const memberManager = await MemberManager.create(user, namespace)
-  memberManager.rotateServiceAccountSecret(name)
+  await memberManager.rotateServiceAccountSecret(name)
 }

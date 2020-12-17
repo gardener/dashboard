@@ -65,7 +65,8 @@ router.route('/:name')
 
       switch (method) {
         case 'rotateSecret':
-          res.send(await members.rotateSecret({ user, namespace, name }))
+          await members.rotateSecret({ user, namespace, name })
+          res.end()
           break
         default:
           throw new UnprocessableEntity(`${method} not allowed for members`)

@@ -205,7 +205,7 @@ class MemberManager {
       .head()
       .get('name')
       .value()
-    return await this.client.core.secrets.delete(namespace, name)
+    await this.client.core.secrets.delete(namespace, name)
   }
 
   async getKubeconfig (item) {
