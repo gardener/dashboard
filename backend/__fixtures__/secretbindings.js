@@ -7,6 +7,7 @@
 'use strict'
 
 const { cloneDeep, map, find, filter, set } = require('lodash')
+const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
 const quotaList = require('./quotas').list('garden-foo')
@@ -76,21 +77,29 @@ const secretBindings = {
   }
 }
 
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings', matchOptions)
+const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings/:name', matchOptions)
+
 const mocks = {
   list () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const items = filter(secretBindingList, ['metadata.namespace', namespace])
       return Promise.resolve({ items })
     }
   },
   create ({ resourceVersion = '42' } = {}) {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
       set(item, 'metadata.namespace', namespace)
       set(item, 'metadata. resourceVersion', resourceVersion)
@@ -98,19 +107,23 @@ const mocks = {
     }
   },
   get () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = secretBindings.get(namespace, name)
       return Promise.resolve(item)
     }
   },
   delete () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = secretBindings.get(namespace, name)
       return Promise.resolve(item)
     }

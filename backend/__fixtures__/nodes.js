@@ -7,6 +7,8 @@
 'use strict'
 
 const { cloneDeep, find, set } = require('lodash')
+const createError = require('http-errors')
+const pathToRegexp = require('path-to-regexp')
 
 const nodeList = [
   getNode({ name: 'node-1', hostname: 'host-1' }),
@@ -49,11 +51,16 @@ const nodes = {
   }
 }
 
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/api/v1/nodes', matchOptions)
+
 const mocks = {
   list () {
-    // eslint-disable-next-line no-unused-vars
-    const path = '/api/v1/nodes'
-    return () => {
+    return headers => {
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
       const items = nodes.list()
       return Promise.resolve({ items })
     }
