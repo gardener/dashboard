@@ -195,6 +195,7 @@ import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
 import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
+import RotateServiceAccountSecret from '@/components/messages/RotateServiceAccountSecret'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 
 import {
@@ -553,14 +554,15 @@ export default {
       })
     },
     confirmRotateServiceAccountSecret (name) {
-      const memberName = escape(displayName(name))
-      const messageHtml = `Do you want to rotate the secret of service account <i>${memberName}</i>?<br /> Attention: The current kubeconfig credentials will be revoked`
+      const message = this.$renderComponent(RotateServiceAccountSecret, {
+        name
+      })
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Rotate',
         captionText: 'Confirm Service Account Secret Rotation',
-        messageHtml,
+        messageHtml: message.innerHTML,
         dialogColor: 'red',
-        confirmValue: memberName
+        confirmValue: name
       })
     },
     onEditUser ({ username, roles }) {

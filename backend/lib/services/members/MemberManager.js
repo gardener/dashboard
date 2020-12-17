@@ -127,7 +127,7 @@ class MemberManager {
   async createServiceAccount (item, { createdBy, description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return // do not throw an error as it is allowed to add foreign service accounts
+      return // foreign service account => early exit, nothing to create
     }
 
     const serviceAccount = await this.client.core.serviceaccounts.create(namespace, {
@@ -175,7 +175,7 @@ class MemberManager {
   async deleteServiceAccount (item) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return // do not throw an error as it is allowed to add foreign service accounts
+      return // foreign service account => early exit, nothing to delete
     }
 
     await this.client.core.serviceaccounts.delete(namespace, name)
