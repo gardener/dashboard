@@ -105,23 +105,32 @@ const terminals = {
   }
 }
 
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals', matchOptions)
+const matchItem = pathToRegexp.match('/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals/:name', matchOptions)
+
 const mocks = {
   list () {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
       const [pathname] = split(headers[':path'], '?')
-      const { params: { namespace } = {} } = match(pathname) || {}
+      const matchResult = matchList(pathname)
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
+
       const labelSelector = parseLabelSelector(headers)
       const items = terminals.list(namespace, { labelSelector })
       return Promise.resolve({ items })
     }
   },
   create ({ resourceVersion = '42' } = {}) {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
       const identifier = get(item, 'metadata.annotations["dashboard.gardener.cloud/identifier"]', '21')
       const generateName = get(item, 'metadata.generateName')
@@ -137,24 +146,14 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
-  get () {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
-    return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
-
-      const item = terminals.get(namespace, name)
-      if (item) {
-        return Promise.resolve(item)
-      }
-      return Promise.reject(createError(404))
-    }
-  },
   watch () {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const [pathname] = split(headers[':path'], '?')
+      const matchResult = matchList(pathname)
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const fieldSelector = parseFieldSelector(headers)
       const items = filter(terminals.list(namespace), fieldSelector)
       const stream = new PassThrough()
@@ -172,11 +171,27 @@ const mocks = {
       return stream
     }
   },
+  get () {
+    return headers => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
+      const item = terminals.get(namespace, name)
+      if (item) {
+        return Promise.resolve(item)
+      }
+      return Promise.reject(createError(404))
+    }
+  },
   patch () {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = terminals.get(namespace, name)
       const resourceVersion = get(item, 'metadata.resourceVersion', '42')
       merge(item, json)
@@ -185,10 +200,12 @@ const mocks = {
     }
   },
   delete () {
-    const path = '/apis/dashboard.gardener.cloud/v1alpha1/namespaces/:namespace/terminals/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = terminals.get(namespace, name)
       return Promise.resolve(item)
     }
