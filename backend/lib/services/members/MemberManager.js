@@ -23,7 +23,7 @@ class MemberManager {
     this.userId = userId
     this.namespace = project.spec.namespace
     this.projectName = project.metadata.name
-    this.subjectList = new SubjectList(project.spec.members, serviceAccounts)
+    this.subjectList = new SubjectList(project, serviceAccounts)
   }
 
   list () {
@@ -180,10 +180,9 @@ class MemberManager {
     try {
       await this.client.core.serviceaccounts.delete(namespace, name)
     } catch (err) {
-      if (isHttpError(err) && err.statusCode === 404) {
-        return // do not fail request if service account has already been deleted
+      if (!isHttpError(err) || err.statusCode !== 404) {
+        throw err
       }
-      throw err
     }
     this.subjectList.delete(item.id)
   }

@@ -8,7 +8,7 @@
 
 const { pick } = require('lodash')
 
-const PROPERTY_NAMES = ['createdBy', 'creationTimestamp', 'description', 'kubeconfig', 'hasServiceAccountResource']
+const PROPERTY_NAMES = ['createdBy', 'creationTimestamp', 'description', 'kubeconfig', 'orphaned']
 
 class Member {
   constructor (username, { roles, extensions } = {}) {

@@ -81,7 +81,7 @@ describe('services', function () {
       },
       {
         kind: 'ServiceAccount',
-        name: 'robot-no-sa-res',
+        name: 'robot-orphaned',
         namespace: 'garden-foo',
         role: 'myrole'
       },
@@ -189,10 +189,11 @@ describe('services', function () {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
         delete: jest.fn().mockImplementation((namespace, name) => {
-          if (!_.find(serviceAccounts, { metadata: { name, namespace } })) {
+          const item = _.find(serviceAccounts, { metadata: { name, namespace } })
+          if (!item) {
             return Promise.reject(createError(404))
           }
-          return Promise.resolve()
+          return Promise.resolve(item)
         }),
         mergePatch: jest.fn().mockResolvedValue()
       }
@@ -202,7 +203,7 @@ describe('services', function () {
     })
 
     describe('SubjectList', function () {
-      const subjectList = new SubjectList(memberSubjects)
+      const subjectList = new SubjectList(project)
 
       describe('#get', function () {
         it('should merge role, roles into roles', async function () {
@@ -244,8 +245,7 @@ describe('services', function () {
             roles: ['otherrole', 'admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined,
-            hasServiceAccountResource: true
+            description: undefined
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
@@ -256,12 +256,12 @@ describe('services', function () {
             roles: [],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined,
-            hasServiceAccountResource: true
+            description: undefined
           })
           expect(frontendMemberList).toContainEqual({
-            username: 'system:serviceaccount:garden-foo:robot-no-sa-res',
-            roles: ['myrole']
+            username: 'system:serviceaccount:garden-foo:robot-orphaned',
+            roles: ['myrole'],
+            orphaned: true
           })
         })
 
@@ -273,8 +273,7 @@ describe('services', function () {
             roles: ['admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: 'description',
-            hasServiceAccountResource: true
+            description: 'description'
           })
         })
       })
@@ -401,6 +400,7 @@ describe('services', function () {
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
           expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          expect(memberManager.subjectList.has(id)).toBe(false)
         })
 
         it('should not delete a serviceaccount from a different namespace', async function () {
@@ -408,12 +408,15 @@ describe('services', function () {
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
           expect(client.core.serviceaccounts.delete).not.toBeCalled()
+          expect(memberManager.subjectList.has(id)).toBe(true)
         })
 
         it('should not fail if service account has already been deleted', async function () {
-          const id = 'system:serviceaccount:garden-foo:robot-no-sa-res'
+          const id = 'system:serviceaccount:garden-foo:robot-orphaned'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccount(item)).resolves.not.toThrow(NotFound)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-orphaned')
+          expect(memberManager.subjectList.has(id)).toBe(false)
         })
       })
 

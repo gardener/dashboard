@@ -12,17 +12,17 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title class="d-flex">
             <span class="subtitle-1">{{item.displayName}}</span>
-            <v-tooltip top v-if="!isServiceAccountFromCurrentNamespace">
+            <v-tooltip top v-if="foreign">
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
               </template>
               <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
             </v-tooltip>
-            <v-tooltip top v-if="!item.hasServiceAccountResource && isServiceAccountFromCurrentNamespace">
+            <v-tooltip top v-if="orphaned">
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on" small class="ml-1" color="warning">mdi-alert-circle-outline</v-icon>
               </template>
-              <span>Service Account Resource missing</span>
+              <span>Associated Service Account does not exists</span>
             </v-tooltip>
           </v-list-item-title>
           <v-list-item-subtitle>{{item.username}}</v-list-item-subtitle>
@@ -58,30 +58,30 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td width="250px" v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end">
-        <div v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.native.stop="onDownload" :disabled="!item.hasServiceAccountResource">
+              <v-btn v-on="on" icon @click.native.stop="onDownload" :disabled="orphaned">
                 <v-icon>mdi-download</v-icon>
               </v-btn>
             </template>
             <span>Download Kubeconfig</span>
           </v-tooltip>
         </div>
-        <div v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click="onKubeconfig" :disabled="!item.hasServiceAccountResource">
+              <v-btn v-on="on" icon @click="onKubeconfig" :disabled="orphaned">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
             </template>
             <span>Show Kubeconfig</span>
           </v-tooltip>
         </div>
-        <div v-if="isServiceAccountFromCurrentNamespace && canDeleteSecrets" class="ml-1">
+        <div v-if="!foreign && canDeleteSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click="onRotateSecret" :disabled="!item.hasServiceAccountResource">
+              <v-btn v-on="on" icon @click="onRotateSecret" :disabled="orphaned">
                 <v-icon>mdi-refresh</v-icon>
               </v-btn>
             </template>
@@ -102,10 +102,10 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
-                <v-icon>{{ isServiceAccountFromCurrentNamespace ? 'mdi-delete' : 'mdi-close' }}</v-icon>
+                <v-icon>{{ foreign ? 'mdi-close' : 'mdi-delete' }}</v-icon>
               </v-btn>
             </template>
-            <span>{{ isServiceAccountFromCurrentNamespace ? 'Delete Service Account' : 'Remove Foreign Service Account from Project' }}</span>
+            <span>{{ foreign ? 'Remove Foreign Service Account from Project' : 'Delete Service Account' }}</span>
           </v-tooltip>
         </div>
       </div>
@@ -150,8 +150,11 @@ export default {
       'canGetSecrets',
       'canDeleteSecrets'
     ]),
-    isServiceAccountFromCurrentNamespace () {
-      return !isForeignServiceAccount(this.namespace, this.item.username)
+    orphaned () {
+      return this.item.orphaned
+    },
+    foreign () {
+      return isForeignServiceAccount(this.namespace, this.item.username)
     },
     createdByClasses () {
       return this.item.createdBy ? ['font-weight-bold'] : ['grey--text']
