@@ -16,6 +16,8 @@ module.exports = {
   '/cloudprofiles': require('./cloudprofiles'),
   '/seeds': require('./seeds'),
   '/shoots': require('./shoots'),
+  '/gardener-extensions': require('./gardenerExtensions'),
+  '/networking-types': require('./networkingTypes'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),

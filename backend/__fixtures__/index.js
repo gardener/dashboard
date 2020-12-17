@@ -14,6 +14,7 @@ const seeds = require('./seeds')
 const secrets = require('./secrets')
 const secretbindings = require('./secretbindings')
 const quotas = require('./quotas')
+const controllerregistrations = require('./controllerregistrations')
 const projects = require('./projects')
 const serviceaccounts = require('./serviceaccounts')
 const cloudprofiles = require('./cloudprofiles')
@@ -44,6 +45,7 @@ const fixtures = {
   serviceaccounts,
   cloudprofiles,
   quotas,
+  controllerregistrations,
   nodes,
   terminals,
   github,

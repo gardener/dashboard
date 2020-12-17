@@ -23,7 +23,6 @@ import get from 'lodash/get'
 import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
-import escape from 'lodash/escape'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent) {
@@ -127,27 +126,33 @@ export class ShootEditorCompletions {
         property: propertyName,
         type: upperFirst(completion.type),
         description: completion.description,
-        render: (el, self, data) => {
-          const propertyWrapper = document.createElement('div')
-          propertyWrapper.innerHTML = [
-            '<span class="property">',
-            escape(propertyName),
-            '</span>',
-            '<span class="type">',
-            escape(upperFirst(completion.type)),
-            '</span>'
-          ].join('')
-          propertyWrapper.className = 'ghint-type'
-          el.appendChild(propertyWrapper)
+        render (el, self, data) {
+          const document = el.ownerDocument
+          const { property, type, description } = data
 
-          const descWrapper = document.createElement('div')
-          descWrapper.innerHTML = [
-            '<span class="description">',
-            escape(completion.description),
-            '</span>'
-          ].join('')
-          descWrapper.className = 'ghint-desc'
-          el.appendChild(descWrapper)
+          const propertyElement = document.createElement('span')
+          propertyElement.className = 'property'
+          propertyElement.textContent = property
+
+          const typeElement = document.createElement('span')
+          typeElement.className = 'type'
+          typeElement.textContent = type
+
+          const propertyWrapper = document.createElement('div')
+          propertyWrapper.className = 'ghint-type'
+          propertyWrapper.appendChild(propertyElement)
+          propertyWrapper.appendChild(typeElement)
+
+          const descriptionElement = document.createElement('span')
+          descriptionElement.className = 'description'
+          descriptionElement.textContent = description
+
+          const descriptionWrapper = document.createElement('div')
+          descriptionWrapper.className = 'ghint-desc'
+          descriptionWrapper.appendChild(descriptionElement)
+
+          el.appendChild(propertyWrapper)
+          el.appendChild(descriptionWrapper)
         }
       })
     })

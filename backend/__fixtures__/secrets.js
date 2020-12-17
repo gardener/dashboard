@@ -195,21 +195,29 @@ const secrets = {
   }
 }
 
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets', matchOptions)
+const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:name', matchOptions)
+
 const mocks = {
   list () {
-    const path = '/api/v1/namespaces/:namespace/secrets'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const items = secrets.list(namespace)
       return Promise.resolve({ items })
     }
   },
   create ({ resourceVersion = '42' } = {}) {
-    const path = '/api/v1/namespaces/:namespace/secrets'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
       set(item, 'metadata.namespace', namespace)
       set(item, 'metadata.resourceVersion', resourceVersion)
@@ -217,10 +225,12 @@ const mocks = {
     }
   },
   get (options) {
-    const path = '/api/v1/namespaces/:namespace/secrets/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const [hostname] = split(headers[':authority'], ':')
       if (hostname === 'kubernetes') {
         if (namespace === 'garden' && startsWith(name, 'seedsecret-')) {
@@ -260,13 +270,15 @@ const mocks = {
     }
   },
   patch () {
-    const path = '/api/v1/namespaces/:namespace/secrets/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       if (has(json, 'metadata.resourceVersion')) {
         return Promise.reject(createError(409))
       }
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
       const item = secrets.get(namespace, name)
       const resourceVersion = get(item, 'metadata.resourceVersion', '42')
       merge(item, json)
@@ -275,10 +287,12 @@ const mocks = {
     }
   },
   delete () {
-    const path = '/api/v1/namespaces/:namespace/secrets/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = secrets.get(namespace, name)
       return Promise.resolve(item)
     }

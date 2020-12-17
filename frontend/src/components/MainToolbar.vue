@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
             <span>Info</span>
           </v-tooltip>
         </template>
-        <v-card tile>
+        <v-card tile width="300px">
           <v-card-title primary-title>
             <div class="content">
               <div class="title mb-2">Gardener</div>
@@ -123,6 +123,9 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
+import map from 'lodash/map'
+import join from 'lodash/join'
+import uniq from 'lodash/uniq'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
@@ -160,7 +163,8 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin'
+      'isAdmin',
+      'controllerRegistrationList'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -189,6 +193,19 @@ export default {
         name: 'Account',
         query
       }
+    },
+    extensionCount () {
+      return this.controllerRegistrationList.length
+    },
+    extensionList () {
+      return map(this.controllerRegistrationList, ({ name, version, resources }, id) => {
+        return {
+          id,
+          name,
+          version,
+          kind: join(uniq(map(resources, 'kind')), ', ')
+        }
+      })
     }
   },
   watch: {

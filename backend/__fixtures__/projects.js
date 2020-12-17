@@ -7,7 +7,7 @@
 'use strict'
 
 const { PassThrough } = require('stream')
-const { cloneDeep, merge, get, set, filter, find, includes, intersection } = require('lodash')
+const { cloneDeep, merge, get, set, filter, find, includes, intersection, split } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
@@ -220,99 +220,118 @@ const projects = {
   }
 }
 
-module.exports = {
-  ...projects,
-  mocks: {
-    list () {
-      // eslint-disable-next-line no-unused-vars
-      const path = '/apis/core.gardener.cloud/v1beta1/projects'
-      return () => {
-        const items = projects.list()
-        return Promise.resolve({ items })
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/projects', matchOptions)
+const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/projects/:name', matchOptions)
+
+const mocks = {
+  list () {
+    return headers => {
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
       }
-    },
-    create ({ uid = 21, resourceVersion = '42', phase = 'Ready' } = {}) {
-      // eslint-disable-next-line no-unused-vars
-      const path = '/apis/core.gardener.cloud/v1beta1/projects'
-      return (headers, json) => {
-        const payload = getTokenPayload(headers)
-        const item = cloneDeep(json)
-        const name = json.metadata.name
-        const user = createUser(payload.id)
-        set(item, 'metadata.resourceVersion', resourceVersion)
-        set(item, 'metadata.uid', uid)
-        set(item, 'spec.namespace', `garden-${name}`)
-        set(item, 'spec.createdBy', user)
-        set(item, 'spec.owner', user)
-        set(item, 'spec.members', [{
-          ...user,
-          role: 'owner',
-          roles: ['admin', 'uam']
-        }])
-        set(item, 'status.phase', 'Initial')
-        projects.items.push(item)
-        return Promise.resolve(item)
+      const items = projects.list()
+      return Promise.resolve({ items })
+    }
+  },
+  create ({ uid = 21, resourceVersion = '42', phase = 'Ready' } = {}) {
+    return (headers, json) => {
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
       }
-    },
-    watch ({ phase = 'Ready', milliseconds } = {}) {
-      // eslint-disable-next-line no-unused-vars
-      const path = '/apis/core.gardener.cloud/v1beta1/projects'
-      return headers => {
-        const fieldSelector = parseFieldSelector(headers)
-        const stream = new PassThrough()
-        process.nextTick(async () => {
-          const items = filter(projects.list(), fieldSelector)
-          for (const item of items) {
-            const chunk = JSON.stringify({ type: 'ADDED', object: item }) + '\n'
-            stream.write(chunk)
-          }
-          await delay(milliseconds)
-          const initialItems = filter(items, ['status.phase', 'Initial'])
-          for (const item of initialItems) {
-            const resourceVersion = get(item, 'metadata.resourceVersion', '42')
-            set(item, 'status.phase', phase)
-            set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
-            const chunk = JSON.stringify({ type: 'MODIFIED', object: item }) + '\n'
-            stream.write(chunk)
-          }
-          stream.end()
-        })
-        return stream
+      const payload = getTokenPayload(headers)
+      const item = cloneDeep(json)
+      const name = json.metadata.name
+      const user = createUser(payload.id)
+      set(item, 'metadata.resourceVersion', resourceVersion)
+      set(item, 'metadata.uid', uid)
+      set(item, 'spec.namespace', `garden-${name}`)
+      set(item, 'spec.createdBy', user)
+      set(item, 'spec.owner', user)
+      set(item, 'spec.members', [{
+        ...user,
+        role: 'owner',
+        roles: ['admin', 'uam']
+      }])
+      set(item, 'status.phase', 'Initial')
+      projects.items.push(item)
+      return Promise.resolve(item)
+    }
+  },
+  watch ({ phase = 'Ready', milliseconds } = {}) {
+    return headers => {
+      const [pathname] = split(headers[':path'], '?')
+      const matchResult = matchList(pathname)
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
       }
-    },
-    get () {
-      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
-      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
-      return headers => {
-        const { params: { name } = {} } = match(headers[':path']) || {}
-        const payload = getTokenPayload(headers)
-        const item = projects.get(name)
-        if (!projects.isMember(item, payload)) {
-          return Promise.reject(createError(403))
+      const fieldSelector = parseFieldSelector(headers)
+      const stream = new PassThrough()
+      process.nextTick(async () => {
+        const items = filter(projects.list(), fieldSelector)
+        for (const item of items) {
+          const chunk = JSON.stringify({ type: 'ADDED', object: item }) + '\n'
+          stream.write(chunk)
         }
-        return Promise.resolve(item)
+        await delay(milliseconds)
+        const initialItems = filter(items, ['status.phase', 'Initial'])
+        for (const item of initialItems) {
+          const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+          set(item, 'status.phase', phase)
+          set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+          const chunk = JSON.stringify({ type: 'MODIFIED', object: item }) + '\n'
+          stream.write(chunk)
+        }
+        stream.end()
+      })
+      return stream
+    }
+  },
+  get () {
+    return headers => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
       }
-    },
-    patch () {
-      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
-      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
-      return (headers, json) => {
-        const { params: { name } = {} } = match(headers[':path']) || {}
-        const item = projects.get(name)
-        const resourceVersion = get(item, 'metadata.resourceVersion', '42')
-        merge(item, json)
-        set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
-        return Promise.resolve(item)
+      const { params: { name } = {} } = matchResult
+      const payload = getTokenPayload(headers)
+      const item = projects.get(name)
+      if (!projects.isMember(item, payload)) {
+        return Promise.reject(createError(403))
       }
-    },
-    delete () {
-      const path = '/apis/core.gardener.cloud/v1beta1/projects/:name'
-      const match = pathToRegexp.match(path, { decode: decodeURIComponent })
-      return headers => {
-        const { params: { name } = {} } = match(headers[':path']) || {}
-        const item = projects.get(name)
-        return Promise.resolve(item)
+      return Promise.resolve(item)
+    }
+  },
+  patch () {
+    return (headers, json) => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
       }
+      const { params: { name } = {} } = matchResult
+      const item = projects.get(name)
+      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      merge(item, json)
+      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      return Promise.resolve(item)
+    }
+  },
+  delete () {
+    return headers => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { name } = {} } = matchResult
+      const item = projects.get(name)
+      return Promise.resolve(item)
     }
   }
+}
+
+module.exports = {
+  ...projects,
+  mocks
 }

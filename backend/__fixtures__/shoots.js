@@ -118,12 +118,18 @@ const shoots = {
   }
 }
 
+const matchOptions = { decode: decodeURIComponent }
+const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots', matchOptions)
+const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name', matchOptions)
+
 const mocks = {
   list () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const payload = getTokenPayload(headers)
       const project = projects.getByNamespace(namespace)
       if (!projects.isMember(project, payload)) {
@@ -134,10 +140,12 @@ const mocks = {
     }
   },
   create ({ uid = 21, resourceVersion = '42', phase = 'Ready' } = {}) {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace } = {} } = match(headers[':path']) || {}
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
       const payload = getTokenPayload(headers)
       const project = projects.getByNamespace(namespace)
       if (!projects.isMember(project, payload)) {
@@ -154,10 +162,12 @@ const mocks = {
     }
   },
   get () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const payload = getTokenPayload(headers)
       const project = projects.getByNamespace(namespace)
       if (!projects.isMember(project, payload)) {
@@ -171,10 +181,12 @@ const mocks = {
     }
   },
   patch () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       let item = shoots.get(namespace, name)
       if (!item) {
         return Promise.reject(createError(404))
@@ -193,10 +205,12 @@ const mocks = {
     }
   },
   put () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return (headers, json) => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       let item = shoots.get(namespace, name)
       if (!item) {
         return Promise.reject(createError(404))
@@ -208,10 +222,12 @@ const mocks = {
     }
   },
   delete () {
-    const path = '/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name'
-    const match = pathToRegexp.match(path, { decode: decodeURIComponent })
     return headers => {
-      const { params: { namespace, name } = {} } = match(headers[':path']) || {}
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
       const item = shoots.get(namespace, name)
       set(item, 'metadata.annotations["confirmation.gardener.cloud/deletion"]', 'true')
       return Promise.resolve(item)

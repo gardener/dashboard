@@ -7,6 +7,9 @@
 'use strict'
 
 const { split, join, reduce } = require('lodash')
+const createError = require('http-errors')
+const pathToRegexp = require('path-to-regexp')
+
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
@@ -66,7 +69,12 @@ const auth = {
 
 const mocks = {
   reviewSelfSubjectRules () {
+    const match = pathToRegexp.match('/apis/authorization.k8s.io/v1/selfsubjectrulesreviews')
     return (headers, json) => {
+      const matchResult = match(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
       const payload = auth.getTokenPayload(headers)
       const resourceRules = []
       const nonResourceRules = []
@@ -102,7 +110,12 @@ const mocks = {
     }
   },
   reviewSelfSubjectAccess ({ allowed = true } = {}) {
+    const match = pathToRegexp.match('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
     return (headers, json) => {
+      const matchResult = match(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
       const { id } = auth.getTokenPayload(headers)
       const { resourceAttributes, nonResourceAttributes } = json.spec
       if (resourceAttributes) {
@@ -125,7 +138,12 @@ const mocks = {
     }
   },
   reviewToken ({ domain = 'example.org' } = {}) {
+    const match = pathToRegexp.match('/apis/authentication.k8s.io/v1/tokenreviews')
     return (headers, json) => {
+      const matchResult = match(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
       const { spec: { token } } = json
       const { id: username, groups } = decode(token)
       const authenticated = username.endsWith(domain)

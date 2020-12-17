@@ -17,7 +17,6 @@ Array [
         "nonResourceAttributes": undefined,
         "resourceAttributes": Object {
           "group": "core.gardener.cloud",
-          "name": undefined,
           "resource": "cloudprofiles",
           "verb": "list",
         },
