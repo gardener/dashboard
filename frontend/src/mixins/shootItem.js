@@ -192,6 +192,17 @@ export const shootItem = {
     },
     hibernationPossibleMessage () {
       return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
+    },
+    maintenancePossibleConstraint () {
+      const constraints = get(this.shootItem, 'status.constraints')
+      return find(constraints, ['type', 'MaintenancePreconditionsSatisfied'])
+    },
+    isMaintenancePossible () {
+      const status = get(this.maintenancePossibleConstraint, 'status', 'True')
+      return status !== 'False'
+    },
+    maintenancePossibleMessage () {
+      return get(this.maintenancePossibleConstraint, 'message', 'Maintenance currently not possible')
     }
   },
   methods: {

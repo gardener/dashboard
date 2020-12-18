@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     :caption="caption"
     icon="mdi-refresh"
     :buttonText="buttonText"
+    :disabled="!isMaintenancePossible"
     maxWidth="850"
     confirmButtonText="Trigger now">
     <template v-slot:actionComponent>
@@ -65,6 +66,9 @@ export default {
     caption () {
       if (this.isMaintenanceToBeScheduled) {
         return 'Requesting to schedule cluster maintenance'
+      }
+      if (!this.isMaintenancePossible) {
+        return this.maintenancePossibleMessage
       }
       return this.buttonTitle
     },
