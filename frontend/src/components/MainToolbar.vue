@@ -123,9 +123,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import map from 'lodash/map'
-import join from 'lodash/join'
-import uniq from 'lodash/uniq'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
@@ -163,8 +160,7 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin',
-      'controllerRegistrationList'
+      'isAdmin'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -193,19 +189,6 @@ export default {
         name: 'Account',
         query
       }
-    },
-    extensionCount () {
-      return this.controllerRegistrationList.length
-    },
-    extensionList () {
-      return map(this.controllerRegistrationList, ({ name, version, resources }, id) => {
-        return {
-          id,
-          name,
-          version,
-          kind: join(uniq(map(resources, 'kind')), ', ')
-        }
-      })
     }
   },
   watch: {
