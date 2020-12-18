@@ -401,7 +401,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
-      const res = await agent
+      await agent
         .post(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
@@ -411,7 +411,6 @@ describe('api', function () {
 
       expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
-
     })
   })
 })
