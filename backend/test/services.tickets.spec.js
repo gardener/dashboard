@@ -12,18 +12,10 @@ const {
 const github = require('../lib/github')
 const logger = require('../lib/logger')
 const cache = require('../lib/cache')
-const { filter, map, unset } = require('lodash')
+const { filter, map, unset, find, cloneDeep } = require('lodash')
 
 describe('services', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-
-  afterEach(function () {
-    sandbox.restore()
-  })
-
   describe('tickets', function () {
-    let debugSpy
     let getIssueStub
     let removeIssueSpy
     let createCommentStub
@@ -53,39 +45,41 @@ describe('services', function () {
     }
 
     beforeEach(function () {
-      debugSpy = sandbox.spy(logger, 'debug')
-      createCommentStub = sandbox.stub(github, 'createComment')
-      closeIssueStub = sandbox.stub(github, 'closeIssue')
-      getIssueStub = sandbox.stub(github, 'getIssue')
-      sandbox.stub(cache, 'getTicketCache').returns(ticketCache)
-      ticketCache.issues = issues
-      removeIssueSpy = sandbox.spy(ticketCache, 'removeIssue')
+      ticketCache.issues = cloneDeep(issues)
+      jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
+      createCommentStub = jest.spyOn(github, 'createComment').mockReturnValue()
+      closeIssueStub = jest.spyOn(github, 'closeIssue').mockReturnValue()
+      getIssueStub = jest.spyOn(github, 'getIssue').mockImplementation(({ number }) => {
+        return Promise.resolve({
+          data: find(issues, ['id', number])
+        })
+      })
+      removeIssueSpy = jest.spyOn(ticketCache, 'removeIssue')
     })
 
     describe('#deleteTickets', function () {
       it('should not remove any issues', async function () {
         await deleteTickets({ projectName: 'foo', name: 'foo' })
-        expect(debugSpy).to.not.be.called
-        expect(createCommentStub).to.not.be.called
-        expect(closeIssueStub).to.not.be.called
-        expect(removeIssueSpy).to.not.be.called
+        expect(getIssueStub).not.toBeCalled()
+        expect(logger.debug).not.toBeCalled()
+        expect(createCommentStub).not.toBeCalled()
+        expect(closeIssueStub).not.toBeCalled()
+        expect(removeIssueSpy).not.toBeCalled()
       })
 
       it('should create comment and close issue', async function () {
-        getIssueStub.withArgs({ number: 1 }).returns({
-          data: issue1
-        })
-        getIssueStub.withArgs({ number: 3 }).returns({
-          data: issue3
-        })
-        createCommentStub.withArgs({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
-        closeIssueStub.withArgs({ number: issue1.id })
-
         await deleteTickets({ projectName: 'foo', name: 'bar' })
-        expect(debugSpy).to.be.calledTwice
-        expect(createCommentStub).to.be.calledWith({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
-        expect(closeIssueStub).to.be.calledWith({ number: issue1.id })
-        expect(removeIssueSpy).to.be.calledOnce
+        expect(getIssueStub).toBeCalledTimes(2)
+        expect(getIssueStub.mock.calls).toEqual([
+          [{ number: issue1.id }],
+          [{ number: issue3.id }]
+        ])
+        expect(logger.debug).toBeCalledTimes(2)
+        expect(createCommentStub).toBeCalledTimes(1)
+        expect(createCommentStub.mock.calls[0]).toEqual([{ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_'])
+        expect(closeIssueStub).toBeCalledTimes(1)
+        expect(closeIssueStub.mock.calls[0]).toEqual([{ number: issue1.id }])
+        expect(removeIssueSpy).toBeCalledTimes(1)
       })
     })
   })

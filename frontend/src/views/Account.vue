@@ -120,7 +120,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-expand-transition>
                 <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
                   <v-card-text class="pt-0">
-                    <div class="grey--text text--darken-2">
+                    <div>
                       The downloaded <tt>kubeconfig</tt> will initiate
                       <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
                         OIDC

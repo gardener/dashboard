@@ -37,18 +37,18 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-title>
               </v-list-item-content>
               <v-list-item-action>
-                <service-account-roles :role-display-names="desiredRoleDisplayNames"></service-account-roles>
+                <member-account-roles :role-display-names="desiredRoleDisplayNames"></member-account-roles>
               </v-list-item-action>
             </v-list-item>
           </v-list>
         </div>
       </div>
-      <g-alert
+      <g-message
         color="error"
         class="ma-0"
         :message.sync="errorMessage"
         :detailedMessage.sync="detailedErrorMessage"
-      ></g-alert>
+      ></g-message>
     </template>
   </g-dialog>
 </template>
@@ -56,8 +56,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GDialog from '@/components/dialogs/GDialog'
 import AccountAvatar from '@/components/AccountAvatar'
-import GAlert from '@/components/GAlert'
-import ServiceAccountRoles from '@/components/ServiceAccountRoles'
+import GMessage from '@/components/GMessage'
+import MemberAccountRoles from '@/components/MemberAccountRoles'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
@@ -67,9 +67,9 @@ export default {
   name: 'WebterminalServiceAccountDialog',
   components: {
     GDialog,
-    GAlert,
+    GMessage,
     AccountAvatar,
-    ServiceAccountRoles
+    MemberAccountRoles
   },
   props: {
     namespace: {

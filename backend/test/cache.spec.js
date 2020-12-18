@@ -11,9 +11,6 @@ const cache = require('../lib/cache')
 const { cache: internalCache } = cache
 
 describe('cache', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-
   const a = { metadata: { uid: 1, name: 'a', namespace: 'z' } }
   const b = { metadata: { uid: 2, name: 'b', namespace: 'y' } }
   const c = { metadata: { uid: 3, name: 'c', namespace: 'y' } }
@@ -58,49 +55,60 @@ describe('cache', function () {
   }
   Project.scope = 'Cluster'
 
+  class ControllerRegistration {
+    syncList (store) {
+      return replace(store, [a, c])
+    }
+  }
+  ControllerRegistration.scope = 'Cluster'
+
   const gardenerCore = {
     cloudprofiles: new CloudProfile(),
     quotas: new Quota(),
     seeds: new Seed(),
-    projects: new Project()
+    projects: new Project(),
+    controllerregistrations: new ControllerRegistration()
   }
 
   const testClient = {
     'core.gardener.cloud': gardenerCore
   }
 
-  afterEach(function () {
-    sandbox.restore()
-  })
-
   it('should dispatch "synchronize" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'synchronize')
+    const stub = jest.spyOn(internalCache, 'synchronize')
     cache.synchronize(testClient)
-    expect(stub).to.be.calledOnceWith(testClient)
+    expect(stub).toBeCalledTimes(1)
+    expect(stub.mock.calls[0][0]).toBe(testClient)
   })
 
   it('should dispatch "getCloudProfiles" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getCloudProfiles').returns(list)
-    expect(cache.getCloudProfiles()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const stub = jest.spyOn(internalCache, 'getCloudProfiles').mockReturnValue(list)
+    expect(cache.getCloudProfiles()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getQuotas" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getQuotas').returns(list)
-    expect(cache.getQuotas()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const stub = jest.spyOn(internalCache, 'getQuotas').mockReturnValue(list)
+    expect(cache.getQuotas()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getSeeds" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getSeeds').returns(list)
-    expect(cache.getSeeds()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const stub = jest.spyOn(internalCache, 'getSeeds').mockReturnValue(list)
+    expect(cache.getSeeds()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getProjects" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getProjects').returns(list)
-    expect(cache.getProjects()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const stub = jest.spyOn(internalCache, 'getProjects').mockReturnValue(list)
+    expect(cache.getProjects()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
+  })
+
+  it('should dispatch "getControllerRegistrations" to internal cache', function () {
+    const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
+    expect(cache.getControllerRegistrations()).toEqual(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   describe('Cache', function () {
@@ -111,37 +119,41 @@ describe('cache', function () {
       cache = new Cache()
     })
 
-    describe('#synchronize', async function () {
+    describe('#synchronize', function () {
       let syncCloudprofilesSpy
       let syncQuotasSpy
       let syncSeedsSpy
       let syncProjectsSpy
+      let syncControllerregistrationsSpy
 
       beforeEach(function () {
-        syncCloudprofilesSpy = sandbox.spy(gardenerCore.cloudprofiles, 'syncList')
-        syncQuotasSpy = sandbox.spy(gardenerCore.quotas, 'syncListAllNamespaces')
-        syncSeedsSpy = sandbox.spy(gardenerCore.seeds, 'syncList')
-        syncProjectsSpy = sandbox.spy(gardenerCore.projects, 'syncList')
+        syncCloudprofilesSpy = jest.spyOn(gardenerCore.cloudprofiles, 'syncList')
+        syncQuotasSpy = jest.spyOn(gardenerCore.quotas, 'syncListAllNamespaces')
+        syncSeedsSpy = jest.spyOn(gardenerCore.seeds, 'syncList')
+        syncProjectsSpy = jest.spyOn(gardenerCore.projects, 'syncList')
+        syncControllerregistrationsSpy = jest.spyOn(gardenerCore.controllerregistrations, 'syncList')
       })
 
       it('should syncronize the cache', async function () {
-        expect(cache.synchronizationPromise).to.be.undefined
+        expect(cache.synchronizationPromise).toBeUndefined()
         await cache.synchronize(testClient)
-        expect(syncCloudprofilesSpy).to.be.calledOnce
-        expect(syncQuotasSpy).to.be.calledOnce
-        expect(syncSeedsSpy).to.be.calledOnce
-        expect(syncProjectsSpy).to.be.calledOnce
-        expect(cache.synchronizationPromise).to.be.instanceof(Promise)
-        expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).to.eql([a, c])
-        expect(orderBy(cache.getQuotas(), 'metadata.uid')).to.eql([a, b, c])
-        expect(orderBy(cache.getSeeds(), 'metadata.uid')).to.eql([a, b])
-        expect(orderBy(cache.getProjects(), 'metadata.uid')).to.eql([a, b, c, d])
+        expect(syncCloudprofilesSpy).toBeCalledTimes(1)
+        expect(syncQuotasSpy).toBeCalledTimes(1)
+        expect(syncSeedsSpy).toBeCalledTimes(1)
+        expect(syncProjectsSpy).toBeCalledTimes(1)
+        expect(syncControllerregistrationsSpy).toBeCalledTimes(1)
+        expect(cache.synchronizationPromise).toBeInstanceOf(Promise)
+        expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).toEqual([a, c])
+        expect(orderBy(cache.getQuotas(), 'metadata.uid')).toEqual([a, b, c])
+        expect(orderBy(cache.getSeeds(), 'metadata.uid')).toEqual([a, b])
+        expect(orderBy(cache.getProjects(), 'metadata.uid')).toEqual([a, b, c, d])
+        expect(orderBy(cache.getControllerRegistrations(), 'metadata.uid')).toEqual([a, c])
       })
     })
 
     describe('#getTicketCache', function () {
       it('should return the ticket cache', function () {
-        expect(cache.getTicketCache()).to.equal(cache.ticketCache)
+        expect(cache.getTicketCache()).toBe(cache.ticketCache)
       })
     })
   })

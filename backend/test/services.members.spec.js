@@ -6,22 +6,13 @@
 
 'use strict'
 
-const delay = require('delay')
 const _ = require('lodash')
 const { UnprocessableEntity, NotFound } = require('http-errors')
+const createError = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
 const SubjectList = require('../lib/services/members/SubjectList')
 
-const { expect } = require('chai')
-
 describe('services', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-
-  afterEach(function () {
-    sandbox.restore()
-  })
-
   describe('members', function () {
     const memberSubjects = [
       {
@@ -90,6 +81,12 @@ describe('services', function () {
       },
       {
         kind: 'ServiceAccount',
+        name: 'robot-orphaned',
+        namespace: 'garden-foo',
+        role: 'myrole'
+      },
+      {
+        kind: 'ServiceAccount',
         name: 'robot-foreign-namespace',
         namespace: 'garden-foreign',
         role: 'myrole',
@@ -121,7 +118,12 @@ describe('services', function () {
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          }
+        ]
       },
       {
         metadata: {
@@ -141,7 +143,15 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          },
+          {
+            name: 'secret-2'
+          }
+        ]
       },
       {
         metadata: {
@@ -172,40 +182,41 @@ describe('services', function () {
 
     beforeEach(function () {
       client['core.gardener.cloud'].projects = {
-        mergePatch: sandbox.stub().callsFake(async (name, body) => {
-          await delay(1)
-        })
+        mergePatch: jest.fn().mockResolvedValue()
       }
       client.core.serviceaccounts = {
-        create: sandbox.stub().callsFake(async (namespace, body) => {
-          await delay(1)
-          _.set(body, 'metadata.creationTimestamp', 'now')
-          return body
+        create: jest.fn().mockImplementation((namespace, body) => {
+          return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: sandbox.stub().callsFake(async (namespace, name) => {
-          await delay(1)
+        delete: jest.fn().mockImplementation((namespace, name) => {
+          const item = _.find(serviceAccounts, { metadata: { name, namespace } })
+          if (!item) {
+            return Promise.reject(createError(404))
+          }
+          return Promise.resolve(item)
         }),
-        mergePatch: sandbox.stub().callsFake(async (namespace, name, body) => {
-          await delay(1)
-        })
+        mergePatch: jest.fn().mockResolvedValue()
+      }
+      client.core.secrets = {
+        delete: jest.fn().mockResolvedValue()
       }
     })
 
     describe('SubjectList', function () {
-      const subjectList = new SubjectList(memberSubjects)
+      const subjectList = new SubjectList(project)
 
       describe('#get', function () {
         it('should merge role, roles into roles', async function () {
           const memberRoles = subjectList.get('foo@bar.com').roles
-          expect(memberRoles).to.have.length(2)
-          expect(memberRoles).to.have.deep.members(['admin', 'owner'])
+          expect(memberRoles).toHaveLength(2)
+          expect(memberRoles).toEqual(expect.arrayContaining(['admin', 'owner']))
         })
       })
 
       describe('#has', function () {
         it('should merge role, roles into roles', async function () {
-          expect(subjectList.has('foo@bar.com')).to.be.true
-          expect(subjectList.has('foo@baz.com')).to.be.false
+          expect(subjectList.has('foo@bar.com')).toBe(true)
+          expect(subjectList.has('foo@baz.com')).toBe(false)
         })
       })
     })
@@ -224,35 +235,40 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).to.have.length(8)
-          expect(frontendMemberList).to.deep.contain({
+          expect(frontendMemberList).toHaveLength(9)
+          expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
           })
-          expect(frontendMemberList).to.deep.contain({
+          expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-multiple',
             roles: ['otherrole', 'admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
             description: undefined
           })
-          expect(frontendMemberList).to.deep.contain({
+          expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
             roles: ['myrole', 'viewer', 'admin']
           })
-          expect(frontendMemberList).to.deep.contain({
+          expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-nomember',
             roles: [],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
             description: undefined
           })
+          expect(frontendMemberList).toContainEqual({
+            username: 'system:serviceaccount:garden-foo:robot-orphaned',
+            roles: ['myrole'],
+            orphaned: true
+          })
         })
 
         it('should normalize kind service account members subject to kind user with service account prefix and add metadata from service account', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).to.deep.contain({
+          expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-sa',
             roles: ['admin', 'myrole', 'viewer'],
             createdBy: 'foo',
@@ -264,12 +280,7 @@ describe('services', function () {
 
       describe('#get', function () {
         it('should throw NotFound', async function () {
-          try {
-            await memberManager.get('john.doe@baz.com')
-            expect.fail('should throw an error')
-          } catch (err) {
-            expect(err).to.be.instanceof(NotFound)
-          }
+          await expect(memberManager.get('john.doe@baz.com')).rejects.toThrow(NotFound)
         })
       })
 
@@ -285,11 +296,11 @@ describe('services', function () {
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
-          expect(newMemberListItem.subject.name).to.eql(name)
-          expect(newMemberListItem.subject.kind).to.eql('User')
-          expect(newMemberListItem.subject.role).to.eql('admin')
-          expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer', 'myrole'])
-          expect(newMemberListItem.roles).to.have.deep.members(roles)
+          expect(newMemberListItem.subject.name).toEqual(name)
+          expect(newMemberListItem.subject.kind).toBe('User')
+          expect(newMemberListItem.subject.role).toBe('admin')
+          expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['viewer', 'myrole']))
+          expect(newMemberListItem.roles).toEqual(roles)
         })
 
         it('should add a service account to project', async function () {
@@ -300,21 +311,16 @@ describe('services', function () {
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
-          expect(newMemberListItem.subject.name).to.eql('newsa')
-          expect(newMemberListItem.subject.kind).to.eql('ServiceAccount')
-          expect(newMemberListItem.subject.role).to.eql('sa-role')
-          expect(newMemberListItem.roles).to.have.deep.members(roles)
+          expect(newMemberListItem.subject.name).toBe('newsa')
+          expect(newMemberListItem.subject.kind).toBe('ServiceAccount')
+          expect(newMemberListItem.subject.role).toBe('sa-role')
+          expect(newMemberListItem.roles).toEqual(roles)
         })
       })
 
       describe('#update', function () {
         it('should throw NotFound', async function () {
-          try {
-            await memberManager.update('john.doe@baz.com', {})
-            expect.fail('should throw an error')
-          } catch (err) {
-            expect(err).to.be.instanceof(NotFound)
-          }
+          await expect(memberManager.update('john.doe@baz.com', {})).rejects.toThrow(NotFound)
         })
 
         it('should update a project member', async function () {
@@ -325,10 +331,10 @@ describe('services', function () {
           const memberSubjects = memberManager.subjectList
           const updatedMemberListItem = memberSubjects.subjectListItems[name]
 
-          expect(updatedMemberListItem.subject.name).to.eql(name)
-          expect(updatedMemberListItem.subject.kind).to.eql('User')
-          expect(updatedMemberListItem.subject.role).to.eql('role1')
-          expect(updatedMemberListItem.roles).to.have.deep.members(roles)
+          expect(updatedMemberListItem.subject.name).toEqual(name)
+          expect(updatedMemberListItem.subject.kind).toBe('User')
+          expect(updatedMemberListItem.subject.role).toBe('role1')
+          expect(updatedMemberListItem.roles).toEqual(roles)
         })
 
         it('should add new roles to first occurrence of user, remove roles of other occurrences that are no longer assigned to member', async function () {
@@ -342,11 +348,11 @@ describe('services', function () {
           const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
           const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
 
-          expect(firstUpdatedMemberListItem.subject.role).to.eql('admin')
-          expect(firstUpdatedMemberListItem.subject.roles).to.have.deep.members(['newrole'])
+          expect(firstUpdatedMemberListItem.subject.role).toBe('admin')
+          expect(firstUpdatedMemberListItem.subject.roles).toEqual(expect.arrayContaining(['newrole']))
 
-          expect(secondUpdatedMemberListItem.subject.role).to.eql('admin')
-          expect(secondUpdatedMemberListItem.subject.roles).to.be.undefined
+          expect(secondUpdatedMemberListItem.subject.role).toBe('admin')
+          expect(secondUpdatedMemberListItem.subject.roles).toBeUndefined()
         })
 
         it('should remove member occurrences without roles', async function () {
@@ -360,21 +366,16 @@ describe('services', function () {
           const firstUpdatedMemberListItem = newMemberListItemGroup.items[0]
           const secondUpdatedMemberListItem = newMemberListItemGroup.items[1]
 
-          expect(firstUpdatedMemberListItem.subject.role).to.eql('otherrole')
-          expect(firstUpdatedMemberListItem.subject.roles).to.be.undefined
+          expect(firstUpdatedMemberListItem.subject.role).toBe('otherrole')
+          expect(firstUpdatedMemberListItem.subject.roles).toBeUndefined()
 
-          expect(secondUpdatedMemberListItem).to.be.undefined
+          expect(secondUpdatedMemberListItem).toBeUndefined()
         })
 
         it('should throw an error when trying to remove all roles with update', async function () {
           const name = 'foo@bar.com'
           const roles = []
-          try {
-            await memberManager.update(name, { roles })
-            expect.fail('should throw an error')
-          } catch (err) {
-            expect(err).to.be.instanceof(UnprocessableEntity)
-          }
+          await expect(memberManager.update(name, { roles })).rejects.toThrow(UnprocessableEntity)
         })
 
         it('should not convert a service account kind user to kind serviceaccount', async function () {
@@ -385,29 +386,66 @@ describe('services', function () {
           const memberSubjects = memberManager.subjectList
           const newMemberListItem = memberSubjects.subjectListItems[name]
 
-          expect(newMemberListItem.subject.name).to.eql(name)
-          expect(newMemberListItem.subject.kind).to.eql('User')
-          expect(newMemberListItem.subject.role).to.eql('admin')
-          expect(newMemberListItem.subject.roles).to.have.deep.members(['viewer'])
-          expect(newMemberListItem.roles).to.have.deep.members(roles)
+          expect(newMemberListItem.subject.name).toEqual(name)
+          expect(newMemberListItem.subject.kind).toBe('User')
+          expect(newMemberListItem.subject.role).toBe('admin')
+          expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['viewer']))
+          expect(newMemberListItem.roles).toEqual(roles)
         })
       })
 
       describe('#deleteServiceAccount', function () {
+        it('should delete a serviceaccount', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          expect(memberManager.subjectList.has(id)).toBe(false)
+        })
+
         it('should not delete a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).to.not.have.been.called
+          expect(client.core.serviceaccounts.delete).not.toBeCalled()
+          expect(memberManager.subjectList.has(id)).toBe(true)
+        })
+
+        it('should not fail if service account has already been deleted', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-orphaned'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-orphaned')
+          expect(memberManager.subjectList.has(id)).toBe(false)
         })
       })
 
       describe('#updateServiceAccount ', function () {
-        it('should not delete a serviceaccount from a different namespace', async function () {
+        it('should not update a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await memberManager.updateServiceAccount(item, {})
-          expect(client.core.serviceaccounts.mergePatch).to.not.have.been.called
+          await expect(memberManager.updateServiceAccount(item, {})).rejects.toThrow(UnprocessableEntity)
+        })
+      })
+
+      describe('#deleteServiceAccountSecret', function () {
+        it('should delete a serviceaccount secret', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccountSecret(item)
+          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
+        })
+
+        it('should not delete a serviceaccount secret from a different namespace', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+        })
+
+        it('should not delete a service account secret if there is one more secret attached', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-multiple'
+          const item = memberManager.subjectList.get(id)
+          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
         })
       })
     })

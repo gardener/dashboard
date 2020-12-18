@@ -114,7 +114,8 @@ function ensureDataLoaded (store, localStorage) {
         case 'NewShoot':
         case 'NewShootEditor': {
           const promises = [
-            store.dispatch('subscribeShoots')
+            store.dispatch('subscribeShoots'),
+            store.dispatch('fetchNetworkingTypes')
           ]
           if (store.getters.canGetSecrets) {
             promises.push(store.dispatch('fetchInfrastructureSecrets'))

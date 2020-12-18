@@ -81,7 +81,6 @@ export default {
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
 
-  $cyan-darken-1: map-get($cyan, 'darken-1');
   $gh-code-background-color: map-get($grey, 'lighten-4');
   $gh-code-color: map-get($grey, 'darken-4');
 
@@ -97,16 +96,13 @@ export default {
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border: 0.5px;
-    border-bottom: 0.5px solid $cyan-darken-1;
-    background-color: $cyan-darken-1;
-    color: white;
 
     padding: 4px 8px;
     margin-bottom: 0;
   }
 
   .comment-body {
-    border: 0.5px solid $cyan-darken-1;
+    border: 0.5px solid;
 
     padding: 4px 8px;
 
@@ -184,7 +180,6 @@ export default {
 
   a {
     text-decoration: none;
-    color: white;
   }
 
   a:hover{

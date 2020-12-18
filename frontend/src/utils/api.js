@@ -216,6 +216,14 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
+export function rotateServiceAccountSecret ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return callResourceMethod(`/api/namespaces/${namespace}/members/${name}`, {
+    method: 'rotateSecret'
+  })
+}
+
 /* User */
 export function createTokenReview (data) {
   return createResource('/auth', data)
@@ -312,4 +320,14 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
     namespace
   }
   return invokeTerminalMethod('listProjectTerminalShortcuts', body)
+}
+
+/* Controller Registrations */
+
+export function getGardenerExtensions () {
+  return getResource('/api/gardener-extensions')
+}
+
+export function getNetworkingTypes () {
+  return getResource('/api/networking-types')
 }

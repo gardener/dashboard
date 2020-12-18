@@ -7,9 +7,10 @@
 'use strict'
 
 const _ = require('lodash')
-const common = require('../support/common')
+const { cache: { resetTicketCache } } = require('../../lib/cache')
 const { createHubSignature } = require('../../lib/github/webhook')
 const { loadOpenIssues, converter } = require('../../lib/services/tickets')
+const { octokit } = require('../../lib/github')
 
 class CacheEvent {
   constructor ({ cache, type, id, timeout = 1000 }) {
@@ -49,30 +50,52 @@ class CacheEvent {
   }
 }
 
-module.exports = function ({ agent, sandbox, github }) {
-  /* eslint no-unused-expressions: 0 */
-  const { webhookSecret, createGithubIssue, createGithubComment, githubIssueList, githubIssueCommentList, formatTime } = github
+describe('github', function () {
+  const { formatTime } = fixtures.helper
+  const {
+    gitHub: {
+      webhookSecret
+    }
+  } = fixtures.config.default
 
+  let agent
   let cache
+  let makeSanitizedHtmlStub
 
-  beforeEach(async function () {
-    cache = common.stub.getTicketCache(sandbox)
-    github.stub.getIssues({ state: 'open' })
-    await loadOpenIssues()
+  beforeAll(() => {
+    agent = createAgent()
   })
 
-  it('should initialize the cache with all open issues', function () {
-    const issues = cache.getIssues()
-    expect(issues).to.have.length(3)
+  afterAll(() => {
+    return agent.close()
+  })
+
+  beforeEach(async () => {
+    cache = resetTicketCache()
+    await loadOpenIssues()
+    makeSanitizedHtmlStub = jest.spyOn(converter, 'makeSanitizedHtml').mockImplementation(text => text)
+  })
+
+  describe('#loadOpenIssues', function () {
+    it('should initialize the cache with all open issues', async function () {
+      expect(octokit.paginate).toBeCalledTimes(1)
+
+      const issues = cache.getIssues()
+      expect(issues).toHaveLength(3)
+    })
   })
 
   describe('event "issues"', function () {
     const githubEvent = 'issues'
-    let newGithubIssue, closedGithubIssue, githubIssue, makeSanitizedHtmlStub
+    let newGithubIssue
+    let closedGithubIssue
+    let githubIssue
 
     beforeEach(function () {
-      makeSanitizedHtmlStub = sandbox.stub(converter, 'makeSanitizedHtml').callsFake(text => text)
-      newGithubIssue = createGithubIssue({ number: 42 })
+      octokit.paginate.mockClear()
+
+      newGithubIssue = fixtures.github.issues.create({ number: 42 })
+      const githubIssueList = fixtures.github.issues.list()
       githubIssue = _
         .chain(githubIssueList)
         .find(['number', 1])
@@ -92,23 +115,27 @@ module.exports = function ({ agent, sandbox, github }) {
       const body = JSON.stringify({ action: 'opened', issue: githubIssue })
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
+      // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(4)
+      expect(issues).toHaveLength(4)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.body).to.equal(githubIssue.body)
-      expect(issueEvent.type).to.equal('ADDED')
-      expect(issueEvent.object).to.eql(issue)
-      expect(makeSanitizedHtmlStub).to.have.callCount(1)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('This is bug #42')
+      expect(issue).toBeDefined()
+      expect(issue.data.body).toBe(githubIssue.body)
+      expect(issueEvent.type).toBe('ADDED')
+      expect(issueEvent.object).toEqual(issue)
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['This is bug #42'])
     })
 
     it('should handle github webhook event "issues" action "edited"', async function () {
@@ -116,90 +143,113 @@ module.exports = function ({ agent, sandbox, github }) {
       const body = JSON.stringify({ action: 'edited', issue: githubIssue })
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
+      // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.body).to.equal(githubIssue.body)
-      expect(issueEvent.type).to.equal('MODIFIED')
-      expect(issueEvent.object).to.eql(issue)
-      expect(makeSanitizedHtmlStub).to.have.callCount(1)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('This the very serious bug #1')
+      expect(issue).toBeDefined()
+      expect(issue.data.body).toBe(githubIssue.body)
+      expect(issueEvent.type).toBe('MODIFIED')
+      expect(issueEvent.object).toEqual(issue)
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['This the very serious bug #1'])
     })
 
     it('should handle github webhook event "issues" action "closed"', async function () {
       const body = JSON.stringify({ action: 'closed', issue: githubIssue })
+
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
+      // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(2)
+      expect(issues).toHaveLength(2)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.undefined
-      expect(issueEvent.type).to.equal('DELETED')
-      expect(makeSanitizedHtmlStub).to.have.callCount(1)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('This is bug #1')
+      expect(issue).toBeUndefined()
+      expect(issueEvent.type).toBe('DELETED')
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['This is bug #1'])
     })
 
     it('should handle github webhook event "issues" action "reopened"', async function () {
       githubIssue = _.set(closedGithubIssue, 'state', 'open')
       const body = JSON.stringify({ action: 'reopened', issue: githubIssue })
-      github.stub.getComments({ number: githubIssue.number })
+
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
+
       const commentEventPromise = new CacheEvent({ cache, type: 'comment', id: 1 }).startWaiting()
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
+      expect(octokit.paginate).toBeCalledTimes(1)
+
+      // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(4)
+      expect(issues).toHaveLength(4)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.body).to.equal(githubIssue.body)
-      expect(issueEvent.type).to.equal('ADDED')
-      expect(issueEvent.object).to.eql(issue)
+      expect(issue).toBeDefined()
+      expect(issue.data.body).toBe(githubIssue.body)
+      expect(issueEvent.type).toBe('ADDED')
+      expect(issueEvent.object).toEqual(issue)
+
+      // comments
       const { object: comment } = await commentEventPromise
-      expect(comment.metadata.number).to.equal(githubIssue.number)
-      expect(comment.metadata.id).to.equal(1)
-      expect(makeSanitizedHtmlStub).to.have.callCount(2)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('This is bug #4')
-      expect(makeSanitizedHtmlStub.getCall(1)).to.be.calledWithExactly('This is comment 1 for issue #4')
+      expect(comment.metadata.number).toBe(githubIssue.number)
+      expect(comment.metadata.id).toBe(1)
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(2)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['This is bug #4'])
+      expect(makeSanitizedHtmlStub.mock.calls[1]).toEqual(['This is comment 1 for issue #4'])
     })
   })
 
   describe('event "issue_comment"', function () {
     const githubEvent = 'issue_comment'
-    let githubIssue, githubComment, newGithubComment, makeSanitizedHtmlStub
+    let githubIssue
+    let githubComment
+    let newGithubComment
 
     beforeEach(function () {
-      makeSanitizedHtmlStub = sandbox.stub(converter, 'makeSanitizedHtml').callsFake(text => text)
+      octokit.paginate.mockClear()
+
+      const githubIssueList = fixtures.github.issues.list()
       githubIssue = _
         .chain(githubIssueList)
         .find(['number', 2])
         .cloneDeep()
         .set('updated_at', formatTime(Date.now()))
         .value()
-      newGithubComment = createGithubComment({ id: 3, number: githubIssue.number })
+      newGithubComment = fixtures.github.comments.create({ id: 3, number: githubIssue.number })
+      const githubIssueCommentList = fixtures.github.comments.list()
       githubComment = _
         .chain(githubIssueCommentList)
         .find({
@@ -217,66 +267,78 @@ module.exports = function ({ agent, sandbox, github }) {
       githubIssue.comments = 2
       githubComment = newGithubComment
       const body = JSON.stringify({ action: 'created', issue: githubIssue, comment: githubComment })
+
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
+
       let commentEvent
       cache.emitter.once('comment', event => { commentEvent = event })
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.comments).to.equal(githubIssue.comments)
-      expect(issueEvent.type).to.equal('MODIFIED')
-      expect(issueEvent.object).to.eql(issue)
+      expect(issue).toBeDefined()
+      expect(issue.data.comments).toBe(githubIssue.comments)
+      expect(issueEvent.type).toBe('MODIFIED')
+      expect(issueEvent.object).toEqual(issue)
+
       // comments
       const comments = cache.getCommentsForIssue({ issueNumber: githubIssue.number })
-      expect(commentEvent.type).to.equal('ADDED')
-      expect(comments).to.have.length(1)
-      expect(comments[0]).to.eql(commentEvent.object)
-      expect(makeSanitizedHtmlStub).to.have.callCount(2)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('The second bug')
-      expect(makeSanitizedHtmlStub.getCall(1)).to.be.calledWithExactly('This is comment 3 for issue #2')
+      expect(commentEvent.type).toBe('ADDED')
+      expect(comments).toHaveLength(1)
+      expect(comments[0]).toEqual(commentEvent.object)
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(2)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['The second bug'])
+      expect(makeSanitizedHtmlStub.mock.calls[1]).toEqual(['This is comment 3 for issue #2'])
     })
 
     it('should handle github webhook event "issue_comment" action "deleted"', async function () {
       githubIssue.comments = 0
       const body = JSON.stringify({ action: 'deleted', issue: githubIssue, comment: githubComment })
+
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
+
       let commentEvent
       cache.emitter.once('comment', event => { commentEvent = event })
-      const res = await agent
+
+      await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
         .set('x-hub-signature', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
+        .expect(200)
 
-      expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()
-      expect(issues).to.have.length(3)
+      expect(issues).toHaveLength(3)
       const issue = _.find(issues, ['metadata.number', githubIssue.number])
-      expect(issue).to.be.not.undefined
-      expect(issue.data.comments).to.equal(githubIssue.comments)
-      expect(issueEvent.type).to.equal('MODIFIED')
-      expect(issueEvent.object).to.eql(issue)
+      expect(issue).toBeDefined()
+      expect(issue.data.comments).toBe(githubIssue.comments)
+      expect(issueEvent.type).toBe('MODIFIED')
+      expect(issueEvent.object).toEqual(issue)
+
       // comments
       const comments = cache.getCommentsForIssue({ issueNumber: githubIssue.number })
-      expect(commentEvent.type).to.equal('DELETED')
-      expect(comments).to.be.empty
-      expect(makeSanitizedHtmlStub).to.have.callCount(2)
-      expect(makeSanitizedHtmlStub.getCall(0)).to.be.calledWithExactly('The second bug')
-      expect(makeSanitizedHtmlStub.getCall(1)).to.be.calledWithExactly(undefined)
+      expect(commentEvent.type).toBe('DELETED')
+      expect(comments).toHaveLength(0)
+
+      // sanitizedHtml
+      expect(makeSanitizedHtmlStub).toBeCalledTimes(2)
+      expect(makeSanitizedHtmlStub.mock.calls[0]).toEqual(['The second bug'])
+      expect(makeSanitizedHtmlStub.mock.calls[1]).toEqual(['This is comment 2 for issue #2'])
     })
   })
-}
+})

@@ -34,6 +34,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn color="accentTitle" icon @click.native.stop="openUserHelpDialog">
           <v-icon color="accentTitle">mdi-help-circle-outline</v-icon>
         </v-btn>
+        <table-column-selection
+          :headers="userAccountTableHeaders"
+          @setSelectedHeader="setSelectedHeaderUserAccount"
+          @reset="resetTableSettingsUserAccount"
+        ></table-column-selection>
       </v-toolbar>
 
       <v-card-text v-if="!userList.length">
@@ -43,24 +48,26 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-list two-line subheader v-else>
-        <template v-for="(user, index) in sortedAndFilteredUserList">
-          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
+      <v-data-table
+        v-else
+        :headers="visibleUserAccountTableHeaders"
+        :items="userList"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="userAccountTableOptions"
+        must-sort
+        :custom-sort="sortAccounts"
+        :search="userFilter"
+      >
+        <template v-slot:item="{ item }">
           <project-user-row
-            :username="user.username"
-            :isCurrentUser="user.isCurrentUser"
-            :avatarUrl="user.avatarUrl"
-            :displayName="user.displayName"
-            :isEmail="user.isEmail"
-            :isOwner="user.isOwner"
-            :roles="user.roles"
-            :roleDisplayNames="user.roleDisplayNames"
+            :item="item"
+            :headers="userAccountTableHeaders"
             :key="user.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
           ></project-user-row>
         </template>
-      </v-list>
+      </v-data-table>
     </v-card>
 
     <v-card class="mt-6">
@@ -88,6 +95,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
           <v-icon color="accentTitle">mdi-help-circle-outline</v-icon>
         </v-btn>
+        <table-column-selection
+          :headers="serviceAccountTableHeaders"
+          @setSelectedHeader="setSelectedHeaderServiceAccount"
+          @reset="resetTableSettingsServiceAccount"
+        ></table-column-selection>
       </v-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
@@ -97,28 +109,29 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-list two-line subheader v-else>
-        <template v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList">
-          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
+      <v-data-table
+        v-else
+        :headers="visibleServiceAccountTableHeaders"
+        :items="serviceAccountList"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="serviceAccountTableOptions"
+        must-sort
+        :custom-sort="sortAccounts"
+        :search="serviceAccountFilter"
+      >
+        <template v-slot:item="{ item }">
           <project-service-account-row
-            :username="serviceAccount.username"
-            :isCurrentUser="serviceAccount.isCurrentUser"
-            :avatarUrl="serviceAccount.avatarUrl"
-            :displayName="serviceAccount.displayName"
-            :createdBy="serviceAccount.createdBy"
-            :creationTimestamp="serviceAccount.creationTimestamp"
-            :created="serviceAccount.created"
-            :description="serviceAccount.description"
-            :roles="serviceAccount.roles"
-            :roleDisplayNames="serviceAccount.roleDisplayNames"
-            :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
+            :item="item"
+            :headers="serviceAccountTableHeaders"
+            :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
+            @rotateSecret="onRotateServiceAccountSecret"
             @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
-      </v-list>
+      </v-data-table>
     </v-card>
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
@@ -149,14 +162,14 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState, mapActions, mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
-import replace from 'lodash/replace'
-import sortBy from 'lodash/sortBy'
+import orderBy from 'lodash/orderBy'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import head from 'lodash/head'
 
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
@@ -166,6 +179,8 @@ import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
 import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
+import RotateServiceAccountSecret from '@/components/messages/RotateServiceAccountSecret'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
 
 import {
   displayName,
@@ -176,7 +191,8 @@ import {
   isServiceAccountUsername,
   getTimestampFormatted,
   getProjectDetails,
-  sortedRoleDisplayNames
+  sortedRoleDisplayNames,
+  mapTableHeader
 } from '@/utils'
 
 import { getMember } from '@/utils/api'
@@ -189,7 +205,8 @@ export default {
     CodeBlock,
     ProjectUserRow,
     ProjectServiceAccountRow,
-    ConfirmDialog
+    ConfirmDialog,
+    TableColumnSelection
   },
   data () {
     return {
@@ -208,7 +225,21 @@ export default {
       fab: false,
       floatingButton: false,
       currentServiceAccountName: undefined,
-      currentServiceAccountKubeconfig: undefined
+      currentServiceAccountKubeconfig: undefined,
+      userAccountTableOptions: undefined,
+      serviceAccountTableOptions: undefined,
+      defaultUserAccountTableOptions: {
+        itemsPerPage: 10,
+        sortBy: ['username'],
+        sortDesc: [false]
+      },
+      defaultServiceAccountTableOptions: {
+        itemsPerPage: 5,
+        sortBy: ['displayName'],
+        sortDesc: [false]
+      },
+      userAccountSelectedColumns: {},
+      serviceAccountSelectedColumns: {}
     }
   },
   computed: {
@@ -237,20 +268,6 @@ export default {
     costObject () {
       return this.projectDetails.costObject
     },
-    serviceAccountList () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
-      return map(serviceAccounts, serviceAccount => {
-        const { username } = serviceAccount
-        return {
-          ...serviceAccount,
-          avatarUrl: gravatarUrlGeneric(username),
-          displayName: displayName(username),
-          created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
-          isCurrentUser: this.isCurrentUser(username)
-        }
-      })
-    },
     userList () {
       const users = filter(this.memberList, ({ username }) => !isServiceAccountUsername(username))
       return map(users, user => {
@@ -266,20 +283,6 @@ export default {
         }
       })
     },
-    sortedAndFilteredUserList () {
-      const predicate = ({ username }) => {
-        if (isServiceAccountUsername(username)) {
-          return false
-        }
-
-        if (!this.userFilter) {
-          return true
-        }
-        const name = replace(username, /@.*$/, '')
-        return includes(toLower(name), toLower(this.userFilter))
-      }
-      return sortBy(filter(this.userList, predicate), 'displayName')
-    },
     allEmails () {
       const emails = []
       forEach(this.userList, ({ username }) => {
@@ -289,24 +292,114 @@ export default {
       })
       return join(emails, ';')
     },
-    sortedAndFilteredServiceAccountList () {
-      const predicate = ({ username }) => {
-        if (!this.serviceAccountFilter) {
-          return true
+    userAccountTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'username',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ROLES',
+          align: 'end',
+          value: 'roles',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
         }
-        const { name } = parseServiceAccountUsername(username)
-        return includes(toLower(name), toLower(this.serviceAccountFilter))
-      }
-      return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
+      ]
+      return map(headers, header => ({
+        ...header,
+        selected: get(this.userAccountSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleUserAccountTableHeaders () {
+      return filter(this.userAccountTableHeaders, ['selected', true])
+    },
+    serviceAccountList () {
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccountUsername(username))
+      return map(serviceAccounts, serviceAccount => {
+        const { username } = serviceAccount
+        return {
+          ...serviceAccount,
+          avatarUrl: gravatarUrlGeneric(username),
+          displayName: displayName(username),
+          created: getTimestampFormatted(serviceAccount.creationTimestamp),
+          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
+          isCurrentUser: this.isCurrentUser(username)
+        }
+      })
     },
     currentServiceAccountDisplayName () {
       return get(parseServiceAccountUsername(this.currentServiceAccountName), 'name')
+    },
+    serviceAccountTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'displayName',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'CREATED BY',
+          align: 'start',
+          value: 'createdBy',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'CREATED AT',
+          align: 'start',
+          value: 'creationTimestamp',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'DESCRIPTION',
+          align: 'start',
+          value: 'description',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ROLES',
+          align: 'end',
+          value: 'roles',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
+        }
+      ]
+      return map(headers, header => ({
+        ...header,
+        selected: get(this.serviceAccountSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleServiceAccountTableHeaders () {
+      return filter(this.serviceAccountTableHeaders, ['selected', true])
     }
   },
   methods: {
     ...mapActions([
       'addMember',
       'deleteMember',
+      'rotateServiceAccountSecret',
       'setError'
     ]),
     openUserAddDialog () {
@@ -350,27 +443,27 @@ export default {
         this.setError(err)
       }
     },
-    async onDownload (name) {
-      const kubeconfig = await this.downloadKubeconfig(name)
+    async onDownload ({ username }) {
+      const kubeconfig = await this.downloadKubeconfig(username)
       if (kubeconfig) {
         download(kubeconfig, 'kubeconfig.yaml', 'text/yaml')
       }
     },
-    async onKubeconfig (name) {
-      const kubeconfig = await this.downloadKubeconfig(name)
+    async onKubeconfig ({ username }) {
+      const kubeconfig = await this.downloadKubeconfig(username)
       if (kubeconfig) {
-        this.currentServiceAccountName = name
+        this.currentServiceAccountName = username
         this.currentServiceAccountKubeconfig = kubeconfig
         this.kubeconfigDialog = true
       }
     },
-    async onRemoveUser (name) {
-      const removalConfirmed = await this.confirmRemoveUser(name)
+    async onRemoveUser ({ username }) {
+      const removalConfirmed = await this.confirmRemoveUser(username)
       if (!removalConfirmed) {
         return
       }
-      await this.deleteMember(name)
-      if (this.isCurrentUser(name) && !this.isAdmin) {
+      await this.deleteMember(username)
+      if (this.isCurrentUser(username) && !this.isAdmin) {
         if (this.projectList.length > 0) {
           const p1 = this.projectList[0]
           this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
@@ -399,15 +492,21 @@ export default {
         dialogColor: 'red'
       })
     },
-    async onDeleteServiceAccount (serviceAccountName) {
+    async onDeleteServiceAccount ({ username }) {
       let deletionConfirmed
-      if (isForeignServiceAccount(this.namespace, serviceAccountName)) {
-        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(serviceAccountName)
+      if (isForeignServiceAccount(this.namespace, username)) {
+        deletionConfirmed = await this.confirmRemoveForeignServiceAccount(username)
       } else {
-        deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
+        deletionConfirmed = await this.confirmDeleteServiceAccount(username)
       }
       if (deletionConfirmed) {
-        return this.deleteMember(serviceAccountName)
+        return this.deleteMember(username)
+      }
+    },
+    async onRotateServiceAccountSecret ({ username }) {
+      const rotationConfirmed = await this.confirmRotateServiceAccountSecret(username)
+      if (rotationConfirmed) {
+        return this.rotateServiceAccountSecret(username)
       }
     },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
@@ -438,12 +537,24 @@ export default {
         confirmValue: name
       })
     },
-    onEditUser (username, roles) {
+    confirmRotateServiceAccountSecret (name) {
+      const message = this.$renderComponent(RotateServiceAccountSecret, {
+        name
+      })
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Rotate',
+        captionText: 'Confirm Service Account Secret Rotation',
+        messageHtml: message.innerHTML,
+        dialogColor: 'red',
+        confirmValue: name
+      })
+    },
+    onEditUser ({ username, roles }) {
       this.memberName = username
       this.memberRoles = roles
       this.openUserUpdateDialog()
     },
-    onEditServiceAccount (username, roles, description) {
+    onEditServiceAccount ({ username, roles, description }) {
       this.memberName = username
       this.memberRoles = roles
       this.serviceAccountDescription = description
@@ -454,6 +565,94 @@ export default {
     },
     isCurrentUser (username) {
       return this.username === username
+    },
+    getSortVal (item, sortBy) {
+      const roles = item.roles
+      switch (sortBy) {
+        case 'roles':
+          if (includes(roles, 'owner')) {
+            return 1
+          }
+          if (includes(roles, 'uam')) {
+            return 2
+          }
+          if (includes(roles, 'admin')) {
+            return 3
+          }
+          if (includes(roles, 'viewer')) {
+            return 4
+          }
+          return 5
+        default:
+          return get(item, sortBy)
+      }
+    },
+    sortAccounts (items, sortByArr, sortDescArr) {
+      const sortBy = head(sortByArr)
+      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
+      const sortedItems = orderBy(items, [item => this.getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
+      return sortedItems
+    },
+    setSelectedHeaderUserAccount (header) {
+      this.$set(this.userAccountSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumnsUserAccount()
+    },
+    resetTableSettingsUserAccount () {
+      this.userAccountSelectedColumns = mapTableHeader(this.userAccountTableHeaders, 'defaultSelected')
+      this.userAccountTableOptions = this.defaultUserAccountTableOptions
+      this.saveSelectedColumnsUserAccount()
+    },
+    saveSelectedColumnsUserAccount () {
+      this.$localStorage.setObject('members/useraccount-list/selected-columns', mapTableHeader(this.userAccountTableHeaders, 'selected'))
+    },
+    setSelectedHeaderServiceAccount (header) {
+      this.$set(this.serviceAccountSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumnsServiceAccount()
+    },
+    resetTableSettingsServiceAccount () {
+      this.serviceAccountSelectedColumns = mapTableHeader(this.serviceAccountTableHeaders, 'defaultSelected')
+      this.serviceAccountTableOptions = this.defaultServiceAccountTableOptions
+      this.saveSelectedColumnsServiceAccount()
+    },
+    saveSelectedColumnsServiceAccount () {
+      this.$localStorage.setObject('members/serviceaccount-list/selected-columns', mapTableHeader(this.serviceAccountTableHeaders, 'selected'))
+    },
+    updateTableSettings () {
+      this.userAccountSelectedColumns = this.$localStorage.getObject('members/useraccount-list/selected-columns') || {}
+      const userAccountTableOptions = this.$localStorage.getObject('members/useraccount-list/options')
+      this.userAccountTableOptions = {
+        ...this.defaultUserAccountTableOptions,
+        ...userAccountTableOptions
+      }
+
+      this.serviceAccountSelectedColumns = this.$localStorage.getObject('members/serviceaccount-list/selected-columns') || {}
+      const serviceAccountTableOptions = this.$localStorage.getObject('members/serviceaccount-list/options')
+      this.serviceAccountTableOptions = {
+        ...this.defaultServiceAccountTableOptions,
+        ...serviceAccountTableOptions
+      }
+    }
+  },
+  watch: {
+    userAccountTableOptions (value) {
+      if (!value) {
+        return
+      }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+      this.$localStorage.setObject('members/useraccount-list/options', { sortBy, sortDesc, itemsPerPage })
+    },
+    serviceAccountTableOptions (value) {
+      if (!value) {
+        return
+      }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+      this.$localStorage.setObject('members/serviceaccount-list/options', { sortBy, sortDesc, itemsPerPage })
     }
   },
   mounted () {
@@ -470,6 +669,15 @@ export default {
       this.kubeconfigDialog = false
       this.fab = false
     })
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.updateTableSettings()
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.updateTableSettings()
+    next()
   }
 }
 </script>

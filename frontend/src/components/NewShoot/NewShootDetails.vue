@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
-        <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+        <label>{{slaTitle}}</label>
         <p class="subtitle-1" v-html="slaDescriptionHtml" />
       </v-col>
     </v-row>

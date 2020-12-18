@@ -39,6 +39,12 @@
   cursor: pointer;
 }
 
+.alert-banner-message {
+  p {
+    display: inline !important;
+  }
+}
+
 .full-width {
   width: 100%;
 }

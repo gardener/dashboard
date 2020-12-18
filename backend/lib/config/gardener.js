@@ -9,9 +9,9 @@
 const assert = require('assert').strict
 const _ = require('lodash')
 const yaml = require('js-yaml')
-const { existsSync, readFileSync } = require('fs')
+const fs = require('fs')
 const { homedir } = require('os')
-const { join: joinPath } = require('path')
+const { join } = require('path')
 
 const environmentVariableDefinitions = {
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
@@ -70,24 +70,19 @@ module.exports = {
     }
   },
   getFilename ({ argv, env } = process) {
-    if (/^test/.test(env.NODE_ENV)) {
-      return joinPath(__dirname, 'test.yaml')
-    }
     if (env.GARDENER_CONFIG) {
       return env.GARDENER_CONFIG
     }
-    if (argv[2]) {
+    if (argv[2] && env.NODE_ENV !== 'test') {
       return argv[2]
     }
-    return joinPath(homedir(), '.gardener', 'config.yaml')
+    return join(homedir(), '.gardener', 'config.yaml')
   },
   loadConfig (filename, { env } = process) {
     const config = this.getDefaults({ env })
     if (filename) {
       try {
-        if (this.existsSync(filename)) {
-          _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
-        }
+        _.merge(config, this.readConfig(filename))
       } catch (err) { /* ignore */ }
     }
     this.assignEnvironmentVariables(config, env)
@@ -111,6 +106,7 @@ module.exports = {
 
     return config
   },
-  existsSync,
-  readFileSync
+  readConfig (path) {
+    return yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+  }
 }

@@ -131,6 +131,43 @@ const quotaList = [
   getQuota({ name: 'foo-quota2', namespace: 'garden-foo' })
 ]
 
+const controllerRegistrationList = [
+  {
+    metadata: {
+      name: 'foo'
+    },
+    spec: {
+      resources: [
+        {
+          kind: 'bar'
+        }
+      ],
+      deployment: {
+        providerConfig: {
+          values: {
+            image: {
+              tag: 'v1.0.0'
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    metadata: {
+      name: 'bar'
+    },
+    spec: {
+      resources: [
+        {
+          kind: 'Network',
+          type: 'NetworkType'
+        }
+      ]
+    }
+  }
+]
+
 const stub = {
   getCloudProfiles (sandbox) {
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
@@ -152,6 +189,10 @@ const stub = {
     const ticketCache = createTicketCache()
     getTicketCacheStub.returns(ticketCache)
     return ticketCache
+  },
+  getControllerRegistrations (sandbox) {
+    const getControllerRegistrationsStub = sandbox.stub(cache, 'getControllerRegistrations')
+    getControllerRegistrationsStub.returns(controllerRegistrationList)
   }
 }
 

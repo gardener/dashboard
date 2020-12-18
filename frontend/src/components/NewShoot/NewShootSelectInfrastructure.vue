@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
       class="select_infra_card"
-      :color="$vuetify.theme.dark ? 'grey darken-2' : 'grey lighten-2'"
       :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
       @click="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"

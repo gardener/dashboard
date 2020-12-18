@@ -66,6 +66,19 @@ SPDX-License-Identifier: Apache-2.0
           @blur="$v.region.$touch()"
           ></v-select>
       </v-col>
+      <v-col cols="3">
+        <v-select
+          color="primary"
+          item-color="primary"
+          label="Networking Type"
+          :items="networkingTypeList"
+          persistent-hint
+          v-model="networkingType"
+          :error-messages="getErrorMessages('networkingType')"
+          @input="$v.networkingType.$touch()"
+          @blur="$v.networkingType.$touch()"
+          ></v-select>
+      </v-col>
       <template v-if="infrastructureKind === 'openstack'">
         <v-col cols="3">
           <wildcard-select
@@ -222,6 +235,9 @@ const validations = {
   region: {
     required
   },
+  networkingType: {
+    required
+  },
   loadBalancerProviderName: {
     required: requiredIf(function () {
       return this.infrastructureKind === 'openstack'
@@ -279,6 +295,7 @@ export default {
       cloudProfileName: undefined,
       secret: undefined,
       region: undefined,
+      networkingType: undefined,
       floatingPoolName: undefined,
       // default validation status of subcomponents is true, as they are not shown in all cases
       floatingPoolValid: true,
@@ -344,7 +361,8 @@ export default {
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegionAndZones',
       'projectFromProjectList',
-      'costObjectSettings'
+      'costObjectSettings',
+      'networkingTypeList'
     ]),
     validationErrors () {
       const validationErrors = {
@@ -360,6 +378,9 @@ export default {
         },
         region: {
           required: 'Region is required'
+        },
+        networkingType: {
+          required: 'Networking Type is required'
         },
         loadBalancerProviderName: {
           required: 'Load Balancer Providers required'
@@ -636,6 +657,7 @@ export default {
       cloudProfileName,
       secret,
       region,
+      networkingType,
       floatingPoolName,
       loadBalancerProviderName,
       loadBalancerClasses,
@@ -649,6 +671,7 @@ export default {
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
+      this.networkingType = networkingType
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
       this.loadBalancerClassNames = map(loadBalancerClasses, 'name')

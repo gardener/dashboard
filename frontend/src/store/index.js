@@ -33,6 +33,7 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
+import camelCase from 'lodash/camelCase'
 import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
@@ -55,6 +56,8 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
+import gardenerExtensions from './modules/gardenerExtensions'
+import networkingTypes from './modules/networkingTypes'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
@@ -90,7 +93,6 @@ const state = {
   redirectPath: null,
   loading: false,
   alert: null,
-  alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null,
   localTimezone: moment.tz.guess(),
@@ -334,6 +336,13 @@ const getters = {
       const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
+  },
+  gardenerExtensionsist (state) {
+    return state.gardenerExtensions.all
+  },
+  networkingTypeList (state, getters) {
+    const networkList = state.networkingTypes.all
+    return sortBy(networkList)
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -856,10 +865,20 @@ const getters = {
     return get(state, 'alert.type', 'error')
   },
   alertBannerMessage (state) {
-    return get(state, 'alertBanner.message', '')
+    return get(state, 'cfg.alert.message')
   },
   alertBannerType (state) {
-    return get(state, 'alertBanner.type', 'error')
+    return get(state, 'cfg.alert.type', 'error')
+  },
+  alertBannerIdentifier (state, getters) {
+    if (!getters.alertBannerMessage) {
+      return
+    }
+    const defaultIdentifier = hash(getters.alertBannerMessage)
+    const configIdentifier = get(state, 'cfg.alert.identifier')
+    const identifier = camelCase(configIdentifier) || defaultIdentifier
+    // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
+    return `cfg.${identifier}`
   },
   currentNamespaces (state, getters) {
     if (state.namespace === '_all') {
@@ -920,6 +939,9 @@ const getters = {
   },
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canDeleteSecrets (state) {
+    return canI(state.subjectRules, 'delete', '', 'secrets')
   },
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
@@ -996,6 +1018,20 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  async fetchGardenerExtensions ({ dispatch }) {
+    try {
+      await dispatch('gardenerExtensions/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
+  async fetchNetworkingTypes ({ dispatch }) {
+    try {
+      await dispatch('networkingTypes/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   async fetchSeeds ({ dispatch }) {
     try {
@@ -1254,12 +1290,17 @@ const actions = {
       await dispatch('setError', { message: `Delete member failed. ${err.message}` })
     }
   },
+  async rotateServiceAccountSecret ({ dispatch, commit }, payload) {
+    try {
+      const result = await dispatch('members/rotateServiceAccountSecret', payload)
+      await dispatch('setAlert', { message: 'Service Account Secret Rotation started', type: 'success' })
+      return result
+    } catch (err) {
+      await dispatch('setError', { message: `Failed to Rotate Service Account Secret ${err.message}` })
+    }
+  },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
-
-    if (get(value, 'alert')) {
-      commit('SET_ALERT_BANNER', get(value, 'alert'))
-    }
 
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
@@ -1354,10 +1395,6 @@ const actions = {
     commit('SET_ALERT', value)
     return state.alert
   },
-  setAlertBanner ({ commit }, value) {
-    commit('SET_ALERT_BANNER', value)
-    return state.alertBanner
-  },
   setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
     return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
   },
@@ -1417,9 +1454,6 @@ const mutations = {
   SET_ALERT (state, value) {
     state.alert = value
   },
-  SET_ALERT_BANNER (state, value) {
-    state.alertBanner = value
-  },
   setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)
   },
@@ -1441,6 +1475,8 @@ const modules = {
   members,
   draggable,
   cloudProfiles,
+  gardenerExtensions,
+  networkingTypes,
   seeds,
   shoots,
   infrastructureSecrets,

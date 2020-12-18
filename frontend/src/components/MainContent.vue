@@ -6,17 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-main>
-    <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
-      <div class="alertBannerMessage" v-html="alertBannerMessageHtml"></div>
-    </v-alert>
+    <g-alert :message="alertBannerMessage" :type="alertBannerType" :identifier="alertBannerIdentifier"></g-alert>
     <router-view :key="key"></router-view>
   </v-main>
 </template>
 
 <script>
 import set from 'lodash/set'
-import { mapGetters, mapActions } from 'vuex'
-import { transformHtml } from '@/utils'
+import GAlert from '@/components/GAlert'
+import { mapGetters } from 'vuex'
 
 function setElementStyle (element, key, value) {
   if (element) {
@@ -34,24 +32,15 @@ function setWrapElementHeight (element, value) {
 
 export default {
   name: 'main-content',
+  components: {
+    GAlert
+  },
   computed: {
     ...mapGetters([
       'alertBannerMessage',
-      'alertBannerType'
+      'alertBannerType',
+      'alertBannerIdentifier'
     ]),
-    alertBannerVisible: {
-      get () {
-        return !!this.alertBannerMessage
-      },
-      set (value) {
-        if (!value) {
-          this.setAlertBanner(null)
-        }
-      }
-    },
-    alertBannerMessageHtml () {
-      return transformHtml(this.alertBannerMessage)
-    },
     key () {
       if (this.$route.name !== 'ShootItemTerminal') {
         return undefined
@@ -61,9 +50,6 @@ export default {
 
   },
   methods: {
-    ...mapActions([
-      'setAlertBanner'
-    ]),
     getWrapElement () {
       return this.$el.querySelector(':scope > div[class$="wrap"]')
     },
@@ -86,18 +72,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-  .alertBannerMessage {
-    a {
-      color: white !important;
-    }
-    p {
-      display: inline !important;
-    }
-  }
-
-  .alertBanner {
-    margin-top: 0px;
-  }
-</style>

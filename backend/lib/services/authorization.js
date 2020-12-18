@@ -72,13 +72,12 @@ exports.canListSeeds = function (user) {
   })
 }
 
-exports.canListCloudProfiles = function (user, name) {
+exports.canListCloudProfiles = function (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'cloudprofiles',
-      name
+      resource: 'cloudprofiles'
     }
   })
 }
@@ -90,6 +89,16 @@ exports.canGetCloudProfiles = function (user, name) {
       group: 'core.gardener.cloud',
       resource: 'cloudprofiles',
       name
+    }
+  })
+}
+
+exports.canListControllerRegistrations = function (user) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'controllerregistrations'
     }
   })
 }

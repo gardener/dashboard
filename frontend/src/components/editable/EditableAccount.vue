@@ -124,7 +124,7 @@ export default {
     },
     color: {
       type: String,
-      default: 'blue-grey darken-2'
+      default: 'primary'
     },
     placeholder: {
       type: String

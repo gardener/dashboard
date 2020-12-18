@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <slot name="message">
           This is a generic dialog template.
         </slot>
-        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
+        <g-message color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-message>
       </v-card-text>
       <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
         <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
@@ -35,8 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="userInput"
           type="text"
           filled
-          dense
-          color="grey darken-2">
+          dense>
         </v-text-field>
       </v-alert>
       <v-card-actions>
@@ -50,14 +49,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { setDelayedInputFocus } from '@/utils'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
 
 export default {
   name: 'gdialog',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     confirmValue: {

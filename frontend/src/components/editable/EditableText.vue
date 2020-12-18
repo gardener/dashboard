@@ -104,7 +104,7 @@ export default {
     },
     color: {
       type: String,
-      default: 'blue-grey darken-2'
+      default: 'primary'
     },
     noValueText: {
       type: String,
@@ -173,6 +173,9 @@ export default {
       this.isActive = false
     },
     async onSave (value) {
+      if (this.error) {
+        return
+      }
       this.loading = this.color
       try {
         await this.save(this.internalValue)

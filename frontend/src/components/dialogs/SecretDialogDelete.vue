@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             <span class="error--text font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
-        <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+        <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -32,13 +32,13 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'secret-dialog-delete',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {

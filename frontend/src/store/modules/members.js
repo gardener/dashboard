@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { getMembers, addMember, updateMember, deleteMember } from '@/utils/api'
+import { getMembers, addMember, updateMember, deleteMember, rotateServiceAccountSecret } from '@/utils/api'
 
 // initial state
 const state = {
@@ -41,6 +41,10 @@ const actions = {
     const namespace = rootState.namespace
     const res = await deleteMember({ namespace, name })
     commit('RECEIVE', res.data)
+  },
+  async rotateServiceAccountSecret ({ commit, rootState }, name) {
+    const namespace = rootState.namespace
+    await rotateServiceAccountSecret({ namespace, name })
   }
 }
 

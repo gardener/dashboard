@@ -72,7 +72,6 @@ SPDX-License-Identifier: Apache-2.0
         :namespace="namespace"
         ref="serviceAccount"
       ></webterminal-service-account-dialog>
-      <confirm-dialog ref="confirmDialog"></confirm-dialog>
     </template>
   </g-dialog>
 </template>
@@ -84,7 +83,6 @@ import TerminalTarget from '@/components/TerminalTarget'
 import TerminalShortcuts from '@/components/TerminalShortcuts'
 import UnverifiedTerminalShortcutsDialog from '@/components/dialogs/UnverifiedTerminalShortcutsDialog'
 import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalServiceAccountDialog'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapGetters } from 'vuex'
 import { getMembers, terminalConfig } from '@/utils/api'
 import { TargetEnum } from '@/utils'
@@ -104,8 +102,7 @@ export default {
     TerminalTarget,
     TerminalShortcuts,
     UnverifiedTerminalShortcutsDialog,
-    WebterminalServiceAccountDialog,
-    ConfirmDialog
+    WebterminalServiceAccountDialog
   },
   mixins: [shootItem],
   props: {
