@@ -26,6 +26,24 @@ SPDX-License-Identifier: Apache-2.0
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
+         <div class="title grey--text text--darken-1 my-4">Assign roles to your members.</div>
+          <p class="body-1">
+            Add roles to your members to restrict access to resources of this project. Currently supported roles are:
+            <ul>
+              <li>
+                <code>owner</code> - Access to all resources and ability to manage members. Currently there can only be one owner per project. You can change the owner on the project administration page.
+              </li>
+              <li>
+                <code>admin</code> - Access to all resources of this project, except for member management.
+              </li>
+              <li>
+                <code>viewer</code> - Read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read infrastructure secrets.
+              </li>
+              <li>
+                <code>UAM</code> - Give the member User Access Management rights. Members with this role can manage members, should be used in combination with admin role to extend rights. Should not be used if an external UAM system is connected via a service account.
+              </li>
+            </ul>
+          </p>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>

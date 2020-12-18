@@ -8,6 +8,7 @@
 
 const _ = require('lodash')
 const { UnprocessableEntity, NotFound } = require('http-errors')
+const createError = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
 const SubjectList = require('../lib/services/members/SubjectList')
 
@@ -80,6 +81,12 @@ describe('services', function () {
       },
       {
         kind: 'ServiceAccount',
+        name: 'robot-orphaned',
+        namespace: 'garden-foo',
+        role: 'myrole'
+      },
+      {
+        kind: 'ServiceAccount',
         name: 'robot-foreign-namespace',
         namespace: 'garden-foreign',
         role: 'myrole',
@@ -111,7 +118,12 @@ describe('services', function () {
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          }
+        ]
       },
       {
         metadata: {
@@ -131,7 +143,15 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
-        }
+        },
+        secrets: [
+          {
+            name: 'secret-1'
+          },
+          {
+            name: 'secret-2'
+          }
+        ]
       },
       {
         metadata: {
@@ -168,13 +188,22 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: jest.fn().mockResolvedValue(),
+        delete: jest.fn().mockImplementation((namespace, name) => {
+          const item = _.find(serviceAccounts, { metadata: { name, namespace } })
+          if (!item) {
+            return Promise.reject(createError(404))
+          }
+          return Promise.resolve(item)
+        }),
         mergePatch: jest.fn().mockResolvedValue()
+      }
+      client.core.secrets = {
+        delete: jest.fn().mockResolvedValue()
       }
     })
 
     describe('SubjectList', function () {
-      const subjectList = new SubjectList(memberSubjects)
+      const subjectList = new SubjectList(project)
 
       describe('#get', function () {
         it('should merge role, roles into roles', async function () {
@@ -206,7 +235,7 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).toHaveLength(8)
+          expect(frontendMemberList).toHaveLength(9)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
@@ -228,6 +257,11 @@ describe('services', function () {
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
             description: undefined
+          })
+          expect(frontendMemberList).toContainEqual({
+            username: 'system:serviceaccount:garden-foo:robot-orphaned',
+            roles: ['myrole'],
+            orphaned: true
           })
         })
 
@@ -361,20 +395,57 @@ describe('services', function () {
       })
 
       describe('#deleteServiceAccount', function () {
+        it('should delete a serviceaccount', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          expect(memberManager.subjectList.has(id)).toBe(false)
+        })
+
         it('should not delete a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
           expect(client.core.serviceaccounts.delete).not.toBeCalled()
+          expect(memberManager.subjectList.has(id)).toBe(true)
+        })
+
+        it('should not fail if service account has already been deleted', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-orphaned'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccount(item)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-orphaned')
+          expect(memberManager.subjectList.has(id)).toBe(false)
         })
       })
 
       describe('#updateServiceAccount ', function () {
-        it('should not delete a serviceaccount from a different namespace', async function () {
+        it('should not update a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await memberManager.updateServiceAccount(item, {})
-          expect(client.core.serviceaccounts.mergePatch).not.toBeCalled()
+          await expect(memberManager.updateServiceAccount(item, {})).rejects.toThrow(UnprocessableEntity)
+        })
+      })
+
+      describe('#deleteServiceAccountSecret', function () {
+        it('should delete a serviceaccount secret', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          const item = memberManager.subjectList.get(id)
+          await memberManager.deleteServiceAccountSecret(item)
+          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
+        })
+
+        it('should not delete a serviceaccount secret from a different namespace', async function () {
+          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
+          const item = memberManager.subjectList.get(id)
+          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+        })
+
+        it('should not delete a service account secret if there is one more secret attached', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-multiple'
+          const item = memberManager.subjectList.get(id)
+          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
         })
       })
     })

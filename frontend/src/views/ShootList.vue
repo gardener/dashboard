@@ -26,125 +26,13 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.esc="search=''"
           class="search_textfield"
         ></v-text-field>
-        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute>
-          <template v-slot:activator="{ on: menu }">
-            <v-tooltip open-delay="500" top>
-              <template v-slot:activator="{ on: tooltip }">
-                <v-btn v-on="{ ...menu, ...tooltip}" icon>
-                  <v-icon class="cursor-pointer" color="white">mdi-dots-vertical</v-icon>
-                </v-btn>
-              </template>
-              Table Options
-            </v-tooltip>
-          </template>
-          <v-list subheader dense>
-            <v-subheader>Column Selection</v-subheader>
-            <v-list-item v-for="header in headers" :key="header.text" @click.stop="setSelectedColumn(header)">
-              <v-list-item-action>
-                <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
-              </v-list-item-action>
-              <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>
-                  <v-tooltip v-if="header.customField" top open-delay="500">
-                    <template v-slot:activator="{ on: tooltip }">
-                      <div v-on="tooltip">
-                        <v-badge
-                          inline
-                          icon="mdi-playlist-star"
-                          color="cyan darken-2"
-                          class="mt-0"
-                        >
-                          <span>{{ header.text }}</span>
-                        </v-badge>
-                      </div>
-                    </template>
-                    Custom Field
-                  </v-tooltip>
-                  <template v-else>{{ header.text }}</template>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-tooltip top style="width: 100%">
-                  <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="resetTableSettings">
-                      Reset
-                    </v-btn>
-                  </template>
-                  <span>Reset to Defaults</span>
-                </v-tooltip>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-          <v-list subheader dense v-if="!projectScope">
-            <v-subheader>Filter Table</v-subheader>
-            <v-list-item @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
-              <v-list-item-action>
-                <v-icon :color="checkboxColor(showOnlyShootsWithIssues)" v-text="checkboxIcon(showOnlyShootsWithIssues)"/>
-              </v-list-item-action>
-              <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>Show only clusters with issues</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <template v-if="isAdmin">
-              <v-list-item
-                @click.stop="toggleFilter('progressing')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('progressing'))" v-text="checkboxIcon(isFilterActive('progressing'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide progressing clusters</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('userIssues')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('userIssues'))" v-text="checkboxIcon(isFilterActive('userIssues'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide user issues</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('deactivatedReconciliation')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('deactivatedReconciliation'))" v-text="checkboxIcon(isFilterActive('deactivatedReconciliation'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide clusters with deactivated reconciliation</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('hideTicketsWithLabel')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass"
-                v-if="!!gitHubRepoUrl && hideClustersWithLabels.length">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('hideTicketsWithLabel'))" v-text="checkboxIcon(isFilterActive('hideTicketsWithLabel'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>
-                    Hide clusters with
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <span v-on="on"><tt>configured</tt><v-icon small>mdi-help-circle-outline</v-icon></span>
-                      </template>
-                      <div v-for="label in hideClustersWithLabels" :key="label">- {{label}}</div>
-                    </v-tooltip>
-                    ticket labels
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </template>
-          </v-list>
-        </v-menu>
+        <table-column-selection
+          :headers="selectableHeaders"
+          :filters="selectableFilters"
+          @setSelectedHeader="setSelectedHeader"
+          @reset="resetTableSettings"
+          @toggleFilter="toggleFilter"
+        ></table-column-selection>
       </v-toolbar>
       <v-data-table
         class="shootListTable"
@@ -198,28 +86,22 @@ import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import ShootListRow from '@/components/ShootListRow'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
+import { mapTableHeader } from '@/utils'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
-
-function mapHeader (headers, valueKey) {
-  const obj = {}
-  for (const { value: key, [valueKey]: value } of headers) {
-    obj[key] = value
-  }
-  return obj
-}
 
 export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
-    ShootAccessCard
+    ShootAccessCard,
+    TableColumnSelection
   },
   data () {
     return {
       floatingButton: false,
       search: '',
       dialog: null,
-      tableMenu: false,
       options: undefined,
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
@@ -260,7 +142,6 @@ export default {
       setSelectedShootInternal: 'setSelectedShoot',
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
-      setShootListFilters: 'setShootListFilters',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
     }),
@@ -280,13 +161,7 @@ export default {
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
     },
-    checkboxColor (selected) {
-      return selected ? 'cyan darken-2' : ''
-    },
-    checkboxIcon (selected) {
-      return selected ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
-    },
-    setSelectedColumn (header) {
+    setSelectedHeader (header) {
       this.$set(this.selectedColumns, header.value, !header.selected)
       this.saveSelectedColumns()
     },
@@ -321,7 +196,8 @@ export default {
         ...projectSpecificTableOptions
       }
     },
-    async toggleFilter (key) {
+    async toggleFilter ({ value }) {
+      const key = value
       await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
 
       this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
@@ -386,34 +262,142 @@ export default {
       return get(this.selectedItem, 'metadata.name')
     },
     currentStandardSelectedColumns () {
-      return mapHeader(this.standardHeaders, 'selected')
+      return mapTableHeader(this.standardHeaders, 'selected')
     },
     currentCustomSelectedColumns () {
-      return mapHeader(this.customHeaders, 'selected')
+      return mapTableHeader(this.customHeaders, 'selected')
     },
     defaultStandardSelectedColumns () {
-      return mapHeader(this.standardHeaders, 'defaultSelected')
+      return mapTableHeader(this.standardHeaders, 'defaultSelected')
     },
     defaultCustomSelectedColumns () {
-      return mapHeader(this.customHeaders, 'defaultSelected')
+      return mapTableHeader(this.customHeaders, 'defaultSelected')
     },
     standardHeaders () {
       const headers = [
-        { text: 'PROJECT', value: 'project', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: !!this.projectScope },
-        { text: 'NAME', value: 'name', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: false },
-        { text: 'INFRASTRUCTURE', value: 'infrastructure', class: 'nowrap', align: 'left', selected: false, defaultSelected: true, hidden: false },
-        { text: 'SEED', value: 'seed', align: 'left', class: 'nowrap', selected: false, defaultSelected: false, hidden: false },
-        { text: 'TECHNICAL ID', value: 'technicalId', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: !this.isAdmin },
-        { text: 'CREATED BY', value: 'createdBy', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: false },
-        { text: 'CREATED AT', value: 'createdAt', class: 'nowrap', align: 'left', selected: false, defaultSelected: false, hidden: false },
-        { text: 'PURPOSE', value: 'purpose', class: 'nowrap text-center', align: 'center', selected: false, defaultSelected: true, hidden: false },
-        { text: 'STATUS', value: 'lastOperation', class: 'nowrap text-left', align: 'left', selected: false, defaultSelected: true, hidden: false },
-        { text: 'VERSION', value: 'k8sVersion', class: 'nowrap text-center', align: 'center', selected: false, defaultSelected: true, hidden: false },
-        { text: 'READINESS', value: 'readiness', class: 'nowrap text-center', sortable: true, align: 'center', selected: false, defaultSelected: true, hidden: false },
-        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', selected: false, defaultSelected: false, hidden: !this.cfg.accessRestriction || !this.isAdmin },
-        { text: 'TICKET', value: 'ticket', class: 'nowrap', sortable: true, align: 'left', selected: false, defaultSelected: false, hidden: !this.gitHubRepoUrl || !this.isAdmin },
-        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', selected: false, defaultSelected: true, hidden: !this.gitHubRepoUrl || !this.isAdmin },
-        { text: 'ACTIONS', value: 'actions', class: 'nowrap text-right action-button-group', sortable: false, align: 'right', selected: false, defaultSelected: true, hidden: !(this.canDeleteShoots || this.canGetSecrets) }
+        {
+          text: 'PROJECT',
+          value: 'project',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: !!this.projectScope
+        },
+        {
+          text: 'NAME',
+          value: 'name',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'INFRASTRUCTURE',
+          value: 'infrastructure',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'SEED',
+          value: 'seed',
+          align: 'left',
+          class: 'nowrap',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'TECHNICAL ID',
+          value: 'technicalId',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.isAdmin
+        },
+        {
+          text: 'CREATED BY',
+          value: 'createdBy',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'CREATED AT',
+          value: 'createdAt',
+          class: 'nowrap',
+          align: 'left',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'PURPOSE',
+          value: 'purpose',
+          class: 'nowrap text-center',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'STATUS',
+          value: 'lastOperation',
+          class: 'nowrap text-left',
+          align: 'left',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'VERSION',
+          value: 'k8sVersion',
+          class: 'nowrap text-center',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'READINESS',
+          value: 'readiness',
+          class: 'nowrap text-center',
+          sortable: true,
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'ACCESS RESTRICTIONS',
+          value: 'accessRestrictions',
+          sortable: false,
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.cfg.accessRestriction || !this.isAdmin
+        },
+        {
+          text: 'TICKET',
+          value: 'ticket',
+          class: 'nowrap',
+          sortable: true,
+          align: 'left',
+          defaultSelected: false,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'TICKET LABELS',
+          value: 'ticketLabels',
+          sortable: false,
+          align: 'left',
+          defaultSelected: true,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'ACTIONS',
+          value: 'actions',
+          class: 'nowrap text-right action-button-group',
+          sortable: false,
+          align: 'right',
+          defaultSelected: true,
+          hidden: !(this.canDeleteShoots || this.canGetSecrets)
+        }
       ]
       return map(headers, (header, index) => ({
         ...header,
@@ -455,11 +439,57 @@ export default {
       const allHeaders = [...this.standardHeaders, ...this.customHeaders]
       return sortBy(allHeaders, ['weight', 'text'])
     },
-    headers () {
+    selectableHeaders () {
       return filter(this.allHeaders, ['hidden', false])
     },
     visibleHeaders () {
-      return filter(this.headers, ['selected', true])
+      return filter(this.selectableHeaders, ['selected', true])
+    },
+    allFilters () {
+      return [
+        {
+          text: 'Show only clusters with issues',
+          value: 'onlyShootsWithIssues',
+          selected: this.onlyShootsWithIssues,
+          hidden: this.projectScope
+        },
+        {
+          text: 'Hide progressing clusters',
+          value: 'progressing',
+          selected: this.isFilterActive('progressing'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide user issues',
+          value: 'userIssues',
+          selected: this.isFilterActive('userIssues'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with deactivated reconciliation',
+          value: 'deactivatedReconciliation',
+          selected: this.isFilterActive('deactivatedReconciliation'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with configured ticket labels',
+          value: 'hideTicketsWithLabel',
+          selected: this.isFilterActive('hideTicketsWithLabel'),
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length,
+          helpTooltip: this.hideTicketsWithLabelTooltip,
+          disabled: this.filtersDisabled
+        }
+      ]
+    },
+    selectableFilters () {
+      return filter(this.allFilters, ['hidden', false])
+    },
+    hideTicketsWithLabelTooltip () {
+      const labels = map(this.hideClustersWithLabels, label => (`- ${label}`))
+      return ['Configured Labels', ...labels]
     },
     projectScope () {
       return this.namespace !== '_all'
@@ -557,10 +587,6 @@ export default {
         padding-right: 24px;
       }
     }
-  }
-
-  .disabled_filter {
-    opacity: 0.5;
   }
 
   .search_textfield {

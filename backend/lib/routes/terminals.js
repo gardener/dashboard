@@ -9,6 +9,7 @@
 const express = require('express')
 const { terminals, authorization } = require('../services')
 const _ = require('lodash')
+const { UnprocessableEntity } = require('http-errors')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -37,7 +38,7 @@ router.route('/')
       const { method, params: body } = req.body
 
       if (!_.includes(['create', 'fetch', 'list', 'config', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
-        throw new Error(`${method} not allowed for terminals`)
+        throw new UnprocessableEntity(`${method} not allowed for terminals`)
       }
       res.send(await terminals[method]({ user, body }))
     } catch (err) {

@@ -7,7 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity } = require('http-errors')
+const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
 
 const config = require('../../config')
@@ -23,7 +23,7 @@ class MemberManager {
     this.userId = userId
     this.namespace = project.spec.namespace
     this.projectName = project.metadata.name
-    this.subjectList = new SubjectList(project.spec.members, serviceAccounts)
+    this.subjectList = new SubjectList(project, serviceAccounts)
   }
 
   list () {
@@ -97,6 +97,19 @@ class MemberManager {
     return this.subjectList.members
   }
 
+  async rotateServiceAccountSecret (id) {
+    const item = this.subjectList.get(id)
+    if (!item) {
+      return
+    }
+
+    if (item.kind !== 'ServiceAccount') {
+      throw new UnprocessableEntity('Member is not a ServiceAccount')
+    }
+
+    await this.deleteServiceAccountSecret(item)
+  }
+
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
@@ -114,7 +127,7 @@ class MemberManager {
   async createServiceAccount (item, { createdBy, description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      return // foreign service account => early exit, nothing to create
     }
 
     const serviceAccount = await this.client.core.serviceaccounts.create(namespace, {
@@ -144,7 +157,7 @@ class MemberManager {
   async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
     }
 
     const isDirty = item.extend({ description })
@@ -162,11 +175,36 @@ class MemberManager {
   async deleteServiceAccount (item) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      return
+      return // foreign service account => early exit, nothing to delete
+    }
+    try {
+      await this.client.core.serviceaccounts.delete(namespace, name)
+    } catch (err) {
+      if (!isHttpError(err) || err.statusCode !== 404) {
+        throw err
+      }
+    }
+    this.subjectList.delete(item.id)
+  }
+
+  async deleteServiceAccountSecret (item) {
+    const { namespace } = Member.parseUsername(item.id)
+    if (namespace !== this.namespace) {
+      throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-    await this.client.core.serviceaccounts.delete(namespace, name)
-    this.subjectList.delete(item.id)
+    const name = _
+      .chain(item)
+      .get('extensions.secrets', [])
+      .tap(secrets => {
+        if (secrets.length > 1) {
+          throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
+        }
+      })
+      .head()
+      .get('name')
+      .value()
+    await this.client.core.secrets.delete(namespace, name)
   }
 
   async getKubeconfig (item) {

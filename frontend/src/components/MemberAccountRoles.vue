@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div d-flex flex-row>
-    <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+  <div>
+    <v-tooltip top v-for="({ displayName, notEditable, tooltip }, index) in roleDisplayNames" :key="displayName" :disabled="!tooltip">
       <template v-slot:activator="{ on }">
-        <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+        <v-chip v-on="on" small :color="notEditable ? 'grey' : 'black'" outlined :class="{'ml-3': index > 0}">
           {{displayName}}
         </v-chip>
       </template>

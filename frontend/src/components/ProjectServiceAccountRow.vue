@@ -5,164 +5,138 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <v-list-item>
-      <v-list-item-avatar>
-        <img :src="avatarUrl" />
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title v-if="isServiceAccountFromCurrentNamespace" class="cursor-pointer">
-          <g-popper
-            :title="displayName"
-            toolbarColor="cyan darken-2"
-            :popperKey="`serviceAccount_sa_${username}`"
-          >
-            <template v-slot:popperRef>
-              <span>{{displayName}}</span>
-            </template>
-            <v-list class="pa-0">
-              <v-list-item class="px-0">
-                <v-list-item-content class="pt-1">
-                  <v-list-item-subtitle>Created by</v-list-item-subtitle>
-                  <v-list-item-title><account-avatar :account-name="createdBy"></account-avatar></v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item class="px-0">
-                <v-list-item-content class="pt-1">
-                  <v-list-item-subtitle>Description</v-list-item-subtitle>
-                  <v-list-item-title v-if="description">{{description}}</v-list-item-title>
-                  <v-list-item-title v-else class="font-weight-light text--disabled">Not defined</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item class="px-0">
-                <v-list-item-content class="pt-1">
-                  <v-list-item-subtitle>Created</v-list-item-subtitle>
-                  <v-list-item-title>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <span v-on="on">
-                          <time-string :date-time="creationTimestamp" mode="past"></time-string>
-                        </span>
-                      </template>
-                      {{created}}
-                    </v-tooltip>
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </g-popper>
-        </v-list-item-title>
-        <v-list-item-title v-else>
-          <span>{{displayName}}</span>
+  <tr>
+    <td v-if="selectedHeaders.displayName">
+      <v-list-item>
+        <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title class="d-flex">
+            <span class="subtitle-1">{{item.displayName}}</span>
+            <v-tooltip top v-if="foreign">
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
+              </template>
+              <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
+            </v-tooltip>
+            <v-tooltip top v-if="orphaned">
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on" small class="ml-1" color="warning">mdi-alert-circle-outline</v-icon>
+              </template>
+              <span>Associated Service Account does not exists</span>
+            </v-tooltip>
+          </v-list-item-title>
+          <v-list-item-subtitle>{{item.username}}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+    </td>
+    <td v-if="selectedHeaders.createdBy">
+      <account-avatar :account-name="item.createdBy" :size="16"></account-avatar>
+    </td>
+    <td v-if="selectedHeaders.creationTimestamp">
+      <div>
+        <v-tooltip top v-if="item.creationTimestamp">
+          <template v-slot:activator="{ on }">
+            <span v-on="on">
+              <time-string :date-time="item.creationTimestamp" mode="past"></time-string>
+            </span>
+          </template>
+          {{item.created}}
+        </v-tooltip>
+        <span v-else class="font-weight-light text--disabled">Unknown</span>
+      </div>
+    </td>
+    <td v-if="selectedHeaders.description">
+      <div class="description-column">
+        <span v-if="item.description">{{item.description}}</span>
+        <span v-else class="font-weight-light text--disabled">Not defined</span>
+      </div>
+    </td>
+    <td v-if="selectedHeaders.roles">
+      <div class="d-flex justify-end">
+        <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
+      </div>
+    </td>
+    <td width="250px" v-if="selectedHeaders.actions">
+      <div class="d-flex flex-row justify-end">
+        <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>
+              <v-btn v-on="on" icon @click.native.stop="onDownload" :disabled="orphaned">
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
             </template>
-            <span>Service Account invited from namespace {{serviceAccountNamespace}}</span>
+            <span>Download Kubeconfig</span>
           </v-tooltip>
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          {{username}}
-        </v-list-item-subtitle>
-      </v-list-item-content>
-      <v-list-item-action class="ml-1">
-        <service-account-roles :role-display-names="roleDisplayNames"></service-account-roles>
-      </v-list-item-action>
-      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onDownload">
-              <v-icon>mdi-download</v-icon>
-            </v-btn>
-          </template>
-          <span>Download Kubeconfig</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click="onKubeconfig">
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
-          </template>
-          <span>Show Kubeconfig</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onEdit">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-          </template>
-          <span>Change Service Account Roles</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
-              <v-icon v-if="isServiceAccountFromCurrentNamespace">mdi-delete</v-icon>
-              <v-icon v-else>mdi-close</v-icon>
-            </v-btn>
-          </template>
-          <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
-          <span v-else>Remove Foreign Service Account from Project</span>
-        </v-tooltip>
-      </v-list-item-action>
-    </v-list-item>
-  </div>
+        </div>
+        <div v-if="!foreign && canGetSecrets" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click="onKubeconfig" :disabled="orphaned">
+                <v-icon>mdi-eye</v-icon>
+              </v-btn>
+            </template>
+            <span>Show Kubeconfig</span>
+          </v-tooltip>
+        </div>
+        <div v-if="!foreign && canDeleteSecrets" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click="onRotateSecret" :disabled="orphaned">
+                <v-icon>mdi-refresh</v-icon>
+              </v-btn>
+            </template>
+            <span>Rotate Service Account Secret</span>
+          </v-tooltip>
+        </div>
+        <div v-if="canManageServiceAccountMembers" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="onEdit">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+            <span>Edit Service Account</span>
+          </v-tooltip>
+        </div>
+        <div v-if="canManageServiceAccountMembers" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
+                <v-icon>{{ foreign ? 'mdi-close' : 'mdi-delete' }}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{ foreign ? 'Remove Foreign Service Account from Project' : 'Delete Service Account' }}</span>
+          </v-tooltip>
+        </div>
+      </div>
+    </td>
+  </tr>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
-import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
-import ServiceAccountRoles from '@/components/ServiceAccountRoles'
+import MemberAccountRoles from '@/components/MemberAccountRoles'
 import {
   isForeignServiceAccount,
-  parseServiceAccountUsername
+  parseServiceAccountUsername,
+  mapTableHeader
 } from '@/utils'
 
 export default {
   name: 'project-service-account-row',
   components: {
     TimeString,
-    GPopper,
     AccountAvatar,
-    ServiceAccountRoles
+    MemberAccountRoles
   },
   props: {
-    username: {
-      type: String,
+    item: {
+      type: Object,
       required: true
     },
-    avatarUrl: {
-      type: String,
-      required: true
-    },
-    displayName: {
-      type: String,
-      required: true
-    },
-    createdBy: {
-      type: String
-    },
-    description: {
-      type: String
-    },
-    creationTimestamp: {
-      type: String
-    },
-    created: {
-      type: String
-    },
-    roles: {
-      type: Array,
-      required: true
-    },
-    roleDisplayNames: {
+    headers: {
       type: Array,
       required: true
     }
@@ -173,41 +147,50 @@ export default {
     ]),
     ...mapGetters([
       'canManageServiceAccountMembers',
-      'canGetSecrets'
+      'canGetSecrets',
+      'canDeleteSecrets'
     ]),
-    isServiceAccountFromCurrentNamespace () {
-      return !isForeignServiceAccount(this.namespace, this.username)
+    orphaned () {
+      return this.item.orphaned
+    },
+    foreign () {
+      return isForeignServiceAccount(this.namespace, this.item.username)
     },
     createdByClasses () {
-      return this.createdBy ? ['font-weight-bold'] : ['grey--text']
+      return this.item.createdBy ? ['font-weight-bold'] : ['grey--text']
     },
     serviceAccountNamespace () {
-      const { namespace } = parseServiceAccountUsername(this.username)
+      const { namespace } = parseServiceAccountUsername(this.item.username)
       return namespace
+    },
+    selectedHeaders () {
+      return mapTableHeader(this.headers, 'selected')
     }
   },
   methods: {
     onDownload () {
-      this.$emit('download', this.username)
+      this.$emit('download', this.item)
     },
     onKubeconfig () {
-      this.$emit('kubeconfig', this.username)
+      this.$emit('kubeconfig', this.item)
     },
-    onEdit (username) {
-      this.$emit('edit', this.username, this.roles, this.description)
+    onRotateSecret () {
+      this.$emit('rotateSecret', this.item)
     },
-    onDelete (username) {
-      this.$emit('delete', this.username)
+    onEdit () {
+      this.$emit('edit', this.item)
+    },
+    onDelete () {
+      this.$emit('delete', this.item)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .cursor-pointer {
-    cursor: pointer;
-  }
-  ::v-deep .popper {
-    text-align: initial;
+  .description-column {
+    max-width: 20vw;
+    max-height: 60px;
+    overflow: scroll;
   }
 </style>

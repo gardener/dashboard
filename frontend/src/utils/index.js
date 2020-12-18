@@ -23,13 +23,14 @@ import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
-import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
 const { v4: uuidv4 } = require('uuid')
+
+const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 
 export function emailToDisplayName (value) {
   if (value) {
@@ -389,7 +390,7 @@ export function isTypeDelete (lastOperation) {
 }
 
 export function isServiceAccountUsername (username) {
-  return startsWith(username, 'system:serviceaccount:')
+  return serviceAccountRegex.test(username)
 }
 
 export function isForeignServiceAccount (currentNamespace, username) {
@@ -406,7 +407,7 @@ export function parseServiceAccountUsername (username) {
   if (!username) {
     return undefined
   }
-  const [, namespace, name] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  const [, namespace, name] = serviceAccountRegex.exec(username) || []
   return { namespace, name }
 }
 
@@ -776,6 +777,14 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
 export function sortedRoleDisplayNames (roleNames) {
   const displayNames = filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
   return sortBy(displayNames, 'displayName')
+}
+
+export function mapTableHeader (headers, valueKey) {
+  const obj = {}
+  for (const { value: key, [valueKey]: value } of headers) {
+    obj[key] = value
+  }
+  return obj
 }
 
 export default {
