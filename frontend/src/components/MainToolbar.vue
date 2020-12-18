@@ -129,9 +129,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import map from 'lodash/map'
-import join from 'lodash/join'
-import uniq from 'lodash/uniq'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
