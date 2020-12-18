@@ -11,7 +11,13 @@ const _ = require('lodash')
 const SubjectListItem = require('./SubjectListItem')
 
 class SubjectList {
-  constructor (subjects, serviceAccounts) {
+  constructor (project, serviceAccounts) {
+    const {
+      spec: {
+        namespace,
+        members: subjects
+      }
+    } = project
     const createServiceAccountItem = ({ metadata, secrets }) => {
       const { namespace, name, annotations = {}, creationTimestamp } = metadata
       const createdByLegacy = annotations['garden.sapcloud.io/createdBy']
@@ -27,8 +33,7 @@ class SubjectList {
         createdBy,
         description,
         creationTimestamp,
-        secrets,
-        hasServiceAccountResource: true
+        secrets
       })
       return item
     }
@@ -43,11 +48,15 @@ class SubjectList {
 
     const extendItem = item => {
       const id = item.id
-      if (serviceAccountItems[id]) {
-        item.extend({
-          ...serviceAccountItems[id].extensions
-        })
-        delete serviceAccountItems[id]
+      if (_.startsWith(id, `system:serviceaccount:${namespace}:`)) {
+        const extensions = {}
+        if (serviceAccountItems[id]) {
+          _.assign(extensions, serviceAccountItems[id].extensions)
+          delete serviceAccountItems[id]
+        } else {
+          _.set(extensions, 'orphaned', true)
+        }
+        item.extend(extensions)
       }
     }
 
