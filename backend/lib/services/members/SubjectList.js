@@ -47,8 +47,8 @@ class SubjectList {
     }
 
     const extendItem = item => {
-      const { id, kind } = item
-      if (kind === 'ServiceAccount' && _.startsWith(id, `system:serviceaccount:${namespace}:`)) {
+      const id = item.id
+      if (_.startsWith(id, `system:serviceaccount:${namespace}:`)) {
         const extensions = {}
         if (serviceAccountItems[id]) {
           _.assign(extensions, serviceAccountItems[id].extensions)
