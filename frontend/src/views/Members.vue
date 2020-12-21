@@ -498,7 +498,7 @@ export default {
       } else {
         message = this.$renderComponent(RemoveProjectMember, {
           projectName,
-          name: displayName(name)
+          memberName: displayName(name)
         })
       }
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -530,7 +530,7 @@ export default {
       const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
       const message = this.$renderComponent(RemoveProjectMember, {
         projectName,
-        name,
+        memberName: name,
         namespace
       })
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -554,6 +554,7 @@ export default {
       })
     },
     confirmRotateServiceAccountSecret (name) {
+      name = displayName(name)
       const message = this.$renderComponent(RotateServiceAccountSecret, {
         name
       })

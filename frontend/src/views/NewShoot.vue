@@ -234,6 +234,7 @@ export default {
         infrastructureKind,
         cloudProfileName,
         region,
+        networkingType,
         secret,
         floatingPoolName,
         loadBalancerProviderName,
@@ -251,6 +252,7 @@ export default {
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
+      set(shootResource, 'spec.networking.type', networkingType)
       set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
