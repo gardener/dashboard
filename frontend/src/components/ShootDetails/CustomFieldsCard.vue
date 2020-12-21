@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="customFields">
+  <v-card v-if="customFields && customFields.length">
     <v-toolbar flat dark dense color="cyan darken-2">
       <v-toolbar-title class="subtitle-1">Custom Fields</v-toolbar-title>
     </v-toolbar>
