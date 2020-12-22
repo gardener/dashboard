@@ -121,7 +121,10 @@ function ensureDataLoaded (store, localStorage) {
             promises.push(store.dispatch('fetchInfrastructureSecrets'))
           }
           await Promise.all(promises)
-          if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
+
+          const namespaceChanged = from.params.namespace !== to.params.namespace
+          const navigatingToNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
+          if (namespaceChanged || navigatingToNewShoot) {
             await store.dispatch('resetNewShootResource')
           }
           break
