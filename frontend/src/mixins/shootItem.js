@@ -193,15 +193,15 @@ export const shootItem = {
     hibernationPossibleMessage () {
       return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
     },
-    maintenancePossibleConstraint () {
+    maintenancePreconditionSatisfiedConstraint () {
       const constraints = get(this.shootItem, 'status.constraints')
       return find(constraints, ['type', 'MaintenancePreconditionsSatisfied'])
     },
-    isMaintenancePossible () {
-      const status = get(this.maintenancePossibleConstraint, 'status', 'True')
+    isMaintenancePreconditionSatisfied () {
+      const status = get(this.maintenancePreconditionSatisfiedConstraint, 'status', 'True')
       return status !== 'False'
     },
-    maintenancePossibleMessage () {
+    maintenancePreconditionSatisfiedMessage () {
       return get(this.maintenancePossibleConstraint, 'message', 'Maintenance currently not possible')
     }
   },

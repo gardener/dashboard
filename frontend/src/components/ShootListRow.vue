@@ -21,14 +21,22 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-              <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
+              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp" />
+              <version-expiration-warning :shootItem="shootItem" />
+              <maintenance-constraint-warning
+                :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
+                :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+                icon />
+              <hibernation-constraint-warning
+                :isHibernationPossible="isHibernationPossible"
+                :hibernationPossibleMessage="hibernationPossibleMessage"
+                :hasHibernationSchedules="shootHibernationSchedules.length"
+                icon />
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"
                 :namespace="shootNamespace"
-                :purpose="shootPurpose">
-              </hibernation-schedule-warning>
+                :purpose="shootPurpose" />
             </div>
           </v-col>
         </v-row>
@@ -153,6 +161,8 @@ import HibernationScheduleWarning from '@/components/ShootHibernation/Hibernatio
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
+import HibernationConstraintWarning from '@/components/ShootHibernation/HibernationConstraintWarning'
+import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
 
 import {
   isTypeDelete,
@@ -178,7 +188,9 @@ export default {
     ShootSeedName,
     Vendor,
     VersionExpirationWarning,
-    ShootListRowActions
+    ShootListRowActions,
+    HibernationConstraintWarning,
+    MaintenanceConstraintWarning
   },
   props: {
     shootItem: {

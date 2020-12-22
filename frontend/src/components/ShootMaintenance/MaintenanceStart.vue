@@ -13,20 +13,19 @@ SPDX-License-Identifier: Apache-2.0
     :caption="caption"
     icon="mdi-refresh"
     :buttonText="buttonText"
-    :disabled="!isMaintenancePossible"
     maxWidth="850"
     confirmButtonText="Trigger now">
     <template v-slot:actionComponent>
-      <v-row >
-        <v-col>
-          <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-        </v-col>
-        <maintenance-components
-          title="The following updates will be performed"
-          :selectable="false"
-          ref="maintenanceComponents"
-        ></maintenance-components>
-      </v-row>
+      <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+      <maintenance-components
+        title="The following updates will be performed"
+        :selectable="false"
+        ref="maintenanceComponents"
+      ></maintenance-components>
+      <maintenance-constraint-warning
+        :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
+        :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+        small />
     </template>
   </action-button-dialog>
 </template>
@@ -34,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -43,7 +43,8 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   components: {
     ActionButtonDialog,
-    MaintenanceComponents
+    MaintenanceComponents,
+    MaintenanceConstraintWarning
   },
   props: {
     shootItem: {
@@ -66,9 +67,6 @@ export default {
     caption () {
       if (this.isMaintenanceToBeScheduled) {
         return 'Requesting to schedule cluster maintenance'
-      }
-      if (!this.isMaintenancePossible) {
-        return this.maintenancePossibleMessage
       }
       return this.buttonTitle
     },

@@ -20,10 +20,6 @@ SPDX-License-Identifier: Apache-2.0
       <maintenance-components
         ref="maintenanceComponents"
       ></maintenance-components>
-      <v-alert v-if="!isMaintenancePossible" type="warning" outlined>
-        <div class="font-weight-bold">Your Maintenance schedule may not have any effect:</div>
-        <div>{{maintenancePossibleMessage}}</div>
-      </v-alert>
     </template>
   </action-button-dialog>
 </template>

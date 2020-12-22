@@ -16,7 +16,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <hibernation-constraint-warning
+              :isHibernationPossible="isHibernationPossible"
+              :hibernationPossibleMessage="hibernationPossibleMessage"
+              :hasHibernationSchedules="shootHibernationSchedules.length"
+              icon
+              small />
             <v-icon
               v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
               small
@@ -47,7 +53,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
-          <v-list-item-subtitle class="pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <maintenance-constraint-warning
+              :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
+              :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+              icon
+              small />
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -118,6 +129,8 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
+import HibernationConstraintWarning from '@/components/ShootHibernation/HibernationConstraintWarning'
+import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 
@@ -131,7 +144,9 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    RotateKubeconfigStart
+    RotateKubeconfigStart,
+    HibernationConstraintWarning,
+    MaintenanceConstraintWarning
   },
   props: {
     shootItem: {

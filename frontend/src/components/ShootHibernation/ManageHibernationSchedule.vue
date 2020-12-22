@@ -59,10 +59,10 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
-        <v-alert type="warning" outlined>
-          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-          <div>{{hibernationPossibleMessage}}</div>
-        </v-alert>
+        <hibernation-constraint-warning
+          :isHibernationPossible="isHibernationPossible"
+          :hibernationPossibleMessage="hibernationPossibleMessage"
+          hasHibernationSchedules />
       </v-col>
     </v-row>
   </div>
@@ -78,6 +78,7 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
 import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import HibernationConstraintWarning from '@/components/ShootHibernation/HibernationConstraintWarning'
 
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
@@ -86,7 +87,8 @@ const { v4: uuidv4 } = require('uuid')
 export default {
   name: 'hibernation-schedule',
   components: {
-    HibernationScheduleEvent
+    HibernationScheduleEvent,
+    HibernationConstraintWarning
   },
   props: {
     userInterActionBus: {
