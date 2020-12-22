@@ -123,8 +123,8 @@ function ensureDataLoaded (store, localStorage) {
           await Promise.all(promises)
 
           const namespaceChanged = from.params.namespace !== to.params.namespace
-          const navigatingToNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
-          if (namespaceChanged || navigatingToNewShoot) {
+          const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
+          if (namespaceChanged || toNewShoot) {
             await store.dispatch('resetNewShootResource')
           }
           break
