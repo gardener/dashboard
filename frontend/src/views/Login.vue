@@ -13,9 +13,9 @@ SPDX-License-Identifier: Apache-2.0
           <v-col cols="12" sm="8" md="4" lg="4">
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
-                <div class="layout column align-center secondary darken-1 pa-3">
+                <div class="layout column align-center secondary darken-1 pa-3 pt-6">
                   <img src="../assets/logo.svg" alt="Login to Gardener" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h4">Universal Kubernetes at Scale</span>
+                  <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
                 </div>
                 <v-tabs
                   centered
@@ -34,10 +34,10 @@ SPDX-License-Identifier: Apache-2.0
               <v-card-text class="login-form d-flex align-center justify-center py-0">
                 <v-tabs-items v-model="loginType">
                     <v-tab-item id="oidc">
-                      <span class="text-subtitle-1">Press Login to be redirected to configured OpenID Connect Provider.</span>
+                      <div class="text-subtitle-1 text-center">Press Login to be redirected to configured<br> OpenID Connect Provider.</div>
                     </v-tab-item >
                     <v-tab-item id="token">
-                      <span class="text-subtitle-1">Enter a bearer token trusted by the Kubernetes API server and press Login.</span>
+                      <div class="text-subtitle-1 text-center pt-3">Enter a bearer token trusted by the Kubernetes API server and press Login.</div>
                       <v-text-field
                         ref="token"
                         v-model="token"
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-tab-item>
                   </v-tabs-items>
               </v-card-text>
-              <v-card-actions class="pa-3">
+              <v-card-actions class="bt-2 pb-4">
                 <div class="d-flex justify-center flex-grow-1">
                   <v-btn @click="handleLogin" color="primary">Login</v-btn>
                 </div>
@@ -198,7 +198,7 @@ export default {
   }
 
   .login-form {
-    min-height: 130px;
+    min-height: 140px;
   }
 
   .footer {
