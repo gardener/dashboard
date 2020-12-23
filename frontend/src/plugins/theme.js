@@ -11,18 +11,18 @@ const theme = {
     light: {
       primary: colors.lightBlue.base,
       secondary: colors.grey.darken3,
-      accent: colors.lightBlue.darken2,
-      accentTitle: colors.lightBlue.lighten4,
-      anchor: colors.lightBlue.accent2,
-      actionButton: colors.lightBlue.darken4
+      accent: colors.lightBlue.darken1,
+      accentTitle: colors.shades.white,
+      anchor: colors.lightBlue.base,
+      actionButton: colors.lightBlue.darken1
     },
     dark: {
       primary: colors.lightBlue.base,
-      secondary: colors.grey.darken4,
-      accent: colors.lightBlue.darken4,
-      accentTitle: colors.lightBlue.lighten2,
-      anchor: colors.lightBlue.accent2,
-      actionButton: colors.lightBlue.lighten2,
+      secondary: colors.grey.darken3,
+      accent: colors.lightBlue.darken2,
+      accentTitle: colors.shades.white,
+      anchor: colors.lightBlue.base,
+      actionButton: colors.lightBlue.base,
       error: colors.red.darken4,
       warning: colors.orange.darken4
     }
