@@ -31,13 +31,13 @@ SPDX-License-Identifier: Apache-2.0
                   </v-tab>
                 </v-tabs>
               </v-card-title>
-              <v-card-text class="login-form d-flex align-center py-0">
+              <v-card-text class="login-form d-flex align-center justify-center py-0">
                 <v-tabs-items v-model="loginType">
                     <v-tab-item id="oidc">
-                      <span class="text-center d-flex text-subtitle-1">Press Login to be redirected to configured OpenID Connect Provider.</span>
+                      <span class="text-subtitle-1">Press Login to be redirected to configured OpenID Connect Provider.</span>
                     </v-tab-item >
                     <v-tab-item id="token">
-                      <span class="text-center d-flex text-subtitle-1">Enter a bearer token trusted by the Kubernetes API server and press Login.</span>
+                      <span class="text-subtitle-1">Enter a bearer token trusted by the Kubernetes API server and press Login.</span>
                       <v-text-field
                         ref="token"
                         v-model="token"
