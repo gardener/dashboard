@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <template v-if="namespace && name">
-      Do you want to remove the service account <i>{{name}}</i> of namespace <i>{{namespace}}</i>
+    <template v-if="namespace && memberName">
+      Do you want to remove the service account <i>{{memberName}}</i> of namespace <i>{{namespace}}</i>
       from the project <i>{{projectName}}</i>?
     </template>
-    <template v-else-if="name">
+    <template v-else-if="memberName">
       Do you want to remove the user <i>{{memberName}}</i> from the project <i>{{projectName}}</i>?
     </template>
     <template v-else>
@@ -27,7 +27,7 @@ export default {
       type: String,
       required: true
     },
-    name: String,
+    memberName: String,
     namespace: String
   }
 }

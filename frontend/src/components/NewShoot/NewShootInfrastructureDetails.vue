@@ -642,6 +642,7 @@ export default {
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
         region: this.region,
+        networkingType: this.networkingType,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
         loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),
