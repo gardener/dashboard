@@ -108,7 +108,10 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        gardenerVersion,
+        version: expect.any(String)
+      })
     })
 
     it('should return information without version', async function () {
@@ -126,7 +129,9 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        version: expect.any(String)
+      })
     })
   })
 })
