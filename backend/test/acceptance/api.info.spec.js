@@ -109,7 +109,6 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        gardenerVersion,
         version: expect.any(String)
       })
     })
