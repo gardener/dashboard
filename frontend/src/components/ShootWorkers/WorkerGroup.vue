@@ -77,9 +77,16 @@ export default {
           })
           if (machineType.storage) {
             description.push({
-              title: 'Volume Size',
-              value: `${machineType.storage.size}`
+              title: 'Volume Type',
+              value: machineType.storage.type,
+              description: `(Class: ${machineType.storage.class})`
             })
+            if (!this.workerGroup.volume || !this.workerGroup.volume.size) {
+              description.push({
+                title: 'Volume Size',
+                value: `${machineType.storage.size}`
+              })
+            }
           }
         } else {
           description.push({
@@ -93,13 +100,19 @@ export default {
         if (volumeType) {
           description.push({
             title: 'Volume Type',
-            value: `${volumeType.name} / ${this.workerGroup.volume.size}`,
+            value: volumeType.name,
             description: `(Class: ${volumeType.class})`
           })
-        } else {
+        } else if (this.workerGroup.volume.type) {
           description.push({
             title: 'Volume Type',
             value: this.workerGroup.volume.type
+          })
+        }
+        if (this.workerGroup.volume.size) {
+          description.push({
+            title: 'Volume Size',
+            value: `${this.workerGroup.volume.size}`
           })
         }
       }
