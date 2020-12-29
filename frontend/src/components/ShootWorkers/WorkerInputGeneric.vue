@@ -133,7 +133,7 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize } from '@/utils'
+import { getValidationErrors, parseSize, machineTypeHasStorageWithTypeFixed } from '@/utils'
 import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -280,7 +280,10 @@ export default {
         return true
       }
       const machineType = this.selectedMachineType
-      if (machineType && machineType.storage && machineType.storage.type !== 'fixed') {
+      if (machineType && !machineType.storage) {
+        return true
+      }
+      if (machineType && machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
         return true
       }
       return false
@@ -401,7 +404,7 @@ export default {
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
-      if (machineType && machineType.storage && machineType.storage.size === this.volumeSizeInternal) {
+      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSizeInternal) {
         delete this.worker.volume
       } else {
         set(this.worker, 'volume.size', this.volumeSizeInternal)
@@ -455,15 +458,13 @@ export default {
       }
     },
     setVolumeDependingOnMachineType () {
-      const machineType = this.selectedMachineType
-      if (machineType && machineType.storage) {
-        if (!get(this.worker, 'volume.size') && !machineType.storage.type !== 'fixed') {
+      if (!get(this.worker, 'volume.size')) {
+        const machineType = this.selectedMachineType
+        if (machineType && machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
           this.volumeSizeInternal = machineType.storage.size
-          this.onInputVolumeSize()
         }
-      } else if (!this.volumeInCloudProfile) {
-        this.volumeSizeInternal = undefined
       }
+      this.onInputVolumeSize()
     }
   },
   mounted () {

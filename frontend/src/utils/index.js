@@ -578,9 +578,9 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const name = `worker-${shortRandomString(5)}`
   const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const machineType = get(head(machineTypesForZone), 'name')
+  const machineType = head(machineTypesForZone) || {}
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const volumeType = get(head(volumeTypesForZone), 'name')
+  const volumeType = head(volumeTypesForZone) || {}
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
   const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
@@ -591,20 +591,31 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     maximum: 2,
     maxSurge: 1,
     machine: {
-      type: machineType,
+      type: machineType.name,
       image: machineImage
     },
     zones,
     isNew: true
   }
-  if (volumeType) {
+  if (volumeType.name) {
     worker.volume = {
-      type: volumeType,
+      type: volumeType.name,
+      size: defaultVolumeSize
+    }
+  } else if (machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
+    worker.volume = {
+      size: machineType.storage.size
+    }
+  } else if (!machineType.storage) {
+    worker.volume = {
       size: defaultVolumeSize
     }
   }
-
   return worker
+}
+
+export function machineTypeHasStorageWithTypeFixed (machineType) {
+  return machineType && machineType.storage && machineType.storage.type === 'default'
 }
 
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
