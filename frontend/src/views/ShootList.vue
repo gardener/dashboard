@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="subtitle-1">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="search || items.length > 3"
+        <v-text-field v-if="shootSearch || items.length > 3"
           prepend-inner-icon="mdi-magnify"
           color="cyan darken-2"
           label="Search"
@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
           hide-details
           flat
           solo
-          v-model="search"
-          @keyup.esc="search=''"
+          v-model="shootSearch"
+          @keyup.esc="shootSearch=''"
           class="search_textfield"
         ></v-text-field>
         <table-column-selection
@@ -39,9 +39,12 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        must-sort
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :search="shootSearch"
+        :custom-filter="searchShoots"
+        must-sort
+        :custom-sort="sortShoots"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
@@ -85,9 +88,24 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
+import split from 'lodash/split'
+import includes from 'lodash/includes'
+import some from 'lodash/some'
+import padStart from 'lodash/padStart'
+import head from 'lodash/head'
+import orderBy from 'lodash/orderBy'
+import toLower from 'lodash/toLower'
 import ShootListRow from '@/components/ShootListRow'
+import semver from 'semver'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
-import { mapTableHeader } from '@/utils'
+import {
+  mapTableHeader,
+  getCreatedBy,
+  getProjectName,
+  isShootStatusHibernated,
+  isReconciliationDeactivated
+} from '@/utils'
+import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
@@ -100,7 +118,7 @@ export default {
   data () {
     return {
       floatingButton: false,
-      search: '',
+      shootSearch: '',
       dialog: null,
       options: undefined,
       cachedItems: null,
@@ -131,17 +149,11 @@ export default {
       } else {
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-      this.setShootListSortParams(value)
-    },
-    search (value) {
-      this.setShootListSearchValue(value)
     }
   },
   methods: {
     ...mapActions({
       setSelectedShootInternal: 'setSelectedShoot',
-      setShootListSortParams: 'setShootListSortParams',
-      setShootListSearchValue: 'setShootListSearchValue',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
     }),
@@ -218,6 +230,190 @@ export default {
       this.clearSelectedShootTimerID = setTimeout(() => {
         this.setSelectedShootInternal(null)
       }, 500)
+    },
+    searchShoots (value, search, item) {
+      const searchableCustomFields = filter(this.shootCustomFieldList, ['searchable', true])
+
+      const searchValue = split(search, ' ')
+      return some(searchValue, value => {
+        if (includes(this.getRawVal(item, 'name'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'infrastructure'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'seed'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'project'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'createdBy'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'purpose'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'k8sVersion'), value)) {
+          return true
+        }
+        if (includes(this.getRawVal(item, 'ticketLabels'), value)) {
+          return true
+        }
+
+        return some(searchableCustomFields, ({ key }) => includes(this.getRawVal(item, key), value))
+      })
+    },
+    sortShoots (items, sortByArr, sortDescArr) {
+      const sortBy = head(sortByArr)
+      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
+      if (sortBy) {
+        const sortbyNameAsc = (a, b) => {
+          if (this.getRawVal(a, 'name') > this.getRawVal(b, 'name')) {
+            return 1
+          } else if (this.getRawVal(a, 'name') < this.getRawVal(b, 'name')) {
+            return -1
+          }
+          return 0
+        }
+        const inverse = sortOrder === 'desc' ? -1 : 1
+        switch (sortBy) {
+          case 'k8sVersion': {
+            items.sort((a, b) => {
+              const versionA = this.getRawVal(a, sortBy)
+              const versionB = this.getRawVal(b, sortBy)
+
+              if (semver.gt(versionA, versionB)) {
+                return 1 * inverse
+              } else if (semver.lt(versionA, versionB)) {
+                return -1 * inverse
+              } else {
+                return sortbyNameAsc(a, b)
+              }
+            })
+            break
+          }
+          case 'readiness': {
+            items.sort((a, b) => {
+              const readinessA = this.getSortVal(a, sortBy)
+              const readinessB = this.getSortVal(b, sortBy)
+
+              if (readinessA === readinessB) {
+                return sortbyNameAsc(a, b)
+              } else if (!readinessA) {
+                return 1
+              } else if (!readinessB) {
+                return -1
+              } else if (readinessA > readinessB) {
+                return 1 * inverse
+              } else {
+                return -1 * inverse
+              }
+            })
+            break
+          }
+          default: {
+            items = orderBy(items, [item => this.getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          }
+        }
+      }
+      return items
+    },
+    getRawVal (item, column) {
+      const metadata = item.metadata
+      const spec = item.spec
+      switch (column) {
+        case 'purpose':
+          return get(spec, 'purpose')
+        case 'lastOperation':
+          return get(item, 'status.lastOperation')
+        case 'createdAt':
+          return metadata.creationTimestamp
+        case 'createdBy':
+          return getCreatedBy(metadata)
+        case 'project':
+          return getProjectName(metadata)
+        case 'k8sVersion':
+          return get(spec, 'kubernetes.version')
+        case 'infrastructure':
+          return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
+        case 'seed':
+          return get(item, 'spec.seedName')
+        case 'ticketLabels': {
+          const labels = this.ticketsLabels(metadata)
+          return join(map(labels, 'name'), ' ')
+        }
+        default: {
+          if (startsWith(column, 'Z_')) {
+            const path = get(this.shootCustomFields, [column, 'path'])
+            return get(item, path)
+          }
+          return metadata[column]
+        }
+      }
+    },
+    getSortVal (item, sortBy) {
+      const value = this.getRawVal(item, sortBy)
+      const status = item.status
+      switch (sortBy) {
+        case 'purpose':
+          switch (value) {
+            case 'infrastructure':
+              return 0
+            case 'production':
+              return 1
+            case 'development':
+              return 2
+            case 'evaluation':
+              return 3
+            default:
+              return 4
+          }
+        case 'lastOperation': {
+          const operation = value || {}
+          const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+          const lastErrors = get(item, 'status.lastErrors', [])
+          const isError = operation.state === 'Failed' || lastErrors.length
+          const allErrorCodes = errorCodesFromArray(lastErrors)
+          const userError = isUserError(allErrorCodes)
+          const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
+
+          if (ignoredFromReconciliation) {
+            if (isError) {
+              return 400
+            } else {
+              return 450
+            }
+          } else if (userError && !inProgress) {
+            return 200
+          } else if (userError && inProgress) {
+            const progress = padStart(operation.progress, 2, '0')
+            return `3${progress}`
+          } else if (isError && !inProgress) {
+            return 0
+          } else if (isError && inProgress) {
+            const progress = padStart(operation.progress, 2, '0')
+            return `1${progress}`
+          } else if (inProgress) {
+            const progress = padStart(operation.progress, 2, '0')
+            return `6${progress}`
+          } else if (isShootStatusHibernated(status)) {
+            return 500
+          }
+          return 700
+        }
+        case 'readiness': {
+          const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
+          const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
+          return lastErrorTransitionTime
+        }
+        case 'ticket': {
+          const { namespace, name } = item.metadata
+          return this.latestUpdatedTicketByNameAndNamespace({ namespace, name })
+        }
+        default:
+          return toLower(value)
+      }
     }
   },
   computed: {
@@ -234,7 +430,10 @@ export default {
       onlyShootsWithIssues: 'onlyShootsWithIssues',
       projectFromProjectList: 'projectFromProjectList',
       projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList'
+      shootCustomFieldList: 'shootCustomFieldList',
+      shootCustomFields: 'shootCustomFields',
+      ticketsLabels: 'ticketsLabels',
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace'
     }),
     ...mapState([
       'shootsLoading',
@@ -547,13 +746,13 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.search = null
+    this.shootSearch = null
     this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
-    this.search = null
+    this.shootSearch = null
     next()
   }
 }
