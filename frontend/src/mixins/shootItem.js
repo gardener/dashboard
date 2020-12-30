@@ -207,7 +207,7 @@ export const shootItem = {
       if (!this.isShootActionsDisabledForPurpose) {
         return tooltip
       }
-      return 'Actions disabled for cluster purpose infrastructure'
+      return 'Actions disabled for cluster with purpose infrastructure'
     }
   }
 }
