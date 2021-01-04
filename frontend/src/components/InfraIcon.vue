@@ -7,12 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex align-center" :class="contentClass">
     <infra-icon-aws v-if="value==='aws'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-aws>
-    <infra-icon-azure v-if="value==='azure'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-azure>
-    <infra-icon-gcp v-if="value==='gcp'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-gcp>
-    <infra-icon-openstack v-if="value==='openstack'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-openstack>
-    <infra-icon-alicloud v-if="value==='alicloud'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-alicloud>
-    <infra-icon-metal v-if="value==='metal'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-metal>
-    <infra-icon-vsphere v-if="value==='vsphere'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-vsphere>
+    <infra-icon-azure v-else-if="value==='azure'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-azure>
+    <infra-icon-gcp v-else-if="value==='gcp'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-gcp>
+    <infra-icon-openstack v-else-if="value==='openstack'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-openstack>
+    <infra-icon-alicloud v-else-if="value==='alicloud'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-alicloud>
+    <infra-icon-metal v-else-if="value==='metal'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-metal>
+    <infra-icon-vsphere v-else-if="value==='vsphere'" :width="size" :height="size" :iconColorCode="iconColorCode"></infra-icon-vsphere>
+    <v-icon v-else color="iconColor" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </div>
 </template>
 
