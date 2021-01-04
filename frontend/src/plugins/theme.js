@@ -9,20 +9,20 @@ import colors from 'vuetify/lib/util/colors'
 const theme = {
   themes: {
     light: {
-      primary: colors.lightBlue.base,
+      primary: '#009F76',
       secondary: colors.grey.darken3,
-      accent: colors.lightBlue.darken1,
+      accent: '#009F76',
       accentTitle: colors.shades.white,
-      anchor: colors.lightBlue.base,
-      actionButton: colors.lightBlue.darken1
+      anchor: '#439246',
+      actionButton: '#439246'
     },
     dark: {
-      primary: colors.lightBlue.base,
+      primary: '#009F76',
       secondary: colors.grey.darken3,
-      accent: colors.lightBlue.darken2,
+      accent: '#009F76',
       accentTitle: colors.shades.white,
-      anchor: colors.lightBlue.base,
-      actionButton: colors.lightBlue.base,
+      anchor: '#439246',
+      actionButton: '#439246',
       error: colors.red.darken4,
       warning: colors.orange.darken4
     }
