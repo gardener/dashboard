@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card :class="cardClass">
-      <v-card-title class="accent">
-        <v-icon large class="accentTitle--text">mdi-account-plus</v-icon>
-        <span class="headline ml-5 accentTitle--text">{{ title}}</span>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
+        <span class="headline ml-5 toolbar-title--text">{{ title}}</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">

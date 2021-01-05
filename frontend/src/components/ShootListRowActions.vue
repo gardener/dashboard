@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:activator="{ on: menu }">
       <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
-          <v-btn v-on="{ ...menu, ...tooltip}" icon class="actionButton--text">
+          <v-btn v-on="{ ...menu, ...tooltip}" icon class="action-button--text">
             <v-icon class="cursor-pointer">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>

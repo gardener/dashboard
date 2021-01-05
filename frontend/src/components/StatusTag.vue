@@ -193,7 +193,7 @@ export default {
         return 'grey'
       }
       if (this.isProgressing && this.isAdmin) {
-        return 'blue darken-2'
+        return 'info'
       }
       return 'primary'
     },

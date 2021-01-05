@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 mt-4 ticket-toolbar accent accentTitle--text">
+    <v-card-title class="subtitle-1 mt-4 ticket-toolbar toolbar-background toolbar-title--text">
       <div class="d-flex flex-wrap align-center">
         <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
         <div v-if="labels.length" class="labels"><ticket-label v-for="label in labels" :key="label.id" :label="label"></ticket-label></div>

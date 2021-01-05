@@ -6,14 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-app >
-    <div class="login-background secondary"></div>
+    <div class="login-background main-background"></div>
     <v-main>
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4" lg="4">
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
-                <div class="layout column align-center secondary darken-1 pa-3 pt-6">
+                <div class="layout column align-center main-background darken-1 pa-3 pt-6">
                   <img src="../assets/logo.svg" alt="Login to Gardener" width="180" height="180">
                   <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
                 </div>

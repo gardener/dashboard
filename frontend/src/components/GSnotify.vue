@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <vue-snotify :class="{'snotify-dark' : $vuetify.theme.dark}"></vue-snotify>
+  <vue-snotify :class="$vuetify.theme.dark ? 'snotify-dark' : 'snotify-light'"></vue-snotify>
 </template>
 
 <script>
@@ -95,13 +95,12 @@ export default {
 }
 </script>
 <style lang="scss">
-  @import '~vuetify/src/styles/styles.sass';
   @import "~vue-snotify/styles/material.scss";
 
-  $error-color: map-get($red, 'darken-1');
-  $warning-color: map-get($orange, 'darken-1');
-  $success-color: map-get($green, 'darken-1');
-  $info-color: map-get($blue, 'darken-1');
+  $error-color: var(--v-error-base);
+  $warning-color: var(--v-warning-base);
+  $success-color: var(--v-success-base);
+  $info-color: var(--v-info-base);
 
   .snotify-rightTop {
     top: 75px;
@@ -110,6 +109,7 @@ export default {
   .snotify {
     width: 400px;
   }
+
   .snotify-dark {
     .snotify-error {
       background-color: rgba(0, 0, 0, .9) !important;
@@ -134,6 +134,21 @@ export default {
       .snotifyToast__body {
         color: $info-color;
       }
+    }
+  }
+
+  .snotify-light {
+    .snotify-error {
+      background-color: $error-color !important;
+    }
+    .snotify-warning {
+      background-color: $warning-color !important;
+    }
+    .snotify-success {
+      background-color: $success-color !important;
+    }
+    .snotify-info {
+      background-color: $info-color !important;
     }
   }
 

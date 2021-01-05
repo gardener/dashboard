@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
-            <v-btn icon :to=to :disabled="disabled" color="actionButton">
+            <v-btn icon :to=to :disabled="disabled" color="action-button">
               <v-icon>mdi-console-line</v-icon>
             </v-btn>
           </div>

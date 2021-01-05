@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dense class="accent accentTitle--text">
+          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list dense>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dense class="accent accentTitle--text">
+          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="onDownload" color="actionButton">
+                      <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
                         <v-icon>mdi-download</v-icon>
                       </v-btn>
                     </template>
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel" color="actionButton">
+                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel" color="action-button">
                         <v-icon>{{expansionPanelIcon}}</v-icon>
                       </v-btn>
                     </template>

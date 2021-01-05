@@ -95,7 +95,7 @@ export default {
       if (this.color) {
         return this.color
       }
-      return 'actionButton'
+      return 'action-button'
     }
   },
   methods: {

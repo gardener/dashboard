@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <copy-btn color="actionButton" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
+                    <copy-btn color="action-button" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        color="actionButton"
+                        color="action-button"
                         :value="description"
                         :save="updateDescription"
                       />
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
-                        color="actionButton"
+                        color="action-button"
                         :value="owner"
                         :items="userList"
                         :rules="[rules.owner]"
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        color="actionButton"
+                        color="action-button"
                         :value="purpose"
                         :save="updatePurpose"
                       />
@@ -244,7 +244,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-text
                         :read-only="!canPatchProject"
-                        color="actionButton"
+                        color="action-button"
                         :value="costObject"
                         :rules="[rules.costObject]"
                         :save="updateCostObject"
@@ -337,7 +337,7 @@ export default {
   data () {
     return {
       color: 'primary',
-      toolbarColor: 'accent accentTitle--text',
+      toolbarColor: 'toolbar-background toolbar-title--text',
       edit: false,
       editOwner: false,
       ownerMessages: [],

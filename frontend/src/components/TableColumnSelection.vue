@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip open-delay="500" top>
         <template v-slot:activator="{ on: tooltip }">
           <v-btn v-on="{ ...menu, ...tooltip}" icon>
-            <v-icon class="cursor-pointer" color="accentTitle">mdi-dots-vertical</v-icon>
+            <v-icon class="cursor-pointer" color="toolbar-title">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
         Table Options

@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="actionButton" icon @click.native.stop="onDownload" :disabled="orphaned">
+              <v-btn v-on="on" color="action-button" icon @click.native.stop="onDownload" :disabled="orphaned">
                 <v-icon>mdi-download</v-icon>
               </v-btn>
             </template>
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="actionButton"  icon @click="onKubeconfig" :disabled="orphaned">
+              <v-btn v-on="on" color="action-button"  icon @click="onKubeconfig" :disabled="orphaned">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
             </template>
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="!foreign && canDeleteSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="actionButton"  icon @click="onRotateSecret" :disabled="orphaned">
+              <v-btn v-on="on" color="action-button"  icon @click="onRotateSecret" :disabled="orphaned">
                 <v-icon>mdi-refresh</v-icon>
               </v-btn>
             </template>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="canManageServiceAccountMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="actionButton"  icon @click.native.stop="onEdit">
+              <v-btn v-on="on" color="action-button"  icon @click.native.stop="onEdit">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>

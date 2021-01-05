@@ -133,7 +133,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
 export default {
-  name: 'toolbar',
+  name: 'toolbar-background',
   components: {
     Breadcrumb
   },

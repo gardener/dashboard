@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog v-model="visible" max-width="800">
     <v-card>
       <v-card-title class="error">
-        <v-icon x-large class="accentTitle--text icon">mdi-alert-outline</v-icon>
-        <span class="headline ml-5 accentTitle--text">Confirm Delete</span>
+        <v-icon x-large class="toolbar-title--text icon">mdi-alert-outline</v-icon>
+        <span class="headline ml-5 toolbar-title--text">Confirm Delete</span>
       </v-card-title>
       <v-card-text>
         <v-container fluid>

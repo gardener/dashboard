@@ -14,12 +14,12 @@ SPDX-License-Identifier: Apache-2.0
     >
       <div class="teaser">
         <div class="content center secondary darken-2">
-          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right accentTitle--text ma-2">
+          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right main-navigation-title--text ma-2">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
             <img src="../assets/logo.svg" class="logo">
-            <h1 class="accentTitle--text">Gardener <span class="version">{{version}}</span></h1>
+            <h1 class="main-navigation-title--text">Gardener <span class="version">{{version}}</span></h1>
             <h2 class="primary--text">Universal Kubernetes at Scale</h2>
           </a>
         </div>
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
               color="secondary darken-1"
               v-on="on"
               block
-              class="project-selector elevation-4 accentTitle--text"
+              class="project-selector elevation-4 main-navigation-title--text"
               @keydown.down="highlightProjectWithKeys('down')"
               @keydown.up="highlightProjectWithKeys('up')"
               @keyup.enter="navigateToHighlightedProject"
@@ -137,10 +137,10 @@ SPDX-License-Identifier: Apache-2.0
           <template v-for="(route, index) in routes">
             <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" activeClass="active-item">
               <v-list-item-action>
-                <v-icon small color="accentTitle">{{route.meta.menu.icon}}</v-icon>
+                <v-icon small color="main-navigation-title">{{route.meta.menu.icon}}</v-icon>
               </v-list-item-action>
               <v-list-item-content>
-                <v-list-item-title class="subtitle-1 accentTitle--text" >{{route.meta.menu.title}}</v-list-item-title>
+                <v-list-item-title class="subtitle-1 main-navigation-title--text" >{{route.meta.menu.title}}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </template>

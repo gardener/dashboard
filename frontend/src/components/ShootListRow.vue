@@ -117,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top v-if="canGetSecrets">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn small icon class="actionButton--text" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                <v-btn small icon class="action-button--text" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
                   <v-icon size="22">mdi-key</v-icon>
                 </v-btn>
               </div>

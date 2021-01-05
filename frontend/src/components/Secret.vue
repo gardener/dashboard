@@ -8,14 +8,14 @@ SPDX-License-Identifier: Apache-2.0
   <v-card :class="cardClass">
 
     <!-- Header -->
-    <v-toolbar color="accent accentTitle--text">
-      <infra-icon v-model="icon" iconColor="accentTitle" :size="32"></infra-icon>
+    <v-toolbar color="toolbar-background toolbar-title--text">
+      <infra-icon v-model="icon" iconColor="toolbar-title" :size="32"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="accentTitle" v-if="!disabled" icon @click.native.stop="onAdd()">
+      <v-btn color="toolbar-title" v-if="!disabled" icon @click.native.stop="onAdd()">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
-      <v-btn color="accentTitle" v-if="!disabled" icon @click.native.stop="onToogleHelp()">
+      <v-btn color="toolbar-title" v-if="!disabled" icon @click.native.stop="onToogleHelp()">
         <v-icon>mdi-help-circle-outline</v-icon>
       </v-btn>
     </v-toolbar>

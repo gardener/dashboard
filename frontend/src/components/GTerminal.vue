@@ -144,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small text class="actionButton" @click="retry()">
+                <v-btn small text class="action-button" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>

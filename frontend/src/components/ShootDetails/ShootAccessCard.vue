@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-action class="mx-0">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.native.stop="showToken = !showToken" color="actionButton">
+              <v-btn v-on="on" icon @click.native.stop="showToken = !showToken" color="action-button">
                 <v-icon>{{visibilityIcon}}</v-icon>
               </v-btn>
             </template>
@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onDownload" color="actionButton">
+            <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </template>
@@ -117,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig" color="actionButton">
+            <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig" color="action-button">
               <v-icon>{{visibilityIconKubeconfig}}</v-icon>
             </v-btn>
           </template>

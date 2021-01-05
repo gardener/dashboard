@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
             @click="showUpdateDialog"
             icon
             :disabled="!canUpdate"
-            color="actionButton"
+            color="action-button"
           >
             <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>

@@ -7,13 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid class="shootlist">
     <v-card>
-      <v-toolbar flat height="72" color="accent">
-        <icon-base width="44" height="60" viewBox="0 0 298 403" class="mr-2" iconColor="accentTitle">
+      <v-toolbar flat height="72" color="toolbar-background">
+        <icon-base width="44" height="60" viewBox="0 0 298 403" class="mr-2" iconColor="toolbar-title">
           <certified-kubernetes></certified-kubernetes>
         </icon-base>
         <v-toolbar-title class="white--text">
-          <div class="headline accentTitle--text">Kubernetes Clusters</div>
-          <div class="subtitle-1 accentTitle--text">{{headlineSubtitle}}</div>
+          <div class="headline toolbar-title--text">Kubernetes Clusters</div>
+          <div class="subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           class="mr-3"
         ></v-text-field>
         <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
-          <v-icon color="accentTitle">mdi-plus</v-icon>
+          <v-icon color="toolbar-title">mdi-plus</v-icon>
         </v-btn>
         <table-column-selection
           :headers="selectableHeaders"
@@ -60,11 +60,11 @@ SPDX-License-Identifier: Apache-2.0
 
       <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
-          <v-card-title class="accent accentTitle--text">
-            <div class="headline">Cluster Access <code class="accent lighten-1 accentTitle--text">{{currentName}}</code></div>
+          <v-card-title class="toolbar-background toolbar-title--text">
+            <div class="headline">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon color="accentTitle">mdi-close</v-icon>
+              <v-icon color="toolbar-title">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
           <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>

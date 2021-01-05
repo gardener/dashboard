@@ -68,7 +68,7 @@ export default {
   computed: {
     codeBlockClass () {
       if (this.$vuetify.theme.dark) {
-        return 'grey darken-4 code-block-dark '
+        return 'grey darken-4 code-block-dark'
       }
       return 'grey lighten-5'
     }

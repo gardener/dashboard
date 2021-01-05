@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-action class="mx-0">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword" color="actionButton">
+              <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword" color="action-button">
                 <v-icon>{{visibilityIcon}}</v-icon>
               </v-btn>
             </template>

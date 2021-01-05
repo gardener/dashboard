@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card v-else>
-      <v-toolbar flat dense color="accent accentTitle--text">
+      <v-toolbar flat dense color="toolbar-background toolbar-title--text">
         <v-toolbar-title class="subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">

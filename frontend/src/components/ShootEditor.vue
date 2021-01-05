@@ -132,7 +132,7 @@ import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/dracula.css'
+import 'codemirror/theme/seti.css'
 
 // lodash
 import get from 'lodash/get'
@@ -332,7 +332,7 @@ export default {
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
         extraKeys,
-        theme: this.$vuetify.theme.dark ? 'dracula' : 'default'
+        theme: this.$vuetify.theme.dark ? 'seti' : 'default'
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')

@@ -77,7 +77,7 @@ export default {
     },
     confirmColor: {
       type: String,
-      default: 'red'
+      default: 'error'
     },
     defaultColor: {
       type: String
@@ -179,11 +179,11 @@ export default {
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
         case 'error':
-          return 'error accentTitle--text'
+          return 'error toolbar-title--text'
         case 'warning':
-          return 'warning accentTitle--text'
+          return 'warning toolbar-title--text'
         default:
-          return 'accent accentTitle--text'
+          return 'toolbar-background toolbar-title--text'
       }
     },
     textColorClassForString (textColorClass) {
