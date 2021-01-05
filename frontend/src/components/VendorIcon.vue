@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <span>
     <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
     <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else :class="contentClass" style="font-size:1.5em">mdi-blur-radial</v-icon>
+    <v-icon v-else :class="contentClass" class="cyan--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </span>
 </template>
 
@@ -34,8 +34,20 @@ export default {
   computed: {
     iconSrc () {
       switch (this.value) {
+        case 'azure':
+          return require('@/assets/azure.svg')
+        case 'aws':
+          return require('@/assets/aws.svg')
+        case 'gcp':
+          return require('@/assets/gcp.svg')
+        case 'openstack':
+          return require('@/assets/openstack.svg')
+        case 'alicloud':
+          return require('@/assets/alicloud.svg')
         case 'digital-ocean':
           return require('@/assets/digital-ocean.svg')
+        case 'vsphere':
+          return require('@/assets/vsphere.svg')
         case 'china-telecom':
           return require('@/assets/china-telecom.svg')
         case 'coreos':
@@ -46,6 +58,8 @@ export default {
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
+        case 'metal':
+          return require('@/assets/metal.svg')
         case 'gardenlinux':
           return require('@/assets/logo.svg')
       }

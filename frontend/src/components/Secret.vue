@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <!-- Header -->
     <v-toolbar color="toolbar-background toolbar-title--text">
-      <infra-icon v-model="icon" iconColor="toolbar-title" :size="32"></infra-icon>
+      <infra-icon v-model="icon" :size="32"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn color="toolbar-title" v-if="!disabled" icon @click.native.stop="onAdd()">
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
-import InfraIcon from '@/components/InfraIcon'
+import InfraIcon from '@/components/VendorIcon'
 import { isOwnSecret } from '@/utils'
 
 export default {

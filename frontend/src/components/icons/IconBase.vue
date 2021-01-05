@@ -24,8 +24,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import get from 'lodash/get'
-
 export default {
   props: {
     iconName: {
@@ -52,7 +50,7 @@ export default {
   computed: {
     iconColorCode () {
       const iconColor = this.iconColor
-      return get(this, ['$vuetify', 'theme', 'currentTheme', iconColor], iconColor)
+      return this.$vuetify.theme.currentTheme[iconColor]
     }
   }
 }

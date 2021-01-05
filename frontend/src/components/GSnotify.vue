@@ -101,6 +101,7 @@ export default {
   $warning-color: var(--v-warning-base);
   $success-color: var(--v-success-base);
   $info-color: var(--v-info-base);
+  $dark-background: rgba(0, 0, 0, .9);
 
   .snotify-rightTop {
     top: 75px;
@@ -112,25 +113,25 @@ export default {
 
   .snotify-dark {
     .snotify-error {
-      background-color: rgba(0, 0, 0, .9) !important;
+      background-color: $dark-background !important;
       .snotifyToast__body {
         color: $error-color;
       }
     }
     .snotify-warning {
-      background-color: rgba(0, 0, 0, .9) !important;
+      background-color: $dark-background !important;
       .snotifyToast__body {
         color: $warning-color;
       }
     }
     .snotify-success {
-      background-color: rgba(0, 0, 0, .9) !important;
+      background-color: $dark-background !important;
       .snotifyToast__body {
         color: $success-color;
       }
     }
     .snotify-info {
-      background-color: rgba(0, 0, 0, .9) !important;
+      background-color: $dark-background !important;
       .snotifyToast__body {
         color: $info-color;
       }

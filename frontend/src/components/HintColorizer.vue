@@ -41,7 +41,7 @@ export default {
         return
       }
 
-      const colorCode = get(this, ['$vuetify', 'theme', 'currentTheme', hintColor], hintColor)
+      const colorCode = this.$vuetify.theme.currentTheme[hintColor]
       if (!this.isSelectErrorColor && hintColor !== 'default') {
         hintElement.style = `color: ${colorCode}`
       } else {

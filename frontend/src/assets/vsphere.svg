@@ -1,29 +1,13 @@
-<!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
-
-SPDX-License-Identifier: Apache-2.0
--->
-
-<template>
-  <svg xmlns="http://www.w3.org/2000/svg"
-    :width="width"
-    :height="height"
-    viewBox="0 0 110 114"
-    :aria-labelledby="iconName"
-    role="presentation"
-  >
-    <title
-    :id="iconName"
-    lang="en"
-  >{{ iconName }} icon</title>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="110px" height="114px" viewBox="0 0 110 114" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <linearGradient x1="0%" y1="50%" x2="100%" y2="50%" id="linearGradient-1">
-            <stop :stop-color="color1" offset="0%"></stop>
-            <stop :stop-color="color2" offset="100%"></stop>
+            <stop stop-color="#FFF263" offset="0%"></stop>
+            <stop stop-color="#FEDC5E" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="0%" y1="50%" x2="100%" y2="50%" id="linearGradient-2">
-            <stop :stop-color="color3" offset="0%"></stop>
-            <stop :stop-color="color4" offset="100%"></stop>
+            <stop stop-color="#9EE96B" offset="0%"></stop>
+            <stop stop-color="#6EAF56" offset="100%"></stop>
         </linearGradient>
     </defs>
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -32,41 +16,4 @@ SPDX-License-Identifier: Apache-2.0
             <path d="M96.469,0 L40.295,0 C32.978,0 27.045,6.233 27.045,13.922 L27.045,28.704 L13.25,28.704 C5.933,28.704 0,34.937 0,42.626 L0,99.588 C0,107.277 5.933,113.51 13.25,113.51 L69.422,113.51 C76.739,113.51 82.671,107.277 82.671,99.588 L82.671,84.806 L96.468,84.806 C103.785,84.806 109.717,78.573 109.717,70.884 L109.717,13.922 C109.717,6.233 103.785,0 96.467,0 L96.469,0 Z M95.428,61.025 C95.5465696,65.9395425 91.6623712,70.0215307 86.748,70.147 L68.382,70.147 L68.382,89.73 C68.5000086,94.6441562 64.6159713,98.7255276 59.702,98.851 L22.969,98.851 C18.0550287,98.7255276 14.1709914,94.6441562 14.289,89.73 L14.289,52.485 C14.1704304,47.5704575 18.0546288,43.4884693 22.969,43.363 L41.335,43.363 L41.335,23.78 C41.2169914,18.8658438 45.1010287,14.7844724 50.015,14.659 L86.746,14.659 C91.6599713,14.7844724 95.5440086,18.8658438 95.426,23.78 L95.428,61.025 Z" id="Shape" fill="url(#linearGradient-2)"></path>
         </g>
     </g>
-  </svg>
-</template>
-
-<script>
-
-export default {
-  data () {
-    return {
-      iconName: 'openstack'
-    }
-  },
-  props: {
-    width: {
-      type: Number
-    },
-    height: {
-      type: Number
-    },
-    iconColorCode: {
-      type: String
-    }
-  },
-  computed: {
-    color1 () {
-      return this.iconColorCode || '#FFF263'
-    },
-    color2 () {
-      return this.iconColorCode || '#FEDC5E'
-    },
-    color3 () {
-      return this.iconColorCode || '#9EE96B'
-    },
-    color4 () {
-      return this.iconColorCode || '#6EAF56'
-    }
-  }
-}
-</script>
+</svg>
