@@ -195,7 +195,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'darkMode'
     ]),
     ...mapGetters([
       'canPatchShoots'
@@ -332,7 +333,7 @@ export default {
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
         extraKeys,
-        theme: this.$vuetify.theme.dark ? 'seti' : 'default'
+        theme: this.darkMode ? 'seti' : 'default'
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -464,6 +465,9 @@ export default {
           }
         }
       }
+    },
+    darkMode (value) {
+      this.$instance.setOption('theme', value ? 'seti' : 'default')
     }
   },
   beforeDestroy () {
