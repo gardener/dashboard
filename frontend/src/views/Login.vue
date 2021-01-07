@@ -78,6 +78,7 @@ import { mapState, mapActions } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import { setDelayedInputFocus } from '@/utils'
+import { LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH } from '@/utils/auth'
 
 export default {
   data () {
@@ -94,7 +95,11 @@ export default {
       'user'
     ]),
     redirectPath () {
-      return get(this.$route.query, 'redirectPath', '/')
+      let redirectPath = get(this.$route.query, 'redirectPath', '/')
+      if (redirectPath === '/' && this.$localStorage.getItem(LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH) !== null) {
+        redirectPath = this.$localStorage.getItem(LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH)
+      }
+      return redirectPath
     },
     primaryLoginType () {
       return this.cfg.primaryLoginType || 'oidc'

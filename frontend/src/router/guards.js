@@ -7,6 +7,8 @@
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import { getPrivileges, getConfiguration } from '@/utils/api'
+import { LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH } from '@/utils/auth'
+import Vue from 'vue'
 
 export default function createGuards (store, userManager, localStorage) {
   return {
@@ -53,8 +55,8 @@ function ensureConfigurationLoaded (store) {
 
 function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
   return async (to, from, next) => {
+    const { meta = {}, path } = to
     try {
-      const { meta = {}, path } = to
       if (meta.public) {
         return next()
       }
@@ -76,6 +78,9 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
     } catch (err) {
       const { response: { status, data = {} } = {} } = err
       if (status === 401) {
+        if (path !== '/') {
+          Vue.localStorage.setItem(LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH, path)
+        }
         return userManager.signout(new Error(data.message))
       }
       next(err)

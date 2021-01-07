@@ -9,6 +9,7 @@ import decode from 'jwt-decode'
 import { createTokenReview } from './api'
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+export const LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH = 'auth/login/redirection-path'
 
 export class UserManager {
   constructor () {
@@ -34,6 +35,8 @@ export class UserManager {
     let path = '/auth/logout'
     if (err) {
       path += `?error[message]=${encodeURIComponent(err.message)}`
+    } else if (Vue.localStorage.getItem(LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH) !== null) {
+      Vue.localStorage.removeItem(LOCAL_STORE_AUTH_LOGIN_REDIRECTION_PATH)
     }
     window.location = this.origin + path
   }
