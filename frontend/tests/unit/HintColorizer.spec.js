@@ -26,7 +26,7 @@ describe('HintColorizer.vue', () => {
   }
 
   it('should be able to apply (theme-) color', async () => {
-    const template = '<hint-colorizer hint-color="orange"><v-select hint="test" persistent-hint></v-select></hint-colorizer>'
+    const template = '<hint-colorizer hint-color="warning"><v-select hint="test" persistent-hint></v-select></hint-colorizer>'
     const wrapper = mount({
       template,
       vuetify,
@@ -34,12 +34,14 @@ describe('HintColorizer.vue', () => {
     })
 
     const colorizerHintElement = findHintElement(wrapper)
-    expect(colorizerHintElement.element.style.color).toBe('orange')
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
+    const color = colorizerHintElement.element.style.color
 
     wrapper.findComponent(HintColorizer).setProps({ hintColor: 'primary' })
 
     await Vue.nextTick()
-    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that primarty has been replaced by color mvalue from theme
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
+    expect(color).not.toBe(colorizerHintElement.element.style.color) // check that color value has been changed
 
     wrapper.findComponent(HintColorizer).setProps({ hintColor: 'default' })
 
@@ -53,12 +55,12 @@ describe('HintColorizer.vue', () => {
         errorMessage: undefined
       }
     }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage" hint="test" persistent-hint></v-text-field></hint-colorizer>'
+    const template = '<hint-colorizer hintColor="warning" ref="hintColorizer"><v-text-field :error-messages="errorMessage" hint="test" persistent-hint></v-text-field></hint-colorizer>'
     let wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
     let colorizerHintElement = findHintElement(wrapper)
-    expect(colorizerHintElement.element.style.color).toBe('orange')
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
 
     data = () => {
       return {
@@ -69,7 +71,7 @@ describe('HintColorizer.vue', () => {
       vuetify
     })
     colorizerHintElement = findHintElement(wrapper)
-    expect(colorizerHintElement.element.style.color).not.toBe('orange')
+    expect(colorizerHintElement.element.style.color).toBe('') // check that color has not been set
   })
 
   it('should not overwrite error color for v-select', async () => {
@@ -78,12 +80,12 @@ describe('HintColorizer.vue', () => {
         errorMessage: undefined
       }
     }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage" hint="test" persistent-hint></v-select></hint-colorizer>'
+    const template = '<hint-colorizer hintColor="warning" ref="hintColorizer"><v-select :error-messages="errorMessage" hint="test" persistent-hint></v-select></hint-colorizer>'
     let wrapper = mount({ template, data, components: { HintColorizer } }, {
       vuetify
     })
     let colorizerHintElement = findHintElement(wrapper)
-    expect(colorizerHintElement.element.style.color).toBe('orange')
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
 
     data = () => {
       return {
@@ -94,7 +96,7 @@ describe('HintColorizer.vue', () => {
       vuetify
     })
     colorizerHintElement = findHintElement(wrapper)
-    expect(colorizerHintElement.element.style.color).not.toBe('orange')
+    expect(colorizerHintElement.element.style.color).toBe('') // check that color has not been set
   })
 })
 
