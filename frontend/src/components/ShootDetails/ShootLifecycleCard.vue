@@ -17,10 +17,10 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex pt-1">
-            <hibernation-constraint-warning
-              :isHibernationPossible="isHibernationPossible"
-              :hibernationPossibleMessage="hibernationPossibleMessage"
-              :hasHibernationSchedules="shootHibernationSchedules.length"
+            <constraint-warning
+              :value="!isHibernationPossible && shootHibernationSchedules.length"
+              constraintType="hibernation"
+              :constraintMessage="hibernationPossibleMessage"
               icon
               small />
             <v-icon
@@ -54,9 +54,10 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
           <v-list-item-subtitle class="d-flex pt-1">
-            <maintenance-constraint-warning
-              :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
-              :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+            <constraint-warning
+              :value="!isMaintenancePreconditionSatisfied"
+              constraintType="maintenance"
+              :constraintMessage="maintenancePreconditionSatisfiedMessage"
               icon
               small />
             {{maintenanceDescription}}
@@ -129,8 +130,7 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
-import HibernationConstraintWarning from '@/components/ShootHibernation/HibernationConstraintWarning'
-import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 
@@ -145,8 +145,7 @@ export default {
     DeleteCluster,
     ReconcileStart,
     RotateKubeconfigStart,
-    HibernationConstraintWarning,
-    MaintenanceConstraintWarning
+    ConstraintWarning
   },
   props: {
     shootItem: {

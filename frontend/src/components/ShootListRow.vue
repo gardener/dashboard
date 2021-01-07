@@ -23,14 +23,15 @@ SPDX-License-Identifier: Apache-2.0
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
               <self-termination-warning :expirationTimestamp="shootExpirationTimestamp" />
               <version-expiration-warning :shootItem="shootItem" />
-              <maintenance-constraint-warning
-                :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
-                :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+              <constraint-warning
+                :value="!isMaintenancePreconditionSatisfied"
+                constraintType="maintenance"
+                :constraintMessage="maintenancePreconditionSatisfiedMessage"
                 icon />
-              <hibernation-constraint-warning
-                :isHibernationPossible="isHibernationPossible"
-                :hibernationPossibleMessage="hibernationPossibleMessage"
-                :hasHibernationSchedules="shootHibernationSchedules.length"
+              <constraint-warning
+                :value="!isHibernationPossible && shootHibernationSchedules.length"
+                constraintType="hibernation"
+                :constraintMessage="hibernationPossibleMessage"
                 icon />
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
@@ -161,8 +162,7 @@ import HibernationScheduleWarning from '@/components/ShootHibernation/Hibernatio
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
-import HibernationConstraintWarning from '@/components/ShootHibernation/HibernationConstraintWarning'
-import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import {
   isTypeDelete,
@@ -189,8 +189,7 @@ export default {
     Vendor,
     VersionExpirationWarning,
     ShootListRowActions,
-    HibernationConstraintWarning,
-    MaintenanceConstraintWarning
+    ConstraintWarning
   },
   props: {
     shootItem: {

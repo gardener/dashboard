@@ -22,9 +22,10 @@ SPDX-License-Identifier: Apache-2.0
         :selectable="false"
         ref="maintenanceComponents"
       ></maintenance-components>
-      <maintenance-constraint-warning
-        :isMaintenancePreconditionSatisfied="isMaintenancePreconditionSatisfied"
-        :maintenancePreconditionSatisfiedMessage="maintenancePreconditionSatisfiedMessage"
+      <constraint-warning
+        :value="!isMaintenancePreconditionSatisfied"
+        constraintType="maintenance"
+        :constraintMessage="maintenancePreconditionSatisfiedMessage"
         small />
     </template>
   </action-button-dialog>
@@ -33,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
-import MaintenanceConstraintWarning from '@/components/ShootMaintenance/MaintenanceConstraintWarning'
+import ConstraintWarning from '@/components/ConstraintWarning'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -44,7 +45,7 @@ export default {
   components: {
     ActionButtonDialog,
     MaintenanceComponents,
-    MaintenanceConstraintWarning
+    ConstraintWarning
   },
   props: {
     shootItem: {
