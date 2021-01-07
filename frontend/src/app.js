@@ -20,6 +20,9 @@ const App = Vue.extend({
         this.$bus.$emit('esc-pressed')
       }
     })
+
+    const darkMode = Vue.localStorage.getItem('global/dark-mode') === 'true'
+    this.$store.commit('SET_DARK_MODE', darkMode)
   },
   render (createElement) {
     return createElement('router-view')
@@ -27,15 +30,13 @@ const App = Vue.extend({
 })
 
 function createApp (vuetify) {
+  Object.defineProperty(Vue, 'vuetify', { value: vuetify })
   return new Vue({
     vuetify,
     store,
     router: createRouter(store),
     render (createElement) {
       return createElement(App)
-    },
-    beforeCreate () {
-      this.$store.dispatch('initStore')
     }
   })
 }

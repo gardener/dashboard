@@ -26,6 +26,7 @@ import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
 import hljs from 'highlight.js/lib/core'
+import { mapState } from 'vuex'
 
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'
@@ -66,8 +67,11 @@ export default {
     clipboard: undefined
   }),
   computed: {
+    ...mapState([
+      'darkMode'
+    ]),
     codeBlockClass () {
-      if (this.$vuetify.theme.dark) {
+      if (this.darkMode) {
         return 'grey darken-4 code-block-dark'
       }
       return 'grey lighten-5'

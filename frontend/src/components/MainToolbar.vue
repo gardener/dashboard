@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
-            <v-switch v-model="darkModeValue" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
+            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
             <span class="primary--text text-button">Dark</span>
           </v-card-actions>
           <v-divider></v-divider>
@@ -117,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" :background-color="$vuetify.theme.dark ? 'black' : 'white'">
+      <v-tabs slider-color="primary darken-3" :background-color="darkMode ? 'black' : 'white'">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -161,14 +161,14 @@ export default {
       'title',
       'sidebar',
       'user',
-      'cfg',
-      'darkMode'
+      'cfg'
     ]),
     ...mapGetters([
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin'
+      'isAdmin',
+      'getDarkMode'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -198,9 +198,9 @@ export default {
         query
       }
     },
-    darkModeValue: {
+    darkMode: {
       get () {
-        return this.darkMode
+        return this.getDarkMode
       },
       set (value) {
         this.setDarkMode(value)
