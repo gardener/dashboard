@@ -6,6 +6,8 @@
 
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VuetifyDev from '@/plugins/vuetify.dev'
+import VuetifyProd from '@/plugins/vuetify'
 import createLogger from 'vuex/dist/logger'
 import hash from 'object-hash'
 
@@ -66,6 +68,9 @@ import infrastructureSecrets from './modules/infrastructureSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
 
+const Vuetify = process.env.NODE_ENV === 'development' ? VuetifyDev : VuetifyProd
+const localStorage = Vue.localStorage
+
 Vue.use(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
@@ -122,7 +127,8 @@ const state = {
       shortName: 'SC',
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     }
-  }
+  },
+  darkMode: false
 }
 
 class Shortcut {
@@ -1401,6 +1407,15 @@ const actions = {
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SPLITPANE_RESIZE', value)
     return state.splitpaneResize
+  },
+  setDarkMode ({ commit }, darkMode) {
+    commit('SET_DARK_MODE', darkMode)
+    return state.darkMode
+  },
+  initStore ({ commit }) {
+    const darkMode = localStorage.getItem('global/dark-mode') || false
+    commit('SET_DARK_MODE', darkMode)
+    return state
   }
 }
 
@@ -1467,6 +1482,11 @@ const mutations = {
   },
   SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
+  },
+  SET_DARK_MODE (state, value) {
+    state.darkMode = value
+    localStorage.setItem('global/dark-mode', value)
+    Vuetify.framework.theme.dark = value
   }
 }
 

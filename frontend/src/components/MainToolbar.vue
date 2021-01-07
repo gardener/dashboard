@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
-            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
+            <v-switch v-model="darkModeValue" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
             <span class="primary--text text-button">Dark</span>
           </v-card-actions>
           <v-divider></v-divider>
@@ -148,7 +148,8 @@ export default {
   methods: {
     ...mapActions([
       'setSidebar',
-      'setError'
+      'setError',
+      'setDarkMode'
     ]),
     handleLogout () {
       this.$auth.signout()
@@ -160,7 +161,8 @@ export default {
       'title',
       'sidebar',
       'user',
-      'cfg'
+      'cfg',
+      'darkMode'
     ]),
     ...mapGetters([
       'username',
@@ -196,13 +198,12 @@ export default {
         query
       }
     },
-    darkMode: {
+    darkModeValue: {
       get () {
-        return this.$localStorage.getObject('dark_mode') || false
+        return this.darkMode
       },
       set (value) {
-        this.$localStorage.setObject('dark_mode', value)
-        this.$vuetify.theme.dark = value
+        this.setDarkMode(value)
       }
     }
   },
