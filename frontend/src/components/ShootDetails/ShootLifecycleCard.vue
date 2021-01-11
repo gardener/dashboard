@@ -18,11 +18,12 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex pt-1">
             <constraint-warning
-              :value="!isHibernationPossible && shootHibernationSchedules.length"
-              constraintType="hibernation"
-              :constraintMessage="hibernationPossibleMessage"
+              :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+              type="hibernation"
               icon
-              small />
+              small>
+              {{hibernationPossibleMessage}}
+            </constraint-warning>
             <v-icon
               v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
               small
@@ -56,10 +57,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle class="d-flex pt-1">
             <constraint-warning
               :value="!isMaintenancePreconditionSatisfied"
-              constraintType="maintenance"
-              :constraintMessage="maintenancePreconditionSatisfiedMessage"
+              type="maintenance"
               icon
-              small />
+              small>
+              {{maintenancePreconditionSatisfiedMessage}}
+            </constraint-warning>
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>

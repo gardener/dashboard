@@ -16,11 +16,11 @@ SPDX-License-Identifier: Apache-2.0
         >mdi-alert-circle-outline</v-icon>
       </template>
       <div>{{constraintTitle}}</div>
-      <div>{{constraintMessage}}</div>
+      <slot></slot>
     </v-tooltip>
     <v-alert v-else type="warning" outlined>
       <div class="font-weight-bold">{{constraintTitle}}</div>
-      <div>{{constraintMessage}}</div>
+      <slot></slot>
     </v-alert>
   </div>
 </template>
@@ -32,10 +32,7 @@ export default {
     value: {
       type: Boolean
     },
-    constraintType: {
-      type: String
-    },
-    constraintMessage: {
+    type: {
       type: String
     },
     icon: {
@@ -47,7 +44,7 @@ export default {
   },
   computed: {
     constraintTitle () {
-      switch (this.constraintType) {
+      switch (this.type) {
         case 'hibernation':
           return 'Your hibernation schedule may not have any effect:'
         case 'maintenance':

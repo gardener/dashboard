@@ -24,9 +24,10 @@ SPDX-License-Identifier: Apache-2.0
       ></maintenance-components>
       <constraint-warning
         :value="!isMaintenancePreconditionSatisfied"
-        constraintType="maintenance"
-        :constraintMessage="maintenancePreconditionSatisfiedMessage"
-        small />
+        type="maintenance"
+        small>
+        {{maintenancePreconditionSatisfiedMessage}}
+      </constraint-warning>
     </template>
   </action-button-dialog>
 </template>

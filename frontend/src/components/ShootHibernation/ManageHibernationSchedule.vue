@@ -60,9 +60,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
         <constraint-warning
-          :value="!isHibernationPossible && shootHibernationSchedules.length"
-          constraintType="hibernation"
-          :constraintMessage="hibernationPossibleMessage" />
+          :value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
+          type="hibernation">
+          {{hibernationPossibleMessage}}
+        </constraint-warning>
       </v-col>
     </v-row>
   </div>

@@ -25,14 +25,16 @@ SPDX-License-Identifier: Apache-2.0
               <version-expiration-warning :shootItem="shootItem" />
               <constraint-warning
                 :value="!isMaintenancePreconditionSatisfied"
-                constraintType="maintenance"
-                :constraintMessage="maintenancePreconditionSatisfiedMessage"
-                icon />
+                type="maintenance"
+                icon>
+                {{maintenancePreconditionSatisfiedMessage}}
+              </constraint-warning>
               <constraint-warning
-                :value="!isHibernationPossible && shootHibernationSchedules.length"
-                constraintType="hibernation"
-                :constraintMessage="hibernationPossibleMessage"
-                icon />
+                :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+                type="hibernation"
+                icon>
+                {{hibernationPossibleMessage}}
+              </constraint-warning>
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"

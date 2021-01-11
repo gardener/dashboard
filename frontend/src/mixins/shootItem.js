@@ -210,7 +210,7 @@ export const shootItem = {
       return status !== 'False'
     },
     maintenancePreconditionSatisfiedMessage () {
-      return get(this.maintenancePossibleConstraint, 'message', 'Maintenance currently not possible')
+      return get(this.maintenancePossibleConstraint, 'message', 'It may not be safe to trigger maintenance for this cluster')
     }
   },
   methods: {
