@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-alert
         type="warning"
         :identifier="alertBannerIdentifier"
-        color="cyan darken-2"
+        color="primary"
         transition="slide-y-transition"
       >
         <template v-slot:message>
@@ -132,6 +132,7 @@ import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/seti.css'
 
 // lodash
 import get from 'lodash/get'
@@ -194,7 +195,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'darkMode'
     ]),
     ...mapGetters([
       'canPatchShoots'
@@ -330,7 +332,8 @@ export default {
         lineWrapping: true,
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
-        extraKeys
+        extraKeys,
+        theme: this.darkMode ? 'seti' : 'default'
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -462,6 +465,9 @@ export default {
           }
         }
       }
+    },
+    darkMode (value) {
+      this.$instance.setOption('theme', value ? 'seti' : 'default')
     }
   },
   beforeDestroy () {

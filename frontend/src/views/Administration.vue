@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <copy-btn :color="color" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
+                    <copy-btn color="action-button" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="description"
                         :save="updateDescription"
                       />
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
-                        :color="color"
+                        color="action-button"
                         :value="owner"
                         :items="userList"
                         :rules="[rules.owner]"
@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-list-item-content>
                     <v-list-item-subtitle>Created By</v-list-item-subtitle>
                     <v-list-item-title>
-                      <account-avatar :account-name="createdBy" mail-to :color="color"></account-avatar>
+                      <account-avatar :account-name="createdBy" mail-to></account-avatar>
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="purpose"
                         :save="updatePurpose"
                       />
@@ -202,7 +202,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col v-if="canDeleteProject" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -217,7 +217,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-tooltip v-if="canDeleteProject" top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                          <v-btn color="error" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
                             <v-icon>mdi-delete</v-icon>
                           </v-btn>
                         </div>
@@ -231,7 +231,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="costObjectSettingEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Billing</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -244,7 +244,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="costObject"
                         :rules="[rules.costObject]"
                         :save="updateCostObject"
@@ -263,7 +263,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="isKubeconfigEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
+              <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
               </v-toolbar>
               <v-list>
@@ -275,7 +275,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-list-item-title>Command Line Interface Access</v-list-item-title>
                     <v-list-item-subtitle class="wrap-text">
                       Go to
-                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }" :class="textColor">
+                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
                         My Account
                       </router-link>
                       to download the <tt>kubeconfig</tt> for this project.
@@ -290,7 +290,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
-      defaultColor="red"
+      defaultColor="error"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       ref="gDialog">
@@ -300,7 +300,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:message>
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
-        <i class="red--text">The operation can not be undone.</i>
+        <i class="error--text">The operation can not be undone.</i>
       </template>
     </g-dialog>
 
@@ -317,7 +317,7 @@ import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import ShootCustomField from '@/components/ShootCustomField'
 import { errorDetailsFromError } from '@/utils/error'
-import { transformHtml, getProjectDetails, textColor, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -336,7 +336,8 @@ export default {
   },
   data () {
     return {
-      color: 'blue-grey darken-2',
+      color: 'primary',
+      toolbarColor: 'toolbar-background toolbar-title--text',
       edit: false,
       editOwner: false,
       ownerMessages: [],
@@ -456,13 +457,10 @@ export default {
       return this.cfg.sla || {}
     },
     slaDescriptionHtml () {
-      return transformHtml(this.sla.description, this.color)
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title
-    },
-    textColor () {
-      return textColor(this.color)
     }
   },
   methods: {

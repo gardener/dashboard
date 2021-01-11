@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-for="({ title, subtitle, value }, index) in commands">
       <v-list-item :key="title">
         <v-list-item-icon>
-          <v-icon v-if="index === 0" color="cyan darken-2">mdi-console-line</v-icon>
+          <v-icon v-if="index === 0" color="primary">mdi-console-line</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>{{title}}</v-list-item-title>
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-action class="mx-0">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.native.stop="toggle(index)">
+              <v-btn v-on="on" icon @click.native.stop="toggle(index)" color="action-button">
                 <v-icon>{{visibilityIcon(index)}}</v-icon>
               </v-btn>
             </template>

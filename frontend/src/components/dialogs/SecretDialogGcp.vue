@@ -11,9 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="gcp"
-    color="green"
-    infraIcon="gcp-white"
-    backgroundSrc="/static/background_gcp.svg"
+    infraIcon="gcp"
     createTitle="Add new Google Secret"
     replaceTitle="Replace Google Secret"
     @input="onInput">
@@ -22,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       <div>
         <v-textarea
           ref="serviceAccountKey"
-          color="green"
+          color="primary"
           filled
           v-model="serviceAccountKey"
           label="Service Account Key"

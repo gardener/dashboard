@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
           <v-list-item-title class="wrap-text pt-1">
-            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
             Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
           </v-list-item-title>
         </v-list-item-content>

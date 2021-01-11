@@ -6,17 +6,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="green darken-2">
-        <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
-        <v-toolbar-title class="subtitle-1 white--text">
+    <v-card class="mt-6">
+      <v-toolbar flat color="toolbar-background toolbar-title--text">
+        <v-icon class="pr-2" color="toolbar-title">mdi-account-multiple</v-icon>
+        <v-toolbar-title class="subtitle-1">
           Project Users
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="userList.length > 3"
-          class="searchField"
+          class="mr-3"
           prepend-inner-icon="mdi-magnify"
-          color="green darken-2"
+          color="primary"
           label="Search"
           hide-details
           flat
@@ -26,13 +26,13 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.esc="userFilter=''"
         ></v-text-field>
         <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
-          <v-icon class="white--text">mdi-email-outline</v-icon>
+          <v-icon color="toolbar-title">mdi-email-outline</v-icon>
         </v-btn>
         <v-btn v-if="canManageMembers" icon @click.native.stop="openUserAddDialog">
-          <v-icon class="white--text">mdi-plus</v-icon>
+          <v-icon color="toolbar-title">mdi-plus</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openUserHelpDialog">
-          <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+        <v-btn color="toolbar-title" icon @click.native.stop="openUserHelpDialog">
+          <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
         </v-btn>
         <table-column-selection
           :headers="userAccountTableHeaders"
@@ -70,17 +70,17 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <v-card class="mr-extra mt-6">
-      <v-toolbar flat color="blue-grey">
-        <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
-        <v-toolbar-title class="subtitle-1 white--text">
+    <v-card class="mt-6">
+      <v-toolbar flat color="toolbar-background  toolbar-title--text">
+        <v-icon color="toolbar-title" class="pr-2">mdi-monitor-multiple</v-icon>
+        <v-toolbar-title class="subtitle-1">
           Service Accounts
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="serviceAccountList.length > 3"
-          class="searchField"
+          class="mr-3"
           prepend-inner-icon="mdi-magnify"
-          color="blue-grey"
+          color="toolbar-background toolbar-title--text"
           label="Search"
           hide-details
           flat
@@ -90,10 +90,10 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
         <v-btn v-if="canManageServiceAccountMembers" icon @click.native.stop="openServiceAccountAddDialog">
-          <v-icon class="white--text">mdi-plus</v-icon>
+          <v-icon color="toolbar-title">mdi-plus</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
-          <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+          <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
         </v-btn>
         <table-column-selection
           :headers="serviceAccountTableHeaders"
@@ -142,11 +142,11 @@ SPDX-License-Identifier: Apache-2.0
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
       <v-card>
-        <v-card-title class="teal darken-2 grey--text text--lighten-4">
-          <div class="headline">Kubeconfig <code class="serviceAccount_name">{{currentServiceAccountDisplayName}}</code></div>
+        <v-card-title class="toolbar-background toolbar-title--text">
+          <div class="headline">Kubeconfig <code class="toolbar-background lighten-1 toolbar-title--text">{{currentServiceAccountDisplayName}}</code></div>
           <v-spacer></v-spacer>
-          <v-btn icon class="grey--text text--lighten-4" @click.native="kubeconfigDialog = false">
-            <v-icon>mdi-close</v-icon>
+          <v-btn icon @click.native="kubeconfigDialog = false">
+            <v-icon color="toolbar-title">mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -155,22 +155,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
     </v-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-    <v-fab-transition v-if="canManageServiceAccountMembers || canManageMembers">
-      <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
-        <template v-slot:activator>
-          <v-btn v-model="fab" color="teal darken-2" dark fab>
-            <v-icon v-if="fab">mdi-close</v-icon>
-            <v-icon v-else>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-        <v-btn v-if="canManageServiceAccountMembers" fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
-          <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
-        </v-btn>
-        <v-btn v-if="canManageMembers" fab small color="grey lighten-2" @click="openUserAddDialog">
-          <v-icon color="green darken-2">mdi-account</v-icon>
-        </v-btn>
-      </v-speed-dial>
-    </v-fab-transition>
   </v-container>
 </template>
 
@@ -505,7 +489,7 @@ export default {
         confirmButtonText: 'Remove User',
         captionText: 'Confirm Remove User',
         messageHtml: message.innerHTML,
-        dialogColor: 'red'
+        dialogColor: 'error'
       })
     },
     async onDeleteServiceAccount ({ username }) {
@@ -537,7 +521,7 @@ export default {
         confirmButtonText: 'Delete',
         captionText: 'Confirm Remove Member',
         messageHtml: message.innerHTML,
-        dialogColor: 'red'
+        dialogColor: 'error'
       })
     },
     confirmDeleteServiceAccount (name) {
@@ -549,7 +533,7 @@ export default {
         confirmButtonText: 'Delete',
         captionText: 'Confirm Member Deletion',
         messageHtml: message.innerHTML,
-        dialogColor: 'red',
+        dialogColor: 'error',
         confirmValue: name
       })
     },
@@ -562,7 +546,7 @@ export default {
         confirmButtonText: 'Rotate',
         captionText: 'Confirm Service Account Secret Rotation',
         messageHtml: message.innerHTML,
-        dialogColor: 'red',
+        dialogColor: 'error',
         confirmValue: name
       })
     },
@@ -698,18 +682,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .searchField {
-    margin-right: 20px !important;
-  }
-
-  .v-input__slot {
-    margin: 0px;
-  }
-
-  .serviceAccount_name {
-    color: rgb(0, 137, 123);
-  }
-</style>

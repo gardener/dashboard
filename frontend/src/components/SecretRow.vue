@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete">
-              <v-icon class="red--text">mdi-delete</v-icon>
+              <v-icon class="error--text">mdi-delete</v-icon>
             </v-btn>
           </div>
         </template>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-btn :disabled="!isOwnSecret" icon @click.native.stop="onUpdate">
-              <v-icon class="cyan--text text--darken-2">mdi-pencil</v-icon>
+              <v-icon class="action-button--text">mdi-pencil</v-icon>
             </v-btn>
           </div>
         </template>

@@ -11,10 +11,9 @@ SPDX-License-Identifier: Apache-2.0
     v-if="hasCloudProfileForCloudProviderKind('aws')"
     infrastructureKey="aws"
     infrastructureName="Amazon Web Services"
-    icon="aws-white"
+    icon="aws"
     secretDescriptorKey="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
-    color="aws-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -26,10 +25,9 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="azure"
     infrastructureName="Microsoft Azure Cloud"
-    icon="azure-white"
+    icon="azure"
     secretDescriptorKey="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
-    color="azure-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -41,10 +39,9 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="gcp"
     infrastructureName="Google Cloud Platform"
-    icon="gcp-white"
+    icon="gcp"
     secretDescriptorKey="project"
     description="Make sure that the new credentials have the correct permission on GCP."
-    color="green"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -56,9 +53,8 @@ SPDX-License-Identifier: Apache-2.0
     class="mt-4"
     infrastructureKey="openstack"
     infrastructureName="OpenStack"
-    icon="openstack-white"
+    icon="openstack"
     description="Make sure that the new credentials have the correct OpenStack permissions"
-    color="openstack-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -71,9 +67,8 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="alicloud"
     infrastructureName="Alibaba Cloud"
     secretDescriptorKey="accessKeyID"
-    icon="alicloud-white"
+    icon="alicloud"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
-    color="grey darken-4"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -86,9 +81,8 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="metal"
     infrastructureName="Metal Cloud"
     secretDescriptorKey="metalHMAC"
-    icon="metal-white"
+    icon="metal"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
-    color="metal-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -101,9 +95,8 @@ SPDX-License-Identifier: Apache-2.0
     infrastructureKey="vsphere"
     infrastructureName="VMware vSphere"
     secretDescriptorKey="vsphereUsername"
-    icon="vsphere-white"
+    icon="vsphere"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
-    color="vsphere-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -117,61 +110,26 @@ SPDX-License-Identifier: Apache-2.0
       infrastructureName="Digital Ocean"
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
-      color="blue"
-      ></disabled-secret>
+        ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
       infrastructureName="China Telecom"
       icon="china-telecom"
       description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
-      color="blue darken-3"
-      ></disabled-secret>
+        ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
       infrastructureName="Nutanix"
       icon="mdi-xamarin"
       description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
-      color="light-green lighten-1"
-      ></disabled-secret>
+        ></disabled-secret>
 
     </template>
 
     <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
-    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
-
-    <v-fab-transition>
-      <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
-        <template v-slot:activator>
-          <v-btn class="cyan darken-2" dark fab v-model="dialogState.speedDial">
-            <v-icon v-if="dialogState.speedDial">mdi-close</v-icon>
-            <v-icon v-else>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="vsphere-bgcolor" @click="onAdd('vsphere')">
-          <infra-icon value="vsphere-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small class="metal-bgcolor" @click="onAdd('metal')">
-          <infra-icon value="metal-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small color="grey darken-4" @click="onAdd('alicloud')">
-          <infra-icon value="alicloud-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="openstack-bgcolor" @click="onAdd('openstack')">
-          <infra-icon value="openstack-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small color="green" @click="onAdd('gcp')">
-          <infra-icon value="gcp-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="azure-bgcolor" @click="onAdd('azure')">
-          <infra-icon value="azure-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="aws-bgcolor" @click="onAdd('aws')">
-          <infra-icon value="aws-white" :width="20"></infra-icon>
-        </v-btn>
-      </v-speed-dial>
-    </v-fab-transition>
+    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
   </v-container>
 </template>
 
@@ -183,7 +141,6 @@ import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
-import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 
@@ -193,7 +150,6 @@ export default {
     DeleteDialog,
     Secret,
     DisabledSecret,
-    InfraIcon,
     SecretDialogWrapper
   },
   data () {
@@ -240,10 +196,6 @@ export default {
       'cloudProfilesByCloudProviderKind',
       'getInfrastructureSecretByName'
     ]),
-    backgroundForSelectedSecret () {
-      const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
-      return this.backgroundForCloudProviderKind(kind)
-    },
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
@@ -273,25 +225,6 @@ export default {
     onDelete (row) {
       this.selectedSecret = row // pragma: whitelist secret
       this.dialogState.deleteConfirm = true
-    },
-    backgroundForCloudProviderKind (kind) {
-      switch (kind) {
-        case 'azure':
-          return '/static/background_azure.svg'
-        case 'aws':
-          return '/static/background_aws.svg'
-        case 'gcp':
-          return '/static/background_gcp.svg'
-        case 'openstack':
-          return '/static/background_openstack.svg'
-        case 'alicloud':
-          return '/static/background_alicloud.svg'
-        case 'metal':
-          return '/static/background_metal.svg'
-        case 'vsphere':
-          return '/static/background_vsphere.svg'
-      }
-      return '/static/background_aws.svg'
     },
     hideDialogs () {
       merge(this.dialogState, this.initialDialogState)

@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       class="selectClass"
       :class="selectClass"
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :label="wildcardSelectLabel"
       :items="wildcardSelectItemObjects"
       return-object
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="wildcardSelectedValue.isWildcard"
       :class="textFieldClass"
-      color="cyan darken-2"
+      color="primary"
       :label="wildcardTextFieldLabel"
       v-model="wildcardVariablePart"
       :error-messages="getErrorMessages('wildcardVariablePart')"

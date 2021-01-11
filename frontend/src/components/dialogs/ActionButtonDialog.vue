@@ -110,7 +110,8 @@ export default {
       type: Boolean
     },
     iconColor: {
-      type: String
+      type: String,
+      default: 'action-button'
     },
     smallIcon: {
       type: Boolean,
@@ -118,7 +119,7 @@ export default {
     },
     dialogColor: {
       type: String,
-      default: 'orange'
+      default: 'warning'
     },
     disabled: {
       type: Boolean,

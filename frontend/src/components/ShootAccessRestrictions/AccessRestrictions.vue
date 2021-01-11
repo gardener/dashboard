@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-action class="action-select">
             <v-switch
               v-model="accessRestrictions[definition.key].value"
-              color="cyan darken-2"
+              color="primary"
               inset
             ></v-switch>
           </v-list-item-action>
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-checkbox
                 v-model="accessRestrictions[definition.key].options[optionValue.key].value"
                 :disabled="!enabled(definition)"
-                color="cyan darken-2"
+                color="primary"
               ></v-checkbox>
             </v-list-item-action>
             <v-list-item-content>

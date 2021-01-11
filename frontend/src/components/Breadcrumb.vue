@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon large>mdi-chevron-right</v-icon>
     </template>
     <template v-slot:item="{ item }">
-      <router-link v-if="item.to" :to="item.to" class="black--text text-decoration-none">
+      <router-link v-if="item.to" :to="item.to" class="text-decoration-none">
         {{ item.text }}
       </router-link>
-      <span v-else class="black--text text-h6">
+      <span v-else class="text-h6">
         {{ item.text }}
       </span>
     </template>

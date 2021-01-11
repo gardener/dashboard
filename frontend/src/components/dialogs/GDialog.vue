@@ -35,8 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="userInput"
           type="text"
           filled
-          dense
-          color="grey darken-2">
+          dense>
         </v-text-field>
       </v-alert>
       <v-card-actions>
@@ -53,6 +52,7 @@ import { setDelayedInputFocus } from '@/utils'
 import GMessage from '@/components/GMessage'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
+import { mapState } from 'vuex'
 
 export default {
   name: 'gdialog',
@@ -78,7 +78,7 @@ export default {
     },
     confirmColor: {
       type: String,
-      default: 'red'
+      default: 'error'
     },
     defaultColor: {
       type: String
@@ -111,6 +111,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'darkMode'
+    ]),
     hasError () {
       return this.confirmValue && this.confirmValue !== this.userInput
     },
@@ -140,7 +143,10 @@ export default {
     },
     confirmAlertColor () {
       const color = this.confirmValue ? this.confirmColor : this.defaultColor
-      return `${color || 'cyan'} lighten-5`
+      if (this.darkMode) {
+        return `${color || 'primary'} darken-3`
+      }
+      return `${color || 'primary'} lighten-3`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
@@ -176,22 +182,22 @@ export default {
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
-        case 'red':
-          return 'red darken-2 grey--text text--lighten-4'
-        case 'orange':
-          return 'orange darken-2 grey--text text--lighten-4'
+        case 'error':
+          return 'error toolbar-title--text'
+        case 'warning':
+          return 'warning toolbar-title--text'
         default:
-          return 'cyan darken-2 grey--text text--lighten-4'
+          return 'toolbar-background toolbar-title--text'
       }
     },
     textColorClassForString (textColorClass) {
       switch (textColorClass) {
-        case 'red':
-          return 'red--text text--darken-2'
-        case 'orange':
-          return 'orange--text text--darken-2'
+        case 'error':
+          return 'error--text'
+        case 'warning':
+          return 'warning--text'
         default:
-          return 'cyan--text text--darken-2'
+          return 'primary--text'
       }
     },
     async resolveAction (value) {

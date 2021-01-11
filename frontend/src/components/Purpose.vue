@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-select
       hint="Indicate the importance of the cluster"
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       label="Purpose"
       :items="purposes"
       item-text="purpose"
