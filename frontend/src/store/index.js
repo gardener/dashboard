@@ -1003,9 +1003,6 @@ const getters = {
   },
   onlyShootsWithIssues (state, getters) {
     return getters['shoots/onlyShootsWithIssues']
-  },
-  getDarkMode (state) {
-    return state.darkMode
   }
 }
 

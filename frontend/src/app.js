@@ -21,7 +21,7 @@ const App = Vue.extend({
       }
     })
 
-    const darkMode = Vue.localStorage.getItem('global/dark-mode') === 'true'
+    const darkMode = this.$localStorage.getItem('global/dark-mode') === 'true'
     this.$store.commit('SET_DARK_MODE', darkMode)
   },
   render (createElement) {

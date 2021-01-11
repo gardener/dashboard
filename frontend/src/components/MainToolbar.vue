@@ -167,8 +167,7 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin',
-      'getDarkMode'
+      'isAdmin'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -200,7 +199,7 @@ export default {
     },
     darkMode: {
       get () {
-        return this.getDarkMode
+        return this.$store.state.darkMode
       },
       set (value) {
         this.setDarkMode(value)
