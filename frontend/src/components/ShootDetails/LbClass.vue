@@ -7,11 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     :title="name"
-    toolbarColor="cyan darken-2"
     :popperKey="`lbclass_${name}`"
   >
     <template v-slot:popperRef>
-      <v-chip small class="cursor-pointer mr-2" outlined color="cyan darken-2">{{name}}</v-chip>
+      <v-chip small class="cursor-pointer mr-2" outlined color="primary">{{name}}</v-chip>
     </template>
     <span class="font-weight-bold">Floating Subnet ID:</span>&nbsp;{{floatingSubnetID}}
   </g-popper>

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon color="primary">
                 <v-icon medium>mdi-help-circle-outline</v-icon>
               </v-btn>
             </template>
@@ -41,10 +41,10 @@ SPDX-License-Identifier: Apache-2.0
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index" class="px-3">
-              <v-btn block text color="cyan darken-2" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon color="cyan darken-2" class="mr-3">{{item.icon}}</v-icon>
+              <v-btn block text color="primary" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
+                <v-icon color="primary" class="mr-3">{{item.icon}}</v-icon>
                 {{item.title}}
-                <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+                <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
               </v-btn>
             </v-card-actions>
           </template>
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="mdi-account-supervisor">
+              <v-badge v-if="isAdmin" color="primary" bottom overlap icon="mdi-account-supervisor">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span v-if="isAdmin">
               {{avatarTitle}}
-              <v-chip small color="cyan darken-2" dark>
+              <v-chip small color="primary">
                 <v-avatar>
                   <v-icon>mdi-account-supervisor</v-icon>
                 </v-avatar>
@@ -95,10 +95,16 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
-            <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
+            <v-btn block text color="primary" class="justify-start" :to="accountLink" title="My Account">
               <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>
+          </v-card-actions>
+          <v-divider></v-divider>
+          <v-card-actions class="px-3">
+            <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
+            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
+            <span class="primary--text text-button">Dark</span>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -111,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="grey darken-3" background-color="white" color="black">
+      <v-tabs slider-color="primary darken-3" :background-color="darkMode ? 'black' : 'white'">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -123,14 +129,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import map from 'lodash/map'
-import join from 'lodash/join'
-import uniq from 'lodash/uniq'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
 export default {
-  name: 'toolbar',
+  name: 'toolbar-background',
   components: {
     Breadcrumb
   },
@@ -145,7 +148,8 @@ export default {
   methods: {
     ...mapActions([
       'setSidebar',
-      'setError'
+      'setError',
+      'setDarkMode'
     ]),
     handleLogout () {
       this.$auth.signout()
@@ -163,8 +167,7 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin',
-      'controllerRegistrationList'
+      'isAdmin'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -194,18 +197,13 @@ export default {
         query
       }
     },
-    extensionCount () {
-      return this.controllerRegistrationList.length
-    },
-    extensionList () {
-      return map(this.controllerRegistrationList, ({ name, version, resources }, id) => {
-        return {
-          id,
-          name,
-          version,
-          kind: join(uniq(map(resources, 'kind')), ', ')
-        }
-      })
+    darkMode: {
+      get () {
+        return this.$store.state.darkMode
+      },
+      set (value) {
+        this.setDarkMode(value)
+      }
     }
   },
   watch: {

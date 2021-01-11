@@ -36,15 +36,16 @@ export default {
       if (!this.$el) {
         return
       }
-      const elementClasses = this.$el.classList
-      elementClasses.forEach((className) => {
-        if (className.startsWith('hintColor-')) {
-          elementClasses.remove(className)
-        }
-      })
+      const hintElement = this.$el.querySelector('.v-messages__message')
+      if (!hintElement) {
+        return
+      }
 
+      const colorCode = this.$vuetify.theme.currentTheme[hintColor]
       if (!this.isSelectErrorColor && hintColor !== 'default') {
-        elementClasses.add(`hintColor-${hintColor}`)
+        hintElement.style = `color: ${colorCode}`
+      } else {
+        hintElement.style = ''
       }
     }
   },
@@ -56,13 +57,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  @import '~vuetify/src/styles/styles.sass';
-
-  .hintColor-orange {
-    ::v-deep .v-messages__message {
-      color: map-get($orange, 'darken-2') !important;
-    }
-  }
-</style>

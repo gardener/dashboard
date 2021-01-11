@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>{{item.displayName}}</v-list-item-title>
           <v-list-item-subtitle>
-            <a v-if="item.isEmail" :href="`mailto:${item.username}`" class="cyan--text text--darken-2">{{item.username}}</a>
+            <a v-if="item.isEmail" :href="`mailto:${item.username}`">{{item.username}}</a>
             <span v-else>{{item.username}}</span>
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="canManageMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.stop="onEdit">
+              <v-btn v-on="on" color="action-button"  icon @click.stop="onEdit">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn :disabled="item.isOwner" icon color="red" @click.native.stop="onDelete">
+                <v-btn :disabled="item.isOwner" icon color="error" @click.native.stop="onDelete">
                   <v-icon>mdi-close</v-icon>
                 </v-btn>
               </div>

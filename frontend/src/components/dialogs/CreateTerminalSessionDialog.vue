@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
     :confirmDisabled="!valid"
     max-width="750px"
     max-height="100vh"
-    defaultColor="cyan-darken-2"
+    defaultColor="toolbar-background"
     ref="gDialog"
   >
     <template v-slot:caption>Create Terminal Session</template>
     <template v-slot:message>
-      <v-tabs v-model="tab" color="cyan darken-2">
+      <v-tabs v-model="tab" color="primary">
         <v-tab key="target-tab" href="#target-tab">Terminal</v-tab>
         <v-tab v-if="isTerminalShortcutsFeatureEnabled" key="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
       </v-tabs>
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list>
             <v-list-item-group
               v-model="shortcutTab.selectedShortcuts"
-              color="cyan darken-2"
+              color="primary"
               active-class="g-border"
               multiple
             >

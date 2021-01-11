@@ -8,14 +8,14 @@ SPDX-License-Identifier: Apache-2.0
   <tr>
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
       <template v-if="cell.header.value === 'project'">
-        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+        <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
           {{ shootProjectName }}
         </router-link>
       </template>
       <template v-if="cell.header.value === 'name'">
         <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
           <v-col class="grow pa-0 ma-0">
-            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+            <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
               {{ shootName }}
             </router-link>
           </v-col>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
                 <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
               </router-link>
             </div>
@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top v-if="canGetSecrets">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                <v-btn small icon class="action-button--text" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
                   <v-icon size="22">mdi-key</v-icon>
                 </v-btn>
               </div>

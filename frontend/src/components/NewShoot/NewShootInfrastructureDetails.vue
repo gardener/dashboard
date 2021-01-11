@@ -15,14 +15,14 @@ SPDX-License-Identifier: Apache-2.0
           :cloudProfiles="cloudProfiles"
           @valid="onCloudProfileNameValid"
           @input="onUpdateCloudProfileName"
-          color="cyan darken-2">
+          color="primary">
         </cloud-profile>
       </v-col>
       <v-col cols="3">
         <v-select
           ref="secret"
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Secret"
           :items="secretItems"
           item-value="metadata.name"
@@ -54,8 +54,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="3">
         <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Region"
           :items="regionItems"
           :hint="regionHint"
@@ -68,8 +68,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="3">
         <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Networking Type"
           :items="networkingTypeList"
           persistent-hint
@@ -90,8 +90,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Load Balancer Provider"
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
@@ -105,8 +105,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-else-if="infrastructureKind === 'metal'">
         <v-col cols="3">
           <v-text-field
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Project ID"
             v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
@@ -118,8 +118,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Partition ID"
             :items="partitionIDs"
             v-model="partitionID"
@@ -132,8 +132,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
             v-model="firewallImage"
@@ -144,8 +144,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
             v-model="firewallSize"
@@ -156,8 +156,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Networks"
             :items="allFirewallNetworks"
             v-model="firewallNetworks"
@@ -174,8 +174,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-else-if="infrastructureKind === 'vsphere'">
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
             v-model="loadBalancerClassNames"
@@ -642,6 +642,7 @@ export default {
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
         region: this.region,
+        networkingType: this.networkingType,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
         loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),

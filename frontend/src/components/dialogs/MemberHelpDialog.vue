@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{ title}}</span>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
+        <span class="headline ml-5 toolbar-title--text">{{ title}}</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
@@ -47,13 +47,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.stop="hide" :class="buttonClass" tabindex="2">Ok</v-btn>
+        <v-btn text @click.stop="hide" class="primary--text" tabindex="2">Ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+
 export default {
   name: 'help-member-dialog',
   props: {
@@ -91,14 +92,6 @@ export default {
         return 'help_service'
       }
       return ''
-    },
-    buttonClass () {
-      if (this.isUserDialog) {
-        return 'green--text darken-2'
-      } else if (this.isServiceDialog) {
-        return 'blue-grey--text'
-      }
-      return ''
     }
   },
   methods: {
@@ -108,22 +101,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .help_user, .help_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .help_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .help_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>

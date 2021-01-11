@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
         <h1>{{code}}</h1>
         <h2>{{text}}</h2>
         <p v-if="message">{{message}}</p>
-        <v-btn dark color="cyan darken-2" @click="onClick" class="mt-12">{{buttonText}}</v-btn>
+        <v-btn color="primary" @click="onClick" class="mt-12">{{buttonText}}</v-btn>
       </v-col>
     </v-row>
   </v-container>

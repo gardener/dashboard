@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="customFields">
-    <v-toolbar flat dark dense color="cyan darken-2">
+  <v-card v-if="customFields && customFields.length">
+    <v-toolbar flat dark dense color="toolbar-background toolbar-title--text">
       <v-toolbar-title class="subtitle-1">Custom Fields</v-toolbar-title>
     </v-toolbar>
     <v-list>
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider v-if="index !== 0" inset :key="`${customField.key}-divider`"></v-divider>
         <v-list-item :key="customField.key">
           <v-list-item-icon>
-            <v-icon color="cyan darken-2" v-if="customField.icon">{{customField.icon}}</v-icon>
+            <v-icon color="primary" v-if="customField.icon">{{customField.icon}}</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{customField.name}}</v-list-item-subtitle>

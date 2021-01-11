@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-tooltip top v-if="expirationTimestamp">
     <template v-slot:activator="{ on }">
       <v-icon v-on="on" color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
-      <v-icon v-on="on" color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
+      <v-icon v-on="on" color="primary" class="terminationIcon" v-else>mdi-clock</v-icon>
     </template>
     <span v-if="isValidTerminationDate">This cluster will self terminate <span class="font-weight-bold"><time-string :date-time="expirationTimestamp" mode="future"></time-string></span></span>
     <span v-else>This cluster is about to self terminate</span>
