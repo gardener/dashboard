@@ -48,13 +48,8 @@ SPDX-License-Identifier: Apache-2.0
       <div v-if="canDefineVolumeSize" class="smallInput">
         <size-input
           :min="minimumVolumeSize"
-<<<<<<< HEAD
-          color="cyan darken-2"
-          :error-messages="getErrorMessages('volumeSizeInternal')"
-=======
           color="primary"
-          :error-messages="getErrorMessages('worker.volume.size')"
->>>>>>> master
+          :error-messages="getErrorMessages('volumeSizeInternal')"
           @input="onInputVolumeSize"
           @blur="$v.volumeSizeInternal.$touch()"
           label="Volume Size"
