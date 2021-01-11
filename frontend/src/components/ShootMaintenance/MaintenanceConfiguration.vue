@@ -6,9 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="maintenanceTimeValid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Maintenance">
     <template v-slot:actionComponent>

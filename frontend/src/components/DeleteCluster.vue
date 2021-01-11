@@ -6,18 +6,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
-    @dialogOpened="onDeleteDialogOpened"
+    :shoot-item="shootItem"
+    @dialog-opened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-delete"
-    iconColor="error"
-    dialogColor="error"
-    confirmButtonText="Delete"
+    icon-color="error"
+    dialog-color="error"
+    confirm-button-text="Delete"
     confirm-required
-    :buttonText="buttonText"
-    :smallIcon="small"
-    maxWidth="600"
+    :button-text="buttonText"
+    :small-icon="small"
+    max-width="600"
   >
     <template v-slot:actionComponent>
       <v-list>

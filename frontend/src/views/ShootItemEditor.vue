@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       alert-banner-identifier="shootEditorWarning"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
-      :shootContent="shootContent"
-      :extraKeys="extraKeys"
+      :shoot-content="shootContent"
+      :extra-keys="extraKeys"
       @clean="onClean"
-      @conflictPath="onConflictPath"
+      @conflict-path="onConflictPath"
       ref="shootEditor"
       v-on="$shootEditor.hooks"
     >

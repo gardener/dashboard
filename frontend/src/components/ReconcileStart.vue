@@ -6,15 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :loading="isReconcileToBeScheduled"
-    @dialogOpened="startDialogOpened"
+    @dialog-opened="startDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    maxWidth="600"
-    :buttonText="buttonText"
-    confirmButtonText="Trigger now"
+    max-width="600"
+    :button-text="buttonText"
+    confirm-button-text="Trigger now"
     :disabled="isShootReconciliationDeactivated">
     <template v-slot:actionComponent>
       <v-row >

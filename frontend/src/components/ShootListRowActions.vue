@@ -19,28 +19,28 @@ SPDX-License-Identifier: Apache-2.0
     <v-list subheader dense class="actionMenuItem" @click.native.capture="actionMenu=false">
       <v-list-item>
         <v-list-item-content>
-          <change-hibernation :shootItem="shootItem" text></change-hibernation>
+          <change-hibernation :shoot-item="shootItem" text></change-hibernation>
         </v-list-item-content>
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <maintenance-start :shootItem="shootItem" text></maintenance-start>
+          <maintenance-start :shoot-item="shootItem" text></maintenance-start>
         </v-list-item-content>
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <reconcile-start :shootItem="shootItem" text></reconcile-start>
+          <reconcile-start :shoot-item="shootItem" text></reconcile-start>
         </v-list-item-content>
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <rotate-kubeconfig-start :shootItem="shootItem" text></rotate-kubeconfig-start>
+          <rotate-kubeconfig-start :shoot-item="shootItem" text></rotate-kubeconfig-start>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
       <v-list-item>
         <v-list-item-content>
-            <delete-cluster :shootItem="shootItem" text></delete-cluster>
+            <delete-cluster :shoot-item="shootItem" text></delete-cluster>
         </v-list-item-content>
       </v-list-item>
     </v-list>

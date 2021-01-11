@@ -32,17 +32,17 @@ SPDX-License-Identifier: Apache-2.0
       {{actionToolTip}}
     </v-tooltip>
     <g-dialog
-      :confirmButtonText="confirmButtonText"
+      :confirm-button-text="confirmButtonText"
       :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       :max-width="maxWidth"
-      :maxHeight="maxHeight"
-      :confirmValue="confirmValue"
-      :confirmMessage="confirmMessage"
-      :confirmColor="dialogColor"
-      :defaultColor="dialogColor"
-      :disableConfirmInputFocus="disableConfirmInputFocus"
+      :max-height="maxHeight"
+      :confirm-value="confirmValue"
+      :confirm-message="confirmMessage"
+      :confirm-color="dialogColor"
+      :default-color="dialogColor"
+      :disable-confirm-input-focus="disableConfirmInputFocus"
       ref="gDialog"
     >
       <template v-slot:caption>{{caption}}</template>

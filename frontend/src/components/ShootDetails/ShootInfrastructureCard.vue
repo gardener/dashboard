@@ -16,10 +16,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
-            <vendor title extended :shootItem="shootItem"></vendor>
+            <vendor title extended :shoot-item="shootItem"></vendor>
           </v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <vendor extended :shootItem="shootItem"></vendor>
+            <vendor extended :shoot-item="shootItem"></vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Seed</v-list-item-subtitle>
             <v-list-item-title class="pt-1">
-              <shoot-seed-name :shootItem="shootItem" />
+              <shoot-seed-name :shoot-item="shootItem" />
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action>

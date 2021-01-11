@@ -9,13 +9,13 @@ SPDX-License-Identifier: Apache-2.0
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('aws')"
-    infrastructureKey="aws"
-    infrastructureName="Amazon Web Services"
+    infrastructure-key="aws"
+    infrastructure-name="Amazon Web Services"
     icon="aws"
-    secretDescriptorKey="accessKeyID"
+    secret-descriptor-key="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -23,13 +23,13 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('azure')"
     class="mt-4"
-    infrastructureKey="azure"
-    infrastructureName="Microsoft Azure Cloud"
+    infrastructure-key="azure"
+    infrastructure-name="Microsoft Azure Cloud"
     icon="azure"
-    secretDescriptorKey="subscriptionID"
+    secret-descriptor-key="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -37,13 +37,13 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('gcp')"
     class="mt-4"
-    infrastructureKey="gcp"
-    infrastructureName="Google Cloud Platform"
+    infrastructure-key="gcp"
+    infrastructure-name="Google Cloud Platform"
     icon="gcp"
-    secretDescriptorKey="project"
+    secret-descriptor-key="project"
     description="Make sure that the new credentials have the correct permission on GCP."
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -51,12 +51,12 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('openstack')"
     class="mt-4"
-    infrastructureKey="openstack"
-    infrastructureName="OpenStack"
+    infrastructure-key="openstack"
+    infrastructure-name="OpenStack"
     icon="openstack"
     description="Make sure that the new credentials have the correct OpenStack permissions"
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -64,13 +64,13 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('alicloud')"
     class="mt-4"
-    infrastructureKey="alicloud"
-    infrastructureName="Alibaba Cloud"
-    secretDescriptorKey="accessKeyID"
+    infrastructure-key="alicloud"
+    infrastructure-name="Alibaba Cloud"
+    secret-descriptor-key="accessKeyID"
     icon="alicloud"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -78,13 +78,13 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('metal')"
     class="mt-4"
-    infrastructureKey="metal"
-    infrastructureName="Metal Cloud"
-    secretDescriptorKey="metalHMAC"
+    infrastructure-key="metal"
+    infrastructure-name="Metal Cloud"
+    secret-descriptor-key="metalHMAC"
     icon="metal"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -92,13 +92,13 @@ SPDX-License-Identifier: Apache-2.0
     <secret
     v-if="hasCloudProfileForCloudProviderKind('vsphere')"
     class="mt-4"
-    infrastructureKey="vsphere"
-    infrastructureName="VMware vSphere"
-    secretDescriptorKey="vsphereUsername"
+    infrastructure-key="vsphere"
+    infrastructure-name="VMware vSphere"
+    secret-descriptor-key="vsphereUsername"
     icon="vsphere"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
     @add="onAdd"
-    @toogleHelp="onToogleHelp"
+    @toogle-help="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
     ></secret>
@@ -107,28 +107,28 @@ SPDX-License-Identifier: Apache-2.0
 
       <disabled-secret
       class="mt-4"
-      infrastructureName="Digital Ocean"
+      infrastructure-name="Digital Ocean"
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
         ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
-      infrastructureName="China Telecom"
+      infrastructure-name="China Telecom"
       icon="china-telecom"
       description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
         ></disabled-secret>
 
       <disabled-secret
       class="mt-4"
-      infrastructureName="Nutanix"
+      infrastructure-name="Nutanix"
       icon="mdi-xamarin"
       description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
         ></disabled-secret>
 
     </template>
 
-    <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
+    <secret-dialog-wrapper :dialog-state="dialogState" :selected-secret="selectedSecret"></secret-dialog-wrapper>
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
   </v-container>
 </template>

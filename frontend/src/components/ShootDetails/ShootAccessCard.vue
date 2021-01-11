@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       :shoot-item=shootItem
       target="shoot"
       :description="shootTerminalDescription"
-      :buttonDescription="shootTerminalButtonDescription"
+      :button-description="shootTerminalButtonDescription"
       :disabled="shootTerminalButtonDisabled"
       >
     </terminal-list-tile>
@@ -31,15 +31,15 @@ SPDX-License-Identifier: Apache-2.0
 
     <terminal-shortcuts-tile
       v-if="isTerminalShortcutsTileVisible"
-      :shootItem="shootItem"
-      @addTerminalShortcut="onAddTerminalShortcut"
+      :shoot-item="shootItem"
+      @add-terminal-shortcut="onAddTerminalShortcut"
       popper-boundaries-selector="#accessCardList"
       class="mt-3"
     ></terminal-shortcuts-tile>
 
     <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="mdi-developer-board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="mdi-developer-board" app-title="Dashboard" :url="dashboardUrl" :url-text="dashboardUrlText" :is-shoot-status-hibernated="isShootStatusHibernated"></link-list-tile>
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <v-list-item>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
 
-    <gardenctl-commands v-if="isGardenctlTileVisible" :shootItem="shootItem"></gardenctl-commands>
+    <gardenctl-commands v-if="isGardenctlTileVisible" :shoot-item="shootItem"></gardenctl-commands>
   </v-list>
 </template>
 

@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <g-splitpane
       v-if="splitpaneTree"
-      :splitpaneTree="splitpaneTree"
+      :splitpane-tree="splitpaneTree"
       ref="splitpane"
     >
       <template v-slot="{item}">

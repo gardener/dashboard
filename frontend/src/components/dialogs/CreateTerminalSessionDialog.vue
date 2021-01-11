@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
-    confirmButtonText="Create"
-    :confirmDisabled="!valid"
+    confirm-button-text="Create"
+    :confirm-disabled="!valid"
     max-width="750px"
     max-height="100vh"
-    defaultColor="toolbar-background"
+    default-color="toolbar-background"
     ref="gDialog"
   >
     <template v-slot:caption>Create Terminal Session</template>
@@ -40,8 +40,8 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   :target="targetTab.selectedTarget"
-                  @selectedConfig="selectedConfigChanged"
-                  @validSettings="validSettingsChanged"
+                  @selected-config="selectedConfigChanged"
+                  @valid-settings="validSettingsChanged"
                 ></terminal-settings>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
               <terminal-shortcuts
                 :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
-                @addTerminalShortcut="onAddTerminalShortcut"
+                @add-terminal-shortcut="onAddTerminalShortcut"
               ></terminal-shortcuts>
             </v-list-item-group>
           </v-list>

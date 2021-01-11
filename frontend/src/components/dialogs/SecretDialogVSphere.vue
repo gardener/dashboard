@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="vsphere"
-    infraIcon="vsphere"
-    createTitle="Add new VMware vSphere Secret"
-    replaceTitle="Replace VMware vSphere Secret"
+    cloud-provider-kind="vsphere"
+    infra-icon="vsphere"
+    create-title="Add new VMware vSphere Secret"
+    replace-title="Replace VMware vSphere Secret"
     @input="onInput">
 
     <template v-slot:data-slot>

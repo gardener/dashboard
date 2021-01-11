@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="aws"
-    infraIcon="aws"
-    createTitle="Add new AWS Secret"
-    replaceTitle="Replace AWS Secret"
+    cloud-provider-kind="aws"
+    infra-icon="aws"
+    create-title="Add new AWS Secret"
+    replace-title="Replace AWS Secret"
     @input="onInput">
 
     <template v-slot:data-slot>

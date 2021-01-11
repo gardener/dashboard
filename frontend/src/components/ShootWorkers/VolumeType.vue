@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <hint-colorizer hintColor="warning">
+    <hint-colorizer hint-color="warning">
       <v-select
         color="primary"
         item-color="primary"
