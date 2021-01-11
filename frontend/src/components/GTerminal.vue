@@ -17,22 +17,21 @@ SPDX-License-Identifier: Apache-2.0
       <g-popper
         v-if="snackbarDetailsText"
         title="Details"
-        toolbarColor="cyan darken-2"
         :popperKey="`popper_snackbar_${uuid}`"
         placement="bottom"
         :boundariesSelector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
         <template v-slot:popperRef>
-          <v-btn text small color="cyan darken-2">
+          <v-btn text small color="primary">
             Details
           </v-btn>
         </template>
       </g-popper>
-      <v-btn text color="cyan darken-2" @click="retry">
+      <v-btn text color="primary" @click="retry">
         Retry
       </v-btn>
-      <v-btn text color="cyan darken-2" @click="hideSnackbarAndClose">
+      <v-btn text color="primary" @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
@@ -41,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       :timeout="-1"
       :absolute="true"
       :bottom="true"
-      color="red"
+      color="error"
     >
       {{ snackbarText }}
       <v-btn text @click="hideSnackbarAndClose">
@@ -63,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
               <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
               <g-popper
                 :title="`${imageShortText} Help`"
-                toolbar-color="cyan darken-2"
                 :popper-key="`popper_${uuid}`"
                 placement="bottom"
                 :boundaries-selector="`#boundary_${uuid}`"
@@ -146,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small text class="actionButton" @click="retry()">
+                <v-btn small text class="action-button" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>

@@ -166,7 +166,7 @@ describe('MainNavigation.vue', () => {
     await Vue.nextTick()
     const projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     const exactMatchListTile = projectListWrapper.findAll('.project-list-tile').at(1)
-    expect(exactMatchListTile.classes()).toEqual(expect.arrayContaining(['grey', 'lighten-4']))
+    expect(exactMatchListTile.classes()).toEqual(expect.arrayContaining(['highlighted-item']))
   })
 
   it('Projects can be highlighted via arrow keys', async () => {

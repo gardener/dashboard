@@ -411,16 +411,6 @@ export function parseServiceAccountUsername (username) {
   return { namespace, name }
 }
 
-// expect colors to be in format <color> <optional:modifier>
-export function textColor (color) {
-  const [colorStr, colorMod] = split(color, ' ')
-  let textColor = `${colorStr}--text`
-  if (colorMod) {
-    textColor = `${textColor} text--${colorMod}`
-  }
-  return textColor
-}
-
 export function encodeBase64 (input) {
   return Buffer.from(input, 'utf8').toString('base64')
 }
@@ -501,11 +491,6 @@ export const shootAddonList = [
   }
 ]
 
-export function textColorFromColor (color) {
-  const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
-  return map(split(color, ' '), iteratee)
-}
-
 function htmlToDocumentFragment (html) {
   const template = document.createElement('template')
   template.innerHTML = html.trim() // Never return a text node of whitespace as the result
@@ -518,12 +503,11 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function transformHtml (html, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
+export function transformHtml (html, transformToExternalLinks = true) {
   if (!html) {
     return undefined
   }
 
-  const textColorClasses = textColorFromColor(linkColor)
   const documentFragment = htmlToDocumentFragment(html)
   if (!documentFragment) {
     return html
@@ -531,10 +515,6 @@ export function transformHtml (html, linkColor = 'cyan darken-2', transformToExt
 
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
-    if (textColorClasses.length) {
-      linkElement.classList.add(...textColorClasses)
-    }
-
     if (transformToExternalLinks) {
       linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')

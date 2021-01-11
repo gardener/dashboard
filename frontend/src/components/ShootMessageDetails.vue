@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-list>
     <v-list-item>
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-information-outline</v-icon>
+        <v-icon color="primary">mdi-information-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Status</v-list-item-subtitle>
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-post-outline</v-icon>
+          <v-icon color="primary">mdi-post-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Last Message</v-list-item-subtitle>
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider inset></v-divider>
     <v-list-item v-if="lastUpdateTime">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
+        <v-icon color="primary">mdi-clock-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
@@ -70,7 +70,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-alert
                 v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
-                dark
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError ? true : false"
               >
@@ -79,7 +78,6 @@ SPDX-License-Identifier: Apache-2.0
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
-                        class="cyan--text text--darken-2"
                         :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
                       >
                         <span>{{secretBindingName}}</span>

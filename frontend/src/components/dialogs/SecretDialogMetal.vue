@@ -11,9 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="metal"
-    color="blue"
-    infraIcon="metal-white"
-    backgroundSrc="/static/background_metal.svg"
+    infraIcon="metal"
     createTitle="Add new Metal Secret"
     replaceTitle="Replace Metal Secret"
     @input="onInput">
@@ -21,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="blue"
+          color="primary"
           v-model="apiUrl"
           ref="apiUrl"
           label="API URL"
@@ -32,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="blue"
+          color="primary"
           v-model="apiHmac"
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"

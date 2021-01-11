@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       :id="iconName"
       lang="en"
     >{{ iconName }} icon</title>
-    <g :fill="iconColor">
+    <g :fill="iconColorCode">
       <slot />
     </g>
   </svg>
@@ -45,6 +45,12 @@ export default {
     iconColor: {
       type: String,
       default: '#FFF'
+    }
+  },
+  computed: {
+    iconColorCode () {
+      const iconColor = this.iconColor
+      return this.$vuetify.theme.currentTheme[iconColor]
     }
   }
 }

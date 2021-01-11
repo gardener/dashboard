@@ -10,23 +10,22 @@ SPDX-License-Identifier: Apache-2.0
       fixed
       app
       :mobile-breakpoint="400"
-      dark
+      color="secondary"
     >
       <div class="teaser">
-        <div class="content center">
-          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text ma-2">
+        <div class="content center secondary darken-2">
+          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right main-navigation-title--text ma-2">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
             <img src="../assets/logo.svg" class="logo">
-            <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2>Universal Kubernetes at Scale</h2>
+            <h1 class="main-navigation-title--text">Gardener <span class="version">{{version}}</span></h1>
+            <h2 class="primary--text">Universal Kubernetes at Scale</h2>
           </a>
         </div>
       </div>
       <template v-if="projectList.length">
         <v-menu
-          light
           attach
           offset-y
           left
@@ -39,9 +38,10 @@ SPDX-License-Identifier: Apache-2.0
         >
           <template v-slot:activator="{ on }">
             <v-btn
+              color="secondary darken-1"
               v-on="on"
               block
-              class="project-selector elevation-4 white--text"
+              class="project-selector elevation-4 main-navigation-title--text"
               @keydown.down="highlightProjectWithKeys('down')"
               @keydown.up="highlightProjectWithKeys('up')"
               @keyup.enter="navigateToHighlightedProject"
@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon class="pr-6">mdi-grid-large</v-icon>
               <span class="ml-2" :class="{ placeholder: !project }" >{{projectName}}</span>
               <template v-if="project">
-                <stale-project-warning :project="project" small color="white"></stale-project-warning>
+                <stale-project-warning :project="project" small></stale-project-warning>
               </template>
               <v-spacer></v-spacer>
               <v-icon right>{{projectMenuIcon}}</v-icon>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
 
           <v-card>
             <template v-if="projectList.length > 3">
-              <v-card-title class="pa-0 grey lighten-5">
+              <v-card-title class="pa-0">
                 <v-text-field
                   clearable
                   label="Filter projects"
@@ -66,7 +66,6 @@ SPDX-License-Identifier: Apache-2.0
                   flat
                   single-line
                   hide-details
-                  color="grey darken-1"
                   prepend-icon="mdi-magnify"
                   class="pl-4 mt-0 pt-0 project-filter"
                   v-model="projectFilter"
@@ -82,17 +81,17 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-title>
               <v-divider></v-divider>
             </template>
-            <v-list flat light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
+            <v-list flat class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
               <v-list-item
-                class="project-list-tile"
                 v-for="project in visibleProjectList"
                 @click="onProjectClick($event, project)"
-                :class="{'grey lighten-4' : isHighlightedProject(project)}"
+                class="project-list-tile"
+                :class="{'highlighted-item' : isHighlightedProject(project)}"
                 :key="project.metadata.name"
                 :data-g-project-name="project.metadata.name"
               >
                 <v-list-item-avatar>
-                  <v-icon v-if="project.metadata.name === projectName" color="teal">mdi-check</v-icon>
+                  <v-icon v-if="project.metadata.name === projectName" color="primary">mdi-check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
@@ -103,14 +102,14 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-action>
               </v-list-item>
             </v-list>
-            <v-card-actions class="grey lighten-3">
+            <v-card-actions>
               <v-tooltip top :disabled="canCreateProject" style="width: 100%">
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
                     <v-btn
                       text
                       block
-                      class="project-add text-left teal--text"
+                      class="project-add text-left primary--text"
                       :disabled="!canCreateProject"
                       @click.stop="openProjectDialog"
                     >
@@ -125,10 +124,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-card>
         </v-menu>
       </template>
-      <v-list ref="mainMenu">
+      <v-list ref="mainMenu" class="main-menu" flat>
         <v-list-item :to="{name: 'Home'}" exact v-if="hasNoProjects">
           <v-list-item-action>
-            <v-icon class="white--text">mdi-home-outline</v-icon>
+            <v-icon>mdi-home-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title class="subtitle-1">Home</v-list-item-title>
@@ -136,12 +135,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
+            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" activeClass="active-item">
               <v-list-item-action>
-                <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
+                <v-icon small color="main-navigation-title">{{route.meta.menu.icon}}</v-icon>
               </v-list-item-action>
               <v-list-item-content>
-                <v-list-item-title class="subtitle-1" >{{route.meta.menu.title}}</v-list-item-title>
+                <v-list-item-title class="subtitle-1 main-navigation-title--text" >{{route.meta.menu.title}}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </template>
@@ -462,7 +461,6 @@ export default {
         position: relative;
         height: $teaserHeight;
         overflow: hidden;
-        background-color: #212121;
         text-align: center;
 
         a {
@@ -495,7 +493,6 @@ export default {
           }
 
           h2 {
-            color: rgb(0, 137, 123);
             font-size: 15px;
             font-weight: 300;
             padding: 0px;
@@ -511,11 +508,9 @@ export default {
       height: 60px !important;
       font-weight: 700;
       font-size: 16px;
-      background-color: rgba(0,0,0,0.1) !important;
       .placeholder::before {
         content: 'Project';
         font-weight: 400;
-        color: hsla(0,0%,100%,.7);
         text-transform: none;
       }
     }
@@ -530,13 +525,6 @@ export default {
       .v-list-item__title {
         text-transform: uppercase !important;
         max-width: 180px;
-      }
-      .v-list-item--active {
-        background: rgba(255,255,255,0.1) !important;
-        color: white !important;
-        .icon {
-          color: white !important;
-        }
       }
     }
 
@@ -561,10 +549,6 @@ export default {
           overflow-y: auto;
           max-width: 300px;
 
-          div:hover {
-            background-color: #F5F5F5
-          }
-
           div > a {
             height: 54px;
           }
@@ -574,7 +558,17 @@ export default {
           .project-owner {
             font-size: 11px;
           }
+          .highlighted-item {
+            background-color: rgba(#c0c0c0, .2) !important;
+            font-weight: bold;
+          }
         }
+      }
+    }
+
+    .main-menu {
+      .active-item {
+        background-color: rgba(#fff, .3);
       }
     }
   }

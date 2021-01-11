@@ -148,9 +148,20 @@ export const shootItem = {
     canLinkToSeed () {
       return get(this.shootItem, 'info.canLinkToSeed', false)
     },
-
     isShootLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)
+    },
+    isShootLastOperationTypeControlPlaneMigrating () {
+      return this.shootLastOperation.type === 'Migrate' || this.shootLastOperation.type === 'Restore'
+    },
+    shootLastOperationTypeControlPlaneMigrationMessage () {
+      switch (this.shootLastOperation.type) {
+        case 'Migrate':
+          return 'Deleting Resources on old Seed'
+        case 'Restore':
+          return 'Creating Resoures on new Seed'
+      }
+      return ''
     },
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
@@ -179,9 +190,6 @@ export const shootItem = {
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
     },
-    isControlPlaneMigrating () {
-      return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName
-    },
     hibernationPossibleConstraint () {
       const constraints = get(this.shootItem, 'status.constraints')
       return find(constraints, ['type', 'HibernationPossible'])
@@ -199,7 +207,7 @@ export const shootItem = {
       if (!this.isShootActionsDisabledForPurpose) {
         return tooltip
       }
-      return 'Actions disabled for cluster purpose infrastructure'
+      return 'Actions disabled for cluster with purpose infrastructure'
     }
   }
 }

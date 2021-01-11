@@ -165,7 +165,7 @@ export default {
       } else if (this.isError) {
         return 'error'
       } else {
-        return 'cyan darken-2'
+        return 'primary'
       }
     },
     errorDescriptions () {

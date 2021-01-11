@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <div class="d-flex flex-wrap">
       <div class="regularInput">
         <v-text-field
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.name')"
           @input="onInputName"
           @blur="$v.worker.name.$touch()"
@@ -48,8 +48,13 @@ SPDX-License-Identifier: Apache-2.0
       <div v-if="canDefineVolumeSize" class="smallInput">
         <size-input
           :min="minimumVolumeSize"
+<<<<<<< HEAD
           color="cyan darken-2"
           :error-messages="getErrorMessages('volumeSizeInternal')"
+=======
+          color="primary"
+          :error-messages="getErrorMessages('worker.volume.size')"
+>>>>>>> master
           @input="onInputVolumeSize"
           @blur="$v.volumeSizeInternal.$touch()"
           label="Volume Size"
@@ -59,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.minimum')"
           @input="onInputminimum"
           @blur="$v.worker.minimum.$touch()"
@@ -70,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.maximum')"
           @input="onInputmaximum"
           @blur="$v.worker.maximum.$touch()"
@@ -82,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.maxSurge')"
           @input="onInputMaxSurge"
           @blur="$v.worker.maxSurge.$touch()"
@@ -92,8 +97,8 @@ SPDX-License-Identifier: Apache-2.0
 
       <div class="regularInput" v-if="zonedCluster">
         <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Zone"
           :items="zoneItems"
           :error-messages="getErrorMessages('selectedZones')"

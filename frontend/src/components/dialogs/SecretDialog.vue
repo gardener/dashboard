@@ -7,22 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-      <v-img
-        class="white--text align-center justify-start"
-        height="130px"
-        :src="backgroundSrc"
-      >
-        <v-card-title>
-          <infra-icon v-model="infraIcon" :width="42"></infra-icon>
-          <span class="headline ml-5">{{title}}</span>
-        </v-card-title>
-      </v-img>
+      <v-card-title class="toolbar-background">
+        <infra-icon v-model="infraIcon" :size="42"></infra-icon>
+        <span class="headline ml-5 toolbar-title--text">{{title}}</span>
+      </v-card-title>
       <v-card-text>
         <v-container fluid>
           <div>
             <template v-if="isCreateMode">
               <v-text-field
-                :color="color"
+                color="primary"
                 ref="name"
                 v-model.trim="name"
                 label="Secret Name"
@@ -41,8 +35,7 @@ SPDX-License-Identifier: Apache-2.0
               ref="cloudProfile"
               v-model="cloudProfileName"
               :isCreateMode="isCreateMode"
-              :cloudProfiles="cloudProfiles"
-              :color="color">
+              :cloudProfiles="cloudProfiles">
             </cloud-profile>
           </div>
 
@@ -56,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="cancel">Cancel</v-btn>
-        <v-btn text @click.native="submit" :class="textColor" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-btn text @click.native="submit" color="primary" :disabled="!valid">{{submitButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -66,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
 import CloudProfile from '@/components/CloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
@@ -110,10 +103,6 @@ export default {
       type: String,
       required: true
     },
-    backgroundSrc: {
-      type: String,
-      required: true
-    },
     createTitle: {
       type: String,
       required: true
@@ -124,10 +113,6 @@ export default {
     },
     secret: {
       type: Object
-    },
-    color: {
-      type: String,
-      required: true
     },
     infraIcon: {
       type: String,
@@ -206,9 +191,6 @@ export default {
     },
     title () {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
-    },
-    textColor () {
-      return textColor(this.color)
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length

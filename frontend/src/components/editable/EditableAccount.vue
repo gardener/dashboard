@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
               class="grow content"
               :class="{ 'content--bounce': contentBounce }"
             >
-              <account-avatar :account-name="value" mail-to :color="color"></account-avatar>
+              <account-avatar :account-name="value" mail-to></account-avatar>
             </v-col>
             <v-col class="shrink">
               <v-btn
@@ -65,11 +65,11 @@ SPDX-License-Identifier: Apache-2.0
             :color="color"
           >
             <template v-slot:selection="{ item: value }">
-              <account-avatar :account-name="value" :color="color"></account-avatar>
+              <account-avatar :account-name="value"></account-avatar>
             </template>
             <template v-slot:item="{ item: value }">
               <v-list-item-content>
-                <account-avatar :account-name="value" :color="color"></account-avatar>
+                <account-avatar :account-name="value"></account-avatar>
               </v-list-item-content>
             </template>
             <template v-slot:append-outer>
@@ -124,7 +124,7 @@ export default {
     },
     color: {
       type: String,
-      default: 'blue-grey darken-2'
+      default: 'primary'
     },
     placeholder: {
       type: String

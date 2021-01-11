@@ -7,8 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About Azure Secrets"
-    color="blue darken-1"
-    backgroundSrc="/static/background_azure.svg"
     :value="value"
     @input="onInput"
   >
@@ -24,8 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Read the
           <a href="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure"
-          target="_blank"
-          class="blue--text text--darken-1">
+          target="_blank">
           IAM Console help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to manage your credentials and subscriptions.
         </p>
       </div>

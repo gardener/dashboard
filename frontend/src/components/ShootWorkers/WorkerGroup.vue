@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     :title="workerGroup.name"
-    toolbarColor="cyan darken-2"
     :popperKey="`worker_group_${workerGroup.name}`"
   >
     <template v-slot:popperRef>
@@ -15,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         small
         class="cursor-pointer my-0 ml-0"
         outlined
-        color="cyan darken-2">
+        color="primary">
         {{workerGroup.name}}
       </v-chip>
     </template>

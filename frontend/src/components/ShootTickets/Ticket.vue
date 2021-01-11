@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticket-toolbar">
+    <v-card-title class="subtitle-1 mt-4 ticket-toolbar toolbar-background toolbar-title--text">
       <div class="d-flex flex-wrap align-center">
         <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
         <div v-if="labels.length" class="labels"><ticket-label v-for="label in labels" :key="label.id" :label="label"></ticket-label></div>
@@ -15,8 +15,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-container>
       <span class="font-weight-bold">{{login}}</span> created this
-      <a :href="ticketHtmlUrl" target="_blank" class="cyan--text text--darken-2">ticket</a>
-      <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
+      <a :href="ticketHtmlUrl" target="_blank">ticket</a>
+      <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="anchor" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-string :dateTime="ticket.metadata.created_at" mode="past"></time-string>
     </v-container>
     <v-list>
@@ -25,9 +25,9 @@ SPDX-License-Identifier: Apache-2.0
     </v-list>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
-      <v-btn text class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
+      <v-btn text class="action-button primary--text" :href="addCommentLink" target="_blank" title="Add Comment">
         Add Comment
-        <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
+        <v-icon color="anchor" class="link-icon pl-2">mdi-open-in-new</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
     </v-card-actions>

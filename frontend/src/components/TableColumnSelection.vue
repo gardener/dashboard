@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip open-delay="500" top>
         <template v-slot:activator="{ on: tooltip }">
           <v-btn v-on="{ ...menu, ...tooltip}" icon>
-            <v-icon class="cursor-pointer" color="white">mdi-dots-vertical</v-icon>
+            <v-icon class="cursor-pointer" color="toolbar-title">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
         Table Options
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-action>
           <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
         </v-list-item-action>
-        <v-list-item-content class="grey--text text--darken-2">
+        <v-list-item-content class="primary--text">
           <v-list-item-title>
             <v-tooltip v-if="header.customField" top open-delay="500">
               <template v-slot:activator="{ on: tooltip }">
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-badge
                     inline
                     icon="mdi-playlist-star"
-                    color="cyan darken-2"
+                    color="primary"
                     class="mt-0"
                   >
                     <span>{{ header.text }}</span>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-tooltip top style="width: 100%">
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="onReset">
+              <v-btn v-on="on" block text class="text-center primary--text" @click.stop="onReset">
                 Reset
               </v-btn>
             </template>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-action>
           <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
         </v-list-item-action>
-        <v-list-item-content class="grey--text text--darken-2">
+        <v-list-item-content class="primary--text">
           <v-list-item-title>
             {{filter.text}}
             <v-tooltip top v-if="filter.helpTooltip">
@@ -111,7 +111,7 @@ export default {
       this.$emit('toggleFilter', filter)
     },
     checkboxColor (selected) {
-      return selected ? 'cyan darken-2' : ''
+      return selected ? 'primary' : ''
     },
     checkboxIcon (selected) {
       return selected ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'

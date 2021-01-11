@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-row>
     <v-col class="regularInput">
       <v-text-field
-        color="cyan darken-2"
+        color="primary"
         label="Maintenance Start Time"
         v-model="localizedMaintenanceBegin"
         :error-messages="getErrorMessages('localizedMaintenanceBegin')"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-col>
     <v-col class="regularInput">
       <v-autocomplete
-        color="cyan darken-2"
+        color="primary"
         label="Timezone"
         :items="timezones"
         v-model="selectedTimezone"

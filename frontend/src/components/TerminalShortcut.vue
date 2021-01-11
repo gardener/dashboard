@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
                 small
                 class="my-0 ml-2 enablePointerEvents"
                 outlined
-                color="orange darken-2">
+                color="warning">
                 Unverified
               </v-chip>
             </template>

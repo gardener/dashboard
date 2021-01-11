@@ -11,20 +11,20 @@ SPDX-License-Identifier: Apache-2.0
         <ticket :ticket="ticket"></ticket>
       </v-card>
       <div class="d-flex align-center justify-center mt-4">
-        <v-btn text color="cyan darken-2" :href="createTicketLink" target="_blank" title="Create Ticket">
+        <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
-          <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+          <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
       </div>
     </template>
     <v-card v-else>
-      <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar flat dense color="toolbar-background toolbar-title--text">
         <v-toolbar-title class="subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
-        <v-btn text color="cyan darken-2" :href="createTicketLink" target="_blank" title="Create Ticket">
+        <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
-          <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+          <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
       </v-card-actions>
     </v-card>
