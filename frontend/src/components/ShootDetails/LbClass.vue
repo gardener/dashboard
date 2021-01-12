@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     :title="name"
-    :popperKey="`lbclass_${name}`"
+    :popper-key="`lbclass_${name}`"
   >
     <template v-slot:popperRef>
       <v-chip small class="cursor-pointer mr-2" outlined color="primary">{{name}}</v-chip>

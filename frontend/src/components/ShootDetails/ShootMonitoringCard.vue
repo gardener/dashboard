@@ -19,9 +19,9 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title class="d-flex align-center pt-1">
             <shoot-status
               class="pr-2"
-              :shootItem="shootItem"
-              :popperKey="`${shootNamespace}/${shootName}_lastOp`"
-              popperPlacement="bottom"
+              :shoot-item="shootItem"
+              :popper-key="`${shootNamespace}/${shootName}_lastOp`"
+              popper-placement="bottom"
               showStatusText
               >
             </shoot-status>
@@ -37,13 +37,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Readiness</v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <status-tags v-else :shootItem="shootItem" popperPlacement="bottom"></status-tags>
+            <status-tags v-else :shoot-item="shootItem" popper-placement="bottom"></status-tags>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <template v-if="canGetSecrets">
         <v-divider inset></v-divider>
-        <cluster-metrics v-if="!metricsNotAvailableText" :shootItem="shootItem"></cluster-metrics>
+        <cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></cluster-metrics>
         <v-list-item v-else>
           <v-list-item-icon>
             <v-icon color="primary">mdi-alert-circle-outline</v-icon>

@@ -6,17 +6,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
-    @dialogOpened="onConfigurationDialogOpened"
+    :shoot-item="shootItem"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Add-ons"
-    maxWidth="900"
+    max-width="900"
     max-height="60vh"
     >
     <template v-slot:actionComponent>
       <manage-shoot-addons
         ref="addons"
-        :isCreateMode="false"
+        :is-create-mode="false"
        ></manage-shoot-addons>
     </template>
   </action-button-dialog>

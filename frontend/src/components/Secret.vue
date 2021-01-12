@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         v-for="secret in rows"
         :key="secret.metadata.name"
         :secret="secret"
-        :secretDescriptorKey="secretDescriptorKey"
+        :secret-descriptor-key="secretDescriptorKey"
         @update="onUpdate"
         @delete="onDelete"
       >

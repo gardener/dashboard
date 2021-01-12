@@ -17,9 +17,9 @@ SPDX-License-Identifier: Apache-2.0
       <g-popper
         v-if="snackbarDetailsText"
         title="Details"
-        :popperKey="`popper_snackbar_${uuid}`"
+        :popper-key="`popper_snackbar_${uuid}`"
         placement="bottom"
-        :boundariesSelector="`#boundary_${uuid}`"
+        :boundaries-selector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
         <template v-slot:popperRef>
@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-card tile>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('horizontal')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
                   <span>Split Pane Vertically</span>
@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-actions>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('vertical')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
                   <span>Split Pane Horizontally</span>
@@ -132,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-tooltip :disabled="connectionMenu" top style="min-width: 110px">
                 <template v-slot:activator="{ on: tooltip }">
                   <v-btn v-on="{ ...tooltip, ...menu }" small text color="grey lighten-1" class="text-none systemBarButton">
-                    <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+                    <icon-base width="18" height="18" view-box="-2 -2 30 30" icon-color="#bdbdbd" class="mr-2">
                       <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                       <disconnected v-else></disconnected>
                     </icon-base>

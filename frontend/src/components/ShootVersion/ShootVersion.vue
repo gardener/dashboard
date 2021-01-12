@@ -39,25 +39,25 @@ SPDX-License-Identifier: Apache-2.0
       <span>{{tooltipText}}</span>
     </v-tooltip>
     <g-dialog
-      :confirmValue="confirm"
-      confirmButtonText="Update"
-      :confirmDisabled="selectedVersionInvalid"
+      :confirm-value="confirm"
+      confirm-button-text="Update"
+      :confirm-disabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
-      confirmColor="warning"
-      defaultColor="warning"
+      confirm-color="warning"
+      default-color="warning"
       ref="gDialog"
       >
       <template v-slot:caption>Update Cluster</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
       <template v-slot:message>
         <shoot-version-update
-          :availableK8sUpdates="availableK8sUpdates"
-          :currentK8sVersion="kubernetesVersion"
-          @selectedVersion="onSelectedVersion"
-          @selectedVersionType="onSelectedVersionType"
-          @selectedVersionInvalid="onSelectedVersionInvalid"
-          @confirmRequired="onConfirmRequired"
+          :availableK8s-updates="availableK8sUpdates"
+          :currentK8s-version="kubernetesVersion"
+          @selected-version="onSelectedVersion"
+          @selected-version-type="onSelectedVersionType"
+          @selected-version-invalid="onSelectedVersionInvalid"
+          @confirm-required="onConfirmRequired"
           ref="shootVersionUpdate"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">

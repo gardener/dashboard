@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shootItem="shootItem" onlyK8sWarnings></version-expiration-warning>
+          <version-expiration-warning :shoot-item="shootItem" onlyK8sWarnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>
@@ -79,18 +79,18 @@ SPDX-License-Identifier: Apache-2.0
             <worker-group
             class="mr-2 mb-2"
             v-for="workerGroup in shootWorkerGroups"
-            :workerGroup="workerGroup"
-            :cloudProfileName="shootCloudProfileName"
-            :shootItem="shootItem"
+            :worker-group="workerGroup"
+            :cloud-profile-name="shootCloudProfileName"
+            :shoot-item="shootItem"
             :key="workerGroup.name"
             ></worker-group>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shootItem="shootItem" onlyMachineImageWarnings></version-expiration-warning>
+          <version-expiration-warning :shoot-item="shootItem" onlyMachineImageWarnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <worker-configuration :shootItem="shootItem"></worker-configuration>
+          <worker-configuration :shoot-item="shootItem"></worker-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{shootCreatedAt}}</span>
               </template>
-              <time-string :dateTime="shootMetadata.creationTimestamp" mode="past"></time-string>
+              <time-string :date-time="shootMetadata.creationTimestamp" mode="past"></time-string>
             </v-tooltip>
           </v-list-item-title>
         </v-list-item-content>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-content>
           <v-list-item-action>
             <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
-            <purpose-configuration v-if="canGetSecrets" :shootItem="shootItem"></purpose-configuration>
+            <purpose-configuration v-if="canGetSecrets" :shoot-item="shootItem"></purpose-configuration>
           </v-list-item-action>
         </v-list-item>
       </template>
@@ -158,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Access Restrictions</v-list-item-subtitle>
             <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
-              <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+              <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
             </v-list-item-title>
             <v-list-item-title v-else class="d-flex align-center pt-1">
               No access restrictions configured
@@ -166,7 +166,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-content>
           <v-list-item-action>
             <access-restrictions-configuration
-              :shootItem="shootItem"></access-restrictions-configuration>
+              :shoot-item="shootItem"></access-restrictions-configuration>
           </v-list-item-action>
         </v-list-item>
       </template>
@@ -193,7 +193,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <addon-configuration :shootItem="shootItem"></addon-configuration>
+          <addon-configuration :shoot-item="shootItem"></addon-configuration>
         </v-list-item-action>
       </v-list-item>
     </v-list>

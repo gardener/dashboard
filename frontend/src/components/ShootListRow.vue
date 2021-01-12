@@ -21,8 +21,8 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-              <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
+              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp"></self-termination-warning>
+              <version-expiration-warning :shoot-item="shootItem"></version-expiration-warning>
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"
@@ -34,10 +34,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </template>
       <template v-if="cell.header.value === 'infrastructure'">
-        <vendor :shootItem="shootItem"></vendor>
+        <vendor :shoot-item="shootItem"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
-        <shoot-seed-name :shootItem="shootItem" />
+        <shoot-seed-name :shoot-item="shootItem" />
       </template>
       <template v-if="cell.header.value === 'technicalId'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">
@@ -64,8 +64,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'lastOperation'">
         <div>
           <shoot-status
-          :popperKey="`${shootNamespace}/${shootName}`"
-          :shootItem="shootItem">
+          :popper-key="`${shootNamespace}/${shootName}`"
+          :shoot-item="shootItem">
           </shoot-status>
         </div>
       </template>
@@ -73,10 +73,10 @@ SPDX-License-Identifier: Apache-2.0
         <shoot-version :shoot-item="shootItem" chip></shoot-version>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <status-tags :shootItem="shootItem"></status-tags>
+        <status-tags :shoot-item="shootItem"></status-tags>
       </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
-        <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+        <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
         <v-tooltip top>
@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span>{{showClusterAccessActionTitle}}</span>
           </v-tooltip>
-          <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
+          <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
     </td>

@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="gcp"
-    infraIcon="gcp"
-    createTitle="Add new Google Secret"
-    replaceTitle="Replace Google Secret"
+    cloud-provider-kind="gcp"
+    infra-icon="gcp"
+    create-title="Add new Google Secret"
+    replace-title="Replace Google Secret"
     @input="onInput">
 
     <template v-slot:data-slot>

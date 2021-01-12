@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     @pane-remove="resize"
   >
     <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" class="position-relative">
-      <g-splitpane v-if="hasChildren(item)" :splitpaneTree="item">
+      <g-splitpane v-if="hasChildren(item)" :splitpane-tree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
