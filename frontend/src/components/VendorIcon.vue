@@ -44,12 +44,8 @@ export default {
           return require('@/assets/openstack.svg')
         case 'alicloud':
           return require('@/assets/alicloud.svg')
-        case 'digital-ocean':
-          return require('@/assets/digital-ocean.svg')
         case 'vsphere':
           return require('@/assets/vsphere.svg')
-        case 'china-telecom':
-          return require('@/assets/china-telecom.svg')
         case 'coreos':
           return require('@/assets/coreos.svg')
         case 'suse-jeos':

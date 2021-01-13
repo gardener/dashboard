@@ -758,12 +758,6 @@ const getters = {
       })
     }
   },
-
-  infrastructureSecretsByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])
-    }
-  },
   infrastructureSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
@@ -942,6 +936,12 @@ const getters = {
   },
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canCreateSecrets (state) {
+    return canI(state.subjectRules, 'create', '', 'secrets')
+  },
+  canPatchSecrets (state) {
+    return canI(state.subjectRules, 'patch', '', 'secrets')
   },
   canDeleteSecrets (state) {
     return canI(state.subjectRules, 'delete', '', 'secrets')

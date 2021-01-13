@@ -28,9 +28,14 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.esc="search=''"
           class="mr-3"
         ></v-text-field>
-        <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
-          <v-icon color="toolbar-title">mdi-plus</v-icon>
-        </v-btn>
+        <v-tooltip top v-if="canCreateShoots && projectScope">
+          <template v-slot:activator="{ on }">
+             <v-btn v-on="on" icon :to="{ name: 'NewShoot', params: {  namespace } }">
+               <v-icon color="toolbar-title">mdi-plus</v-icon>
+             </v-btn>
+          </template>
+          <span>Create Cluster</span>
+        </v-tooltip>
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
@@ -103,7 +108,6 @@ export default {
   },
   data () {
     return {
-      floatingButton: false,
       search: '',
       dialog: null,
       options: undefined,
@@ -540,9 +544,6 @@ export default {
     hideClustersWithLabels () {
       return get(this.cfg, 'ticket.hideClustersWithLabels', [])
     }
-  },
-  mounted () {
-    this.floatingButton = true
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

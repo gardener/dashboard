@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-card-title class="toolbar-background">
-        <infra-icon v-model="infraIcon" :size="42"></infra-icon>
+        <infra-icon v-model="infraIcon" :width="42"></infra-icon>
         <span class="headline ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>

@@ -6,127 +6,82 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
+    <v-card class="mt-6">
+      <v-toolbar flat color="toolbar-background toolbar-title--text">
+        <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
+        <v-toolbar-title class="subtitle-1">
+          Project Secrets
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field v-if="secretList.length > 3"
+          class="mr-3"
+          prepend-inner-icon="mdi-magnify"
+          color="primary"
+          label="Search"
+          hide-details
+          flat
+          solo
+          clearable
+          v-model="secretFilter"
+          @keyup.esc="secretFilter=''"
+        ></v-text-field>
+        <v-menu v-if="canCreateSecrets" :nudge-bottom="20" :nudge-right="20" left v-model="createSecretMenu" absolute>
+          <template v-slot:activator="{ on: menu }">
+            <v-tooltip  top>
+              <template v-slot:activator="{ on: tooltip }">
+                <v-btn v-on="{ ...menu, ...tooltip}" icon>
+                  <v-icon color="toolbar-title">mdi-plus</v-icon>
+                </v-btn>
+              </template>
+              Create Secret
+            </v-tooltip>
+          </template>
+          <v-list subheader dense>
+            <v-subheader>Select Infrastructure</v-subheader>
+            <v-list-item v-for="infrastructure in sortedCloudProviderKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
+              <v-list-item-action>
+                 <infra-icon :value="infrastructure" :width="24"></infra-icon>
+              </v-list-item-action>
+              <v-list-item-content class="primary--text">
+                <v-list-item-title>
+                    {{infrastructure}}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <table-column-selection
+          :headers="secretTableHeaders"
+          @setSelectedHeader="setSelectedHeader"
+          @reset="resetTableSettings"
+        ></table-column-selection>
+      </v-toolbar>
 
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('aws')"
-    infrastructureKey="aws"
-    infrastructureName="Amazon Web Services"
-    icon="aws"
-    secretDescriptorKey="accessKeyID"
-    description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('azure')"
-    class="mt-4"
-    infrastructureKey="azure"
-    infrastructureName="Microsoft Azure Cloud"
-    icon="azure"
-    secretDescriptorKey="subscriptionID"
-    description="Make sure that the new credentials have the correct permission on Azure."
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('gcp')"
-    class="mt-4"
-    infrastructureKey="gcp"
-    infrastructureName="Google Cloud Platform"
-    icon="gcp"
-    secretDescriptorKey="project"
-    description="Make sure that the new credentials have the correct permission on GCP."
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('openstack')"
-    class="mt-4"
-    infrastructureKey="openstack"
-    infrastructureName="OpenStack"
-    icon="openstack"
-    description="Make sure that the new credentials have the correct OpenStack permissions"
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('alicloud')"
-    class="mt-4"
-    infrastructureKey="alicloud"
-    infrastructureName="Alibaba Cloud"
-    secretDescriptorKey="accessKeyID"
-    icon="alicloud"
-    description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('metal')"
-    class="mt-4"
-    infrastructureKey="metal"
-    infrastructureName="Metal Cloud"
-    secretDescriptorKey="metalHMAC"
-    icon="metal"
-    description="Make sure that the new credentials have the correct Metal Cloud permissions"
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <secret
-    v-if="hasCloudProfileForCloudProviderKind('vsphere')"
-    class="mt-4"
-    infrastructureKey="vsphere"
-    infrastructureName="VMware vSphere"
-    secretDescriptorKey="vsphereUsername"
-    icon="vsphere"
-    description="Make sure that the new credentials have the correct VMware vSphere permissions"
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
-    <template v-if="showDisabledCloudProviders">
-
-      <disabled-secret
-      class="mt-4"
-      infrastructureName="Digital Ocean"
-      icon="digital-ocean"
-      description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
-        ></disabled-secret>
-
-      <disabled-secret
-      class="mt-4"
-      infrastructureName="China Telecom"
-      icon="china-telecom"
-      description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
-        ></disabled-secret>
-
-      <disabled-secret
-      class="mt-4"
-      infrastructureName="Nutanix"
-      icon="mdi-xamarin"
-      description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
-        ></disabled-secret>
-
-    </template>
+      <v-card-text v-if="!secretList.length">
+        <div class="title grey--text text--darken-1 my-4">Add Secrets to your project.</div>
+        <p class="body-1">
+          Add Secrets to your project. You need to create at least one secret to be able to create a cluster.
+        </p>
+      </v-card-text>
+      <v-data-table
+        :headers="visibleSecretTableHeaders"
+        :items="secretList"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="secretTableOptions"
+        must-sort
+        :search="secretFilter"
+      >
+        <template v-slot:item="{ item }">
+          <secret-row
+            :item="item"
+            :headers="secretTableHeaders"
+            :key="`${item.cloudProfileName}/${item.name}`"
+            @delete="onRemoveSecret"
+            @update="onUpdateSecret"
+          ></secret-row>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
@@ -135,26 +90,31 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
-import { isOwnSecret } from '@/utils'
+import { isOwnSecret, mapTableHeader } from '@/utils'
 import get from 'lodash/get'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
-import Secret from '@/components/Secret'
-import DisabledSecret from '@/components/DisabledSecret'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
+import SecretRow from '@/components/SecretRow.vue'
+import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
 
 export default {
   name: 'secrets',
   components: {
     DeleteDialog,
-    Secret,
-    DisabledSecret,
-    SecretDialogWrapper
+    SecretDialogWrapper,
+    TableColumnSelection,
+    SecretRow,
+    InfraIcon
   },
   data () {
     return {
-      selectedSecret: {}, // pragma: whitelist secret
+      selectedSecret: {},
       dialogState: {
         aws: {
           visible: false,
@@ -188,21 +148,96 @@ export default {
         speedDial: false
       },
       initialDialogState: {},
-      floatingButton: false
+      defaultSecretTableOptions: {
+        itemsPerPage: 10,
+        sortBy: ['name'],
+        sortDesc: [false]
+      },
+      secretSelectedColumns: {},
+      secretTableOptions: undefined,
+      secretFilter: '',
+      createSecretMenu: false
     }
   },
   computed: {
     ...mapGetters([
       'cloudProfilesByCloudProviderKind',
-      'getInfrastructureSecretByName'
+      'getInfrastructureSecretByName',
+      'infrastructureSecretList',
+      'shootList',
+      'canCreateSecrets',
+      'sortedCloudProviderKindList'
     ]),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
       }
     },
-    showDisabledCloudProviders () {
-      return !!this.$store.state.cfg.showDisabledCloudProviders
+    secretTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'name',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'INFRASTRUCTURE',
+          align: 'start',
+          value: 'infrastructure',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'CLOUD PROFILE',
+          align: 'start',
+          value: 'cloudProfileName',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'DETAILS',
+          align: 'start',
+          value: 'details',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'USED BY',
+          align: 'start',
+          value: 'relatedShootCount',
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
+        }
+      ]
+      return map(headers, header => ({
+        ...header,
+        selected: get(this.secretSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleSecretTableHeaders () {
+      return filter(this.secretTableHeaders, ['selected', true])
+    },
+    secretList () {
+      return map(this.infrastructureSecretList, secret => ({
+        name: secret.metadata.name,
+        isOwnSecret: isOwnSecret(secret),
+        ownernamespace: secret.metadata.secretRef.namespace,
+        infrastructure: secret.metadata.cloudProviderKind,
+        cloudProfileName: secret.metadata.cloudProfileName,
+        details: this.getSecretDetails(secret),
+        relatedShootCount: this.relatedShootCount(secret),
+        relatedShootCountLabel: this.relatedShootCountLabel(secret),
+        isSupportedInfrastructure: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
+        secret
+      }))
     }
   },
   methods: {
@@ -213,25 +248,89 @@ export default {
     onHideHelp (infrastructureKind) {
       this.dialogState[infrastructureKind].help = false
     },
-    onAdd (infrastructureKind) {
-      this.selectedSecret = undefined // pragma: whitelist secret
+    openSecretAddDialog (infrastructureKind) {
+      this.selectedSecret = undefined
       this.dialogState[infrastructureKind].visible = true
     },
-    onUpdate (row) {
-      const kind = row.metadata.cloudProviderKind
-      this.selectedSecret = row // pragma: whitelist secret
+    onUpdateSecret (secret) {
+      const kind = secret.metadata.cloudProviderKind
+      this.selectedSecret = secret
       this.dialogState[kind].visible = true
     },
-    onDelete (row) {
-      this.selectedSecret = row // pragma: whitelist secret
+    onRemoveSecret (secret) {
+      this.selectedSecret = secret
       this.dialogState.deleteConfirm = true
     },
     hideDialogs () {
       merge(this.dialogState, this.initialDialogState)
+    },
+    getSecretDetails (secret) {
+      const secretData = secret.data || {}
+      switch (secret.metadata.cloudProviderKind) {
+        case 'openstack':
+          return `Domain Name: ${secretData.domainName} / Tenant Name: ${secretData.tenantName}`
+        case 'vsphere':
+          return `vSphere Username: ${secretData.vsphereUsername} / NSX-T Username: ${secretData.nsxtUsername}`
+        case 'aws':
+          return `Access Key ID: ${secretData.accessKeyID}`
+        case 'azure':
+          return `Subscription ID: ${secretData.subscriptionID}`
+        case 'gcp':
+          return `Project ${secretData.project}`
+        case 'alicloud':
+          return `Access Key ID: ${secretData.accessKeyID}`
+        case 'metal':
+          return `HMAC: ${secretData.metalHMAC}`
+      }
+      return undefined
+    },
+    relatedShootCount (secret) {
+      const name = secret.metadata.name
+      const shootsByInfrastructureSecret = filter(this.shootList, ['spec.secretBindingName', name])
+      return shootsByInfrastructureSecret.length
+    },
+    relatedShootCountLabel (secret) {
+      const count = this.relatedShootCount(secret)
+      if (count === 0) {
+        return 'currently unused'
+      } else {
+        return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
+      }
+    },
+    setSelectedHeader (header) {
+      this.$set(this.secretSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumns()
+    },
+    resetTableSettings () {
+      this.secretSelectedColumns = mapTableHeader(this.secretTableHeaders, 'defaultSelected')
+      this.tableOptions = this.defaultSecretTableOptions
+      this.saveSelectedColumns()
+    },
+    saveSelectedColumns () {
+      this.$localStorage.setObject('secrets/secret-list/selected-columns', mapTableHeader(this.secretTableHeaders, 'selected'))
+    },
+    updateTableSettings () {
+      this.secretSelectedColumns = this.$localStorage.getObject('members/secret-list/selected-columns') || {}
+      const tableOptions = this.$localStorage.getObject('members/secret-list/options')
+      this.secretTableOptions = {
+        ...this.defaultSecretTableOptions,
+        ...tableOptions
+      }
+    }
+  },
+  watch: {
+    secretTableOptions (value) {
+      if (!value) {
+        return
+      }
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+      this.$localStorage.setObject('members/secret-list/options', { sortBy, sortDesc, itemsPerPage })
     }
   },
   mounted () {
-    this.floatingButton = true
     if (!get(this.$route.params, 'name')) {
       return
     }
@@ -247,6 +346,15 @@ export default {
     this.$bus.$on('esc-pressed', () => {
       this.hideDialogs()
     })
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.updateTableSettings()
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.updateTableSettings()
+    next()
   }
 }
 </script>

@@ -218,7 +218,6 @@ export default {
       grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
       idToken: undefined,
       showToken: false,
-      floatingButton: false,
       showMessage: false,
       kubeconfigYaml: ''
     }
