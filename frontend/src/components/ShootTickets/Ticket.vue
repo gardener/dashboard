@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <span class="font-weight-bold">{{login}}</span> created this
       <a :href="ticketHtmlUrl" target="_blank">ticket</a>
       <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="anchor" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :dateTime="ticket.metadata.created_at" mode="past"></time-string>
+      <time-string :date-time="ticket.metadata.created_at" mode="past"></time-string>
     </v-container>
     <v-list>
       <ticket-comment :comment="ticket"></ticket-comment>

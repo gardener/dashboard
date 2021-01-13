@@ -9,11 +9,11 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="projectShortcuts.length || shortcuts.length">
       <template v-for="shortcut in projectShortcuts">
         <terminal-shortcut
-          :shootItem="shootItem"
+          :shoot-item="shootItem"
           :shortcut="shortcut"
           :key="`project-shortcut-${shortcut.id}`"
           :popper-boundaries-selector="popperBoundariesSelector"
-          @addTerminalShortcut="onAddTerminalShortcut"
+          @add-terminal-shortcut="onAddTerminalShortcut"
         >
           <template v-slot:icon>
             <v-tooltip top>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
                         <v-icon color="primary">mdi-grid-large</v-icon>
                       </v-avatar>
                     </template>
-                    <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">
+                    <icon-base width="24" height="23" icon-color="primary" view-box="-4 0 56 54">
                       <terminal-shortcut-icon></terminal-shortcut-icon>
                     </icon-base>
                   </v-badge>
@@ -48,13 +48,13 @@ SPDX-License-Identifier: Apache-2.0
           :shortcut="shortcut"
           :key="`g-shortcut-${shortcut.id}`"
           :popper-boundaries-selector="popperBoundariesSelector"
-          @addTerminalShortcut="onAddTerminalShortcut"
+          @add-terminal-shortcut="onAddTerminalShortcut"
         >
           <template v-slot:icon>
             <v-tooltip top>
               <template v-slot:activator="{ on: tooltip }">
                 <span v-on="tooltip" >
-                  <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">
+                  <icon-base width="24" height="23" icon-color="primary" view-box="-4 0 56 54">
                     <terminal-shortcut-icon></terminal-shortcut-icon>
                   </icon-base>
                 </span>

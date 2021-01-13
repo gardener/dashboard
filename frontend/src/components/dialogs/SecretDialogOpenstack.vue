@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="openstack"
-    infraIcon="openstack"
-    createTitle="Add new OpenStack Secret"
-    replaceTitle="Replace OpenStack Secret"
+    cloud-provider-kind="openstack"
+    infra-icon="openstack"
+    create-title="Add new OpenStack Secret"
+    replace-title="Replace OpenStack Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
       <div>
-        <hint-colorizer hintColor="primary">
+        <hint-colorizer hint-color="primary">
           <v-text-field
           color="primary"
           v-model="username"
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         </hint-colorizer>
       </div>
       <div>
-        <hint-colorizer hintColor="warning">
+        <hint-colorizer hint-color="warning">
           <v-text-field
             color="primary"
             v-model="password"

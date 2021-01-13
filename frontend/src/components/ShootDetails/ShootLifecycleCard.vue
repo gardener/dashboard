@@ -34,10 +34,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <change-hibernation :shootItem="shootItem"></change-hibernation>
+          <change-hibernation :shoot-item="shootItem"></change-hibernation>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <hibernation-configuration ref="hibernationConfiguration" :shootItem="shootItem"></hibernation-configuration>
+          <hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem"></hibernation-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -52,10 +52,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <maintenance-start :shootItem="shootItem"></maintenance-start>
+          <maintenance-start :shoot-item="shootItem"></maintenance-start>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <maintenance-configuration :shootItem="shootItem"></maintenance-configuration>
+          <maintenance-configuration :shoot-item="shootItem"></maintenance-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <reconcile-start :shootItem="shootItem"></reconcile-start>
+          <reconcile-start :shoot-item="shootItem"></reconcile-start>
         </v-list-item-action>
       </v-list-item>
       <template v-if="canPatchShoots">
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action>
-            <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
+            <rotate-kubeconfig-start :shoot-item="shootItem"></rotate-kubeconfig-start>
           </v-list-item-action>
         </v-list-item>
         <v-divider inset></v-divider>
@@ -99,7 +99,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action>
-            <delete-cluster :shootItem="shootItem"></delete-cluster>
+            <delete-cluster :shoot-item="shootItem"></delete-cluster>
           </v-list-item-action>
         </v-list-item>
       </template>

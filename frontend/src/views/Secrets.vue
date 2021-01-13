@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-menu>
         <table-column-selection
           :headers="secretTableHeaders"
-          @setSelectedHeader="setSelectedHeader"
+          @set-selected-header="setSelectedHeader"
           @reset="resetTableSettings"
         ></table-column-selection>
       </v-toolbar>
@@ -83,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
+    <secret-dialog-wrapper :dialog-state="dialogState" :selected-secret="selectedSecret"></secret-dialog-wrapper>
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
   </v-container>
 </template>

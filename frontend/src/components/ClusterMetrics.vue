@@ -8,34 +8,34 @@ SPDX-License-Identifier: Apache-2.0
   <v-list>
     <link-list-tile v-if="isAdmin"
       icon="mdi-developer-board"
-      appTitle="Grafana"
+      app-title="Grafana"
       :url="grafanaUrlOperators"
-      :urlText="grafanaUrlOperators"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlOperators"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-else
       icon="mdi-developer-board"
-      appTitle="Grafana"
+      app-title="Grafana"
       :url="grafanaUrlUsers"
-      :urlText="grafanaUrlUsers"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlUsers"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-if="isAdmin"
-      appTitle="Prometheus"
+      app-title="Prometheus"
       :url="prometheusUrl"
-      :urlText="prometheusUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="prometheusUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <link-list-tile v-if="hasAlertmanager"
-      appTitle="Alertmanager"
+      app-title="Alertmanager"
       :url="alertmanagerUrl"
-      :urlText="alertmanagerUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="alertmanagerUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
-    <username-password v-if="isAdmin" :username="username" :password="password" :showNotAvailablePlaceholder="isSeedUnreachable">
+    <username-password v-if="isAdmin" :username="username" :password="password" :show-not-available-placeholder="isSeedUnreachable">
       <template v-slot:notAvailablePlaceholder>
         <v-list-item-content>
           <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>

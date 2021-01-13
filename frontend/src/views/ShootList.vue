@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid class="shootlist">
     <v-card>
       <v-toolbar flat height="72" color="toolbar-background">
-        <icon-base width="44" height="60" viewBox="0 0 298 403" class="mr-2" iconColor="toolbar-title">
+        <icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
           <certified-kubernetes></certified-kubernetes>
         </icon-base>
         <v-toolbar-title class="white--text">
@@ -39,9 +39,9 @@ SPDX-License-Identifier: Apache-2.0
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
-          @setSelectedHeader="setSelectedHeader"
+          @set-selected-header="setSelectedHeader"
           @reset="resetTableSettings"
-          @toggleFilter="toggleFilter"
+          @toggle-filter="toggleFilter"
         ></table-column-selection>
       </v-toolbar>
       <v-data-table
@@ -55,9 +55,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
-            :shootItem="item"
-            :visibleHeaders="visibleHeaders"
-            @showDialog="showDialog"
+            :shoot-item="item"
+            :visible-headers="visibleHeaders"
+            @show-dialog="showDialog"
             :key="item.metadata.uid"
           ></shoot-list-row>
         </template>

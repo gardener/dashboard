@@ -135,7 +135,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" activeClass="active-item">
+            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" active-class="active-item">
               <v-list-item-action>
                 <v-icon small color="main-navigation-title">{{route.meta.menu.icon}}</v-icon>
               </v-list-item-action>

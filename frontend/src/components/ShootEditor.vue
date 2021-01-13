@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
               tooltip-text='Copy'
               :user-feedback="false"
               @copy="onCopy"
-              @copyFailed="onCopyFailed"
+              @copy-failed="onCopyFailed"
             >
             </copy-btn>
           </div>
