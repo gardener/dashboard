@@ -68,7 +68,7 @@ Object {
     "major": "1",
     "minor": "0",
   },
-  "version": "1.47.0",
+  "version": Any<String>,
 }
 `;
 
@@ -96,6 +96,6 @@ Array [
 
 exports[`api info should return information without version 2`] = `
 Object {
-  "version": "1.47.0",
+  "version": Any<String>,
 }
 `;
