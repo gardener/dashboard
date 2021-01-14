@@ -14,9 +14,5 @@ const {
 
 module.exports = io => {
   const emitter = dashboardClient['core.gardener.cloud'].seeds.watchList()
-  registerHandler(emitter, ({ type, object }) => {
-    if (type === 'ADDED') {
-      bootstrapper.bootstrapResource(object)
-    }
-  })
+  registerHandler(emitter, event => bootstrapper.handleResourceEvent(event))
 }
