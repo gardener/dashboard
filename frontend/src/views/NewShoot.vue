@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
-      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-message>
+      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage" class="error-alert"></g-message>
     </v-container>
     <v-divider></v-divider>
     <div class="d-flex align-center justify-end toolbar">

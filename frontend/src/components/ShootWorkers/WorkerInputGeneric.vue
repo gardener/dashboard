@@ -384,7 +384,7 @@ export default {
     },
     onInputMaxSurge () {
       this.$v.worker.maxSurge.$touch()
-      this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
+      this.$emit('update-max-surge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
       this.validateInput()
     },
     onInputZones () {

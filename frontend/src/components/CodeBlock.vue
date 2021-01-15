@@ -98,7 +98,7 @@ export default {
         block.textContent = trim(lines.join('\n'))
       }
       hljs.highlightBlock(block)
-      this.$emit('highlightBlock')
+      this.$emit('highlight-block')
     },
     onCopy () {
       this.showMessage = true

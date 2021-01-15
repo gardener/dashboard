@@ -132,7 +132,7 @@ export default {
     },
     onInputMachineImage () {
       this.$v.worker.machine.image.$touch()
-      this.$emit('updateMachineImage', this.worker.machine.image)
+      this.$emit('update-machine-image', this.worker.machine.image)
       this.validateInput()
     },
     validateInput () {

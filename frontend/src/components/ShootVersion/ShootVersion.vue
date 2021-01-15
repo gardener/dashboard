@@ -42,8 +42,8 @@ SPDX-License-Identifier: Apache-2.0
       :confirm-value="confirm"
       confirm-button-text="Update"
       :confirm-disabled="selectedVersionInvalid"
-      :errorMessage.sync="updateErrorMessage"
-      :detailedErrorMessage.sync="updateDetailedErrorMessage"
+      :error-message.sync="updateErrorMessage"
+      :detailed-error-message.sync="updateDetailedErrorMessage"
       confirm-color="warning"
       default-color="warning"
       ref="gDialog"
@@ -52,8 +52,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:affectedObjectName>{{shootName}}</template>
       <template v-slot:message>
         <shoot-version-update
-          :availableK8s-updates="availableK8sUpdates"
-          :currentK8s-version="kubernetesVersion"
+          :available-k8s-updates="availableK8sUpdates"
+          :current-k8s-version="kubernetesVersion"
           @selected-version="onSelectedVersion"
           @selected-version-type="onSelectedVersionType"
           @selected-version-invalid="onSelectedVersionInvalid"

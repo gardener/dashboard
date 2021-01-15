@@ -147,7 +147,7 @@ export default {
     },
     onInputVolumeType () {
       this.$v.worker.volume.type.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     onInputIops (value) {
@@ -161,7 +161,7 @@ export default {
         unset(this.worker.providerConfig, 'volume.iops')
       }
       this.$v.workerIops.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     validateInput () {

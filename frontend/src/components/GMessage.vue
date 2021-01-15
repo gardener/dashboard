@@ -54,7 +54,7 @@ export default {
       set (value) {
         if (!value) {
           this.$emit('update:message', undefined)
-          this.$emit('update:detailedMessage', undefined)
+          this.$emit('update:detailed-message', undefined)
         }
       }
     }

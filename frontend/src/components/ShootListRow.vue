@@ -259,7 +259,7 @@ export default {
   methods: {
     showDialog: function (action) {
       const shootItem = this.shootItem
-      this.$emit('showDialog', { action, shootItem })
+      this.$emit('show-dialog', { action, shootItem })
     }
   }
 }

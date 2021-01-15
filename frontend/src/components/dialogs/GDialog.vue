@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <slot name="message">
           This is a generic dialog template.
         </slot>
-        <g-message color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-message>
+        <g-message color="error" class="mt-4" :message.sync="message" :detailed-message.sync="detailedMessage"></g-message>
       </v-card-text>
       <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
         <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
@@ -130,7 +130,7 @@ export default {
         return this.errorMessage
       },
       set (value) {
-        this.$emit('update:errorMessage', value)
+        this.$emit('update:error-message', value)
       }
     },
     detailedMessage: {
@@ -138,7 +138,7 @@ export default {
         return this.detailedErrorMessage
       },
       set (value) {
-        this.$emit('update:detailedErrorMessage', value)
+        this.$emit('update:detailed-error-message', value)
       }
     },
     confirmAlertColor () {
