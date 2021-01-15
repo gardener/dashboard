@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
   <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
   <v-tooltip v-else top color="rgba(0, 0, 0, 1)" content-class="tooltip">
     <template v-slot:activator="{ on }">
-      <div class="d-flex" v-on="on">
-        <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
+      <div class="d-flex align-center" v-on="on">
+        <infra-icon v-model="shootCloudProviderKind" class="mr-2"></infra-icon>
         {{ description }}
       </div>
     </template>

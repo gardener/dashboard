@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-card-title class="toolbar-background">
-        <infra-icon v-model="infraIcon" :width="42"></infra-icon>
         <span class="headline ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>
@@ -67,7 +66,6 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
 import GMessage from '@/components/GMessage'
-import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
@@ -83,8 +81,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    GMessage,
-    InfraIcon
+    GMessage
   },
   props: {
     value: {

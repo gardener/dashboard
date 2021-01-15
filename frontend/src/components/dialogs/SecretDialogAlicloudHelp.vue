@@ -71,8 +71,8 @@ export default {
           },
           {
             Action: [
-                'ram:GetRole',
-                'ram:CreateRole'
+              'ram:GetRole',
+              'ram:CreateRole'
             ],
             Effect: 'Allow',
             Resource: '*'

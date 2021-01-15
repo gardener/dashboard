@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.infrastructure">
-      <infra-icon v-model="item.infrastructure" content-class="mr-2"></infra-icon>
+      <infra-icon v-model="item.infrastructure"></infra-icon>
       {{item.infrastructure}}
     </td>
     <td v-if="selectedHeaders.cloudProfileName">

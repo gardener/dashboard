@@ -12,11 +12,12 @@ SPDX-License-Identifier: Apache-2.0
       :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
       @click="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
+      :color="darkMode ? 'grey darken-2' : undefined"
       hover
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
+          <infra-icon :value="infrastructureKind" :size="60" no-dark-mode-background></infra-icon>
         </div>
         <div class="mt-2" >
           <span class="subtitle-1">{{infrastructureKind}}</span>
@@ -28,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import InfraIcon from '@/components/VendorIcon'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'new-shoot-select-infrastructure',
@@ -52,6 +53,9 @@ export default {
     ...mapGetters([
       'sortedCloudProviderKindList',
       'cloudProfilesByCloudProviderKind'
+    ]),
+    ...mapState([
+      'darkMode'
     ])
   },
   methods: {

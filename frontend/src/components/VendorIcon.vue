@@ -5,33 +5,39 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span>
-    <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
-    <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else :class="contentClass" class="cyan--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
-  </span>
+  <v-avatar :color="darkMode && !noDarkModeBackground ? 'grey darken-2' : undefined" small :size="avatarSize">
+    <img v-if="iconSrc" :src="iconSrc">
+    <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
+    <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
+  </v-avatar>
 </template>
 
 <script>
 import startsWith from 'lodash/startsWith'
+import { mapState } from 'vuex'
 
 export default {
+  data () {
+    return {
+      backgroundDivSize: undefined
+    }
+  },
   props: {
     value: {
       type: String
     },
-    width: {
-      type: Number
+    size: {
+      type: Number,
+      default: 20
     },
-    height: {
-      type: Number
-    },
-    contentClass: {
-      type: String,
-      default: ''
+    noDarkModeBackground: {
+      type: Boolean
     }
   },
   computed: {
+    ...mapState([
+      'darkMode'
+    ]),
     iconSrc () {
       switch (this.value) {
         case 'azure':
@@ -61,17 +67,11 @@ export default {
       }
       return undefined
     },
-    getHeight () {
-      return this.height
-    },
-    getWidth () {
-      if (!this.width && !this.height) {
-        return 20
-      }
-      return this.width
-    },
     isMdiIcon () {
       return startsWith(this.value, 'mdi-')
+    },
+    avatarSize () {
+      return this.size + 4
     }
   }
 }

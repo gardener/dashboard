@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-subheader>Select Infrastructure</v-subheader>
             <v-list-item v-for="infrastructure in sortedCloudProviderKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
               <v-list-item-action>
-                 <infra-icon :value="infrastructure" :width="24"></infra-icon>
+                 <infra-icon :value="infrastructure" :size="24"></infra-icon>
               </v-list-item-action>
               <v-list-item-content class="primary--text">
                 <v-list-item-title>
