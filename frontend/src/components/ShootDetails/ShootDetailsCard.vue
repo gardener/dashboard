@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shoot-item="shootItem" onlyK8sWarnings></version-expiration-warning>
+          <version-expiration-warning :shoot-item="shootItem" only-k8s-warnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>

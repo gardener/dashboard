@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <div class="fill-height">
     <shoot-editor
       alert-banner-identifier="shootEditorWarning"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       :shoot-content="shootContent"
       :extra-keys="extraKeys"
       @clean="onClean"

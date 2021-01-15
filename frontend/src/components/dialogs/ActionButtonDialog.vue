@@ -34,8 +34,8 @@ SPDX-License-Identifier: Apache-2.0
     <g-dialog
       :confirm-button-text="confirmButtonText"
       :confirm-disabled="!valid"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       :max-width="maxWidth"
       :max-height="maxHeight"
       :confirm-value="confirmValue"
@@ -137,22 +137,6 @@ export default {
     ...mapGetters([
       'canPatchShoots'
     ]),
-    message: {
-      get () {
-        return this.errorMessage
-      },
-      set (value) {
-        this.$emit('update:errorMessage', value)
-      }
-    },
-    detailedMessage: {
-      get () {
-        return this.detailedErrorMessage
-      },
-      set (value) {
-        this.$emit('update:detailedErrorMessage', value)
-      }
-    },
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
     },
@@ -187,7 +171,7 @@ export default {
       this.$refs.gDialog.showDialog()
       this.$nextTick(() => {
         // need to defer event until dialog has been rendered
-        this.$emit('dialogOpened')
+        this.$emit('dialog-opened')
       })
     },
     async waitForDialogClosed () {

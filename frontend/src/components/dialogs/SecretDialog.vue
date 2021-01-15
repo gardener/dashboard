@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
 
           <slot name="data-slot"></slot>
-          <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+          <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
@@ -147,7 +147,7 @@ export default {
       },
       set (cloudProfileName) {
         this.selectedCloudProfile = cloudProfileName
-        this.$emit('cloudProfileName', cloudProfileName)
+        this.$emit('cloud-profile-name', cloudProfileName)
       }
     },
     cloudProfiles () {

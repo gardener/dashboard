@@ -117,7 +117,7 @@ export default {
         }
       }
 
-      this.$emit('addTerminalShortcut', shortcut)
+      this.$emit('add-terminal-shortcut', shortcut)
     }
   }
 }

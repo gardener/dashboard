@@ -67,7 +67,7 @@ export default {
         }
       }
 
-      this.$emit('update:currentString', timeString)
+      this.$emit('update:current-string', timeString)
       return timeString
     }
   },

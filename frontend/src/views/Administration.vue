@@ -291,8 +291,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-dialog
       default-color="error"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       ref="gDialog">
       <template v-slot:caption>
         Confirm Delete

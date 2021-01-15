@@ -213,7 +213,7 @@ export default {
     },
     updateLocation (location) {
       const id = this.id
-      this.$emit('updateLocation', { location, id })
+      this.$emit('update-location', { location, id })
       this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
@@ -234,11 +234,11 @@ export default {
         weekdays = join(map(this.selectedDays, 'value'), ',')
       }
       const id = this.id
-      this.$emit('updateSelectedDays', { weekdays, id })
+      this.$emit('update-selected-days', { weekdays, id })
       this.validateInput()
     },
     removeScheduleEvent () {
-      this.$emit('removeScheduleEvent')
+      this.$emit('remove-schedule-event')
     },
     touchIfNothingFocused () {
       if (!get(this, '$refs.selectedDays.isFocused') &&
