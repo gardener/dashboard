@@ -18,17 +18,23 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.infrastructure">
-      <infra-icon v-model="item.infrastructure"></infra-icon>
-      {{item.infrastructure}}
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <infra-icon v-on="on" v-model="item.infrastructure"></infra-icon>
+        </template>
+        <span>{{item.infrastructure}}</span>
+      </v-tooltip>
     </td>
     <td v-if="selectedHeaders.cloudProfileName">
       {{item.cloudProfileName}}
     </td>
     <td v-if="selectedHeaders.details">
-      <div class="d-flex">
-        <span v-if="item.isOwnSecret">{{item.details}}</span>
-        <span v-else>Owner: {{item.ownernamespace}}</span>
-      </div>
+      <v-tooltip top v-for="({label, value}) in item.details" :key="label">
+        <template v-slot:activator="{ on }">
+          <v-chip v-on="on" v-if="value" color="primary" small class="mr-2">{{value}}</v-chip>
+        </template>
+        <span>{{label}}</span>
+      </v-tooltip>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
       <div class="d-flex">

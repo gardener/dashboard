@@ -268,19 +268,62 @@ export default {
       const secretData = secret.data || {}
       switch (secret.metadata.cloudProviderKind) {
         case 'openstack':
-          return `Domain Name: ${secretData.domainName} / Tenant Name: ${secretData.tenantName}`
+          return [
+            {
+              label: 'Domain Name',
+              value: secretData.domainName
+            },
+            {
+              label: 'Tenant Name',
+              value: 'secretData.tenantName'
+            }
+          ]
         case 'vsphere':
-          return `vSphere Username: ${secretData.vsphereUsername} / NSX-T Username: ${secretData.nsxtUsername}`
+          return [
+            {
+              label: 'vSphere Username',
+              value: secretData.vsphereUsername
+            },
+            {
+              label: 'NSX-T Username',
+              value: secretData.nsxtUsername
+            }
+          ]
         case 'aws':
-          return `Access Key ID: ${secretData.accessKeyID}`
+          return [
+            {
+              label: 'Access Key ID',
+              value: secretData.accessKeyID
+            }
+          ]
         case 'azure':
-          return `Subscription ID: ${secretData.subscriptionID}`
+          return [
+            {
+              label: 'Subscription ID',
+              value: secretData.subscriptionID
+            }
+          ]
         case 'gcp':
-          return `Project ${secretData.project}`
+          return [
+            {
+              label: 'Project',
+              value: secretData.project
+            }
+          ]
         case 'alicloud':
-          return `Access Key ID: ${secretData.accessKeyID}`
+          return [
+            {
+              label: 'Access Key ID',
+              value: secretData.accessKeyID
+            }
+          ]
         case 'metal':
-          return `HMAC: ${secretData.metalHMAC}`
+          return [
+            {
+              label: 'HMAC',
+              value: secretData.metalHMAC
+            }
+          ]
       }
       return undefined
     },

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :color="darkMode && !noDarkModeBackground ? 'grey darken-2' : undefined" small :size="avatarSize">
+  <v-avatar :color="darkMode && !noDarkModeBackground ? 'grey darken-2' : undefined" small :size="avatarSize" v-on="inputListeners">
     <img v-if="iconSrc" :src="iconSrc">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
@@ -38,6 +38,17 @@ export default {
     ...mapState([
       'darkMode'
     ]),
+    inputListeners: function () {
+      var vm = this
+      return Object.assign({},
+        this.$listeners,
+        {
+          input: function (event) {
+            vm.$emit('input', event.target.value)
+          }
+        }
+      )
+    },
     iconSrc () {
       switch (this.value) {
         case 'azure':
