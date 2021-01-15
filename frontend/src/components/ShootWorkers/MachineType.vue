@@ -109,7 +109,7 @@ export default {
     },
     onInputMachineType () {
       this.$v.worker.machine.type.$touch()
-      this.$emit('updateMachineType', this.worker.machine.type)
+      this.$emit('update-machine-type', this.worker.machine.type)
       this.validateInput()
     },
     validateInput () {

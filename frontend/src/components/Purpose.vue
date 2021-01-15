@@ -82,7 +82,7 @@ export default {
     },
     onInputPurpose () {
       this.$v.internalPurpose.$touch()
-      this.$emit('updatePurpose', this.internalPurpose)
+      this.$emit('update-purpose', this.internalPurpose)
       this.validateInput()
     },
     validateInput () {

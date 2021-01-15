@@ -132,7 +132,7 @@ export default {
   },
   methods: {
     onAddTerminalShortcut (shortcut) {
-      this.$emit('addTerminalShortcut', shortcut)
+      this.$emit('add-terminal-shortcut', shortcut)
     }
   }
 }

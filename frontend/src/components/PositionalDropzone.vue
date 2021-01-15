@@ -108,7 +108,7 @@ export default {
     dropped () {
       this.mouseDown = false
 
-      this.$emit('droppedAt', this.currentPosition)
+      this.$emit('dropped-at', this.currentPosition)
     }
   }
 }

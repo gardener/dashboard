@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         color="error"
         class="ma-0"
         :message.sync="errorMessageInternal"
-        :detailedMessage.sync="detailedErrorMessageInternal"
+        :detailed-message.sync="detailedErrorMessageInternal"
       ></g-message>
     </div>
     <v-divider></v-divider>
@@ -230,7 +230,7 @@ export default {
         return this.errorMessage
       },
       set (value) {
-        this.$emit('update:errorMessage', value)
+        this.$emit('update:error-message', value)
       }
     },
     detailedErrorMessageInternal: {
@@ -238,7 +238,7 @@ export default {
         return this.detailedErrorMessage
       },
       set (value) {
-        this.$emit('update:detailedErrorMessage', value)
+        this.$emit('update:detailed-error-message', value)
       }
     },
     isReadOnly () {
@@ -275,7 +275,7 @@ export default {
     },
     setConflictPath (conflictPath) {
       this.conflictPath = conflictPath
-      this.$emit('conflictPath', conflictPath)
+      this.$emit('conflict-path', conflictPath)
     },
     reload () {
       this.update(this.value)
