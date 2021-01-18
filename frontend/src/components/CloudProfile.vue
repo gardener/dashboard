@@ -14,8 +14,8 @@ SPDX-License-Identifier: Apache-2.0
       item-text="metadata.displayName"
       label="Cloud Profile"
       :error-messages="getErrorMessages('value')"
-      :color="color"
-      :item-color="color"
+      color="primary"
+      item-color="primary"
       @input="onInput"
       @blur="$v.value.$touch()"
       ></v-select>
@@ -52,10 +52,6 @@ export default {
     },
     cloudProfiles: {
       type: Array,
-      required: true
-    },
-    color: {
-      type: String,
       required: true
     }
   },

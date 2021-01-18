@@ -16,7 +16,7 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const semver = require('semver')
 
-const { decodeBase64, getSeedNameFromShoot } = utils
+const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain } = utils
 
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   const client = user.client
@@ -220,7 +220,7 @@ exports.info = async function ({ user, namespace, name }) {
     seed = getSeed(getSeedNameFromShoot(shoot))
     const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
     if (prefix) {
-      const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+      const ingressDomain = getSeedIngressDomain(seed)
       if (ingressDomain) {
         data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
       }

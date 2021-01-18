@@ -8,20 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="vsphere"
-    color="indigo darken-4"
-    infraIcon="vsphere-white"
-    backgroundSrc="/static/background_vsphere.svg"
-    createTitle="Add new VMware vSphere Secret"
-    replaceTitle="Replace VMware vSphere Secret"
+    cloud-provider-kind="vsphere"
+    infra-icon="vsphere"
+    create-title="Add new VMware vSphere Secret"
+    replace-title="Replace VMware vSphere Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
       <div>
         <v-text-field
-        color="indigo darken-4"
+        color="primary"
         v-model="vsphereUsername"
         ref="vsphereUsername"
         label="vSphere Username"
@@ -32,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="indigo darken-4"
+          color="primary"
           v-model="vspherePassword"
           label="vSphere Password"
           :error-messages="getErrorMessages('vspherePassword')"
@@ -45,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-        color="indigo darken-4"
+        color="primary"
         v-model="nsxtUsername"
         label="NSX-T Username"
         :error-messages="getErrorMessages('nsxtUsername')"
@@ -55,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="indigo darken-4"
+          color="primary"
           v-model="nsxtPassword"
           label="NSX-T Password"
           :error-messages="getErrorMessages('nsxtPassword')"

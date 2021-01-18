@@ -6,18 +6,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
-    @dialogOpened="onDeleteDialogOpened"
+    :shoot-item="shootItem"
+    @dialog-opened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-delete"
-    :iconColor="iconColor"
-    dialogColor="red"
-    confirmButtonText="Delete"
+    icon-color="error"
+    dialog-color="error"
+    confirm-button-text="Delete"
     confirm-required
-    :buttonText="buttonText"
-    :smallIcon="small"
-    maxWidth="600"
+    :button-text="buttonText"
+    :small-icon="small"
+    max-width="600"
   >
     <template v-slot:actionComponent>
       <v-list>
@@ -34,11 +34,11 @@ SPDX-License-Identifier: Apache-2.0
         Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
       </p>
       <p>
-        <i class="red--text text--darken-2">This action cannot be undone.</i>
+        <i class="error--text">This action cannot be undone.</i>
       </p>
       <p v-if="isShootReconciliationDeactivated">
         <v-row class="fill-height" >
-          <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
+          <v-icon color="warning" class="mr-1">mdi-alert-box</v-icon>
           <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
         </v-row>
       </p>
@@ -65,9 +65,6 @@ export default {
     small: {
       type: Boolean,
       default: false
-    },
-    iconColor: {
-      type: String
     },
     text: {
       type: Boolean

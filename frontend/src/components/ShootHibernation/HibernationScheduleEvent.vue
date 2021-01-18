@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-row >
         <v-col class="weekday-select">
           <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           v-model="selectedDays"
           ref="selectedDays"
           @blur="touchIfNothingFocused"
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col class="time-select">
           <v-text-field
-            color="cyan darken-2"
+            color="primary"
             label="Wake up at"
             v-model="wakeUpTime"
             ref="wakeUpTime"
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col class="time-select">
           <v-text-field
-            color="cyan darken-2"
+            color="primary"
             label="Hibernate at"
             v-model="hibernateTime"
             ref="hibernateTime"
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col class="timezone-select">
           <v-autocomplete
-            color="cyan darken-2"
+            color="primary"
             label="Timezone"
             :items="timezones"
             v-model="selectedTimezone"
@@ -213,7 +213,7 @@ export default {
     },
     updateLocation (location) {
       const id = this.id
-      this.$emit('updateLocation', { location, id })
+      this.$emit('update-location', { location, id })
       this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
@@ -234,11 +234,11 @@ export default {
         weekdays = join(map(this.selectedDays, 'value'), ',')
       }
       const id = this.id
-      this.$emit('updateSelectedDays', { weekdays, id })
+      this.$emit('update-selected-days', { weekdays, id })
       this.validateInput()
     },
     removeScheduleEvent () {
-      this.$emit('removeScheduleEvent')
+      this.$emit('remove-schedule-event')
     },
     touchIfNothingFocused () {
       if (!get(this, '$refs.selectedDays.isFocused') &&

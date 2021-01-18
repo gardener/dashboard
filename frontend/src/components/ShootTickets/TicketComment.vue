@@ -12,11 +12,11 @@ SPDX-License-Identifier: Apache-2.0
       </v-avatar>
     </v-list-item-avatar>
     <v-list-item-icon v-else class="align-self-start">
-      <v-icon color="cyan darken-2">mdi-comment-outline</v-icon>
+      <v-icon color="primary">mdi-comment-outline</v-icon>
     </v-list-item-icon>
     <v-list-item-content class="comment">
-      <v-list-item-title class="comment-header">
-        <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" mode="past"></time-string></a>
+      <v-list-item-title class="comment-header toolbar-background toolbar-title--text">
+        <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :date-time="createdAt" mode="past" class="toolbar-title--text"></time-string></a>
       </v-list-item-title>
       <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
     </v-list-item-content>
@@ -81,7 +81,6 @@ export default {
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
 
-  $cyan-darken-1: map-get($cyan, 'darken-1');
   $gh-code-background-color: map-get($grey, 'lighten-4');
   $gh-code-color: map-get($grey, 'darken-4');
 
@@ -97,16 +96,13 @@ export default {
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border: 0.5px;
-    border-bottom: 0.5px solid $cyan-darken-1;
-    background-color: $cyan-darken-1;
-    color: white;
 
     padding: 4px 8px;
     margin-bottom: 0;
   }
 
   .comment-body {
-    border: 0.5px solid $cyan-darken-1;
+    border: 0.5px solid;
 
     padding: 4px 8px;
 
@@ -184,7 +180,6 @@ export default {
 
   a {
     text-decoration: none;
-    color: white;
   }
 
   a:hover{

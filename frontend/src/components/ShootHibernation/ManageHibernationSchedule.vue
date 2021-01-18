@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
       <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
         <hibernation-schedule-event
           ref="scheduleEvents"
-          :scheduleEvent="scheduleEvent"
-          @removeScheduleEvent="onRemoveSchedule(index)"
-          @updateWakeUpTime="onUpdateWakeUpTime"
-          @updateHibernateTime="onUpdateHibernateTime"
-          @updateSelectedDays="onUpdateSelectedDays"
-          @updateLocation="onUpdateLocation"
+          :schedule-event="scheduleEvent"
+          @remove-schedule-event="onRemoveSchedule(index)"
+          @update-wake-up-time="onUpdateWakeUpTime"
+          @update-hibernate-time="onUpdateHibernateTime"
+          @update-selected-days="onUpdateSelectedDays"
+          @update-location="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
@@ -27,13 +27,13 @@ SPDX-License-Identifier: Apache-2.0
             outlined
             fab
             icon
-            color="cyan darken-2">
-            <v-icon class="cyan--text text--darken-2">mdi-plus</v-icon>
+            color="primary">
+            <v-icon class="primary--text">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
             text
-            color="cyan darken-2">
+            color="primary">
             Add Hibernation Schedule
           </v-btn>
         </v-col>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col>
         <v-checkbox
           v-model="confirmNoSchedule"
-          color="cyan darken-2"
+          color="primary"
           class="my-0"
           :label="noScheduleCheckboxLabel"
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"

@@ -7,8 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <secret-dialog-help
     title="About VMware vSphere Secrets"
-    color="indigo darken-4"
-    backgroundSrc="/static/background_vsphere.svg"
     :value="value"
     @input="onInput"
   >
@@ -24,13 +22,11 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Please read the
           <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
-            target="_blank"
-            class="indigo--text text--darken-4">
+            target="_blank">
             VMware vSphere Documentation</a>
             and the
           <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
-            target="_blank"
-            class="indigo--text text--darken-4">
+            target="_blank">
           VMware NSX-T Data Center Documentation</a>.
         </p>
       </div>

@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
                 small
                 class="my-0 ml-2 enablePointerEvents"
                 outlined
-                color="orange darken-2">
+                color="warning">
                 Unverified
               </v-chip>
             </template>
@@ -150,7 +150,7 @@ export default {
   },
   methods: {
     addTerminalShortcut (shortcut) {
-      this.$emit('addTerminalShortcut', shortcut)
+      this.$emit('add-terminal-shortcut', shortcut)
     },
     shortcutTargetDescription (shortcut) {
       return targetText(shortcut.target)

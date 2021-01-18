@@ -8,20 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="azure"
-    color="blue darken-1"
-    infraIcon="azure-white"
-    backgroundSrc="/static/background_azure.svg"
-    createTitle="Add new Azure Secret"
-    replaceTitle="Replace Azure Secret"
+    cloud-provider-kind="azure"
+    infra-icon="azure"
+    create-title="Add new Azure Secret"
+    replace-title="Replace Azure Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="blue darken-1"
+          color="primary"
           v-model="clientId"
           ref="clientId"
           label="Client Id"
@@ -32,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="blue darken-1"
+          color="primary"
           v-model="clientSecret"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
@@ -45,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="blue darken-1"
+          color="primary"
           v-model="tenantId"
           label="Tenant Id"
           :error-messages="getErrorMessages('tenantId')"
@@ -55,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="blue darken-1"
+          color="primary"
           v-model="subscriptionId"
           label="Subscription Id"
           :error-messages="getErrorMessages('subscriptionId')"

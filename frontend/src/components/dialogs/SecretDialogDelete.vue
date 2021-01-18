@@ -7,34 +7,23 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-img
-        class="white--text"
-        height="130px"
-        :src="backgroundSrc"
-      >
-        <v-container class="fill-height" >
-          <v-row class="fill-height" align="center" justify="start" >
-            <v-col cols="1">
-              <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
-            </v-col>
-            <v-col>
-              <div class="credential_title">Confirm Delete</div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-img>
-
+      <v-card-title class="error">
+        <v-icon x-large class="toolbar-title--text icon">mdi-alert-outline</v-icon>
+        <span class="headline ml-5 toolbar-title--text">Confirm Delete</span>
+      </v-card-title>
       <v-card-text>
         <v-container fluid>
-          Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
-          <span class="red--text font-weight-bold">The operation can not be undone.</span>
+          <span class="subtitle-1">
+            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
+            <span class="error--text font-weight-bold">The operation can not be undone.</span>
+          </span>
         </v-container>
-        <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+        <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="hide">Cancel</v-btn>
-        <v-btn text @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
+        <v-btn text @click.native="onDeleteSecret" color="error">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -58,10 +47,6 @@ export default {
     },
     secret: {
       type: Object,
-      required: true
-    },
-    backgroundSrc: {
-      type: String,
       required: true
     }
   },

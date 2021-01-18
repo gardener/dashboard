@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template >
   <v-dialog v-model="visible" max-width="650" persistent>
-    <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{title}}</span>
+    <v-card>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
+        <span class="headline ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-col cols="8">
               <v-text-field
                 :disabled="isUpdateDialog"
-                color="black"
+                color="primary"
                 ref="internalName"
                 :label="nameLabel"
                 v-model.trim="internalName"
@@ -31,8 +31,8 @@ SPDX-License-Identifier: Apache-2.0
             </v-col>
             <v-col cols="4">
               <v-select
-                color="black"
-                item-color="black"
+                color="primary"
+                item-color="primary"
                 label="Roles"
                 :items="roleItems"
                 multiple
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
                 tabindex="2"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small color="black" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
+                  <v-chip small color="primary" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
                     <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-row v-if="isServiceDialog">
             <v-col cols="12">
               <v-text-field
-                color="black"
+                color="primary"
                 label="Description"
                 v-model.trim="internalDescription"
                 @keyup.enter="submitAddMember()"
@@ -65,14 +65,14 @@ SPDX-License-Identifier: Apache-2.0
               ></v-text-field>
             </v-col>
           </v-row>
-          <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+          <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.stop="cancel" tabindex="5">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="4">Update</v-btn>
-        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="4">{{addMemberButtonText}}</v-btn>
+        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="primary--text" tabindex="4">Update</v-btn>
+        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="primary--text" tabindex="4">{{addMemberButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -270,15 +270,6 @@ export default {
       }
       return undefined
     },
-    cardClass () {
-      if (this.isUserDialog) {
-        return 'add_user'
-      }
-      if (this.isServiceDialog) {
-        return 'add_service'
-      }
-      return undefined
-    },
     memberUsernames () {
       return map(this.memberList, 'username')
     },
@@ -435,22 +426,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .add_user, .add_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .add_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .add_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>

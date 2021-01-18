@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip top :disabled="!isShootLastOperationTypeControlPlaneMigrating">
       <template v-slot:activator="{ on }">
         <div v-on="on">
-          <v-progress-circular v-if="isShootLastOperationTypeControlPlaneMigrating" indeterminate size=12 width=2 color="cyan darken-2" class="mr-1"></v-progress-circular>
-          <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
+          <v-progress-circular v-if="isShootLastOperationTypeControlPlaneMigrating" indeterminate size=12 width=2 class="mr-1"></v-progress-circular>
+          <router-link v-if="canLinkToSeed" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
             <span>{{shootSeedName}}</span>
           </router-link>
           <span v-else>{{shootSeedName}}</span>

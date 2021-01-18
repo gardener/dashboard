@@ -6,12 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :disabled="disabled"
     :tooltip="tooltip"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    maxWidth="760"
+    max-width="760"
     caption="Configure Access Restrictions">
     <template v-slot:actionComponent>
       <access-restrictions

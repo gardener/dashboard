@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="code-block" :data-lang="lang">
+  <div class="code-block" :class="codeBlockClass" :data-lang="lang">
     <div class="code-block-wrapper" :style="{ 'max-height': height }">
       <pre><code :class="lang" ref="block"></code></pre>
       <span class="copied" :class="{ 'active': showMessage }">Copied!</span>
@@ -26,6 +26,7 @@ import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
 import hljs from 'highlight.js/lib/core'
+import { mapState } from 'vuex'
 
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'
@@ -65,6 +66,17 @@ export default {
     showMessage: false,
     clipboard: undefined
   }),
+  computed: {
+    ...mapState([
+      'darkMode'
+    ]),
+    codeBlockClass () {
+      if (this.darkMode) {
+        return 'grey darken-4 code-block-dark'
+      }
+      return 'grey lighten-5'
+    }
+  },
   methods: {
     prettyPrint (textContent) {
       const block = this.$refs.block
@@ -86,7 +98,7 @@ export default {
         block.textContent = trim(lines.join('\n'))
       }
       hljs.highlightBlock(block)
-      this.$emit('highlightBlock')
+      this.$emit('highlight-block')
     },
     onCopy () {
       this.showMessage = true
@@ -109,14 +121,12 @@ export default {
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
 
-  $grey-lighten-5: map-get($grey, 'lighten-5');
+  $grey-lighten-4: map-get($grey, 'lighten-4');
 
   .code-block {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: $grey-lighten-5;
-    color: $grey-lighten-5;
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;
@@ -168,6 +178,14 @@ export default {
       &:before {
         content: none;
       }
+    }
+  }
+  .code-block-dark {
+    &:after {
+      color: rgba(#fff, .26) !important;
+    }
+    code.hljs {
+      color: $grey-lighten-4 !important;
     }
   }
   .code-block-wrapper {

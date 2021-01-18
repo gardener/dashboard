@@ -20,8 +20,14 @@ describe('CodeBlock.vue', () => {
         foo: true
         bar: 42`
     }
+    const computed = {
+      codeBlockClass () {
+        return ''
+      }
+    }
     const wrapper = shallowMount(CodeBlock, {
-      propsData
+      propsData,
+      computed
     })
     const vm = wrapper.vm
     return new Promise(resolve => vm.$nextTick(resolve))

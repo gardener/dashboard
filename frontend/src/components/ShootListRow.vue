@@ -8,21 +8,21 @@ SPDX-License-Identifier: Apache-2.0
   <tr>
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
       <template v-if="cell.header.value === 'project'">
-        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+        <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
           {{ shootProjectName }}
         </router-link>
       </template>
       <template v-if="cell.header.value === 'name'">
         <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
           <v-col class="grow pa-0 ma-0">
-            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+            <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
               {{ shootName }}
             </router-link>
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-              <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
+              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp"></self-termination-warning>
+              <version-expiration-warning :shoot-item="shootItem"></version-expiration-warning>
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"
@@ -34,10 +34,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </template>
       <template v-if="cell.header.value === 'infrastructure'">
-        <vendor :shootItem="shootItem"></vendor>
+        <vendor :shoot-item="shootItem"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
-        <shoot-seed-name :shootItem="shootItem" />
+        <shoot-seed-name :shoot-item="shootItem" />
       </template>
       <template v-if="cell.header.value === 'technicalId'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">
@@ -64,8 +64,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'lastOperation'">
         <div>
           <shoot-status
-          :popperKey="`${shootNamespace}/${shootName}`"
-          :shootItem="shootItem">
+          :popper-key="`${shootNamespace}/${shootName}`"
+          :shoot-item="shootItem">
           </shoot-status>
         </div>
       </template>
@@ -73,16 +73,16 @@ SPDX-License-Identifier: Apache-2.0
         <shoot-version :shoot-item="shootItem" chip></shoot-version>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <status-tags :shootItem="shootItem"></status-tags>
+        <status-tags :shoot-item="shootItem"></status-tags>
       </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
-        <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+        <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
                 <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
               </router-link>
             </div>
@@ -117,14 +117,14 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top v-if="canGetSecrets">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                <v-btn small icon class="action-button--text" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
                   <v-icon size="22">mdi-key</v-icon>
                 </v-btn>
               </div>
             </template>
             <span>{{showClusterAccessActionTitle}}</span>
           </v-tooltip>
-          <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
+          <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
     </td>
@@ -259,7 +259,7 @@ export default {
   methods: {
     showDialog: function (action) {
       const shootItem = this.shootItem
-      this.$emit('showDialog', { action, shootItem })
+      this.$emit('show-dialog', { action, shootItem })
     }
   }
 }

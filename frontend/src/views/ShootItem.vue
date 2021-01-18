@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot="{item}">
       <shoot-details
         style="overflow: auto; height: 100%"
-        :shootItem="shootItem"
-        @addTerminalShortcut="onAddTerminalShortcut"
+        :shoot-item="shootItem"
+        @add-terminal-shortcut="onAddTerminalShortcut"
       ></shoot-details>
       <positional-dropzone positional-dropzone :uuid="item.uuid"></positional-dropzone>
     </template>

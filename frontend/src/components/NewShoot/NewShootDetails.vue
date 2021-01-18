@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <v-text-field
           ref="name"
-          color="cyan darken-2"
+          color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
           v-model="name"
@@ -21,10 +21,10 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
       </v-col>
       <v-col cols="3">
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="warning">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Kubernetes Version"
             item-text="version"
             item-value="version"
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <purpose
           :secret="secret"
-          @updatePurpose="onUpdatePurpose"
+          @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
           ref="purpose"
           v-on="$purpose.hooks"
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
-        <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+        <label>{{slaTitle}}</label>
         <p class="subtitle-1" v-html="slaDescriptionHtml" />
       </v-col>
     </v-row>

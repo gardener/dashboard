@@ -6,22 +6,22 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="cyan darken-2">
+    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
       <v-toolbar-title class="subtitle-1">Logging and Monitoring</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-tractor</v-icon>
+          <v-icon color="primary">mdi-tractor</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Status</v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <shoot-status
               class="pr-2"
-              :shootItem="shootItem"
-              :popperKey="`${shootNamespace}/${shootName}_lastOp`"
-              popperPlacement="bottom"
+              :shoot-item="shootItem"
+              :popper-key="`${shootNamespace}/${shootName}_lastOp`"
+              popper-placement="bottom"
               showStatusText
               >
             </shoot-status>
@@ -31,22 +31,22 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-speedometer</v-icon>
+          <v-icon color="primary">mdi-speedometer</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Readiness</v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <status-tags v-else :shootItem="shootItem" popperPlacement="bottom"></status-tags>
+            <status-tags v-else :shoot-item="shootItem" popper-placement="bottom"></status-tags>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <template v-if="canGetSecrets">
         <v-divider inset></v-divider>
-        <cluster-metrics v-if="!metricsNotAvailableText" :shootItem="shootItem"></cluster-metrics>
+        <cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></cluster-metrics>
         <v-list-item v-else>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>

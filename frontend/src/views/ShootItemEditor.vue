@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <div class="fill-height">
     <shoot-editor
       alert-banner-identifier="shootEditorWarning"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      :shootContent="shootContent"
-      :extraKeys="extraKeys"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
+      :shoot-content="shootContent"
+      :extra-keys="extraKeys"
       @clean="onClean"
-      @conflictPath="onConflictPath"
+      @conflict-path="onConflictPath"
       ref="shootEditor"
       v-on="$shootEditor.hooks"
     >
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
       </template>
       <template v-slot:toolbarItemsRight>
-        <v-btn text @click.native.stop="save()" :disabled="clean" color="cyan darken-2">Save</v-btn>
+        <v-btn text @click.native.stop="save()" :disabled="clean" color="primary">Save</v-btn>
       </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>

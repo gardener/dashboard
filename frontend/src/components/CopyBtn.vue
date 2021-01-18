@@ -92,7 +92,10 @@ export default {
       if (this.copySucceeded) {
         return 'success'
       }
-      return this.color
+      if (this.color) {
+        return this.color
+      }
+      return 'action-button'
     }
   },
   methods: {
@@ -113,7 +116,7 @@ export default {
         console.error('error', err)
         this.snackbar = true
         this.copySucceeded = false
-        this.$emit('copyFailed')
+        this.$emit('copy-failed')
       })
     }
   },

@@ -32,17 +32,17 @@ SPDX-License-Identifier: Apache-2.0
       {{actionToolTip}}
     </v-tooltip>
     <g-dialog
-      :confirmButtonText="confirmButtonText"
+      :confirm-button-text="confirmButtonText"
       :confirm-disabled="!valid"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       :max-width="maxWidth"
-      :maxHeight="maxHeight"
-      :confirmValue="confirmValue"
-      :confirmMessage="confirmMessage"
-      :confirmColor="dialogColor"
-      :defaultColor="dialogColor"
-      :disableConfirmInputFocus="disableConfirmInputFocus"
+      :max-height="maxHeight"
+      :confirm-value="confirmValue"
+      :confirm-message="confirmMessage"
+      :confirm-color="dialogColor"
+      :default-color="dialogColor"
+      :disable-confirm-input-focus="disableConfirmInputFocus"
       ref="gDialog"
     >
       <template v-slot:caption>{{caption}}</template>
@@ -110,7 +110,8 @@ export default {
       type: Boolean
     },
     iconColor: {
-      type: String
+      type: String,
+      default: 'action-button'
     },
     smallIcon: {
       type: Boolean,
@@ -118,7 +119,7 @@ export default {
     },
     dialogColor: {
       type: String,
-      default: 'orange'
+      default: 'warning'
     },
     disabled: {
       type: Boolean,
@@ -136,22 +137,6 @@ export default {
     ...mapGetters([
       'canPatchShoots'
     ]),
-    message: {
-      get () {
-        return this.errorMessage
-      },
-      set (value) {
-        this.$emit('update:errorMessage', value)
-      }
-    },
-    detailedMessage: {
-      get () {
-        return this.detailedErrorMessage
-      },
-      set (value) {
-        this.$emit('update:detailedErrorMessage', value)
-      }
-    },
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
     },
@@ -186,7 +171,7 @@ export default {
       this.$refs.gDialog.showDialog()
       this.$nextTick(() => {
         // need to defer event until dialog has been rendered
-        this.$emit('dialogOpened')
+        this.$emit('dialog-opened')
       })
     },
     async waitForDialogClosed () {

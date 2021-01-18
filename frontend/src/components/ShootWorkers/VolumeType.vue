@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <hint-colorizer hintColor="orange">
+    <hint-colorizer hint-color="warning">
       <v-select
-        color="cyan darken-2"
-        item-color="cyan darken-2"
+        color="primary"
+        item-color="primary"
         :items="volumeTypeItems"
         item-text="name"
         item-value="name"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="isAWS"
       class="ml-1"
-      color="cyan darken-2"
+      color="primary"
       :error-messages="getErrorMessages('workerIops')"
       @input="onInputIops"
       @blur="$v.workerIops.$touch()"
@@ -147,7 +147,7 @@ export default {
     },
     onInputVolumeType () {
       this.$v.worker.volume.type.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     onInputIops (value) {
@@ -161,7 +161,7 @@ export default {
         unset(this.worker.providerConfig, 'volume.iops')
       }
       this.$v.workerIops.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     validateInput () {

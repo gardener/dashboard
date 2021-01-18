@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <div class="d-flex flex-wrap">
       <div class="regularInput">
         <v-text-field
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.name')"
           @input="onInputName"
           @blur="$v.worker.name.$touch()"
@@ -21,34 +21,34 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regularInput">
         <machine-type
-        :machineTypes="machineTypes"
+        :machine-types="machineTypes"
         :worker="worker"
-        @updateMachineType="onUpdateMachineType"
+        @update-machine-type="onUpdateMachineType"
         @valid="onMachineTypeValid">
         </machine-type>
       </div>
       <div class="regularInput">
         <machine-image
-        :machineImages="machineImages"
+        :machine-images="machineImages"
         :worker="worker"
         :updateOSMaintenance="updateOSMaintenance"
-        @updateMachineImage="onUpdateMachineImage"
+        @update-machine-image="onUpdateMachineImage"
         @valid="onMachineImageValid">
         </machine-image>
       </div>
       <div v-if="volumeInCloudProfile" class="regularInput">
         <volume-type
-        :volumeTypes="volumeTypes"
+        :volume-types="volumeTypes"
         :worker="worker"
-        :cloudProfileName="cloudProfileName"
-        @updateVolumeType="onUpdateVolumeType"
+        :cloud-profile-name="cloudProfileName"
+        @update-volume-type="onUpdateVolumeType"
         @valid="onVolumeTypeValid">
         </volume-type>
       </div>
       <div v-if="volumeInCloudProfile" class="smallInput">
         <size-input
           :min="minimumVolumeSize"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.volume.size')"
           @input="onInputVolumeSize"
           @blur="$v.worker.volume.size.$touch()"
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.minimum')"
           @input="onInputminimum"
           @blur="$v.worker.minimum.$touch()"
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.maximum')"
           @input="onInputmaximum"
           @blur="$v.worker.maximum.$touch()"
@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="smallInput">
         <v-text-field
           min="0"
-          color="cyan darken-2"
+          color="primary"
           :error-messages="getErrorMessages('worker.maxSurge')"
           @input="onInputMaxSurge"
           @blur="$v.worker.maxSurge.$touch()"
@@ -92,8 +92,8 @@ SPDX-License-Identifier: Apache-2.0
 
       <div class="regularInput" v-if="zonedCluster">
         <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Zone"
           :items="zoneItems"
           :error-messages="getErrorMessages('selectedZones')"
@@ -384,7 +384,7 @@ export default {
     },
     onInputMaxSurge () {
       this.$v.worker.maxSurge.$touch()
-      this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
+      this.$emit('update-max-surge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
       this.validateInput()
     },
     onInputZones () {

@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <hint-colorizer hintColor="orange">
+  <hint-colorizer hint-color="warning">
     <v-select
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="machineTypeItems"
       item-text="name"
       item-value="name"
@@ -109,7 +109,7 @@ export default {
     },
     onInputMachineType () {
       this.$v.worker.machine.type.$touch()
-      this.$emit('updateMachineType', this.worker.machine.type)
+      this.$emit('update-machine-type', this.worker.machine.type)
       this.validateInput()
     },
     validateInput () {

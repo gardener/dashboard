@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-cube</v-icon>
-        <span class="headline ml-5">Create Project</span>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-cube</v-icon>
+        <span class="headline ml-5 toolbar-title--text">Create Project</span>
       </v-card-title>
       <v-card-text class="dialog-content">
         <form>
@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="projectName"
                   label="Name"
                   v-model.trim="projectName"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-row v-if="costObjectSettingEnabled">
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="costObject"
                   :label="costObjectTitle"
                   v-model="costObject"
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
                   @blur="$v.costObject.$touch()"
                   >
                 </v-text-field>
-                <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" outlined :color="color">
+                <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" outlined color="primary">
                   <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
               </v-col>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="description"
                   label="Description"
                   v-model="description"
@@ -60,13 +60,13 @@ SPDX-License-Identifier: Apache-2.0
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   label="Purpose"
                   v-model="purpose"
                   ></v-text-field>
               </v-col>
             </v-row>
-            <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+            <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </v-container>
         </form>
         <v-snackbar :value="loading" bottom right absolute :timeout="-1">
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
           :loading="loading"
           :disabled="!valid || loading"
           @click.stop="submit"
-          :color="color"
+          color="primary"
         >
           Create
         </v-btn>
@@ -135,8 +135,7 @@ export default {
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      loading: false,
-      color: 'blue-grey darken-2'
+      loading: false
     }
   },
   validations () {
@@ -337,11 +336,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .dialog-title {
-    background-size: cover;
-    height: 130px;
-    background-image: url('../../assets/project_background.svg');
-  }
   .dialog-content {
     height: auto;
   }

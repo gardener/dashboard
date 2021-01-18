@@ -83,7 +83,6 @@ export default {
     margin: 10px 20px 10px 0px;
     min-width: 120px;
     filter: grayscale(70%);
-    background-color: #f9f9f9;
   }
 
   .select_infra_card:hover {

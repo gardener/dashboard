@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     code="404"
     text="Looks like you're lost"
     message="The page you are looking for is not available!"
-    buttonText="Get me out of here"
+    button-text="Get me out of here"
     @click="onClick"
   ></g-error>
 </template>

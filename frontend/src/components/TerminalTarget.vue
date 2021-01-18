@@ -17,12 +17,12 @@ SPDX-License-Identifier: Apache-2.0
         v-if="shootItem && hasControlPlaneTerminalAccess"
         label="Control Plane"
         value="cp"
-        color="cyan darken-2"
+        color="primary"
       ></v-radio>
       <v-radio
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
-        color="cyan darken-2"
+        color="primary"
         :disabled="isShootStatusHibernated"
       >
         <template v-slot:label>
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-radio
         v-if="hasGardenTerminalAccess"
         value="garden"
-        color="cyan darken-2"
+        color="primary"
         :disabled="!isAdmin && isShootStatusHibernated"
       >
         <template v-slot:label>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
       class="mt-2 mb-2"
       :value="true"
       type="info"
-      color="cyan darken-2"
+      color="primary"
       outlined
     >
       <strong>Terminal will be running on <tt>{{shootName}}</tt> cluster</strong><br>

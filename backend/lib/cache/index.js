@@ -28,7 +28,8 @@ async function initializeStoreSynchronization (store, cachable) {
 
 class Cache {
   constructor () {
-    this.synchronizationPromise = undefined
+    this.synchronizationPromise = new Promise(resolve => (this.resolveSynchronizationPromise = resolve))
+    this.synchronizationPromiseResolved = false
     this.cloudprofiles = new Store()
     this.seeds = new Store()
     this.quotas = new Store()
@@ -43,10 +44,16 @@ class Cache {
     or the information can be considered as not sensitive or public.
   */
   synchronize (client) {
-    if (!this.synchronizationPromise) {
+    if (!this.synchronizationPromiseResolved) {
       const keys = ['cloudprofiles', 'quotas', 'seeds', 'projects', 'controllerregistrations']
       const iteratee = key => initializeStoreSynchronization(this[key], client['core.gardener.cloud'][key])
-      this.synchronizationPromise = Promise.all(keys.map(iteratee))
+      const initializationPromises = keys.map(iteratee)
+      const initializeAll = async () => {
+        await Promise.all(initializationPromises)
+        this.resolveSynchronizationPromise()
+        this.synchronizationPromiseResolved = true
+      }
+      initializeAll()
     }
     return this.synchronizationPromise
   }

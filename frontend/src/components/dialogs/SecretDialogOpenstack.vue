@@ -8,20 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="openstack"
-    color="black"
-    infraIcon="openstack-white"
-    backgroundSrc="/static/background_openstack.svg"
-    createTitle="Add new OpenStack Secret"
-    replaceTitle="Replace OpenStack Secret"
+    cloud-provider-kind="openstack"
+    infra-icon="openstack"
+    create-title="Add new OpenStack Secret"
+    replace-title="Replace OpenStack Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="domainName"
           ref="domainName"
           label="Domain Name"
@@ -32,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="tenantName"
           label="Project / Tenant Name"
           :error-messages="getErrorMessages('tenantName')"
@@ -41,9 +39,9 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="primary">
           <v-text-field
-          color="black"
+          color="primary"
           v-model="username"
           label="Technical User"
           :error-messages="getErrorMessages('username')"
@@ -54,9 +52,9 @@ SPDX-License-Identifier: Apache-2.0
         </hint-colorizer>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="warning">
           <v-text-field
-            color="black"
+            color="primary"
             v-model="password"
             label="Password"
             :error-messages="getErrorMessages('password')"

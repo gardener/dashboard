@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="cyan darken-2">
+    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
       <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-information-outline</v-icon>
+          <v-icon color="primary">mdi-information-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Name</v-list-item-subtitle>
@@ -28,14 +28,14 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
+            <v-icon color="primary">mdi-clock-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Cluster Termination</v-list-item-subtitle>
             <v-list-item-title class="d-flex align-center pt-1">
               <v-icon
                 v-if="!isSelfTerminationWarning"
-                color="cyan darken-2"
+                color="primary"
                 left
                 size="18"
               >mdi-information</v-icon>
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-cube-outline</v-icon>
+          <v-icon color="primary">mdi-cube-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Kubernetes Version</v-list-item-subtitle>
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shootItem="shootItem" onlyK8sWarnings></version-expiration-warning>
+          <version-expiration-warning :shoot-item="shootItem" only-k8s-warnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-server</v-icon>
+          <v-icon color="primary">mdi-server</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Worker Groups</v-list-item-subtitle>
@@ -79,24 +79,24 @@ SPDX-License-Identifier: Apache-2.0
             <worker-group
             class="mr-2 mb-2"
             v-for="workerGroup in shootWorkerGroups"
-            :workerGroup="workerGroup"
-            :cloudProfileName="shootCloudProfileName"
-            :shootItem="shootItem"
+            :worker-group="workerGroup"
+            :cloud-profile-name="shootCloudProfileName"
+            :shoot-item="shootItem"
             :key="workerGroup.name"
             ></worker-group>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shootItem="shootItem" onlyMachineImageWarnings></version-expiration-warning>
+          <version-expiration-warning :shoot-item="shootItem" onlyMachineImageWarnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <worker-configuration :shootItem="shootItem"></worker-configuration>
+          <worker-configuration :shoot-item="shootItem"></worker-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-account-outline</v-icon>
+          <v-icon color="primary">mdi-account-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Created by</v-list-item-subtitle>
@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{shootCreatedAt}}</span>
               </template>
-              <time-string :dateTime="shootMetadata.creationTimestamp" mode="past"></time-string>
+              <time-string :date-time="shootMetadata.creationTimestamp" mode="past"></time-string>
             </v-tooltip>
           </v-list-item-title>
         </v-list-item-content>
@@ -123,7 +123,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-label-outline</v-icon>
+            <v-icon color="primary">mdi-label-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Purpose</v-list-item-subtitle>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-content>
           <v-list-item-action>
             <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
-            <purpose-configuration v-if="canGetSecrets" :shootItem="shootItem"></purpose-configuration>
+            <purpose-configuration v-if="canGetSecrets" :shoot-item="shootItem"></purpose-configuration>
           </v-list-item-action>
         </v-list-item>
       </template>
@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-file-document-outline</v-icon>
+            <v-icon color="primary">mdi-file-document-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
@@ -153,12 +153,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-earth</v-icon>
+            <v-icon color="primary">mdi-earth</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Access Restrictions</v-list-item-subtitle>
             <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
-              <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+              <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
             </v-list-item-title>
             <v-list-item-title v-else class="d-flex align-center pt-1">
               No access restrictions configured
@@ -166,14 +166,14 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-content>
           <v-list-item-action>
             <access-restrictions-configuration
-              :shootItem="shootItem"></access-restrictions-configuration>
+              :shoot-item="shootItem"></access-restrictions-configuration>
           </v-list-item-action>
         </v-list-item>
       </template>
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-puzzle</v-icon>
+          <v-icon color="primary">mdi-puzzle</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Add-ons <span class="caption">(not actively monitored and provided on a best-effort basis only)</span></v-list-item-subtitle>
@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0
                 :key="index"
                 small
                 outlined
-                color="cyan darken-2"
+                color="primary"
                 class="mr-2"
               >
               {{name}}
@@ -193,7 +193,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <addon-configuration :shootItem="shootItem"></addon-configuration>
+          <addon-configuration :shoot-item="shootItem"></addon-configuration>
         </v-list-item-action>
       </v-list-item>
     </v-list>
