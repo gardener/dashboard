@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="vsphere"
-    infra-icon="vsphere"
     create-title="Add new VMware vSphere Secret"
     replace-title="Replace VMware vSphere Secret"
     @input="onInput">

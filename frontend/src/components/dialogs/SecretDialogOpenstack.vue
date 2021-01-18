@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="openstack"
-    infra-icon="openstack"
     create-title="Add new OpenStack Secret"
     replace-title="Replace OpenStack Secret"
     @input="onInput">

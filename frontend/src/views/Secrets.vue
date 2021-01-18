@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-tooltip>
           </template>
           <v-list subheader dense>
-            <v-subheader>Select Infrastructure</v-subheader>
+            <v-subheader>Create Secret</v-subheader>
             <v-list-item v-for="infrastructure in sortedCloudProviderKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
               <v-list-item-action>
                  <infra-icon :value="infrastructure" :size="24"></infra-icon>

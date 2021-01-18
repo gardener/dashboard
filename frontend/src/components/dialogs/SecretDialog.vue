@@ -110,10 +110,6 @@ export default {
     },
     secret: {
       type: Object
-    },
-    infraIcon: {
-      type: String,
-      required: true
     }
   },
   data () {

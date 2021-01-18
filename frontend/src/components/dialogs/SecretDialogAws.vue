@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="aws"
-    infra-icon="aws"
     create-title="Add new AWS Secret"
     replace-title="Replace AWS Secret"
     @input="onInput">

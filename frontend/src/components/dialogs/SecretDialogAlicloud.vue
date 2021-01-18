@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="alicloud"
-    infra-icon="alicloud"
     create-title="Add new Alibaba Cloud Secret"
     replace-title="Replace Alibaba Cloud Secret"
     @input="onInput">

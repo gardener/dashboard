@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="azure"
-    infra-icon="azure"
     create-title="Add new Azure Secret"
     replace-title="Replace Azure Secret"
     @input="onInput">
