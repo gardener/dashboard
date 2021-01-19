@@ -595,7 +595,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
 }
 
 export function machineTypeHasStorageWithTypeFixed (machineType) {
-  return get(machineType, 'storage.type') === 'default'
+  return get(machineType, 'storage.type') === 'fixed'
 }
 
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
