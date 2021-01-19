@@ -1336,7 +1336,6 @@ __metadata:
     "@vue/eslint-config-standard": ^5.1.2
     "@vue/test-utils": ^1.0.3
     ansi-html: ^0.0.7
-    axios: ^0.19.2
     babel-eslint: ^10.1.0
     clipboard: ^2.0.6
     codemirror: ^5.52.2
@@ -3794,15 +3793,6 @@ __metadata:
   version: 1.10.1
   resolution: "aws4@npm:1.10.1"
   checksum: 53f2897324997542e3cfeca0b24f5960e2470eb8527f0b6587432a4607dcb8ca817955aef4297a3b429f1ca5fa688ba1b6bc57d744add41292ffcb59466392bb
-  languageName: node
-  linkType: hard
-
-"axios@npm:^0.19.2":
-  version: 0.19.2
-  resolution: "axios@npm:0.19.2"
-  dependencies:
-    follow-redirects: 1.5.10
-  checksum: bad346deea24050f9953ce09bb8015f85a99a7b8f016806adccfab0b8981827d1fbee9c77c0ef7c70cc48392c1af6bbc65e07c3e88221d17282d2d5fd0a191f6
   languageName: node
   linkType: hard
 
@@ -7937,7 +7927,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:1.5.10, follow-redirects@npm:^1.0.0":
+"follow-redirects@npm:^1.0.0":
   version: 1.5.10
   resolution: "follow-redirects@npm:1.5.10"
   dependencies:
