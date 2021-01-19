@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="fill-height">
-    <div v-g-draggable="draggableValue" :data-g-id="uuid" @dragStart="dragStart" @dragEnd="dragEnd" class="fill-height full-width">
+    <div v-g-draggable="draggableValue" :data-g-id="uuid" @drag-start="dragStart" @drag-end="dragEnd" class="fill-height full-width">
       <div ref="handle" :data-g-id="uuid">
         <slot name="handle"></slot>
       </div>

@@ -221,8 +221,8 @@ export default {
       this.selectedPrivilegedMode = privilegedMode
 
       // in case "initialize" is called with the same parameters, selectedConfig does not change and hence the watch is not called. Make sure that selectedConfig is emitted in any case
-      this.$emit('selectedConfig', this.selectedConfig)
-      this.$emit('validSettings', this.validSettings)
+      this.$emit('selected-config', this.selectedConfig)
+      this.$emit('valid-settings', this.validSettings)
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -230,10 +230,10 @@ export default {
   },
   watch: {
     selectedConfig () {
-      this.$emit('selectedConfig', this.selectedConfig)
+      this.$emit('selected-config', this.selectedConfig)
     },
     validSettings () {
-      this.$emit('validSettings', this.validSettings)
+      this.$emit('valid-settings', this.validSettings)
     }
   }
 }

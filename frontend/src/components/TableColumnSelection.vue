@@ -102,13 +102,13 @@ export default {
   },
   methods: {
     onSetSelectedHeader (header) {
-      this.$emit('setSelectedHeader', header)
+      this.$emit('set-selected-header', header)
     },
     onReset () {
       this.$emit('reset')
     },
     onToggleFilter (filter) {
-      this.$emit('toggleFilter', filter)
+      this.$emit('toggle-filter', filter)
     },
     checkboxColor (selected) {
       return selected ? 'primary' : ''

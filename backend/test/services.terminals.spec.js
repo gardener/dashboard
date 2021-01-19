@@ -37,7 +37,8 @@ const {
 
 const {
   Handler,
-  Bootstrapper
+  Bootstrapper,
+  BootstrapStatusEnum
 } = require('../lib/services/terminals/terminalBootstrap')
 
 const {
@@ -140,12 +141,13 @@ describe('services', function () {
 
     const terminalConfig = config.terminal
     let terminalStub
+    let seedList
 
     beforeEach(function () {
       terminalStub = jest.fn().mockReturnValue(terminalConfig)
       Object.defineProperty(config, 'terminal', { get: terminalStub })
-      jest.spyOn(cache, 'getCloudProfiles').mockReturnValue(fixtures.cloudprofiles.list())
-      jest.spyOn(cache, 'getSeeds').mockReturnValue(fixtures.seeds.list())
+      seedList = fixtures.seeds.list()
+      jest.spyOn(cache, 'getSeeds').mockReturnValue(seedList)
     })
 
     afterEach(function () {
@@ -733,6 +735,20 @@ describe('services', function () {
                 .find({ metadata: { namespace, name } })
                 .cloneDeep()
                 .value()
+            },
+            async listAllNamespaces (query) {
+              await nextTick()
+
+              const fieldSelector = fixtures.helper.parseFieldSelector(query.fieldSelector)
+              const items = _
+                .chain(shootList)
+                .filter(fieldSelector)
+                .tap(shoot => (delete shoot.kind))
+                .value()
+              return {
+                kind: 'ShootList',
+                items
+              }
             }
           }
         })
@@ -759,6 +775,10 @@ describe('services', function () {
         Object.defineProperty(dashboardClient, 'core.gardener.cloud', { value: coreGardenerCloud })
       })
 
+      function getStates (bootstrapper, resources) {
+        return _.map(resources, resource => bootstrapper.bootstrapState.getValue(resource).state)
+      }
+
       it('should not bootstrap anything', async function () {
         const bootstrap = {
           disabled: true
@@ -769,7 +789,7 @@ describe('services', function () {
         bootstrapper.push(new Handler(() => {}, { description: 'test' }))
         bootstrapper.bootstrapResource(seed)
         bootstrapper.bootstrapResource(shootList[0])
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
@@ -787,7 +807,7 @@ describe('services', function () {
         }
         terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
@@ -805,10 +825,50 @@ describe('services', function () {
         terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
         bootstrapper.bootstrapResource(seed)
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
+        expect(getStates(bootstrapper, [seed])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
+      })
+
+      it('should bootstrap a seed cluster after revision changed', async function () {
+        const gardenTerminalHost = {
+          seedRef: seedName
+        }
+        const bootstrap = {
+          disabled: false,
+          shootDisabled: false,
+          seedDisabled: false
+        }
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
+        const seed = _.find(seedList, ['metadata.name', seedName])
+        _.set(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]', 'foo')
+        const bootstrapper = new Bootstrapper()
+        bootstrapper.bootstrapResource(seed)
+        await pEvent(bootstrapper, 'drain')
+        const revision = bootstrapper.bootstrapState.getValue(seed).revision
+        let shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL
+        ])
+        _.set(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]', 'bar') // the bootstrap revision will change
+        bootstrapper.bootstrapResource(seed)
+        await pEvent(bootstrapper, 'drain')
+        const seedValue = bootstrapper.bootstrapState.getValue(seed)
+        expect(seedValue.state).toBe(BootstrapStatusEnum.BOOTSTRAPPED)
+        expect(seedValue.revision).not.toBe(revision)
+        shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.POSTPONED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL
+        ])
+        expect(logger.debug).toBeCalledWith('Bootstrap required for 2 shoots due to terminal bootstrap revision change')
       })
 
       it('should skip bootstrap of unreachable seed cluster', async function () {
@@ -825,7 +885,7 @@ describe('services', function () {
         terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
         bootstrapper.bootstrapResource(seed)
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
@@ -845,14 +905,18 @@ describe('services', function () {
         for (const shoot of shootList) {
           bootstrapper.bootstrapResource(shoot)
         }
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(bootstrapper.isResourcePending(shootList[0])).toBe(true)
         expect(stats.total).toBe(3)
         expect(stats.successRate).toBe(1)
-        expect(bootstrapper.bootstrapped.size).toBe(3)
-        expect(bootstrapper.isResourceBootstrapped(shootList[1])).toBe(true)
-        expect(bootstrapper.isResourceBootstrapped(shootList[2])).toBe(true)
+        expect(bootstrapper.bootstrapState.size).toBe(4)
+        const shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.POSTPONED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.BOOTSTRAPPED
+        ])
       })
 
       it('should not bootstrap shoot cluster', async function () {
@@ -864,13 +928,15 @@ describe('services', function () {
 
         const bootstrapper = new Bootstrapper()
         // bootstrap dummy whose seed does not have .spec.secretRef set
-        bootstrapper.bootstrapResource(shootList[2])
-        await pEvent(bootstrapper, 'empty')
+        const shoot = shootList[2]
+        const { namespace, name } = shoot.metadata
+        bootstrapper.bootstrapResource(shoot)
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(bootstrapper.isResourcePending(shootList[0])).toBe(false)
+        expect(getStates(bootstrapper, [shoot])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
-        expect(logger.info).toBeCalledTimes(1)
+        expect(logger.info).toBeCalledWith(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
       })
 
       it('should not bootstrap unreachable shoot cluster', async function () {
@@ -885,9 +951,9 @@ describe('services', function () {
         const shoot = shootList[3]
         const { namespace, name } = shoot.metadata
         bootstrapper.bootstrapResource(shoot)
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(bootstrapper.isResourcePending(shootList[0])).toBe(false)
+        expect(getStates(bootstrapper, [shoot])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
         expect(logger.debug).toBeCalledWith(`Seed ${unreachableSeedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)

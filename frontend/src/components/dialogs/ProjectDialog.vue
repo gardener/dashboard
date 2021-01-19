@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
                   ></v-text-field>
               </v-col>
             </v-row>
-            <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+            <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </v-container>
         </form>
         <v-snackbar :value="loading" bottom right absolute :timeout="-1">

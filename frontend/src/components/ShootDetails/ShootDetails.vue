@@ -7,21 +7,21 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-row class="d-flex">
       <v-col cols="12" md="6">
-        <shoot-details-card :shootItem="shootItem"></shoot-details-card>
+        <shoot-details-card :shoot-item="shootItem"></shoot-details-card>
         <custom-fields-card :custom-fields="customFields" class="mt-4"></custom-fields-card>
-        <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
-        <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
+        <shoot-infrastructure-card :shoot-item="shootItem" class="mt-4"></shoot-infrastructure-card>
+        <shoot-external-tools-card :shoot-item="shootItem" class="mt-4"></shoot-external-tools-card>
+        <shoot-lifecycle-card ref="shootLifecycle" :shoot-item="shootItem" class="mt-4"></shoot-lifecycle-card>
       </v-col>
       <v-col cols="12" md="6">
         <v-card v-if="canGetSecrets" class="mb-4">
           <v-toolbar flat dense color="toolbar-background toolbar-title--text">
             <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
           </v-toolbar>
-          <shoot-access-card :shootItem="shootItem" @addTerminalShortcut="onAddTerminalShortcut"></shoot-access-card>
+          <shoot-access-card :shoot-item="shootItem" @add-terminal-shortcut="onAddTerminalShortcut"></shoot-access-card>
         </v-card>
-        <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-        <tickets-card :tickets="tickets" :shootItem="shootItem" class="mt-4"></tickets-card>
+        <shoot-monitoring-card :shoot-item="shootItem"></shoot-monitoring-card>
+        <tickets-card :tickets="tickets" :shoot-item="shootItem" class="mt-4"></tickets-card>
       </v-col>
     </v-row>
   </v-container>
@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     onAddTerminalShortcut (shortcut) {
-      this.$emit('addTerminalShortcut', shortcut)
+      this.$emit('add-terminal-shortcut', shortcut)
     }
   },
   mounted () {

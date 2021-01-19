@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <new-shoot-select-infrastructure
             ref="infrastructure"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureValid"
             ></new-shoot-select-infrastructure>
         </v-card-text>
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <new-shoot-details
             ref="clusterDetails"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onDetailsValid"
             ></new-shoot-details>
         </v-card-text>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <new-shoot-infrastructure-details
             ref="infrastructureDetails"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureDetailsValid"
             ></new-shoot-infrastructure-details>
         </v-card-text>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <access-restrictions
             ref="accessRestrictions"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
           ></access-restrictions>
         </v-card-text>
       </v-card>
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-title>
         <v-card-text>
           <manage-workers
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onWorkersValid"
             ref="manageWorkers"
             v-on="$manageWorkers.hooks"
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
-            :isCreateMode="true"
+            :is-create-mode="true"
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
           ></maintenance-time>
           <maintenance-components
             ref="maintenanceComponents"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
           ></maintenance-components>
        </v-card-text>
       </v-card>
@@ -99,14 +99,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-title>
         <v-card-text>
           <manage-hibernation-schedule
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onHibernationScheduleValid"
             ref="hibernationSchedule"
             v-on="$hibernationSchedule.hooks"
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
-      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-message>
+      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage" class="error-alert"></g-message>
     </v-container>
     <v-divider></v-divider>
     <div class="d-flex align-center justify-end toolbar">

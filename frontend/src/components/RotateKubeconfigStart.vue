@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :loading="isActionToBeScheduled"
-    @dialogOpened="startDialogOpened"
+    @dialog-opened="startDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    maxWidth="600"
-    :buttonText="buttonText"
-    :confirmRequired="true"
-    confirmButtonText="Rotate">
+    max-width="600"
+    :button-text="buttonText"
+    :confirm-required="true"
+    confirm-button-text="Rotate">
     <template v-slot:actionComponent>
       <v-row >
         <v-col>

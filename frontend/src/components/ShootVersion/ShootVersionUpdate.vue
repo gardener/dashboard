@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <hint-colorizer hintColor="warning">
+    <hint-colorizer hint-color="warning">
       <v-select
         :items="items"
         color="primary"
@@ -127,14 +127,14 @@ export default {
     },
     selectedVersionIsPatch () {
       const isPatch = get(this.selectedItem, 'type') === 'patch'
-      this.$emit('confirmRequired', !isPatch)
+      this.$emit('confirm-required', !isPatch)
       return isPatch
     },
     selectedMinorVersionIsNotNextMinor () {
       const version = get(this, 'selectedItem.version')
       const type = get(this, 'selectedItem.type')
       const invalid = !version || this.itemIsNotNextMinor(version, type)
-      this.$emit('selectedVersionInvalid', invalid)
+      this.$emit('selected-version-invalid', invalid)
       return invalid
     },
     isError () {
@@ -191,8 +191,8 @@ export default {
     selectedItem (value) {
       const version = get(value, 'version')
       const type = get(value, 'type')
-      this.$emit('selectedVersion', version)
-      this.$emit('selectedVersionType', type)
+      this.$emit('selected-version', version)
+      this.$emit('selected-version-type', type)
     }
   }
 }

@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <table-column-selection
           :headers="userAccountTableHeaders"
-          @setSelectedHeader="setSelectedHeaderUserAccount"
+          @set-selected-header="setSelectedHeaderUserAccount"
           @reset="resetTableSettingsUserAccount"
         ></table-column-selection>
       </v-toolbar>
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <table-column-selection
           :headers="serviceAccountTableHeaders"
-          @setSelectedHeader="setSelectedHeaderServiceAccount"
+          @set-selected-header="setSelectedHeaderServiceAccount"
           @reset="resetTableSettingsServiceAccount"
         ></table-column-selection>
       </v-toolbar>
@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
             :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
-            @rotateSecret="onRotateServiceAccountSecret"
+            @rotate-secret="onRotateServiceAccountSecret"
             @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
@@ -136,8 +136,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :name="memberName" :isCurrentUser="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :isCurrentUser="isCurrentUser(memberName)" :roles="memberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">

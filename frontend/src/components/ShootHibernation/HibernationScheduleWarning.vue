@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     title="No Hibernation Schedule"
-    :popperKey="`no_hibernation_${namespace}/${name}`"
+    :popper-key="`no_hibernation_${namespace}/${name}`"
   >
     <div class="message">
       To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.

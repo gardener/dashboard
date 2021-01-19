@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     onInput (infrastructureKind) {
-      this.$emit('dialogClosed', infrastructureKind)
+      this.$emit('dialog-closed', infrastructureKind)
     }
   }
 }

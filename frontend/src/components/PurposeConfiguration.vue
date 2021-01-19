@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="valid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    maxWidth="400"
+    max-width="400"
     caption="Configure Purpose">
     <template v-slot:actionComponent>
       <purpose
         :secret="secret"
-        @updatePurpose="onUpdatePurpose"
+        @update-purpose="onUpdatePurpose"
         @valid="onPurposeValid"
         ref="purpose"
         v-on="$purpose.hooks"

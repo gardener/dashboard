@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
       <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
         <hibernation-schedule-event
           ref="scheduleEvents"
-          :scheduleEvent="scheduleEvent"
-          @removeScheduleEvent="onRemoveSchedule(index)"
-          @updateWakeUpTime="onUpdateWakeUpTime"
-          @updateHibernateTime="onUpdateHibernateTime"
-          @updateSelectedDays="onUpdateSelectedDays"
-          @updateLocation="onUpdateLocation"
+          :schedule-event="scheduleEvent"
+          @remove-schedule-event="onRemoveSchedule(index)"
+          @update-wake-up-time="onUpdateWakeUpTime"
+          @update-hibernate-time="onUpdateHibernateTime"
+          @update-selected-days="onUpdateSelectedDays"
+          @update-location="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
