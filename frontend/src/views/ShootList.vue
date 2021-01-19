@@ -571,22 +571,9 @@ export default {
     padding-bottom: 10px;
   }
 
-  .shootListTable table.table {
-    thead, tbody {
-      th, td {
-        padding: 10px;
-      }
-    }
-  }
-
-  .shootListTable table {
-    tbody, thead {
-      td:first-child, th:first-child {
-        padding-left: 24px;
-      }
-      td:last-child, th:last-child {
-        padding-right: 24px;
-      }
+  ::v-deep .v-data-table-header {
+    tr {
+      white-space: nowrap;
     }
   }
 

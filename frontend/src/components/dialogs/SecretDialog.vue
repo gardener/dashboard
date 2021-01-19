@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>

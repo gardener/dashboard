@@ -20,18 +20,19 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.infrastructure">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
-          <infra-icon v-on="on" v-model="item.infrastructure"></infra-icon>
+          <div class="d-flex align-center" v-on="on">
+            <infra-icon v-on="on" v-model="item.infrastructure"></infra-icon>
+            <span class="ml-2">{{item.cloudProfileName}}</span>
+          </div>
         </template>
-        <span>{{item.infrastructure}}</span>
+        <div><span class="font-weight-bold">Infrastructure:</span> {{item.infrastructure}}</div>
+        <div><span class="font-weight-bold">Cloud Profile:</span> {{item.cloudProfileName}}</div>
       </v-tooltip>
-    </td>
-    <td v-if="selectedHeaders.cloudProfileName">
-      {{item.cloudProfileName}}
     </td>
     <td v-if="selectedHeaders.details">
       <v-tooltip top v-for="({label, value}) in item.details" :key="label">
         <template v-slot:activator="{ on }">
-          <v-chip v-on="on" v-if="value" color="primary" small class="mr-2">{{value}}</v-chip>
+          <v-chip v-on="on" v-if="value" color="primary" small class="ma-1">{{value}}</v-chip>
         </template>
         <span>{{label}}</span>
       </v-tooltip>

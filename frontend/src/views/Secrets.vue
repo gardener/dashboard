@@ -190,13 +190,6 @@ export default {
           defaultSelected: true
         },
         {
-          text: 'CLOUD PROFILE',
-          align: 'start',
-          value: 'cloudProfileName',
-          sortable: true,
-          defaultSelected: true
-        },
-        {
           text: 'DETAILS',
           align: 'start',
           value: 'details',
@@ -337,7 +330,7 @@ export default {
       if (count === 0) {
         return 'currently unused'
       } else {
-        return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
+        return `${count} ${count > 1 ? 'clusters' : 'cluster'}`
       }
     },
     setSelectedHeader (header) {
@@ -381,7 +374,7 @@ export default {
     if (!infrastructureSecret || !isOwnSecret(infrastructureSecret)) {
       return
     }
-    this.onUpdate(infrastructureSecret)
+    this.onUpdateSecret(infrastructureSecret)
   },
   created () {
     merge(this.initialDialogState, this.dialogState)
@@ -401,3 +394,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped >
+
+  ::v-deep .v-data-table-header {
+    tr {
+      white-space: nowrap;
+    }
+  }
+
+</style>
