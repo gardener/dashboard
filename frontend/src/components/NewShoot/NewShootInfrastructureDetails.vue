@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
-          :isCreateMode="true"
-          :cloudProfiles="cloudProfiles"
+          :is-create-mode="true"
+          :cloud-profiles="cloudProfiles"
           @valid="onCloudProfileNameValid"
           @input="onUpdateCloudProfileName"
           color="primary">
@@ -83,8 +83,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-col cols="3">
           <wildcard-select
             v-model="floatingPoolName"
-            :wildcardSelectItems="allFloatingPoolNames"
-            wildcardSelectLabel="Floating Pool"
+            :wildcard-select-items="allFloatingPoolNames"
+            wildcard-select-label="Floating Pool"
             @valid="onFloatingPoolWildcardValid"
             ></wildcard-select>
         </v-col>
@@ -200,7 +200,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
       </template>
     </v-row>
-    <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
+    <secret-dialog-wrapper :dialog-state="addSecretDialogState" @dialog-closed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
 </template>
 

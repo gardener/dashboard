@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="azure"
-    infraIcon="azure"
-    createTitle="Add new Azure Secret"
-    replaceTitle="Replace Azure Secret"
+    cloud-provider-kind="azure"
+    infra-icon="azure"
+    create-title="Add new Azure Secret"
+    replace-title="Replace Azure Secret"
     @input="onInput">
 
     <template v-slot:data-slot>

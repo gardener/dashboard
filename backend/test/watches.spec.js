@@ -93,7 +93,7 @@ describe('watches', function () {
   })
 
   describe('seeds', function () {
-    const kind = 'Seeds'
+    const kind = 'Seed'
     const { seeds } = dashboardClient['core.gardener.cloud']
 
     it('should watch seeds', async function () {
@@ -105,9 +105,10 @@ describe('watches', function () {
       emitter.emit('event', { type: 'ADDED', object: bar })
       emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
       emitter.emit('event', { type: 'DELETED', object: bar })
-      expect(bootstrapStub).toHaveBeenCalledTimes(2)
+      expect(bootstrapStub).toHaveBeenCalledTimes(3)
       expect(bootstrapStub.mock.calls[0]).toEqual([foo])
       expect(bootstrapStub.mock.calls[1]).toEqual([bar])
+      expect(bootstrapStub.mock.calls[2]).toEqual([{ kind, ...bar }])
     })
   })
 
@@ -179,8 +180,7 @@ describe('watches', function () {
     let watchStub
     let deleteTicketsStub
     let bootstrapResourceStub
-    let isResourcePendingStub
-    let removePendingResourceStub
+    let removeResourceStub
     let findProjectByNamespaceStub
 
     beforeEach(function () {
@@ -188,8 +188,7 @@ describe('watches', function () {
       watchStub = jest.spyOn(shoots, 'watchListAllNamespaces').mockReturnValue(emitter)
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
-      isResourcePendingStub = jest.spyOn(bootstrapper, 'isResourcePending').mockImplementation(_.matches(foobar))
-      removePendingResourceStub = jest.spyOn(bootstrapper, 'removePendingResource').mockReturnValue()
+      removeResourceStub = jest.spyOn(bootstrapper.bootstrapState, 'removeResource').mockReturnValue()
       findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockImplementation(namespace => {
         return _.find(projectList, ['spec.namespace', namespace])
       })
@@ -222,10 +221,8 @@ describe('watches', function () {
 
       expect(logger.error).not.toBeCalled()
       expect(bootstrapResourceStub).toBeCalledTimes(2)
-      expect(isResourcePendingStub).toBeCalledTimes(2)
-      expect(isResourcePendingStub.mock.calls).toEqual([[foobar], [foobar]])
-      expect(removePendingResourceStub).toBeCalledTimes(1)
-      expect(removePendingResourceStub.mock.calls).toEqual([[foobar]])
+      expect(removeResourceStub).toBeCalledTimes(1)
+      expect(removeResourceStub.mock.calls).toEqual([[foobar]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
@@ -237,8 +234,6 @@ describe('watches', function () {
     })
 
     it('should watch shoots with issues', async function () {
-      isResourcePendingStub.mockImplementation(_.matches(foobaz))
-
       watches.shoots(io, { shootsWithIssues })
 
       expect(watchStub).toBeCalledTimes(1)
@@ -282,11 +277,9 @@ describe('watches', function () {
       emitter.emit('event', { type: 'DELETED', object: foobazUnhealthy })
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
-      expect(bootstrapResourceStub).toBeCalledTimes(3)
-      expect(isResourcePendingStub).toBeCalledTimes(3)
-      expect(isResourcePendingStub.mock.calls).toEqual([[foobar], [foobazUnhealthy], [foobazUnhealthy]])
-      expect(removePendingResourceStub).toBeCalledTimes(1)
-      expect(removePendingResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
+      expect(bootstrapResourceStub).toBeCalledTimes(4)
+      expect(removeResourceStub).toBeCalledTimes(1)
+      expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
 
       expect(fooRoom.events).toHaveLength(0)
@@ -326,10 +319,8 @@ describe('watches', function () {
       emitter.emit('event', { type: 'DELETED', object: foobaz })
 
       expect(logger.error).toBeCalledTimes(1)
-      expect(isResourcePendingStub).toBeCalledTimes(2)
-      expect(isResourcePendingStub.mock.calls).toEqual([[foobar], [foobaz]])
-      expect(removePendingResourceStub).toBeCalledTimes(1)
-      expect(removePendingResourceStub.mock.calls).toEqual([[foobar]])
+      expect(removeResourceStub).toBeCalledTimes(2)
+      expect(removeResourceStub.mock.calls).toEqual([[foobar], [foobaz]])
       expect(deleteTicketsStub).toBeCalledTimes(2)
 
       expect(fooRoom.events).toHaveLength(0)

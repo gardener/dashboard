@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
-    @dialogOpened="onConfigurationDialogOpened"
+    :shoot-item="shootItem"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     :caption="caption"
     :icon="icon"
-    :confirmButtonText="confirmText"
-    :confirmRequired="confirmRequired"
+    :confirm-button-text="confirmText"
+    :confirm-required="confirmRequired"
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
-    :buttonText="buttonText"
-     maxWidth="600">
+    :button-text="buttonText"
+     max-width="600">
     <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />

@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
       <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
         <hibernation-schedule-event
           ref="scheduleEvents"
-          :scheduleEvent="scheduleEvent"
-          @removeScheduleEvent="onRemoveSchedule(index)"
-          @updateWakeUpTime="onUpdateWakeUpTime"
-          @updateHibernateTime="onUpdateHibernateTime"
-          @updateSelectedDays="onUpdateSelectedDays"
-          @updateLocation="onUpdateLocation"
+          :schedule-event="scheduleEvent"
+          @remove-schedule-event="onRemoveSchedule(index)"
+          @update-wake-up-time="onUpdateWakeUpTime"
+          @update-hibernate-time="onUpdateHibernateTime"
+          @update-selected-days="onUpdateSelectedDays"
+          @update-location="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
@@ -59,10 +59,11 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
-        <v-alert type="warning" outlined>
-          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-          <div>{{hibernationPossibleMessage}}</div>
-        </v-alert>
+        <constraint-warning
+          :value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
+          type="hibernation">
+          {{hibernationPossibleMessage}}
+        </constraint-warning>
       </v-col>
     </v-row>
   </div>
@@ -78,6 +79,7 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
 import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
@@ -86,7 +88,8 @@ const { v4: uuidv4 } = require('uuid')
 export default {
   name: 'hibernation-schedule',
   components: {
-    HibernationScheduleEvent
+    HibernationScheduleEvent,
+    ConstraintWarning
   },
   props: {
     userInterActionBus: {

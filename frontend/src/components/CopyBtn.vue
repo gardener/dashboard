@@ -116,7 +116,7 @@ export default {
         console.error('error', err)
         this.snackbar = true
         this.copySucceeded = false
-        this.$emit('copyFailed')
+        this.$emit('copy-failed')
       })
     }
   },

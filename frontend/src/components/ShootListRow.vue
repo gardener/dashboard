@@ -21,23 +21,34 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-              <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
+              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp" />
+              <version-expiration-warning :shoot-item="shootItem" />
+              <constraint-warning
+                :value="!isMaintenancePreconditionSatisfied"
+                type="maintenance"
+                icon>
+                {{maintenancePreconditionSatisfiedMessage}}
+              </constraint-warning>
+              <constraint-warning
+                :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+                type="hibernation"
+                icon>
+                {{hibernationPossibleMessage}}
+              </constraint-warning>
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"
                 :namespace="shootNamespace"
-                :purpose="shootPurpose">
-              </hibernation-schedule-warning>
+                :purpose="shootPurpose" />
             </div>
           </v-col>
         </v-row>
       </template>
       <template v-if="cell.header.value === 'infrastructure'">
-        <vendor :shootItem="shootItem"></vendor>
+        <vendor :shoot-item="shootItem"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
-        <shoot-seed-name :shootItem="shootItem" />
+        <shoot-seed-name :shoot-item="shootItem" />
       </template>
       <template v-if="cell.header.value === 'technicalId'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">
@@ -64,8 +75,8 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'lastOperation'">
         <div>
           <shoot-status
-          :popperKey="`${shootNamespace}/${shootName}`"
-          :shootItem="shootItem">
+          :popper-key="`${shootNamespace}/${shootName}`"
+          :shoot-item="shootItem">
           </shoot-status>
         </div>
       </template>
@@ -73,10 +84,10 @@ SPDX-License-Identifier: Apache-2.0
         <shoot-version :shoot-item="shootItem" chip></shoot-version>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <status-tags :shootItem="shootItem"></status-tags>
+        <status-tags :shoot-item="shootItem"></status-tags>
       </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
-        <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+        <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
         <v-tooltip top>
@@ -124,7 +135,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span>{{showClusterAccessActionTitle}}</span>
           </v-tooltip>
-          <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
+          <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
     </td>
@@ -153,6 +164,7 @@ import HibernationScheduleWarning from '@/components/ShootHibernation/Hibernatio
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import {
   isTypeDelete,
@@ -178,7 +190,8 @@ export default {
     ShootSeedName,
     Vendor,
     VersionExpirationWarning,
-    ShootListRowActions
+    ShootListRowActions,
+    ConstraintWarning
   },
   props: {
     shootItem: {
@@ -259,7 +272,7 @@ export default {
   methods: {
     showDialog: function (action) {
       const shootItem = this.shootItem
-      this.$emit('showDialog', { action, shootItem })
+      this.$emit('show-dialog', { action, shootItem })
     }
   }
 }

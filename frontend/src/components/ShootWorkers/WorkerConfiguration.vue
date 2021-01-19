@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="workersValid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    maxWidth="760"
+    max-width="760"
     confirmRequired
-    confirmMessage="Please confirm changes to the worker groups as this may affect your workload"
+    confirm-message="Please confirm changes to the worker groups as this may affect your workload"
     caption="Configure Workers"
     disable-confirm-input-focus>
     <template v-slot:actionComponent>

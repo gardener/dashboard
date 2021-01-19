@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
-    confirmButtonText="Change"
+    confirm-button-text="Change"
     :confirm-disabled="!validSettings"
     max-width="750px"
     max-height="100vh"
-    defaultColor="primary"
+    default-color="primary"
     ref="gDialog"
     >
     <template v-slot:caption>Change Terminal Settings</template>
@@ -18,8 +18,8 @@ SPDX-License-Identifier: Apache-2.0
       <terminal-settings
         ref="settings"
         :target="target"
-        @selectedConfig="selectedConfigChanged"
-        @validSettings="validSettingsChanged"
+        @selected-config="selectedConfigChanged"
+        @valid-settings="validSettingsChanged"
       ></terminal-settings>
     </template>
   </g-dialog>

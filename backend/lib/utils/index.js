@@ -43,6 +43,10 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
+function getSeedIngressDomain (seed) {
+  return _.get(seed, 'spec.dns.ingressDomain') || _.get(seed, 'spec.ingress.domain')
+}
+
 function isSeedUnreachable (seed) {
   const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
   if (!matchLabels) {
@@ -57,5 +61,6 @@ module.exports = {
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
-  isSeedUnreachable
+  isSeedUnreachable,
+  getSeedIngressDomain
 }

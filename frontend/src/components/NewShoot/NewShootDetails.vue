@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
       </v-col>
       <v-col cols="3">
-        <hint-colorizer hintColor="warning">
+        <hint-colorizer hint-color="warning">
           <v-select
             color="primary"
             item-color="primary"
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <purpose
           :secret="secret"
-          @updatePurpose="onUpdatePurpose"
+          @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
           ref="purpose"
           v-on="$purpose.hooks"

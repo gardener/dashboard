@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper :title="statusTitle" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
     <template v-slot:popperRef>
       <div class="shoot-status-div d-flex flex-row">
         <v-tooltip top>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
             </div>
           </div>
         </v-tooltip>
-        <retry-operation :shootItem="shootItem"></retry-operation>
+        <retry-operation :shoot-item="shootItem"></retry-operation>
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
       <template v-if="showStatusText">
@@ -49,11 +49,11 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </template>
     <shoot-message-details
-      :statusTitle="statusTitle"
-      :lastMessage="lastMessage"
-      :errorDescriptions="errorDescriptions"
-      :lastUpdateTime="shootLastOperation.lastUpdateTime"
-      :secretBindingName="shootSecretBindingName"
+      :status-title="statusTitle"
+      :last-message="lastMessage"
+      :error-descriptions="errorDescriptions"
+      :last-update-time="shootLastOperation.lastUpdateTime"
+      :secret-binding-name="shootSecretBindingName"
       :namespace="shootNamespace"
     />
   </g-popper>

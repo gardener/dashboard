@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-tooltip>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
-                  <copy-btn :clipboard-text="kubeconfigYaml" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
+                  <copy-btn :clipboard-text="kubeconfigYaml" tooltip-text="Copy kubeconfig to clipboard"></copy-btn>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>

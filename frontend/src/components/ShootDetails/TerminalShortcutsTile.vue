@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-list-item>
       <v-list-item-icon>
-        <icon-base width="24" height="23" iconColor="primary" viewBox="-4 0 56 54">
+        <icon-base width="24" height="23" icon-color="primary" view-box="-4 0 56 54">
           <terminal-shortcut-icon></terminal-shortcut-icon>
         </icon-base>
       </v-list-item-icon>
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
         <terminal-shortcuts
           :shoot-item="shootItem"
           :popper-boundaries-selector="popperBoundariesSelector"
-          @addTerminalShortcut="onAddTerminalShortcut"
+          @add-terminal-shortcut="onAddTerminalShortcut"
         ></terminal-shortcuts>
       </v-card-text>
     </v-card>
@@ -117,7 +117,7 @@ export default {
         }
       }
 
-      this.$emit('addTerminalShortcut', shortcut)
+      this.$emit('add-terminal-shortcut', shortcut)
     }
   }
 }

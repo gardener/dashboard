@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             <span class="error--text font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
-        <g-message color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-message>
+        <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>

@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <g-popper
     v-if="k8sExpiration || expiredWorkerGroups.length"
     :title="`Update Information for ${this.shootName}`"
-    :toolbarColor="overallStatusColor"
-    :popperKey="`version_warning_${shootName}`"
+    :toolbar-color="overallStatusColor"
+    :popper-key="`version_warning_${shootName}`"
   >
     <template v-slot:popperRef>
       <v-btn icon>

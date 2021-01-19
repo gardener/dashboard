@@ -21,27 +21,27 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regularInput">
         <machine-type
-        :machineTypes="machineTypes"
+        :machine-types="machineTypes"
         :worker="worker"
-        @updateMachineType="onUpdateMachineType"
+        @update-machine-type="onUpdateMachineType"
         @valid="onMachineTypeValid">
         </machine-type>
       </div>
       <div class="regularInput">
         <machine-image
-        :machineImages="machineImages"
+        :machine-images="machineImages"
         :worker="worker"
         :updateOSMaintenance="updateOSMaintenance"
-        @updateMachineImage="onUpdateMachineImage"
+        @update-machine-image="onUpdateMachineImage"
         @valid="onMachineImageValid">
         </machine-image>
       </div>
       <div v-if="volumeInCloudProfile" class="regularInput">
         <volume-type
-        :volumeTypes="volumeTypes"
+        :volume-types="volumeTypes"
         :worker="worker"
-        :cloudProfileName="cloudProfileName"
-        @updateVolumeType="onUpdateVolumeType"
+        :cloud-profile-name="cloudProfileName"
+        @update-volume-type="onUpdateVolumeType"
         @valid="onVolumeTypeValid">
         </volume-type>
       </div>
@@ -425,7 +425,7 @@ export default {
     },
     onInputMaxSurge () {
       this.$v.worker.maxSurge.$touch()
-      this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
+      this.$emit('update-max-surge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
       this.validateInput()
     },
     onInputZones () {

@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
-    confirmButtonText="Confirm"
+    confirm-button-text="Confirm"
     max-width="750px"
     max-height="100vh"
-    defaultColor="primary"
+    default-color="primary"
     ref="gDialog"
     >
     <template v-slot:caption>Confirm</template>

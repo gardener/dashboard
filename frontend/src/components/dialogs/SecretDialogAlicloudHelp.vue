@@ -68,6 +68,14 @@ export default {
             Action: 'slb:*',
             Effect: 'Allow',
             Resource: '*'
+          },
+          {
+            Action: [
+              'ram:GetRole',
+              'ram:CreateRole'
+            ],
+            Effect: 'Allow',
+            Resource: '*'
           }
         ],
         Version: '1'

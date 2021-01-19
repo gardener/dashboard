@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     :title="workerGroup.name"
-    :popperKey="`worker_group_${workerGroup.name}`"
+    :popper-key="`worker_group_${workerGroup.name}`"
   >
     <template v-slot:popperRef>
       <v-chip

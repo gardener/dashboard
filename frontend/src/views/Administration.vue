@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
                         <template v-slot:activator="{ on }">
                           <span v-on="on" class="subtitle-1">{{createdAt}}</span>
                         </template>
-                        <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
+                        <time-string :date-time="creationTimestamp" :point-in-time="-1"></time-string>
                       </v-tooltip>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -290,9 +290,9 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
-      defaultColor="error"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      default-color="error"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       ref="gDialog">
       <template v-slot:caption>
         Confirm Delete

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <hint-colorizer hintColor="warning">
+    <hint-colorizer hint-color="warning">
       <v-select
         color="primary"
         item-color="primary"
@@ -147,7 +147,7 @@ export default {
     },
     onInputVolumeType () {
       this.$v.worker.volume.type.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     onInputIops (value) {
@@ -161,7 +161,7 @@ export default {
         unset(this.worker.providerConfig, 'volume.iops')
       }
       this.$v.workerIops.$touch()
-      this.$emit('updateVolumeType')
+      this.$emit('update-volume-type')
       this.validateInput()
     },
     validateInput () {
