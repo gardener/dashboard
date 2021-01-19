@@ -251,7 +251,7 @@ export default {
           })
         },
         volumeSizeInternal: {
-          minVolumeSize: function (value) {
+          minVolumeSize (value) {
             if (!this.canDefineVolumeSize) {
               return true
             }
