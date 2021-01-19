@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item>
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex"><infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
+            <v-list-item-title class="d-flex"><infra-icon v-model="shootCloudProviderKind" class="mr-2"></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item>

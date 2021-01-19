@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-avatar :color="darkMode && !noDarkModeBackground ? 'grey darken-2' : undefined" small :size="size">
-    <img v-if="iconSrc" :src="iconSrc">
+    <img v-if="iconSrc" :src="iconSrc" :style="iconStyle">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </v-avatar>
@@ -69,6 +69,10 @@ export default {
     },
     isMdiIcon () {
       return startsWith(this.value, 'mdi-')
+    },
+    iconStyle () {
+      const maxIconSize = this.size - 4
+      return `max-height: ${maxIconSize}px; max-width: ${maxIconSize}px;`
     }
   }
 }
