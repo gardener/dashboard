@@ -590,6 +590,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     worker.volume = {
       size: defaultVolumeSize
     }
+  }
   return worker
 }
 
