@@ -582,15 +582,14 @@ export function generateWorker (availableZones, cloudProfileName, region) {
       type: volumeType.name,
       size: defaultVolumeSize
     }
-  } else if (!machineType.storage) {
-    worker.volume = {
-      size: defaultVolumeSize
-    }
   } else if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
     worker.volume = {
       size: machineType.storage.size
     }
-  }
+  } else if (!machineType.storage) {
+    worker.volume = {
+      size: defaultVolumeSize
+    }
   return worker
 }
 
