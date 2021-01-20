@@ -133,7 +133,7 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize, machineTypeHasStorageWithTypeFixed } from '@/utils'
+import { getValidationErrors, parseSize, machineTypeHasStorageButNotWithTypeFixed } from '@/utils'
 import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -276,14 +276,18 @@ export default {
       return find(this.machineTypes, { name: this.worker.machine.type })
     },
     canDefineVolumeSize () {
+      // Volume size can be configured by the user if the volume type is defined via a volume type (volumeInCloudProfile)
+      // not via machine type storage. If defined via storage with type not 'fixed' or if no storage is present, then the
+      // user is allowed to set a volume size, in other words !machineTypeHasStorageButNotWithTypeFixed(machineType) would
+      // have the same effect as the code below, but to make it clearer do it the explicit way...
       if (this.volumeInCloudProfile) {
         return true
       }
       const machineType = this.selectedMachineType
-      if (machineType && !machineType.storage) {
+      if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
         return true
       }
-      if (machineType && machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
+      if (machineType && !machineType.storage) {
         return true
       }
       return false
@@ -405,6 +409,10 @@ export default {
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
       if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSizeInternal) {
+        // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
+        // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
+        // to the default storage size defined for this machine type, remove volume object (contains only size information which
+        // is redundant / not allowed in this case)
         delete this.worker.volume
       } else {
         set(this.worker, 'volume.size', this.volumeSizeInternal)
@@ -460,7 +468,7 @@ export default {
     setVolumeDependingOnMachineType () {
       if (!get(this.worker, 'volume.size')) {
         const machineType = this.selectedMachineType
-        if (machineType && machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
+        if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
           this.volumeSizeInternal = machineType.storage.size
         }
       }

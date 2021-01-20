@@ -582,20 +582,20 @@ export function generateWorker (availableZones, cloudProfileName, region) {
       type: volumeType.name,
       size: defaultVolumeSize
     }
-  } else if (machineType.storage && !machineTypeHasStorageWithTypeFixed(machineType)) {
-    worker.volume = {
-      size: machineType.storage.size
-    }
   } else if (!machineType.storage) {
     worker.volume = {
       size: defaultVolumeSize
+    }
+  } else if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
+    worker.volume = {
+      size: machineType.storage.size
     }
   }
   return worker
 }
 
-export function machineTypeHasStorageWithTypeFixed (machineType) {
-  return get(machineType, 'storage.type') === 'fixed'
+export function machineTypeHasStorageButNotWithTypeFixed (machineType) {
+  return machineType && machineType.storage && machineType.storage.type !== 'fixed'
 }
 
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
