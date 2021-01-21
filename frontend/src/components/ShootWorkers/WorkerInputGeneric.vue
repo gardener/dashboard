@@ -133,7 +133,7 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, parseSize, machineTypeHasStorageButNotWithTypeFixed } from '@/utils'
+import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -273,21 +273,20 @@ export default {
       return !isEmpty(this.volumeTypes)
     },
     selectedMachineType () {
-      return find(this.machineTypes, { name: this.worker.machine.type })
+      return find(this.machineTypes, ['name', this.worker.machine.type])
     },
     canDefineVolumeSize () {
       // Volume size can be configured by the user if the volume type is defined via a volume type (volumeInCloudProfile)
       // not via machine type storage. If defined via storage with type not 'fixed' or if no storage is present, then the
-      // user is allowed to set a volume size, in other words !machineTypeHasStorageButNotWithTypeFixed(machineType) would
-      // have the same effect as the code below, but to make it clearer do it the explicit way...
+      // user is allowed to set a volume size, in other words storage.machine.type must not be 'fixed'
       if (this.volumeInCloudProfile) {
         return true
       }
-      const machineType = this.selectedMachineType
-      if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
+      const storage = get(this.selectedMachineType, 'storage')
+      if (!storage.type) {
         return true
       }
-      if (machineType && !machineType.storage) {
+      if (storage.type !== 'fixed') {
         return true
       }
       return false
@@ -401,6 +400,7 @@ export default {
     },
     onUpdateMachineType () {
       this.setVolumeDependingOnMachineType()
+      this.onInputVolumeSize()
       this.validateInput()
     },
     onUpdateVolumeType () {
@@ -466,13 +466,19 @@ export default {
       }
     },
     setVolumeDependingOnMachineType () {
-      if (!get(this.worker, 'volume.size')) {
-        const machineType = this.selectedMachineType
-        if (machineTypeHasStorageButNotWithTypeFixed(machineType)) {
-          this.volumeSizeInternal = machineType.storage.size
-        }
+      const storage = get(this.selectedMachineType, 'storage')
+      if (!storage) {
+        return
       }
-      this.onInputVolumeSize()
+      // machine type has storage
+      if (get(this.worker, 'volume.size')) {
+        return
+      }
+      // volume sizen is not defined on worker (=default storage size)
+      if (storage.type !== 'fixed') {
+        // storage can be defined, set volumeSizeInternal (=displayed size in size-input) to default storage size
+        this.volumeSizeInternal = storage.size
+      }
     }
   },
   mounted () {
@@ -482,6 +488,7 @@ export default {
       this.volumeSizeInternal = workerVolumeSize
     }
     this.setVolumeDependingOnMachineType()
+    this.onInputVolumeSize()
     this.immutableZones = this.isNew ? [] : this.worker.zones
   }
 }
