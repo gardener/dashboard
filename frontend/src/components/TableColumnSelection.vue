@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="columnSelectionMenu" absolute>
     <template v-slot:activator="{ on: menu }">
-      <v-tooltip  top>
+      <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
           <v-btn v-on="{ ...menu, ...tooltip}" icon>
             <v-icon color="toolbar-title">mdi-dots-vertical</v-icon>

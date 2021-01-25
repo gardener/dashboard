@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :color="darkMode && !noDarkModeBackground ? 'grey darken-2' : undefined" small :size="size">
+  <v-avatar :color="darkMode && !lightBackground ? 'grey darken-2' : undefined" small :size="size" class="rounded-lg" tile>
     <img v-if="iconSrc" :src="iconSrc" :style="iconStyle">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
@@ -17,11 +17,6 @@ import startsWith from 'lodash/startsWith'
 import { mapState } from 'vuex'
 
 export default {
-  data () {
-    return {
-      backgroundDivSize: undefined
-    }
-  },
   props: {
     value: {
       type: String
@@ -30,7 +25,7 @@ export default {
       type: Number,
       default: 24
     },
-    noDarkModeBackground: {
+    lightBackground: {
       type: Boolean
     }
   },
@@ -72,7 +67,7 @@ export default {
     },
     iconStyle () {
       const maxIconSize = this.size - 4
-      return `max-height: ${maxIconSize}px; max-width: ${maxIconSize}px;`
+      return `max-height: ${maxIconSize}px; max-width: ${maxIconSize}px; border-radius: 0px;`
     }
   }
 }

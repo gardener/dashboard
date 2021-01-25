@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
         <v-menu v-if="canCreateSecrets" :nudge-bottom="20" :nudge-right="20" left v-model="createSecretMenu" absolute>
           <template v-slot:activator="{ on: menu }">
-            <v-tooltip  top>
+            <v-tooltip top>
               <template v-slot:activator="{ on: tooltip }">
                 <v-btn v-on="{ ...menu, ...tooltip}" icon>
                   <v-icon color="toolbar-title">mdi-plus</v-icon>
