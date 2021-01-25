@@ -342,6 +342,7 @@ export default {
       ]
       return map(headers, header => ({
         ...header,
+        class: 'nowrap',
         selected: get(this.userAccountSelectedColumns, header.value, header.defaultSelected)
       }))
     },
@@ -412,6 +413,7 @@ export default {
       ]
       return map(headers, header => ({
         ...header,
+        class: 'nowrap',
         selected: get(this.serviceAccountSelectedColumns, header.value, header.defaultSelected)
       }))
     },
@@ -703,13 +705,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped >
-
-  ::v-deep .v-data-table-header {
-    tr {
-      white-space: nowrap;
-    }
-  }
-
-</style>

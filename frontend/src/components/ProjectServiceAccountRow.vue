@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td v-if="selectedHeaders.displayName">
-      <v-list-item>
+      <v-list-item class="pl-0">
         <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
         <v-list-item-content>
           <v-list-item-title class="d-flex">
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td width="250px" v-if="selectedHeaders.actions">
-      <div class="d-flex flex-row justify-end">
+      <div class="d-flex flex-row justify-end mr-n2">
         <div v-if="!foreign && canGetSecrets" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">

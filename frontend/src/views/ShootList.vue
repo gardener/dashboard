@@ -286,63 +286,55 @@ export default {
         {
           text: 'PROJECT',
           value: 'project',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: !!this.projectScope
         },
         {
           text: 'NAME',
           value: 'name',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'INFRASTRUCTURE',
           value: 'infrastructure',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'SEED',
           value: 'seed',
-          align: 'left',
-          class: 'nowrap',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'TECHNICAL ID',
           value: 'technicalId',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.isAdmin
         },
         {
           text: 'CREATED BY',
           value: 'createdBy',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'CREATED AT',
           value: 'createdAt',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'PURPOSE',
           value: 'purpose',
-          class: 'nowrap text-center',
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -350,15 +342,14 @@ export default {
         {
           text: 'STATUS',
           value: 'lastOperation',
-          class: 'nowrap text-left',
-          align: 'left',
+          align: 'center',
+          cellClass: 'pl-4',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'VERSION',
           value: 'k8sVersion',
-          class: 'nowrap text-center',
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -366,7 +357,6 @@ export default {
         {
           text: 'READINESS',
           value: 'readiness',
-          class: 'nowrap text-center',
           sortable: true,
           align: 'center',
           defaultSelected: true,
@@ -376,16 +366,15 @@ export default {
           text: 'ACCESS RESTRICTIONS',
           value: 'accessRestrictions',
           sortable: false,
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.cfg.accessRestriction || !this.isAdmin
         },
         {
           text: 'TICKET',
           value: 'ticket',
-          class: 'nowrap',
           sortable: true,
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
         },
@@ -393,22 +382,22 @@ export default {
           text: 'TICKET LABELS',
           value: 'ticketLabels',
           sortable: false,
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
         },
         {
           text: 'ACTIONS',
           value: 'actions',
-          class: 'nowrap text-right action-button-group',
           sortable: false,
-          align: 'right',
+          align: 'end',
           defaultSelected: true,
           hidden: !(this.canDeleteShoots || this.canGetSecrets)
         }
       ]
       return map(headers, (header, index) => ({
         ...header,
+        class: 'nowrap',
         weight: (index + 1) * 100,
         selected: get(this.selectedColumns, header.value, header.defaultSelected)
       }))
@@ -430,6 +419,7 @@ export default {
         return {
           customField: true,
           text: upperCase(name),
+          class: 'nowrap',
           value: key,
           sortable,
           align,
@@ -516,9 +506,7 @@ export default {
     filtersDisabled () {
       return !this.showOnlyShootsWithIssues
     },
-    disabledFilterClass () {
-      return this.filtersDisabled ? 'disabled_filter' : ''
-    },
+
     headlineSubtitle () {
       const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
@@ -563,22 +551,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped >
-
-  .dashboard {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  ::v-deep .v-data-table-header {
-    tr {
-      white-space: nowrap;
-    }
-  }
-
-  .disabled_filter {
-    opacity: 0.5;
-  }
-
-</style>

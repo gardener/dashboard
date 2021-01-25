@@ -394,13 +394,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped >
-
-  ::v-deep .v-data-table-header {
-    tr {
-      white-space: nowrap;
-    }
-  }
-
-</style>

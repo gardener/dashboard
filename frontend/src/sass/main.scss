@@ -39,6 +39,10 @@
   cursor: pointer;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .alert-banner-message {
   p {
     display: inline !important;

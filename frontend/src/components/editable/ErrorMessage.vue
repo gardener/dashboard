@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon size="18">mdi-chevron-down</v-icon>
           </v-btn>
         </v-col>
-        <v-col class="grow alert-title" @click="expanded = !expanded">
+        <v-col class="grow alert-title cursor-pointer" @click="expanded = !expanded">
           {{msg.text}}
         </v-col>
       </v-row>
@@ -85,7 +85,6 @@ export default {
   .alert-title {
     font-size: 14px;
     font-weight: 500;
-    cursor: pointer;
   }
   .alert-subtitle {
     padding-top: 2px;

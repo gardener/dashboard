@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-row >
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
-      class="select_infra_card"
+      class="select_infra_card cursor-pointer"
       :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
       @click="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
@@ -83,7 +83,6 @@ export default {
   .select_infra_card {
     padding: 10px;
     opacity: 0.8;
-    cursor: pointer;
     margin: 10px 20px 10px 0px;
     min-width: 120px;
     filter: grayscale(70%);
