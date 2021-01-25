@@ -476,9 +476,9 @@ export default {
   },
   mounted () {
     this.validateInput()
-    const workerVolumeSize = get(this.worker, 'volume.size')
-    if (workerVolumeSize) {
-      this.volumeSizeInternal = workerVolumeSize
+    const volumeSize = get(this.worker, 'volume.size')
+    if (volumeSize) {
+      this.volumeSizeInternal = volumeSize
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
