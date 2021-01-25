@@ -21,21 +21,23 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div class="d-flex align-center" v-on="on">
-            <infra-icon v-on="on" v-model="item.infrastructure"></infra-icon>
+            <infra-icon v-on="on" v-model="item.infrastructureName"></infra-icon>
             <span class="ml-2">{{item.cloudProfileName}}</span>
           </div>
         </template>
-        <div><span class="font-weight-bold">Infrastructure:</span> {{item.infrastructure}}</div>
+        <div><span class="font-weight-bold">Infrastructure:</span> {{item.infrastructureName}}</div>
         <div><span class="font-weight-bold">Cloud Profile:</span> {{item.cloudProfileName}}</div>
       </v-tooltip>
     </td>
     <td v-if="selectedHeaders.details">
-      <v-tooltip top v-for="({label, value}) in item.details" :key="label">
-        <template v-slot:activator="{ on }">
-          <v-chip v-on="on" v-if="value" color="primary" small class="ma-1">{{value}}</v-chip>
-        </template>
-        <span>{{label}}</span>
-      </v-tooltip>
+      <v-list color="transparent">
+        <v-list-item>
+          <v-list-item-content class="pa-0">
+            <v-list-item-subtitle>{{descriptionLabel}}</v-list-item-subtitle>
+            <v-list-item-title>{{descriptionValue}}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
       <div class="d-flex">
@@ -78,6 +80,8 @@ SPDX-License-Identifier: Apache-2.0
 import { mapTableHeader } from '@/utils'
 import InfraIcon from '@/components/VendorIcon'
 import { mapGetters } from 'vuex'
+import map from 'lodash/map'
+import join from 'lodash/join'
 
 export default {
   components: {
@@ -100,7 +104,17 @@ export default {
     ...mapGetters([
       'canDeleteSecrets',
       'canPatchSecrets'
-    ])
+    ]),
+    descriptionLabel () {
+      const labels = map(this.item.details, 'label')
+      return join(labels, ' / ')
+    },
+    descriptionValue () {
+      const values = map(this.item.details, ({ value }) => {
+        return value || 'unknown'
+      })
+      return join(values, ' / ')
+    }
   },
   methods: {
     onUpdate () {

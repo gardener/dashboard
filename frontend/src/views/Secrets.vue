@@ -193,7 +193,7 @@ export default {
           text: 'DETAILS',
           align: 'start',
           value: 'details',
-          sortable: true,
+          sortable: false,
           defaultSelected: true
         },
         {
@@ -223,7 +223,8 @@ export default {
         name: secret.metadata.name,
         isOwnSecret: isOwnSecret(secret),
         ownernamespace: secret.metadata.secretRef.namespace,
-        infrastructure: secret.metadata.cloudProviderKind,
+        infrastructure: `${secret.metadata.cloudProviderKind}${secret.metadata.cloudProfileName}`,
+        infrastructureName: secret.metadata.cloudProviderKind,
         cloudProfileName: secret.metadata.cloudProfileName,
         details: this.getSecretDetails(secret),
         relatedShootCount: this.relatedShootCount(secret),
@@ -268,7 +269,7 @@ export default {
             },
             {
               label: 'Tenant Name',
-              value: 'secretData.tenantName'
+              value: secretData.tenantName
             }
           ]
         case 'vsphere':
