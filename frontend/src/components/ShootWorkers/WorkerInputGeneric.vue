@@ -467,7 +467,7 @@ export default {
       if (get(this.worker, 'volume.size')) {
         return
       }
-      // volume sizen is not defined on worker (=default storage size)
+      // volume size is not defined on worker (=default storage size)
       if (storage.type !== 'fixed') {
         // storage can be defined, set volumeSizeInternal (=displayed size in size-input) to default storage size
         this.volumeSizeInternal = storage.size
