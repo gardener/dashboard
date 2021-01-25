@@ -73,9 +73,7 @@ export default {
             Action: [
               'ram:GetRole',
               'ram:CreateRole',
-              'ram:UpdateRole',
-              'ram:ListRoles',
-              'ram:DeleteRole'
+              'ram:CreateServiceLinkedRole'
             ],
             Effect: 'Allow',
             Resource: '*'
