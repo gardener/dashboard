@@ -73,7 +73,7 @@ export default {
     },
     workerGroupDescriptions () {
       const description = []
-      description.push(this.machineTpeDescription)
+      description.push(this.machineTypeDescription)
       const volumeTypeDescription = this.volumeTypeDescription
       if (volumeTypeDescription) {
         description.push(volumeTypeDescription)
@@ -106,7 +106,7 @@ export default {
 
       return description
     },
-    machineTpeDescription () {
+    machineTypeDescription () {
       const machine = get(this.workerGroup, 'machine', {})
       const item = {
         title: 'Machine Type',
