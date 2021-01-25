@@ -278,18 +278,11 @@ export default {
     canDefineVolumeSize () {
       // Volume size can be configured by the user if the volume type is defined via a volume type (volumeInCloudProfile)
       // not via machine type storage. If defined via storage with type not 'fixed' or if no storage is present, then the
-      // user is allowed to set a volume size, in other words storage.machine.type must not be 'fixed'
+      // user is allowed to set a volume size
       if (this.volumeInCloudProfile) {
         return true
       }
-      const storage = get(this.selectedMachineType, 'storage')
-      if (!storage.type) {
-        return true
-      }
-      if (storage.type !== 'fixed') {
-        return true
-      }
-      return false
+      return get(this.selectedMachineType, 'storage.type') !== 'fixed'
     },
     machineImages () {
       return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired }) => {
@@ -299,13 +292,9 @@ export default {
     minimumVolumeSize () {
       const minimumVolumeSize = parseSize(this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region }))
 
-      const machineType = this.selectedMachineType
-      const machineTypeStorageSize = get(machineType, 'storage.size')
-      if (machineTypeStorageSize) {
-        const machineTypeDefaultSize = parseSize(machineTypeStorageSize)
-        if (machineTypeDefaultSize && machineTypeDefaultSize < minimumVolumeSize) {
-          return machineTypeDefaultSize
-        }
+      const defaultSize =  parseSize(get(this.selectedMachineType, 'storage.size'))
+      if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
+        return defaultSize
       }
 
       return minimumVolumeSize
@@ -474,7 +463,7 @@ export default {
       if (get(this.worker, 'volume.size')) {
         return
       }
-      // volume sizen is not defined on worker (=default storage size)
+      // volume size is not defined on worker (=default storage size)
       if (storage.type !== 'fixed') {
         // storage can be defined, set volumeSizeInternal (=displayed size in size-input) to default storage size
         this.volumeSizeInternal = storage.size
@@ -483,9 +472,9 @@ export default {
   },
   mounted () {
     this.validateInput()
-    const workerVolumeSize = get(this.worker, 'volume.size')
-    if (workerVolumeSize) {
-      this.volumeSizeInternal = workerVolumeSize
+    const volumeSize = get(this.worker, 'volume.size')
+    if (volumeSize) {
+      this.volumeSizeInternal = volumeSize
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
