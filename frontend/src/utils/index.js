@@ -163,6 +163,9 @@ export function displayName (username) {
 }
 
 export function parseSize (value) {
+  if (!value) {
+    return 0
+  }
   const sizeRegex = /^(\d+)Gi$/
   const result = sizeRegex.exec(value)
   if (result) {
