@@ -278,18 +278,11 @@ export default {
     canDefineVolumeSize () {
       // Volume size can be configured by the user if the volume type is defined via a volume type (volumeInCloudProfile)
       // not via machine type storage. If defined via storage with type not 'fixed' or if no storage is present, then the
-      // user is allowed to set a volume size, in other words storage.machine.type must not be 'fixed'
+      // user is allowed to set a volume size
       if (this.volumeInCloudProfile) {
         return true
       }
-      const storage = get(this.selectedMachineType, 'storage')
-      if (!storage.type) {
-        return true
-      }
-      if (storage.type !== 'fixed') {
-        return true
-      }
-      return false
+      return get(this.selectedMachineType, 'storage.type') !== 'fixed'
     },
     machineImages () {
       return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired }) => {
