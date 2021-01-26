@@ -88,26 +88,12 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
-import split from 'lodash/split'
-import includes from 'lodash/includes'
-import some from 'lodash/some'
-import padStart from 'lodash/padStart'
-import head from 'lodash/head'
-import orderBy from 'lodash/orderBy'
-import toLower from 'lodash/toLower'
 import ShootListRow from '@/components/ShootListRow'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
-import {
-  mapTableHeader,
-  getCreatedBy,
-  getProjectName,
-  isShootStatusHibernated,
-  isReconciliationDeactivated
-} from '@/utils'
-import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
-import semver from 'semver'
+import { mapTableHeader } from '@/utils'
+import { searchShoots, sortShoots } from '@/utils/shootList'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
@@ -236,188 +222,10 @@ export default {
       }, 500)
     },
     searchShoots (value, search, item) {
-      const searchableCustomFields = filter(this.shootCustomFieldList, ['searchable', true])
-
-      const searchValue = split(search, ' ')
-      return some(searchValue, value => {
-        if (includes(this.getRawVal(item, 'name'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'infrastructure'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'seed'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'project'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'createdBy'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'purpose'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'k8sVersion'), value)) {
-          return true
-        }
-        if (includes(this.getRawVal(item, 'ticketLabels'), value)) {
-          return true
-        }
-
-        return some(searchableCustomFields, ({ key }) => includes(this.getRawVal(item, key), value))
-      })
+      return searchShoots(this.ticketsLabels, this.shootCustomFields, this.shootCustomFieldList, value, search, item)
     },
     sortShoots (items, sortByArr, sortDescArr) {
-      const sortBy = head(sortByArr)
-      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
-      if (sortBy) {
-        const sortbyNameAsc = (a, b) => {
-          if (this.getRawVal(a, 'name') > this.getRawVal(b, 'name')) {
-            return 1
-          } else if (this.getRawVal(a, 'name') < this.getRawVal(b, 'name')) {
-            return -1
-          }
-          return 0
-        }
-        const inverse = sortOrder === 'desc' ? -1 : 1
-        switch (sortBy) {
-          case 'k8sVersion': {
-            items.sort((a, b) => {
-              const versionA = this.getRawVal(a, sortBy)
-              const versionB = this.getRawVal(b, sortBy)
-
-              if (semver.gt(versionA, versionB)) {
-                return 1 * inverse
-              } else if (semver.lt(versionA, versionB)) {
-                return -1 * inverse
-              } else {
-                return sortbyNameAsc(a, b)
-              }
-            })
-            break
-          }
-          case 'readiness': {
-            items.sort((a, b) => {
-              const readinessA = this.getSortVal(a, sortBy)
-              const readinessB = this.getSortVal(b, sortBy)
-
-              if (readinessA === readinessB) {
-                return sortbyNameAsc(a, b)
-              } else if (!readinessA) {
-                return 1
-              } else if (!readinessB) {
-                return -1
-              } else if (readinessA > readinessB) {
-                return 1 * inverse
-              } else {
-                return -1 * inverse
-              }
-            })
-            break
-          }
-          default: {
-            items = orderBy(items, [item => this.getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
-          }
-        }
-      }
-      return items
-    },
-    getRawVal (item, column) {
-      const metadata = item.metadata
-      const spec = item.spec
-      switch (column) {
-        case 'purpose':
-          return get(spec, 'purpose')
-        case 'lastOperation':
-          return get(item, 'status.lastOperation')
-        case 'createdAt':
-          return metadata.creationTimestamp
-        case 'createdBy':
-          return getCreatedBy(metadata)
-        case 'project':
-          return getProjectName(metadata)
-        case 'k8sVersion':
-          return get(spec, 'kubernetes.version')
-        case 'infrastructure':
-          return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
-        case 'seed':
-          return get(item, 'spec.seedName')
-        case 'ticketLabels': {
-          const labels = this.ticketsLabels(metadata)
-          return join(map(labels, 'name'), ' ')
-        }
-        default: {
-          if (startsWith(column, 'Z_')) {
-            const path = get(this.shootCustomFields, [column, 'path'])
-            return get(item, path)
-          }
-          return metadata[column]
-        }
-      }
-    },
-    getSortVal (item, sortBy) {
-      const value = this.getRawVal(item, sortBy)
-      const status = item.status
-      switch (sortBy) {
-        case 'purpose':
-          switch (value) {
-            case 'infrastructure':
-              return 0
-            case 'production':
-              return 1
-            case 'development':
-              return 2
-            case 'evaluation':
-              return 3
-            default:
-              return 4
-          }
-        case 'lastOperation': {
-          const operation = value || {}
-          const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-          const lastErrors = get(item, 'status.lastErrors', [])
-          const isError = operation.state === 'Failed' || lastErrors.length
-          const allErrorCodes = errorCodesFromArray(lastErrors)
-          const userError = isUserError(allErrorCodes)
-          const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
-
-          if (ignoredFromReconciliation) {
-            if (isError) {
-              return 400
-            } else {
-              return 450
-            }
-          } else if (userError && !inProgress) {
-            return 200
-          } else if (userError && inProgress) {
-            const progress = padStart(operation.progress, 2, '0')
-            return `3${progress}`
-          } else if (isError && !inProgress) {
-            return 0
-          } else if (isError && inProgress) {
-            const progress = padStart(operation.progress, 2, '0')
-            return `1${progress}`
-          } else if (inProgress) {
-            const progress = padStart(operation.progress, 2, '0')
-            return `6${progress}`
-          } else if (isShootStatusHibernated(status)) {
-            return 500
-          }
-          return 700
-        }
-        case 'readiness': {
-          const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-          const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-          return lastErrorTransitionTime
-        }
-        case 'ticket': {
-          const { namespace, name } = item.metadata
-          return this.latestUpdatedTicketByNameAndNamespace({ namespace, name })
-        }
-        default:
-          return toLower(value)
-      }
+      return sortShoots(this.ticketsLabels, this.shootCustomFields, this.latestUpdatedTicketByNameAndNamespace, items, sortByArr, sortDescArr)
     }
   },
   computed: {
