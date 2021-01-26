@@ -21,14 +21,25 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp"></self-termination-warning>
-              <version-expiration-warning :shoot-item="shootItem"></version-expiration-warning>
+              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp" />
+              <version-expiration-warning :shoot-item="shootItem" />
+              <constraint-warning
+                :value="!isMaintenancePreconditionSatisfied"
+                type="maintenance"
+                icon>
+                {{maintenancePreconditionSatisfiedMessage}}
+              </constraint-warning>
+              <constraint-warning
+                :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+                type="hibernation"
+                icon>
+                {{hibernationPossibleMessage}}
+              </constraint-warning>
               <hibernation-schedule-warning
                 v-if="isShootHasNoHibernationScheduleWarning"
                 :name="shootName"
                 :namespace="shootNamespace"
-                :purpose="shootPurpose">
-              </hibernation-schedule-warning>
+                :purpose="shootPurpose" />
             </div>
           </v-col>
         </v-row>
@@ -153,6 +164,7 @@ import HibernationScheduleWarning from '@/components/ShootHibernation/Hibernatio
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import {
   isTypeDelete,
@@ -178,7 +190,8 @@ export default {
     ShootSeedName,
     Vendor,
     VersionExpirationWarning,
-    ShootListRowActions
+    ShootListRowActions,
+    ConstraintWarning
   },
   props: {
     shootItem: {

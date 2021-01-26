@@ -200,6 +200,17 @@ export const shootItem = {
     },
     hibernationPossibleMessage () {
       return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
+    },
+    maintenancePreconditionSatisfiedConstraint () {
+      const constraints = get(this.shootItem, 'status.constraints')
+      return find(constraints, ['type', 'MaintenancePreconditionsSatisfied'])
+    },
+    isMaintenancePreconditionSatisfied () {
+      const status = get(this.maintenancePreconditionSatisfiedConstraint, 'status', 'True')
+      return status !== 'False'
+    },
+    maintenancePreconditionSatisfiedMessage () {
+      return get(this.maintenancePossibleConstraint, 'message', 'It may not be safe to trigger maintenance for this cluster')
     }
   },
   methods: {
