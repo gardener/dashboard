@@ -222,10 +222,20 @@ export default {
       }, 500)
     },
     searchShoots (value, search, item) {
-      return searchShoots(this.ticketsLabels, this.shootCustomFields, this.shootCustomFieldList, value, search, item)
+      const storeGetters = {
+        ticketsLabels: this.ticketsLabels,
+        shootCustomFields: this.shootCustomFields,
+        shootCustomFieldList: this.shootCustomFieldList
+      }
+      return searchShoots(storeGetters, value, search, item)
     },
     sortShoots (items, sortByArr, sortDescArr) {
-      return sortShoots(this.ticketsLabels, this.shootCustomFields, this.latestUpdatedTicketByNameAndNamespace, items, sortByArr, sortDescArr)
+      const storeGetters = {
+        ticketsLabels: this.ticketsLabels,
+        shootCustomFields: this.shootCustomFields,
+        latestUpdatedTicketByNameAndNamespace: this.latestUpdatedTicketByNameAndNamespace
+      }
+      return sortShoots(storeGetters, items, sortByArr, sortDescArr)
     }
   },
   computed: {

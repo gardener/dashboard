@@ -73,9 +73,9 @@ export default {
             Action: [
               'ram:GetRole',
               'ram:CreateRole',
-              "ram:UpdateRole",
-              "ram:ListRoles",
-              "ram:DeleteRole"
+              'ram:UpdateRole',
+              'ram:ListRoles',
+              'ram:DeleteRole'
             ],
             Effect: 'Allow',
             Resource: '*'

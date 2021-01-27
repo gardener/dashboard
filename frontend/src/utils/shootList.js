@@ -30,48 +30,49 @@ import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 import semver from 'semver'
 
-export function searchShoots (ticketsLabels, shootCustomFields, shootCustomFieldList, value, search, item) {
+export function searchShoots (storeGetters, value, search, item) {
+  const { shootCustomFieldList } = storeGetters
   const searchableCustomFields = filter(shootCustomFieldList, ['searchable', true])
 
   const searchValue = split(search, ' ')
   return some(searchValue, value => {
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'name'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'name'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'infrastructure'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'infrastructure'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'seed'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'seed'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'project'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'project'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'createdBy'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'createdBy'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'purpose'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'purpose'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'k8sVersion'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'k8sVersion'), value)) {
       return true
     }
-    if (includes(getRawVal(ticketsLabels, shootCustomFields, item, 'ticketLabels'), value)) {
+    if (includes(getRawVal(storeGetters, item, 'ticketLabels'), value)) {
       return true
     }
 
-    return some(searchableCustomFields, ({ key }) => includes(getRawVal(ticketsLabels, shootCustomFields, item, key), value))
+    return some(searchableCustomFields, ({ key }) => includes(getRawVal(storeGetters, item, key), value))
   })
 }
 
-export function sortShoots (ticketsLabels, shootCustomFields, latestUpdatedTicketByNameAndNamespace, items, sortByArr, sortDescArr) {
+export function sortShoots (storeGetters, items, sortByArr, sortDescArr) {
   const sortBy = head(sortByArr)
   const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
-      if (getRawVal(ticketsLabels, shootCustomFields, a, 'name') > getRawVal(ticketsLabels, shootCustomFields, b, 'name')) {
+      if (getRawVal(storeGetters, a, 'name') > getRawVal(storeGetters, b, 'name')) {
         return 1
-      } else if (getRawVal(ticketsLabels, shootCustomFields, a, 'name') < getRawVal(ticketsLabels, shootCustomFields, b, 'name')) {
+      } else if (getRawVal(storeGetters, a, 'name') < getRawVal(storeGetters, b, 'name')) {
         return -1
       }
       return 0
@@ -80,8 +81,8 @@ export function sortShoots (ticketsLabels, shootCustomFields, latestUpdatedTicke
     switch (sortBy) {
       case 'k8sVersion': {
         items.sort((a, b) => {
-          const versionA = getRawVal(ticketsLabels, shootCustomFields, a, sortBy)
-          const versionB = getRawVal(ticketsLabels, shootCustomFields, b, sortBy)
+          const versionA = getRawVal(storeGetters, a, sortBy)
+          const versionB = getRawVal(storeGetters, b, sortBy)
 
           if (semver.gt(versionA, versionB)) {
             return 1 * inverse
@@ -95,8 +96,8 @@ export function sortShoots (ticketsLabels, shootCustomFields, latestUpdatedTicke
       }
       case 'readiness': {
         items.sort((a, b) => {
-          const readinessA = getSortVal(ticketsLabels, shootCustomFields, latestUpdatedTicketByNameAndNamespace, a, sortBy)
-          const readinessB = getSortVal(ticketsLabels, shootCustomFields, latestUpdatedTicketByNameAndNamespace, b, sortBy)
+          const readinessA = getSortVal(storeGetters, a, sortBy)
+          const readinessB = getSortVal(storeGetters, b, sortBy)
 
           if (readinessA === readinessB) {
             return sortbyNameAsc(a, b)
@@ -113,14 +114,15 @@ export function sortShoots (ticketsLabels, shootCustomFields, latestUpdatedTicke
         break
       }
       default: {
-        items = orderBy(items, [item => getSortVal(ticketsLabels, shootCustomFields, latestUpdatedTicketByNameAndNamespace, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+        items = orderBy(items, [item => getSortVal(storeGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
       }
     }
   }
   return items
 }
 
-function getRawVal (ticketsLabels, shootCustomFields, item, column) {
+function getRawVal (storeGetters, item, column) {
+  const { ticketsLabels, shootCustomFields } = storeGetters
   const metadata = item.metadata
   const spec = item.spec
   switch (column) {
@@ -154,8 +156,9 @@ function getRawVal (ticketsLabels, shootCustomFields, item, column) {
   }
 }
 
-function getSortVal (ticketsLabels, shootCustomFields, latestUpdatedTicketByNameAndNamespace, item, sortBy) {
-  const value = getRawVal(ticketsLabels, shootCustomFields, item, sortBy)
+function getSortVal (storeGetters, item, sortBy) {
+  const { latestUpdatedTicketByNameAndNamespace } = storeGetters
+  const value = getRawVal(storeGetters, item, sortBy)
   const status = item.status
   switch (sortBy) {
     case 'purpose':
