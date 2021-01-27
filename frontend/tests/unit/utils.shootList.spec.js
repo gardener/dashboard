@@ -5,7 +5,6 @@
 //
 
 import { sortShoots } from '@/utils/shootList'
-const { noop } = require('lodash')
 
 let shootItems
 const storeGetters = {
