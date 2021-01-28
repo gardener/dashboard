@@ -25,8 +25,22 @@ SPDX-License-Identifier: Apache-2.0
             <span class="ml-2">{{item.cloudProfileName}}</span>
           </div>
         </template>
-        <div><span class="font-weight-bold">Infrastructure:</span> {{item.infrastructureName}}</div>
-        <div><span class="font-weight-bold">Cloud Profile:</span> {{item.cloudProfileName}}</div>
+        <v-card color="transparent">
+          <v-list color="transparent">
+            <v-list-item>
+              <v-list-item-content class="pa-0">
+                <v-list-item-subtitle class="white--text">Infrastructure</v-list-item-subtitle>
+                <v-list-item-title class="d-flex white--text"><infra-icon v-model="item.infrastructureName" class="mr-2" dark-background></infra-icon>{{ item.infrastructureName }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-content class="pa-0">
+                <v-list-item-subtitle class="white--text">Cloud Profile</v-list-item-subtitle>
+                <v-list-item-title class="white--text">{{ item.cloudProfileName }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
       </v-tooltip>
     </td>
     <td v-if="selectedHeaders.details">
