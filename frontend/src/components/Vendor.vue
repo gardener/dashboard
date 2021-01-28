@@ -6,31 +6,32 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <span v-if="title">{{ shootZones.length ? `Provider / Region / ${zoneTitle}` : 'Provider / Region' }}</span>
-  <v-tooltip v-else top>
+  <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
+  <v-tooltip v-else top color="rgba(0, 0, 0, 1)" content-class="tooltip">
     <template v-slot:activator="{ on }">
       <div class="d-flex align-center" v-on="on">
         <infra-icon v-model="shootCloudProviderKind" class="mr-2"></infra-icon>
         {{ description }}
       </div>
     </template>
-    <v-card color="transparent">
-      <v-list color="transparent">
+    <v-card>
+      <v-list>
         <v-list-item>
           <v-list-item-content class="pa-0">
-            <v-list-item-subtitle class="white--text">Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex white--text"><infra-icon v-model="shootCloudProviderKind" class="mr-2" dark-background></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
+            <v-list-item-subtitle>Provider</v-list-item-subtitle>
+            <v-list-item-title class="d-flex"><infra-icon v-model="shootCloudProviderKind" class="mr-2"></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item>
           <v-list-item-content class="pa-0">
-            <v-list-item-subtitle class="white--text">Region</v-list-item-subtitle>
-            <v-list-item-title class="white--text">{{ shootRegion }}</v-list-item-title>
+            <v-list-item-subtitle>Region</v-list-item-subtitle>
+            <v-list-item-title>{{ shootRegion }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item v-if="shootZones.length">
           <v-list-item-content class="pa-0">
-            <v-list-item-subtitle class="white--text">{{zoneTitle}}</v-list-item-subtitle>
-            <v-list-item-title class="white--text">{{shootZonesText}}</v-list-item-title>
+            <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
+            <v-list-item-title>{{shootZonesText}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -89,3 +90,10 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .tooltip {
+    opacity: 1 !important;
+    padding: 0;
+  }
+</style>
