@@ -18,16 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.infrastructure">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div class="d-flex align-center" v-on="on">
-            <infra-icon v-on="on" v-model="item.infrastructureName"></infra-icon>
-            <span class="ml-2">{{item.cloudProfileName}}</span>
-          </div>
-        </template>
-        <div><span class="font-weight-bold">Infrastructure:</span> {{item.infrastructureName}}</div>
-        <div><span class="font-weight-bold">Cloud Profile:</span> {{item.cloudProfileName}}</div>
-      </v-tooltip>
+      <vendor extended :cloud-provider-kind="item.infrastructureName" :cloud-profile-name="item.cloudProfileName"></vendor>
     </td>
     <td v-if="selectedHeaders.details">
       <v-list color="transparent">
@@ -78,14 +69,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import { mapTableHeader } from '@/utils'
-import InfraIcon from '@/components/VendorIcon'
+import Vendor from '@/components/Vendor'
 import { mapGetters } from 'vuex'
 import map from 'lodash/map'
 import join from 'lodash/join'
 
 export default {
   components: {
-    InfraIcon
+    Vendor
   },
   props: {
     item: {

@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </template>
       <template v-if="cell.header.value === 'infrastructure'">
-        <vendor :shoot-item="shootItem"></vendor>
+        <vendor :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
         <shoot-seed-name :shoot-item="shootItem" />

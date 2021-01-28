@@ -16,10 +16,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
-            <vendor title extended :shoot-item="shootItem"></vendor>
+            <vendor title extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
           </v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <vendor extended :shoot-item="shootItem"></vendor>
+            <vendor extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
