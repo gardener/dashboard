@@ -197,9 +197,9 @@ exports.info = async function ({ user, namespace, name }) {
   const client = user.client
 
   const [
-    shoot,
-    secret
-  ] = await Promise.all([
+    { value: shoot, reason: shootError },
+    { value: secret }
+  ] = await Promise.allSettled([
     read({
       user,
       namespace,
@@ -212,12 +212,15 @@ exports.info = async function ({ user, namespace, name }) {
     })
   ])
 
+  if (shootError) {
+    throw shootError
+  }
+
   const data = {
     canLinkToSeed: false
   }
-  let seed
   if (shoot.spec.seedName) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
+    const seed = getSeed(getSeedNameFromShoot(shoot))
     const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
     if (prefix) {
       const ingressDomain = getSeedIngressDomain(seed)
@@ -259,7 +262,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   const isAdmin = await authorization.isAdmin(user)
   if (!isAdmin) {
-    await assignComponentSecrets(client, data, namespace, name)
+    await assignMonitoringSecret(client, data, namespace, name)
   }
 
   return data
@@ -288,20 +291,12 @@ exports.seedInfo = async function ({ user, namespace, name }) {
   try {
     const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
     const seedShootNamespace = shoot.status.technicalID
-    await assignComponentSecrets(seedClient, data, seedShootNamespace)
+    await assignMonitoringSecret(seedClient, data, seedShootNamespace)
   } catch (err) {
     logger.error('Failed to retrieve information using seed core client', err)
   }
 
   return data
-}
-
-function assignComponentSecrets (client, data, namespace, name) {
-  const components = ['monitoring']
-  return Promise.all(components.map(component => {
-    const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
-    return assignComponentSecret(client, data, component, namespace, ingressSecretName)
-  }))
 }
 
 async function getSecret (client, { namespace, name }) {
@@ -311,25 +306,33 @@ async function getSecret (client, { namespace, name }) {
     if (isHttpError(err, 404)) {
       return
     }
-    logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
+    logger.error('failed to fetch %s secret: %s', name, err)
     throw err
   }
 }
 
-async function assignComponentSecret (client, data, component, namespace, name) {
-  const secret = await getSecret(client, { namespace, name })
-  if (secret) {
-    _
-      .chain(secret)
-      .get('data')
-      .pick('username', 'password')
-      .forEach((value, key) => {
-        if (key === 'password') {
-          data[`${component}_password`] = decodeBase64(value)
-        } else if (key === 'username') {
-          data[`${component}_username`] = decodeBase64(value)
-        }
-      })
-      .commit()
+async function assignMonitoringSecret (client, data, namespace, shootName) {
+  const name = shootName ? `${shootName}.monitoring` : 'monitoring-ingress-credentials'
+  try {
+    const secret = await getSecret(client, { namespace, name })
+    if (secret) {
+      _
+        .chain(secret)
+        .get('data')
+        .pick('username', 'password')
+        .forEach((value, key) => {
+          if (key === 'password') {
+            data.monitoringPassword = decodeBase64(value)
+          } else if (key === 'username') {
+            data.monitoringUsername = decodeBase64(value)
+          }
+        })
+        .commit()
+    }
+  } catch (err) {
+    if (isHttpError(err, 403)) {
+      return
+    }
+    throw err
   }
 }

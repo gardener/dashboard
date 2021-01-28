@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
-      <template v-if="canGetSecrets">
+      <template v-if="canGetMonitoringSecret">
         <v-divider inset></v-divider>
         <cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></cluster-metrics>
         <v-list-item v-else>
@@ -80,8 +80,12 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'canGetSecrets'
+      'canGetSecret'
     ]),
+    canGetMonitoringSecret () {
+      const name = `${this.shootName}.monitoring`
+      return this.canGetSecret(name)
+    },
     metricsNotAvailableText () {
       if (this.isTestingCluster) {
         return 'Cluster Metrics not available for clusters with purpose testing'

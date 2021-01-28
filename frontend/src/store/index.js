@@ -943,6 +943,11 @@ const getters = {
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
   },
+  canGetSecret (state) {
+    return name => {
+      return canI(state.subjectRules, 'get', '', 'secrets', name)
+    }
+  },
   canDeleteSecrets (state) {
     return canI(state.subjectRules, 'delete', '', 'secrets')
   },
@@ -1133,10 +1138,7 @@ const actions = {
         }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = []
-        if (store.getters.canGetSecrets) {
-          promises.push(store.dispatch('getShootInfo', metadata))
-        }
+        const promises = [store.dispatch('getShootInfo', metadata)]
         const seedName = spec.seedName
         if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
           promises.push(store.dispatch('getShootSeedInfo', metadata))
