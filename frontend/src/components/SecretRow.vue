@@ -24,8 +24,19 @@ SPDX-License-Identifier: Apache-2.0
       <v-list color="transparent">
         <v-list-item>
           <v-list-item-content class="pa-0">
-            <v-list-item-subtitle>{{descriptionLabel}}</v-list-item-subtitle>
-            <v-list-item-title>{{descriptionValue}}</v-list-item-title>
+            <v-list-item-subtitle>
+              <span v-for="({ label }, index) in item.details" :key="label">
+                <span>{{label}}</span>
+                <span v-if="index !== item.details.length - 1"> / </span>
+              </span>
+            </v-list-item-subtitle>
+            <v-list-item-title>
+              <span v-for="({ value }, index) in item.details" :key="value">
+                <span v-if="value">{{value}}</span>
+                <span v-else class="font-weight-light text--disabled">unknown</span>
+                <span v-if="index !== item.details.length - 1"> / </span>
+              </span>
+            </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -71,8 +82,6 @@ SPDX-License-Identifier: Apache-2.0
 import { mapTableHeader } from '@/utils'
 import Vendor from '@/components/Vendor'
 import { mapGetters } from 'vuex'
-import map from 'lodash/map'
-import join from 'lodash/join'
 
 export default {
   components: {
@@ -95,17 +104,7 @@ export default {
     ...mapGetters([
       'canDeleteSecrets',
       'canPatchSecrets'
-    ]),
-    descriptionLabel () {
-      const labels = map(this.item.details, 'label')
-      return join(labels, ' / ')
-    },
-    descriptionValue () {
-      const values = map(this.item.details, ({ value }) => {
-        return value || 'unknown'
-      })
-      return join(values, ' / ')
-    }
+    ])
   },
   methods: {
     onUpdate () {
