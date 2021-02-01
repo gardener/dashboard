@@ -64,6 +64,7 @@ SPDX-License-Identifier: Apache-2.0
         </p>
       </v-card-text>
       <v-data-table
+        v-else
         :headers="visibleSecretTableHeaders"
         :items="secretList"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
