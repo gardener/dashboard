@@ -292,7 +292,7 @@ export default {
     minimumVolumeSize () {
       const minimumVolumeSize = parseSize(this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region }))
 
-      const defaultSize =  parseSize(get(this.selectedMachineType, 'storage.size'))
+      const defaultSize = parseSize(get(this.selectedMachineType, 'storage.size'))
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
       }
