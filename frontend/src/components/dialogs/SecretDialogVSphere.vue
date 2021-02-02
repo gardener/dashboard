@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     replace-title="Replace VMware vSphere Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
         color="primary"
@@ -62,6 +62,28 @@ SPDX-License-Identifier: Apache-2.0
           @input="$v.nsxtPassword.$touch()"
           @blur="$v.nsxtPassword.$touch()"
         ></v-text-field>
+      </div>
+    </template>
+
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on VMware vSphere, you need to add vSphere and NSX-T account credentials.
+          The Gardener needs these credentials to provision and operate the VMware vSphere infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Ensure that these accounts have privileges to <b>create, modify and delete VMs and Networking resources</b>.
+        </p>
+        <p>
+          Please read the
+          <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
+            target="_blank">
+            VMware vSphere Documentation</a>
+            and the
+          <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
+            target="_blank">
+          VMware NSX-T Data Center Documentation</a>.
+        </p>
       </div>
     </template>
 
