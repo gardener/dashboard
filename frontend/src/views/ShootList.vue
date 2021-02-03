@@ -93,7 +93,6 @@ import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 import { mapTableHeader } from '@/utils'
-import { searchShoots, sortShoots } from '@/utils/shootList'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
@@ -220,22 +219,6 @@ export default {
       this.clearSelectedShootTimerID = setTimeout(() => {
         this.setSelectedShootInternal(null)
       }, 500)
-    },
-    searchShoots (value, search, item) {
-      const storeGetters = {
-        ticketsLabels: this.ticketsLabels,
-        shootCustomFields: this.shootCustomFields,
-        shootCustomFieldList: this.shootCustomFieldList
-      }
-      return searchShoots(storeGetters, value, search, item)
-    },
-    sortShoots (items, sortByArr, sortDescArr) {
-      const storeGetters = {
-        ticketsLabels: this.ticketsLabels,
-        shootCustomFields: this.shootCustomFields,
-        latestUpdatedTicketByNameAndNamespace: this.latestUpdatedTicketByNameAndNamespace
-      }
-      return sortShoots(storeGetters, items, sortByArr, sortDescArr)
     }
   },
   computed: {
@@ -255,7 +238,9 @@ export default {
       shootCustomFieldList: 'shootCustomFieldList',
       shootCustomFields: 'shootCustomFields',
       ticketsLabels: 'ticketsLabels',
-      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace'
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
+      sortShoots: 'shoots/sortShoots',
+      searchShoots: 'shoots/searchShoots'
     }),
     ...mapState([
       'shootsLoading',

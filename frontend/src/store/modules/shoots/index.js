@@ -20,7 +20,8 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import store from '../'
+import store from '../../'
+import getters from './getters'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
@@ -40,14 +41,6 @@ import find from 'lodash/find'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
-const keyForShoot = ({ name, namespace }) => {
-  return `${name}_${namespace}`
-}
-
-const findItem = ({ name, namespace }) => {
-  return state.shoots[keyForShoot({ name, namespace })]
-}
-
 // initial state
 const state = {
   shoots: {},
@@ -56,38 +49,6 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined
-}
-
-// getters
-const getters = {
-  filteredItems () {
-    return state.filteredShoots
-  },
-  itemByNameAndNamespace () {
-    return ({ namespace, name }) => {
-      return findItem({ name, namespace })
-    }
-  },
-  selectedItem () {
-    if (state.selection) {
-      return findItem(state.selection)
-    }
-  },
-  getShootListFilters () {
-    return state.shootListFilters
-  },
-  onlyShootsWithIssues (state, getters) {
-    return get(getters.getShootListFilters, 'onlyShootsWithIssues', true)
-  },
-  newShootResource () {
-    return state.newShootResource
-  },
-  initialNewShootResource () {
-    return state.initialNewShootResource
-  },
-  keyForItem () {
-    return keyForShoot
-  }
 }
 
 // actions
@@ -158,7 +119,7 @@ const actions = {
     if (!metadata) {
       return commit('SET_SELECTION', null)
     }
-    const item = findItem(metadata)
+    const item = getters.findItem(state)(metadata)
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
@@ -368,34 +329,34 @@ function setFilteredItems (state, rootState) {
 }
 
 const putItem = (state, newItem) => {
-  const item = findItem(newItem.metadata)
+  const item = getters.findItem(state)(newItem.metadata)
   if (item !== undefined) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
+      Vue.set(state.shoots, getters.keyForShoot()(item.metadata), assign(item, newItem))
     }
   } else {
     newItem.info = undefined // register property to ensure reactivity
-    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
+    Vue.set(state.shoots, getters.keyForShoot()(newItem.metadata), newItem)
   }
 }
 
 const deleteItem = (state, deletedItem) => {
-  const item = findItem(deletedItem.metadata)
+  const item = getters.findItem(state)(deletedItem.metadata)
   if (item !== undefined) {
-    Vue.delete(state.shoots, keyForShoot(item.metadata))
+    Vue.delete(state.shoots, getters.keyForShoot()(item.metadata))
   }
 }
 
 // mutations
 const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
-    const item = findItem({ namespace, name })
+    const item = getters.findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
     }
   },
   RECEIVE_SEED_INFO (state, { namespace, name, info }) {
-    const item = findItem({ namespace, name })
+    const item = getters.findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'seedInfo', info)
     }
