@@ -1133,10 +1133,7 @@ const actions = {
         }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = []
-        if (store.getters.canGetSecrets) {
-          promises.push(store.dispatch('getShootInfo', metadata))
-        }
+        const promises = [store.dispatch('getShootInfo', metadata)]
         const seedName = spec.seedName
         if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
           promises.push(store.dispatch('getShootSeedInfo', metadata))
