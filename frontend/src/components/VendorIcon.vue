@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <span>
     <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
     <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else :class="contentClass" class="cyan--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
+    <v-icon v-else :class="contentClass" class="primary--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </span>
 </template>
 

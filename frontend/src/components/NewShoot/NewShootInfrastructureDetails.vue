@@ -682,6 +682,7 @@ export default {
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
       this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
+      this.$v.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
       this.validateInput()
     },
     isAddNewSecret (item) {

@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description}) in description" :key="title" class="px-0">
+      <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
         <v-list-item-content class="pt-1">
           <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
           <v-list-item-title>{{value}} {{description}}</v-list-item-title>
@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
 import join from 'lodash/join'
+import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -55,91 +56,135 @@ export default {
       'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName'
     ]),
-    machineTypes () {
-      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+    machineType () {
+      const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const type = get(this.workerGroup, 'machine.type')
+      return find(machineTypes, ['name', type])
     },
-    volumeTypes () {
-      return this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+    volumeType () {
+      const volumeTypes = this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const type = get(this.workerGroup, 'volume.type')
+      return find(volumeTypes, ['name', type])
     },
-    machineImages () {
-      return this.machineImagesByCloudProfileName(this.cloudProfileName)
+    machineImage () {
+      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const { name, version } = get(this.workerGroup, 'machine.image', {})
+      return find(machineImages, { name, version })
     },
-    description () {
+    workerGroupDescriptions () {
       const description = []
-      if (this.workerGroup.machine.type) {
-        const machineType = find(this.machineTypes, { name: this.workerGroup.machine.type })
-        if (machineType) {
-          description.push({
-            title: 'Machine Type',
-            value: machineType.name,
-            description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
-          })
-          if (machineType.storage) {
-            description.push({
-              title: 'Volume Size',
-              value: `${machineType.storage.size}`
-            })
-          }
-        } else {
-          description.push({
-            title: 'Machine Type',
-            value: this.workerGroup.machine.type
-          })
-        }
+      description.push(this.machineTypeDescription)
+      const volumeTypeDescription = this.volumeTypeDescription
+      if (volumeTypeDescription) {
+        description.push(volumeTypeDescription)
       }
-      if (this.workerGroup.volume) {
-        const volumeType = find(this.volumeTypes, { name: this.workerGroup.volume.type })
-        if (volumeType) {
-          description.push({
-            title: 'Volume Type',
-            value: `${volumeType.name} / ${this.workerGroup.volume.size}`,
-            description: `(Class: ${volumeType.class})`
-          })
-        } else {
-          description.push({
-            title: 'Volume Type',
-            value: this.workerGroup.volume.type
-          })
-        }
+      const volumeSizeDescription = this.volumeSizeDescription
+      if (volumeSizeDescription) {
+        description.push(volumeSizeDescription)
       }
-      if (this.workerGroup.machine.image) {
-        const machineImage = find(this.machineImages, this.workerGroup.machine.image)
+      description.push(this.machineImageDescription)
 
-        if (machineImage) {
-          const machineImageDescription = {
-            title: 'Machine Image',
-            value: `${machineImage.name} | Version: ${machineImage.version}`
-          }
-          if (machineImage.expirationDate) {
-            machineImageDescription.description = `(Expires: ${machineImage.expirationDateString})`
-          }
-          description.push(machineImageDescription)
-        } else {
-          description.push({
-            title: 'Machine Image',
-            value: this.workerGroup.machine.image
-          })
-        }
-      }
-      if (this.workerGroup.minimum && this.workerGroup.maximum) {
+      const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
+      if (minimum && maximum) {
         description.push({
           title: 'Autoscaler',
-          value: `Min. ${this.workerGroup.minimum} / Max. ${this.workerGroup.maximum}`
+          value: `Min. ${minimum} / Max. ${maximum}`
         })
       }
-      if (this.workerGroup.maxSurge) {
+      if (maxSurge) {
         description.push({
           title: 'Max. Surge',
-          value: `${this.workerGroup.maxSurge}`
+          value: `${maxSurge}`
         })
       }
-      if (this.workerGroup.zones) {
+      if (zones.length) {
         description.push({
-          title: this.workerGroup.zones.length > 1 ? 'Zones' : 'Zone',
-          value: join(this.workerGroup.zones, ', ')
+          title: zones.length > 1 ? 'Zones' : 'Zone',
+          value: join(zones, ', ')
         })
       }
+
       return description
+    },
+    machineTypeDescription () {
+      const machine = get(this.workerGroup, 'machine', {})
+      const item = {
+        title: 'Machine Type',
+        value: machine.type
+      }
+
+      const machineType = this.machineType
+      if (machineType) {
+        item.description = `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
+      }
+
+      return item
+    },
+    volumeTypeDescription () {
+      // workers with volume type (e.g. aws)
+      const volume = get(this.workerGroup, 'volume', {})
+      if (volume.type) {
+        const item = {
+          title: 'Volume Type',
+          value: volume.type
+        }
+
+        const volumeType = this.volumeType
+        if (volumeType) {
+          item.description = `(Class: ${volumeType.class})`
+        }
+
+        return item
+      }
+
+      // workers with storage in machine type metadata (e.g. openstack)
+      const storage = get(this.machineType, 'storage', {})
+      if (storage.type) {
+        return {
+          title: 'Volume Type',
+          value: storage.type,
+          description: `(Class: ${storage.class})`
+        }
+      }
+
+      return undefined
+    },
+    volumeSizeDescription () {
+      // all infrastructures support volume sizes, but for some they are optional
+      const volume = get(this.workerGroup, 'volume', {})
+      if (volume.size) {
+        return {
+          title: 'Volume Size',
+          value: `${volume.size}`
+        }
+      }
+
+      // if no size is defined on the worker itself, check if machine storage defines a default size
+      const storage = get(this.machineType, 'storage', {})
+      if (storage.size) {
+        return {
+          title: 'Volume Size',
+          value: `${storage.size}`
+        }
+      }
+
+      return undefined
+    },
+    machineImageDescription () {
+      const { name, version } = get(this.workerGroup, 'machine.image', {})
+      const item = {
+        title: 'Machine Image',
+        value: `${name} | Version: ${version}`
+      }
+
+      const machineImage = this.machineImage
+      if (!machineImage) {
+        item.description = '(Image is expired)'
+      } else if (machineImage.expirationDate) {
+        item.description = `(Expires: ${machineImage.expirationDateString})`
+      }
+
+      return item
     }
   }
 }
