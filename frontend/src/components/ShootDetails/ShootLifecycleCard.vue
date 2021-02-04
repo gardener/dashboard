@@ -16,7 +16,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <constraint-warning
+              :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+              type="hibernation"
+              icon
+              small>
+              {{hibernationPossibleMessage}}
+            </constraint-warning>
             <v-icon
               v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
               small
@@ -47,7 +54,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
-          <v-list-item-subtitle class="pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <constraint-warning
+              :value="!isMaintenancePreconditionSatisfied"
+              type="maintenance"
+              icon
+              small>
+              {{maintenancePreconditionSatisfiedMessage}}
+            </constraint-warning>
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -118,6 +132,7 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 
@@ -131,7 +146,8 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    RotateKubeconfigStart
+    RotateKubeconfigStart,
+    ConstraintWarning
   },
   props: {
     shootItem: {

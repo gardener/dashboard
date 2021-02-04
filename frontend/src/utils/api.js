@@ -4,35 +4,60 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import axios from 'axios'
 import get from 'lodash/get'
 
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
-
 /* General Purpose */
+async function request (method, url, data) {
+  const options = {
+    method,
+    cache: 'no-cache',
+    headers: {
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  }
+  if (data) {
+    options.headers['Content-Type'] = 'application/json'
+    options.body = JSON.stringify(data)
+  }
+  let response = await fetch(url, options)
+  const { status, statusText, headers } = response
+  response = {
+    status,
+    statusText,
+    headers,
+    data: await response.json()
+  }
+  if (status >= 200 && status < 300) {
+    return response
+  }
+  const error = new Error(`Request failed with status code ${status}`)
+  error.response = response
+  throw error
+}
 
 function getResource (url) {
-  return axios.get(url)
+  return request('GET', url)
 }
 
 function deleteResource (url) {
-  return axios.delete(url)
+  return request('DELETE', url)
 }
 
 function createResource (url, data) {
   return callResourceMethod(url, data)
 }
 
-function updateResource (url, data) {
-  return axios.put(url, data)
+async function updateResource (url, data) {
+  return request('PUT', url, data)
 }
 
-function patchResource (url, data) {
-  return axios.patch(url, data)
+async function patchResource (url, data) {
+  return request('PATCH', url, data)
 }
 
-function callResourceMethod (url, data) {
-  return axios.post(url, data)
+async function callResourceMethod (url, data) {
+  return request('POST', url, data)
 }
 
 /* Configuration */

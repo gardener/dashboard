@@ -130,7 +130,8 @@ export default {
           {
             Action: [
               'ram:GetRole',
-              'ram:CreateRole'
+              'ram:CreateRole',
+              'ram:CreateServiceLinkedRole'
             ],
             Effect: 'Allow',
             Resource: '*'
