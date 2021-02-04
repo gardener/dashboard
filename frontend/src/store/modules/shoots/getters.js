@@ -16,6 +16,7 @@ import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import padStart from 'lodash/padStart'
+import semver from 'semver'
 
 import {
   getCreatedBy,
@@ -23,18 +24,8 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated
 } from '@/utils'
-
+import { findItem } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
-
-import semver from 'semver'
-
-const keyForShoot = ({ name, namespace }) => {
-  return `${name}_${namespace}`
-}
-
-const findItem = state => {
-  return ({ name, namespace }) => state.shoots[keyForShoot({ name, namespace })]
-}
 
 const getRawVal = (rootGetters, item, column) => {
   const metadata = item.metadata
@@ -135,7 +126,6 @@ const getSortVal = (rootGetters, item, sortBy) => {
 }
 
 export default {
-  findItem,
   filteredItems (state) {
     return state.filteredShoots
   },
@@ -160,9 +150,6 @@ export default {
   },
   initialNewShootResource (state) {
     return state.initialNewShootResource
-  },
-  keyForShoot () {
-    return keyForShoot
   },
   searchShoots (state, getters, rootState, rootGetters) {
     return (value, search, item) => {

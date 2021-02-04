@@ -22,6 +22,7 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import store from '../../'
 import getters from './getters'
+import { keyForShoot, findItem } from './helper'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
@@ -119,7 +120,7 @@ const actions = {
     if (!metadata) {
       return commit('SET_SELECTION', null)
     }
-    const item = getters.findItem(state)(metadata)
+    const item = findItem(state)(metadata)
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
@@ -329,34 +330,34 @@ function setFilteredItems (state, rootState) {
 }
 
 const putItem = (state, newItem) => {
-  const item = getters.findItem(state)(newItem.metadata)
+  const item = findItem(state)(newItem.metadata)
   if (item !== undefined) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, getters.keyForShoot()(item.metadata), assign(item, newItem))
+      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
     }
   } else {
     newItem.info = undefined // register property to ensure reactivity
-    Vue.set(state.shoots, getters.keyForShoot()(newItem.metadata), newItem)
+    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
   }
 }
 
 const deleteItem = (state, deletedItem) => {
-  const item = getters.findItem(state)(deletedItem.metadata)
+  const item = findItem(state)(deletedItem.metadata)
   if (item !== undefined) {
-    Vue.delete(state.shoots, getters.keyForShoot()(item.metadata))
+    Vue.delete(state.shoots, keyForShoot(item.metadata))
   }
 }
 
 // mutations
 const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
-    const item = getters.findItem(state)({ namespace, name })
+    const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
     }
   },
   RECEIVE_SEED_INFO (state, { namespace, name, info }) {
-    const item = getters.findItem(state)({ namespace, name })
+    const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'seedInfo', info)
     }
