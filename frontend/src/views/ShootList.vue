@@ -136,6 +136,7 @@ export default {
         }
         this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
       } else {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
     }
