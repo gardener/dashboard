@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="search || items.length > 3"
+        <v-text-field v-if="shootSearch || items.length > 3"
           prepend-inner-icon="mdi-magnify"
           color="primary"
           label="Search"
@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
           hide-details
           flat
           solo
-          v-model="search"
-          @keyup.esc="search=''"
+          v-model="shootSearch"
+          @keyup.esc="shootSearch=''"
           class="mr-3"
         ></v-text-field>
         <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
@@ -44,9 +44,12 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        must-sort
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :search="shootSearch"
+        :custom-filter="searchItems"
+        must-sort
+        :custom-sort="sortItems"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
@@ -104,7 +107,7 @@ export default {
   data () {
     return {
       floatingButton: false,
-      search: '',
+      shootSearch: '',
       dialog: null,
       options: undefined,
       cachedItems: null,
@@ -133,19 +136,14 @@ export default {
         }
         this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
       } else {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-      this.setShootListSortParams(value)
-    },
-    search (value) {
-      this.setShootListSearchValue(value)
     }
   },
   methods: {
     ...mapActions({
       setSelectedShootInternal: 'setSelectedShoot',
-      setShootListSortParams: 'setShootListSortParams',
-      setShootListSearchValue: 'setShootListSearchValue',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
     }),
@@ -238,7 +236,12 @@ export default {
       onlyShootsWithIssues: 'onlyShootsWithIssues',
       projectFromProjectList: 'projectFromProjectList',
       projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList'
+      shootCustomFieldList: 'shootCustomFieldList',
+      shootCustomFields: 'shootCustomFields',
+      ticketsLabels: 'ticketsLabels',
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
+      sortItems: 'shoots/sortItems',
+      searchItems: 'shoots/searchItems'
     }),
     ...mapState([
       'shootsLoading',
@@ -551,13 +554,13 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.search = null
+    this.shootSearch = null
     this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
-    this.search = null
+    this.shootSearch = null
     next()
   }
 }

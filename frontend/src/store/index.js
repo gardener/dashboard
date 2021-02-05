@@ -524,7 +524,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems']
+    return getters['shoots/filteredItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -1180,12 +1180,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, options) {
-    return dispatch('shoots/setListSortParams', options)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   async setShootListFilters ({ dispatch, getters }, value) {
     try {
       await dispatch('shoots/setShootListFilters', value)
@@ -1199,12 +1193,6 @@ const actions = {
     } catch (err) {
       dispatch('setError', err)
     }
-  },
-  setShootListSearchValue ({ dispatch }, searchValue) {
-    return dispatch('shoots/setListSearchValue', searchValue)
-      .catch(err => {
-        dispatch('setError', err)
-      })
   },
   setNewShootResource ({ dispatch }, data) {
     return dispatch('shoots/setNewShootResource', data)
