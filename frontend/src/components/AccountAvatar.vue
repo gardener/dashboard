@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div style="white-space:nowrap">
+  <div class="nowrap">
     <v-avatar :size="size">
       <img :src="avatarUrl"/>
     </v-avatar>
