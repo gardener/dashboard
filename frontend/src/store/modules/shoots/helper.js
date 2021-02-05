@@ -4,15 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const keyForShoot = ({ name, namespace }) => {
+export function keyForShoot ({ name, namespace }) {
   return `${name}_${namespace}`
 }
 
-const findItem = state => {
+export function findItem (state) {
   return ({ name, namespace }) => state.shoots[keyForShoot({ name, namespace })]
-}
-
-module.exports = {
-  keyForShoot,
-  findItem
 }

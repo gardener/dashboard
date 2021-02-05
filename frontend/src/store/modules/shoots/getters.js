@@ -61,7 +61,7 @@ const getRawVal = (rootGetters, item, column) => {
   }
 }
 
-const getSortVal = (rootGetters, item, sortBy) => {
+function getSortVal (rootGetters, item, sortBy) {
   const value = getRawVal(rootGetters, item, sortBy)
   const status = item.status
   switch (sortBy) {
@@ -130,13 +130,11 @@ export default {
     return state.filteredShoots
   },
   itemByNameAndNamespace (state) {
-    return ({ namespace, name }) => {
-      return findItem(state)({ name, namespace })
-    }
+    return findItem(state)
   },
-  selectedItem (state) {
+  selectedItem (state, getters) {
     if (state.selection) {
-      return findItem(state)(state.selection)
+      return getters.itemByNameAndNamespace(state.selection)
     }
   },
   getShootListFilters (state) {
