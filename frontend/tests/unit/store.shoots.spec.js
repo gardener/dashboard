@@ -22,7 +22,7 @@ describe('store.shoots.getters', () => {
     shootCustomFieldList: undefined,
     latestUpdatedTicketByNameAndNamespace: undefined
   }
-  const sortShoots = getters.sortShoots(undefined, undefined, undefined, rootGetters)
+  const sortItems = getters.sortItems(undefined, undefined, undefined, rootGetters)
 
   beforeEach(() => {
     shootItems = [
@@ -124,7 +124,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by name', () => {
     const sortBy = ['name']
     const sortDesc = [true]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot2')
@@ -134,7 +134,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by purpose', () => {
     const sortBy = ['purpose']
     const sortDesc = [true]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -144,7 +144,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by creationTimestamp', () => {
     const sortBy = ['creationTimestamp']
     const sortDesc = [false]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
     expect(sortedShoots[1].metadata.name).toBe('shoot2')
@@ -154,7 +154,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by kubernetes version', () => {
     const sortBy = ['k8sVersion']
     const sortDesc = [false]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -164,7 +164,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by infrastructure', () => {
     const sortBy = ['infrastructure']
     const sortDesc = [true]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -174,7 +174,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by lastOperation (status)', () => {
     const sortBy = ['lastOperation']
     const sortDesc = [true]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
@@ -184,7 +184,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by readiness', () => {
     const sortBy = ['readiness']
     const sortDesc = [false]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
@@ -194,7 +194,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by readiness', () => {
     const sortBy = ['readiness']
     const sortDesc = [false]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
@@ -204,7 +204,7 @@ describe('store.shoots.getters', () => {
   it('should sort shoots by custom column', () => {
     const sortBy = ['Z_Foo']
     const sortDesc = [false]
-    const sortedShoots = sortShoots(shootItems, sortBy, sortDesc)
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')

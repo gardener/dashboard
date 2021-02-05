@@ -27,7 +27,7 @@ import {
 import { findItem } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
-const getRawVal = (rootGetters, item, column) => {
+export function getRawVal (rootGetters, item, column) {
   const metadata = item.metadata
   const spec = item.spec
   switch (column) {
@@ -61,7 +61,7 @@ const getRawVal = (rootGetters, item, column) => {
   }
 }
 
-function getSortVal (rootGetters, item, sortBy) {
+export function getSortVal (rootGetters, item, sortBy) {
   const value = getRawVal(rootGetters, item, sortBy)
   const status = item.status
   switch (sortBy) {
@@ -149,7 +149,7 @@ export default {
   initialNewShootResource (state) {
     return state.initialNewShootResource
   },
-  searchShoots (state, getters, rootState, rootGetters) {
+  searchItems (state, getters, rootState, rootGetters) {
     return (value, search, item) => {
       const searchableCustomFields = filter(rootGetters.shootCustomFieldList, ['searchable', true])
 
@@ -184,7 +184,7 @@ export default {
       })
     }
   },
-  sortShoots (state, getters, rootState, rootGetters) {
+  sortItems (state, getters, rootState, rootGetters) {
     return (items, sortByArr, sortDescArr) => {
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'

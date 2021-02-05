@@ -47,9 +47,9 @@ SPDX-License-Identifier: Apache-2.0
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
-        :custom-filter="searchShoots"
+        :custom-filter="searchItems"
         must-sort
-        :custom-sort="sortShoots"
+        :custom-sort="sortItems"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
@@ -240,8 +240,8 @@ export default {
       shootCustomFields: 'shootCustomFields',
       ticketsLabels: 'ticketsLabels',
       latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
-      sortShoots: 'shoots/sortShoots',
-      searchShoots: 'shoots/searchShoots'
+      sortItems: 'shoots/sortItems',
+      searchItems: 'shoots/searchItems'
     }),
     ...mapState([
       'shootsLoading',
