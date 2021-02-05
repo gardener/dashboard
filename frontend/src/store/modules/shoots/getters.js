@@ -27,7 +27,7 @@ import {
 import { findItem } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
-const getRawVal = (rootGetters, item, column) => {
+function getRawVal (rootGetters, item, column) {
   const metadata = item.metadata
   const spec = item.spec
   switch (column) {
