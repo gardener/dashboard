@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.details">
       <v-list color="transparent">
-        <v-list-item>
+        <v-list-item class="pa-0">
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>
               <span v-for="({ label }, index) in item.details" :key="label">

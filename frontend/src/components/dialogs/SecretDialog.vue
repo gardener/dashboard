@@ -5,12 +5,21 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="750">
+  <v-dialog v-model="visible" max-width="850">
     <v-card>
       <v-card-title class="toolbar-background">
         <span class="headline toolbar-title--text">{{title}}</span>
+        <v-spacer></v-spacer>
+        <v-btn
+          light
+          icon
+          :class="helpVisible ? 'toolbar-title toolbar--text' : 'toolbar toolbar-title--text'"
+          @click="helpVisible=!helpVisible"
+        >
+          <v-icon>mdi-help</v-icon>
+        </v-btn>
       </v-card-title>
-      <v-card-text class="pa-0">
+      <v-card-text>
         <div class="d-flex flex-row pa-3">
           <div class="d-flex flex-column flex-grow-1" ref="secretDetails">
             <div>
@@ -47,21 +56,6 @@ SPDX-License-Identifier: Apache-2.0
               <slot name="help-slot"></slot>
             </div>
           </v-slide-x-reverse-transition>
-          <v-btn
-            class="ml-3"
-            fab
-            right
-            small
-            color="primary"
-            @click="helpVisible=!helpVisible"
-          >
-            <v-icon v-if="helpVisible">
-              mdi-close
-            </v-icon>
-            <v-icon v-else>
-              mdi-help
-            </v-icon>
-          </v-btn>
        </div>
       </v-card-text>
       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
@@ -221,7 +215,7 @@ export default {
       if (detailsRef) {
         detailsHeight = detailsRef.getBoundingClientRect().height
       }
-      return `max-width: 50%; max-height: ${detailsHeight}px; overflow-y: scroll;`
+      return `max-width: 80%; max-height: ${detailsHeight}px; overflow-y: scroll;`
     }
   },
   methods: {
