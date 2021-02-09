@@ -213,6 +213,7 @@ export default {
       ]
       return map(headers, header => ({
         ...header,
+        class: 'nowrap',
         selected: get(this.secretSelectedColumns, header.value, header.defaultSelected)
       }))
     },
