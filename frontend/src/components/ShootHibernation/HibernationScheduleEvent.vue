@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-autocomplete
             color="primary"
             label="Timezone"
-            :items="timezones"
+            :items="locations"
             v-model="selectedTimezone"
             @input="onInputSelectedTimezone"
             >
@@ -77,9 +77,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { getValidationErrors } from '@/utils'
+import { locations, parseTime } from '@/utils/time'
 import { required, requiredIf } from 'vuelidate/lib/validators'
-import { mapState } from 'vuex'
-import moment from 'moment-timezone'
 import join from 'lodash/join'
 import split from 'lodash/split'
 import get from 'lodash/get'
@@ -87,6 +86,7 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+import padStart from 'lodash/padStart'
 
 const validationErrors = {
   selectedDays: {
@@ -130,9 +130,6 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'localTimezone'
-    ]),
     id () {
       return this.scheduleEvent.id
     }
@@ -140,7 +137,7 @@ export default {
   data () {
     return {
       validationErrors,
-      timezones: moment.tz.names(),
+      locations,
       selectedTimezone: null,
       wakeUpTime: null,
       hibernateTime: null,
@@ -190,25 +187,18 @@ export default {
       return getValidationErrors(this, field)
     },
     updateTime ({ eventName, time }) {
-      const momentObj = moment(time, 'HHmm')
-      let hour
-      let minute
-      const id = this.id
-      if (momentObj.isValid()) {
-        hour = momentObj.format('HH')
-        minute = momentObj.format('mm')
+      const parsedTime = parseTime(time)
+      if (!parsedTime) {
+        return
       }
+      const id = this.id
+      const { hour, minute } = parsedTime
       this.$emit(eventName, { hour, minute, id })
       this.validateInput()
     },
     getTime ({ hour, minute } = {}) {
       if (hour && minute) {
-        const momentObj = moment()
-        momentObj.hour(hour)
-        momentObj.minute(minute)
-        if (momentObj.isValid()) {
-          return momentObj.format('HH:mm')
-        }
+        return `${padStart(hour, 2, '0')}:${padStart(minute, 2, '0')}`
       }
     },
     updateLocation (location) {

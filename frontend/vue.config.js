@@ -5,9 +5,6 @@
 const path = require('path')
 const fs = require('fs')
 
-const MomentTimezoneDataPlugin = require('moment-timezone-data-webpack-plugin')
-const MomentLocalesPlugin = require('moment-locales-webpack-plugin')
-
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
     process.env.VUE_APP_VERSION = fs.readFileSync(path.resolve(__dirname, '../VERSION')).toString().trim()
@@ -16,7 +13,6 @@ if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   }
 }
 const proxyTarget = 'http://localhost:3030'
-const currentYear = new Date().getFullYear()
 
 const KiB = 1024
 const MiB = 1024 * KiB
@@ -44,19 +40,6 @@ module.exports = {
     if (process.env.NODE_ENV === 'development') {
       config.plugins.delete('VuetifyLoaderPlugin')
     }
-
-    config
-      .plugin('moment-locales')
-      .use(MomentLocalesPlugin, [{
-        localesToKeep: ['es-us']
-      }])
-
-    config
-      .plugin('moment-timezone')
-      .use(MomentTimezoneDataPlugin, [{
-        startYear: currentYear,
-        endYear: currentYear
-      }])
 
     config.externals({
       websocket: /^ws$/i

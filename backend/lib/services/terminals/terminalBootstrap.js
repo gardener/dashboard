@@ -10,7 +10,6 @@ const Queue = require('better-queue')
 const _ = require('lodash')
 const hash = require('object-hash')
 const net = require('net')
-const moment = require('moment')
 
 const logger = require('../../logger')
 const config = require('../../config')
@@ -602,10 +601,10 @@ class Bootstrapper extends Queue {
         }
       }
 
-      const lastFailure = moment(value.failure.date)
-      const now = moment(new Date())
+      const lastFailure = value.failure.date
+      const now = new Date()
       const multiplier = Math.min(value.failure.counter * 2, 24)
-      const needsWait = now.diff(lastFailure) <= multiplier * 60 * 60 * 1000
+      const needsWait = now.getTime() - lastFailure.getTime() <= multiplier * 60 * 60 * 1000
       if (needsWait) {
         return {
           required: false,
@@ -738,7 +737,7 @@ class Bootstrapper extends Queue {
 
   static get options () {
     const defaultOptions = {
-      maxTimeout: moment.duration(10, 'minutes').asMilliseconds()
+      maxTimeout: 600000 // 10 minutes
     }
     const configOptions = _
       .chain(config)

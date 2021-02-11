@@ -6,7 +6,6 @@
 
 'use strict'
 
-import moment from 'moment-timezone'
 import semver from 'semver'
 import md5 from 'md5'
 import capitalize from 'lodash/capitalize'
@@ -28,6 +27,7 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+import { humanizeDuration, humanizeDurationTo, humanizeDurationFrom } from '@/utils/time'
 const { v4: uuidv4 } = require('uuid')
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -258,24 +258,32 @@ export function routeName (route) {
 export function getDateFormatted (timestamp) {
   if (!timestamp) {
     return undefined
-  } else {
-    return moment(timestamp).format('YYYY-MM-DD')
   }
+  const date = new Date(timestamp)
+  return new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium'
+  }).format(date)
 }
 
 export function getTimestampFormatted (timestamp) {
   if (!timestamp) {
     return undefined
   }
-  return moment(timestamp).format('lll')
+  const date = new Date(timestamp)
+  return new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(date)
 }
 
 export function getTimeStringFrom (time, fromTime, withoutSuffix = false) {
   if (!time) {
     return undefined
-  } else {
-    return moment(time).from(fromTime, withoutSuffix)
   }
+  if (withoutSuffix) {
+    return humanizeDuration(time, fromTime)
+  }
+  return humanizeDurationFrom(time, fromTime)
 }
 
 export function getTimeStringTo (time, toTime, withoutPrefix = false) {
@@ -286,7 +294,10 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
       // Equal dates result in text "a few seconds ago", this is not we want here...
       toTime.setSeconds(toTime.getSeconds() + 1)
     }
-    return moment(time).to(toTime, withoutPrefix)
+    if (withoutPrefix) {
+      return humanizeDuration(time, toTime)
+    }
+    return humanizeDurationTo(time, toTime)
   }
 }
 
@@ -527,33 +538,6 @@ export function transformHtml (html, transformToExternalLinks = true) {
   })
 
   return documentFragmentToHtml(documentFragment)
-}
-
-export function randomLocalMaintenanceBegin () {
-  // randomize maintenance time window
-  const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
-  const randomHour = sample(hours)
-  // use local timezone offset
-  const localBegin = `${randomHour}:00`
-
-  return localBegin
-}
-
-export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
-  timezone = timezone || store.state.localTimezone
-  if (localBegin) {
-    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
-
-    let utcBegin
-    let utcEnd
-    if (utcMoment && utcMoment.isValid()) {
-      utcBegin = utcMoment.format('HHmm00+0000')
-      utcMoment.add(1, 'h')
-      utcEnd = utcMoment.format('HHmm00+0000')
-    }
-    return { utcBegin, utcEnd }
-  }
-  return undefined
 }
 
 export function generateWorker (availableZones, cloudProfileName, region) {

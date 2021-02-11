@@ -1358,10 +1358,6 @@ __metadata:
     jwt-decode: ^2.2.0
     lodash: ^4.17.19
     md5: ^2.2.1
-    moment: ^2.29.1
-    moment-locales-webpack-plugin: ^1.2.0
-    moment-timezone: ^0.5.31
-    moment-timezone-data-webpack-plugin: ^1.3.0
     netmask: ^1.0.6
     object-hash: ^2.0.3
     ora: ^3.4.0
@@ -11428,13 +11424,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"lodash.difference@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.difference@npm:4.5.0"
-  checksum: 7a2c297cf5fb6cf6899825e620cb017694a1891b3b35e11aa7ddc503128222a84d851937c36584a9e690344ccaf84116f137d04fdd8949ee90918edd4637d3b6
-  languageName: node
-  linkType: hard
-
 "lodash.get@npm:^4.4.2":
   version: 4.4.2
   resolution: "lodash.get@npm:4.4.2"
@@ -12045,51 +12034,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment-locales-webpack-plugin@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "moment-locales-webpack-plugin@npm:1.2.0"
-  dependencies:
-    lodash.difference: ^4.5.0
-  peerDependencies:
-    moment: ^2.8.0
-    webpack: ^1 || ^2 || ^3 || ^4 || ^5
-  checksum: a1613eaa41f44587378d32ccfa5dbd123545891a679aef1c5bfebe9aa2b3dafbb43ee915b15d7775993ee61c0610b350a1702931db8b11f2becfc1a07f1d80f4
-  languageName: node
-  linkType: hard
-
-"moment-timezone-data-webpack-plugin@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "moment-timezone-data-webpack-plugin@npm:1.3.0"
-  dependencies:
-    find-cache-dir: ^3.0.0
-    make-dir: ^3.0.0
-  peerDependencies:
-    moment-timezone: ">= 0.1.0"
-    webpack: 4.x.x || 5.x.x
-  checksum: 30466ae1230bea37d1f3065b74b1c89c30df1adb0e8123f959b9ae1579c77d9a42c8ba3642f53d34720d2335e123634c92a03b040ea40d28fd3d3a06fb2cfe56
-  languageName: node
-  linkType: hard
-
-"moment-timezone@npm:^0.5.31":
-  version: 0.5.31
-  resolution: "moment-timezone@npm:0.5.31"
-  dependencies:
-    moment: ">= 2.9.0"
-  checksum: db8c241301530919ea3091b75c067c1b919973619bed0f3b0c009eb94e44da726452a1382c099d55a876407fd4e22802b45bc51f96c5cbfbb7fbbfa6660079e8
-  languageName: node
-  linkType: hard
-
-"moment@npm:>= 2.9.0, moment@npm:^2.24.0":
+"moment@npm:^2.24.0":
   version: 2.29.0
   resolution: "moment@npm:2.29.0"
   checksum: ad4850191348e75447d4d0b1362c78825b3d966f5abc42b3ed0ae0a6fcda5eb4504789c361d18c762f7467b3a7923b59f8bf1d52769568585516035b6c848a55
-  languageName: node
-  linkType: hard
-
-"moment@npm:^2.29.1":
-  version: 2.29.1
-  resolution: "moment@npm:2.29.1"
-  checksum: 86729013febf7160de5b93da69273dd304d674b0224f9544b3abd09a87671ddd2cdd57598261ce57588910d63747ffd5590965e83c790d8bf327083c0e0a06e0
   languageName: node
   linkType: hard
 

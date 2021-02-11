@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-text-field
         color="primary"
         label="Maintenance Start Time"
-        v-model="localizedMaintenanceBegin"
-        :error-messages="getErrorMessages('localizedMaintenanceBegin')"
-        @input="onInputLocalizedMaintenanceBegin"
-        @blur="$v.localizedMaintenanceBegin.$touch()"
+        v-model="maintenanceBegin"
+        :error-messages="getErrorMessages('maintenanceBegin')"
+        @input="onInputmaintenanceBegin"
+        @blur="$v.maintenanceBegin.$touch()"
         type="time"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
@@ -32,13 +32,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import moment from 'moment-timezone'
-import { mapState } from 'vuex'
-import { getValidationErrors, randomLocalMaintenanceBegin, utcMaintenanceWindowFromLocalBegin } from '@/utils'
+import { getValidationErrors } from '@/utils'
+import { getTimezone, timezones, randomMaintenanceBegin, getMaintenanceWindow, parseTimeWithOffset } from '@/utils/time'
 import { required } from 'vuelidate/lib/validators'
 
 const validationErrors = {
-  localizedMaintenanceBegin: {
+  maintenanceBegin: {
     required: 'Maintenance start time is required'
   }
 }
@@ -50,35 +49,30 @@ export default {
       type: String
     }
   },
-  computed: {
-    ...mapState([
-      'localTimezone'
-    ])
-  },
   validations: {
-    localizedMaintenanceBegin: {
+    maintenanceBegin: {
       required
     }
   },
   data () {
     return {
-      selectedTimezone: this.localTimezone,
-      timezones: moment.tz.names(),
+      selectedTimezone: getTimezone(),
+      timezones,
       validationErrors,
-      localizedMaintenanceBegin: undefined,
+      maintenanceBegin: undefined,
       valid: undefined
     }
   },
   methods: {
-    getUTCMaintenanceWindow () {
-      return utcMaintenanceWindowFromLocalBegin({ localBegin: this.localizedMaintenanceBegin, timezone: this.selectedTimezone })
+    getMaintenanceWindow () {
+      return getMaintenanceWindow(this.maintenanceBegin, this.selectedTimezone)
     },
     reset () {
-      this.selectedTimezone = this.localTimezone
+      this.selectedTimezone = getTimezone()
       if (!this.timeWindowBegin) {
         this.setDefaultMaintenanceTimeWindow()
       } else {
-        this.setLocalizedTime(this.timeWindowBegin)
+        this.setBeginTime(this.timeWindowBegin)
       }
       this.validateInput()
     },
@@ -91,28 +85,29 @@ export default {
         this.$emit('valid', this.valid)
       }
     },
-    setLocalizedTime (utcTime) {
-      const momentObj = moment.tz(utcTime, 'HHmmZ', this.selectedTimezone)
-      if (momentObj.isValid()) {
-        const newLocalizedTimeWindowBegin = momentObj.format('HH:mm')
-        if (newLocalizedTimeWindowBegin !== this.localizedMaintenanceBegin) {
+    setBeginTime (time) {
+      const parsedTime = parseTimeWithOffset(time)
+      if (parsedTime) {
+        const newTimeWindowBegin = `${parsedTime.timeHour}:${parsedTime.timeMinute}`
+        if (newTimeWindowBegin !== this.maintenanceBegin || parsedTime.timezone !== this.selectedTimezone) {
           // Only set if value actually changed in parent component
           // Vue component would reset input focus otherwise
-          this.localizedMaintenanceBegin = newLocalizedTimeWindowBegin
+          this.maintenanceBegin = newTimeWindowBegin
+          this.selectedTimezone = parsedTime.timezone
         }
       }
     },
     setDefaultMaintenanceTimeWindow () {
-      this.localizedMaintenanceBegin = randomLocalMaintenanceBegin()
+      this.maintenanceBegin = randomMaintenanceBegin()
     },
-    onInputLocalizedMaintenanceBegin () {
-      this.$v.localizedMaintenanceBegin.$touch()
+    onInputmaintenanceBegin () {
+      this.$v.maintenanceBegin.$touch()
       this.validateInput()
     }
   },
   watch: {
-    timeWindowBegin (utcBegin) {
-      this.setLocalizedTime(utcBegin)
+    timeWindowBegin (time) {
+      this.setBeginTime(time)
       this.validateInput()
     }
   },

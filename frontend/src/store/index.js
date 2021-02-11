@@ -20,6 +20,7 @@ import {
   TargetEnum
 } from '@/utils'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
+import { guessLocation } from '@/utils/time'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
@@ -52,7 +53,6 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
-import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -97,7 +97,7 @@ const state = {
   alert: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  localTimezone: moment.tz.guess(),
+  location: guessLocation(),
   focusedElementId: null,
   splitpaneResize: null,
   splitpaneLayouts: {},
@@ -434,7 +434,7 @@ const getters = {
             isPreview: classification === 'preview',
             isSupported: classification === 'supported',
             isDeprecated: classification === 'deprecated',
-            isExpired: expirationDate && moment().isAfter(expirationDate),
+            isExpired: expirationDate && new Date(expirationDate).getTime() - new Date().getTime() < 0,
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,
@@ -815,7 +815,7 @@ const getters = {
           isPreview: classification === 'preview',
           isSupported: classification === 'supported',
           isDeprecated: classification === 'deprecated',
-          isExpired: version.expirationDate && moment().isAfter(version.expirationDate),
+          isExpired: version.expirationDate && new Date(version.expirationDate).getTime() - new Date().getTime() < 0,
           expirationDateString: getDateFormatted(version.expirationDate)
         }
       })

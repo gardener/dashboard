@@ -6,9 +6,6 @@
 
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import store from '@/store'
-import moment from 'moment-timezone'
-
-const localTimezone = store.state.localTimezone
 
 describe('utils', () => {
   describe('hibernationSchedule', () => {
@@ -33,22 +30,20 @@ describe('utils', () => {
           start: '00 17 * * 1,2,3,4,5',
           end: '00 08 * * 1,2,4,6'
         }
-        const expectedStartMoment = moment.utc('1700', 'HHmm')
-        const expectedEndMoment = moment.utc('0800', 'HHmm')
         const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         expect(scheduleEvents).toBeInstanceOf(Array)
         expect(scheduleEvents).toHaveLength(2)
         const { start, location } = scheduleEvents[0]
         expect(start).toEqual(
-          { hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5' }
+          { hour: '17', minute: '00', weekdays: '1,2,3,4,5' }
         )
-        expect(location).toBe(localTimezone)
+        expect(location).toBe('UTC')
         const { end } = scheduleEvents[1]
         const locationEnd = scheduleEvents[1].location
         expect(end).toEqual(
-          { hour: expectedEndMoment.tz(localTimezone).format('HH'), minute: expectedEndMoment.tz(localTimezone).format('mm'), weekdays: '1,2,4,6' }
+          { hour: '08', minute: '00', weekdays: '1,2,4,6' }
         )
-        expect(locationEnd).toBe(localTimezone)
+        expect(locationEnd).toBe('UTC')
       })
     })
 
@@ -95,15 +90,14 @@ describe('utils', () => {
       const crontabBlock = {
         start: '00 20 * * *'
       }
-      const expectedStartMoment = moment.utc('2000', 'HHmm')
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
       expect(start).toEqual(
-        { hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5,6,0' }
+        { hour: '20', minute: '00', weekdays: '1,2,3,4,5,6,0' }
       )
-      expect(location).toBe(localTimezone)
+      expect(location).toBe('UTC')
     })
 
     it('should parse a crontab block and remove duplicate weekdays and wrong order', () => {

@@ -40,7 +40,6 @@ import uniq from 'lodash/uniq'
 import { mapState } from 'vuex'
 import Ticket from '@/components/ShootTickets/Ticket'
 import { shootItem } from '@/mixins/shootItem'
-import moment from 'moment-timezone'
 
 export default {
   components: {
@@ -78,7 +77,7 @@ export default {
         region: this.shootRegion,
         machineImageNames: this.shootMachineImageNames,
         projectName: this.shootProjectName,
-        utcDateTimeNow: moment().utc().format(),
+        utcDateTimeNow: new Date().toUTCString(),
         seedName: this.shootSeedName
       })
     },

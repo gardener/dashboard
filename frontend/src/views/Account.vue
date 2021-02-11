@@ -195,8 +195,8 @@ import ExternalLink from '@/components/ExternalLink'
 import download from 'downloadjs'
 import AccountAvatar from '@/components/AccountAvatar'
 import { getToken } from '@/utils/api'
+import { humanizeDurationTo } from '@/utils/time'
 import { mapState, mapGetters } from 'vuex'
-import moment from 'moment-timezone'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -255,7 +255,8 @@ export default {
       return this.user.groups
     },
     expiresAt () {
-      return moment.duration(this.user.exp - Math.floor(Date.now() / 1000), 'seconds').humanize(true)
+      const expirationTimestamp = this.user.exp * 1000
+      return humanizeDurationTo(new Date(), expirationTimestamp)
     },
     projectNames () {
       const names = map(this.projectList, 'metadata.name').sort()

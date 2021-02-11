@@ -33,11 +33,10 @@ import {
   purposesForSecret,
   shortRandomString,
   shootAddonList,
-  utcMaintenanceWindowFromLocalBegin,
-  randomLocalMaintenanceBegin,
   generateWorker
 } from '@/utils'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import { randomMaintenanceBegin, getMaintenanceWindow, getTimezone } from '@/utils/time'
 import find from 'lodash/find'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -247,11 +246,11 @@ const actions = {
 
     set(shootResource, 'spec.addons', addons)
 
-    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
+    const { begin, end } = getMaintenanceWindow(randomMaintenanceBegin(), getTimezone())
     const maintenance = {
       timeWindow: {
-        begin: utcBegin,
-        end: utcEnd
+        begin,
+        end
       },
       autoUpdate: {
         kubernetesVersion: true,
@@ -264,7 +263,7 @@ const actions = {
     hibernationSchedule = map(hibernationSchedule, schedule => {
       return {
         ...schedule,
-        location: rootState.localTimezone
+        location: rootState.location
       }
     })
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)

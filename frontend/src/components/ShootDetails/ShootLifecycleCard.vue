@@ -121,9 +121,8 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import moment from 'moment-timezone'
 
 import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
 import DeleteCluster from '@/components/DeleteCluster'
@@ -135,6 +134,7 @@ import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+import { parseTimeWithOffset } from '@/utils/time'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -156,9 +156,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapState([
-      'localTimezone'
-    ]),
     ...mapGetters([
       'canPatchShoots'
     ]),
@@ -180,14 +177,14 @@ export default {
       }
     },
     maintenanceDescription () {
-      const timezone = this.localTimezone
       const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
-      const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
-      if (momentObj.isValid()) {
-        const maintenanceStr = momentObj.format('HH:mm')
-        return `Start time: ${maintenanceStr} ${timezone}`
+      const parsedMaintenanceStart = parseTimeWithOffset(maintenanceStart)
+      if (!parsedMaintenanceStart) {
+        return 'Could not parse start time'
       }
-      return ''
+
+      const { timeHour, timeMinute, timezone } = parsedMaintenanceStart
+      return `Start time: ${timeHour}:${timeMinute} ${timezone}`
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
