@@ -5,7 +5,6 @@
 //
 
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-import store from '@/store'
 
 describe('utils', () => {
   describe('hibernationSchedule', () => {
