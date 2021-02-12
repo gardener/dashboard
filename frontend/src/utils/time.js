@@ -722,12 +722,12 @@ export function getTimezone () {
   var offset = new Date().getTimezoneOffset()
   var sign = offset < 0 ? '+' : '-'
   offset = Math.abs(offset)
-  const hour = padStart(offset / 60, 2, '0')
+  const hour = padStart(Math.floor(offset / 60), 2, '0')
   const minute = padStart(offset % 60, 2, '0')
   return `UTC${sign}${hour}:${minute}`
 }
 
-// Eypected input: parsable date string
+// Expected input: parsable date string
 export function humanizeDuration (refDate, date, length = 1) {
   const refTimestamp = new Date(refDate).getTime()
   const timestamp = new Date(date).getTime()
@@ -750,7 +750,7 @@ export function humanizeDuration (refDate, date, length = 1) {
     rounded: Math.round(duration / 31556952),
     weight: 6,
     multipleText: 'years',
-    singleText: ' a year'
+    singleText: 'a year'
   }
   duration = duration % 31556952
   const months = {
@@ -758,7 +758,7 @@ export function humanizeDuration (refDate, date, length = 1) {
     rounded: Math.round(duration / 2592000),
     weight: 5,
     multipleText: 'months',
-    singleText: ' a month'
+    singleText: 'a month'
   }
   duration = duration % 2592000
   const weeks = {
@@ -766,7 +766,7 @@ export function humanizeDuration (refDate, date, length = 1) {
     rounded: Math.round(duration / 604800),
     weight: 4,
     multipleText: 'weeks',
-    singleText: ' a week'
+    singleText: 'a week'
   }
   duration = duration % 604800
   const days = {
@@ -774,7 +774,7 @@ export function humanizeDuration (refDate, date, length = 1) {
     rounded: Math.round(duration / 86400),
     weight: 3,
     multipleText: 'days',
-    singleText: ' a day'
+    singleText: 'a day'
   }
   duration = duration % 86400
   const hours = {
@@ -790,23 +790,24 @@ export function humanizeDuration (refDate, date, length = 1) {
     rounded: Math.round(duration / 60),
     weight: 1,
     multipleText: 'minutes',
-    singleText: ' a minute'
+    singleText: 'a minute'
   }
   const seconds = {
     actual: Math.floor(duration % 60),
     rounded: Math.round(duration % 60),
     weight: 0,
     multipleText: 'seconds',
-    singleText: ' a second'
+    singleText: 'a second'
   }
 
   const durationStrings = []
   const addDurationString = (durationStrings, durationObject) => {
-    const value = durationStrings.length === length - 1 ? durationObject.rounded : durationObject.actual
-    if (value > 1) {
-      durationStrings.push({ weight: durationObject.weight, value: `${value} ${durationObject.multipleText}` })
-    } else if (value > 0) {
+    const isLastPart = durationStrings.length === length - 1
+    const value = isLastPart ? durationObject.rounded : durationObject.actual
+    if (value === 1) {
       durationStrings.push({ weight: durationObject.weight, value: durationObject.singleText })
+    } else if (!isLastPart || value > 0) { // do not add if last part is zero
+      durationStrings.push({ weight: durationObject.weight, value: `${value} ${durationObject.multipleText}` })
     }
   }
 
@@ -825,33 +826,34 @@ export function humanizeDuration (refDate, date, length = 1) {
     if (index >= length) {
       return false
     }
+
+    // if last aprt is zero (= not in durationStrings): prevent that next part is added instead
     return durationStrings[index - 1].weight - durationStrings[index].weight === 1
   })
   return join(map(validStrings, 'value'), ' and ')
 }
 
-// Eypected input: parsable date string
+// Expected input: parsable date string
 export function humanizeDurationTo (refDate, date) {
   const durationString = humanizeDuration(refDate, date)
   return `in ${durationString}`
 }
 
-// Eypected input: parsable date string
+// Expected input: parsable date string
 export function humanizeDurationFrom (refDate, date) {
   const durationString = humanizeDuration(refDate, date)
   return `${durationString} ago`
 }
 
+// Returns random time with format hh:mm
 export function randomMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
   const randomHour = sample(hours)
-  // use local timezone offset
-  const localBegin = `${randomHour}:00`
-
-  return localBegin
+  return `${randomHour}:00`
 }
 
+// Expects time with format hh:mm and timezone
 export function getMaintenanceWindow (maintenanceBegin, timezone) {
   const parsedBegin = parseTime(maintenanceBegin)
   const beginHour = new Date(0, 0, 0, parsedBegin.hour, 0, 0)
