@@ -182,6 +182,7 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
+      const location = this.location
       const valid = false
       this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false

@@ -187,12 +187,14 @@ export default {
       return getValidationErrors(this, field)
     },
     updateTime ({ eventName, time }) {
+      let hour
+      let minute
       const parsedTime = parseTime(time)
-      if (!parsedTime) {
-        return
+      if (parsedTime) {
+        hour = parsedTime.hour
+        minute = parsedTime.minute
       }
       const id = this.id
-      const { hour, minute } = parsedTime
       this.$emit(eventName, { hour, minute, id })
       this.validateInput()
     },
@@ -245,11 +247,11 @@ export default {
     },
     onInputWakeUpTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateWakeUpTime', time: this.wakeUpTime })
+      this.updateTime({ eventName: 'update-wake-up-time', time: this.wakeUpTime })
     },
     onInputHibernateTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateHibernateTime', time: this.hibernateTime })
+      this.updateTime({ eventName: 'update-hibernate-time', time: this.hibernateTime })
     },
     onInputSelectedTimezone () {
       this.updateLocation(this.selectedTimezone)
