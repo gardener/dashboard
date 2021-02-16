@@ -13,7 +13,7 @@ import {
   humanizeDuration,
   randomMaintenanceBegin,
   getMaintenanceWindow
-} from '@/utils/time.js'
+} from '@/utils/time'
 
 describe('utils.time', () => {
   describe('parseTimeWithOffset', () => {

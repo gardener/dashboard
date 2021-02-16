@@ -33,7 +33,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { getValidationErrors } from '@/utils'
-import { getTimezone, timezones, randomMaintenanceBegin, getMaintenanceWindow, parseTimeWithOffset } from '@/utils/time'
+import { getTimezone, randomMaintenanceBegin, getMaintenanceWindow, parseTimeWithOffset } from '@/utils/time'
+import { timezones } from '@/utils/time/timezones'
 import { required } from 'vuelidate/lib/validators'
 
 const validationErrors = {

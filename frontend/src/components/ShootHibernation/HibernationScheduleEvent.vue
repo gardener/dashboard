@@ -77,7 +77,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { getValidationErrors } from '@/utils'
-import { locations, parseTime } from '@/utils/time'
+import { parseTime } from '@/utils/time'
+import { locations } from '@/utils/time/locations'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import join from 'lodash/join'
 import split from 'lodash/split'
