@@ -529,31 +529,37 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
-export function randomLocalMaintenanceBegin () {
+export const maintenanceTimeWithTimezoneRegex = /^(\d{2})(\d{2})\d{2}([+-])(\d{2})(\d{2})$/ // regex for maintenance times in shoot yaml
+export const inputTimezoneRegex = /^([+-])(\d{2}):(\d{2})$/ // regex for timezone from user input
+
+export function randomMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
   const randomHour = sample(hours)
-  // use local timezone offset
-  const localBegin = `${randomHour}:00`
-
-  return localBegin
+  return `${randomHour}:00`
 }
 
-export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
-  timezone = timezone || store.state.localTimezone
-  if (localBegin) {
-    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
-
-    let utcBegin
-    let utcEnd
-    if (utcMoment && utcMoment.isValid()) {
-      utcBegin = utcMoment.format('HHmm00+0000')
-      utcMoment.add(1, 'h')
-      utcEnd = utcMoment.format('HHmm00+0000')
-    }
-    return { utcBegin, utcEnd }
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone) {
+  const inputTimezoneRegex = /^([+-])(\d{2}):(\d{2})$/
+  if (!inputTimezoneRegex.test(beginTimezone)) {
+    return undefined
   }
-  return undefined
+  if (!beginTime) {
+    return undefined
+  }
+
+  const [, sign, hour, minute] = inputTimezoneRegex.exec(beginTimezone)
+  const timezone = `${sign}${hour}${minute}`
+
+  const beginMoment = moment(beginTime, 'HH:mm')
+
+  if (!beginMoment || !beginMoment.isValid()) {
+    return undefined
+  }
+  const begin = `${beginMoment.format('HHmm')}00${timezone}`
+  beginMoment.add(1, 'h')
+  const end = `${beginMoment.format('HHmm')}00${timezone}`
+  return { begin, end }
 }
 
 export function generateWorker (availableZones, cloudProfileName, region) {

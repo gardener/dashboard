@@ -10,36 +10,41 @@ SPDX-License-Identifier: Apache-2.0
       <v-text-field
         color="primary"
         label="Maintenance Start Time"
-        v-model="localizedMaintenanceBegin"
-        :error-messages="getErrorMessages('localizedMaintenanceBegin')"
-        @input="onInputLocalizedMaintenanceBegin"
-        @blur="$v.localizedMaintenanceBegin.$touch()"
+        v-model="maintenanceBegin"
+        :error-messages="getErrorMessages('maintenanceBegin')"
+        @input="onInputmaintenanceBegin"
+        @blur="$v.maintenanceBegin.$touch()"
         type="time"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
       ></v-text-field>
     </v-col>
     <v-col class="regularInput">
-      <v-autocomplete
+      <v-text-field
         color="primary"
         label="Timezone"
-        :items="timezones"
-        v-model="selectedTimezone"
-        >
-      </v-autocomplete>
+        v-model="maintenanceTimezone"
+        :error-messages="getErrorMessages('maintenanceTimezone')"
+        @input="onInputmaintenanceTimezone"
+        @blur="$v.maintenanceTimezone.$touch()"
+      ></v-text-field>
     </v-col>
   </v-row>
 </template>
 
 <script>
-import moment from 'moment-timezone'
 import { mapState } from 'vuex'
-import { getValidationErrors, randomLocalMaintenanceBegin, utcMaintenanceWindowFromLocalBegin } from '@/utils'
+import { getValidationErrors, randomMaintenanceBegin, maintenanceWindowWithBeginAndTimezone, maintenanceTimeWithTimezoneRegex } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
+import { isTimezone } from '@/utils/validators'
 
 const validationErrors = {
-  localizedMaintenanceBegin: {
+  maintenanceBegin: {
     required: 'Maintenance start time is required'
+  },
+  maintenanceTimezone: {
+    required: 'Timezone is required',
+    isTimezone: 'TimeZone needs to have format [+|-]HH:mm'
   }
 }
 
@@ -52,33 +57,35 @@ export default {
   },
   computed: {
     ...mapState([
-      'localTimezone'
+      'timezone'
     ])
   },
   validations: {
-    localizedMaintenanceBegin: {
+    maintenanceBegin: {
       required
+    },
+    maintenanceTimezone: {
+      required,
+      isTimezone
     }
   },
   data () {
     return {
-      selectedTimezone: this.localTimezone,
-      timezones: moment.tz.names(),
+      maintenanceTimezone: this.timezone,
       validationErrors,
-      localizedMaintenanceBegin: undefined,
+      maintenanceBegin: undefined,
       valid: undefined
     }
   },
   methods: {
-    getUTCMaintenanceWindow () {
-      return utcMaintenanceWindowFromLocalBegin({ localBegin: this.localizedMaintenanceBegin, timezone: this.selectedTimezone })
+    getMaintenanceWindow () {
+      return maintenanceWindowWithBeginAndTimezone(this.maintenanceBegin, this.maintenanceTimezone)
     },
     reset () {
-      this.selectedTimezone = this.localTimezone
       if (!this.timeWindowBegin) {
         this.setDefaultMaintenanceTimeWindow()
       } else {
-        this.setLocalizedTime(this.timeWindowBegin)
+        this.setBeginTimeAndTimezone(this.timeWindowBegin)
       }
       this.validateInput()
     },
@@ -91,28 +98,30 @@ export default {
         this.$emit('valid', this.valid)
       }
     },
-    setLocalizedTime (utcTime) {
-      const momentObj = moment.tz(utcTime, 'HHmmZ', this.selectedTimezone)
-      if (momentObj.isValid()) {
-        const newLocalizedTimeWindowBegin = momentObj.format('HH:mm')
-        if (newLocalizedTimeWindowBegin !== this.localizedMaintenanceBegin) {
-          // Only set if value actually changed in parent component
-          // Vue component would reset input focus otherwise
-          this.localizedMaintenanceBegin = newLocalizedTimeWindowBegin
-        }
+    setBeginTimeAndTimezone (windowBegin) {
+      if (!maintenanceTimeWithTimezoneRegex.test(windowBegin)) {
+        return undefined
       }
+      const [, timeHours, timeMinutes, offsetSign, offsetHours, offsetMinutes] = maintenanceTimeWithTimezoneRegex.exec(windowBegin)
+      this.maintenanceBegin = `${timeHours}:${timeMinutes}`
+      this.maintenanceTimezone = `${offsetSign}${offsetHours}:${offsetMinutes}`
     },
     setDefaultMaintenanceTimeWindow () {
-      this.localizedMaintenanceBegin = randomLocalMaintenanceBegin()
+      this.maintenanceBegin = randomMaintenanceBegin()
+      this.maintenanceTimezone = this.timezone
     },
-    onInputLocalizedMaintenanceBegin () {
-      this.$v.localizedMaintenanceBegin.$touch()
+    onInputmaintenanceBegin () {
+      this.$v.maintenanceBegin.$touch()
+      this.validateInput()
+    },
+    onInputmaintenanceTimezone () {
+      this.$v.maintenanceTimezone.$touch()
       this.validateInput()
     }
   },
   watch: {
-    timeWindowBegin (utcBegin) {
-      this.setLocalizedTime(utcBegin)
+    timeWindowBegin (windowBegin) {
+      this.setBeginTimeAndTimezone(windowBegin)
       this.validateInput()
     }
   },

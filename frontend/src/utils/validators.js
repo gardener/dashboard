@@ -5,6 +5,7 @@
 //
 
 import { withParams, regex, ref } from 'vuelidate/lib/validators/common'
+import { inputTimezoneRegex } from '@/utils'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
 
@@ -30,6 +31,10 @@ const noStartEndHyphen = (value) => {
 }
 const numberOrPercentage = (value) => {
   return numberOrPercentagePattern.test(value)
+}
+
+const isTimezone = (value) => {
+  return inputTimezoneRegex.test(value)
 }
 
 const unique = key => withParams({ type: 'unique', key },
@@ -88,5 +93,6 @@ export {
   includesIfAvailable,
   uniqueWorkerName,
   numberOrPercentage,
-  requiresCostObjectIfEnabled
+  requiresCostObjectIfEnabled,
+  isTimezone
 }
