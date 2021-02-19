@@ -8,20 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="aws"
-    color="orange darken-1"
-    infraIcon="aws-white"
-    backgroundSrc="/static/background_aws.svg"
-    createTitle="Add new AWS Secret"
-    replaceTitle="Replace AWS Secret"
+    cloud-provider-kind="aws"
+    infra-icon="aws"
+    create-title="Add new AWS Secret"
+    replace-title="Replace AWS Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
       <div>
         <v-text-field
-          color="orange darken-1"
+          color="primary"
           v-model="accessKeyId"
           ref="accessKeyId"
           label="Access Key Id"
@@ -34,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          color="orange darken-1"
+          color="primary"
           v-model="secretAccessKey"
           label="Secret Access Key"
           :error-messages="getErrorMessages('secretAccessKey')"

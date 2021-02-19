@@ -8,6 +8,7 @@
 
 const { isHttpError } = require('@gardener-dashboard/request')
 const kubeconfig = require('@gardener-dashboard/kube-config')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')
@@ -16,7 +17,7 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const semver = require('semver')
 
-const { decodeBase64, getSeedNameFromShoot } = utils
+const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain } = utils
 
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   const client = user.client
@@ -197,9 +198,9 @@ exports.info = async function ({ user, namespace, name }) {
   const client = user.client
 
   const [
-    shoot,
-    secret
-  ] = await Promise.all([
+    { value: shoot, reason: shootError },
+    { value: secret }
+  ] = await Promise.allSettled([
     read({
       user,
       namespace,
@@ -212,15 +213,18 @@ exports.info = async function ({ user, namespace, name }) {
     })
   ])
 
+  if (shootError) {
+    throw shootError
+  }
+
   const data = {
     canLinkToSeed: false
   }
-  let seed
   if (shoot.spec.seedName) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
+    const seed = getSeed(getSeedNameFromShoot(shoot))
     const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
     if (prefix) {
-      const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+      const ingressDomain = getSeedIngressDomain(seed)
       if (ingressDomain) {
         data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
       }
@@ -259,7 +263,14 @@ exports.info = async function ({ user, namespace, name }) {
 
   const isAdmin = await authorization.isAdmin(user)
   if (!isAdmin) {
-    await assignComponentSecrets(client, data, namespace, name)
+    /*
+      We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
+      as we agreed that also project viewers should be able to see the monitoring credentials.
+      Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
+      Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
+      This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
+    */
+    await assignMonitoringSecret(dashboardClient, data, namespace, name)
   }
 
   return data
@@ -288,20 +299,12 @@ exports.seedInfo = async function ({ user, namespace, name }) {
   try {
     const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
     const seedShootNamespace = shoot.status.technicalID
-    await assignComponentSecrets(seedClient, data, seedShootNamespace)
+    await assignMonitoringSecret(seedClient, data, seedShootNamespace)
   } catch (err) {
     logger.error('Failed to retrieve information using seed core client', err)
   }
 
   return data
-}
-
-function assignComponentSecrets (client, data, namespace, name) {
-  const components = ['monitoring']
-  return Promise.all(components.map(component => {
-    const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
-    return assignComponentSecret(client, data, component, namespace, ingressSecretName)
-  }))
 }
 
 async function getSecret (client, { namespace, name }) {
@@ -311,12 +314,13 @@ async function getSecret (client, { namespace, name }) {
     if (isHttpError(err, 404)) {
       return
     }
-    logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
+    logger.error('failed to fetch %s secret: %s', name, err)
     throw err
   }
 }
 
-async function assignComponentSecret (client, data, component, namespace, name) {
+async function assignMonitoringSecret (client, data, namespace, shootName) {
+  const name = shootName ? `${shootName}.monitoring` : 'monitoring-ingress-credentials'
   const secret = await getSecret(client, { namespace, name })
   if (secret) {
     _
@@ -325,9 +329,9 @@ async function assignComponentSecret (client, data, component, namespace, name) 
       .pick('username', 'password')
       .forEach((value, key) => {
         if (key === 'password') {
-          data[`${component}_password`] = decodeBase64(value)
+          data.monitoringPassword = decodeBase64(value)
         } else if (key === 'username') {
-          data[`${component}_username`] = decodeBase64(value)
+          data.monitoringUsername = decodeBase64(value)
         }
       })
       .commit()

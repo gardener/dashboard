@@ -6,32 +6,37 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid class="shootlist">
-    <v-card class="mr-extra">
-      <v-toolbar flat height="72" color="cyan darken-2">
-        <img src="../assets/certified_kubernetes_white.svg" height="60" class="ml-1 mr-3">
+    <v-card>
+      <v-toolbar flat height="72" color="toolbar-background">
+        <icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
+          <certified-kubernetes></certified-kubernetes>
+        </icon-base>
         <v-toolbar-title class="white--text">
-          <div class="headline">Kubernetes Clusters</div>
-          <div class="subtitle-1">{{headlineSubtitle}}</div>
+          <div class="headline toolbar-title--text">Kubernetes Clusters</div>
+          <div class="subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="search || items.length > 3"
+        <v-text-field v-if="shootSearch || items.length > 3"
           prepend-inner-icon="mdi-magnify"
-          color="cyan darken-2"
+          color="primary"
           label="Search"
           clearable
           hide-details
           flat
           solo
-          v-model="search"
-          @keyup.esc="search=''"
-          class="search_textfield"
+          v-model="shootSearch"
+          @keyup.esc="shootSearch=''"
+          class="mr-3"
         ></v-text-field>
+        <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
+          <v-icon color="toolbar-title">mdi-plus</v-icon>
+        </v-btn>
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
-          @setSelectedHeader="setSelectedHeader"
+          @set-selected-header="setSelectedHeader"
           @reset="resetTableSettings"
-          @toggleFilter="toggleFilter"
+          @toggle-filter="toggleFilter"
         ></table-column-selection>
       </v-toolbar>
       <v-data-table
@@ -39,15 +44,18 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        must-sort
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :search="shootSearch"
+        :custom-filter="searchItems"
+        must-sort
+        :custom-sort="sortItems"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
-            :shootItem="item"
-            :visibleHeaders="visibleHeaders"
-            @showDialog="showDialog"
+            :shoot-item="item"
+            :visible-headers="visibleHeaders"
+            @show-dialog="showDialog"
             :key="item.metadata.uid"
           ></shoot-list-row>
         </template>
@@ -55,22 +63,17 @@ SPDX-License-Identifier: Apache-2.0
 
       <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
-          <v-card-title class="teal darken-1 grey--text text--lighten-4">
-            <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
+          <v-card-title class="toolbar-background toolbar-title--text">
+            <div class="headline">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon>mdi-close</v-icon>
+              <v-icon color="toolbar-title">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
           <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>
-    <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
-        <v-icon dark ref="add">mdi-plus</v-icon>
-      </v-btn>
-    </v-fab-transition>
   </v-container>
 </template>
 
@@ -86,6 +89,8 @@ import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import ShootListRow from '@/components/ShootListRow'
+import IconBase from '@/components/icons/IconBase'
+import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 import { mapTableHeader } from '@/utils'
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
@@ -95,12 +100,14 @@ export default {
   components: {
     ShootListRow,
     ShootAccessCard,
+    IconBase,
+    CertifiedKubernetes,
     TableColumnSelection
   },
   data () {
     return {
       floatingButton: false,
-      search: '',
+      shootSearch: '',
       dialog: null,
       options: undefined,
       cachedItems: null,
@@ -129,19 +136,14 @@ export default {
         }
         this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
       } else {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-      this.setShootListSortParams(value)
-    },
-    search (value) {
-      this.setShootListSearchValue(value)
     }
   },
   methods: {
     ...mapActions({
       setSelectedShootInternal: 'setSelectedShoot',
-      setShootListSortParams: 'setShootListSortParams',
-      setShootListSearchValue: 'setShootListSearchValue',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
     }),
@@ -234,7 +236,12 @@ export default {
       onlyShootsWithIssues: 'onlyShootsWithIssues',
       projectFromProjectList: 'projectFromProjectList',
       projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList'
+      shootCustomFieldList: 'shootCustomFieldList',
+      shootCustomFields: 'shootCustomFields',
+      ticketsLabels: 'ticketsLabels',
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
+      sortItems: 'shoots/sortItems',
+      searchItems: 'shoots/searchItems'
     }),
     ...mapState([
       'shootsLoading',
@@ -547,13 +554,13 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.search = null
+    this.shootSearch = null
     this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
-    this.search = null
+    this.shootSearch = null
     next()
   }
 }
@@ -564,10 +571,6 @@ export default {
   .dashboard {
     padding-top: 10px;
     padding-bottom: 10px;
-  }
-
-  .cluster_name {
-    color: rgb(0, 137, 123);
   }
 
   .shootListTable table.table {
@@ -589,12 +592,8 @@ export default {
     }
   }
 
-  .search_textfield {
-    min-width: 125px;
-  }
-
-  .v-input__slot {
-    margin: 0px;
+  .disabled_filter {
+    opacity: 0.5;
   }
 
 </style>

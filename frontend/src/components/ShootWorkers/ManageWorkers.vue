@@ -11,14 +11,14 @@ SPDX-License-Identifier: Apache-2.0
         ref="workerInput"
         :worker="worker"
         :workers="internalWorkers"
-        :cloudProfileName="cloudProfileName"
+        :cloud-profile-name="cloudProfileName"
         :region="region"
-        :allZones="allZones"
-        :availableZones="availableZones"
-        :zonedCluster="zonedCluster"
+        :all-zones="allZones"
+        :available-zones="availableZones"
+        :zoned-cluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
-        :isNew="isNewCluster || worker.isNew"
-        :maxAdditionalZones="maxAdditionalZones"
+        :is-new="isNewCluster || worker.isNew"
+        :max-additional-zones="maxAdditionalZones"
         @valid="onWorkerValid">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
@@ -42,14 +42,14 @@ SPDX-License-Identifier: Apache-2.0
           fab
           icon
           class="ml-1"
-          color="cyan darken-2">
-          <v-icon class="cyan--text text--darken-2">mdi-plus</v-icon>
+          color="primary">
+          <v-icon class="primary--text">mdi-plus</v-icon>
         </v-btn>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           text
-          class="cyan--text text--darken-2">
+          class="primary--text">
           Add Worker Group
         </v-btn>
       </v-col>

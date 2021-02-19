@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     :code="code"
     :text="text"
     :message="message"
-    :buttonText="buttonText"
+    :button-text="buttonText"
     @click="onClick"
   ></g-error>
 </template>

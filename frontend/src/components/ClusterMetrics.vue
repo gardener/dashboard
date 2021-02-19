@@ -8,39 +8,39 @@ SPDX-License-Identifier: Apache-2.0
   <v-list>
     <link-list-tile v-if="isAdmin"
       icon="mdi-developer-board"
-      appTitle="Grafana"
+      app-title="Grafana"
       :url="grafanaUrlOperators"
-      :urlText="grafanaUrlOperators"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlOperators"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-else
       icon="mdi-developer-board"
-      appTitle="Grafana"
+      app-title="Grafana"
       :url="grafanaUrlUsers"
-      :urlText="grafanaUrlUsers"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlUsers"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-if="isAdmin"
-      appTitle="Prometheus"
+      app-title="Prometheus"
       :url="prometheusUrl"
-      :urlText="prometheusUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="prometheusUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <link-list-tile v-if="hasAlertmanager"
-      appTitle="Alertmanager"
+      app-title="Alertmanager"
       :url="alertmanagerUrl"
-      :urlText="alertmanagerUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="alertmanagerUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
-    <username-password v-if="isAdmin" :username="username" :password="password" :showNotAvailablePlaceholder="isSeedUnreachable">
+    <username-password v-if="isAdmin" :username="username" :password="password" :show-not-available-placeholder="isSeedUnreachable">
       <template v-slot:notAvailablePlaceholder>
         <v-list-item-content>
           <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
           <v-list-item-title class="wrap-text pt-1">
-            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
             Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
           </v-list-item-title>
         </v-list-item-content>
@@ -86,10 +86,10 @@ export default {
       return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_username', '') : get(this.shootItem, 'info.monitoring_username', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringUsername', '') : get(this.shootItem, 'info.monitoringUsername', '')
     },
     password () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_password', '') : get(this.shootItem, 'info.monitoring_password', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringPassword', '') : get(this.shootItem, 'info.monitoringPassword', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])

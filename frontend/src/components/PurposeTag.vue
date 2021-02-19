@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-tooltip top>
     <template v-slot:activator="{ on }">
-      <v-chip v-on="on" class="purpose-tag" v-if="!!shortPurpose" :outlined="!isCritical" :text-color="textColor" color="cyan darken-2" small>{{ shortPurpose }}</v-chip>
+      <v-chip v-on="on" class="purpose-tag" v-if="!!shortPurpose" :outlined="!isCritical" :text-color="textColor" color="primary" small>{{ shortPurpose }}</v-chip>
     </template>
     <span>{{ purpose }}</span>
   </v-tooltip>
@@ -44,7 +44,7 @@ export default {
     },
     textColor () {
       if (!this.isCritical) {
-        return 'cyan darken-2'
+        return 'primary'
       } else {
         return 'white'
       }

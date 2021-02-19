@@ -8,21 +8,19 @@ SPDX-License-Identifier: Apache-2.0
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="gcp"
-    color="green"
-    infraIcon="gcp-white"
-    backgroundSrc="/static/background_gcp.svg"
-    createTitle="Add new Google Secret"
-    replaceTitle="Replace Google Secret"
+    cloud-provider-kind="gcp"
+    infra-icon="gcp"
+    create-title="Add new Google Secret"
+    replace-title="Replace Google Secret"
     @input="onInput">
 
     <template v-slot:data-slot>
       <div>
         <v-textarea
           ref="serviceAccountKey"
-          color="green"
+          color="primary"
           filled
           v-model="serviceAccountKey"
           label="Service Account Key"

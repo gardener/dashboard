@@ -8,15 +8,15 @@ SPDX-License-Identifier: Apache-2.0
   <v-card :class="cardClass">
 
     <!-- Header -->
-    <v-toolbar :class="toolbarClass" dark>
-      <infra-icon v-model="icon" :width="32"></infra-icon>
+    <v-toolbar color="toolbar-background toolbar-title--text">
+      <infra-icon v-model="icon" :size="32"></infra-icon>
       <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
-        <v-icon class="white--text">mdi-plus</v-icon>
+      <v-btn color="toolbar-title" v-if="!disabled" icon @click.native.stop="onAdd()">
+        <v-icon>mdi-plus</v-icon>
       </v-btn>
-      <v-btn v-if="!disabled" icon @click.native.stop="onToogleHelp()">
-        <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+      <v-btn color="toolbar-title" v-if="!disabled" icon @click.native.stop="onToogleHelp()">
+        <v-icon>mdi-help-circle-outline</v-icon>
       </v-btn>
     </v-toolbar>
     <div class="description_container" v-if="!hasRows">
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         v-for="secret in rows"
         :key="secret.metadata.name"
         :secret="secret"
-        :secretDescriptorKey="secretDescriptorKey"
+        :secret-descriptor-key="secretDescriptorKey"
         @update="onUpdate"
         @delete="onDelete"
       >
@@ -81,10 +81,6 @@ export default {
       type: String,
       required: true
     },
-    color: {
-      type: String,
-      required: true
-    },
     description: {
       type: String,
       required: true
@@ -109,14 +105,10 @@ export default {
       return this.rows.length > 0
     },
     cardClass () {
-      let cardClass = 'mr-extra'
       if (this.disabled) {
-        cardClass = `${cardClass} card_disabled`
+        return 'card_disabled'
       }
-      return cardClass
-    },
-    toolbarClass () {
-      return `${this.color} elevation-0`
+      return undefined
     }
   },
   methods: {

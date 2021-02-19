@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <hint-colorizer hintColor="orange">
+  <hint-colorizer hint-color="warning">
     <v-select
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="machineTypeItems"
       item-text="name"
       item-value="name"
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
             <span v-if="item.gpu">GPU: {{item.gpu}} | </span>
             <span v-if="item.memory">Memory: {{item.memory}}</span>
-            <span v-if="item.volumeType && item.volumeSize"> | Volume Type: {{item.volumeType}} | Volume Size: {{item.volumeSize}}</span>
+            <span v-if="item.storage"> | Volume Type: {{item.storage.type}} | Class: {{item.storage.class}} | Default Size: {{item.storage.size}}</span>
           </v-list-item-subtitle>
         </v-list-item-content>
       </template>
@@ -89,7 +89,6 @@ export default {
           name: this.worker.machine.type
         })
       }
-      this.onInputMachineType()
       return machineTypes
     },
     notInCloudProfile () {
@@ -109,7 +108,7 @@ export default {
     },
     onInputMachineType () {
       this.$v.worker.machine.type.$touch()
-      this.$emit('updateMachineType', this.worker.machine.type)
+      this.$emit('update-machine-type', this.worker.machine.type)
       this.validateInput()
     },
     validateInput () {

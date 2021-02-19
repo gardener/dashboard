@@ -135,8 +135,10 @@ describe('cache', function () {
       })
 
       it('should syncronize the cache', async function () {
-        expect(cache.synchronizationPromise).toBeUndefined()
+        expect(cache.synchronizationPromise).toBeInstanceOf(Promise)
+        expect(cache.synchronizationPromiseResolved).toBe(false)
         await cache.synchronize(testClient)
+        expect(cache.synchronizationPromiseResolved).toBe(true)
         expect(syncCloudprofilesSpy).toBeCalledTimes(1)
         expect(syncQuotasSpy).toBeCalledTimes(1)
         expect(syncSeedsSpy).toBeCalledTimes(1)

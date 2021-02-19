@@ -163,6 +163,9 @@ export function displayName (username) {
 }
 
 export function parseSize (value) {
+  if (!value) {
+    return 0
+  }
   const sizeRegex = /^(\d+)Gi$/
   const result = sizeRegex.exec(value)
   if (result) {
@@ -411,16 +414,6 @@ export function parseServiceAccountUsername (username) {
   return { namespace, name }
 }
 
-// expect colors to be in format <color> <optional:modifier>
-export function textColor (color) {
-  const [colorStr, colorMod] = split(color, ' ')
-  let textColor = `${colorStr}--text`
-  if (colorMod) {
-    textColor = `${textColor} text--${colorMod}`
-  }
-  return textColor
-}
-
 export function encodeBase64 (input) {
   return Buffer.from(input, 'utf8').toString('base64')
 }
@@ -501,11 +494,6 @@ export const shootAddonList = [
   }
 ]
 
-export function textColorFromColor (color) {
-  const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
-  return map(split(color, ' '), iteratee)
-}
-
 function htmlToDocumentFragment (html) {
   const template = document.createElement('template')
   template.innerHTML = html.trim() // Never return a text node of whitespace as the result
@@ -518,12 +506,11 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function transformHtml (html, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
+export function transformHtml (html, transformToExternalLinks = true) {
   if (!html) {
     return undefined
   }
 
-  const textColorClasses = textColorFromColor(linkColor)
   const documentFragment = htmlToDocumentFragment(html)
   if (!documentFragment) {
     return html
@@ -531,10 +518,6 @@ export function transformHtml (html, linkColor = 'cyan darken-2', transformToExt
 
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
-    if (textColorClasses.length) {
-      linkElement.classList.add(...textColorClasses)
-    }
-
     if (transformToExternalLinks) {
       linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')
@@ -578,9 +561,9 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const name = `worker-${shortRandomString(5)}`
   const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const machineType = get(head(machineTypesForZone), 'name')
+  const machineType = head(machineTypesForZone) || {}
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const volumeType = get(head(volumeTypesForZone), 'name')
+  const volumeType = head(volumeTypesForZone) || {}
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
   const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
@@ -591,19 +574,26 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     maximum: 2,
     maxSurge: 1,
     machine: {
-      type: machineType,
+      type: machineType.name,
       image: machineImage
     },
     zones,
     isNew: true
   }
-  if (volumeType) {
+  if (volumeType.name) {
     worker.volume = {
-      type: volumeType,
+      type: volumeType.name,
       size: defaultVolumeSize
     }
+  } else if (!machineType.storage) {
+    worker.volume = {
+      size: defaultVolumeSize
+    }
+  } else if (machineType.storage.type !== 'fixed') {
+    worker.volume = {
+      size: machineType.storage.size
+    }
   }
-
   return worker
 }
 

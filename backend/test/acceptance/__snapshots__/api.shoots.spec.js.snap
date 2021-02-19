@@ -884,8 +884,8 @@ Array [
 
 exports[`api shoots should return shoot seed info 2`] = `
 Object {
-  "monitoring_password": "pass-foo-barShoot",
-  "monitoring_username": "user-foo-barShoot",
+  "monitoringPassword": "pass-foo-barShoot",
+  "monitoringUsername": "user-foo-barShoot",
 }
 `;
 

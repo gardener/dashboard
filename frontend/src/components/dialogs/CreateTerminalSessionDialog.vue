@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
-    confirmButtonText="Create"
-    :confirmDisabled="!valid"
+    confirm-button-text="Create"
+    :confirm-disabled="!valid"
     max-width="750px"
     max-height="100vh"
-    defaultColor="cyan-darken-2"
+    default-color="toolbar-background"
     ref="gDialog"
   >
     <template v-slot:caption>Create Terminal Session</template>
     <template v-slot:message>
-      <v-tabs v-model="tab" color="cyan darken-2">
+      <v-tabs v-model="tab" color="primary">
         <v-tab key="target-tab" href="#target-tab">Terminal</v-tab>
         <v-tab v-if="isTerminalShortcutsFeatureEnabled" key="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
       </v-tabs>
@@ -40,8 +40,8 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   :target="targetTab.selectedTarget"
-                  @selectedConfig="selectedConfigChanged"
-                  @validSettings="validSettingsChanged"
+                  @selected-config="selectedConfigChanged"
+                  @valid-settings="validSettingsChanged"
                 ></terminal-settings>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -52,14 +52,14 @@ SPDX-License-Identifier: Apache-2.0
           <v-list>
             <v-list-item-group
               v-model="shortcutTab.selectedShortcuts"
-              color="cyan darken-2"
+              color="primary"
               active-class="g-border"
               multiple
             >
               <terminal-shortcuts
                 :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
-                @addTerminalShortcut="onAddTerminalShortcut"
+                @add-terminal-shortcut="onAddTerminalShortcut"
               ></terminal-shortcuts>
             </v-list-item-group>
           </v-list>

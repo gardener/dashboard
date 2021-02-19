@@ -17,22 +17,21 @@ SPDX-License-Identifier: Apache-2.0
       <g-popper
         v-if="snackbarDetailsText"
         title="Details"
-        toolbarColor="cyan darken-2"
-        :popperKey="`popper_snackbar_${uuid}`"
+        :popper-key="`popper_snackbar_${uuid}`"
         placement="bottom"
-        :boundariesSelector="`#boundary_${uuid}`"
+        :boundaries-selector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
         <template v-slot:popperRef>
-          <v-btn text small color="cyan darken-2">
+          <v-btn text small color="primary">
             Details
           </v-btn>
         </template>
       </g-popper>
-      <v-btn text color="cyan darken-2" @click="retry">
+      <v-btn text color="primary" @click="retry">
         Retry
       </v-btn>
-      <v-btn text color="cyan darken-2" @click="hideSnackbarAndClose">
+      <v-btn text color="primary" @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
@@ -41,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       :timeout="-1"
       :absolute="true"
       :bottom="true"
-      color="red"
+      color="error"
     >
       {{ snackbarText }}
       <v-btn text @click="hideSnackbarAndClose">
@@ -63,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
               <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
               <g-popper
                 :title="`${imageShortText} Help`"
-                toolbar-color="cyan darken-2"
                 :popper-key="`popper_${uuid}`"
                 placement="bottom"
                 :boundaries-selector="`#boundary_${uuid}`"
@@ -92,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-card tile>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('horizontal')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
                   <span>Split Pane Vertically</span>
@@ -102,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-actions>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('vertical')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
                   <span>Split Pane Horizontally</span>
@@ -134,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-tooltip :disabled="connectionMenu" top style="min-width: 110px">
                 <template v-slot:activator="{ on: tooltip }">
                   <v-btn v-on="{ ...tooltip, ...menu }" small text color="grey lighten-1" class="text-none systemBarButton">
-                    <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+                    <icon-base width="18" height="18" view-box="-2 -2 30 30" icon-color="#bdbdbd" class="mr-2">
                       <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                       <disconnected v-else></disconnected>
                     </icon-base>
@@ -146,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small text class="actionButton" @click="retry()">
+                <v-btn small text class="action-button" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>

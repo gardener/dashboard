@@ -12,33 +12,23 @@ import omit from 'lodash/omit'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
-import transform from 'lodash/transform'
-import isEqual from 'lodash/isEqual'
-import isObject from 'lodash/isObject'
-import orderBy from 'lodash/orderBy'
-import toLower from 'lodash/toLower'
-import padStart from 'lodash/padStart'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import some from 'lodash/some'
-import split from 'lodash/split'
-import join from 'lodash/join'
 import set from 'lodash/set'
 import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import semver from 'semver'
-import store from '../'
+import store from '../../'
+import getters from './getters'
+import { keyForShoot, findItem } from './helper'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import {
-  isShootStatusHibernated,
   isReconciliationDeactivated,
   isStatusProgressing,
-  getCreatedBy,
-  getProjectName,
   shootHasIssue,
   purposesForSecret,
   shortRandomString,
@@ -48,62 +38,18 @@ import {
   generateWorker
 } from '@/utils'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
-import startsWith from 'lodash/startsWith'
 import find from 'lodash/find'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
-const keyForShoot = ({ name, namespace }) => {
-  return `${name}_${namespace}`
-}
-
-const findItem = ({ name, namespace }) => {
-  return state.shoots[keyForShoot({ name, namespace })]
-}
-
 // initial state
 const state = {
   shoots: {},
-  sortedShoots: [],
-  filteredAndSortedShoots: [],
-  sortParams: undefined,
-  searchValue: undefined,
+  filteredShoots: [],
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined
-}
-
-// getters
-const getters = {
-  sortedItems () {
-    return state.filteredAndSortedShoots
-  },
-  itemByNameAndNamespace () {
-    return ({ namespace, name }) => {
-      return findItem({ name, namespace })
-    }
-  },
-  selectedItem () {
-    if (state.selection) {
-      return findItem(state.selection)
-    }
-  },
-  getShootListFilters () {
-    return state.shootListFilters
-  },
-  onlyShootsWithIssues (state, getters) {
-    return get(getters.getShootListFilters, 'onlyShootsWithIssues', true)
-  },
-  newShootResource () {
-    return state.newShootResource
-  },
-  initialNewShootResource () {
-    return state.initialNewShootResource
-  },
-  keyForItem () {
-    return keyForShoot
-  }
 }
 
 // actions
@@ -174,23 +120,12 @@ const actions = {
     if (!metadata) {
       return commit('SET_SELECTION', null)
     }
-    const item = findItem(metadata)
+    const item = findItem(state)(metadata)
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
         return dispatch('getInfo', { name: metadata.name, namespace: metadata.namespace })
       }
-    }
-  },
-  setListSortParams ({ commit, rootState }, options) {
-    const sortParams = pick(options, ['sortBy', 'sortDesc'])
-    if (!isEqual(sortParams, state.sortParams)) {
-      commit('SET_SORTPARAMS', { rootState, sortParams })
-    }
-  },
-  setListSearchValue ({ commit, rootState }, searchValue) {
-    if (!isEqual(searchValue, state.searchValue)) {
-      commit('SET_SEARCHVALUE', { rootState, searchValue })
     }
   },
   setShootListFilters ({ commit, rootState }, value) {
@@ -339,219 +274,12 @@ const actions = {
   }
 }
 
-// Deep diff between two object, using lodash
-function difference (object, base) {
-  function changes (object, base) {
-    return transform(object, function (result, value, key) {
-      if (!isEqual(value, base[key])) {
-        result[key] = (isObject(value) && isObject(base[key])) ? changes(value, base[key]) : value
-      }
-    })
-  }
-  return changes(object, base)
-}
-
-function getRawVal (item, column) {
-  const metadata = item.metadata
-  const spec = item.spec
-  switch (column) {
-    case 'purpose':
-      return get(spec, 'purpose')
-    case 'lastOperation':
-      return get(item, 'status.lastOperation')
-    case 'createdAt':
-      return metadata.creationTimestamp
-    case 'createdBy':
-      return getCreatedBy(metadata)
-    case 'project':
-      return getProjectName(metadata)
-    case 'k8sVersion':
-      return get(spec, 'kubernetes.version')
-    case 'infrastructure':
-      return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
-    case 'seed':
-      return get(item, 'spec.seedName')
-    case 'ticketLabels': {
-      const labels = store.getters.ticketsLabels(metadata)
-      return join(map(labels, 'name'), ' ')
-    }
-    default: {
-      if (startsWith(column, 'Z_')) {
-        const path = get(store.getters.shootCustomFields, [column, 'path'])
-        return get(item, path)
-      }
-      return metadata[column]
-    }
-  }
-}
-
-function getSortVal (item, sortBy) {
-  const value = getRawVal(item, sortBy)
-  const status = item.status
-  switch (sortBy) {
-    case 'purpose':
-      switch (value) {
-        case 'infrastructure':
-          return 0
-        case 'production':
-          return 1
-        case 'development':
-          return 2
-        case 'evaluation':
-          return 3
-        default:
-          return 4
-      }
-    case 'lastOperation': {
-      const operation = value || {}
-      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-      const lastErrors = get(item, 'status.lastErrors', [])
-      const isError = operation.state === 'Failed' || lastErrors.length
-      const allErrorCodes = errorCodesFromArray(lastErrors)
-      const userError = isUserError(allErrorCodes)
-      const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
-
-      if (ignoredFromReconciliation) {
-        if (isError) {
-          return 400
-        } else {
-          return 450
-        }
-      } else if (userError && !inProgress) {
-        return 200
-      } else if (userError && inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `3${progress}`
-      } else if (isError && !inProgress) {
-        return 0
-      } else if (isError && inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `1${progress}`
-      } else if (inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `6${progress}`
-      } else if (isShootStatusHibernated(status)) {
-        return 500
-      }
-      return 700
-    }
-    case 'readiness': {
-      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-      return lastErrorTransitionTime
-    }
-    case 'ticket': {
-      const { namespace, name } = item.metadata
-      return store.getters.latestUpdatedTicketByNameAndNamespace({ namespace, name })
-    }
-    default:
-      return toLower(value)
-  }
-}
-
 function shoots (state) {
   return map(Object.keys(state.shoots), (key) => state.shoots[key])
 }
 
-function setSortedItems (state, rootState) {
-  const sortBy = head(get(state, 'sortParams.sortBy'))
-  const sortDesc = get(state, 'sortParams.sortDesc', [false])
-  const sortOrder = head(sortDesc) ? 'desc' : 'asc'
-  let sortedShoots = shoots(state)
-  if (sortBy) {
-    const sortbyNameAsc = (a, b) => {
-      if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
-        return 1
-      } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
-        return -1
-      }
-      return 0
-    }
-    const inverse = sortOrder === 'desc' ? -1 : 1
-    switch (sortBy) {
-      case 'k8sVersion': {
-        sortedShoots.sort((a, b) => {
-          const versionA = getRawVal(a, sortBy)
-          const versionB = getRawVal(b, sortBy)
-
-          if (semver.gt(versionA, versionB)) {
-            return 1 * inverse
-          } else if (semver.lt(versionA, versionB)) {
-            return -1 * inverse
-          } else {
-            return sortbyNameAsc(a, b)
-          }
-        })
-        break
-      }
-      case 'readiness': {
-        sortedShoots.sort((a, b) => {
-          const readinessA = getSortVal(a, sortBy)
-          const readinessB = getSortVal(b, sortBy)
-
-          if (readinessA === readinessB) {
-            return sortbyNameAsc(a, b)
-          } else if (!readinessA) {
-            return 1
-          } else if (!readinessB) {
-            return -1
-          } else if (readinessA > readinessB) {
-            return 1 * inverse
-          } else {
-            return -1 * inverse
-          }
-        })
-        break
-      }
-      default: {
-        sortedShoots = orderBy(sortedShoots, [item => getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
-      }
-    }
-  }
-  state.sortedShoots = sortedShoots
-  setFilteredAndSortedItems(state, rootState)
-}
-
-function setFilteredAndSortedItems (state, rootState) {
-  function matchesShoot (searchValue) {
-    const searchableCustomFields = filter(store.getters.shootCustomFieldList, ['searchable', true])
-
-    return shoot => {
-      return some(searchValue, value => {
-        if (includes(getRawVal(shoot, 'name'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'infrastructure'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'seed'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'project'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'createdBy'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'purpose'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'k8sVersion'), value)) {
-          return true
-        }
-        if (includes(getRawVal(shoot, 'ticketLabels'), value)) {
-          return true
-        }
-
-        return some(searchableCustomFields, ({ key }) => includes(getRawVal(shoot, key), value))
-      })
-    }
-  }
-
-  let items = state.sortedShoots
-  if (state.searchValue) {
-    items = filter(items, matchesShoot(state.searchValue))
-  }
+function setFilteredItems (state, rootState) {
+  let items = shoots(state)
   if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
     if (get(state, 'shootListFilters.progressing', false)) {
       const predicate = item => {
@@ -598,54 +326,38 @@ function setFilteredAndSortedItems (state, rootState) {
     }
   }
 
-  state.filteredAndSortedShoots = items
+  state.filteredShoots = items
 }
 
 const putItem = (state, newItem) => {
-  const item = findItem(newItem.metadata)
+  const item = findItem(state)(newItem.metadata)
   if (item !== undefined) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      const sortBy = get(state, 'sortParams.sortBy')
-      let sortRequired = true
-      if (sortBy === 'name' || sortBy === 'infrastructure' || sortBy === 'project' || sortBy === 'createdAt' || sortBy === 'createdBy') {
-        sortRequired = false // these values cannot change
-      } else if (sortBy !== 'lastOperation') { // don't check in this case as most put events will be lastOperation anyway
-        const changes = difference(item, newItem)
-        const sortBy = get(state, 'sortParams.sortBy')
-        if (!getRawVal(changes, sortBy)) {
-          sortRequired = false
-        }
-      }
       Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
-      return sortRequired
     }
   } else {
     newItem.info = undefined // register property to ensure reactivity
     Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
-    return true
   }
 }
 
 const deleteItem = (state, deletedItem) => {
-  const item = findItem(deletedItem.metadata)
-  let sortRequired = false
+  const item = findItem(state)(deletedItem.metadata)
   if (item !== undefined) {
     Vue.delete(state.shoots, keyForShoot(item.metadata))
-    sortRequired = true
   }
-  return sortRequired
 }
 
 // mutations
 const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
-    const item = findItem({ namespace, name })
+    const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
     }
   },
   RECEIVE_SEED_INFO (state, { namespace, name, info }) {
-    const item = findItem({ namespace, name })
+    const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'seedInfo', info)
     }
@@ -653,28 +365,12 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
-  SET_SORTPARAMS (state, { rootState, sortParams }) {
-    state.sortParams = sortParams
-    setSortedItems(state, rootState)
-  },
-  SET_SEARCHVALUE (state, { rootState, searchValue }) {
-    if (searchValue && searchValue.length > 0) {
-      state.searchValue = split(searchValue, ' ')
-    } else {
-      state.searchValue = undefined
-    }
-    setFilteredAndSortedItems(state, rootState)
-  },
   ITEM_PUT (state, { newItem, rootState }) {
-    const sortRequired = putItem(state, newItem)
-
-    if (sortRequired) {
-      setSortedItems(state, rootState)
-    }
+    putItem(state, newItem)
   },
   HANDLE_EVENTS (state, { rootState, events }) {
-    let sortRequired = false
     const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
+    let setFilteredItemsRequired = false
     forEach(events, event => {
       switch (event.type) {
         case 'ADDED':
@@ -683,37 +379,34 @@ const mutations = {
             !onlyShootsWithIssues ||
             onlyShootsWithIssues === shootHasIssue(event.object)) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
-            if (putItem(state, event.object)) {
-              sortRequired = true
-            }
+            putItem(state, event.object)
+            setFilteredItemsRequired = true
           }
           break
         case 'DELETED':
-          if (deleteItem(state, event.object)) {
-            sortRequired = true
-          }
+          deleteItem(state, event.object)
+          setFilteredItemsRequired = true
           break
         default:
           console.error('undhandled event type', event.type)
       }
     })
-    if (sortRequired) {
-      setSortedItems(state, rootState)
+    if (setFilteredItemsRequired) {
+      setFilteredItems(state, rootState)
     }
   },
   CLEAR_ALL (state) {
     state.shoots = {}
-    state.sortedShoots = []
-    state.filteredAndSortedShoots = []
+    state.filteredShoots = []
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
     state.shootListFilters = value
-    setFilteredAndSortedItems(state, rootState)
+    setFilteredItems(state, rootState)
   },
   SET_SHOOT_LIST_FILTER (state, { rootState, filterValue }) {
     const { filter, value } = filterValue
     state.shootListFilters[filter] = value
-    setFilteredAndSortedItems(state, rootState)
+    setFilteredItems(state, rootState)
   },
   SET_NEW_SHOOT_RESOURCE (state, { data }) {
     state.newShootResource = data

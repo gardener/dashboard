@@ -6,26 +6,28 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :loading="isMaintenanceToBeScheduled"
-    @dialogOpened="startDialogVisible"
+    @dialog-opened="startDialogVisible"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    :buttonText="buttonText"
-    maxWidth="850"
-    confirmButtonText="Trigger now">
+    :button-text="buttonText"
+    max-width="850"
+    confirm-button-text="Trigger now">
     <template v-slot:actionComponent>
-      <v-row >
-        <v-col>
-          <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-        </v-col>
-        <maintenance-components
-          title="The following updates will be performed"
-          :selectable="false"
-          ref="maintenanceComponents"
-        ></maintenance-components>
-      </v-row>
+      <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+      <maintenance-components
+        title="The following updates will be performed"
+        :selectable="false"
+        ref="maintenanceComponents"
+      ></maintenance-components>
+      <constraint-warning
+        :value="!isMaintenancePreconditionSatisfied"
+        type="maintenance"
+        small>
+        {{maintenancePreconditionSatisfiedMessage}}
+      </constraint-warning>
     </template>
   </action-button-dialog>
 </template>
@@ -33,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import ConstraintWarning from '@/components/ConstraintWarning'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -42,7 +45,8 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   components: {
     ActionButtonDialog,
-    MaintenanceComponents
+    MaintenanceComponents,
+    ConstraintWarning
   },
   props: {
     shootItem: {

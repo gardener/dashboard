@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     <g-popper
       @input="onPopperInput"
       :title="tag.name"
-      :toolbarColor="color"
-      :popperKey="popperKeyWithType"
+      :toolbar-color="color"
+      :popper-key="popperKeyWithType"
       :placement="popperPlacement"
       :disabled="!tag.message">
       <template v-slot:popperRef>
@@ -45,11 +45,11 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <shoot-message-details
-        :statusTitle="chipStatus"
-        :lastMessage="nonErrorMessage"
-        :errorDescriptions="errorDescriptions"
-        :lastTransitionTime="tag.lastTransitionTime"
-        :secretBindingName="secretBindingName"
+        :status-title="chipStatus"
+        :last-message="nonErrorMessage"
+        :error-descriptions="errorDescriptions"
+        :last-transition-time="tag.lastTransitionTime"
+        :secret-binding-name="secretBindingName"
         :namespace="namespace"
       />
     </g-popper>
@@ -193,9 +193,9 @@ export default {
         return 'grey'
       }
       if (this.isProgressing && this.isAdmin) {
-        return 'blue darken-2'
+        return 'info'
       }
-      return 'cyan darken-2'
+      return 'primary'
     },
     visible () {
       if (!this.isAdmin) {

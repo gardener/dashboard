@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-dialog
     ref="gDialog"
-    :confirmButtonText="confirmButtonText"
-    :cancelButtonText="cancelButtonText"
+    :confirm-button-text="confirmButtonText"
+    :cancel-button-text="cancelButtonText"
     :max-width="maxWidth"
-    :defaultColor="dialogColor"
-    :confirmValue="confirmValue"
+    :default-color="dialogColor"
+    :confirm-value="confirmValue"
     >
     <template v-slot:caption>{{captionText}}</template>
     <template v-slot:message>
@@ -45,7 +45,7 @@ export default {
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
-      this.dialogColor = dialogColor || 'orange'
+      this.dialogColor = dialogColor || 'warning'
       this.maxWidth = maxWidth || '400'
       this.confirmValue = confirmValue
 

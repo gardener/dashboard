@@ -6,15 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="hibernationScheduleValid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Hibernation Schedule">
     <template v-slot:actionComponent>
       <manage-hibernation-schedule
-        :isHibernationPossible="isHibernationPossible"
-        :hibernationPossibleMessage="hibernationPossibleMessage"
+        :is-hibernation-possible="isHibernationPossible"
+        :hibernation-possible-message="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
         ref="hibernationSchedule"
         v-on="$hibernationSchedule.hooks"

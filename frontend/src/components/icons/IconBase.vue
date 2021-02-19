@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <!-- do not use kebab case for viewBox SVG attribute -->
   <svg xmlns="http://www.w3.org/2000/svg"
     :width="width"
     :height="height"
@@ -16,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       :id="iconName"
       lang="en"
     >{{ iconName }} icon</title>
-    <g :fill="iconColor">
+    <g :fill="iconColorCode">
       <slot />
     </g>
   </svg>
@@ -45,6 +46,12 @@ export default {
     iconColor: {
       type: String,
       default: '#FFF'
+    }
+  },
+  computed: {
+    iconColorCode () {
+      const iconColor = this.iconColor
+      return this.$vuetify.theme.currentTheme[iconColor]
     }
   }
 }
