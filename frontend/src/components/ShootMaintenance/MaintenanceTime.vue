@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('maintenanceTimezone')"
         @input="onInputmaintenanceTimezone"
         @blur="$v.maintenanceTimezone.$touch()"
+        append-icon="mdi-map-clock-outline"
       ></v-text-field>
     </v-col>
   </v-row>
@@ -44,7 +45,7 @@ const validationErrors = {
   },
   maintenanceTimezone: {
     required: 'Timezone is required',
-    isTimezone: 'TimeZone needs to have format [+|-]HH:mm'
+    isTimezone: 'TimeZone must have format [+|-]HH:mm'
   }
 }
 
@@ -85,7 +86,7 @@ export default {
       if (!this.timeWindowBegin) {
         this.setDefaultMaintenanceTimeWindow()
       } else {
-        this.setBeginTimeAndTimezone(this.timeWindowBegin)
+        this.setBeginTimeTimezoneString(this.timeWindowBegin)
       }
       this.validateInput()
     },
@@ -98,7 +99,7 @@ export default {
         this.$emit('valid', this.valid)
       }
     },
-    setBeginTimeAndTimezone (windowBegin) {
+    setBeginTimeTimezoneString (windowBegin) {
       if (!maintenanceTimeWithTimezoneRegex.test(windowBegin)) {
         return undefined
       }
@@ -121,7 +122,7 @@ export default {
   },
   watch: {
     timeWindowBegin (windowBegin) {
-      this.setBeginTimeAndTimezone(windowBegin)
+      this.setBeginTimeTimezoneString(windowBegin)
       this.validateInput()
     }
   },

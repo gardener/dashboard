@@ -57,6 +57,7 @@ SPDX-License-Identifier: Apache-2.0
             :items="locations"
             v-model="selectedLocation"
             @input="onInputSelectedLocation"
+            append-icon="mdi-map-marker-outline"
             >
           </v-autocomplete>
         </v-col>
