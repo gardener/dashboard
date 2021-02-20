@@ -28,6 +28,7 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+import TimeWithOffset from '@/utils/TimeWithOffset'
 const { v4: uuidv4 } = require('uuid')
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -529,9 +530,6 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
-export const maintenanceTimeWithTimezoneRegex = /^(\d{2})(\d{2})\d{2}([+-])(\d{2})(\d{2})$/ // regex for maintenance times in shoot yaml
-export const inputTimezoneRegex = /^([+-])(\d{2}):(\d{2})$/ // regex for timezone from user input
-
 export function randomMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
@@ -539,26 +537,24 @@ export function randomMaintenanceBegin () {
   return `${randomHour}:00`
 }
 
-export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone) {
-  const inputTimezoneRegex = /^([+-])(\d{2}):(\d{2})$/
-  if (!inputTimezoneRegex.test(beginTimezone)) {
-    return undefined
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = 60) {
+  const maintenanceTimezone = new TimeWithOffset(beginTimezone)
+  if (!maintenanceTimezone.isValid()) {
+    return
   }
+  const timezoneString = maintenanceTimezone.toTimezoneString({ colon: false })
+
   if (!beginTime) {
     return undefined
   }
-
-  const [, sign, hour, minute] = inputTimezoneRegex.exec(beginTimezone)
-  const timezone = `${sign}${hour}${minute}`
-
   const beginMoment = moment(beginTime, 'HH:mm')
-
   if (!beginMoment || !beginMoment.isValid()) {
     return undefined
   }
-  const begin = `${beginMoment.format('HHmm')}00${timezone}`
-  beginMoment.add(1, 'h')
-  const end = `${beginMoment.format('HHmm')}00${timezone}`
+
+  const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
+  beginMoment.add(windowSize, 'm')
+  const end = `${beginMoment.format('HHmm')}00${timezoneString}`
   return { begin, end }
 }
 

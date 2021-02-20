@@ -5,7 +5,6 @@
 //
 
 import { withParams, regex, ref } from 'vuelidate/lib/validators/common'
-import { inputTimezoneRegex } from '@/utils'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
 
@@ -17,6 +16,7 @@ const resourceNamePattern = /^[a-z0-9](?:[-a-z0-9]*[a-z0-9])?$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
+export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = regex('base64', base64Pattern)
 const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
@@ -34,7 +34,7 @@ const numberOrPercentage = (value) => {
 }
 
 const isTimezone = (value) => {
-  return inputTimezoneRegex.test(value)
+  return timezonePattern.test(value)
 }
 
 const unique = key => withParams({ type: 'unique', key },

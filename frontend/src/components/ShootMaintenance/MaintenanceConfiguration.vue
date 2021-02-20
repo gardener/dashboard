@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <maintenance-time
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"
+        :time-window-end="data.timeWindowEnd"
         @valid="onMaintenanceTimeValid"
       ></maintenance-time>
       <maintenance-components

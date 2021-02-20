@@ -133,7 +133,8 @@ import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import ConstraintWarning from '@/components/ConstraintWarning'
 
-import { isShootHasNoHibernationScheduleWarning, maintenanceTimeWithTimezoneRegex } from '@/utils'
+import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+import TimeWithOffset from '@/utils/TimeWithOffset'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -177,12 +178,12 @@ export default {
     },
     maintenanceDescription () {
       const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
-      if (!maintenanceTimeWithTimezoneRegex.test(maintenanceStart)) {
-        return ''
+      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+      if (!maintenanceStartTime.isValid()) {
+        return
       }
-      const [, timeHours, timeMinutes, offsetSign, offsetHours, offsetMinutes] = maintenanceTimeWithTimezoneRegex.exec(maintenanceStart)
-      const maintenanceStr = `${timeHours}:${timeMinutes} GMT${offsetSign}${offsetHours}:${offsetMinutes}`
-      return `Start time: ${maintenanceStr}`
+
+      return `Start time: ${maintenanceStartTime.toString()}`
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
