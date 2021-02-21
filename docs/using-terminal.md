@@ -5,6 +5,8 @@ The dashboard features an integrated web-based terminal to your clusters. It all
 ### Prerequisites
 - You are logged on to the Gardener Dashboard.
 - You have created a cluster and its status is operational.
+- The landscape administrator has enabled the terminal feature
+- The cluster you want to connect to is reachable from the dashboard
 
 On this page:
 - [Open from cluster list](#open-from-cluster-list)
@@ -40,4 +42,3 @@ $ k get ns
 ```
 You get a result like this:
 <img src="images/03-list-ns.png">
-

@@ -52,9 +52,9 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
     ![Download service account kubeconfig](images/Download-service-account-kubeconfig.png)
 
-1. Add the downloaded  `kubeconfig` to your configuration.
+1. Add the downloaded `kubeconfig` to your configuration.
 
-You can now execute `kubectl` commands on the garden cluster using the anonymous service account.
+You can now execute `kubectl` commands on the garden cluster using the technical service account.
 
 ## List Gardener API resources
 
@@ -142,7 +142,7 @@ You can now execute `kubectl` commands on the garden cluster using the anonymous
 
 ## Working with projects
 
-1. You can get the details for a project, where you’re a member (or through a service account). 
+1. You can get the details for a project, where you (or the service account) is a member. 
 
     ```
     kubectl get project flowering
@@ -192,7 +192,7 @@ geranium   aws            1.18.3    aws-eu1   geranium.flowering.shoot.<truncate
 
 To create a new cluster using the command line, you need a YAML definition of the `Shoot` resource. 
 
-1. To get started, copy the following YAML definition to a new file, for example, `daffodil.yaml` (or copy file [shoot.yaml](shoot.yaml) to `daffodil.yaml`).
+1. To get started, copy the following YAML definition to a new file, for example, `daffodil.yaml` (or copy file [shoot.yaml](shoot.yaml) to `daffodil.yaml`) and adapt it to your needs.
 
     ```
     apiVersion: core.gardener.cloud/v1beta1
