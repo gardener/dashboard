@@ -90,7 +90,7 @@ You can now execute `kubectl` commands on the garden cluster using the anonymous
     openidconnectpresets              oidcps          settings.gardener.cloud        true         OpenIDConnectPreset
     ```
 
-2. Enter the following command ot view the Gardener API versions:
+2. Enter the following command to view the Gardener API versions:
    
     ```
     kubectl api-versions | grep garden
