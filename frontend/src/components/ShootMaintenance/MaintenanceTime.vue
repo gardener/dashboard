@@ -85,7 +85,6 @@ export default {
   },
   methods: {
     getMaintenanceWindow () {
-      console.log(this.windowDuration)
       return maintenanceWindowWithBeginAndTimezone(this.maintenanceBegin, this.maintenanceTimezone, this.windowDuration)
     },
     reset () {
