@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
-            <v-btn block text color="primary" class="justify-start" @click="showInfoDialog" title="About">
+            <v-btn block text color="primary" class="justify-start" @click="infoDialog=true" title="About">
               <v-icon color="primary" class="mr-3">mdi-information-outline</v-icon>
               About
             </v-btn>
@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab>
       </v-tabs>
     </template>
-    <info-dialog ref="infoDialog"></info-dialog>
+    <info-dialog v-model="infoDialog" @dialog-closed="infoDialog=false"></info-dialog>
   </v-app-bar>
 </template>
 
@@ -143,7 +143,8 @@ export default {
   data () {
     return {
       menu: false,
-      help: false
+      help: false,
+      infoDialog: false
     }
   },
   methods: {
@@ -154,11 +155,6 @@ export default {
     ]),
     handleLogout () {
       this.$auth.signout()
-    },
-    showInfoDialog () {
-      this.$refs.infoDialog.showDialog()
-      this.$refs.infoDialog.fetchVersions()
-      this.$refs.infoDialog.fetchExtensions()
     }
   },
   computed: {

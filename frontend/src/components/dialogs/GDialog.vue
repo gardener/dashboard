@@ -219,6 +219,7 @@ export default {
         this.resolve = undefined
         resolve(value)
       }
+      this.$emit('dialog-closed', value)
       this.visible = false
     },
     showScrollBar (retryCount = 0) {
