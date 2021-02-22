@@ -94,7 +94,9 @@ export default {
       }
     },
     async fetchExtensions () {
-      await this.fetchGardenerExtensions()
+      if (this.isAdmin) {
+        await this.fetchGardenerExtensions()
+      }
     },
     onDialogClosed () {
       this.$emit('dialog-closed')
