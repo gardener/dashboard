@@ -1,0 +1,8 @@
+# The documentation matches the file/folder structure at /docs
+nodesSelector:
+  path: https://github.com/gardener/dashboard/tree/master/docs    
+links:
+  downloads:
+    scope:
+      # all referenced files that reside in dashboard's docs dir are forged into the documentation
+      gardener/dashboard/(blob|raw)/(.*)/docs: ~
