@@ -58,9 +58,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-toolbar>
 
       <v-card-text v-if="!secretList.length">
-        <div class="title grey--text text--darken-1 my-4">Add Secrets to your project.</div>
+        <div class="title grey--text text--darken-1 my-4">Add Secrets to your project</div>
         <p class="body-1">
-          Before you can provision and access a Kubernetes cluster, you need to add account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
+          Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
       <v-data-table
