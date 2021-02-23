@@ -1297,8 +1297,14 @@ const actions = {
 
     const themes = get(Vue, 'vuetify.framework.theme.themes')
     if (themes) {
-      assign(themes.light, state.cfg.themes.light)
-      assign(themes.dark, state.cfg.themes.dark)
+      const lightTheme = get(state, 'cfg.themes.light')
+      if (lightTheme) {
+        assign(themes.light, lightTheme)
+      }
+      const darkTheme = get(state, 'cfg.themes.dark')
+      if (darkTheme) {
+        assign(themes.dark, darkTheme)
+      }
     }
 
     return state.cfg
