@@ -353,7 +353,7 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  gardenerExtensionsist (state) {
+  gardenerExtensionsList (state) {
     return state.gardenerExtensions.all
   },
   networkingTypeList (state, getters) {

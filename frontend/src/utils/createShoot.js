@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -54,7 +54,6 @@ export function getSpecTemplate (infrastructureKind) {
       return {
         provider: getProviderTemplate(infrastructureKind),
         networking: {
-          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
           nodes: defaultWorkerCIDR
         }
       }
