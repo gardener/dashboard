@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
+        <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
         <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
@@ -219,6 +219,7 @@ export default {
         this.resolve = undefined
         resolve(value)
       }
+      this.$emit('dialog-closed', value)
       this.visible = false
     },
     showScrollBar (retryCount = 0) {

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,7 +14,7 @@ fi
 
 cd "${SOURCE_PATH}"
 
-# Abort with an error exit code if 
+# Abort with an error exit code if
 # the lockfile was to be modified or
 # the cache folder was to be modified or
 # the checksums of the packages are not consistent
