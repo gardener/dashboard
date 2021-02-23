@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -11,12 +11,12 @@ class TimeWithOffset {
     const [ok, hours = '00', minutes = '00', , offsetSign = '+', offsetHours = '00', offsetMinutes = '00'] = timeWithOffsetRegex.exec(timeString) || []
     this.valid = !!ok
     Object.assign(this, {
-        hours,
-        minutes,
-        offsetSign,
-        offsetHours,
-        offsetMinutes
-      })
+      hours,
+      minutes,
+      offsetSign,
+      offsetHours,
+      offsetMinutes
+    })
   }
 
   isValid () {
