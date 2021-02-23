@@ -215,7 +215,11 @@ export default {
       if (detailsRef) {
         detailsHeight = detailsRef.getBoundingClientRect().height
       }
-      return `max-width: 80%; max-height: ${detailsHeight}px; overflow-y: scroll;`
+      return {
+        maxWidth: '80%',
+        maxHeight: `${detailsHeight}px`,
+        overflowY: 'scroll'
+      }
     }
   },
   methods: {

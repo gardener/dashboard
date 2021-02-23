@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" small class="mx-1">mdi-account-arrow-left</v-icon>
           </template>
-          <span>Secret shared by {{item.ownernamespace}}</span>
+          <span>Secret shared by {{item.ownerNamespace}}</span>
         </v-tooltip>
       </div>
     </td>

@@ -67,7 +67,11 @@ export default {
     },
     iconStyle () {
       const maxIconSize = this.size - 4
-      return `max-height: ${maxIconSize}px; max-width: ${maxIconSize}px; border-radius: 0px;`
+      return {
+        maxHeight: `${maxIconSize}px`,
+        maxWidth: `${maxIconSize}px`,
+        borderRadius: '0px'
+      }
     }
   }
 }

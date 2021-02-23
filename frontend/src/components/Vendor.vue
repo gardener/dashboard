@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item v-if="zones.length">
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
-            <v-list-item-title>{{zonesText}}</v-list-item-title>
+            <v-list-item-title>{{zoneText}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -77,7 +77,7 @@ export default {
     }
   },
   computed: {
-    zonesText () {
+    zoneText () {
       return join(this.zones, ', ')
     },
     zoneTitle () {
@@ -98,7 +98,7 @@ export default {
         description.push(this.region)
       }
       if (this.extended && this.zones.length) {
-        description.push(this.zonesText)
+        description.push(this.zoneText)
       }
 
       return join(description, ' / ')

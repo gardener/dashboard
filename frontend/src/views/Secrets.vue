@@ -224,7 +224,7 @@ export default {
       return map(this.infrastructureSecretList, secret => ({
         name: secret.metadata.name,
         isOwnSecret: isOwnSecret(secret),
-        ownernamespace: secret.metadata.secretRef.namespace,
+        ownerNamespace: secret.metadata.secretRef.namespace,
         infrastructure: `${secret.metadata.cloudProviderKind}${secret.metadata.cloudProfileName}`,
         infrastructureName: secret.metadata.cloudProviderKind,
         cloudProfileName: secret.metadata.cloudProfileName,
