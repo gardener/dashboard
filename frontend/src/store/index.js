@@ -52,6 +52,7 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
+import assign from 'lodash/assign'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -1293,6 +1294,9 @@ const actions = {
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
     })
+
+    assign(Vue.vuetify.framework.theme.themes.light, state.cfg.themes.light)
+    assign(Vue.vuetify.framework.theme.themes.dark, state.cfg.themes.dark)
 
     return state.cfg
   },

@@ -61,7 +61,7 @@ export default {
         case 'metal':
           return require('@/assets/metal.svg')
         case 'gardenlinux':
-          return require('@/assets/logo.svg')
+          return require('@/assets/gardenlinux.svg')
       }
       return undefined
     },
