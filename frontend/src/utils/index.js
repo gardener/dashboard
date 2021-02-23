@@ -542,7 +542,7 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   if (!maintenanceTimezone.isValid()) {
     return
   }
-  const timezoneString = maintenanceTimezone.toTimezoneString({ colon: false })
+  const timezoneString = maintenanceTimezone.getTimezoneString({ colon: false })
 
   if (!beginTime) {
     return undefined

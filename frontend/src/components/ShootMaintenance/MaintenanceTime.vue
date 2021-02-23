@@ -109,8 +109,8 @@ export default {
       if (!beginTime.isValid()) {
         return undefined
       }
-      this.maintenanceBegin = beginTime.toTimeString()
-      this.maintenanceTimezone = beginTime.toTimezoneString()
+      this.maintenanceBegin = beginTime.getTimeString()
+      this.maintenanceTimezone = beginTime.getTimezoneString()
     },
     setEndTimeTimezoneString (windowEnd) {
       const endTime = new TimeWithOffset(windowEnd)
