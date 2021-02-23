@@ -17,8 +17,11 @@ SPDX-License-Identifier: Apache-2.0
             ></v-switch>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="wrap-text" v-html="transformHtml(definition.input.title)"></v-list-item-title>
-            <v-list-item-subtitle v-if="definition.input.description" class="wrap-text" v-html="transformHtml(definition.input.description)"></v-list-item-subtitle>
+            <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
+            <v-list-item-subtitle v-if="definition.input.description"
+              class="wrap-text"
+              v-html="transformHtml(definition.input.description)"
+            />
           </v-list-item-content>
         </v-list-item>
         <template v-if="definition">
@@ -31,8 +34,14 @@ SPDX-License-Identifier: Apache-2.0
               ></v-checkbox>
             </v-list-item-action>
             <v-list-item-content>
-              <v-list-item-title class="wrap-text" :class="textClass(definition)" v-html="transformHtml(optionValue.input.title)"></v-list-item-title>
-              <v-list-item-subtitle v-if="optionValue.input.description" class="wrap-text pt-n3" :class="textClass(definition)" v-html="transformHtml(optionValue.input.description)"></v-list-item-subtitle>
+              <v-list-item-title class="wrap-text" :class="textClass(definition)">
+                {{optionValue.input.title}}
+              </v-list-item-title>
+              <v-list-item-subtitle v-if="optionValue.input.description"
+                class="wrap-text"
+                :class="textClass(definition)"
+                v-html="transformHtml(optionValue.input.description)"
+              />
             </v-list-item-content>
           </v-list-item>
         </template>
@@ -103,8 +112,9 @@ export default {
       return inverted ? !value : value
     },
     textClass (definition) {
-      const enabled = this.enabled(definition)
-      return enabled ? 'text--secondary' : 'text--disabled'
+      return this.enabled(definition)
+        ? 'text--secondary'
+        : 'text--disabled'
     },
     applyTo (shootResource) {
       const definitions = this.definitions || []

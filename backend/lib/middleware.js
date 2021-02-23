@@ -42,18 +42,14 @@ function frontendConfig (config) {
       input = {},
       options = []
     } = item
-    convertAndSanitize(display, 'title')
     convertAndSanitize(display, 'description')
-    convertAndSanitize(input, 'title')
     convertAndSanitize(input, 'description')
     for (const option of options) {
       const {
         display = {},
         input = {}
       } = option
-      convertAndSanitize(display, 'title')
       convertAndSanitize(display, 'description')
-      convertAndSanitize(input, 'title')
       convertAndSanitize(input, 'description')
     }
   }
