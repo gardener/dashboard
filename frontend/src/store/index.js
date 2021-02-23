@@ -1295,8 +1295,11 @@ const actions = {
       commit('setCondition', { conditionKey, conditionValue })
     })
 
-    assign(Vue.vuetify.framework.theme.themes.light, state.cfg.themes.light)
-    assign(Vue.vuetify.framework.theme.themes.dark, state.cfg.themes.dark)
+    const themes = get(Vue, 'vuetify.framework.theme.themes')
+    if (themes) {
+      assign(themes.light, state.cfg.themes.light)
+      assign(themes.dark, state.cfg.themes.dark)
+    }
 
     return state.cfg
   },
