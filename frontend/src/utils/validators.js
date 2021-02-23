@@ -16,6 +16,7 @@ const resourceNamePattern = /^[a-z0-9](?:[-a-z0-9]*[a-z0-9])?$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
+export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = regex('base64', base64Pattern)
 const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
@@ -30,6 +31,10 @@ const noStartEndHyphen = (value) => {
 }
 const numberOrPercentage = (value) => {
   return numberOrPercentagePattern.test(value)
+}
+
+const isTimezone = (value) => {
+  return timezonePattern.test(value)
 }
 
 const unique = key => withParams({ type: 'unique', key },
@@ -88,5 +93,6 @@ export {
   includesIfAvailable,
   uniqueWorkerName,
   numberOrPercentage,
-  requiresCostObjectIfEnabled
+  requiresCostObjectIfEnabled,
+  isTimezone
 }

@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <maintenance-time
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"
+        :time-window-end="data.timeWindowEnd"
         @valid="onMaintenanceTimeValid"
       ></maintenance-time>
       <maintenance-components
@@ -71,11 +72,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+        const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
         const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
         assign(this.data, {
-          timeWindowBegin: utcBegin,
-          timeWindowEnd: utcEnd,
+          timeWindowBegin: begin,
+          timeWindowEnd: end,
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates
         })

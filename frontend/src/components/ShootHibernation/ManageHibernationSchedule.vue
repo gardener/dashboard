@@ -117,7 +117,7 @@ export default {
   computed: {
     ...mapState([
       'cfg',
-      'localTimezone'
+      'location'
     ]),
     showNoScheduleCheckbox () {
       return purposeRequiresHibernationSchedule(this.purpose) &&
@@ -147,10 +147,10 @@ export default {
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
-        crontabBlock.location = this.localTimezone
+        crontabBlock.location = this.location
         const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
-          parsedScheduleEvent.location = this.localTimezone
+          parsedScheduleEvent.location = this.location
         })
         return parsedScheduleEvents
       })
@@ -182,7 +182,7 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
-      const location = this.localTimezone
+      const location = this.location
       const valid = false
       this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false

@@ -307,15 +307,15 @@ export default {
       const addons = this.$refs.addons.getAddons()
       set(shootResource, 'spec.addons', addons)
 
-      const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
       autoUpdate.machineImageVersion = osUpdates
       const maintenance = {
         timeWindow: {
-          begin: utcBegin,
-          end: utcEnd
+          begin,
+          end
         },
         autoUpdate
       }
@@ -380,10 +380,12 @@ export default {
         this.$refs.accessRestrictions.setAccessRestrictions({ shootResource, cloudProfileName, region })
       }
 
-      const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
+      const begin = get(shootResource, 'spec.maintenance.timeWindow.begin')
+      const end = get(shootResource, 'spec.maintenance.timeWindow.end')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
-      this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
+      this.$refs.maintenanceTime.setBeginTimeTimezoneString(begin)
+      this.$refs.maintenanceTime.setEndTimeTimezoneString(end)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
       const name = get(shootResource, 'metadata.name')

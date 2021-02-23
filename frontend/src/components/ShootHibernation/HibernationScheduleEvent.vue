@@ -50,13 +50,14 @@ SPDX-License-Identifier: Apache-2.0
             type="time"
           ></v-text-field>
         </v-col>
-        <v-col class="timezone-select">
+        <v-col class="location-select">
           <v-autocomplete
             color="primary"
-            label="Timezone"
-            :items="timezones"
-            v-model="selectedTimezone"
-            @input="onInputSelectedTimezone"
+            label="Location"
+            :items="locations"
+            v-model="selectedLocation"
+            @input="onInputSelectedLocation"
+            append-icon="mdi-map-marker-outline"
             >
           </v-autocomplete>
         </v-col>
@@ -78,7 +79,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { getValidationErrors } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
-import { mapState } from 'vuex'
 import moment from 'moment-timezone'
 import join from 'lodash/join'
 import split from 'lodash/split'
@@ -98,8 +98,8 @@ const validationErrors = {
   wakeUpTime: {
     required: 'You need to specify at least hibernation or wake up time'
   },
-  selectedTimezone: {
-    required: 'Timezone is required'
+  selectedLocation: {
+    required: 'Location is required'
   }
 }
 
@@ -125,14 +125,11 @@ export default {
         return !this.hibernateTime
       })
     },
-    selectedTimezone: {
+    selectedLocation: {
       required
     }
   },
   computed: {
-    ...mapState([
-      'localTimezone'
-    ]),
     id () {
       return this.scheduleEvent.id
     }
@@ -140,8 +137,8 @@ export default {
   data () {
     return {
       validationErrors,
-      timezones: moment.tz.names(),
-      selectedTimezone: null,
+      locations: moment.tz.names(),
+      selectedLocation: null,
       wakeUpTime: null,
       hibernateTime: null,
       selectedDays: null,
@@ -255,14 +252,14 @@ export default {
     },
     onInputWakeUpTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateWakeUpTime', time: this.wakeUpTime })
+      this.updateTime({ eventName: 'update-wake-up-time', time: this.wakeUpTime })
     },
     onInputHibernateTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateHibernateTime', time: this.hibernateTime })
+      this.updateTime({ eventName: 'update-hibernate-time', time: this.hibernateTime })
     },
-    onInputSelectedTimezone () {
-      this.updateLocation(this.selectedTimezone)
+    onInputSelectedLocation () {
+      this.updateLocation(this.selectedLocation)
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -272,7 +269,7 @@ export default {
     }
   },
   mounted () {
-    this.selectedTimezone = this.scheduleEvent.location
+    this.selectedLocation = this.scheduleEvent.location
     this.wakeUpTime = this.getTime(this.scheduleEvent.end)
     this.hibernateTime = this.getTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
@@ -288,7 +285,7 @@ export default {
   .time-select {
     max-width: 100px;
   }
-  .timezone-select {
+  .location-select {
     max-width: 300px;
   }
 </style>

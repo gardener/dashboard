@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -78,6 +78,18 @@ if (debug) {
   plugins.push(createLogger())
 }
 
+// Guess current location or fallback to UTC
+// Do not use moment.tz.guess() as their fallback logic can lead to unexpected behavior
+// see also https://github.com/gardener/dashboard/issues/944, https://github.com/moment/moment-timezone/issues/559
+function guessLocation () {
+  const locations = moment.tz.names()
+  let location = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (!includes(locations, location)) {
+    location = 'UTC'
+  }
+  return location
+}
+
 // initial state
 const state = {
   cfg: null,
@@ -97,7 +109,8 @@ const state = {
   alert: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  localTimezone: moment.tz.guess(),
+  location: guessLocation(),
+  timezone: moment().format('Z'),
   focusedElementId: null,
   splitpaneResize: null,
   splitpaneLayouts: {},
