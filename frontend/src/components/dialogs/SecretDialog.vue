@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </div>
           <v-slide-x-reverse-transition>
-            <div v-if="helpVisible" class="d-flex pa-3 ml-3" :style="helpStyle">
+            <div v-if="helpVisible" class="d-flex pa-3 ml-3 help" :style="helpStyle">
               <slot name="help-slot"></slot>
             </div>
           </v-slide-x-reverse-transition>
@@ -216,9 +216,7 @@ export default {
         detailsHeight = detailsRef.getBoundingClientRect().height
       }
       return {
-        maxWidth: '80%',
-        maxHeight: `${detailsHeight}px`,
-        overflowY: 'scroll'
+        maxHeight: `${detailsHeight}px`
       }
     }
   },
@@ -328,3 +326,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .help {
+    max-width: 80%;
+    overflow-y: scroll;
+  }
+
+</style>
