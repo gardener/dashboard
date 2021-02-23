@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
-      <div class="d-flex">
+      <div class="d-flex" :class="{'font-weight-light text--disabled' : !item.relatedShootCount}">
         {{item.relatedShootCountLabel}}
       </div>
     </td>

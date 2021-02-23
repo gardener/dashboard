@@ -42,13 +42,13 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           {{item.created}}
         </v-tooltip>
-        <span v-else class="font-weight-light text--disabled">Unknown</span>
+        <span v-else class="font-weight-light text--disabled">unknown</span>
       </div>
     </td>
     <td v-if="selectedHeaders.description">
       <div class="description-column">
         <span v-if="item.description">{{item.description}}</span>
-        <span v-else class="font-weight-light text--disabled">Not defined</span>
+        <span v-else class="font-weight-light text--disabled">not defined</span>
       </div>
     </td>
     <td v-if="selectedHeaders.roles">

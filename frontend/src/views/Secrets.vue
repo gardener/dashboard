@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text v-if="!secretList.length">
         <div class="title grey--text text--darken-1 my-4">Add Secrets to your project.</div>
         <p class="body-1">
-          Add Secrets to your project. You need to create at least one secret to be able to create a cluster.
+          Before you can provision and access a Kubernetes cluster, you need to add account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
       <v-data-table
@@ -311,13 +311,6 @@ export default {
             {
               label: 'Access Key ID',
               value: secretData.accessKeyID
-            }
-          ]
-        case 'metal':
-          return [
-            {
-              label: 'HMAC',
-              value: secretData.metalHMAC
             }
           ]
       }
