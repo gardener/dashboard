@@ -225,7 +225,7 @@ export default {
         name: secret.metadata.name,
         isOwnSecret: isOwnSecret(secret),
         ownerNamespace: secret.metadata.secretRef.namespace,
-        infrastructure: `${secret.metadata.cloudProviderKind}${secret.metadata.cloudProfileName}`,
+        infrastructure: `${secret.metadata.cloudProviderKind}--${secret.metadata.cloudProfileName}`,
         infrastructureName: secret.metadata.cloudProviderKind,
         cloudProfileName: secret.metadata.cloudProfileName,
         details: this.getSecretDetails(secret),
