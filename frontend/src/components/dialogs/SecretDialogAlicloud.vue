@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="alicloud"
-    infra-icon="alicloud"
     create-title="Add new Alibaba Cloud Secret"
     replace-title="Replace Alibaba Cloud Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -46,6 +45,28 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
     </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
+          credentials for Alibaba Cloud Resource Access Management (RAM), use the
+          <a href="https://ram.console.aliyun.com/overview" target="_blank">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
+          (<a href="https://www.alibabacloud.com/help/doc-detail/59643.htm" target="_blank">official
+          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
+        </p>
+        <p>
+          Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
+          (<a href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
+          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>). Alternatively, you can assign following permissions to the RAM
+          user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
+        </p>
+        <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      </div>
+    </template>
 
   </secret-dialog>
 
@@ -53,6 +74,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import CodeBlock from '@/components/CodeBlock'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
@@ -70,7 +92,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    CodeBlock
   },
   props: {
     value: {
@@ -86,7 +109,36 @@ export default {
       accessKeyId: undefined,
       accessKeySecret: undefined,
       hideSecret: true,
-      validationErrors
+      validationErrors,
+      template: {
+        Statement: [
+          {
+            Action: 'vpc:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: 'ecs:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: 'slb:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: [
+              'ram:GetRole',
+              'ram:CreateRole',
+              'ram:CreateServiceLinkedRole'
+            ],
+            Effect: 'Allow',
+            Resource: '*'
+          }
+        ],
+        Version: '1'
+      }
     }
   },
   validations () {

@@ -8,15 +8,15 @@ SPDX-License-Identifier: Apache-2.0
   <v-row >
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
-      class="select_infra_card"
-      :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
-      @click="selectInfrastructure(infrastructureKind)"
+      class="select_infra_card cursor-pointer"
+      :class="{ 'select_infra_card_active elevation-8' : infrastructureKind == selectedInfrastructure }"
+      @click.native.stop="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
       hover
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
+          <infra-icon :value="infrastructureKind" :size="60" light-background></infra-icon>
         </div>
         <div class="mt-2" >
           <span class="subtitle-1">{{infrastructureKind}}</span>
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import InfraIcon from '@/components/VendorIcon'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'new-shoot-select-infrastructure',
@@ -52,6 +52,9 @@ export default {
     ...mapGetters([
       'sortedCloudProviderKindList',
       'cloudProfilesByCloudProviderKind'
+    ]),
+    ...mapState([
+      'darkMode'
     ])
   },
   methods: {
@@ -79,22 +82,20 @@ export default {
   .select_infra_card {
     padding: 10px;
     opacity: 0.8;
-    cursor: pointer;
     margin: 10px 20px 10px 0px;
     min-width: 120px;
-    filter: grayscale(70%);
+    filter: grayscale(80%);
   }
 
   .select_infra_card:hover {
-    padding: 10px;
     opacity: 1;
     filter: grayscale(50%);
   }
 
   .select_infra_card_active {
+    border: 1px solid var(--v-primary-base);
     opacity: 1;
     filter: grayscale(0%);
-    background-color: transparent;
   }
 
   .select_infra_card_active:hover {

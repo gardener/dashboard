@@ -5,45 +5,60 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="750">
+  <v-dialog v-model="visible" max-width="850">
     <v-card>
       <v-card-title class="toolbar-background">
-        <infra-icon v-model="infraIcon" :size="42"></infra-icon>
-        <span class="headline ml-5 toolbar-title--text">{{title}}</span>
+        <span class="headline toolbar-title--text">{{title}}</span>
+        <v-spacer></v-spacer>
+        <v-btn
+          light
+          icon
+          :class="helpVisible ? 'toolbar-title toolbar--text' : 'toolbar toolbar-title--text'"
+          @click="helpVisible=!helpVisible"
+        >
+          <v-icon>mdi-help</v-icon>
+        </v-btn>
       </v-card-title>
       <v-card-text>
-        <v-container fluid>
-          <div>
-            <template v-if="isCreateMode">
-              <v-text-field
-                color="primary"
-                ref="name"
-                v-model.trim="name"
-                label="Secret Name"
-                :error-messages="getErrorMessages('name')"
-                @input="$v.name.$touch()"
-                @blur="$v.name.$touch()"
-              ></v-text-field>
-            </template>
-            <template v-else>
-              <div class="title pb-4">{{name}}</div>
-            </template>
+        <div class="d-flex flex-row pa-3">
+          <div class="d-flex flex-column flex-grow-1" ref="secretDetails">
+            <div>
+              <template v-if="isCreateMode">
+                <v-text-field
+                  color="primary"
+                  ref="name"
+                  v-model.trim="name"
+                  label="Secret Name"
+                  :error-messages="getErrorMessages('name')"
+                  @input="$v.name.$touch()"
+                  @blur="$v.name.$touch()"
+                ></v-text-field>
+              </template>
+              <template v-else>
+                <div class="title pb-4">{{name}}</div>
+              </template>
+              </div>
+
+            <div v-show="cloudProfiles.length !== 1">
+              <cloud-profile
+                ref="cloudProfile"
+                v-model="cloudProfileName"
+                :is-create-mode="isCreateMode"
+                :cloud-profiles="cloudProfiles">
+              </cloud-profile>
             </div>
 
-          <div v-show="cloudProfiles.length !== 1">
-            <cloud-profile
-              ref="cloudProfile"
-              v-model="cloudProfileName"
-              :is-create-mode="isCreateMode"
-              :cloud-profiles="cloudProfiles">
-            </cloud-profile>
+            <slot name="secret-slot"></slot>
+            <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </div>
-
-          <slot name="data-slot"></slot>
-          <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
-        </v-container>
+          <v-slide-x-reverse-transition>
+            <div v-if="helpVisible" class="d-flex pa-3 ml-3 help" :style="helpStyle">
+              <slot name="help-slot"></slot>
+            </div>
+          </v-slide-x-reverse-transition>
+       </div>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>
@@ -67,7 +82,6 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
 import GMessage from '@/components/GMessage'
-import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
@@ -83,8 +97,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    GMessage,
-    InfraIcon
+    GMessage
   },
   props: {
     value: {
@@ -113,10 +126,6 @@ export default {
     },
     secret: {
       type: Object
-    },
-    infraIcon: {
-      type: String,
-      required: true
     }
   },
   data () {
@@ -125,7 +134,8 @@ export default {
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors
+      validationErrors,
+      helpVisible: false
     }
   },
   validations () {
@@ -198,6 +208,16 @@ export default {
     shootsByInfrastructureSecret () {
       const name = get(this.secret, 'metadata.name')
       return filter(this.shootList, ['spec.secretBindingName', name])
+    },
+    helpStyle () {
+      const detailsRef = this.$refs.secretDetails
+      let detailsHeight = 0
+      if (detailsRef) {
+        detailsHeight = detailsRef.getBoundingClientRect().height
+      }
+      return {
+        maxHeight: `${detailsHeight}px`
+      }
     }
   },
   methods: {
@@ -306,3 +326,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .help {
+    max-width: 80%;
+    overflow-y: scroll;
+  }
+
+</style>

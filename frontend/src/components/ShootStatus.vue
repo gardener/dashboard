@@ -201,10 +201,6 @@ export default {
     max-height:  30px;
   }
 
-  .cursor-pointer {
-    cursor: pointer;
-  }
-
   .vertical-align-middle {
     vertical-align: middle;
   }

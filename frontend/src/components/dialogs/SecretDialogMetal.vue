@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="metal"
-    infra-icon="metal"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -40,6 +39,14 @@ SPDX-License-Identifier: Apache-2.0
           @input="$v.apiHmac.$touch()"
           @blur="$v.apiHmac.$touch()"
         ></v-text-field>
+      </div>
+    </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+        </p>
       </div>
     </template>
 

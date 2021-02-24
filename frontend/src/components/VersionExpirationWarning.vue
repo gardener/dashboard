@@ -72,7 +72,6 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import some from 'lodash/some'
 import get from 'lodash/get'
-import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot, getDateFormatted } from '@/utils'
 
@@ -95,10 +94,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'kubernetesVersions',
-      'machineImagesByCloudProfileName'
-    ]),
     k8sExpiration () {
       if (this.onlyMachineImageWarnings) {
         return undefined

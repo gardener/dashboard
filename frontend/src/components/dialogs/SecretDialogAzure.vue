@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="azure"
-    infra-icon="azure"
     create-title="Add new Azure Secret"
     replace-title="Replace Azure Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -60,6 +59,23 @@ SPDX-License-Identifier: Apache-2.0
           @input="$v.subscriptionId.$touch()"
           @blur="$v.subscriptionId.$touch()"
         ></v-text-field>
+      </div>
+    </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on Azure, you need to add account credentials.
+          The Gardener needs the credentials to provision and operate the Azure infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Ensure that the account has the <b>contributor</b> role.
+        </p>
+        <p>
+          Read the
+          <a href="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure"
+          target="_blank">
+          IAM Console help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to manage your credentials and subscriptions.
+        </p>
       </div>
     </template>
 

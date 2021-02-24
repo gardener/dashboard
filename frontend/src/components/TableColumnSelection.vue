@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="columnSelectionMenu" absolute>
     <template v-slot:activator="{ on: menu }">
-      <v-tooltip open-delay="500" top>
+      <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
           <v-btn v-on="{ ...menu, ...tooltip}" icon>
-            <v-icon class="cursor-pointer" color="toolbar-title">mdi-dots-vertical</v-icon>
+            <v-icon color="toolbar-title">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
         Table Options
@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-action>
         <v-list-item-content class="primary--text">
           <v-list-item-title>
-            <v-tooltip v-if="header.customField" top open-delay="500">
+            <v-tooltip v-if="header.customField" top>
               <template v-slot:activator="{ on: tooltip }">
                 <div v-on="tooltip">
                   <v-badge

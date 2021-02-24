@@ -5,12 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span v-if="title">{{ shootZones.length ? `Provider / Region / ${zoneTitle}` : 'Provider / Region' }}</span>
+  <span v-if="title">{{ titleText }}</span>
   <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
   <v-tooltip v-else top color="rgba(0, 0, 0, 1)" content-class="tooltip">
     <template v-slot:activator="{ on }">
-      <div class="d-flex" v-on="on">
-        <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
+      <div class="d-flex align-center" v-on="on">
+        <infra-icon v-model="cloudProviderKind" class="mr-2"></infra-icon>
         {{ description }}
       </div>
     </template>
@@ -19,19 +19,25 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item>
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex"><infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
+            <v-list-item-title class="d-flex"><infra-icon v-model="cloudProviderKind" class="mr-2"></infra-icon>{{ cloudProviderKind }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item v-if="cloudProfileName">
+          <v-list-item-content class="pa-0">
+            <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
+            <v-list-item-title>{{ cloudProfileName }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item v-if="region">
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>Region</v-list-item-subtitle>
-            <v-list-item-title>{{ shootRegion }}</v-list-item-title>
+            <v-list-item-title>{{ region }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item v-if="shootZones.length">
+        <v-list-item v-if="zones.length">
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
-            <v-list-item-title>{{shootZonesText}}</v-list-item-title>
+            <v-list-item-title>{{zoneText}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -42,16 +48,24 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import join from 'lodash/join'
 import InfraIcon from '@/components/VendorIcon'
-import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     InfraIcon
   },
   props: {
-    shootItem: {
-      type: Object,
-      required: true
+    zones: {
+      type: Array,
+      default: () => []
+    },
+    cloudProviderKind: {
+      type: String
+    },
+    cloudProfileName: {
+      type: String
+    },
+    region: {
+      type: String
     },
     title: {
       type: Boolean,
@@ -62,30 +76,48 @@ export default {
       default: false
     }
   },
-  mixins: [shootItem],
   computed: {
-    shootZonesText () {
-      return join(this.shootZones, ', ')
+    zoneText () {
+      return join(this.zones, ', ')
     },
     zoneTitle () {
-      if (this.shootZones.length > 1) {
+      if (this.zones.length > 1) {
         return 'Zones'
       }
       return 'Zone'
     },
     description () {
       const description = []
-      if (this.extended) {
-        description.push(this.shootCloudProviderKind)
-        description.push(this.shootRegion)
-        if (this.shootZones.length > 0) {
-          description.push(this.shootZonesText)
-        }
-      } else {
-        description.push(this.shootRegion)
+      if (this.extended && this.cloudProviderKind) {
+        description.push(this.cloudProviderKind)
+      }
+      if (this.cloudProfileName) {
+        description.push(this.cloudProfileName)
+      }
+      if (this.region) {
+        description.push(this.region)
+      }
+      if (this.extended && this.zones.length) {
+        description.push(this.zoneText)
       }
 
       return join(description, ' / ')
+    },
+    titleText () {
+      const titles = []
+      if (this.extended && this.cloudProviderKind) {
+        titles.push('Provider')
+      }
+      if (this.cloudProfileName) {
+        titles.push('Profile')
+      }
+      if (this.region) {
+        titles.push('Region')
+      }
+      if (this.extended && this.zones.length) {
+        titles.push(this.zoneTitle)
+      }
+      return join(titles, ' / ')
     }
   }
 }
