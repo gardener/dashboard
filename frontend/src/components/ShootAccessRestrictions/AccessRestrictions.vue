@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
             <v-list-item-subtitle v-if="definition.input.description"
-              class="wrap-text"
+              class="wrap-text pt-1"
               v-html="transformHtml(definition.input.description)"
             />
           </v-list-item-content>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
                 {{optionValue.input.title}}
               </v-list-item-title>
               <v-list-item-subtitle v-if="optionValue.input.description"
-                class="wrap-text"
+                class="wrap-text pt-1"
                 :class="textClass(definition)"
                 v-html="transformHtml(optionValue.input.description)"
               />
