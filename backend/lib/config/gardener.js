@@ -88,12 +88,19 @@ module.exports = {
     this.assignEnvironmentVariables(config, env)
     const requiredConfigurationProperties = [
       'sessionSecret',
-      'apiServerUrl',
-      'oidc.issuer',
-      'oidc.client_id',
-      'oidc.client_secret',
-      'oidc.redirect_uri'
+      'apiServerUrl'
     ]
+
+    // When OIDC is configured, some more configuration is required
+    if (config.oidc) {
+      requiredConfigurationProperties.push(
+        'oidc.issuer',
+        'oidc.client_id',
+        'oidc.client_secret',
+        'oidc.redirect_uri'
+      )
+    }
+
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
