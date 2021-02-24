@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </template>
       <template v-if="cell.header.value === 'infrastructure'">
-        <vendor :shoot-item="shootItem"></vendor>
+        <vendor :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
         <shoot-seed-name :shoot-item="shootItem" />
@@ -70,10 +70,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </template>
       <template v-if="cell.header.value === 'purpose'">
-        <purpose-tag :purpose="shootPurpose"></purpose-tag>
+        <div class="d-flex justify-center pr-4">
+          <purpose-tag :purpose="shootPurpose"></purpose-tag>
+        </div>
       </template>
       <template v-if="cell.header.value === 'lastOperation'">
-        <div>
+        <div class="d-flex align-center justify-center pr-4">
           <shoot-status
           :popper-key="`${shootNamespace}/${shootName}`"
           :shoot-item="shootItem">
@@ -81,10 +83,14 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.value === 'k8sVersion'">
-        <shoot-version :shoot-item="shootItem" chip></shoot-version>
+        <div class="d-flex justify-center pr-4">
+          <shoot-version :shoot-item="shootItem" chip></shoot-version>
+        </div>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <status-tags :shoot-item="shootItem"></status-tags>
+        <div class="d-flex justify-center pr-4">
+          <status-tags :shoot-item="shootItem"></status-tags>
+        </div>
       </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
@@ -124,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
         </span>
       </template>
       <template v-if="cell.header.value === 'actions'">
-        <v-row class="fill-height" align="center" justify="end" >
+        <v-row class="fill-height" align="center" justify="end">
           <v-tooltip top v-if="canGetSecrets">
             <template v-slot:activator="{ on }">
               <div v-on="on">
@@ -280,17 +286,5 @@ export default {
 <style lang="scss" scoped>
   .labels {
     line-height: 10px;
-  }
-
-  .action-button-group {
-    white-space: nowrap;
-
-    button[type=button] {
-      margin: 0 4px;
-    }
-  }
-
-  .nowrap {
-    white-space: nowrap;
   }
 </style>

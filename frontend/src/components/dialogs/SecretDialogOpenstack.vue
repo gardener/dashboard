@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="openstack"
-    infra-icon="openstack"
     create-title="Add new OpenStack Secret"
     replace-title="Replace OpenStack Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -66,6 +65,24 @@ SPDX-License-Identifier: Apache-2.0
             hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
           ></v-text-field>
         </hint-colorizer>
+      </div>
+    </template>
+
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
+          The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
+        </p>
+        <p>
+          Read the
+          <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
+            target="_blank">
+            OpenStack help section<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
+        </p>
       </div>
     </template>
 

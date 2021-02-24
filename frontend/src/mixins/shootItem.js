@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -12,7 +12,7 @@ import find from 'lodash/find'
 import { mapGetters } from 'vuex'
 
 import {
-  getDateFormatted,
+  getTimestampFormatted,
   getCreatedBy,
   isShootStatusHibernated,
   isReconciliationDeactivated,
@@ -47,7 +47,7 @@ export const shootItem = {
       return getCreatedBy(this.shootMetadata)
     },
     shootCreatedAt () {
-      return getDateFormatted(this.shootMetadata.creationTimestamp)
+      return getTimestampFormatted(this.shootMetadata.creationTimestamp)
     },
     shootCreationTimestamp () {
       return this.shootMetadata.creationTimestamp

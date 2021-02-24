@@ -1,37 +1,38 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span>
-    <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
-    <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else :class="contentClass" class="primary--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
-  </span>
+  <v-avatar :color="darkMode && !lightBackground ? 'grey darken-2' : undefined" small :size="size" class="rounded-lg" tile>
+    <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" class="rounded-0">
+    <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
+    <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
+  </v-avatar>
 </template>
 
 <script>
 import startsWith from 'lodash/startsWith'
+import { mapState } from 'vuex'
 
 export default {
   props: {
     value: {
       type: String
     },
-    width: {
-      type: Number
+    size: {
+      type: Number,
+      default: 24
     },
-    height: {
-      type: Number
-    },
-    contentClass: {
-      type: String,
-      default: ''
+    lightBackground: {
+      type: Boolean
     }
   },
   computed: {
+    ...mapState([
+      'darkMode'
+    ]),
     iconSrc () {
       switch (this.value) {
         case 'azure':
@@ -44,12 +45,8 @@ export default {
           return require('@/assets/openstack.svg')
         case 'alicloud':
           return require('@/assets/alicloud.svg')
-        case 'digital-ocean':
-          return require('@/assets/digital-ocean.svg')
         case 'vsphere':
           return require('@/assets/vsphere.svg')
-        case 'china-telecom':
-          return require('@/assets/china-telecom.svg')
         case 'coreos':
           return require('@/assets/coreos.svg')
         case 'suse-jeos':
@@ -65,17 +62,15 @@ export default {
       }
       return undefined
     },
-    getHeight () {
-      return this.height
-    },
-    getWidth () {
-      if (!this.width && !this.height) {
-        return 20
-      }
-      return this.width
-    },
     isMdiIcon () {
       return startsWith(this.value, 'mdi-')
+    },
+    iconStyle () {
+      const maxIconSize = this.size - 4
+      return {
+        maxHeight: `${maxIconSize}px`,
+        maxWidth: `${maxIconSize}px`
+      }
     }
   }
 }

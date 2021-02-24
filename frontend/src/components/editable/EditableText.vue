@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-col
             ref="content"
             v-on="on"
-            class="grow content"
+            class="grow content cursor-pointer"
             :class="{ 'content--bounce': contentBounce }"
           >
             <template v-if="value">{{value}}</template>
@@ -225,7 +225,6 @@ export default {
   $green-base: map-get($green, 'base');
 
   .content {
-    cursor: pointer;
     animation-duration: 900ms;
     animation-iteration-count: 1;
     transform-origin: bottom;

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -33,9 +33,9 @@ import {
   purposesForSecret,
   shortRandomString,
   shootAddonList,
-  utcMaintenanceWindowFromLocalBegin,
-  randomLocalMaintenanceBegin,
-  generateWorker
+  generateWorker,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone
 } from '@/utils'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 import find from 'lodash/find'
@@ -247,11 +247,11 @@ const actions = {
 
     set(shootResource, 'spec.addons', addons)
 
-    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
+    const { begin, end } = maintenanceWindowWithBeginAndTimezone(randomMaintenanceBegin(), rootState.timezone)
     const maintenance = {
       timeWindow: {
-        begin: utcBegin,
-        end: utcEnd
+        begin,
+        end
       },
       autoUpdate: {
         kubernetesVersion: true,
@@ -264,7 +264,7 @@ const actions = {
     hibernationSchedule = map(hibernationSchedule, schedule => {
       return {
         ...schedule,
-        location: rootState.localTimezone
+        location: rootState.location
       }
     })
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)

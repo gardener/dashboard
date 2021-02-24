@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -25,15 +25,30 @@ SPDX-License-Identifier: Apache-2.0
           v-model="userFilter"
           @keyup.esc="userFilter=''"
         ></v-text-field>
-        <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
-          <v-icon color="toolbar-title">mdi-email-outline</v-icon>
-        </v-btn>
-        <v-btn v-if="canManageMembers" icon @click.native.stop="openUserAddDialog">
-          <v-icon color="toolbar-title">mdi-plus</v-icon>
-        </v-btn>
-        <v-btn color="toolbar-title" icon @click.native.stop="openUserHelpDialog">
-          <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
-        </v-btn>
+        <v-tooltip top v-if="allEmails" >
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon :href="`mailto:${allEmails}`">
+              <v-icon color="toolbar-title">mdi-email-outline</v-icon>
+            </v-btn>
+          </template>
+          <span>Mail to all Members</span>
+        </v-tooltip>
+        <v-tooltip top v-if="canManageMembers" >
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="openUserAddDialog">
+              <v-icon color="toolbar-title">mdi-plus</v-icon>
+            </v-btn>
+          </template>
+          <span>Add Member</span>
+        </v-tooltip>
+        <v-tooltip top v-if="canManageMembers" >
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" color="toolbar-title" icon @click.native.stop="openUserHelpDialog">
+              <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
+            </v-btn>
+          </template>
+          <span>Help</span>
+        </v-tooltip>
         <table-column-selection
           :headers="userAccountTableHeaders"
           @set-selected-header="setSelectedHeaderUserAccount"
@@ -89,12 +104,22 @@ SPDX-License-Identifier: Apache-2.0
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-btn v-if="canManageServiceAccountMembers" icon @click.native.stop="openServiceAccountAddDialog">
-          <v-icon color="toolbar-title">mdi-plus</v-icon>
-        </v-btn>
-        <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
-          <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
-        </v-btn>
+        <v-tooltip top v-if="canManageServiceAccountMembers" >
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="openServiceAccountAddDialog">
+              <v-icon color="toolbar-title">mdi-plus</v-icon>
+            </v-btn>
+          </template>
+          <span>Create Service Account</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="openServiceAccountHelpDialog">
+              <v-icon color="toolbar-title">mdi-help-circle-outline</v-icon>
+            </v-btn>
+          </template>
+          <span>Help</span>
+        </v-tooltip>
         <table-column-selection
           :headers="serviceAccountTableHeaders"
           @set-selected-header="setSelectedHeaderServiceAccount"
@@ -223,7 +248,6 @@ export default {
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
-      floatingButton: false,
       currentServiceAccountName: undefined,
       currentServiceAccountKubeconfig: undefined,
       userAccountTableOptions: undefined,
@@ -318,6 +342,7 @@ export default {
       ]
       return map(headers, header => ({
         ...header,
+        class: 'nowrap',
         selected: get(this.userAccountSelectedColumns, header.value, header.defaultSelected)
       }))
     },
@@ -388,6 +413,7 @@ export default {
       ]
       return map(headers, header => ({
         ...header,
+        class: 'nowrap',
         selected: get(this.serviceAccountSelectedColumns, header.value, header.defaultSelected)
       }))
     },
@@ -655,9 +681,6 @@ export default {
       }
       this.$localStorage.setObject('members/serviceaccount-list/options', { sortBy, sortDesc, itemsPerPage })
     }
-  },
-  mounted () {
-    this.floatingButton = true
   },
   created () {
     this.$bus.$on('esc-pressed', () => {
