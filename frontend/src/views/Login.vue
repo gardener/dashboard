@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
-                  <img src="/static/logo/logo.svg" alt="Login to Gardener" width="180" height="180">
+                  <img src="/static/assets/logo.svg" alt="Login to Gardener" width="180" height="180">
                   <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
                 </div>
                 <v-tabs

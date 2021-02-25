@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:caption>About</template>
     <template v-slot:message>
       <div class="d-flex flex-row align-center mt-3">
-        <img src="/static/logo/logo.svg" class="logo mr-3">
+        <img src="/static/assets/logo.svg" class="logo mr-3">
         <div>
           <h2 class="mb-1">Gardener Dashboard</h2>
         </div>
