@@ -192,6 +192,27 @@ frontendConfig:
   #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
   #         inverted: true
 
+  # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
+  # themes:
+  #   light: # overwrite light theme colors
+  #     primary: '#0a7254',
+  #     anchor: '#009f76',
+  #     'main-background': colors.grey.darken3,
+  #     'main-navigation-title': colors.shades.white,
+  #     'toolbar-background': '#0a7254',
+  #     'toolbar-title': colors.shades.white,
+  #     'action-button': '#009f76'
+  #   dark: # overwrite dark theme colors
+  #    primary: '#0a7254',
+  #    anchor: '#009f76',
+  #    'main-background': colors.grey.darken3,
+  #    'main-navigation-title': colors.shades.white,
+  #    'toolbar-background': '#0a7254',
+  #    'toolbar-title': colors.shades.white,
+  #    'action-button': '#009f76',
+  #    error: colors.red.darken4,
+  #    warning: colors.orange.darken4
+
 # # github configuration of the ticket feature
 # gitHub:
 #   apiUrl: https://api.foo-github.com
