@@ -507,7 +507,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
   }
   return client['dashboard.gardener.cloud'].terminals
     .watch(namespace, name)
-    .waitFor(isTerminalReady, { timeout: 10 * 1000 })
+    .waitFor(isTerminalReady, { timeout: 60 * 1000 })
 }
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {
