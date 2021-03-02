@@ -524,11 +524,11 @@ describe('gardener-dashboard', function () {
               themes: {
                 light: {
                   primary: '#ff0000',
-                  'main-navigation-title': 'colors.grey.darken3'
+                  'main-navigation-title': 'grey.darken3'
                 },
                 dark: {
                   primary: '#ff0000',
-                  'main-navigation-title': 'colors.grey.darken3'
+                  'main-navigation-title': 'grey.darken3'
                 }
               }
             }
@@ -544,11 +544,11 @@ describe('gardener-dashboard', function () {
           expect(themes).toEqual({
             light: {
               primary: '#ff0000',
-              'main-navigation-title': 'colors.grey.darken3'
+              'main-navigation-title': 'grey.darken3'
             },
             dark: {
               primary: '#ff0000',
-              'main-navigation-title': 'colors.grey.darken3'
+              'main-navigation-title': 'grey.darken3'
             }
           })
         })
@@ -560,7 +560,7 @@ describe('gardener-dashboard', function () {
               themes: {
                 light: {
                   primary: '#ff0000',
-                  'main-navigation-title': 'colors.grey.darken3'
+                  'main-navigation-title': 'grey.darken3'
                 }
               }
             }
@@ -576,7 +576,7 @@ describe('gardener-dashboard', function () {
           expect(themes).toEqual({
             light: {
               primary: '#ff0000',
-              'main-navigation-title': 'colors.grey.darken3'
+              'main-navigation-title': 'grey.darken3'
             }
           })
         })
