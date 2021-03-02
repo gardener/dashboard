@@ -1,13 +1,13 @@
 # Theming
 
 ## Motivation
-We want to give Gardener landscape administrators the possibility to change the appearance of the Gardener Dashboard via configuration without the need to touch the code. Right now, we support basic theming, more theming options would be possible but are currently not planned.
+Gardener landscape administrators should have the possibility to change the appearance of the Gardener Dashboard via configuration without the need to touch the code.
 
 ## Colors
-Gardener Dashboard as been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
-Colors can be configured for both light and dark themes. Configuraion is done via the helm chart, see the respective theme section there. Colors cam be secified as HTM color code (e.g. #FF0000 for red) or by referncing a color from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
+Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
+Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors cam be specified as HTML color code (e.g. #FF0000 for red) or by referencing a color from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
 
-The following colors can colors can be configured:
+The following colors can be configured:
 
 | name                    | usage|
 | ----------------------- |------|
