@@ -1317,7 +1317,7 @@ const actions = {
         const customTheme = get(state, ['cfg', 'themes', name])
         if (customTheme) {
           forOwn(customTheme, (value, key) => {
-            customTheme[key] = get(colors, toPath(value).slice(1), value)
+            customTheme[key] = get(colors, toPath(value), value)
           })
           assign(themes[name], customTheme)
         }

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-card class="mt-6">
+    <v-card class="ma-3">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="subtitle-1">

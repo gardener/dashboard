@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid class="shootlist">
-    <v-card>
+  <v-container fluid>
+    <v-card class="ma-3">
       <v-toolbar flat height="72" color="toolbar-background">
         <icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
           <certified-kubernetes></certified-kubernetes>
@@ -45,7 +45,6 @@ SPDX-License-Identifier: Apache-2.0
         ></table-column-selection>
       </v-toolbar>
       <v-data-table
-        class="shootListTable"
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
