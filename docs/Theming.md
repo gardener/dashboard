@@ -23,7 +23,7 @@ The following colors can colors can be configured:
 | `error`                 | Snotify error popups, error texts |
 
 ## Logos and Icons
-It is also possible to exchange the Dashboard logo and icons. You can replace the assets folder via a volume mount in your deployment.
+It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder via a volume mount in your deployment.
 
 The simplest solution is to create a configmap and add the assets to it:
 ```
