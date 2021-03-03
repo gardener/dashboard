@@ -52,6 +52,8 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
+import assign from 'lodash/assign'
+import forOwn from 'lodash/forOwn'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -65,6 +67,7 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
+import colors from 'vuetify/lib/util/colors'
 
 const localStorage = Vue.localStorage
 
@@ -1306,6 +1309,26 @@ const actions = {
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
     })
+
+    const themes = get(Vue, 'vuetify.framework.theme.themes')
+    if (themes) {
+      const applyCustomThemeConfiguration = (name) => {
+        const customTheme = get(state, ['cfg', 'themes', name])
+        if (customTheme) {
+          forOwn(customTheme, (value, key) => {
+            const color = get(colors, value)
+            if (color) {
+              customTheme[key] = color
+            } else if (!/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(value)) {
+              delete customTheme[key]
+            }
+          })
+          assign(themes[name], customTheme)
+        }
+      }
+      applyCustomThemeConfiguration('light')
+      applyCustomThemeConfiguration('dark')
+    }
 
     return state.cfg
   },

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-6">
     <v-row>
       <v-col cols="12" md="6">
         <v-card>

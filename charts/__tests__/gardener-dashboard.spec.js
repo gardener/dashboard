@@ -516,6 +516,71 @@ describe('gardener-dashboard', function () {
           })
         })
       })
+      describe('themes', function () {
+        it('should render the template', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            frontendConfig: {
+              themes: {
+                light: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                },
+                dark: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                }
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const themes = config.frontend.themes
+          expect(themes).toEqual({
+            light: {
+              primary: '#ff0000',
+              'main-navigation-title': 'grey.darken3'
+            },
+            dark: {
+              primary: '#ff0000',
+              'main-navigation-title': 'grey.darken3'
+            }
+          })
+        })
+
+        it('should render the template with light theme values only', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            frontendConfig: {
+              themes: {
+                light: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                }
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const themes = config.frontend.themes
+          expect(themes).toEqual({
+            light: {
+              primary: '#ff0000',
+              'main-navigation-title': 'grey.darken3'
+            }
+          })
+        })
+      })
     })
   })
 })

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-card class="mt-6">
+    <v-card class="ma-3">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subtitle-1">
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <v-card class="mt-6">
+    <v-card class="ma-3 mt-6">
       <v-toolbar flat color="toolbar-background  toolbar-title--text">
         <v-icon color="toolbar-title" class="pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subtitle-1">

@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:caption>About</template>
     <template v-slot:message>
       <div class="d-flex flex-row align-center mt-3">
-        <img src="../../assets/logo.svg" class="logo mr-3">
+        <img src="/static/assets/logo.svg" class="logo mr-3">
         <div>
           <h2 class="mb-1">Gardener Dashboard</h2>
         </div>
@@ -23,16 +23,16 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider class="my-3"></v-divider>
       <div class="grey--text text--darken-1">
         <div class="font-weight-bold">Version Information</div>
-        <div v-if="!!dashboardVersion">Dashboard {{dashboardVersion}}</div>
-        <div v-if="!!gardenerVersion">API {{gardenerVersion}}</div>
-        <v-divider v-if="gardenerExtensionsList.length" class="my-3"></v-divider>
-        <div v-if="gardenerExtensionsList.length" class="font-weight-bold">Extensions ({{gardenerExtensionsList.length}} deployed)</div>
+        <div v-if="!!dashboardVersion">Dashboard<code class="ml-1 px-1">{{dashboardVersion}}</code></div>
+        <div v-if="!!gardenerVersion">API<code class="ml-1 px-1">{{gardenerVersion}}</code></div>
+        <v-divider v-if="extensionsList.length" class="my-3"></v-divider>
+        <div v-if="extensionsList.length" class="font-weight-bold">Extensions ({{extensionsList.length}} deployed)</div>
         <div
-        v-for="extension in gardenerExtensionsList"
+        v-for="extension in extensionsList"
         :key="extension.id"
         class="extension-item">
           <span>{{extension.name}}</span>
-          <span v-if="!!extension.version"> {{extension.version}}</span>
+          <span v-if="!!extension.version"><code class="ml-1 px-1">{{extension.version}}</code></span>
           <span v-if="!!extension.kind"> (Kind: {{extension.kind}})</span>
         </div>
       </div>
@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters, mapActions } from 'vuex'
 import GDialog from '@/components/dialogs/GDialog'
 import { getInfo } from '@/utils/api'
+import sortBy from 'lodash/sortBy'
 
 export default {
   name: 'info-dialog',
@@ -65,9 +66,11 @@ export default {
     ...mapGetters([
       'isAdmin',
       'gardenerExtensionsList'
-    ])
+    ]),
+    extensionsList () {
+      return sortBy(this.gardenerExtensionsList, 'name')
+    }
   },
-
   methods: {
     ...mapActions([
       'fetchGardenerExtensions',

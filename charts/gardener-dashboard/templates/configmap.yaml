@@ -286,3 +286,18 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.frontendConfig.themes }}
+      themes:
+        {{- if .Values.frontendConfig.themes.light }}
+          {{- with .Values.frontendConfig.themes.light }}
+          light:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.frontendConfig.themes.dark }}
+          {{- with .Values.frontendConfig.themes.dark }}
+          dark:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
