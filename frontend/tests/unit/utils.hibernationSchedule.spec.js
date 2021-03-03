@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,7 +8,7 @@ import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents }
 import store from '@/store'
 import moment from 'moment-timezone'
 
-const localTimezone = store.state.localTimezone
+const currentLocation = store.state.location
 
 describe('utils', () => {
   describe('hibernationSchedule', () => {
@@ -40,15 +40,15 @@ describe('utils', () => {
         expect(scheduleEvents).toHaveLength(2)
         const { start, location } = scheduleEvents[0]
         expect(start).toEqual(
-          { hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5' }
+          { hour: expectedStartMoment.tz(currentLocation).format('HH'), minute: expectedStartMoment.tz(currentLocation).format('mm'), weekdays: '1,2,3,4,5' }
         )
-        expect(location).toBe(localTimezone)
+        expect(location).toBe(currentLocation)
         const { end } = scheduleEvents[1]
         const locationEnd = scheduleEvents[1].location
         expect(end).toEqual(
-          { hour: expectedEndMoment.tz(localTimezone).format('HH'), minute: expectedEndMoment.tz(localTimezone).format('mm'), weekdays: '1,2,4,6' }
+          { hour: expectedEndMoment.tz(currentLocation).format('HH'), minute: expectedEndMoment.tz(currentLocation).format('mm'), weekdays: '1,2,4,6' }
         )
-        expect(locationEnd).toBe(localTimezone)
+        expect(locationEnd).toBe(currentLocation)
       })
     })
 
@@ -101,9 +101,9 @@ describe('utils', () => {
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
       expect(start).toEqual(
-        { hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5,6,0' }
+        { hour: expectedStartMoment.tz(currentLocation).format('HH'), minute: expectedStartMoment.tz(currentLocation).format('mm'), weekdays: '1,2,3,4,5,6,0' }
       )
-      expect(location).toBe(localTimezone)
+      expect(location).toBe(currentLocation)
     })
 
     it('should parse a crontab block and remove duplicate weekdays and wrong order', () => {

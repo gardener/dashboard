@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -86,10 +86,10 @@ export default {
       return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_username', '') : get(this.shootItem, 'info.monitoring_username', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringUsername', '') : get(this.shootItem, 'info.monitoringUsername', '')
     },
     password () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_password', '') : get(this.shootItem, 'info.monitoring_password', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringPassword', '') : get(this.shootItem, 'info.monitoringPassword', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])

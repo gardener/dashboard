@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -28,6 +28,7 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+import TimeWithOffset from '@/utils/TimeWithOffset'
 const { v4: uuidv4 } = require('uuid')
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -163,6 +164,9 @@ export function displayName (username) {
 }
 
 export function parseSize (value) {
+  if (!value) {
+    return 0
+  }
   const sizeRegex = /^(\d+)Gi$/
   const result = sizeRegex.exec(value)
   if (result) {
@@ -526,31 +530,32 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
-export function randomLocalMaintenanceBegin () {
+export function randomMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
   const randomHour = sample(hours)
-  // use local timezone offset
-  const localBegin = `${randomHour}:00`
-
-  return localBegin
+  return `${randomHour}:00`
 }
 
-export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
-  timezone = timezone || store.state.localTimezone
-  if (localBegin) {
-    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
-
-    let utcBegin
-    let utcEnd
-    if (utcMoment && utcMoment.isValid()) {
-      utcBegin = utcMoment.format('HHmm00+0000')
-      utcMoment.add(1, 'h')
-      utcEnd = utcMoment.format('HHmm00+0000')
-    }
-    return { utcBegin, utcEnd }
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = 60) {
+  const maintenanceTimezone = new TimeWithOffset(beginTimezone)
+  if (!maintenanceTimezone.isValid()) {
+    return
   }
-  return undefined
+  const timezoneString = maintenanceTimezone.getTimezoneString({ colon: false })
+
+  if (!beginTime) {
+    return undefined
+  }
+  const beginMoment = moment(beginTime, 'HH:mm')
+  if (!beginMoment || !beginMoment.isValid()) {
+    return undefined
+  }
+
+  const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
+  beginMoment.add(windowSize, 'm')
+  const end = `${beginMoment.format('HHmm')}00${timezoneString}`
+  return { begin, end }
 }
 
 export function generateWorker (availableZones, cloudProfileName, region) {
@@ -558,9 +563,9 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const name = `worker-${shortRandomString(5)}`
   const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const machineType = get(head(machineTypesForZone), 'name')
+  const machineType = head(machineTypesForZone) || {}
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const volumeType = get(head(volumeTypesForZone), 'name')
+  const volumeType = head(volumeTypesForZone) || {}
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
   const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
@@ -571,19 +576,26 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     maximum: 2,
     maxSurge: 1,
     machine: {
-      type: machineType,
+      type: machineType.name,
       image: machineImage
     },
     zones,
     isNew: true
   }
-  if (volumeType) {
+  if (volumeType.name) {
     worker.volume = {
-      type: volumeType,
+      type: volumeType.name,
       size: defaultVolumeSize
     }
+  } else if (!machineType.storage) {
+    worker.volume = {
+      size: defaultVolumeSize
+    }
+  } else if (machineType.storage.type !== 'fixed') {
+    worker.volume = {
+      size: machineType.storage.size
+    }
   }
-
   return worker
 }
 

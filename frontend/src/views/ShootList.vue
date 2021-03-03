@@ -1,12 +1,12 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid class="shootlist">
-    <v-card>
+  <v-container fluid>
+    <v-card class="ma-3">
       <v-toolbar flat height="72" color="toolbar-background">
         <icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
           <certified-kubernetes></certified-kubernetes>
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="search || items.length > 3"
+        <v-text-field v-if="shootSearch || items.length > 3"
           prepend-inner-icon="mdi-magnify"
           color="primary"
           label="Search"
@@ -24,13 +24,18 @@ SPDX-License-Identifier: Apache-2.0
           hide-details
           flat
           solo
-          v-model="search"
-          @keyup.esc="search=''"
+          v-model="shootSearch"
+          @keyup.esc="shootSearch=''"
           class="mr-3"
         ></v-text-field>
-        <v-btn v-if="canCreateShoots && projectScope" icon :to="{ name: 'NewShoot', params: {  namespace } }">
-          <v-icon color="toolbar-title">mdi-plus</v-icon>
-        </v-btn>
+        <v-tooltip top v-if="canCreateShoots && projectScope">
+          <template v-slot:activator="{ on }">
+             <v-btn v-on="on" icon :to="{ name: 'NewShoot', params: {  namespace } }">
+               <v-icon color="toolbar-title">mdi-plus</v-icon>
+             </v-btn>
+          </template>
+          <span>Create Cluster</span>
+        </v-tooltip>
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
@@ -40,13 +45,15 @@ SPDX-License-Identifier: Apache-2.0
         ></table-column-selection>
       </v-toolbar>
       <v-data-table
-        class="shootListTable"
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        must-sort
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :search="shootSearch"
+        :custom-filter="searchItems"
+        must-sort
+        :custom-sort="sortItems"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
@@ -103,8 +110,7 @@ export default {
   },
   data () {
     return {
-      floatingButton: false,
-      search: '',
+      shootSearch: '',
       dialog: null,
       options: undefined,
       cachedItems: null,
@@ -133,19 +139,14 @@ export default {
         }
         this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
       } else {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-      this.setShootListSortParams(value)
-    },
-    search (value) {
-      this.setShootListSearchValue(value)
     }
   },
   methods: {
     ...mapActions({
       setSelectedShootInternal: 'setSelectedShoot',
-      setShootListSortParams: 'setShootListSortParams',
-      setShootListSearchValue: 'setShootListSearchValue',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
     }),
@@ -238,7 +239,12 @@ export default {
       onlyShootsWithIssues: 'onlyShootsWithIssues',
       projectFromProjectList: 'projectFromProjectList',
       projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList'
+      shootCustomFieldList: 'shootCustomFieldList',
+      shootCustomFields: 'shootCustomFields',
+      ticketsLabels: 'ticketsLabels',
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
+      sortItems: 'shoots/sortItems',
+      searchItems: 'shoots/searchItems'
     }),
     ...mapState([
       'shootsLoading',
@@ -282,63 +288,55 @@ export default {
         {
           text: 'PROJECT',
           value: 'project',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: !!this.projectScope
         },
         {
           text: 'NAME',
           value: 'name',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'INFRASTRUCTURE',
           value: 'infrastructure',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'SEED',
           value: 'seed',
-          align: 'left',
-          class: 'nowrap',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'TECHNICAL ID',
           value: 'technicalId',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.isAdmin
         },
         {
           text: 'CREATED BY',
           value: 'createdBy',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'CREATED AT',
           value: 'createdAt',
-          class: 'nowrap',
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: false
         },
         {
           text: 'PURPOSE',
           value: 'purpose',
-          class: 'nowrap text-center',
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -346,15 +344,14 @@ export default {
         {
           text: 'STATUS',
           value: 'lastOperation',
-          class: 'nowrap text-left',
-          align: 'left',
+          align: 'center',
+          cellClass: 'pl-4',
           defaultSelected: true,
           hidden: false
         },
         {
           text: 'VERSION',
           value: 'k8sVersion',
-          class: 'nowrap text-center',
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -362,7 +359,6 @@ export default {
         {
           text: 'READINESS',
           value: 'readiness',
-          class: 'nowrap text-center',
           sortable: true,
           align: 'center',
           defaultSelected: true,
@@ -372,16 +368,15 @@ export default {
           text: 'ACCESS RESTRICTIONS',
           value: 'accessRestrictions',
           sortable: false,
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.cfg.accessRestriction || !this.isAdmin
         },
         {
           text: 'TICKET',
           value: 'ticket',
-          class: 'nowrap',
           sortable: true,
-          align: 'left',
+          align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
         },
@@ -389,22 +384,22 @@ export default {
           text: 'TICKET LABELS',
           value: 'ticketLabels',
           sortable: false,
-          align: 'left',
+          align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
         },
         {
           text: 'ACTIONS',
           value: 'actions',
-          class: 'nowrap text-right action-button-group',
           sortable: false,
-          align: 'right',
+          align: 'end',
           defaultSelected: true,
           hidden: !(this.canDeleteShoots || this.canGetSecrets)
         }
       ]
       return map(headers, (header, index) => ({
         ...header,
+        class: 'nowrap',
         weight: (index + 1) * 100,
         selected: get(this.selectedColumns, header.value, header.defaultSelected)
       }))
@@ -426,6 +421,7 @@ export default {
         return {
           customField: true,
           text: upperCase(name),
+          class: 'nowrap',
           value: key,
           sortable,
           align,
@@ -512,9 +508,7 @@ export default {
     filtersDisabled () {
       return !this.showOnlyShootsWithIssues
     },
-    disabledFilterClass () {
-      return this.filtersDisabled ? 'disabled_filter' : ''
-    },
+
     headlineSubtitle () {
       const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
@@ -541,9 +535,6 @@ export default {
       return get(this.cfg, 'ticket.hideClustersWithLabels', [])
     }
   },
-  mounted () {
-    this.floatingButton = true
-  },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
@@ -551,46 +542,14 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.search = null
+    this.shootSearch = null
     this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
-    this.search = null
+    this.shootSearch = null
     next()
   }
 }
 </script>
-
-<style lang="scss" scoped >
-
-  .dashboard {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .shootListTable table.table {
-    thead, tbody {
-      th, td {
-        padding: 10px;
-      }
-    }
-  }
-
-  .shootListTable table {
-    tbody, thead {
-      td:first-child, th:first-child {
-        padding-left: 24px;
-      }
-      td:last-child, th:last-child {
-        padding-right: 24px;
-      }
-    }
-  }
-
-  .disabled_filter {
-    opacity: 0.5;
-  }
-
-</style>

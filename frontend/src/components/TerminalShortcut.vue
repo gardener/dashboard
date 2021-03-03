@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn icon @click.stop="addTerminalShortcut(shortcut)" :disabled="disabled" class="enablePointerEvents">
+              <v-btn icon @click.stop="addTerminalShortcut(shortcut)" :disabled="disabled" class="enablePointerEvents" color="action-button">
                 <v-icon>mdi-console-line</v-icon>
               </v-btn>
             </div>
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.stop="expansionPanel = !expansionPanel" class="enablePointerEvents">
+            <v-btn v-on="on" icon @click.stop="expansionPanel = !expansionPanel" class="enablePointerEvents" color="action-button">
               <v-icon>{{visibilityIconShortcut}}</v-icon>
             </v-btn>
           </template>

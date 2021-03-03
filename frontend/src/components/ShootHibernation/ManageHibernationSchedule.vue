@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -59,10 +59,11 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
-        <v-alert type="warning" outlined>
-          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-          <div>{{hibernationPossibleMessage}}</div>
-        </v-alert>
+        <constraint-warning
+          :value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
+          type="hibernation">
+          {{hibernationPossibleMessage}}
+        </constraint-warning>
       </v-col>
     </v-row>
   </div>
@@ -78,6 +79,7 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
 import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
@@ -86,7 +88,8 @@ const { v4: uuidv4 } = require('uuid')
 export default {
   name: 'hibernation-schedule',
   components: {
-    HibernationScheduleEvent
+    HibernationScheduleEvent,
+    ConstraintWarning
   },
   props: {
     userInterActionBus: {
@@ -114,7 +117,7 @@ export default {
   computed: {
     ...mapState([
       'cfg',
-      'localTimezone'
+      'location'
     ]),
     showNoScheduleCheckbox () {
       return purposeRequiresHibernationSchedule(this.purpose) &&
@@ -144,10 +147,10 @@ export default {
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
-        crontabBlock.location = this.localTimezone
+        crontabBlock.location = this.location
         const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
-          parsedScheduleEvent.location = this.localTimezone
+          parsedScheduleEvent.location = this.location
         })
         return parsedScheduleEvents
       })
@@ -179,7 +182,7 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
-      const location = this.localTimezone
+      const location = this.location
       const valid = false
       this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false

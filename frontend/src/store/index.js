@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -52,6 +52,8 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
+import assign from 'lodash/assign'
+import forOwn from 'lodash/forOwn'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -65,6 +67,7 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
+import colors from 'vuetify/lib/util/colors'
 
 const localStorage = Vue.localStorage
 
@@ -76,6 +79,18 @@ const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 
 const plugins = []
 if (debug) {
   plugins.push(createLogger())
+}
+
+// Guess current location or fallback to UTC
+// Do not use moment.tz.guess() as their fallback logic can lead to unexpected behavior
+// see also https://github.com/gardener/dashboard/issues/944, https://github.com/moment/moment-timezone/issues/559
+function guessLocation () {
+  const locations = moment.tz.names()
+  let location = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (!includes(locations, location)) {
+    location = 'UTC'
+  }
+  return location
 }
 
 // initial state
@@ -97,7 +112,8 @@ const state = {
   alert: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  localTimezone: moment.tz.guess(),
+  location: guessLocation(),
+  timezone: moment().format('Z'),
   focusedElementId: null,
   splitpaneResize: null,
   splitpaneLayouts: {},
@@ -340,7 +356,7 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  gardenerExtensionsist (state) {
+  gardenerExtensionsList (state) {
     return state.gardenerExtensions.all
   },
   networkingTypeList (state, getters) {
@@ -524,7 +540,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems']
+    return getters['shoots/filteredItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -758,12 +774,6 @@ const getters = {
       })
     }
   },
-
-  infrastructureSecretsByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])
-    }
-  },
   infrastructureSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
@@ -942,6 +952,12 @@ const getters = {
   },
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canCreateSecrets (state) {
+    return canI(state.subjectRules, 'create', '', 'secrets')
+  },
+  canPatchSecrets (state) {
+    return canI(state.subjectRules, 'patch', '', 'secrets')
   },
   canDeleteSecrets (state) {
     return canI(state.subjectRules, 'delete', '', 'secrets')
@@ -1133,10 +1149,7 @@ const actions = {
         }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = []
-        if (store.getters.canGetSecrets) {
-          promises.push(store.dispatch('getShootInfo', metadata))
-        }
+        const promises = [store.dispatch('getShootInfo', metadata)]
         const seedName = spec.seedName
         if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
           promises.push(store.dispatch('getShootSeedInfo', metadata))
@@ -1183,12 +1196,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, options) {
-    return dispatch('shoots/setListSortParams', options)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   async setShootListFilters ({ dispatch, getters }, value) {
     try {
       await dispatch('shoots/setShootListFilters', value)
@@ -1202,12 +1209,6 @@ const actions = {
     } catch (err) {
       dispatch('setError', err)
     }
-  },
-  setShootListSearchValue ({ dispatch }, searchValue) {
-    return dispatch('shoots/setListSearchValue', searchValue)
-      .catch(err => {
-        dispatch('setError', err)
-      })
   },
   setNewShootResource ({ dispatch }, data) {
     return dispatch('shoots/setNewShootResource', data)
@@ -1308,6 +1309,26 @@ const actions = {
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
     })
+
+    const themes = get(Vue, 'vuetify.framework.theme.themes')
+    if (themes) {
+      const applyCustomThemeConfiguration = (name) => {
+        const customTheme = get(state, ['cfg', 'themes', name])
+        if (customTheme) {
+          forOwn(customTheme, (value, key) => {
+            const color = get(colors, value)
+            if (color) {
+              customTheme[key] = color
+            } else if (!/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(value)) {
+              delete customTheme[key]
+            }
+          })
+          assign(themes[name], customTheme)
+        }
+      }
+      applyCustomThemeConfiguration('light')
+      applyCustomThemeConfiguration('dark')
+    }
 
     return state.cfg
   },

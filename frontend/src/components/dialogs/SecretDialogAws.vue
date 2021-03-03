@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="aws"
-    infra-icon="aws"
     create-title="Add new AWS Secret"
     replace-title="Replace AWS Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -46,6 +45,22 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
     </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
+          credentials for AWS Identity and Access Management (IAM), use the
+          <a href="https://console.aws.amazon.com/iam/home" target="_blank">IAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          The Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Copy the AWS IAM policy document below and attach it to the IAM user
+          (<a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
+          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
+        </p>
+        <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      </div>
+    </template>
 
   </secret-dialog>
 
@@ -53,6 +68,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import CodeBlock from '@/components/CodeBlock'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { alphaNumUnderscore, base64 } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -73,7 +89,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    CodeBlock
   },
   props: {
     value: {
@@ -89,7 +106,69 @@ export default {
       accessKeyId: undefined,
       secretAccessKey: undefined,
       hideSecret: true,
-      validationErrors
+      validationErrors,
+      template: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Action: 'autoscaling:*',
+            Resource: '*'
+          },
+          {
+            Effect: 'Allow',
+            Action: 'ec2:*',
+            Resource: '*'
+          },
+          {
+            Effect: 'Allow',
+            Action: 'elasticloadbalancing:*',
+            Resource: '*'
+          },
+          {
+            Action: [
+              'iam:GetInstanceProfile',
+              'iam:GetPolicy',
+              'iam:GetPolicyVersion',
+              'iam:GetRole',
+              'iam:GetRolePolicy',
+              'iam:ListPolicyVersions',
+              'iam:ListAttachedRolePolicies',
+              'iam:ListInstanceProfilesForRole',
+              'iam:CreateInstanceProfile',
+              'iam:CreatePolicy',
+              'iam:CreatePolicyVersion',
+              'iam:CreateRole',
+              'iam:CreateServiceLinkedRole',
+              'iam:AddRoleToInstanceProfile',
+              'iam:AttachRolePolicy',
+              'iam:DetachRolePolicy',
+              'iam:RemoveRoleFromInstanceProfile',
+              'iam:DeletePolicy',
+              'iam:DeletePolicyVersion',
+              'iam:DeleteRole',
+              'iam:DeleteRolePolicy',
+              'iam:DeleteInstanceProfile',
+              'iam:PutRolePolicy',
+              'iam:PassRole',
+              'iam:UpdateAssumeRolePolicy'
+            ],
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'route53:GetChange',
+              'route53:GetHostedZone',
+              'route53:ListResourceRecordSets',
+              'route53:ChangeResourceRecordSets',
+              'route53:ListHostedZones'
+            ],
+            Resource: '*'
+          }
+        ]
+      }
     }
   },
   validations () {

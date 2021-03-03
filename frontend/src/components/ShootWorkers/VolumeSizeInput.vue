@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -26,10 +26,17 @@ export default {
   computed: {
     innerValue: {
       get () {
-        return parseSize(this.value)
+        if (this.value) {
+          return parseSize(this.value)
+        }
+        return undefined
       },
       set (value) {
-        this.$emit('input', this.format(value))
+        if (!value) {
+          this.$emit('input', undefined)
+        } else {
+          this.$emit('input', this.format(value))
+        }
       }
     }
   },

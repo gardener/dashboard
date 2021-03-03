@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
             class="mr-2 mb-1"
           >{{title}}</v-chip>
         </template>
-        {{description}}
+        <section v-html="transformHtml(description)"/>
       </v-tooltip>
       <v-tooltip
         v-for="{ key: optionsKey, title, description } in options"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
             class="mr-2"
           >{{title}}</v-chip>
         </template>
-        {{description}}
+        <section v-html="transformHtml(description)"/>
       </v-tooltip>
     </v-row>
   </div>
@@ -47,15 +47,26 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
+import { transformHtml } from '@/utils'
+
 export default {
   props: {
     selectedAccessRestrictions: {
       type: Array
+    }
+  },
+  methods: {
+    transformHtml (value) {
+      return transformHtml(value)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
+  section {
+    ::v-deep > p {
+      margin: 0;
+    }
+  }
 </style>

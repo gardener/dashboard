@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -283,6 +283,21 @@ data:
               inverted: {{ .input.inverted }}
               {{- end }}
           {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.frontendConfig.themes }}
+      themes:
+        {{- if .Values.frontendConfig.themes.light }}
+          {{- with .Values.frontendConfig.themes.light }}
+          light:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.frontendConfig.themes.dark }}
+          {{- with .Values.frontendConfig.themes.dark }}
+          dark:
+{{ toYaml . | trim | indent 12 }}
           {{- end }}
         {{- end }}
       {{- end }}

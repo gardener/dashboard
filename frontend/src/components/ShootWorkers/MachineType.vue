@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
             <span v-if="item.gpu">GPU: {{item.gpu}} | </span>
             <span v-if="item.memory">Memory: {{item.memory}}</span>
-            <span v-if="item.volumeType && item.volumeSize"> | Volume Type: {{item.volumeType}} | Volume Size: {{item.volumeSize}}</span>
+            <span v-if="item.storage"> | Volume Type: {{item.storage.type}} | Class: {{item.storage.class}} | Default Size: {{item.storage.size}}</span>
           </v-list-item-subtitle>
         </v-list-item-content>
       </template>
@@ -89,7 +89,6 @@ export default {
           name: this.worker.machine.type
         })
       }
-      this.onInputMachineType()
       return machineTypes
     },
     notInCloudProfile () {

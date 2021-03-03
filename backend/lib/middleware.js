@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -42,18 +42,14 @@ function frontendConfig (config) {
       input = {},
       options = []
     } = item
-    convertAndSanitize(display, 'title')
     convertAndSanitize(display, 'description')
-    convertAndSanitize(input, 'title')
     convertAndSanitize(input, 'description')
     for (const option of options) {
       const {
         display = {},
         input = {}
       } = option
-      convertAndSanitize(display, 'title')
       convertAndSanitize(display, 'description')
-      convertAndSanitize(input, 'title')
       convertAndSanitize(input, 'description')
     }
   }

@@ -1,14 +1,12 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 import { withParams, regex, ref } from 'vuelidate/lib/validators/common'
-import { minValue } from 'vuelidate/lib/validators'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
-import { parseSize } from '@/utils'
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const uppercaseAlphaNumPattern = /^[A-Z0-9]+$/
@@ -18,6 +16,7 @@ const resourceNamePattern = /^[a-z0-9](?:[-a-z0-9]*[a-z0-9])?$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
+export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = regex('base64', base64Pattern)
 const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
@@ -32,6 +31,10 @@ const noStartEndHyphen = (value) => {
 }
 const numberOrPercentage = (value) => {
   return numberOrPercentagePattern.test(value)
+}
+
+const isTimezone = (value) => {
+  return timezonePattern.test(value)
 }
 
 const unique = key => withParams({ type: 'unique', key },
@@ -75,15 +78,6 @@ const includesIfAvailable = (key, reference) => withParams({ type: 'includesIfAv
   }
 )
 
-const minVolumeSize = key => withParams({ type: 'minVolumeSize', key },
-  function (value) {
-    if (this.volumeInCloudProfile) {
-      return minValue(key)(parseSize(value))
-    }
-    return true
-  }
-)
-
 export {
   withParams,
   regex,
@@ -97,8 +91,8 @@ export {
   noStartEndHyphen,
   serviceAccountKey,
   includesIfAvailable,
-  minVolumeSize,
   uniqueWorkerName,
   numberOrPercentage,
-  requiresCostObjectIfEnabled
+  requiresCostObjectIfEnabled,
+  isTimezone
 }

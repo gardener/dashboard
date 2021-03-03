@@ -1,25 +1,32 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import Vuex from 'vuex'
 import {
-  state,
-  actions,
-  getters,
-  mutations,
-  modules,
   mapAccessRestrictionForInput
 } from '@/store'
 
-let store
+import getters from '@/store/modules/shoots/getters'
 
-describe('Store.Shoots', () => {
+describe('store.shoots.getters', () => {
+  let shootItems
+  const rootGetters = {
+    ticketsLabels: undefined,
+    shootCustomFields: {
+      Z_Foo: {
+        path: 'metadata.namespace'
+      }
+    },
+    shootCustomFieldList: undefined,
+    latestUpdatedTicketByNameAndNamespace: undefined
+  }
+  const sortItems = getters.sortItems(undefined, undefined, undefined, rootGetters)
+
   beforeEach(() => {
-    const shootItems = {
-      shoot2_foo: {
+    shootItems = [
+      {
         metadata: {
           name: 'shoot2',
           namespace: 'foo'
@@ -48,7 +55,7 @@ describe('Store.Shoots', () => {
           ]
         }
       },
-      shoot1_foo: {
+      {
         metadata: {
           name: 'shoot1',
           namespace: 'foo'
@@ -77,10 +84,10 @@ describe('Store.Shoots', () => {
           ]
         }
       },
-      shoot3_foo: {
+      {
         metadata: {
           name: 'shoot3',
-          namespace: 'foo'
+          namespace: 'bar'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -100,7 +107,7 @@ describe('Store.Shoots', () => {
           },
           lastErrors: [
             {
-              description: 'foo'
+              description: 'bar'
             }
           ],
           conditions: [
@@ -111,24 +118,13 @@ describe('Store.Shoots', () => {
           ]
         }
       }
-    }
-
-    // Modifies state of module even if we do not include state in the root store
-    // TODO: This is all a bit hacky, think of a cleaner solution on how to create the store
-    state.shoots.shoots = shootItems
-
-    store = new Vuex.Store({
-      actions,
-      getters,
-      mutations,
-      modules
-    })
+    ]
   })
 
   it('should sort shoots by name', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['name'], sortDesc: [true] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['name']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot2')
@@ -136,9 +132,9 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by purpose', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['purpose'], sortDesc: [true] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['purpose']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -146,9 +142,9 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by creationTimestamp', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['creationTimestamp'], sortDesc: [false] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['creationTimestamp']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
     expect(sortedShoots[1].metadata.name).toBe('shoot2')
@@ -156,9 +152,9 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by kubernetes version', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['k8sVersion'], sortDesc: [false] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['k8sVersion']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -166,9 +162,9 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by infrastructure', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['infrastructure'], sortDesc: [true] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['infrastructure']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
     expect(sortedShoots[1].metadata.name).toBe('shoot3')
@@ -176,9 +172,9 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by lastOperation (status)', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['lastOperation'], sortDesc: [true] })
-
-    const sortedShoots = store.getters.shootList
+    const sortBy = ['lastOperation']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot2')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
@@ -186,9 +182,29 @@ describe('Store.Shoots', () => {
   })
 
   it('should sort shoots by readiness', () => {
-    store.dispatch('setShootListSortParams', { sortBy: ['readiness'], sortDesc: [false] })
+    const sortBy = ['readiness']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
+  })
+
+  it('should sort shoots by readiness', () => {
+    const sortBy = ['readiness']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
+  })
+
+  it('should sort shoots by custom column', () => {
+    const sortBy = ['Z_Foo']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
@@ -196,7 +212,7 @@ describe('Store.Shoots', () => {
   })
 })
 
-describe('Store.AccessRestrictions', () => {
+describe('store.AccessRestrictions', () => {
   let definition
   let shootResource
 

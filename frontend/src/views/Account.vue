@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-6">
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
@@ -218,7 +218,6 @@ export default {
       grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
       idToken: undefined,
       showToken: false,
-      floatingButton: false,
       showMessage: false,
       kubeconfigYaml: ''
     }

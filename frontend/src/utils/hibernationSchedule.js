@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -63,11 +63,11 @@ function scheduleEventObjFromRegex (regexVal) {
 
 function convertScheduleEventObjToLocalTimezone (scheduleObj) {
   if (scheduleObj) {
-    const localTimezone = store.state.localTimezone
+    const location = store.state.location
     const momentObj = moment.utc()
     momentObj.hour(scheduleObj.hour)
     momentObj.minute(scheduleObj.minute)
-    momentObj.tz(localTimezone)
+    momentObj.tz(location)
     scheduleObj.hour = momentObj.format('HH')
     scheduleObj.minute = momentObj.format('mm')
   }
@@ -82,7 +82,7 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
   let end = scheduleEventObjFromRegex(cronEnd)
 
   if (!location) {
-    location = store.state.localTimezone
+    location = store.state.location
     start = convertScheduleEventObjToLocalTimezone(start)
     end = convertScheduleEventObjToLocalTimezone(end)
   }

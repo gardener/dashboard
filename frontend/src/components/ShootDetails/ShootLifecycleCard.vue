@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -16,7 +16,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <constraint-warning
+              :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
+              type="hibernation"
+              icon
+              small>
+              {{hibernationPossibleMessage}}
+            </constraint-warning>
             <v-icon
               v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
               small
@@ -47,7 +54,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
-          <v-list-item-subtitle class="pt-1">
+          <v-list-item-subtitle class="d-flex pt-1">
+            <constraint-warning
+              :value="!isMaintenancePreconditionSatisfied"
+              type="maintenance"
+              icon
+              small>
+              {{maintenancePreconditionSatisfiedMessage}}
+            </constraint-warning>
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -107,9 +121,8 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import moment from 'moment-timezone'
 
 import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
 import DeleteCluster from '@/components/DeleteCluster'
@@ -118,8 +131,10 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
+import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+import TimeWithOffset from '@/utils/TimeWithOffset'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -131,7 +146,8 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    RotateKubeconfigStart
+    RotateKubeconfigStart,
+    ConstraintWarning
   },
   props: {
     shootItem: {
@@ -140,9 +156,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapState([
-      'localTimezone'
-    ]),
     ...mapGetters([
       'canPatchShoots'
     ]),
@@ -164,14 +177,13 @@ export default {
       }
     },
     maintenanceDescription () {
-      const timezone = this.localTimezone
       const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
-      const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
-      if (momentObj.isValid()) {
-        const maintenanceStr = momentObj.format('HH:mm')
-        return `Start time: ${maintenanceStr} ${timezone}`
+      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+      if (!maintenanceStartTime.isValid()) {
+        return
       }
-      return ''
+
+      return `Start time: ${maintenanceStartTime.toString()}`
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)

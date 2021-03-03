@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -41,20 +41,18 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
-      <template v-if="canGetSecrets">
-        <v-divider inset></v-divider>
-        <cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></cluster-metrics>
-        <v-list-item v-else>
-          <v-list-item-icon>
-            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>
-              {{metricsNotAvailableText}}
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
+      <v-divider inset></v-divider>
+      <cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></cluster-metrics>
+      <v-list-item v-else>
+        <v-list-item-icon>
+          <v-icon color="primary">mdi-alert-circle-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>
+            {{metricsNotAvailableText}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
     </v-list>
   </v-card>
 </template>
@@ -64,7 +62,6 @@ import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
 import ClusterMetrics from '@/components/ClusterMetrics'
 import { shootItem } from '@/mixins/shootItem'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -79,9 +76,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'canGetSecrets'
-    ]),
     metricsNotAvailableText () {
       if (this.isTestingCluster) {
         return 'Cluster Metrics not available for clusters with purpose testing'

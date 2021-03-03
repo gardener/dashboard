@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -22,10 +22,10 @@ RUN yarn workspaces foreach --all run test-coverage
 # bump backend and frontend version
 RUN yarn workspaces foreach --include "*/(frontend|backend)" version "$(cat VERSION)"
 
-# run backend production install 
+# run backend production install
 RUN yarn workspace @gardener-dashboard/backend prod-install --pack /usr/src/build
 
-# run frontend build 
+# run frontend build
 RUN yarn workspace @gardener-dashboard/frontend run build
 
 # copy files to production directory
