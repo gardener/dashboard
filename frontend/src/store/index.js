@@ -53,7 +53,7 @@ import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import assign from 'lodash/assign'
-import toPath from 'lodash/toPath'
+import forOwn from 'lodash/forOwn'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -68,7 +68,6 @@ import infrastructureSecrets from './modules/infrastructureSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
-import { forOwn } from 'lodash'
 
 const localStorage = Vue.localStorage
 
@@ -1317,7 +1316,12 @@ const actions = {
         const customTheme = get(state, ['cfg', 'themes', name])
         if (customTheme) {
           forOwn(customTheme, (value, key) => {
-            customTheme[key] = get(colors, toPath(value), value)
+            const color = get(colors, value)
+            if (color) {
+              customTheme[key] = color
+            } else if (!/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(value)) {
+              delete customTheme[key]
+            }
           })
           assign(themes[name], customTheme)
         }
