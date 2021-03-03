@@ -70,5 +70,10 @@ const errorCodes = {
     shortDescription: 'Configuration Problem',
     description: 'There is a configuration problem that is most likely caused by your Shoot specification. Please double-check the error message and resolve the problem.',
     userError: true
+  },
+  ERR_RETRYABLE_CONFIGURATION_PROBLEM: {
+    shortDescription: 'Configuration Problem',
+    description: 'There is a configuration problem. Please double-check the error message and resolve the problem.',
+    userError: true
   }
 }
