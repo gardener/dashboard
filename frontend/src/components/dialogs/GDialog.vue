@@ -144,9 +144,9 @@ export default {
     confirmAlertColor () {
       const color = this.confirmValue ? this.confirmColor : this.defaultColor
       if (this.darkMode) {
-        return `${color || 'primary'} darken-3`
+        return `${color || 'primary'} darken-4`
       }
-      return `${color || 'primary'} lighten-3`
+      return `${color || 'primary'} lighten-4`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
