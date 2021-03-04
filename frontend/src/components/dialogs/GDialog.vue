@@ -79,10 +79,11 @@ export default {
     },
     confirmColor: {
       type: String,
-      default: 'error'
+      default: 'toolbar-background'
     },
     defaultColor: {
-      type: String
+      type: String,
+      default: 'toolbar-background'
     },
     confirmButtonText: {
       type: String,
@@ -243,6 +244,6 @@ export default {
 
 <style lang="scss" scoped>
   .confirm-input {
-    max-width: 18em;
+    width: 18em;
   }
 </style>

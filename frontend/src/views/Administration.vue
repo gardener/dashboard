@@ -217,7 +217,7 @@ SPDX-License-Identifier: Apache-2.0
                     <v-tooltip v-if="canDeleteProject" top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn color="error" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                          <v-btn color="action-button" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
                             <v-icon>mdi-delete</v-icon>
                           </v-btn>
                         </div>
@@ -290,7 +290,6 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
-      default-color="error"
       :error-message.sync="errorMessage"
       :detailed-error-message.sync="detailedErrorMessage"
       ref="gDialog">
@@ -298,9 +297,9 @@ SPDX-License-Identifier: Apache-2.0
         Confirm Delete
       </template>
       <template v-slot:message>
-        Are you sure to delete the project <b>{{projectName}}</b>?
+        Are you sure to delete the project <span class="font-weight-bold">{{projectName}}</span>?
         <br />
-        <i class="error--text">The operation can not be undone.</i>
+        <span class="error--text font-weight-bold">The operation can not be undone.</span>
       </template>
     </g-dialog>
 

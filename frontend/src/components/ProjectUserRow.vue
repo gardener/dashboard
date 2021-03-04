@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn :disabled="item.isOwner" icon color="error" @click.native.stop="onDelete">
+                <v-btn :disabled="item.isOwner" icon color="action-button" @click.native.stop="onDelete">
                   <v-icon>mdi-close</v-icon>
                 </v-btn>
               </div>
