@@ -9,11 +9,11 @@ import forEach from 'lodash/forEach'
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 
 const DragAndDropEventsEnum = {
-  DRAG_START: 'dragStart',
-  DRAG_END: 'dragEnd',
-  DRAG_ENTER: 'dragEnter',
-  DRAG_OVER: 'dragOver',
-  DRAG_LEAVE: 'dragLeave',
+  DRAG_START: 'drag-start',
+  DRAG_END: 'drag-end',
+  DRAG_ENTER: 'drag-enter',
+  DRAG_OVER: 'drag-over',
+  DRAG_LEAVE: 'drag-leave',
   DROPPED: 'dropped'
 }
 
