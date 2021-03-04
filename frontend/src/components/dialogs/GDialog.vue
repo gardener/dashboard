@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           </slot>
           <template v-if="$slots.affectedObjectName">
             &nbsp;
-            <code :class="textColorClass"><slot name="affectedObjectName"></slot></code>
+            <tt class="font-weight-bold"><slot name="affectedObjectName"></slot></tt>
           </template>
         </v-toolbar-title>
       </v-toolbar>
@@ -24,22 +24,23 @@ SPDX-License-Identifier: Apache-2.0
         </slot>
         <g-message color="error" class="mt-4" :message.sync="message" :detailed-message.sync="detailedMessage"></g-message>
       </v-card-text>
-      <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
-        <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
-        <v-text-field
-          @keyup.enter="resolveAction(true)"
-          ref="deleteDialogInput"
-          :hint="hint"
-          persistent-hint
-          :error="hasError && userInput.length > 0"
-          v-model="userInput"
-          type="text"
-          filled
-          dense>
-        </v-text-field>
-      </v-alert>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
+        <v-text-field
+          v-if="confirmValue && !confirmDisabled"
+          class="mr-2 confirm-input"
+          @keyup.enter="resolveAction(true)"
+          ref="deleteDialogInput"
+          :label="hint"
+          :error="hasError && userInput.length > 0"
+          hide-details
+          v-model="userInput"
+          type="text"
+          outlined
+          color="primary"
+          dense>
+        </v-text-field>
         <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
         <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
       </v-card-actions>
@@ -119,9 +120,9 @@ export default {
     },
     hint () {
       if (this.userInput.length === 0) {
-        return `Type '${this.confirmValue}' to confirm`
+        return `Type ${this.confirmValue} to confirm`
       } else if (this.userInput !== this.confirmValue) {
-        return `Your input did not match with required phrase '${this.confirmValue}'`
+        return `Input does not match ${this.confirmValue}`
       }
       return ''
     },
@@ -140,13 +141,6 @@ export default {
       set (value) {
         this.$emit('update:detailed-error-message', value)
       }
-    },
-    confirmAlertColor () {
-      const color = this.confirmValue ? this.confirmColor : this.defaultColor
-      if (this.darkMode) {
-        return `${color || 'primary'} darken-4`
-      }
-      return `${color || 'primary'} lighten-4`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
@@ -248,9 +242,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .dialog-title {
-    code {
-      box-shadow: none !important;
-    }
+  .confirm-input {
+    max-width: 18em;
   }
 </style>

@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         class="ma-0"
         :message.sync="errorMessageInternal"
         :detailed-message.sync="detailedErrorMessageInternal"
+        tile
       ></g-message>
     </div>
     <v-divider></v-divider>

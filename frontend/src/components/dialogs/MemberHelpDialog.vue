@@ -45,6 +45,7 @@ SPDX-License-Identifier: Apache-2.0
             </ul>
           </p>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.stop="hide" class="primary--text" tabindex="2">Ok</v-btn>

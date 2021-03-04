@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     :caption="caption"
     icon="mdi-delete"
-    icon-color="error"
-    dialog-color="error"
     confirm-button-text="Delete"
     confirm-required
     :button-text="buttonText"
@@ -31,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-content>
       </v-list>
       <p>
-        Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
+        Type <span class="font-weight-bold">{{shootName}}</span> below and confirm the deletion of the cluster and all of its content.
       </p>
-      <p>
-        <i class="error--text">This action cannot be undone.</i>
+      <p class="mt-2 error--text font-weight-bold">
+        This action cannot be undone.
       </p>
       <p v-if="isShootReconciliationDeactivated">
         <v-row class="fill-height" >

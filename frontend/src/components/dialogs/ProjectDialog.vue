@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
           <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
