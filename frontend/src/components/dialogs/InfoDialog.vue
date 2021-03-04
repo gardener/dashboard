@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider class="my-3"></v-divider>
       <div class="grey--text text--darken-1">
         <div class="font-weight-bold">Version Information</div>
-        <div v-if="!!dashboardVersion">Dashboard<code class="ml-1 px-1">{{dashboardVersion}}</code></div>
-        <div v-if="!!gardenerVersion">API<code class="ml-1 px-1">{{gardenerVersion}}</code></div>
+        <div v-if="!!dashboardVersion">Dashboard<span class="ml-1 font-weight-bold">{{dashboardVersion}}</span></div>
+        <div v-if="!!gardenerVersion">API<span class="ml-1 font-weight-bold">{{gardenerVersion}}</span></div>
         <v-divider v-if="extensionsList.length" class="my-3"></v-divider>
         <div v-if="extensionsList.length" class="font-weight-bold">Extensions ({{extensionsList.length}} deployed)</div>
         <div
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="extension.id"
         class="extension-item">
           <span>{{extension.name}}</span>
-          <span v-if="!!extension.version"><code class="ml-1 px-1">{{extension.version}}</code></span>
+          <span v-if="!!extension.version"><span class="ml-1 font-weight-bold">{{extension.version}}</span></span>
           <span v-if="!!extension.kind"> (Kind: {{extension.kind}})</span>
         </div>
       </div>
