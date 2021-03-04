@@ -17,7 +17,8 @@ import {
   getDateFormatted,
   canI,
   getProjectName,
-  TargetEnum
+  TargetEnum,
+  isHtmlColorCode
 } from '@/utils'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
@@ -1319,7 +1320,7 @@ const actions = {
             const color = get(colors, value)
             if (color) {
               customTheme[key] = color
-            } else if (!/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(value)) {
+            } else if (!isHtmlColorCode(value)) {
               delete customTheme[key]
             }
           })
