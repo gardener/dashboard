@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <svg v-show="isDraggingOtherId" @dropped="dropped" @drag-over="dragOver" @drag-leave="dragLeaveZone" class="g-droppable-zone positional-dropzone fill-height full-width" :data-g-id="uuid" id="dropzone" preserve-aspect-ratio="none" width="400px" height="400px" view-box="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <svg v-show="isDraggingOtherId" @dropped="dropped" @drag-over="dragOver" @drag-leave="dragLeaveZone" class="g-droppable-zone positional-dropzone fill-height full-width" :data-g-id="uuid" id="dropzone" preserveAspectRatio="none" width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
       <rect id="Bottom-Rect" vector-effect="non-scaling-stroke" :stroke="strokeRectBottom" stroke-width="2" fill-opacity="0.76" :fill="fillBottom" x="0" y="200" width="400" height="200"></rect>
       <rect id="Right-Rect" vector-effect="non-scaling-stroke" :stroke="strokeRectRight" stroke-width="2" fill-opacity="0.76" :fill="fillRight" x="200" y="0" width="200" height="400"></rect>
