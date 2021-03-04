@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :title="name"
     :toolbar-color="color"
     :popper-key="`worker_group_${name}`"
+    placement="right"
   >
     <template v-slot:popperRef>
       <v-chip
