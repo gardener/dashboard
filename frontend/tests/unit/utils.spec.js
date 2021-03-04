@@ -499,5 +499,21 @@ describe('utils', () => {
         expect(expiredWorkerGroups).toHaveLength(0)
       })
     })
+
+    describe('html color code', () => {
+      it('should not fail when zero', () => {
+        expect(utils.isHtmlColorCode(undefined)).toBe(false)
+        expect(utils.isHtmlColorCode(null)).toBe(false)
+      })
+
+      it('should return true on html color code', () => {
+        expect(utils.isHtmlColorCode('#0b8062')).toBe(true)
+        expect(utils.isHtmlColorCode('#FfFfFf')).toBe(true)
+      })
+
+      it('should return false on non-html color code', () => {
+        expect(utils.isHtmlColorCode('foo')).toBe(false)
+      })
+    })
   })
 })

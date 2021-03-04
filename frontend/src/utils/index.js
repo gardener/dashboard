@@ -779,6 +779,10 @@ export function mapTableHeader (headers, valueKey) {
   return obj
 }
 
+export function isHtmlColorCode (value) {
+  return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
+}
+
 export default {
   store,
   canI,
@@ -787,5 +791,6 @@ export default {
   k8sVersionUpdatePathAvailable,
   selectedImageIsNotLatest,
   k8sVersionExpirationForShoot,
-  expiringWorkerGroupsForShoot
+  expiringWorkerGroupsForShoot,
+  isHtmlColorCode
 }

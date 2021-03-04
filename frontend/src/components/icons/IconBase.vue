@@ -24,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { isHtmlColorCode } from '@/utils'
 
 export default {
   props: {
@@ -51,7 +52,7 @@ export default {
   computed: {
     iconColorCode () {
       const iconColor = this.iconColor
-      if (/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(iconColor)) {
+      if (isHtmlColorCode(iconColor)) {
         return iconColor
       }
       return this.$vuetify.theme.currentTheme[iconColor]
