@@ -51,6 +51,9 @@ export default {
   computed: {
     iconColorCode () {
       const iconColor = this.iconColor
+      if (/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(iconColor)) {
+        return iconColor
+      }
       return this.$vuetify.theme.currentTheme[iconColor]
     }
   }
