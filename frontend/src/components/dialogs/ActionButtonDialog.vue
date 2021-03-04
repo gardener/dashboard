@@ -119,7 +119,7 @@ export default {
     },
     dialogColor: {
       type: String,
-      default: 'warning'
+      default: 'toolbar-background'
     },
     disabled: {
       type: Boolean,

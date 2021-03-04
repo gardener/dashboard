@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-container>
         <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="hide">Cancel</v-btn>

@@ -61,6 +61,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="cancel">Cancel</v-btn>
