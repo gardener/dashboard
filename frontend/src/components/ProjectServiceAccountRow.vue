@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="canManageServiceAccountMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon color="error" @click.native.stop="onDelete">
+              <v-btn v-on="on" icon color="action-button" @click.native.stop="onDelete">
                 <v-icon>{{ foreign ? 'mdi-close' : 'mdi-delete' }}</v-icon>
               </v-btn>
             </template>
@@ -175,7 +175,7 @@ export default {
       this.$emit('kubeconfig', this.item)
     },
     onRotateSecret () {
-      this.$emit('rotateSecret', this.item)
+      this.$emit('rotate-secret', this.item)
     },
     onEdit () {
       this.$emit('edit', this.item)

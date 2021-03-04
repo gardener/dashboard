@@ -514,8 +514,7 @@ export default {
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Remove User',
         captionText: 'Confirm Remove User',
-        messageHtml: message.innerHTML,
-        dialogColor: 'error'
+        messageHtml: message.innerHTML
       })
     },
     async onDeleteServiceAccount ({ username }) {
@@ -546,8 +545,7 @@ export default {
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
         captionText: 'Confirm Remove Member',
-        messageHtml: message.innerHTML,
-        dialogColor: 'error'
+        messageHtml: message.innerHTML
       })
     },
     confirmDeleteServiceAccount (name) {
@@ -559,7 +557,6 @@ export default {
         confirmButtonText: 'Delete',
         captionText: 'Confirm Member Deletion',
         messageHtml: message.innerHTML,
-        dialogColor: 'error',
         confirmValue: name
       })
     },
@@ -572,7 +569,6 @@ export default {
         confirmButtonText: 'Rotate',
         captionText: 'Confirm Service Account Secret Rotation',
         messageHtml: message.innerHTML,
-        dialogColor: 'error',
         confirmValue: name
       })
     },

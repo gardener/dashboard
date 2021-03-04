@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-card-title class="error">
+      <v-card-title class="toolbar-background">
         <v-icon x-large class="toolbar-title--text icon">mdi-alert-outline</v-icon>
         <span class="headline ml-5 toolbar-title--text">Confirm Delete</span>
       </v-card-title>
@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="hide">Cancel</v-btn>
-        <v-btn text @click.native="onDeleteSecret" color="error">Delete Secret</v-btn>
+        <v-btn text @click.native="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
