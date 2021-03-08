@@ -40,8 +40,6 @@ SPDX-License-Identifier: Apache-2.0
       :max-height="maxHeight"
       :confirm-value="confirmValue"
       :confirm-message="confirmMessage"
-      :confirm-color="dialogColor"
-      :default-color="dialogColor"
       :disable-confirm-input-focus="disableConfirmInputFocus"
       ref="gDialog"
     >
@@ -116,10 +114,6 @@ export default {
     smallIcon: {
       type: Boolean,
       default: false
-    },
-    dialogColor: {
-      type: String,
-      default: 'toolbar-background'
     },
     disabled: {
       type: Boolean,
