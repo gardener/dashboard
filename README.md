@@ -7,7 +7,7 @@
 
 ## Demo
 
-<img src="docs/images/dashboard-demo.gif" alt="Gardener Demo" width="600"/>
+<img src="docs/images/dashboard-demo.gif" alt="Gardener Demo" />
 
 ## Documentation
 
