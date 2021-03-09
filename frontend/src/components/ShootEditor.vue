@@ -203,9 +203,11 @@ export default {
       'canPatchShoots'
     ]),
     value () {
-      const data = cloneDeep(this.shootContent)
+      let data = cloneDeep(this.shootContent)
       if (data) {
-        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        delete data.metadata.managedFields
+        return data
       }
       return undefined
     },
@@ -532,4 +534,22 @@ export default {
     background-color: map-get($grey, 'lighten-4') !important;
   }
 
+  .seti {
+    .CodeMirror-hint {
+      background-color: #000;
+      .ghint-type  {
+        color: #fff;
+      }
+    }
+
+    .CodeMirror-hint .ghint-desc  {
+      .description {
+        color: map-get($grey, 'lighten-3');
+      }
+    }
+
+    .CodeMirror-hint-active {
+      background-color: map-get($grey, 'darken-4') !important;
+    }
+  }
 </style>
