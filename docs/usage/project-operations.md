@@ -22,11 +22,11 @@ It's recommended that you get acquainted with the resources in the [Gardener API
 ## Downloading `kubeconfig` for remote project operations
 The `kubeconfig` for project operations is different from the one for cluster operations. It has a larger scope and allows a different set of operations that are applicable for a project administrator role, such as lifecycle control on clusters and managing project members.
 
-Depending on your goal, you create a service account suitable for automation and download its `kubeconfig`, or you can get a user-specific `kubeconfig`. The difference is the identity on behalf of which the operations are performed. 
+Depending on your goal, you create a service account suitable for automation and download its `kubeconfig`, or you can get a user-specific `kubeconfig`. The difference is the identity on behalf of which the operations are performed.
 
 ### Download `kubeconfig` for a user
 
-Kubernetes doesn’t offer an own resource type for human users that access the API server. Instead, you either have to manage unique user strings, or use an OpenID-Connect (OIDC) compatible Identity Provider (IDP) to do the job. 
+Kubernetes doesn’t offer an own resource type for human users that access the API server. Instead, you either have to manage unique user strings, or use an OpenID-Connect (OIDC) compatible Identity Provider (IDP) to do the job.
 
 Once the latter is set up, each Gardener user can use the `kubelogin` plugin for `kubectl` to authenticate against the API server:
 
@@ -34,11 +34,11 @@ Once the latter is set up, each Gardener user can use the `kubelogin` plugin for
 
 1. Open the menu at the top right of the screen, then choose **MY ACCOUNT**.
 
-    ![Show account details](images/Show-account-details.png)
+    ![Show account details](../images/Show-account-details.png)
 
 1. On the **Access** card, choose the arrow to see all options for the personalized command-line interface access.
-   
-    ![Show details of OICD login](images/Show-details-of-OICD-login.png)
+
+    ![Show details of OICD login](../images/Show-details-of-OICD-login.png)
 
     > The personal bearer token that is also offered here only provides access for a limited amount of time for one time operations, for example, in `curl` commands. The `kubeconfig` provided for the personalized access is used by `kubelogin` to grant access to the Gardener API for the user permanently by using a refresh token.
 
@@ -48,9 +48,9 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 ### Download `kubeconfig` for a Service Account
 
-1. Go to a service account and choose **Download**. 
+1. Go to a service account and choose **Download**.
 
-    ![Download service account kubeconfig](images/Download-service-account-kubeconfig.png)
+    ![Download service account kubeconfig](../images/Download-service-account-kubeconfig.png)
 
 1. Add the downloaded `kubeconfig` to your configuration.
 
@@ -59,7 +59,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
 ## List Gardener API resources
 
 1. Using a `kubeconfig` for project operations, you can  list the Gardner API resources using the following command:
-   
+
     ```
     kubectl api-resources | grep garden
     ```
@@ -91,7 +91,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     ```
 
 2. Enter the following command to view the Gardener API versions:
-   
+
     ```
     kubectl api-versions | grep garden
     ```
@@ -128,7 +128,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     namespaces                                      []                       [garden-flowering]      [get]
     ```
 
-2. Try to execute an operation that you aren’t allowed, for example: 
+2. Try to execute an operation that you aren’t allowed, for example:
 
     ```
     kubectl get projects
@@ -142,7 +142,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
 
 ## Working with projects
 
-1. You can get the details for a project, where you (or the service account) is a member. 
+1. You can get the details for a project, where you (or the service account) is a member.
 
     ```
     kubectl get project flowering
@@ -158,7 +158,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     > For more information, see [Project](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.Project) in the API reference.
 
 2. To query the names of the members of a project, use the following command:
-   
+
     ```
     kubectl get project docu -o jsonpath='{.spec.members[*].name }'
     ```
@@ -173,7 +173,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
 
 ## Working with clusters
 
-The Gardener domain object for a managed cluster is called [Shoot](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.Shoot).  
+The Gardener domain object for a managed cluster is called [Shoot](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.Shoot).
 
 ### List project clusters
 
@@ -190,7 +190,7 @@ geranium   aws            1.18.3    aws-eu1   geranium.flowering.shoot.<truncate
 ```
 ### Create a new cluster
 
-To create a new cluster using the command line, you need a YAML definition of the `Shoot` resource. 
+To create a new cluster using the command line, you need a YAML definition of the `Shoot` resource.
 
 1. To get started, copy the following YAML definition to a new file, for example, `daffodil.yaml` (or copy file [shoot.yaml](shoot.yaml) to `daffodil.yaml`) and adapt it to your needs.
 
@@ -263,11 +263,11 @@ To create a new cluster using the command line, you need a YAML definition of th
           enabled: false
         kubernetesDashboard:
           enabled: false
-          
+
     ```
 
 1. In your new YAML definition file, replace the value of field `metadata.namespace` with your namespace following the convention `garden-[YOUR-PROJECTNAME]`.
-   
+
 1. Create a cluster using this manifest (with flag `--wait=false` the command returns immediately, otherwise it doesn't return until the process is finished):
 
     ```
@@ -318,8 +318,8 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
     shoot.core.gardener.cloud/daffodil configured
     ```
 
-1. Trigger the deletion. 
-  
+1. Trigger the deletion.
+
     ```
     kubectl delete shoot daffodil --wait=false
     ```
