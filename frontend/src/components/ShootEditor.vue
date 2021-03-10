@@ -534,9 +534,12 @@ export default {
     background-color: map-get($grey, 'lighten-4') !important;
   }
 
+  .CodeMirror-hints.seti {
+    background-color: #000;
+  }
+
   .seti {
     .CodeMirror-hint {
-      background-color: #000;
       .ghint-type  {
         color: #fff;
       }
