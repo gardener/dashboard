@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :confirm-button-text="confirmButtonText"
     :cancel-button-text="cancelButtonText"
     :max-width="maxWidth"
-    :default-color="dialogColor"
     :confirm-value="confirmValue"
     >
     <template v-slot:caption>{{captionText}}</template>
@@ -34,18 +33,16 @@ export default {
       cancelButtonText: undefined,
       captionText: undefined,
       messageHtml: undefined,
-      dialogColor: undefined,
       maxWidth: undefined,
       confirmValue: undefined
     }
   },
   methods: {
-    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth, confirmValue } = {}) {
+    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, maxWidth, confirmValue } = {}) {
       this.confirmButtonText = confirmButtonText || 'Confirm'
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
-      this.dialogColor = dialogColor || 'toolbar-background'
       this.maxWidth = maxWidth || '400'
       this.confirmValue = confirmValue
 

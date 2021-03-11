@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     :confirm-button-text="confirmButtonText"
     max-width="750px"
     max-height="100vh"
-    default-color="primary"
     ref="gDialog"
     >
     <template v-slot:caption>

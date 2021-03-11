@@ -44,8 +44,6 @@ SPDX-License-Identifier: Apache-2.0
       :confirm-disabled="selectedVersionInvalid"
       :error-message.sync="updateErrorMessage"
       :detailed-error-message.sync="updateDetailedErrorMessage"
-      confirm-color="toolbar-background"
-      default-color="toolbar-background"
       ref="gDialog"
       >
       <template v-slot:caption>Update Cluster</template>
