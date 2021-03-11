@@ -138,6 +138,7 @@ import 'codemirror/theme/seti.css'
 // lodash
 import get from 'lodash/get'
 import pick from 'lodash/pick'
+import omit from 'lodash/omit'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
@@ -206,7 +207,7 @@ export default {
       let data = cloneDeep(this.shootContent)
       if (data) {
         data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
-        delete data.metadata.managedFields
+        data = omit(data, 'metadata.managedFields')
         return data
       }
       return undefined
