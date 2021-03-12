@@ -2,7 +2,7 @@
 
 Install all dependencies via yarn
 
-<img style="width: 200px" src="https://raw.githubusercontent.com/yarnpkg/assets/master/yarn-kitten-full.png">
+<img width="200" src="https://raw.githubusercontent.com/yarnpkg/assets/master/yarn-kitten-full.png">
 
 ```sh
 yarn
