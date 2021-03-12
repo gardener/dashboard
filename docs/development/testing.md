@@ -3,7 +3,7 @@
 ## Jest
 We use Jest JavaScript Testing Framework
 
-<img style="width: 200px" src="https://jestjs.io/img/jest.svg">
+<img width="200" src="https://jestjs.io/img/jest.svg">
 
 * Jest can collect code coverage information​
 * Jest support snapshot testing out of the box​
@@ -28,7 +28,7 @@ yarn test
 ## Lint
 We use ESLint for static code analyzing.
 
-<img style="width: 200px" src="https://d33wubrfki0l68.cloudfront.net/204482ca413433c80cd14fe369e2181dd97a2a40/092e2/assets/img/logo.svg">
+<img width="200" src="https://d33wubrfki0l68.cloudfront.net/204482ca413433c80cd14fe369e2181dd97a2a40/092e2/assets/img/logo.svg">
 
 To execute, run
 
