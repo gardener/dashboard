@@ -93,6 +93,19 @@ SPDX-License-Identifier: Apache-2.0
             </copy-btn>
           </div>
           <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
+                    <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
         </div>
         <div class="d-flex fill-height align-center justify-end">
           <v-divider vertical></v-divider>
@@ -138,7 +151,6 @@ import 'codemirror/theme/seti.css'
 // lodash
 import get from 'lodash/get'
 import pick from 'lodash/pick'
-import omit from 'lodash/omit'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
@@ -191,7 +203,8 @@ export default {
         property: undefined,
         type: undefined,
         description: undefined
-      }
+      },
+      showManagedFields: false
     }
   },
   mixins: [shootItem],
@@ -207,7 +220,9 @@ export default {
       let data = cloneDeep(this.shootContent)
       if (data) {
         data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
-        data = omit(data, 'metadata.managedFields')
+        if (!this.showManagedFields) {
+          delete data.metadata.managedFields
+        }
         return data
       }
       return undefined
