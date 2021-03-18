@@ -145,8 +145,6 @@ const state = {
   darkTheme: false,
   darkMode: 0
 }
-
-const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 class Shortcut {
   constructor (shortcut, unverified = true) {
     Object.assign(this, shortcut)
@@ -1505,6 +1503,7 @@ const mutations = {
       localStorage.setItem('global/setting-dark-mode', value)
     }
 
+    const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     switch (parseInt(state.darkMode)) {
       case 1:
         Vue.vuetify.framework.theme.dark = true
