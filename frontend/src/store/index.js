@@ -142,9 +142,11 @@ const state = {
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     }
   },
-  darkMode: false
+  darkTheme: false,
+  darkMode: 0
 }
 
+const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 class Shortcut {
   constructor (shortcut, unverified = true) {
     Object.assign(this, shortcut)
@@ -1498,9 +1500,24 @@ const mutations = {
     state.splitpaneResize = value
   },
   SET_DARK_MODE (state, value) {
-    state.darkMode = value
-    localStorage.setItem('global/dark-mode', value)
-    Vue.vuetify.framework.theme.dark = value
+    if (value !== undefined) {
+      state.darkMode = value
+      localStorage.setItem('global/setting-dark-mode', value)
+    }
+
+    switch (parseInt(state.darkMode)) {
+      case 1:
+        Vue.vuetify.framework.theme.dark = true
+        state.darkTheme = true
+        break
+      case 2:
+        Vue.vuetify.framework.theme.dark = darkMediaQuery.matches
+        state.darkTheme = darkMediaQuery.matches
+        break
+      default:
+        Vue.vuetify.framework.theme.dark = false
+        state.darkTheme = false
+    }
   }
 }
 

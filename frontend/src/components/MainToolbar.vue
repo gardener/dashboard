@@ -104,8 +104,17 @@ SPDX-License-Identifier: Apache-2.0
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
-            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
-            <span class="primary--text text-button">Dark</span>
+            <v-btn-toggle v-model="darkMode" borderless mandatory @click.native.stop>
+              <v-btn small>
+                <v-icon color="primary">mdi-brightness-7</v-icon>
+              </v-btn>
+              <v-btn small>
+                <v-icon color="primary">mdi-brightness-4</v-icon>
+              </v-btn>
+              <v-btn small>
+                <v-icon color="primary">mdi-brightness-auto</v-icon>
+              </v-btn>
+            </v-btn-toggle>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -118,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" :background-color="darkMode ? 'black' : 'white'">
+      <v-tabs slider-color="primary darken-3" :background-color="darkTheme ? 'black' : 'white'">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -163,7 +172,8 @@ export default {
       'title',
       'sidebar',
       'user',
-      'cfg'
+      'cfg',
+      'darkTheme'
     ]),
     ...mapGetters([
       'username',
@@ -201,7 +211,7 @@ export default {
     },
     darkMode: {
       get () {
-        return this.$store.state.darkMode
+        return parseInt(this.$store.state.darkMode)
       },
       set (value) {
         this.setDarkMode(value)

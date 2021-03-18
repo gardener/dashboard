@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <vue-snotify :class="darkMode ? 'snotify-dark' : 'snotify-light'"></vue-snotify>
+  <vue-snotify :class="darkTheme ? 'snotify-dark' : 'snotify-light'"></vue-snotify>
 </template>
 
 <script>
@@ -21,7 +21,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'darkMode'
+      'darkTheme'
     ]),
     ...mapGetters([
       'alertMessage',
