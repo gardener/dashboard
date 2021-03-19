@@ -105,15 +105,30 @@ SPDX-License-Identifier: Apache-2.0
           <v-card-actions class="px-3">
             <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
             <v-btn-toggle v-model="darkMode" borderless mandatory @click.native.stop>
-              <v-btn small>
-                <v-icon color="primary">mdi-brightness-7</v-icon>
-              </v-btn>
-              <v-btn small>
-                <v-icon color="primary">mdi-brightness-4</v-icon>
-              </v-btn>
-              <v-btn small>
-                <v-icon color="primary">mdi-brightness-auto</v-icon>
-              </v-btn>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn small v-on="on">
+                    <v-icon color="primary">mdi-brightness-7</v-icon>
+                  </v-btn>
+                </template>
+                <span>Light Mode</span>
+              </v-tooltip>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn small v-on="on">
+                    <v-icon color="primary">mdi-brightness-4</v-icon>
+                  </v-btn>
+                </template>
+                <span>Dark Mode</span>
+              </v-tooltip>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn small v-on="on">
+                    <v-icon color="primary">mdi-brightness-auto</v-icon>
+                  </v-btn>
+                </template>
+                <span>Auto</span>
+              </v-tooltip>
             </v-btn-toggle>
           </v-card-actions>
           <v-divider></v-divider>
