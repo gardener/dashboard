@@ -93,6 +93,19 @@ SPDX-License-Identifier: Apache-2.0
             </copy-btn>
           </div>
           <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
+                    <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
         </div>
         <div class="d-flex fill-height align-center justify-end">
           <v-divider vertical></v-divider>
@@ -190,7 +203,8 @@ export default {
         property: undefined,
         type: undefined,
         description: undefined
-      }
+      },
+      showManagedFields: false
     }
   },
   mixins: [shootItem],
@@ -203,9 +217,13 @@ export default {
       'canPatchShoots'
     ]),
     value () {
-      const data = cloneDeep(this.shootContent)
+      let data = cloneDeep(this.shootContent)
       if (data) {
-        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        if (!this.showManagedFields) {
+          delete data.metadata.managedFields
+        }
+        return data
       }
       return undefined
     },
@@ -532,4 +550,25 @@ export default {
     background-color: map-get($grey, 'lighten-4') !important;
   }
 
+  .CodeMirror-hints.seti {
+    background-color: #000;
+  }
+
+  .seti {
+    .CodeMirror-hint {
+      .ghint-type  {
+        color: #fff;
+      }
+    }
+
+    .CodeMirror-hint .ghint-desc  {
+      .description {
+        color: map-get($grey, 'lighten-3');
+      }
+    }
+
+    .CodeMirror-hint-active {
+      background-color: map-get($grey, 'darken-4') !important;
+    }
+  }
 </style>
