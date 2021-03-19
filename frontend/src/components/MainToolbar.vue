@@ -92,6 +92,32 @@ SPDX-License-Identifier: Apache-2.0
               <div class="title">{{displayName}}</div>
               <div class="caption">{{username}}</div>
               <div class="caption" v-if="isAdmin">Operator</div>
+              <v-btn-toggle v-model="colorScheme" borderless mandatory @click.native.stop class="mt-3">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-white-balance-sunny</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Light Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-weather-night</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Dark Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-brightness-auto</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Auto</span>
+                </v-tooltip>
+              </v-btn-toggle>
             </div>
           </v-card-title>
           <v-divider></v-divider>
@@ -100,36 +126,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>
-          </v-card-actions>
-          <v-divider></v-divider>
-          <v-card-actions class="px-3">
-            <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
-            <v-btn-toggle v-model="darkMode" borderless mandatory @click.native.stop>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn small v-on="on">
-                    <v-icon color="primary">mdi-brightness-7</v-icon>
-                  </v-btn>
-                </template>
-                <span>Light Mode</span>
-              </v-tooltip>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn small v-on="on">
-                    <v-icon color="primary">mdi-brightness-4</v-icon>
-                  </v-btn>
-                </template>
-                <span>Dark Mode</span>
-              </v-tooltip>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn small v-on="on">
-                    <v-icon color="primary">mdi-brightness-auto</v-icon>
-                  </v-btn>
-                </template>
-                <span>Auto</span>
-              </v-tooltip>
-            </v-btn-toggle>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -175,7 +171,7 @@ export default {
     ...mapActions([
       'setSidebar',
       'setError',
-      'setDarkMode'
+      'setColorScheme'
     ]),
     handleLogout () {
       this.$auth.signout()
@@ -224,12 +220,29 @@ export default {
         query
       }
     },
-    darkMode: {
+    colorScheme: {
       get () {
-        return parseInt(this.$store.state.darkMode)
+        switch (this.$store.state.colorScheme) {
+          case 'light':
+            return 0
+          case 'dark':
+            return 1
+          default:
+            return 2
+        }
       },
       set (value) {
-        this.setDarkMode(value)
+        switch (value) {
+          case 0:
+            this.setColorScheme('light')
+            break
+          case 1:
+            this.setColorScheme('dark')
+            break
+          default:
+            this.setColorScheme('auto')
+            break
+        }
       }
     }
   }

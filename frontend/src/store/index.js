@@ -57,6 +57,7 @@ import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
 import moment from 'moment-timezone'
 
+import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
@@ -77,7 +78,7 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
 // plugins
-const plugins = []
+const plugins = [createMediaPlugin(window)]
 if (debug) {
   plugins.push(createLogger())
 }
@@ -143,7 +144,7 @@ const state = {
     }
   },
   darkTheme: false,
-  darkMode: 0
+  colorScheme: 'auto'
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1427,9 +1428,9 @@ const actions = {
     commit('SPLITPANE_RESIZE', value)
     return state.splitpaneResize
   },
-  setDarkMode ({ commit }, darkMode) {
-    commit('SET_DARK_MODE', darkMode)
-    return state.darkMode
+  setColorScheme ({ commit }, colorScheme) {
+    commit('SET_COLOR_SCHEME', colorScheme)
+    return state.colorScheme
   }
 }
 
@@ -1497,26 +1498,13 @@ const mutations = {
   SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
-  SET_DARK_MODE (state, value) {
-    if (value !== undefined) {
-      state.darkMode = value
-      localStorage.setItem('global/setting-dark-mode', value)
-    }
-
-    const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    switch (parseInt(state.darkMode)) {
-      case 1:
-        Vue.vuetify.framework.theme.dark = true
-        state.darkTheme = true
-        break
-      case 2:
-        Vue.vuetify.framework.theme.dark = darkMediaQuery.matches
-        state.darkTheme = darkMediaQuery.matches
-        break
-      default:
-        Vue.vuetify.framework.theme.dark = false
-        state.darkTheme = false
-    }
+  SET_COLOR_SCHEME (state, value) {
+    state.colorScheme = value
+    localStorage.setItem('global/color-scheme', value)
+  },
+  SET_DARK_THEME (state, value) {
+    state.darkTheme = value
+    Vue.vuetify.framework.theme.dark = value
   }
 }
 
