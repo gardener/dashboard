@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import './matchMedia.mock' // Must be imported before the tested file
 import utils from '@/utils'
 import map from 'lodash/map'
 

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import './matchMedia.mock' // Must be imported before the tested file
 import { mount } from '@vue/test-utils'
 import MainNavigation from '@/components/MainNavigation.vue'
 import Vue from 'vue'
