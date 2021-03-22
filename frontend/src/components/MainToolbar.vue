@@ -153,6 +153,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
 import Breadcrumb from '@/components/Breadcrumb'
 import InfoDialog from '@/components/dialogs/InfoDialog'
+import { ColorSchemeEnum } from '@/store/plugins/mediaPlugin.js'
 
 export default {
   name: 'toolbar-background',
@@ -223,9 +224,9 @@ export default {
     colorScheme: {
       get () {
         switch (this.$store.state.colorScheme) {
-          case 'light':
+          case ColorSchemeEnum.LIGHT:
             return 0
-          case 'dark':
+          case ColorSchemeEnum.DARK:
             return 1
           default:
             return 2
@@ -234,13 +235,13 @@ export default {
       set (value) {
         switch (value) {
           case 0:
-            this.setColorScheme('light')
+            this.setColorScheme(ColorSchemeEnum.LIGHT)
             break
           case 1:
-            this.setColorScheme('dark')
+            this.setColorScheme(ColorSchemeEnum.DARK)
             break
           default:
-            this.setColorScheme('auto')
+            this.setColorScheme(ColorSchemeEnum.AUTO)
             break
         }
       }
