@@ -4,17 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-export const ColorSchemeEnum = {
-  DARK: 'dark',
-  LIGHT: 'light',
-  AUTO: 'auto'
-}
-
 export default function (window) {
   return store => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     mq.addEventListener('change', e => {
-      if (![ColorSchemeEnum.DARK, ColorSchemeEnum.LIGHT].includes(store.state.colorScheme)) {
+      if (!['dark', 'light'].includes(store.state.colorScheme)) {
         store.commit('SET_DARK_THEME', e.matches)
       }
     })
@@ -22,10 +16,10 @@ export default function (window) {
     store.subscribe((mutation) => {
       if (mutation.type === 'SET_COLOR_SCHEME') {
         switch (store.state.colorScheme) {
-          case ColorSchemeEnum.DARK:
+          case 'dark':
             store.commit('SET_DARK_THEME', true)
             break
-          case ColorSchemeEnum.LIGHT:
+          case 'light':
             store.commit('SET_DARK_THEME', false)
             break
           default:
