@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
                       <v-icon color="primary">mdi-brightness-auto</v-icon>
                     </v-btn>
                   </template>
-                  <span>Auto</span>
+                  <span>Automatically choose theme based on your system settings</span>
                 </v-tooltip>
               </v-btn-toggle>
             </div>
