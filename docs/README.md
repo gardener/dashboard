@@ -2,7 +2,7 @@
 
 ## Overview
 
-* [Dashboard Architecture](./architecture)
+* [Dashboard Architecture](./architecture/README.md)
 * [Gardener landing page `gardener.cloud`](https://gardener.cloud/)
 * ["Gardener, the Kubernetes Botanist" blog on kubernetes.io](https://kubernetes.io/blog/2018/05/17/gardener/)
 * ["Gardener Project Update" blog on kubernetes.io](https://kubernetes.io/blog/2019/12/02/gardener-project-update/)

@@ -11,7 +11,7 @@
 
 ## Documentation
 
-[Gardener Dashboard Documentation](./docs)
+[Gardener Dashboard Documentation](./docs/README.md)
 
 ## People
 
