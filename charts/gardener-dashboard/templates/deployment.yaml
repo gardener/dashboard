@@ -47,6 +47,12 @@ spec:
           - key: config.yaml
             path: config.yaml
           defaultMode: 420
+      {{- if .Values.frontendConfig.assets }}
+      - name: assets
+        configMap:
+          name: dashboard-assets
+          defaultMode: 0444
+      {{- end }}
       {{- if .Values.kubeconfig }}
       - name: gardener-dashboard-secret-kubeconfig
         secret:
@@ -132,6 +138,10 @@ spec:
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard
+          {{- if .Values.frontendConfig.assets }}
+          - name: assets
+            mountPath: /usr/src/app/public/static/assets
+          {{- end }}
           {{- if .Values.kubeconfig }}
           - name: gardener-dashboard-secret-kubeconfig
             mountPath: /etc/gardener-dashboard/secrets/kubeconfig
