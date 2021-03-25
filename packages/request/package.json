@@ -82,8 +82,8 @@
       "global": {
         "branches": 80,
         "functions": 86,
-        "lines": 90,
-        "statements": 89
+        "lines": 89,
+        "statements": 88
       }
     },
     "setupFilesAfterEnv": [

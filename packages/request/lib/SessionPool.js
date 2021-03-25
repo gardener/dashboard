@@ -13,7 +13,8 @@ const Semaphore = require('./Semaphore')
 const { TimeoutError, isAbortError } = require('./errors')
 
 const {
-  NGHTTP2_CANCEL
+  NGHTTP2_CANCEL,
+  NGHTTP2_INTERNAL_ERROR
 } = http2.constants
 
 const kSemaphore = Symbol('semaphore')
@@ -29,6 +30,7 @@ class SessionPool {
     this.sessions = new Set()
     this.tlsSession = undefined
     this.queue = []
+    this.scalingUp = false
   }
 
   get options () {
@@ -92,10 +94,9 @@ class SessionPool {
   }
 
   async dispatch () {
-    let scalingUp = false
     const scaleUp = async () => {
-      if (!scalingUp) {
-        scalingUp = true
+      if (!this.scalingUp) {
+        this.scalingUp = true
         try {
           await this.createSession()
         } catch (err) {
@@ -106,7 +107,7 @@ class SessionPool {
           const milliseconds = 1000 + Math.floor(100 * (2 * Math.random() - 1))
           await delay(milliseconds)
         } finally {
-          scalingUp = false
+          this.scalingUp = false
           this.dispatch()
         }
       }
@@ -143,20 +144,26 @@ class SessionPool {
     const [session, release] = await this.acquire()
     clearTimeout(session[kTimeoutId])
     logger.trace('Session %s - semaphore value is %d (opening stream)', origin, session[kSemaphore].value)
-    const stream = session.request(headers, options)
-    stream.once('error', err => {
-      if (!isAbortError(err)) {
-        logger.error('Session %s - Stream processing error: %s', origin, err.message)
-      }
-    })
-    stream.once('close', () => {
+    try {
+      const stream = session.request(headers, options)
+      stream.once('error', err => {
+        if (!isAbortError(err)) {
+          logger.error('Session %s - Stream processing error: %s', origin, err.message)
+        }
+      })
+      stream.once('close', () => {
+        release()
+        logger.trace('Session %s - semaphore value is %d (stream closed)', origin, session[kSemaphore].value)
+        if (session[kSemaphore].value >= session[kSemaphore].maxConcurrency) {
+          this.setSessionTimeout(session)
+        }
+      })
+      return stream
+    } catch (err) {
       release()
-      logger.trace('Session %s - semaphore value is %d (stream closed)', origin, session[kSemaphore].value)
-      if (session[kSemaphore].value >= session[kSemaphore].maxConcurrency) {
-        this.setSessionTimeout(session)
-      }
-    })
-    return stream
+      logger.error('Session %s - request error: %s', origin, err.message)
+      throw err
+    }
   }
 
   setSessionTimeout (session) {
@@ -176,7 +183,12 @@ class SessionPool {
       }
     }
     const ping = () => {
-      session.ping(pong)
+      try {
+        session.ping(pong)
+      } catch (err) {
+        logger.error('Session %s - heartbeat error: %s', origin, err.message)
+        this.deleteSession(session, err, NGHTTP2_INTERNAL_ERROR)
+      }
     }
     const pong = (err, duration) => {
       if (err) {
@@ -210,13 +222,21 @@ class SessionPool {
       const session = http2.connect(origin, options)
       session[kTimestamp] = Date.now()
       session[kSemaphore] = new Semaphore(peerMaxConcurrentStreams)
+      const duration = () => Date.now() - session[kTimestamp]
       // tls session can be used for resumption
       session.socket.once('session', session => {
+        logger.debug('Session %s - received tlsSocket session after %d ms', origin, duration())
         this.tlsSession = session
       })
       // update maxConcurrency of semaphore
-      const setMaxConcurrency = () => {
-        session[kSemaphore].maxConcurrency = session.remoteSettings.maxConcurrentStreams
+      const setMaxConcurrency = settings => {
+        const oldValue = session[kSemaphore].maxConcurrency
+        const newValue = settings.maxConcurrentStreams
+        if (oldValue !== newValue) {
+          const change = oldValue < newValue ? 'increased' : 'creased'
+          logger.debug('Session %s - maximum concurrency %s to %d', origin, change, newValue)
+          session[kSemaphore].maxConcurrency = newValue
+        }
       }
       // handle connect timeout
       const timeoutId = setTimeout(() => {
@@ -236,13 +256,12 @@ class SessionPool {
       })
       // handle connect
       session.once('connect', () => {
-        logger.debug('Session %s - connected after %d ms', origin, Date.now() - session[kTimestamp])
+        logger.debug('Session %s - connected after %d ms', origin, duration())
         session.removeAllListeners('error')
         clearTimeout(timeoutId)
-        setMaxConcurrency()
-        session.once('remoteSettings', setMaxConcurrency)
+        setMaxConcurrency(session.remoteSettings)
         session.once('close', () => {
-          logger.info('Session %s - closed after %d ms', origin, Date.now() - session[kTimestamp])
+          logger.info('Session %s - closed after %d ms', origin, duration())
           this.deleteSession(session)
         })
         session.on('error', err => {
@@ -256,6 +275,8 @@ class SessionPool {
         this.addSession(session)
         resolve()
       })
+      // handle remoteSettings
+      session.on('remoteSettings', setMaxConcurrency)
     })
   }
 

@@ -173,24 +173,17 @@ describe('SessionPool', () => {
       ])
       clearTimeout.mockClear()
 
-      // first update of maxConcurrency
-      expect(setMaxConcurrencySpy).toBeCalledTimes(1)
-      expect(setMaxConcurrencySpy.mock.calls[0]).toEqual([
-        session.remoteSettings.maxConcurrentStreams
-      ])
-      setMaxConcurrencySpy.mockClear()
-
-      // listening on 'error' events
-      expect(session.on).toBeCalledTimes(1)
-      expect(session.on.mock.calls[0]).toEqual([
-        'error', expect.any(Function)
+      // listening on 'remoteSettings' and 'error' events
+      expect(session.on).toBeCalledTimes(2)
+      expect(session.on.mock.calls).toEqual([
+        ['remoteSettings', expect.any(Function)],
+        ['error', expect.any(Function)]
       ])
       session.on.mockClear()
 
-      // listening on the 'remoteSettings' and 'close' event
-      expect(session.once).toBeCalledTimes(2)
+      // listening on the 'close' event
+      expect(session.once).toBeCalledTimes(1)
       expect(session.once.mock.calls).toEqual([
-        ['remoteSettings', expect.any(Function)],
         ['close', expect.any(Function)]
       ])
       session.once.mockClear()
@@ -212,7 +205,7 @@ describe('SessionPool', () => {
 
       // receive remote settings
       session.remoteSettings.maxConcurrentStreams = 250
-      session.emit('remoteSettings')
+      session.emit('remoteSettings', session.remoteSettings)
 
       // second update of maxConcurrency
       expect(setMaxConcurrencySpy).toBeCalledTimes(1)
