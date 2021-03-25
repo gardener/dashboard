@@ -9,7 +9,7 @@
 const jwt = require('jsonwebtoken')
 
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { attach, beforeRequest, beforeRedirect, afterResponse } = require('../lib/debug')
+const { attach, beforeRequest, afterResponse } = require('../lib/debug')
 
 describe('kube-client', () => {
   describe('debug', () => {
@@ -68,7 +68,6 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(isDisabledStub).toHaveBeenCalledTimes(1)
       expect(hooks.beforeRequest[0]).toBe(beforeRequest)
       expect(hooks.afterResponse[0]).toBe(afterResponse)
-      expect(hooks.beforeRedirect[0]).toBe(beforeRedirect)
     })
 
     it('should log a http request', () => {
@@ -116,26 +115,6 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(args.httpVersion).toBe(httpVersion)
       expect(args.headers.foo).toBe('bar')
       expect(args.body).toBe(body)
-    })
-
-    it('should log a http redirect', () => {
-      const xRequestId = '42'
-      const request = { options: { headers: { 'x-request-id': xRequestId } } }
-      const headers = { foo: 'bar' }
-      const options = { url, method, headers, body }
-      const redirectUrls = ['http://foo.org/bar']
-      const response = { headers, httpVersion, statusCode, statusMessage, redirectUrls, request }
-
-      beforeRedirect(options, response)
-      expect(responseStub).toHaveBeenCalledTimes(1)
-      expect(requestStub).toHaveBeenCalledTimes(1)
-      const [args] = responseStub.mock.calls[0]
-      expect(args.id).toBe(xRequestId)
-      expect(args.statusCode).toBe(statusCode)
-      expect(args.statusMessage).toBe(statusMessage)
-      expect(args.httpVersion).toBe(httpVersion)
-      expect(args.headers.foo).toBe('bar')
-      expect(JSON.parse(args.body)).toEqual({ redirectUrls })
     })
   })
 })

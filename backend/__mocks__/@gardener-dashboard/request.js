@@ -41,6 +41,10 @@ class MockClient {
     return this[defaults]
   }
 
+  stream (path, options) {
+    return this.request(path, options)
+  }
+
   request (path, { method = 'get', searchParams, headers = {}, json, body } = {}) {
     headers = {
       ...this.defaults.options.headers,

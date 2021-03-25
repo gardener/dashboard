@@ -62,7 +62,7 @@ describe('cache', function () {
       it('should register an EventListener for "issue"', function () {
         const fn = () => {}
         const onSpy = jest.spyOn(emitter, 'on')
-        cache.onIssue(fn)
+        cache.on('issue', fn)
         expect(onSpy).toHaveBeenCalledTimes(1)
         expect(onSpy.mock.calls[0]).toEqual(['issue', fn])
       })
@@ -72,7 +72,7 @@ describe('cache', function () {
       it('should register an EventListener for "comment"', function () {
         const fn = () => {}
         const onSpy = jest.spyOn(emitter, 'on')
-        cache.onComment(fn)
+        cache.on('comment', fn)
         expect(onSpy).toHaveBeenCalledTimes(1)
         expect(onSpy.mock.calls[0]).toEqual(['comment', fn])
       })

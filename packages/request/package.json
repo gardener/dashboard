@@ -24,10 +24,14 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "got": "^11.5.2",
-    "http-errors": "^1.8.0"
+    "@gardener-dashboard/logger": "workspace:*",
+    "http-errors": "^1.8.0",
+    "lodash": "^4.17.19",
+    "type-is": "^1.6.18"
   },
   "devDependencies": {
+    "@gardener-dashboard/test-utils": "workspace:*",
+    "abort-controller": "^3.0.0",
     "eslint": "^7.7.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
@@ -35,7 +39,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^26.4.2"
+    "jest": "^26.6.3"
   },
   "eslintConfig": {
     "env": {
@@ -52,7 +56,9 @@
       "standard",
       "plugin:jest/recommended"
     ],
-    "globals": {},
+    "globals": {
+      "fixtures": true
+    },
     "parserOptions": {
       "ecmaVersion": 11
     },
@@ -64,18 +70,28 @@
     "restoreMocks": true,
     "verbose": true,
     "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
     "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "\\.pnp\\.[^\\/]+$"
+    ],
     "coverageThreshold": {
       "global": {
-        "branches": 95,
-        "functions": 100,
-        "lines": 100,
-        "statements": 100
+        "branches": 80,
+        "functions": 86,
+        "lines": 90,
+        "statements": 89
       }
-    }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "engines": {
-    "node": "^14.15.0",
-    "yarn": "^2.3.3"
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
   }
 }

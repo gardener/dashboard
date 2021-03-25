@@ -8,7 +8,6 @@
 
 const assert = require('assert').strict
 const Client = require('./Client')
-const WatchBuilder = require('./WatchBuilder')
 const Store = require('./cache/Store')
 const { Resources } = require('./resources')
 const kubeconfig = require('@gardener-dashboard/kube-config')
@@ -40,6 +39,5 @@ Object.assign(exports, {
   createClient,
   dashboardClient,
   Resources,
-  Store,
-  WatchBuilder
+  Store
 })

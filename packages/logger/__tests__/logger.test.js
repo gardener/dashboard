@@ -63,7 +63,6 @@ describe('logger', () => {
   const statusCode = 404
   const statusMessage = 'Not found'
   const responseArgs = { id, statusCode, statusMessage, body }
-  const connectArgs = { url, user, headers }
   let time
   let mockTimestamp
 
@@ -173,12 +172,5 @@ describe('logger', () => {
     logger.response(responseArgs)
     const msg = `HTTP/1.1 ${statusCode} ${statusMessage} [${id}]\n${logger.inspect(body)}`
     expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgBlue('res') + '  : ' + msg])
-  })
-
-  it('should log a connect message', () => {
-    const logger = createNoisyLogger()
-    logger.connect(connectArgs)
-    const msg = `CONNECT ${url.pathname} ${user.type}=${user.id} ${url.host}`
-    expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg])
   })
 })

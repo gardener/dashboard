@@ -3,41 +3,51 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #### Builder ####
-FROM  eu.gcr.io/gardener-project/3rd/node:14-alpine3.12 as builder
+FROM eu.gcr.io/gardener-project/3rd/node:15-alpine3.13 as builder
 
 WORKDIR /usr/src/app
 
 COPY . .
 
 # validate zero-installs project and disable network
-RUN yarn config set enableNetwork false \
-    && yarn install --immutable --immutable-cache
+RUN yarn config set enableNetwork false
+RUN yarn install --immutable --immutable-cache
 
 # run lint in all workspaces
-RUN yarn workspaces foreach --all run lint
+RUN yarn workspace @gardener-dashboard/logger      run lint
+RUN yarn workspace @gardener-dashboard/request     run lint
+RUN yarn workspace @gardener-dashboard/kube-config run lint
+RUN yarn workspace @gardener-dashboard/kube-client run lint
+RUN yarn workspace @gardener-dashboard/backend     run lint
+RUN yarn workspace @gardener-dashboard/frontend    run lint
 
 # run test in all workspaces
-RUN yarn workspaces foreach --all run test-coverage
+RUN yarn workspace @gardener-dashboard/logger      run test-coverage
+RUN yarn workspace @gardener-dashboard/request     run test-coverage
+RUN yarn workspace @gardener-dashboard/kube-config run test-coverage
+RUN yarn workspace @gardener-dashboard/kube-client run test-coverage
+RUN yarn workspace @gardener-dashboard/backend     run test-coverage
+RUN yarn workspace @gardener-dashboard/frontend    run test-coverage
 
 # bump backend and frontend version
-RUN yarn workspaces foreach --include "*/(frontend|backend)" version "$(cat VERSION)"
+RUN yarn workspace @gardener-dashboard/backend     version "$(cat VERSION)"
+RUN yarn workspace @gardener-dashboard/frontend    version "$(cat VERSION)"
 
 # run backend production install
-RUN yarn workspace @gardener-dashboard/backend prod-install --pack /usr/src/build
+RUN yarn workspace @gardener-dashboard/backend     prod-install --pack /usr/src/build
 
 # run frontend build
-RUN yarn workspace @gardener-dashboard/frontend run build
+RUN yarn workspace @gardener-dashboard/frontend    run build
 
 # copy files to production directory
 RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM eu.gcr.io/gardener-project/3rd/alpine:3.12 as release
+FROM eu.gcr.io/gardener-project/3rd/alpine:3.13 as release
 
-RUN addgroup -g 1000 node \
-    && adduser -u 1000 -G node -s /bin/sh -D node \
-    && apk add --no-cache tini libstdc++
+RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
+RUN apk add --no-cache tini libstdc++
 
 WORKDIR /usr/src/app
 

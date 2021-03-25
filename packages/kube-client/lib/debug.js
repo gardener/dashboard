@@ -78,15 +78,6 @@ function getUser ({ headers, key, cert }) {
   return user.id ? user : undefined
 }
 
-function beforeConnect (url, options) {
-  const { headers } = options
-  logger.connect({
-    url,
-    user: getUser(options),
-    headers: clone(headers)
-  })
-}
-
 function beforeRequest (options) {
   const { url, method, headers, body } = options
   options[xRequestStart] = Date.now()
@@ -100,22 +91,6 @@ function beforeRequest (options) {
     headers: clone(headers),
     body
   })
-}
-
-function beforeRedirect (options, response) {
-  const { headers, httpVersion, statusCode, statusMessage, redirectUrls, request } = response
-  const id = get(request, 'options.headers["x-request-id"]')
-  logger.response({
-    id,
-    statusCode,
-    statusMessage,
-    httpVersion,
-    headers: clone(headers),
-    body: JSON.stringify({
-      redirectUrls
-    })
-  })
-  beforeRequest(options)
 }
 
 function addHook (options, hook) {
@@ -133,15 +108,12 @@ function attach (options = {}) {
   if (!logger.isDisabled(LEVELS.debug)) {
     addHook(options, beforeRequest)
     addHook(options, afterResponse)
-    addHook(options, beforeRedirect)
   }
   return options
 }
 
 module.exports = {
   attach,
-  beforeConnect,
   beforeRequest,
-  beforeRedirect,
   afterResponse
 }

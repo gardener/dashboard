@@ -12,8 +12,5 @@ module.exports = {
     client: Symbol('http.client'),
     agent: Symbol('http.agent'),
     request: Symbol('http.request')
-  },
-  ws: {
-    connect: Symbol('ws.connect')
   }
 }

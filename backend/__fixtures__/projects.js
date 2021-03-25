@@ -260,7 +260,7 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
-  watch ({ phase = 'Ready', milliseconds } = {}) {
+  watch ({ phase = 'Ready', end = false, milliseconds } = {}) {
     return headers => {
       const [pathname] = split(headers[':path'], '?')
       const matchResult = matchList(pathname)
@@ -268,23 +268,24 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const fieldSelector = parseFieldSelector(headers)
-      const stream = new PassThrough()
+      const stream = new PassThrough({ objectMode: true })
       process.nextTick(async () => {
         const items = filter(projects.list(), fieldSelector)
         for (const item of items) {
-          const chunk = JSON.stringify({ type: 'ADDED', object: item }) + '\n'
-          stream.write(chunk)
+          stream.write({ type: 'ADDED', object: item })
         }
         await delay(milliseconds)
         const initialItems = filter(items, ['status.phase', 'Initial'])
-        for (const item of initialItems) {
+        for (const oldItem of initialItems) {
+          const item = cloneDeep(oldItem)
           const resourceVersion = get(item, 'metadata.resourceVersion', '42')
           set(item, 'status.phase', phase)
           set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
-          const chunk = JSON.stringify({ type: 'MODIFIED', object: item }) + '\n'
-          stream.write(chunk)
+          stream.write({ type: 'MODIFIED', object: item })
         }
-        stream.end()
+        if (end === true) {
+          stream.end()
+        }
       })
       return stream
     }
