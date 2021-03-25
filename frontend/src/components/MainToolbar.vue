@@ -92,6 +92,32 @@ SPDX-License-Identifier: Apache-2.0
               <div class="title">{{displayName}}</div>
               <div class="caption">{{username}}</div>
               <div class="caption" v-if="isAdmin">Operator</div>
+              <v-btn-toggle v-model="colorScheme" borderless mandatory @click.native.stop class="mt-3">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-white-balance-sunny</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Light Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-weather-night</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Dark Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-brightness-auto</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Automatically choose theme based on your system settings</span>
+                </v-tooltip>
+              </v-btn-toggle>
             </div>
           </v-card-title>
           <v-divider></v-divider>
@@ -100,12 +126,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>
-          </v-card-actions>
-          <v-divider></v-divider>
-          <v-card-actions class="px-3">
-            <v-icon color="primary" class="ml-2 mr-3">mdi-brightness-6</v-icon>
-            <v-switch v-model="darkMode" dense hide-details class="ma-0" color="primary" @click.native.stop></v-switch>
-            <span class="primary--text text-button">Dark</span>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -118,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" :background-color="darkMode ? 'black' : 'white'">
+      <v-tabs slider-color="primary darken-3" :background-color="darkTheme ? 'black' : 'white'">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -151,7 +171,7 @@ export default {
     ...mapActions([
       'setSidebar',
       'setError',
-      'setDarkMode'
+      'setColorScheme'
     ]),
     handleLogout () {
       this.$auth.signout()
@@ -163,7 +183,8 @@ export default {
       'title',
       'sidebar',
       'user',
-      'cfg'
+      'cfg',
+      'darkTheme'
     ]),
     ...mapGetters([
       'username',
@@ -199,12 +220,29 @@ export default {
         query
       }
     },
-    darkMode: {
+    colorScheme: {
       get () {
-        return this.$store.state.darkMode
+        switch (this.$store.state.colorScheme) {
+          case 'light':
+            return 0
+          case 'dark':
+            return 1
+          default:
+            return 2
+        }
       },
       set (value) {
-        this.setDarkMode(value)
+        switch (value) {
+          case 0:
+            this.setColorScheme('light')
+            break
+          case 1:
+            this.setColorScheme('dark')
+            break
+          default:
+            this.setColorScheme('auto')
+            break
+        }
       }
     }
   }

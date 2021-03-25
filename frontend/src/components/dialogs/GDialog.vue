@@ -53,7 +53,6 @@ import { setDelayedInputFocus } from '@/utils'
 import GMessage from '@/components/GMessage'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
-import { mapState } from 'vuex'
 
 export default {
   name: 'gdialog',
@@ -105,9 +104,6 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'darkMode'
-    ]),
     hasError () {
       return this.confirmValue && this.confirmValue !== this.userInput
     },

@@ -211,7 +211,7 @@ export default {
   computed: {
     ...mapState([
       'namespace',
-      'darkMode'
+      'darkTheme'
     ]),
     ...mapGetters([
       'canPatchShoots'
@@ -352,7 +352,7 @@ export default {
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
         extraKeys,
-        theme: this.darkMode ? 'seti' : 'default'
+        theme: this.darkTheme ? 'seti' : 'default'
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -485,7 +485,7 @@ export default {
         }
       }
     },
-    darkMode (value) {
+    darkTheme (value) {
       this.$instance.setOption('theme', value ? 'seti' : 'default')
     }
   },

@@ -21,8 +21,8 @@ const App = Vue.extend({
       }
     })
 
-    const darkMode = this.$localStorage.getItem('global/dark-mode') === 'true'
-    this.$store.commit('SET_DARK_MODE', darkMode)
+    const colorScheme = window.localStorage.getItem('global/color-scheme')
+    this.$store.commit('SET_COLOR_SCHEME', colorScheme)
   },
   render (createElement) {
     return createElement('router-view')

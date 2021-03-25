@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :color="darkMode && !lightBackground ? 'grey darken-2' : undefined" small :size="size" class="rounded-lg" tile>
+  <v-avatar :color="darkTheme && !lightBackground ? 'grey darken-2' : undefined" small :size="size" class="rounded-lg" tile>
     <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" class="rounded-0">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
@@ -31,7 +31,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'darkMode'
+      'darkTheme'
     ]),
     iconSrc () {
       switch (this.value) {
