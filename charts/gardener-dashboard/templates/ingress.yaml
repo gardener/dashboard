@@ -17,12 +17,14 @@ metadata:
 {{ toYaml . | indent 4 }}
   {{- end }}
 spec:
+{{- if .Values.tls }}
   tls:
   - secretName: {{ .Values.tlsSecretName | default "gardener-dashboard-tls" }}
     hosts:
     {{- range .Values.hosts }}
     - {{ . }}
     {{- end }}
+{{- end }}
   rules:
   {{- range .Values.hosts }}
   - host: {{ . }}
