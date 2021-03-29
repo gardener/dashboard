@@ -49,7 +49,7 @@ class Semaphore {
           this.dispatch()
         }
       }
-      resolve(releaser)
+      resolve([releaser, this.concurrency])
     }
   }
 }

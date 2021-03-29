@@ -20,15 +20,23 @@ describe('Semaphore', () => {
   })
 
   describe('#aquire', () => {
+    let acquireResult
+    let release
+    let concurrency
+
     it('should create semaphore instance', async () => {
-      let release
       const semaphore = new Semaphore(1)
       expect(semaphore.value).toBe(1)
       // acquire first lock
-      release = await semaphore.acquire()
+      acquireResult = await semaphore.acquire()
+      release = acquireResult[0]
+      concurrency = acquireResult[1]
+      expect(concurrency).toBe(1)
+      expect(semaphore.concurrency).toBe(1)
       expect(semaphore.value).toBe(0)
       // acquire second lock
-      const releasePromise = semaphore.acquire()
+      const acquirePromise = semaphore.acquire()
+      expect(semaphore.concurrency).toBe(1)
       expect(semaphore.value).toBe(-1)
       // release first lock
       release()
@@ -37,8 +45,13 @@ describe('Semaphore', () => {
       release()
       expect(semaphore.value).toBe(0)
       // release second lock
-      release = await releasePromise
+      acquireResult = await acquirePromise
+      release = acquireResult[0]
+      concurrency = acquireResult[1]
+      expect(concurrency).toBe(1)
+      expect(semaphore.concurrency).toBe(1)
       release()
+      expect(semaphore.concurrency).toBe(0)
       expect(semaphore.value).toBe(1)
     })
   })

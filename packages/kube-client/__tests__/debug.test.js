@@ -13,7 +13,6 @@ const { attach, beforeRequest, afterResponse } = require('../lib/debug')
 
 describe('kube-client', () => {
   describe('debug', () => {
-    const uuidRegEx = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
     const url = new URL('https://kubernetes/foo/bar')
     const method = 'GET'
     const body = { ok: true }
@@ -81,7 +80,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(args.body).toBe(body)
       expect(args.user).toBeUndefined()
       expect(args.headers.foo).toBe('bar')
-      expect(args.headers['x-request-id']).toMatch(uuidRegEx)
+      expect(args.headers['x-request-id']).toEqual(expect.any(Number))
     })
 
     it('should log the different types of users', () => {

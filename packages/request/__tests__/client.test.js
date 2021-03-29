@@ -26,6 +26,9 @@ jest.useFakeTimers()
 describe('Client', () => {
   const prefixUrl = 'https://127.0.0.1:31415/test'
   const xRequestId = '4711'
+  const statusCode = 200
+  const contentType = 'application/json'
+  const contentLength = 42
   let agent
   let client
   let stream
@@ -39,6 +42,14 @@ describe('Client', () => {
         foo: 'bar',
         bar: 'foo'
       }),
+      mockHeaders: jest.fn().mockReturnValue({
+        [HTTP2_HEADER_STATUS]: statusCode,
+        [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+        [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
+      }),
+      async getHeaders () {
+        return this.mockHeaders()
+      },
       async * [Symbol.asyncIterator] () {
         yield Buffer.from('{')
         let separator
@@ -70,6 +81,7 @@ describe('Client', () => {
   describe('#constructor', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
+      expect(client.responseTimeout).toBe(15000)
     })
 
     it('should throw a type error', () => {
@@ -158,51 +170,11 @@ describe('Client', () => {
     })
   })
 
-  describe('#getResponseHeaders', () => {
-    const responseHeaders = {
-      [HTTP2_HEADER_STATUS]: 200
-    }
-
-    it('should return the response headers with the default timeout', async () => {
-      const result = client.getResponseHeaders(stream)
-      expect(setTimeout).toBeCalledTimes(1)
-      expect(setTimeout.mock.calls).toEqual([
-        [expect.any(Function), client.responseTimeout]
-      ])
-      expect(stream.once).toBeCalledTimes(1)
-      expect(stream.once.mock.calls).toEqual([
-        ['response', expect.any(Function)]
-      ])
-      const onResponse = stream.once.mock.calls[0][1]
-      onResponse.call(stream, responseHeaders)
-      await expect(result).resolves.toEqual(responseHeaders)
-    })
-
-    it('should return with a timeout error', async () => {
-      const result = client.getResponseHeaders(stream)
-      jest.runAllTimers()
-      await expect(result).rejects.toMatchObject({
-        name: 'TimeoutError',
-        code: 'ETIMEDOUT',
-        message: expect.stringMatching(/Timeout awaiting "response" for \d+ ms/)
-      })
-    })
-  })
-
   describe('#fetch', () => {
     it('should successfully return a response', async () => {
-      const statusCode = 200
-      const contentType = 'application/json'
-      const contentLength = 42
-      const headers = {
-        [HTTP2_HEADER_STATUS]: statusCode,
-        [HTTP2_HEADER_CONTENT_TYPE]: contentType,
-        [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
-      }
-      client.getResponseHeaders = jest.fn().mockResolvedValueOnce(headers)
       const response = await client.fetch()
       expect(response).toMatchObject({
-        headers,
+        headers: stream.mockHeaders(),
         statusCode,
         contentType,
         contentLength,

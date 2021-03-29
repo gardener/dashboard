@@ -12,7 +12,7 @@ const http2 = require('http2')
 const typeis = require('type-is')
 const { pick } = require('lodash')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { TimeoutError, createHttpError } = require('./errors')
+const { createHttpError } = require('./errors')
 const { globalAgent } = require('./Agent')
 
 const {
@@ -23,8 +23,7 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
-  HTTP2_METHOD_GET,
-  NGHTTP2_CANCEL
+  HTTP2_METHOD_GET
 } = http2.constants
 
 const EOL = 10
@@ -92,18 +91,6 @@ class Client {
     )
   }
 
-  getResponseHeaders (stream, { threshold = this.responseTimeout } = {}) {
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        reject(new TimeoutError(`Timeout awaiting "response" for ${threshold} ms`))
-      }, threshold)
-      stream.once('response', headers => {
-        clearTimeout(timeoutId)
-        resolve(headers)
-      })
-    })
-  }
-
   async fetch (path, { method, searchParams, headers, body, signal, ...options } = {}) {
     headers = this.getRequestHeaders(path, {
       method,
@@ -131,17 +118,11 @@ class Client {
       stream.write(body)
     }
     stream.end()
-    try {
-      headers = await this.getResponseHeaders(stream, {
-        timeout: options.responseTimeout
-      })
-    } catch (err) {
-      stream.close(NGHTTP2_CANCEL)
-      throw err
-    }
 
+    const { responseType } = this.defaults.options
     const { transformFactory } = this.constructor
 
+    headers = await stream.getHeaders()
     return {
       request: { options: requestOptions },
       headers,
@@ -161,6 +142,9 @@ class Client {
         return this.headers[HTTP2_HEADER_CONTENT_LENGTH]
       },
       get type () {
+        if (['json', 'text'].includes(responseType)) {
+          return responseType
+        }
         return typeis.is(this.contentType, ['json', 'text'])
       },
       destroy (error) {

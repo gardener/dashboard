@@ -61,7 +61,7 @@ class Logger {
     return chalk.whiteBright(ts)
   }
 
-  request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
+  request ({ id, url, method, httpVersion = '2', user, headers, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
       const ident = this.constructor.getIdentity(user)
       const host = this.constructor.getHost(url, headers)
@@ -75,7 +75,7 @@ class Logger {
     }
   }
 
-  response ({ id, url, method, statusCode, statusMessage = '', httpVersion = '1.1', headers, duration, body }) {
+  response ({ id, url, method, statusCode, statusMessage = '', httpVersion = '2', headers, duration, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (method && url) {

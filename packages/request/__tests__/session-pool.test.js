@@ -50,7 +50,9 @@ class MockHttp2Session extends MockEmitter {
     }
     this.socket = new MockTLSSocket()
     this.destroy = jest.fn()
-    this.close = jest.fn()
+    this.close = jest.fn().mockImplementation(() => {
+      this.emit('close')
+    })
     this.pong = jest.fn()
       .mockReturnValueOnce(7)
       .mockImplementation(() => {
@@ -64,7 +66,8 @@ class MockHttp2Session extends MockEmitter {
           callback(err)
         }
       })
-    this.request = jest.fn((...args) => new MockHttp2Stream(...args))
+    this.request = jest.fn()
+      .mockImplementation((...args) => new MockHttp2Stream(...args))
     this.setTimeout = jest.fn()
   }
 }
@@ -93,6 +96,7 @@ describe('SessionPool', () => {
       .mockImplementation((...args) => {
         return new MockHttp2Session(...args)
       })
+    jest.clearAllMocks()
   })
 
   describe('#constructor', () => {
@@ -111,9 +115,52 @@ describe('SessionPool', () => {
     })
   })
 
+  describe('#request', () => {
+    it('should fail to create a request', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const error = new Error('error')
+      session.request = jest.fn().mockImplementation(() => {
+        throw error
+      })
+      await expect(pool.request()).rejects.toBe(error)
+      const semaphore = getOwnSymbolProperty(session, 'semaphore')
+      expect(semaphore.concurrency).toBe(0)
+    })
+  })
+
+  describe('#getSession', () => {
+    it('should return a new session', () => {
+      pool.createSession = jest.fn()
+      pool.getSession()
+      expect(pool.createSession).toBeCalledTimes(1)
+    })
+
+    it('should return an existing session', () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      expect(pool.getSession()).toBe(session)
+    })
+
+    it('should return the session with the highest load', async () => {
+      options.peerMaxConcurrentStreams = 2
+      const session = pool.getSession()
+      session.emit('connect')
+      const headers = {}
+      const firstStream = await pool.request(headers)
+      const secondStream = await pool.request(headers)
+      expect(pool.getSession()).not.toBe(session)
+      firstStream.emit('close')
+      expect(pool.getSession()).toBe(session)
+      secondStream.emit('close')
+      jest.runAllTimers()
+      expect(pool.sessions.size).toBe(0)
+    })
+  })
+
   describe('#createSession', () => {
-    it('should create and close a session', async () => {
-      const sessionPromise = pool.createSession()
+    it('should create and close a session', () => {
+      const session = pool.createSession()
 
       // create http2 session
       expect(mockHttp2Connect).toBeCalledTimes(1)
@@ -125,7 +172,7 @@ describe('SessionPool', () => {
           servername: sid.hostname
         })
       ])
-      const session = mockHttp2Connect.mock.results[0].value
+      expect(mockHttp2Connect.mock.results[0].value).toBe(session)
       const socket = session.socket
       const semaphore = getOwnSymbolProperty(session, 'semaphore')
       const setMaxConcurrencySpy = jest.spyOn(semaphore, 'maxConcurrency', 'set')
@@ -166,10 +213,9 @@ describe('SessionPool', () => {
       session.removeAllListeners.mockClear()
 
       // clear connect timeout
-      expect(clearTimeout).toBeCalledTimes(2)
-      expect(clearTimeout.mock.calls).toEqual([
-        [connectTimeoutId],
-        [undefined]
+      expect(clearTimeout).toBeCalledTimes(1)
+      expect(clearTimeout.mock.calls[0]).toEqual([
+        connectTimeoutId
       ])
       clearTimeout.mockClear()
 
@@ -200,9 +246,6 @@ describe('SessionPool', () => {
       expect(pool.sessions.size).toBe(1)
       expect(pool.value).toBe(semaphore.value)
 
-      // promise resolved
-      await expect(sessionPromise).resolves.toBeUndefined()
-
       // receive remote settings
       session.remoteSettings.maxConcurrentStreams = 250
       session.emit('remoteSettings', session.remoteSettings)
@@ -225,13 +268,6 @@ describe('SessionPool', () => {
         keepAliveTimeoutId
       ])
       clearTimeout.mockClear()
-
-      // clear heartbeat interval
-      expect(clearInterval).toBeCalledTimes(1)
-      expect(clearInterval.mock.calls[0]).toEqual([
-        undefined
-      ])
-      clearInterval.mockClear()
 
       // session destroyed
       expect(session.destroy).toBeCalledTimes(1)
@@ -259,7 +295,7 @@ describe('SessionPool', () => {
       expect(session.ping).toBeCalledTimes(2)
       expect(session.pong).toBeCalledTimes(2)
 
-      // clear heartbeat interval
+      // clear keep-alive timeout
       expect(clearInterval).toBeCalledTimes(1)
       expect(clearInterval.mock.calls[0]).toEqual([
         intervalId
