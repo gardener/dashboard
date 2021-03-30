@@ -36,6 +36,7 @@ describe('Client', () => {
   beforeEach(() => {
     stream = {
       close: jest.fn(),
+      destroy: jest.fn(),
       end: jest.fn(),
       once: jest.fn(),
       mockBody: jest.fn().mockReturnValue({
@@ -184,6 +185,21 @@ describe('Client', () => {
       })
       const body = await response.body()
       expect(body).toEqual(stream.mockBody())
+    })
+
+    it('should return a response with responseType "text"', async () => {
+      client.defaults.options.responseType = 'text'
+      const response = await client.fetch()
+      expect(response.type).toBe('text')
+    })
+
+    it('should return a response and destroy the stream', async () => {
+      client.defaults.options.responseType = 'text'
+      const response = await client.fetch()
+      const error = new Error('error')
+      response.destroy(error)
+      expect(stream.destroy).toBeCalledTimes(1)
+      expect(stream.destroy.mock.calls[0]).toEqual([error])
     })
   })
 

@@ -12,12 +12,14 @@ const crypto = require('crypto')
 
 const SessionId = require('../lib/SessionId')
 const SessionPool = require('../lib/SessionPool')
+const { StreamError } = require('../lib/errors')
 
 jest.useFakeTimers()
 
 const { getOwnSymbolProperty } = fixtures.helper
 const {
-  NGHTTP2_CANCEL
+  NGHTTP2_CANCEL,
+  HTTP2_HEADER_STATUS
 } = http2.constants
 
 class MockEmitter {
@@ -79,8 +81,14 @@ describe('SessionPool', () => {
   let sid
   let pool
   let mockHttp2Connect
+  let requestHeaders
+  let responseHeaders
 
   beforeEach(() => {
+    requestHeaders = {}
+    responseHeaders = {
+      [HTTP2_HEADER_STATUS]: 200
+    }
     options = {
       peerMaxConcurrentStreams: 100,
       maxOutstandingPings: 2,
@@ -116,16 +124,41 @@ describe('SessionPool', () => {
   })
 
   describe('#request', () => {
+    const error = new Error('error')
+
     it('should fail to create a request', async () => {
       const session = pool.getSession()
       session.emit('connect')
-      const error = new Error('error')
       session.request = jest.fn().mockImplementation(() => {
         throw error
       })
       await expect(pool.request()).rejects.toBe(error)
       const semaphore = getOwnSymbolProperty(session, 'semaphore')
       expect(semaphore.concurrency).toBe(0)
+    })
+
+    it('should create a request with a successful response', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('response', responseHeaders)
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+    })
+
+    it('should create a request with an error', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('error', error)
+      await expect(stream.getHeaders()).rejects.toBe(error)
+    })
+
+    it('should create a request with an unexpected close', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('close')
+      await expect(stream.getHeaders()).rejects.toThrow(StreamError)
     })
   })
 
@@ -146,9 +179,10 @@ describe('SessionPool', () => {
       options.peerMaxConcurrentStreams = 2
       const session = pool.getSession()
       session.emit('connect')
-      const headers = {}
-      const firstStream = await pool.request(headers)
-      const secondStream = await pool.request(headers)
+      const firstStream = await pool.request(requestHeaders)
+      firstStream.emit('response', responseHeaders)
+      const secondStream = await pool.request(requestHeaders)
+      secondStream.emit('response', responseHeaders)
       expect(pool.getSession()).not.toBe(session)
       firstStream.emit('close')
       expect(pool.getSession()).toBe(session)

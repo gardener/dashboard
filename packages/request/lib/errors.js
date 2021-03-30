@@ -18,6 +18,15 @@ class TimeoutError extends Error {
   }
 }
 
+class StreamError extends Error {
+  constructor (message) {
+    super(message)
+    this.name = this.constructor.name
+    this.code = 'ERR_HTTP2_STREAM_ERROR'
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
+
 function isAbortError (err = {}) {
   return err.code === 'ABORT_ERR'
 }
@@ -54,6 +63,7 @@ function isHttpError (err, expectedStatusCode) {
 
 module.exports = {
   TimeoutError,
+  StreamError,
   createHttpError,
   isHttpError,
   isAbortError

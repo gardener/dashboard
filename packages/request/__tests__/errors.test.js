@@ -7,7 +7,7 @@
 'use strict'
 
 const createError = require('http-errors')
-const { createHttpError, isHttpError, TimeoutError, isAbortError } = require('../lib/errors')
+const { TimeoutError, StreamError, isAbortError, createHttpError, isHttpError } = require('../lib/errors')
 
 describe('errors', () => {
   it('#isAbortError', () => {
@@ -24,6 +24,16 @@ describe('errors', () => {
       expect(error.name).toBe('TimeoutError')
       expect(error.message).toBe(message)
       expect(error.code).toBe('ETIMEDOUT')
+    })
+  })
+
+  describe('StreamError', () => {
+    it('#constructor', () => {
+      const message = 'stream error'
+      const error = new StreamError(message)
+      expect(error.name).toBe('StreamError')
+      expect(error.message).toBe(message)
+      expect(error.code).toBe('ERR_HTTP2_STREAM_ERROR')
     })
   })
 

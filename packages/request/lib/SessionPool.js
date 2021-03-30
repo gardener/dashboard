@@ -11,7 +11,7 @@ const net = require('net')
 const { omit } = require('lodash')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const Semaphore = require('./Semaphore')
-const { TimeoutError, isAbortError } = require('./errors')
+const { TimeoutError, StreamError, isAbortError } = require('./errors')
 
 const {
   NGHTTP2_CANCEL,
@@ -107,24 +107,36 @@ class SessionPool {
         logger.trace('Session %s - stream %d ready', origin, stream.id)
       }
       stream.once('finish', () => {
-        logger.trace('Session %s - stream %d emitted "finish"', origin, stream.id)
+        logger.trace('Session %s - stream %d emitted "finish"', origin, stream.id || -1)
       })
-      stream.once('error', err => {
-        if (!isAbortError(err)) {
-          logger.error('Session %s - stream %d processing error: %s', origin, stream.id, err.message)
-        }
-      })
-      stream.once('close', () => {
-        logger.trace('Session %s - stream %d closed', origin, stream.id)
-        releaseStream()
-        if (session[kSemaphore].value >= session[kSemaphore].maxConcurrency) {
-          this.setSessionTimeout(session)
-        }
-      })
-      const headersPromise = new Promise(resolve => {
+      const headersPromise = new Promise((resolve, reject) => {
+        let settled = false
+        stream.on('error', err => {
+          if (!isAbortError(err)) {
+            logger.error('Session %s - stream %d processing error: %s', origin, stream.id || -1, err.message)
+          }
+          if (!settled) {
+            settled = true
+            reject(err)
+          }
+        })
+        stream.once('close', () => {
+          logger.trace('Session %s - stream %d closed', origin, stream.id || -1)
+          releaseStream()
+          if (session[kSemaphore].value >= session[kSemaphore].maxConcurrency) {
+            this.setSessionTimeout(session)
+          }
+          if (!settled) {
+            settled = true
+            reject(new StreamError('Stream unexpectedly closed'))
+          }
+        })
         stream.once('response', headers => {
           logger.trace('Session %s - stream %d emitted "response"', origin, stream.id)
-          resolve(headers)
+          if (!settled) {
+            settled = true
+            resolve(headers)
+          }
         })
       })
       stream.getHeaders = () => headersPromise
