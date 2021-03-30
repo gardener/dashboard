@@ -110,6 +110,10 @@ class Reflector {
   }
 
   syncWith (items, resourceVersion) {
+    for (const item of items) {
+      item.kind = this.kind
+      item.apiVersion = this.apiVersion
+    }
     this.store.replace(items, resourceVersion)
   }
 

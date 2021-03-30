@@ -10,7 +10,7 @@ const _ = require('lodash')
 const createServer = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { Forbidden, isHttpError } = require('http-errors')
+const { isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
 const kubernetesClient = require('@gardener-dashboard/kube-client')
@@ -27,8 +27,9 @@ function socketAuthentication (nsp) {
       logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
       next()
     } catch (err) {
-      logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-      next(new Forbidden(err.message))
+      const level = /^ERR_JWT/.test(err.code) ? 'info' : 'error'
+      logger[level]('Socket %s authentication failed: "%s"', socket.id, err.message)
+      next(err)
     }
   })
 }
