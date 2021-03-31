@@ -159,7 +159,7 @@ export const shootItem = {
         case 'Migrate':
           return 'Deleting Resources on old Seed'
         case 'Restore':
-          return 'Creating Resoures on new Seed'
+          return 'Creating Resources on new Seed'
       }
       return ''
     },
