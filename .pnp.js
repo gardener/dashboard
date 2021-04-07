@@ -78,6 +78,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",
           "packageDependencies": [
             ["eslint", "npm:6.8.0"],
+            ["jest", "npm:26.6.3"],
             ["node-gyp", "npm:7.1.0"]
           ],
           "linkType": "SOFT",
@@ -10588,6 +10589,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["gardener-dashboard", "workspace:."],
             ["eslint", "npm:6.8.0"],
+            ["jest", "npm:26.6.3"],
             ["node-gyp", "npm:7.1.0"]
           ],
           "linkType": "SOFT",
