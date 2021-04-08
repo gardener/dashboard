@@ -19,7 +19,7 @@ metadata:
 spec:
 {{- if .Values.tls.enabled }}
   tls:
-  - secretName: {{ .Values.tlsSecretName | default "gardener-dashboard-tls" }}
+  - secretName: {{ .Values.tls.secretName | default "gardener-dashboard-tls" }}
     hosts:
     {{- range .Values.hosts }}
     - {{ . }}

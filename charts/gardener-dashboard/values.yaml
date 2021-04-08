@@ -42,6 +42,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
 tls:
   enabled: true
+  # secretName: gardener-dashboard-tls
   crt: |
     -----BEGIN CERTIFICATE-----
     Li4u
