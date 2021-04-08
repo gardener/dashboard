@@ -34,5 +34,5 @@ spec:
           serviceName: gardener-dashboard-service
           servicePort: {{ $.Values.servicePort }}
         path: /
-        pathType: prefix
+        pathType: Prefix
   {{- end }}
