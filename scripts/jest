@@ -6,35 +6,13 @@
 
 set -e
 
-export REPO_DIR="$(readlink -f $(dirname ${0})/..)"
-
 # change current working directory
-WORK_DIR=$PWD
-cd "${REPO_DIR}"
-
-# main
-if [[ "$1" =~ "${REPO_DIR}/frontend/" ]]; then
-  cd "${REPO_DIR}/frontend"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/backend/" ]]; then
-  cd "${REPO_DIR}/backend"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/charts/" ]]; then
-  cd "${REPO_DIR}/charts"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/packages/request/" ]]; then
-  cd "${REPO_DIR}/packages/request"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/packages/logger/" ]]; then
-  cd "${REPO_DIR}/packages/logger"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/packages/kube-client/" ]]; then
-  cd "${REPO_DIR}/packages/kube-client"
-  yarn test "$@"
-elif [[ "$1" =~ "${REPO_DIR}/packages/kube-config/" ]]; then
-  cd "${REPO_DIR}/packages/kube-config"
-  yarn test "$@"
-fi
-
+WORK_DIR=${PWD}
+REPO_DIR="$(readlink -f $(dirname ${0})/..)"
+# relative path to workspace
+WORKSPACE=$(sed -r 's/^\/(frontend|backend|charts|packages\/[^/]*)\/.*/\1/g' <<< ${1#${REPO_DIR}})
+cd "${REPO_DIR}/${WORKSPACE}"
+# run test of workspace directory
+yarn test "$@"
 # restore previous working directory
 cd "${WORK_DIR}"
