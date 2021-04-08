@@ -74,7 +74,8 @@ describe('config', function () {
         OIDC_ISSUER: 'issuer',
         OIDC_CLIENT_ID: 'client_id',
         OIDC_CLIENT_SECRET: 'client_secret', // pragma: whitelist secret
-        OIDC_REDIRECT_URI: 'redirect_uri'
+        OIDC_REDIRECT_URI: 'redirect_uri',
+        OIDC_CA: 'my_ca'
       }
 
       beforeEach(() => {
@@ -102,6 +103,7 @@ describe('config', function () {
         expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
         expect(config.port).toBe(1234)
         expect(config.logLevel).toBe('warn')
+        expect(config.oidc.ca).toBe('my_ca')
       })
 
       it('should return the config with port and logLevel overridden by environment variables', function () {
