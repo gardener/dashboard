@@ -74,8 +74,7 @@ describe('config', function () {
         OIDC_ISSUER: 'issuer',
         OIDC_CLIENT_ID: 'client_id',
         OIDC_CLIENT_SECRET: 'client_secret', // pragma: whitelist secret
-        OIDC_REDIRECT_URI: 'redirect_uri',
-        OIDC_CA: 'my_ca'
+        OIDC_REDIRECT_URI: 'redirect_uri'
       }
 
       beforeEach(() => {
@@ -84,12 +83,22 @@ describe('config', function () {
 
       it('should return the config in test environment', function () {
         const env = Object.assign({
-          NODE_ENV: 'test'
+          NODE_ENV: 'test',
+          OIDC_CA: 'ca'
         }, requiredEnvironmentVariables)
 
         const config = gardener.loadConfig(undefined, { env })
         const defaults = gardener.getDefaults({ env })
         expect(config).toMatchObject(defaults)
+      })
+
+      it('should return optional environment variables', function () {
+        const env = Object.assign({
+          OIDC_CA: 'ca'
+        }, requiredEnvironmentVariables)
+
+        const config = gardener.loadConfig(undefined, { env })
+        expect(config.oidc.ca).toBe('ca')
       })
 
       it('should return the config in production environment', function () {
@@ -103,7 +112,6 @@ describe('config', function () {
         expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
         expect(config.port).toBe(1234)
         expect(config.logLevel).toBe('warn')
-        expect(config.oidc.ca).toBe('my_ca')
       })
 
       it('should return the config with port and logLevel overridden by environment variables', function () {
