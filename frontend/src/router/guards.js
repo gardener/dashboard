@@ -106,7 +106,7 @@ function ensureDataLoaded (store, localStorage) {
         case 'Secrets':
         case 'Secret': {
           await Promise.all([
-            store.dispatch('fetchCloudProviderSecrets'),
+            store.dispatch('fetchcloudProviderSecrets'),
             store.dispatch('subscribeShoots')
           ])
           break
@@ -118,7 +118,7 @@ function ensureDataLoaded (store, localStorage) {
             store.dispatch('fetchNetworkingTypes')
           ]
           if (store.getters.canGetSecrets) {
-            promises.push(store.dispatch('fetchCloudProviderSecrets'))
+            promises.push(store.dispatch('fetchcloudProviderSecrets'))
           }
           await Promise.all(promises)
 

@@ -1100,7 +1100,7 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchCloudProviderSecrets ({ dispatch, commit }) {
+  fetchcloudProviderSecrets ({ dispatch, commit }) {
     return dispatch('cloudProviderSecrets/getAll')
       .catch(err => {
         dispatch('setError', err)

@@ -355,7 +355,7 @@ export default {
         details: this.getSecretDetailsInfra(secret),
         relatedShootCount: this.relatedShootCountInfra(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
-        isSupportedInfrastructure: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
+        isSupportedCloudProvider: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
         secret
       }))
     },
@@ -425,7 +425,7 @@ export default {
         details: this.getSecretDetailsDns(secret),
         relatedShootCount: this.relatedShootCountDns(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
-        isSupportedInfrastructure: includes(this.dnsProviderList, secret.metadata.dnsProviderName),
+        isSupportedCloudProvider: includes(this.dnsProviderList, secret.metadata.dnsProviderName),
         secret
       }))
     }

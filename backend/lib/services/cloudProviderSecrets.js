@@ -22,7 +22,7 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
   const dnsProviderName = secretBinding.metadata.labels['gardener.cloud/dnsProviderName']
 
   const { metadata: { namespace, name }, secretRef } = secretBinding
-  const infrastructureSecret = {
+  const cloudProviderSecret = {
     metadata: {
       namespace,
       name,
@@ -37,10 +37,10 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
   }
 
   if (secret) {
-    infrastructureSecret.metadata = _
+    cloudProviderSecret.metadata = _
       .chain(secret.metadata)
       .pick(['resourceVersion'])
-      .assign(infrastructureSecret.metadata)
+      .assign(cloudProviderSecret.metadata)
       .value()
 
     const iteratee = (value, key) => {
@@ -50,15 +50,15 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
       }
       return value
     }
-    infrastructureSecret.data = _.mapValues(secret.data, iteratee)
+    cloudProviderSecret.data = _.mapValues(secret.data, iteratee)
 
     const secretAccountKey = _.get(secret.data, 'serviceaccount.json')
     if (secretAccountKey) {
-      infrastructureSecret.data.project = projectId(secretAccountKey)
+      cloudProviderSecret.data.project = projectId(secretAccountKey)
     }
   }
 
-  return infrastructureSecret
+  return cloudProviderSecret
 }
 
 function projectId (serviceAccountKey) {
@@ -120,7 +120,7 @@ function resolveQuotas (secretBinding) {
   }
 }
 
-async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, secretList, namespace }) {
+async function getcloudProviderSecrets ({ secretBindings, cloudProfileList, secretList, namespace }) {
   return _
     .chain(secretBindings)
     .map(secretBinding => {
@@ -134,11 +134,11 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
         const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
         const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
         if (!cloudProviderKind && !dnsProviderName) {
-          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, name))
+          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping cloud provider secret with name %s', cloudProfileName, name))
         }
         const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
         if (isOwnSecret(secretBinding) && !secret) {
-          throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
+          throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping cloud provider secret with name %s', secretName))
         }
         return fromResource({
           secretBinding,
@@ -190,7 +190,7 @@ exports.list = async function ({ user, namespace }) {
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
 
-    return getInfrastructureSecrets({
+    return getcloudProviderSecrets({
       secretBindings,
       cloudProfileList,
       secretList,

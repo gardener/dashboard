@@ -20,7 +20,7 @@ module.exports = {
   '/networking-types': require('./networkingTypes'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
+  '/namespaces/:namespace/cloudprovider-secrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members')
 }
 

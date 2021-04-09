@@ -54,13 +54,13 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip top v-if="canPatchSecrets">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="!item.isOwnSecret || !item.isSupportedInfrastructure" icon @click="onUpdate">
+              <v-btn :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider" icon @click="onUpdate">
                 <v-icon class="action-button--text">mdi-pencil</v-icon>
               </v-btn>
             </div>
           </template>
           <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
-          <span v-else-if="!item.isSupportedInfrastructure">This infrastructure type is currently not supported by the dashboard</span>
+          <span v-else-if="!item.isSupportedCloudProvider">This infrastructure type is currently not supported by the dashboard</span>
           <span v-else>Edit Secret</span>
         </v-tooltip>
         <v-tooltip top v-if="canDeleteSecrets">
