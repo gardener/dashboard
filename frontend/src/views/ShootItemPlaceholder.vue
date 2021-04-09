@@ -54,7 +54,7 @@ export default {
       'subscribeShoot',
       'subscribeComments',
       'unsubscribeComments',
-      'fetchInfrastructureSecrets',
+      'fetchCloudProviderSecrets',
       'ensureProjectTerminalShortcutsLoaded'
     ]),
     handleShootEvents (events) {
@@ -83,7 +83,7 @@ export default {
           this.subscribeComments(params)
         ]
         if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
-          promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
+          promises.push(this.fetchCloudProviderSecrets()) // Required for purpose configuration
         }
         if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], name) && this.canUseProjectTerminalShortcuts) {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())

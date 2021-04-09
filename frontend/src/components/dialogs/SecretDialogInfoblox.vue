@@ -10,43 +10,42 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    vendor="metal"
-    create-title="Add new Metal Secret"
-    replace-title="Replace Metal Secret"
+    vendor="infoblox"
+    create-title="Add new Infoblox Secret"
+    replace-title="Replace Infoblox Secret"
     @input="onInput">
 
     <template v-slot:secret-slot>
       <div>
         <v-text-field
-          color="primary"
-          v-model="apiUrl"
-          ref="apiUrl"
-          label="API URL"
-          :error-messages="getErrorMessages('apiUrl')"
-          @input="$v.apiUrl.$touch()"
-          @blur="$v.apiUrl.$touch()"
+        color="primary"
+        v-model="infobloxUsername"
+        ref="infobloxUsername"
+        label="Infoblox Username"
+        :error-messages="getErrorMessages('infobloxUsername')"
+        @input="$v.infobloxUsername.$touch()"
+        @blur="$v.infobloxUsername.$touch()"
         ></v-text-field>
       </div>
       <div>
         <v-text-field
           color="primary"
-          v-model="apiHmac"
-          label="API HMAC"
-          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="hideSecret ? 'password' : 'text'"
-          @click:append="() => (hideSecret = !hideSecret)"
-          :error-messages="getErrorMessages('apiHmac')"
-          @input="$v.apiHmac.$touch()"
-          @blur="$v.apiHmac.$touch()"
+          v-model="infobloxPassword"
+          label="Infoblox Password"
+          :error-messages="getErrorMessages('infobloxPassword')"
+          :append-icon="hideInfobloxPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="hideInfobloxPassword ? 'password' : 'text'"
+          @click:append="() => (hideInfobloxPassword = !hideInfobloxPassword)"
+          @input="$v.infobloxPassword.$touch()"
+          @blur="$v.infobloxPassword.$touch()"
         ></v-text-field>
       </div>
     </template>
+
     <template v-slot:help-slot>
       <div>
-        <p>
-          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
-          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
-        </p>
+        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
+        <p>Make sure that you configure your account for DNS usage</p>
       </div>
     </template>
 
@@ -56,16 +55,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required, url } from 'vuelidate/lib/validators'
+import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
-  apiHmac: {
+  infobloxUsername: {
     required: 'You can\'t leave this empty.'
   },
-  apiUrl: {
-    required: 'You can\'t leave this empty.',
-    url: 'You must enter a valid URL'
+  infobloxPassword: {
+    required: 'You can\'t leave this empty.'
   }
 }
 
@@ -84,9 +82,9 @@ export default {
   },
   data () {
     return {
-      apiHmac: undefined,
-      apiUrl: undefined,
-      hideSecret: true,
+      infobloxUsername: undefined,
+      infobloxPassword: undefined,
+      hideInfobloxPassword: true,
       validationErrors
     }
   },
@@ -100,18 +98,17 @@ export default {
     },
     secretData () {
       return {
-        metalAPIHMac: this.apiHmac,
-        metalAPIURL: this.apiUrl
+        USERNAME: this.infobloxUsername,
+        PASSWORD: this.infobloxPassword
       }
     },
     validators () {
       const validators = {
-        apiHmac: {
+        infobloxUsername: {
           required
         },
-        apiUrl: {
-          required,
-          url
+        infobloxPassword: {
+          required
         }
       }
       return validators
@@ -127,11 +124,14 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.apiHmac = ''
-      this.apiUrl = ''
+      this.infobloxUsername = ''
+      this.infobloxPassword = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'apiUrl')
+        if (this.secret.data) {
+          this.infobloxUsername = this.secret.data.USERNAME
+        }
+        setDelayedInputFocus(this, 'infobloxUsername')
       }
     },
     getErrorMessages (field) {

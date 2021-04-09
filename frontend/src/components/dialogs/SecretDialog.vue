@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               </div>
 
-            <div v-show="cloudProfiles.length !== 1">
+            <div v-show="cloudProfiles.length !== 1 && isInfrastructureSecret">
               <cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
@@ -75,13 +75,14 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus, dnsProviderList } from '@/utils'
 import CloudProfile from '@/components/CloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
+import includes from 'lodash/includes'
 import GMessage from '@/components/GMessage'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
@@ -113,7 +114,7 @@ export default {
       type: Boolean,
       required: true
     },
-    cloudProviderKind: {
+    vendor: {
       type: String,
       required: true
     },
@@ -150,8 +151,12 @@ export default {
     ...mapGetters([
       'infrastructureSecretList',
       'cloudProfilesByCloudProviderKind',
-      'shootList'
+      'shootList',
+      'sortedCloudProviderKindList'
     ]),
+    dnsProviderList () {
+      return dnsProviderList
+    },
     cloudProfileName: {
       get () {
         return this.selectedCloudProfile
@@ -162,7 +167,7 @@ export default {
       }
     },
     cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
+      return sortBy(this.cloudProfilesByCloudProviderKind(this.vendor), [(item) => item.metadata.name])
     },
     visible: {
       get () {
@@ -174,7 +179,7 @@ export default {
     },
     valid () {
       let isCloudProfileValid = true
-      if (this.isCreateMode) {
+      if (this.isCreateMode && this.isInfrastructureSecret) {
         isCloudProfileValid = this.isValid(this.$refs.cloudProfile)
       }
       return isCloudProfileValid && this.dataValid && this.isValid(this)
@@ -219,6 +224,12 @@ export default {
       return {
         maxHeight: `${detailsHeight}px`
       }
+    },
+    isInfrastructureSecret () {
+      return includes(this.sortedCloudProviderKindList, this.vendor)
+    },
+    isDnsProviderSecret () {
+      return includes(this.dnsProviderList, this.vendor)
     }
   },
   methods: {
@@ -273,9 +284,16 @@ export default {
           secretRef: {
             name: this.name,
             namespace: this.namespace
-          },
-          cloudProviderKind: this.cloudProviderKind,
-          cloudProfileName: this.cloudProfileName
+          }
+        }
+
+        if (this.isInfrastructureSecret) {
+          metadata.cloudProviderKind = this.vendor
+          metadata.cloudProfileName = this.cloudProfileName
+        }
+
+        if (this.isDnsProviderSecret) {
+          metadata.dnsProviderName = this.vendor
         }
 
         return this.createInfrastructureSecret({ metadata, data: this.data })
@@ -292,11 +310,8 @@ export default {
         cloudProfileRef.$v.$reset()
       }
 
-      this.accessKeyId = ''
-      this.secretAccessKey = ''
-
       if (this.isCreateMode) {
-        this.name = `my-${this.cloudProviderKind}-secret`
+        this.name = `my-${this.vendor}-secret`
 
         if (this.cloudProfiles.length === 1) {
           this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -308,7 +323,6 @@ export default {
       } else {
         this.name = get(this.secret, 'metadata.name')
         this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
-        setDelayedInputFocus(this, 'accessKeyId')
       }
 
       this.errorMessage = undefined

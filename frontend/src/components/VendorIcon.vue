@@ -35,6 +35,7 @@ export default {
     ]),
     iconSrc () {
       switch (this.value) {
+        // infrastructures
         case 'azure':
           return require('@/assets/azure.svg')
         case 'aws':
@@ -47,6 +48,28 @@ export default {
           return require('@/assets/alicloud.svg')
         case 'vsphere':
           return require('@/assets/vsphere.svg')
+        case 'metal':
+          return require('@/assets/metal.svg')
+
+        // dns
+        case 'aws-route53':
+          return require('@/assets/aws-route53.svg')
+        case 'azure-dns':
+          return require('@/assets/azure-dns.svg')
+        case 'google-clouddns':
+          return require('@/assets/google-clouddns.svg')
+        case 'openstack-designate':
+          return require('@/assets/openstack.svg')
+        case 'alicloud-dns':
+          return require('@/assets/alicloud.svg')
+        case 'cloudflare':
+          return require('@/assets/cloudflare.svg')
+        case 'infoblox':
+          return require('@/assets/infoblox.svg')
+        case 'netlify':
+          return require('@/assets/netlify.svg')
+
+        // os
         case 'coreos':
           return require('@/assets/coreos.svg')
         case 'suse-jeos':
@@ -55,10 +78,12 @@ export default {
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
-        case 'metal':
-          return require('@/assets/metal.svg')
         case 'gardenlinux':
           return require('@/assets/gardenlinux.svg')
+        case 'flatcar':
+          return require('@/assets/flatcar.svg')
+        case 'memoryone':
+          return require('@/assets/vsmp-memoryone.svg')
       }
       return undefined
     },

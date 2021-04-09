@@ -13,12 +13,15 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" small class="mx-1">mdi-account-arrow-left</v-icon>
           </template>
-          <span>Secret shared by {{item.ownerNamespace}}</span>
+          <span>Secret shared by {{item.secretNamespace}}</span>
         </v-tooltip>
       </div>
     </td>
-    <td v-if="selectedHeaders.infrastructure">
-      <vendor extended :cloud-provider-kind="item.infrastructureName" :cloud-profile-name="item.cloudProfileName"></vendor>
+    <td v-if="selectedHeaders.secret">
+      <span v-if="!item.isOwnSecret">{{item.secretNamespace}}: </span>{{item.secretName}}
+    </td>
+    <td v-if="selectedHeaders.dnsProvider">
+      <vendor extended :cloud-provider-kind="item.dnsProvider"></vendor>
     </td>
     <td v-if="selectedHeaders.details">
       <v-list color="transparent">

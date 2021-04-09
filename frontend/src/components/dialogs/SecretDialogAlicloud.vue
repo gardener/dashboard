@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="alicloud"
-    create-title="Add new Alibaba Cloud Secret"
-    replace-title="Replace Alibaba Cloud Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template v-slot:help-slot>
-      <div>
+      <div v-if="vendor==='alicloud'">
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
@@ -65,6 +65,10 @@ SPDX-License-Identifier: Apache-2.0
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>
         <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      </div>
+      <div v-if="vendor==='alicloud-dns'">
+        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
+        <p>Make sure that you configure your account for DNS usage</p>
       </div>
     </template>
 
@@ -102,6 +106,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -148,6 +155,15 @@ export default {
   computed: {
     valid () {
       return !this.$v.$invalid
+    },
+    name () {
+      if (this.vendor === 'alicloud') {
+        return 'Alibaba Cloud'
+      }
+      if (this.vendor === 'alicloud-dns') {
+        return 'Alicloud DNS'
+      }
+      return undefined
     },
     secretData () {
       return {

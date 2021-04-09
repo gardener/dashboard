@@ -10,7 +10,7 @@ const { Resources } = require('@gardener-dashboard/kube-client')
 const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']
+const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'USERNAME', 'metalAPIURL']
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
@@ -19,6 +19,7 @@ const { UnprocessableEntity } = createError
 
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
+  const dnsProviderName = secretBinding.metadata.labels['gardener.cloud/dnsProviderName']
 
   const { metadata: { namespace, name }, secretRef } = secretBinding
   const infrastructureSecret = {
@@ -28,6 +29,7 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
       secretRef,
       cloudProviderKind,
       cloudProfileName,
+      dnsProviderName,
       projectName,
       hasCostObject
     },
@@ -88,8 +90,12 @@ function toSecretBindingResource ({ metadata }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
   const { name, secretRef } = metadata
-  const labels = {
-    'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
+  const labels = {}
+  if (metadata.cloudProfileName) {
+    labels['cloudprofile.garden.sapcloud.io/name'] = metadata.cloudProfileName
+  }
+  if (metadata.dnsProviderName) {
+    labels['gardener.cloud/dnsProviderName'] = metadata.dnsProviderName
   }
 
   metadata = _
@@ -120,13 +126,14 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
     .map(secretBinding => {
       try {
         const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
+        const dnsProviderName = _.get(secretBinding, ['metadata', 'labels', 'gardener.cloud/dnsProviderName'])
         const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
         const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
         const name = _.get(secretBinding, 'metadata.name')
         const secretName = _.get(secretBinding, 'secretRef.name')
         const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
         const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
-        if (!cloudProviderKind) {
+        if (!cloudProviderKind && !dnsProviderName) {
           throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, name))
         }
         const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
@@ -149,8 +156,11 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
 }
 
 async function getCloudProviderKind (user, name) {
-  const cloudProfile = await cloudprofiles.read({ user, name })
-  return _.get(cloudProfile, 'metadata.cloudProviderKind')
+  if (name) {
+    const cloudProfile = await cloudprofiles.read({ user, name })
+    return _.get(cloudProfile, 'metadata.cloudProviderKind')
+  }
+  return undefined
 }
 
 /*

@@ -10,43 +10,31 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    vendor="metal"
-    create-title="Add new Metal Secret"
-    replace-title="Replace Metal Secret"
+    vendor="netlify"
+    create-title="Add new Netlify Secret"
+    replace-title="Replace Netlify Secret"
     @input="onInput">
 
     <template v-slot:secret-slot>
       <div>
         <v-text-field
           color="primary"
-          v-model="apiUrl"
-          ref="apiUrl"
-          label="API URL"
-          :error-messages="getErrorMessages('apiUrl')"
-          @input="$v.apiUrl.$touch()"
-          @blur="$v.apiUrl.$touch()"
-        ></v-text-field>
-      </div>
-      <div>
-        <v-text-field
-          color="primary"
-          v-model="apiHmac"
-          label="API HMAC"
-          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="hideSecret ? 'password' : 'text'"
-          @click:append="() => (hideSecret = !hideSecret)"
-          :error-messages="getErrorMessages('apiHmac')"
-          @input="$v.apiHmac.$touch()"
-          @blur="$v.apiHmac.$touch()"
+          v-model="apiToken"
+          label="Netlify API Token"
+          :error-messages="getErrorMessages('apiToken')"
+          :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="hideApiToken ? 'password' : 'text'"
+          @click:append="() => (hideApiToken = !hideApiToken)"
+          @input="$v.apiToken.$touch()"
+          @blur="$v.apiToken.$touch()"
         ></v-text-field>
       </div>
     </template>
+
     <template v-slot:help-slot>
       <div>
-        <p>
-          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
-          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
-        </p>
+        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
+        <p>Make sure that you configure your account for DNS usage</p>
       </div>
     </template>
 
@@ -56,16 +44,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required, url } from 'vuelidate/lib/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
-  apiHmac: {
+  apiToken: {
     required: 'You can\'t leave this empty.'
-  },
-  apiUrl: {
-    required: 'You can\'t leave this empty.',
-    url: 'You must enter a valid URL'
   }
 }
 
@@ -84,9 +68,8 @@ export default {
   },
   data () {
     return {
-      apiHmac: undefined,
-      apiUrl: undefined,
-      hideSecret: true,
+      apiToken: undefined,
+      hideApiToken: true,
       validationErrors
     }
   },
@@ -100,18 +83,13 @@ export default {
     },
     secretData () {
       return {
-        metalAPIHMac: this.apiHmac,
-        metalAPIURL: this.apiUrl
+        apiToken: this.apiToken
       }
     },
     validators () {
       const validators = {
-        apiHmac: {
+        apiToken: {
           required
-        },
-        apiUrl: {
-          required,
-          url
         }
       }
       return validators
@@ -127,12 +105,7 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.apiHmac = ''
-      this.apiUrl = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'apiUrl')
-      }
+      this.apiToken = ''
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)

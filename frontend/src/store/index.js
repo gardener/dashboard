@@ -66,7 +66,7 @@ import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
-import infrastructureSecrets from './modules/infrastructureSecrets'
+import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
@@ -177,6 +177,26 @@ const vendorNameFromImageName = imageName => {
     return 'suse-jeos'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
     return 'suse-chost'
+  } else if (lowerCaseName.includes('flatcar')) {
+    return 'flatcar'
+  } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
+    return 'memoryone'
+  } else if (lowerCaseName.includes('aws-route53')) {
+    return 'aws-route53'
+  } else if (lowerCaseName.includes('azure-dns')) {
+    return 'azure-dns'
+  } else if (lowerCaseName.includes('google-clouddns')) {
+    return 'google-clouddns'
+  } else if (lowerCaseName.includes('openstack-designate')) {
+    return 'openstack-designate'
+  } else if (lowerCaseName.includes('alicloud-dns')) {
+    return 'alicloud-dns'
+  } else if (lowerCaseName.includes('cloudflare')) {
+    return 'cloudflare'
+  } else if (lowerCaseName.includes('infoblox')) {
+    return 'infoblox'
+  } else if (lowerCaseName.includes('netlify')) {
+    return 'netlify'
   }
   return undefined
 }
@@ -630,11 +650,18 @@ const getters = {
     return state.members.all
   },
   infrastructureSecretList (state) {
-    return state.infrastructureSecrets.all
+    return filter(state.cloudProviderSecrets.all, secret => {
+      return !!secret.metadata.cloudProviderKind
+    })
+  },
+  dnsSecretList (state) {
+    return filter(state.cloudProviderSecrets.all, secret => {
+      return !!secret.metadata.dnsProviderName
+    })
   },
   getInfrastructureSecretByName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
+      return getters['cloudProviderSecrets/getInfrastructureSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -776,9 +803,9 @@ const getters = {
       })
     }
   },
-  infrastructureSecretsByCloudProfileName (state) {
+  cloudProviderSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
-      return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
+      return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
     }
   },
   shootByNamespaceAndName (state, getters) {
@@ -1073,8 +1100,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchInfrastructureSecrets ({ dispatch, commit }) {
-    return dispatch('infrastructureSecrets/getAll')
+  fetchCloudProviderSecrets ({ dispatch, commit }) {
+    return dispatch('cloudProviderSecrets/getAll')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -1243,21 +1270,21 @@ const actions = {
       })
   },
   createInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/create', data)
+    return dispatch('cloudProviderSecrets/create', data)
       .then(res => {
         dispatch('setAlert', { message: 'Infractructure secret created', type: 'success' })
         return res
       })
   },
   updateInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/update', data)
+    return dispatch('cloudProviderSecrets/update', data)
       .then(res => {
         dispatch('setAlert', { message: 'Infractructure secret updated', type: 'success' })
         return res
       })
   },
   deleteInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/delete', data)
+    return dispatch('cloudProviderSecrets/delete', data)
       .then(res => {
         dispatch('setAlert', { message: 'Infractructure secret deleted', type: 'success' })
         return res
@@ -1517,7 +1544,7 @@ const modules = {
   networkingTypes,
   seeds,
   shoots,
-  infrastructureSecrets,
+  cloudProviderSecrets,
   tickets
 }
 

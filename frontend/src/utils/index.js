@@ -295,6 +295,17 @@ export function isOwnSecret (infrastructureSecret) {
   return get(infrastructureSecret, 'metadata.secretRef.namespace') === get(infrastructureSecret, 'metadata.namespace')
 }
 
+export const dnsProviderList = [
+  'aws-route53',
+  'azure-dns',
+  'google-clouddns',
+  'openstack-designate',
+  'alicloud-dns',
+  'cloudflare',
+  'infoblox',
+  'netlify'
+]
+
 const availableK8sUpdatesCache = {}
 export function availableK8sUpdatesForShoot (shootVersion, cloudProfileName) {
   let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)

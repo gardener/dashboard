@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="aws"
-    create-title="Add new AWS Secret"
-    replace-title="Replace AWS Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template v-slot:help-slot>
-      <div>
+      <div v-if="vendor==='aws'">
         <p>
           Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
           credentials for AWS Identity and Access Management (IAM), use the
@@ -59,6 +59,10 @@ SPDX-License-Identifier: Apache-2.0
           documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
         </p>
         <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      </div>
+      <div v-if="vendor==='aws-route53'">
+        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
+        <p>Make sure that you configure your account for DNS usage</p>
       </div>
     </template>
 
@@ -99,6 +103,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -203,6 +210,15 @@ export default {
     },
     isCreateMode () {
       return !this.secret
+    },
+    name () {
+      if (this.vendor === 'aws') {
+        return 'AWS'
+      }
+      if (this.vendor === 'aws-route53') {
+        return 'Amazon Route 53'
+      }
+      return undefined
     }
   },
   methods: {

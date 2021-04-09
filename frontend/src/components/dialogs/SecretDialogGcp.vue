@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="gcp"
-    create-title="Add new Google Secret"
-    replace-title="Replace Google Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template v-slot:help-slot>
-      <div class="help-content">
+      <div class="help-content" v-if="vendor==='gcp'">
         <p>
           A service account is a special account that can be used by services and applications running on your Google
           Compute Engine instance to interact with other Google Cloud Platform APIs. Applications can use service
@@ -62,6 +62,10 @@ SPDX-License-Identifier: Apache-2.0
             Service Account Documentation<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to apply for credentials
           to service accounts.
         </p>
+      </div>
+      <div v-if="vendor==='google-clouddns'">
+        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
+        <p>Make sure that you configure your account for DNS usage</p>
       </div>
     </template>
 
@@ -93,6 +97,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -126,6 +133,15 @@ export default {
     },
     isCreateMode () {
       return !this.secret
+    },
+    name () {
+      if (this.vendor === 'gcp') {
+        return 'Google'
+      }
+      if (this.vendor === 'google-clouddns') {
+        return 'Google Cloud DNS'
+      }
+      return undefined
     }
   },
   methods: {
