@@ -6,6 +6,7 @@
 
 'use strict'
 
+require('abort-controller/polyfill')
 const http = require('http')
 const { Test } = require('supertest')
 const pEvent = require('p-event')
@@ -44,12 +45,10 @@ function createHttpAgent () {
   return agent
 }
 
-function createSocketAgent () {
+function createSocketAgent (cache) {
   const server = http.createServer()
-  const io = require('./lib/io')()
-  server.listen(0, '127.0.0.1', () => {
-    io.attach(server)
-  })
+  const io = require('./lib/io')(server, cache)
+  server.listen(0, '127.0.0.1')
 
   const agent = {
     io,
@@ -87,10 +86,10 @@ function createSocketAgent () {
   return agent
 }
 
-function createAgent (type = 'http') {
+function createAgent (type = 'http', cache) {
   switch (type) {
     case 'io':
-      return createSocketAgent()
+      return createSocketAgent(cache)
     default:
       return createHttpAgent()
   }
@@ -110,15 +109,23 @@ jest.mock('./lib/config/gardener', () => {
 })
 
 jest.mock('./lib/cache', () => {
+  const { find } = require('lodash')
   const fixtures = require('./__fixtures__')
   const originalCache = jest.requireActual('./lib/cache')
   const createTicketCache = jest.requireActual('./lib/cache/tickets')
   const { cache } = originalCache
-  cache.cloudprofiles.replace(fixtures.cloudprofiles.list())
-  cache.seeds.replace(fixtures.seeds.list())
-  cache.quotas.replace(fixtures.quotas.list())
-  cache.projects.replace(fixtures.projects.list())
-  cache.controllerregistrations.replace(fixtures.controllerregistrations.list())
+  const keys = ['cloudprofiles', 'seeds', 'quotas', 'projects', 'controllerregistrations']
+  for (const key of keys) {
+    cache.set(key, {
+      items: fixtures[key].list(),
+      list () {
+        return this.items
+      },
+      find (predicate) {
+        return find(this.list(), predicate)
+      }
+    })
+  }
   cache.ticketCache = createTicketCache()
   cache.resetTicketCache = () => (cache.ticketCache = createTicketCache())
   return originalCache

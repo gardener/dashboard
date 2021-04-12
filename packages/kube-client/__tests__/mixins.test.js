@@ -7,50 +7,29 @@
 'use strict'
 
 const { camelCase } = require('lodash')
-const { Agent } = require('http')
+const http2 = require('http2')
 const { mix } = require('mixwith')
 const mixins = require('../lib/mixins')
-const WatchBuilder = require('../lib/WatchBuilder')
 const { PatchType } = require('../lib/util')
-const { Reflector, Store } = require('../lib/cache')
-const {
-  http: httpSymbols,
-  ws: wsSymbols
-} = require('../lib/symbols')
-const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Cacheable, Writable } = mixins
+const { Informer } = require('../lib/cache')
+const { http } = require('../lib/symbols')
+const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Writable } = mixins
+const { HTTP2_HEADER_CONTENT_TYPE } = http2.constants
 
 describe('kube-client', () => {
   describe('mixins', () => {
-    const testStore = new Store()
     const testOptions = {
       foo: 'bar'
     }
-    let testReflector
-    let testReconnector
-    let testAgent
-    let createReflectorStub
-    let createAgentStub
-    let createReconnectorStub
-    let runReflectorSpy
-
-    class TestAgent extends Agent {}
+    const testInformer = {}
+    Informer.create = jest.fn(() => testInformer)
 
     class TestClient {
-      get [httpSymbols.client] () {
-        return {
-          defaults: {
-            options: {
-              prefixUrl: 'url'
-            }
-          }
-        }
-      }
-
-      [httpSymbols.request] (...args) {
+      [http.request] (...args) {
         return args
       }
 
-      [wsSymbols.connect] (...args) {
+      [http.stream] (...args) {
         return args
       }
 
@@ -67,30 +46,11 @@ describe('kube-client', () => {
           plural: 'dummies'
         }
       }
-
-      static createAgent (url, options) {
-        return testAgent
-      }
     }
 
-    class TestReflector {
-      run () {}
-    }
-
-    class TestReconnector {}
-
-    function beforeEachCachableTest () {
-      testAgent = new TestAgent()
-      testReflector = new TestReflector()
-      testReconnector = new TestReconnector()
-      createReflectorStub = jest.spyOn(Reflector, 'create').mockReturnValue(testReflector)
-      createAgentStub = jest.spyOn(TestClient, 'createAgent').mockReturnValue(testAgent)
-      runReflectorSpy = jest.spyOn(testReflector, 'run')
-    }
-
-    function beforeEachObservableTest () {
-      createReconnectorStub = jest.spyOn(WatchBuilder, 'create').mockReturnValue(testReconnector)
-    }
+    beforeEach(() => {
+      Informer.create.mockClear()
+    })
 
     describe('Version', () => {
       class V1Object extends V1(Object) {}
@@ -118,14 +78,13 @@ describe('kube-client', () => {
     })
 
     describe('ClusterScoped', () => {
-      class TestObject extends mix(TestClient).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {}
+      class TestObject extends mix(TestClient).with(ClusterScoped, Readable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', () => {
         const testObject = new TestObject()
         expect(testObject).toHaveProperty('constructor.scope', 'Cluster')
         expect(testObject).toBeInstanceOf(ClusterScoped)
         expect(testObject).toBeInstanceOf(Readable)
-        expect(testObject).toBeInstanceOf(Cacheable)
         expect(testObject).toBeInstanceOf(Observable)
         expect(testObject).toBeInstanceOf(Writable)
       })
@@ -146,81 +105,44 @@ describe('kube-client', () => {
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
         })
+      })
 
+      describe('Observable', () => {
         it('should watch a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('name', { watch: true })
+          const [url, { method, searchParams }] = testObject.watch('name')
           expect(url).toBe('dummies')
-          expect(method).toBeUndefined()
+          expect(method).toBe('get')
           expect(searchParams.toString()).toBe('watch=true&fieldSelector=metadata.name%3Dname')
         })
 
         it('should watch a list of resources', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list({ watch: true })
+          const [url, { method, searchParams }] = testObject.watchList()
           expect(url).toBe('dummies')
-          expect(method).toBeUndefined()
+          expect(method).toBe('get')
           expect(searchParams.toString()).toBe('watch=true')
         })
-      })
 
-      describe('Cachable', () => {
-        beforeEach(beforeEachCachableTest)
-
-        it('should sync a list of resources', () => {
+        it('should create an informer', () => {
           const testObject = new TestObject()
-          const reflector = testObject.syncList(testStore)
-          expect(createReflectorStub).toHaveBeenCalledTimes(1)
-          const [listWatcher, store] = createReflectorStub.mock.calls[0]
-          expect(store).toBe(testStore)
+          testObject.list = jest.fn()
+          testObject.watchList = jest.fn()
+          expect(testObject.informer()).toBe(testInformer)
+          expect(Informer.create).toHaveBeenCalledTimes(1)
+          const [listWatcher] = Informer.create.mock.calls[0]
           expect(listWatcher.group).toBe(TestObject.group)
           expect(listWatcher.version).toBe(TestObject.version)
           expect(listWatcher.names).toEqual(TestObject.names)
-          expect(createAgentStub).toHaveBeenCalledTimes(1)
-          const listStub = jest.spyOn(testObject, 'list')
           listWatcher.list(testOptions)
+          expect(testObject.list).toHaveBeenCalledTimes(1)
+          const listCall = testObject.list.mock.calls[0]
+          expect(listCall.length).toBe(1)
+          expect(listCall[0].searchParams.toString()).toBe('foo=bar')
           listWatcher.watch(testOptions)
-          expect(listStub).toHaveBeenCalledTimes(2)
-          let listCallArgs
-          listCallArgs = listStub.mock.calls[0]
-          expect(listCallArgs.length).toBe(1)
-          expect(listCallArgs[0].agent).toBe(testAgent)
-          expect(listCallArgs[0].searchParams.get('watch')).toBeNull()
-          expect(listCallArgs[0].searchParams.get('foo')).toBe('bar')
-          listCallArgs = listStub.mock.calls[1]
-          expect(listCallArgs.length).toBe(1)
-          expect(listCallArgs[0].agent).toBe(testAgent)
-          expect(listCallArgs[0].searchParams.get('watch')).toBe('true')
-          expect(listCallArgs[0].searchParams.get('foo')).toBe('bar')
-          expect(runReflectorSpy).toHaveBeenCalledTimes(1)
-          expect(reflector).toBe(testReflector)
-        })
-      })
-
-      describe('Observable', () => {
-        beforeEach(beforeEachObservableTest)
-
-        it('should watch a resource', () => {
-          const testObject = new TestObject()
-          const reconnector = testObject.watch('name', testOptions)
-          expect(createReconnectorStub).toHaveBeenCalledTimes(1)
-          const [object, url, searchParams, name] = createReconnectorStub.mock.calls[0]
-          expect(object).toBe(testObject)
-          expect(url).toBe('dummies')
-          expect(searchParams.toString()).toBe('foo=bar')
-          expect(name).toBe('name')
-          expect(reconnector).toBe(testReconnector)
-        })
-
-        it('should watch a list of resources', () => {
-          const testObject = new TestObject()
-          const reconnector = testObject.watchList(testOptions)
-          expect(createReconnectorStub).toHaveBeenCalledTimes(1)
-          const [object, url, searchParams] = createReconnectorStub.mock.calls[0]
-          expect(object).toBe(testObject)
-          expect(url).toBe('dummies')
-          expect(searchParams.toString()).toBe('foo=bar')
-          expect(reconnector).toBe(testReconnector)
+          const watchCall = testObject.watchList.mock.calls[0]
+          expect(watchCall.length).toBe(1)
+          expect(watchCall[0].searchParams.toString()).toBe('foo=bar')
         })
       })
 
@@ -232,7 +154,7 @@ describe('kube-client', () => {
           const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('name', testBody, testOptions)
           expect(url).toBe('dummies/name')
           expect(method).toBe('patch')
-          expect(headers['Content-Type']).toBe(patchContentType)
+          expect(headers[HTTP2_HEADER_CONTENT_TYPE]).toBe(patchContentType)
           expect(searchParams.toString()).toBe('foo=bar')
           expect(json).toBe(testBody)
         }
@@ -257,18 +179,18 @@ describe('kube-client', () => {
           expect(json).toBe(testBody)
         })
 
-        // eslint-disable-next-line jest/expect-expect
         it('should merge patch a resource', () => {
+          expect.assertions(5)
           patchMethodTest(PatchType.MERGE, { bar: 'foo' })
         })
 
-        // eslint-disable-next-line jest/expect-expect
         it('should strategic merge patch a resource', () => {
+          expect.assertions(5)
           patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
         })
 
-        // eslint-disable-next-line jest/expect-expect
         it('should json patch a resource', () => {
+          expect.assertions(5)
           patchMethodTest(PatchType.JSON, ['foo'])
         })
 
@@ -291,14 +213,13 @@ describe('kube-client', () => {
     })
 
     describe('NamespaceScoped', () => {
-      class TestObject extends mix(TestClient).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {}
+      class TestObject extends mix(TestClient).with(NamespaceScoped, Readable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', () => {
         const testObject = new TestObject()
         expect(testObject).toHaveProperty('constructor.scope', 'Namespaced')
         expect(testObject).toBeInstanceOf(NamespaceScoped)
         expect(testObject).toBeInstanceOf(Readable)
-        expect(testObject).toBeInstanceOf(Cacheable)
         expect(testObject).toBeInstanceOf(Observable)
         expect(testObject).toBeInstanceOf(Writable)
       })
@@ -327,131 +248,75 @@ describe('kube-client', () => {
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
         })
+      })
 
+      describe('Observable', () => {
         it('should watch a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('namespace', 'name', { watch: true })
+          const [url, { method, searchParams }] = testObject.watch('namespace', 'name')
           expect(url).toBe('namespaces/namespace/dummies')
-          expect(method).toBeUndefined()
+          expect(method).toBe('get')
           expect(searchParams.toString()).toBe('watch=true&fieldSelector=metadata.name%3Dname')
         })
 
         it('should watch a list of resources', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list('namespace', { watch: true })
+          const [url, { method, searchParams }] = testObject.watchList('namespace')
           expect(url).toBe('namespaces/namespace/dummies')
-          expect(method).toBeUndefined()
+          expect(method).toBe('get')
           expect(searchParams.toString()).toBe('watch=true')
         })
 
         it('should watch a list of resources across all namespaces', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.listAllNamespaces({ watch: true })
+          const [url, { method, searchParams }] = testObject.watchListAllNamespaces()
           expect(url).toBe('dummies')
-          expect(method).toBeUndefined()
+          expect(method).toBe('get')
           expect(searchParams.toString()).toBe('watch=true')
         })
-      })
 
-      describe('Cachable', () => {
-        beforeEach(beforeEachCachableTest)
-
-        it('should sync a list of resources', () => {
+        it('should create an informer', () => {
           const testObject = new TestObject()
-          const reflector = testObject.syncList('namesace', testStore)
-          expect(createReflectorStub).toHaveBeenCalledTimes(1)
-          const [listWatcher, store] = createReflectorStub.mock.calls[0]
-          expect(store).toBe(testStore)
+          testObject.list = jest.fn()
+          testObject.watchList = jest.fn()
+          expect(testObject.informer('namespace')).toBe(testInformer)
+          expect(Informer.create).toHaveBeenCalledTimes(1)
+          const [listWatcher] = Informer.create.mock.calls[0]
           expect(listWatcher.group).toBe(TestObject.group)
           expect(listWatcher.version).toBe(TestObject.version)
           expect(listWatcher.names).toEqual(TestObject.names)
-          expect(createAgentStub).toHaveBeenCalledTimes(1)
-          const listStub = jest.spyOn(testObject, 'list')
           listWatcher.list(testOptions)
+          expect(testObject.list).toHaveBeenCalledTimes(1)
+          const listCall = testObject.list.mock.calls[0]
+          expect(listCall.length).toBe(2)
+          expect(listCall[0]).toBe('namespace')
+          expect(listCall[1].searchParams.toString()).toBe('foo=bar')
           listWatcher.watch(testOptions)
-          expect(listStub).toHaveBeenCalledTimes(2)
-          let listCallArgs
-          listCallArgs = listStub.mock.calls[0]
-          expect(listCallArgs.length).toBe(2)
-          expect(listCallArgs[0]).toBe('namesace')
-          expect(listCallArgs[1].agent).toBe(testAgent)
-          expect(listCallArgs[1].searchParams.get('watch')).toBeNull()
-          expect(listCallArgs[1].searchParams.get('foo')).toBe('bar')
-          listCallArgs = listStub.mock.calls[1]
-          expect(listCallArgs.length).toBe(2)
-          expect(listCallArgs[0]).toBe('namesace')
-          expect(listCallArgs[1].agent).toBe(testAgent)
-          expect(listCallArgs[1].searchParams.get('watch')).toBe('true')
-          expect(listCallArgs[1].searchParams.get('foo')).toBe('bar')
-          expect(runReflectorSpy).toHaveBeenCalledTimes(1)
-          expect(reflector).toBe(testReflector)
+          const watchCall = testObject.watchList.mock.calls[0]
+          expect(watchCall.length).toBe(2)
+          expect(watchCall[0]).toBe('namespace')
+          expect(watchCall[1].searchParams.toString()).toBe('foo=bar')
         })
 
-        it('should sync a list of resources across all namespaces', () => {
+        it('should create an informer across all namespaces', () => {
           const testObject = new TestObject()
-          const reflector = testObject.syncListAllNamespaces(testStore)
-          expect(createReflectorStub).toHaveBeenCalledTimes(1)
-          const [listWatcher, store] = createReflectorStub.mock.calls[0]
-          expect(store).toBe(testStore)
+          testObject.listAllNamespaces = jest.fn()
+          testObject.watchListAllNamespaces = jest.fn()
+          expect(testObject.informerAllNamespaces()).toBe(testInformer)
+          expect(Informer.create).toHaveBeenCalledTimes(1)
+          const [listWatcher] = Informer.create.mock.calls[0]
           expect(listWatcher.group).toBe(TestObject.group)
           expect(listWatcher.version).toBe(TestObject.version)
           expect(listWatcher.names).toEqual(TestObject.names)
-          expect(createAgentStub).toHaveBeenCalledTimes(1)
-          const listStub = jest.spyOn(testObject, 'listAllNamespaces')
           listWatcher.list(testOptions)
+          expect(testObject.listAllNamespaces).toHaveBeenCalledTimes(1)
+          const listCall = testObject.listAllNamespaces.mock.calls[0]
+          expect(listCall.length).toBe(1)
+          expect(listCall[0].searchParams.toString()).toBe('foo=bar')
           listWatcher.watch(testOptions)
-          expect(listStub).toHaveBeenCalledTimes(2)
-          let listCallArgs
-          listCallArgs = listStub.mock.calls[0]
-          expect(listCallArgs.length).toBe(1)
-          expect(listCallArgs[0].agent).toBe(testAgent)
-          expect(listCallArgs[0].searchParams.get('watch')).toBeNull()
-          expect(listCallArgs[0].searchParams.get('foo')).toBe('bar')
-          listCallArgs = listStub.mock.calls[1]
-          expect(listCallArgs.length).toBe(1)
-          expect(listCallArgs[0].agent).toBe(testAgent)
-          expect(listCallArgs[0].searchParams.get('watch')).toBe('true')
-          expect(listCallArgs[0].searchParams.get('foo')).toBe('bar')
-          expect(runReflectorSpy).toHaveBeenCalledTimes(1)
-          expect(reflector).toBe(testReflector)
-        })
-      })
-
-      describe('Observable', () => {
-        beforeEach(beforeEachObservableTest)
-
-        it('should watch a resource', () => {
-          const testObject = new TestObject()
-          const reconnector = testObject.watch('namespace', 'name', testOptions)
-          expect(createReconnectorStub).toHaveBeenCalledTimes(1)
-          const [object, url, searchParams, name] = createReconnectorStub.mock.calls[0]
-          expect(object).toBe(testObject)
-          expect(url).toBe('namespaces/namespace/dummies')
-          expect(searchParams.toString()).toBe('foo=bar')
-          expect(name).toBe('name')
-          expect(reconnector).toBe(testReconnector)
-        })
-
-        it('should watch a list of resources', () => {
-          const testObject = new TestObject()
-          const reconnector = testObject.watchList('namespace', testOptions)
-          expect(createReconnectorStub).toHaveBeenCalledTimes(1)
-          const [object, url, searchParams] = createReconnectorStub.mock.calls[0]
-          expect(object).toBe(testObject)
-          expect(url).toBe('namespaces/namespace/dummies')
-          expect(searchParams.toString()).toBe('foo=bar')
-          expect(reconnector).toBe(testReconnector)
-        })
-
-        it('should watch a list of resources across all namespaces', () => {
-          const testObject = new TestObject()
-          const reconnector = testObject.watchListAllNamespaces(testOptions)
-          expect(createReconnectorStub).toHaveBeenCalledTimes(1)
-          const [object, url, searchParams] = createReconnectorStub.mock.calls[0]
-          expect(object).toBe(testObject)
-          expect(url).toBe('dummies')
-          expect(searchParams.toString()).toBe('foo=bar')
-          expect(reconnector).toBe(testReconnector)
+          const watchCall = testObject.watchListAllNamespaces.mock.calls[0]
+          expect(watchCall.length).toBe(1)
+          expect(watchCall[0].searchParams.toString()).toBe('foo=bar')
         })
       })
 
@@ -463,7 +328,7 @@ describe('kube-client', () => {
           const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('namespace', 'name', testBody, testOptions)
           expect(url).toBe('namespaces/namespace/dummies/name')
           expect(method).toBe('patch')
-          expect(headers['Content-Type']).toBe(patchContentType)
+          expect(headers[HTTP2_HEADER_CONTENT_TYPE]).toBe(patchContentType)
           expect(searchParams.toString()).toBe('foo=bar')
           expect(json).toBe(testBody)
         }
@@ -489,17 +354,17 @@ describe('kube-client', () => {
         })
 
         it('should merge patch a resource', () => {
-          expect.hasAssertions()
+          expect.assertions(5)
           patchMethodTest(PatchType.MERGE, { bar: 'foo' })
         })
 
         it('should strategic merge patch a resource', () => {
-          expect.hasAssertions()
+          expect.assertions(5)
           patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
         })
 
         it('should json patch a resource', () => {
-          expect.hasAssertions()
+          expect.assertions(5)
           patchMethodTest(PatchType.JSON, ['foo'])
         })
 

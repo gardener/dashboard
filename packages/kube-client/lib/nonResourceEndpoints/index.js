@@ -6,11 +6,13 @@
 
 'use strict'
 
+const API = require('./API')
 const Healthz = require('./Healthz')
 const OpenAPI = require('./OpenAPI')
 
 function load (options) {
   return {
+    api: new API(options),
     healthz: new Healthz(options),
     openapi: new OpenAPI(options)
   }

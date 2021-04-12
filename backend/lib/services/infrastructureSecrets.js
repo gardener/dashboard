@@ -141,7 +141,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
           ...projectInfo
         })
       } catch (err) {
-        logger.warn(err.message)
+        logger.info(err.message)
       }
     })
     .compact()

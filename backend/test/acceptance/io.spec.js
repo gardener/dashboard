@@ -12,9 +12,6 @@ const { filter, map, pick, groupBy, find, includes } = require('lodash')
 const kubeClient = require('@gardener-dashboard/kube-client')
 const cache = require('../../lib/cache')
 const { projects, shoots, authorization, tickets } = require('../../lib/services')
-const watches = require('../../lib/watches')
-
-jest.mock('../../lib/watches')
 
 describe('socket.io', function () {
   const id = 'foo@example.org'
@@ -29,7 +26,7 @@ describe('socket.io', function () {
 
   beforeAll(function () {
     cache.cache.resetTicketCache()
-    agent = createAgent('io')
+    agent = createAgent('io', cache)
   })
 
   afterAll(function () {
@@ -51,13 +48,6 @@ describe('socket.io', function () {
   afterEach(function () {
     if (socket && socket.connected) {
       socket.destroy()
-    }
-  })
-
-  it('should init watches with the io server', () => {
-    for (const stub of Object.values(watches)) {
-      expect(stub).toBeCalledTimes(1)
-      expect(stub.mock.calls[0][0]).toBe(agent.io)
     }
   })
 

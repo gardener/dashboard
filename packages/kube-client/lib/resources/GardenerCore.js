@@ -9,9 +9,9 @@
 const { mix } = require('mixwith')
 
 const { GardenerCore } = require('../groups')
-const { NamespaceScoped, ClusterScoped, Readable, Writable, Observable, Cacheable } = require('../mixins')
+const { NamespaceScoped, ClusterScoped, Readable, Writable, Observable } = require('../mixins')
 
-class Project extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {
+class Project extends mix(GardenerCore).with(ClusterScoped, Readable, Observable, Writable) {
   static get names () {
     return {
       plural: 'projects',
@@ -21,7 +21,7 @@ class Project extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable,
   }
 }
 
-class CloudProfile extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable, Observable) {
+class CloudProfile extends mix(GardenerCore).with(ClusterScoped, Readable, Observable) {
   static get names () {
     return {
       plural: 'cloudprofiles',
@@ -31,7 +31,7 @@ class CloudProfile extends mix(GardenerCore).with(ClusterScoped, Readable, Cache
   }
 }
 
-class Seed extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable, Observable) {
+class Seed extends mix(GardenerCore).with(ClusterScoped, Readable, Observable) {
   static get names () {
     return {
       plural: 'seeds',
@@ -41,7 +41,7 @@ class Seed extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable, Ob
   }
 }
 
-class Quota extends mix(GardenerCore).with(NamespaceScoped, Readable, Cacheable, Observable) {
+class Quota extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable) {
   static get names () {
     return {
       plural: 'quotas',
@@ -61,7 +61,7 @@ class SecretBinding extends mix(GardenerCore).with(NamespaceScoped, Readable, Ob
   }
 }
 
-class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {
+class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
     return {
       plural: 'shoots',
@@ -71,7 +71,7 @@ class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Cacheable,
   }
 }
 
-class ControllerRegistration extends mix(GardenerCore).with(ClusterScoped, Readable, Cacheable, Observable) {
+class ControllerRegistration extends mix(GardenerCore).with(ClusterScoped, Readable, Observable) {
   static get names () {
     return {
       plural: 'controllerregistrations',

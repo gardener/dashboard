@@ -6,12 +6,18 @@
 
 'use strict'
 
-const Reflector = require('./Reflector')
+const BackoffManager = require('./BackoffManager')
+const Informer = require('./Informer')
 const ListPager = require('./ListPager')
+const Reflector = require('./Reflector')
 const Store = require('./Store')
+const ListWatcher = require('./ListWatcher')
 
 module.exports = {
-  Reflector,
+  BackoffManager,
+  Informer,
   ListPager,
-  Store
+  Reflector,
+  Store,
+  ListWatcher
 }

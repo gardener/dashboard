@@ -28,10 +28,6 @@ class Client {
     // merge with default options
     options = {
       servername,
-      throwHttpErrors: true,
-      resolveBodyOnly: true,
-      retry: 0,
-      timeout: 30 * 1000,
       ...options
     }
     // set authorization header for basic and bearer authentication scheme
@@ -44,7 +40,7 @@ class Client {
         setAuthorization(options, 'basic', auth)
       }
     }
-    // add hooks for logging (see https://github.com/sindresorhus/got#hooks)
+    // add hooks for logging
     options = debug.attach(options)
     // kubernetes cluster endpoint info
     const { url, ca, rejectUnauthorized = true } = options

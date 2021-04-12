@@ -7,5 +7,5 @@
 'use strict'
 
 const app = require('./lib/app')
-const server = require('./lib/server')(app)
-server.startListening()
+const createServer = require('./lib/server')
+createServer(app).run()
