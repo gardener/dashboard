@@ -18,12 +18,21 @@
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
+  "dependenciesMeta": {
+    "deasync": {
+      "built": false
+    },
+    "fsevents": {
+      "built": false
+    }
+  },
   "devDependencies": {
     "eslint": "^6.8.0",
+    "jest": "^26.6.3",
     "node-gyp": "latest"
   },
   "engines": {
-    "node": "^14.15.0",
-    "yarn": "^2.3.3"
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
   }
 }

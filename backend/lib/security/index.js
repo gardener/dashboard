@@ -195,7 +195,16 @@ function authenticate (options = {}) {
       const audience = [GARDENER_AUDIENCE]
       req.user = await verify(token, { audience })
     } catch (err) {
-      throw new Unauthorized(err.message)
+      const unauthorizedError = new Unauthorized(err.message)
+      switch (err.name) {
+        case 'TokenExpiredError':
+          unauthorizedError.code = 'ERR_JWT_TOKEN_EXPIRED'
+          break
+        case 'NotBeforeError':
+          unauthorizedError.code = 'ERR_JWT_NOT_BEFORE'
+          break
+      }
+      throw unauthorizedError
     }
   }
   const csrfProtection = (req, res) => {

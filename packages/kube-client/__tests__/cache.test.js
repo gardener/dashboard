@@ -6,8 +6,7 @@
 
 'use strict'
 
-const EventEmitter = require('events')
-const pEvent = require('p-event')
+const { PassThrough, addAbortSignal } = require('stream')
 const moment = require('moment')
 
 const ApiErrors = require('../lib/ApiErrors')
@@ -19,7 +18,6 @@ describe('kube-client', () => {
     let map
     let store
     let listWatcher
-    let destroyAgentSpy
 
     function createDummy (metadata) {
       return {
@@ -35,44 +33,10 @@ describe('kube-client', () => {
     const x = createDummy({ uid: 'a', resourceVersion: '4' })
     const bookmark = createDummy({ resourceVersion: '9' })
 
-    class TestSocket extends EventEmitter {
-      constructor ({ maxPingPongCount = Infinity } = {}) {
-        super()
-        this.readyState = 0
-        this.pingPongCount = 0
-        this.maxPingPongCount = maxPingPongCount
-        process.nextTick(() => {
-          this.readyState = 1
-          this.emit('open')
-        })
+    class TestStream extends PassThrough {
+      constructor () {
+        super({ objectMode: true })
       }
-
-      ping () {
-        if (this.pingPongCount < this.maxPingPongCount) {
-          this.pingPongCount++
-          process.nextTick(() => this.emit('pong'))
-        }
-      }
-
-      close () {
-        if (this.readyState < 2) {
-          this.readyState = 2
-          process.nextTick(() => {
-            this.readyState = 3
-            this.emit('close')
-          })
-        }
-      }
-
-      terminate () {
-        if (this.readyState < 2) {
-          this.close()
-        }
-      }
-    }
-
-    class Agent {
-      destroy () {}
     }
 
     class TestPager {
@@ -82,23 +46,29 @@ describe('kube-client', () => {
 
       list () {
         return {
+          metadata: {
+            resourceVersion: '1'
+          },
           items: []
         }
       }
     }
 
     class TestListWatcher {
-      constructor (socket) {
-        this.agent = new Agent()
+      constructor () {
         this.group = ''
         this.version = 'v1'
         this.names = {
           kind: 'Dummy',
           plural: 'dummies'
         }
-        this.socket = socket
+        this.stream = undefined
         this.expiredErrorForToken = undefined
-        this.messages = []
+        this.events = []
+      }
+
+      setAbortSignal (signal) {
+        this.signal = signal
       }
 
       async list ({ limit, continue: continueToken }) {
@@ -130,24 +100,27 @@ describe('kube-client', () => {
       }
 
       watch (options) {
-        this.socket = new TestSocket()
-        while (this.messages.length) {
-          this.socket.emit('message', this.messages.shift())
+        this.stream = new TestStream()
+        if (this.signal) {
+          addAbortSignal(this.signal, this.stream)
         }
-        return this.socket
+        while (this.events.length) {
+          this.stream.write(this.events.shift())
+        }
+        return this.stream
       }
 
       emitEvent (event) {
-        const message = JSON.stringify(event)
-        if (this.socket) {
-          this.socket.emit('message', message)
+        if (this.stream) {
+          this.stream.write(event)
         } else {
-          this.messages.push(message)
+          this.events.push(event)
         }
       }
 
       closeWatch () {
-        this.socket.terminate()
+        this.stream.end()
+        this.stream = undefined
       }
     }
 
@@ -155,7 +128,6 @@ describe('kube-client', () => {
       map = new Map()
       store = new Store(map, { timeout: 1 })
       listWatcher = new TestListWatcher()
-      destroyAgentSpy = jest.spyOn(listWatcher.agent, 'destroy')
     })
 
     describe('Store', () => {
@@ -167,15 +139,12 @@ describe('kube-client', () => {
 
       it('should add, update and delete elements', async () => {
         expect(store).toBeInstanceOf(Store)
-        expect(store.isFresh).toBe(false)
-
-        // refresh
-        store.setRefreshing()
-        expect(store.isFresh).toBe(false)
+        expect(store.hasSynced).toBe(false)
 
         // replace [a]
         store.replace([a])
-        expect(store.isFresh).toBe(true)
+        await store.untilHasSynced
+        expect(store.hasSynced).toBe(true)
         expect(clearSpy).toHaveBeenCalledTimes(1)
         clearSpy.mockClear()
         expect(store.has(a)).toBe(true)
@@ -195,10 +164,6 @@ describe('kube-client', () => {
         // delete b
         store.delete(b)
         expect(store.listKeys()).toEqual(['a'])
-
-        store.setRefreshing()
-        await pEvent(store, 'stale')
-        expect(store.isFresh).toBe(false)
       })
     })
 
@@ -258,22 +223,19 @@ describe('kube-client', () => {
     })
 
     describe('Reflector', () => {
+      let ac
       let reflector
 
       beforeEach(() => {
+        ac = new AbortController()
         reflector = Reflector.create(listWatcher, store)
         reflector.period = moment.duration(1)
         reflector.backoffManager.min = 1
         reflector.backoffManager.max = 10
       })
 
-      afterEach(async () => {
-        await reflector.stop()
-      })
-
-      it('should destroy the agent on stop', async () => {
-        await reflector.stop()
-        expect(destroyAgentSpy).toHaveBeenCalledTimes(1)
+      afterEach(() => {
+        ac.abort()
       })
 
       it('should have property apiVersion', async () => {
@@ -300,26 +262,13 @@ describe('kube-client', () => {
         expect(reflector.relistResourceVersion).toBe('1')
       })
 
-      describe('#heartbeat', () => {
-        it('should start the heartbeat', async () => {
-          reflector.heartbeatInterval = moment.duration(1)
-          const socket = new TestSocket({ maxPingPongCount: 3 })
-          await reflector.heartbeat(socket)
-          expect(socket.pingPongCount).toBe(3)
-        })
-      })
-
       describe('#watchHandler', () => {
         it('should handle watch events', async () => {
           const error = { code: 410, reason: 'Expired' }
-          const socket = new EventEmitter()
-
-          function emitMessage (message, ms) {
-            setTimeout(() => socket.emit('message', message), ms)
-          }
+          const stream = new TestStream()
 
           function emitEvent (event, ms) {
-            emitMessage(JSON.stringify(event), ms)
+            setTimeout(() => stream.write(event), ms)
           }
 
           emitEvent({ type: 'ADDED', object: a }, 1)
@@ -329,13 +278,13 @@ describe('kube-client', () => {
           emitEvent({ type: 'BOOKMARK', object: bookmark }, 6)
           emitEvent({ type: 'ERROR', object: error }, 7)
 
-          emitMessage('{ERROR}', 4)
+          emitEvent({ type: 'INVALID' }, 4)
           emitEvent({ type: 'ADDED', object: {} }, 4)
           emitEvent({ type: 'PATCHED', object: a }, 4)
 
           expect.assertions(3)
           try {
-            await reflector.watchHandler(socket)
+            await reflector.watchHandler(stream)
           } catch (err) {
             // eslint-disable-next-line jest/no-try-expect
             expect(ApiErrors.isExpiredError(err)).toBe(true)
@@ -348,179 +297,121 @@ describe('kube-client', () => {
 
       describe('#listAndWatch', () => {
         const expiredError = new ApiErrors.StatusError({ code: 410, reason: 'Expired' })
-        const connectionRefusedError = new Error('Connection refused')
-        connectionRefusedError.code = 'ECONNREFUSED'
+        const connectionRefusedError = Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' })
         const unexpectedError = new Error('Failed')
         let pager
-        let socket
-        let listStub
-        let listOptions
-        let watchStub
-        let watchOptions
         let createPagerStub
-        let heartbeatStub
-        let watchHandlerStub
-        let terminateSpy
-        let closeStub
+        let listStub
+        let watchStub
 
         beforeEach(() => {
-          reflector.period = moment.duration(1)
-          reflector.gracePeriod = moment.duration(1)
           reflector.minWatchTimeout = moment.duration(30, 'seconds')
+          reflector.setAbortSignal(ac.signal)
           pager = new TestPager()
-          socket = new EventEmitter()
           createPagerStub = jest.spyOn(ListPager, 'create').mockReturnValue(pager)
           listStub = jest.spyOn(pager, 'list')
-          watchStub = jest.spyOn(reflector.listWatcher, 'watch')
-          socket.readyState = 0
-          socket.terminate = () => {}
-          terminateSpy = jest.spyOn(socket, 'terminate')
-          socket.close = () => {}
-          closeStub = jest.spyOn(socket, 'close')
-          heartbeatStub = jest
-            .spyOn(reflector, 'heartbeat')
-            .mockImplementation(() => {
-              socket.isAlive = true
-            })
-          watchHandlerStub = jest.spyOn(reflector, 'watchHandler')
+          watchStub = jest.spyOn(listWatcher, 'watch')
         })
 
         it('should list and fail', async () => {
-          listStub.mockImplementationOnce(() => {
-            throw unexpectedError
-          })
-          reflector.listAndWatch()
-          expect(createPagerStub).toHaveBeenCalledTimes(1)
-          expect(listStub).toHaveBeenCalledTimes(1)
-          listOptions = listStub.mock.calls[0][0]
-          expect(listOptions).toEqual({ resourceVersion: '0' })
-        })
-
-        it('should list, fall back to resourceVersion="" and fail', async () => {
-          listStub.mockImplementationOnce(() => {
-            throw expiredError
-          })
-          listStub.mockImplementationOnce(() => {
-            throw unexpectedError
-          })
-          reflector.listAndWatch()
-          expect(createPagerStub).toHaveBeenCalledTimes(1)
-          expect(listStub).toHaveBeenCalledTimes(2)
-          listOptions = listStub.mock.calls[0][0]
-          expect(listOptions).toEqual({ resourceVersion: '0' })
-          listOptions = listStub.mock.calls[1][0]
-          expect(listOptions).toEqual({ resourceVersion: '' })
-        })
-
-        it('should list, retry to start watching and fail', async () => {
-          listStub.mockImplementation(async () => {
-            return {
-              metadata: {
-                resourceVersion: '2',
-                paginated: true
-              },
-              items: [a, b]
-            }
-          })
-          watchStub.mockImplementationOnce(() => {
-            process.nextTick(() => {
-              socket.emit('error', connectionRefusedError)
-            })
-            return socket
-          })
-          watchStub.mockImplementationOnce(() => {
-            process.nextTick(() => {
-              socket.readyState = 1
-              socket.emit('error', expiredError)
-            })
-            return socket
-          })
-          closeStub.mockImplementation(() => {
-            process.nextTick(() => {
-              socket.readyState = 3
-              socket.emit('close')
-            })
-          })
+          listStub.mockRejectedValueOnce(unexpectedError)
           await reflector.listAndWatch()
           expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
+          expect(listStub.mock.calls).toEqual([
+            [{ resourceVersion: '0' }]
+          ])
+        })
+
+        it('should list, fall back to resourceVersion="" and fail', async () => {
+          listStub.mockRejectedValueOnce(expiredError)
+          listStub.mockRejectedValueOnce(unexpectedError)
+          await reflector.listAndWatch()
+          expect(createPagerStub).toHaveBeenCalledTimes(1)
+          expect(listStub).toHaveBeenCalledTimes(2)
+          expect(listStub.mock.calls).toEqual([
+            [{ resourceVersion: '0' }],
+            [{ resourceVersion: '' }]
+          ])
+        })
+
+        it('should list, retry to start watching and fail', async () => {
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '2',
+              paginated: true
+            },
+            items: [a, b]
+          })
+          watchStub.mockRejectedValueOnce(connectionRefusedError)
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(expiredError)
+            return Promise.resolve(stream)
+          })
+
+          await reflector.listAndWatch()
+          expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(2)
-          watchOptions = watchStub.mock.calls[0][0]
-          expect(watchOptions.allowWatchBookmarks).toBe(true)
-          expect(watchOptions.timeoutSeconds).toBeGreaterThanOrEqual(30)
-          expect(watchOptions.timeoutSeconds).toBeLessThanOrEqual(60)
-          expect(watchOptions.resourceVersion).toBe('2')
-          watchOptions = watchStub.mock.calls[1][0]
-          expect(watchOptions.allowWatchBookmarks).toBe(true)
-          expect(watchOptions.timeoutSeconds).toBeGreaterThanOrEqual(30)
-          expect(watchOptions.timeoutSeconds).toBeLessThanOrEqual(60)
-          expect(watchOptions.resourceVersion).toBe('2')
-          expect(closeStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls).toEqual([
+            [{
+              allowWatchBookmarks: true,
+              timeoutSeconds: expect.toBeWithinRange(30, 60),
+              resourceVersion: '2'
+            }],
+            [{
+              allowWatchBookmarks: true,
+              timeoutSeconds: expect.toBeWithinRange(30, 60),
+              resourceVersion: '2'
+            }]
+          ])
           expect(store.listKeys()).toEqual(['a', 'b'])
         })
 
         it('should list, start watching and exit', async () => {
-          listStub.mockImplementation(async () => {
-            return {
-              metadata: {
-                resourceVersion: '2',
-                paginated: true
-              },
-              items: [a, b]
-            }
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '2',
+              paginated: true
+            },
+            items: [a, b]
           })
-          watchStub.mockImplementation(() => {
-            process.nextTick(() => {
-              reflector.stopRequested = true
-              socket.readyState = 1
-              socket.emit('open')
-            })
-            return socket
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            addAbortSignal(ac.signal, stream)
+            stream.write({ type: 'ADDED', object: c })
+            setImmediate(() => ac.abort())
+            return Promise.resolve(stream)
           })
-          closeStub.mockImplementation(() => {
-            process.nextTick(() => {
-              socket.readyState = 3
-              socket.emit('close')
-            })
-          })
+
           await reflector.listAndWatch()
           expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
-          expect(listStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(1)
-          expect(closeStub).toHaveBeenCalledTimes(1)
-          expect(terminateSpy).not.toHaveBeenCalled()
+          expect(store.listKeys()).toEqual(['a', 'b', 'c'])
         })
 
         it('should list, watch and fail', async () => {
-          listStub.mockImplementation(async () => {
-            return {
-              metadata: {
-                resourceVersion: '2'
-              },
-              items: [a, b]
-            }
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '2',
+              paginated: true
+            },
+            items: [a, b]
           })
-          watchStub.mockImplementation(() => {
-            process.nextTick(() => {
-              socket.readyState = 1
-              socket.emit('open')
-            })
-            return socket
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.write({ type: 'ADDED', object: c })
+            stream.end(unexpectedError)
+            return Promise.resolve(stream)
           })
-          watchHandlerStub.mockImplementation(() => {
-            throw unexpectedError
-          })
+
           await reflector.listAndWatch()
           expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
-          expect(listStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(1)
-          expect(heartbeatStub).toHaveBeenCalledWith(socket)
-          expect(watchHandlerStub).toHaveBeenCalledWith(socket)
-          expect(closeStub).toHaveBeenCalledTimes(1)
-          expect(terminateSpy).toHaveBeenCalledTimes(1)
+          expect(store.listKeys()).toEqual(['a', 'b', 'c'])
         })
       })
 
@@ -534,23 +425,17 @@ describe('kube-client', () => {
             throw new Error('bar')
           })
           listAndWatchStub.mockImplementationOnce(() => {
-            reflector.stop()
+            ac.abort()
           })
-          await reflector.run()
+          await reflector.run(ac.signal)
           expect(listAndWatchStub).toHaveBeenCalledTimes(3)
-          expect(destroyAgentSpy).toHaveBeenCalledTimes(1)
-          destroyAgentSpy.mockClear()
         })
 
         it('should run a reflector', async () => {
           expect(reflector).toBeInstanceOf(Reflector)
-          reflector.run()
-          await pEvent(store, 'fresh')
+          reflector.run(ac.signal)
+          await store.untilHasSynced
           expect(store.listKeys()).toEqual(['a', 'b'])
-          await pEvent(listWatcher.socket, 'open')
-          // wait until message loop has been established
-          await nextTick()
-
           // add c
           listWatcher.emitEvent({ type: 'ADDED', object: c })
           // wait until added event has been handled
@@ -558,6 +443,7 @@ describe('kube-client', () => {
           expect(store.listKeys()).toEqual(['a', 'b', 'c'])
           // close websocket connection
           listWatcher.closeWatch()
+          await nextTick()
           // delete c
           listWatcher.emitEvent({ type: 'DELETED', object: c })
           // wait until deleted event has been handled

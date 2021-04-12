@@ -7,12 +7,8 @@
 'use strict'
 
 const logger = require('../logger')
-const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { tickets } = require('../services')
-const {
-  dashboardClient // privileged client for the garden cluster
-} = require('@gardener-dashboard/kube-client')
 const { bootstrapper } = require('../services/terminals')
 const cache = require('../cache')
 
@@ -39,10 +35,9 @@ function toNamespacedEvents ({ type, object }) {
   }
 }
 
-module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
+module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
   const nsp = io.of('/shoots')
-  const emitter = dashboardClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
-  registerHandler(emitter, async event => {
+  const handleEvent = event => {
     const { type, object } = event
     const { namespace, name, uid } = object.metadata
 
@@ -69,5 +64,9 @@ module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
         deleteTickets(object.metadata)
         break
     }
-  })
+  }
+
+  informer.on('add', object => handleEvent({ type: 'ADDED', object }))
+  informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
+  informer.on('delete', object => handleEvent({ type: 'DELETED', object }))
 }

@@ -148,7 +148,7 @@ async function getcloudProviderSecrets ({ secretBindings, cloudProfileList, secr
           ...projectInfo
         })
       } catch (err) {
-        logger.warn(err.message)
+        logger.info(err.message)
       }
     })
     .compact()

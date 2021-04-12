@@ -15,9 +15,12 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'name'">
         <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
           <v-col class="grow pa-0 ma-0">
-            <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-              {{ shootName }}
-            </router-link>
+            <div class="d-flex align-center justify-start flex-nowrap fill-height">
+              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+                {{ shootName }}
+              </router-link>
+              <copy-btn :clipboard-text="shootName"></copy-btn>
+            </div>
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
@@ -48,7 +51,10 @@ SPDX-License-Identifier: Apache-2.0
         <vendor :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
-        <shoot-seed-name :shoot-item="shootItem" />
+        <div class="d-flex align-center justify-start flex-nowrap fill-height">
+          <shoot-seed-name :shoot-item="shootItem" />
+          <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+        </div>
       </template>
       <template v-if="cell.header.value === 'technicalId'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">

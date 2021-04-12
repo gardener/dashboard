@@ -7,10 +7,12 @@
 'use strict'
 
 const { NotFound } = require('http-errors')
-const { createClient } = require('../lib')
+const { createClient, createDashboardClient } = require('../lib')
+const { extend } = require('@gardener-dashboard/request')
+const { mockLoadResult } = require('@gardener-dashboard/kube-config')
 
 describe('kube-client', () => {
-  describe('Client', () => {
+  describe('#createClient', () => {
     const bearer = 'bearer'
     const namespace = 'namespace'
     const name = 'name'
@@ -44,6 +46,31 @@ describe('kube-client', () => {
         data: {}
       })
       await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
+    })
+  })
+
+  describe('#createDashboardClient', () => {
+    const server = new URL(mockLoadResult.url)
+    const servername = server.hostname
+    const headers = {
+      authorization: `Bearer ${mockLoadResult.auth.bearer}`
+    }
+
+    let testClient
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+      testClient = createDashboardClient()
+    })
+
+    it('should create a dashboard client', () => {
+      expect(testClient.constructor.name).toBe('Client')
+      expect(testClient.cluster.server).toEqual(server)
+      expect(extend).toHaveBeenCalledTimes(24)
+      expect(extend).toHaveBeenCalledWith(expect.objectContaining({
+        servername,
+        headers
+      }))
     })
   })
 })

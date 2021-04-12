@@ -11,7 +11,7 @@ const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
 
-const { Forbidden, UnprocessableEntity } = require('http-errors')
+const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
 const { isHttpError } = require('@gardener-dashboard/request')
 
 const {
@@ -110,9 +110,8 @@ function findImageDescription (containerImage, containerImageDescriptions) {
 exports.findImageDescription = findImageDescription
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
-  const serviceAccount = await client.core.serviceaccounts
-    .watch(namespace, serviceAccountName)
-    .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
+  const asyncIterable = await client.core.serviceaccounts.watch(namespace, serviceAccountName)
+  const serviceAccount = await asyncIterable.until(isServiceAccountReady, { timeout: 10 * 1000 })
   const secretName = getFirstServiceAccountSecret(serviceAccount)
   if (secretName) {
     const secret = await client.core.secrets.get(namespace, secretName)
@@ -129,7 +128,10 @@ function getFirstServiceAccountSecret (serviceAccount) {
     .value()
 }
 
-function isServiceAccountReady (serviceAccount) {
+function isServiceAccountReady ({ type, object: serviceAccount }) {
+  if (type === 'DELETE') {
+    throw new InternalServerError('ServiceAccount resource has been deleted')
+  }
   return !_.isEmpty(getFirstServiceAccountSecret(serviceAccount))
 }
 
@@ -493,11 +495,14 @@ function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, aut
   }
 }
 
-function readTerminalUntilReady ({ user, namespace, name }) {
+async function readTerminalUntilReady ({ user, namespace, name }) {
   const username = user.id
   const client = user.client
 
-  const isTerminalReady = terminal => {
+  const isTerminalReady = ({ type, object: terminal }) => {
+    if (type === 'DELETE') {
+      throw new InternalServerError('Terminal resource has been deleted')
+    }
     if (terminal.metadata.annotations['gardener.cloud/created-by'] !== username) {
       throw new Forbidden('You are not the user who created the terminal resource')
     }
@@ -505,9 +510,8 @@ function readTerminalUntilReady ({ user, namespace, name }) {
     const attachServiceAccountName = _.get(terminal, 'status.attachServiceAccountName')
     return podName && attachServiceAccountName
   }
-  return client['dashboard.gardener.cloud'].terminals
-    .watch(namespace, name)
-    .waitFor(isTerminalReady, { timeout: 60 * 1000 })
+  const asyncIterable = await client['dashboard.gardener.cloud'].terminals.watch(namespace, name)
+  return asyncIterable.until(isTerminalReady, { timeout: 60 * 1000 })
 }
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {

@@ -7,11 +7,22 @@
 'use strict'
 
 const { clone, split, first, get, set } = require('lodash')
-const { v1: uuidv1 } = require('uuid')
 const { pki } = require('node-forge')
 const jwt = require('jsonwebtoken')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const xRequestStart = Symbol('x-request-start')
+
+const xRequestId = {
+  id: 0,
+  next () {
+    if (this.id < Number.MAX_SAFE_INTEGER) {
+      this.id += 1
+    } else {
+      this.id = 1
+    }
+    return this.id
+  }
+}
 
 function decodeBase64 (value) {
   return Buffer.from(value, 'base64').toString('utf8')
@@ -78,20 +89,11 @@ function getUser ({ headers, key, cert }) {
   return user.id ? user : undefined
 }
 
-function beforeConnect (url, options) {
-  const { headers } = options
-  logger.connect({
-    url,
-    user: getUser(options),
-    headers: clone(headers)
-  })
-}
-
 function beforeRequest (options) {
   const { url, method, headers, body } = options
   options[xRequestStart] = Date.now()
   if (!('x-request-id' in headers)) {
-    headers['x-request-id'] = uuidv1()
+    headers['x-request-id'] = xRequestId.next()
   }
   logger.request({
     url,
@@ -100,22 +102,6 @@ function beforeRequest (options) {
     headers: clone(headers),
     body
   })
-}
-
-function beforeRedirect (options, response) {
-  const { headers, httpVersion, statusCode, statusMessage, redirectUrls, request } = response
-  const id = get(request, 'options.headers["x-request-id"]')
-  logger.response({
-    id,
-    statusCode,
-    statusMessage,
-    httpVersion,
-    headers: clone(headers),
-    body: JSON.stringify({
-      redirectUrls
-    })
-  })
-  beforeRequest(options)
 }
 
 function addHook (options, hook) {
@@ -133,15 +119,12 @@ function attach (options = {}) {
   if (!logger.isDisabled(LEVELS.debug)) {
     addHook(options, beforeRequest)
     addHook(options, afterResponse)
-    addHook(options, beforeRedirect)
   }
   return options
 }
 
 module.exports = {
   attach,
-  beforeConnect,
   beforeRequest,
-  beforeRedirect,
   afterResponse
 }

@@ -66,7 +66,7 @@ exports.list = async function ({ user }) {
       if (!_.isEmpty(cloudProfile.data.seedNames)) {
         return true
       }
-      logger.warn(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
+      logger.info(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
       return false
     })
     .value()

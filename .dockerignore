@@ -15,23 +15,35 @@
 
 # include workspace packages/logger
 !packages/logger/package.json
+!packages/logger/jest.setup.js
 !packages/logger/lib
 !packages/logger/__tests__
+!packages/logger/__fixtures__
+!packages/logger/__mocks__
 
 # include workspace packages/request
 !packages/request/package.json
+!packages/request/jest.setup.js
 !packages/request/lib
 !packages/request/__tests__
+!packages/request/__fixtures__
+!packages/request/__mocks__
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
+!packages/kube-config/jest.setup.js
 !packages/kube-config/lib
 !packages/kube-config/__tests__
+!packages/kube-config/__fixtures__
+!packages/kube-config/__mocks__
 
 # include workspace packages/kube-client
 !packages/kube-client/package.json
+!packages/kube-client/jest.setup.js
 !packages/kube-client/lib
 !packages/kube-client/__tests__
+!packages/kube-client/__fixtures__
+!packages/kube-client/__mocks__
 
 # include workspace backend
 !backend/package.json
@@ -61,6 +73,12 @@
 !charts/gardener-dashboard
 !charts/identity
 !charts/__tests__
+!charts/__fixtures__
+!charts/__mocks__
+
+# include workspace packages/test-utils
+!packages/test-utils/package.json
+!packages/test-utils/lib
 
 # include metadata files
 !VERSION
