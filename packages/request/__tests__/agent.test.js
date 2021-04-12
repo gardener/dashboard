@@ -27,10 +27,9 @@ describe('Agent', () => {
       const agent = new Agent(options)
       expect(agent.defaults.options).toEqual({
         peerMaxConcurrentStreams: 100,
-        maxOutstandingPings: 2,
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
-        pingInterval: 30000,
+        pingInterval: 0,
         ...options
       })
       expect(agent.sessionPools.size).toBe(0)

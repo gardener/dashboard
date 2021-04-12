@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
@@ -79,5 +79,12 @@ class LifecycleHooks {
   }
 }
 
-module.exports = () => new LifecycleHooks(dashboardClient)
+module.exports = () => {
+  const client = createDashboardClient({
+    id: 'informer',
+    pingInterval: 30000,
+    maxOutstandingPings: 2
+  })
+  return new LifecycleHooks(client)
+}
 module.exports.LifecycleHooks = LifecycleHooks

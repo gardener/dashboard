@@ -30,6 +30,10 @@ function createClient ({ auth, key, cert, ...options } = {}) {
   return new Client(options)
 }
 
+function createDashboardClient ({ ...options } = {}) {
+  return createClient(Object.assign(options, config))
+}
+
 exports = module.exports = createClient
 
 // create a client instance for the gardener cluster with dashboard privileges
@@ -37,6 +41,7 @@ const dashboardClient = new Client(config)
 
 Object.assign(exports, {
   createClient,
+  createDashboardClient,
   dashboardClient,
   Resources,
   Store

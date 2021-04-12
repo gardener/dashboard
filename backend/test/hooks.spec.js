@@ -6,7 +6,8 @@
 
 'use strict'
 
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
+
 const cache = require('../lib/cache')
 
 jest.mock('../lib/io')
@@ -21,9 +22,12 @@ describe('hooks', () => {
   describe('LifecycleHooks', () => {
     const { LifecycleHooks } = createHooks
     let hooks
+    let dashboardClient
 
     beforeEach(() => {
+      createDashboardClient.mockClear()
       hooks = createHooks()
+      dashboardClient = createDashboardClient.mock.results[0].value
       hooks.ac.abort = jest.fn()
     })
 

@@ -96,7 +96,7 @@ class SessionPool {
       release()
       logger.trace('Session %s - stream released (%d/%d)', origin, semaphore.concurrency, semaphore.maxConcurrency)
     }
-    clearTimeout(session[kTimeoutId])
+    this.clearSessionTimeout(session)
     try {
       const stream = session.request(headers, options)
       if (stream.pending) {
