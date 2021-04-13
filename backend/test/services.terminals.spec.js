@@ -264,7 +264,7 @@ describe('services', function () {
           await expect(getGardenTerminalHostClusterSecretRef(client)).rejects.toThrow(AssertionError)
         })
 
-        it('should throw a no seed error ', async function () {
+        it('should throw a no seed error', async function () {
           const gardenTerminalHost = {
             seedRef: 'none'
           }

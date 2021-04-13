@@ -420,7 +420,7 @@ describe('services', function () {
         })
       })
 
-      describe('#updateServiceAccount ', function () {
+      describe('#updateServiceAccount', function () {
         it('should not update a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
