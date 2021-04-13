@@ -14,8 +14,8 @@ import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
 import range from 'lodash/range'
 import toUpper from 'lodash/toUpper'
-import moment from 'moment-timezone'
 import store from '../store'
+import moment from './moment'
 const { v4: uuidv4 } = require('uuid')
 
 const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
@@ -65,9 +65,9 @@ function convertScheduleEventObjToLocalTimezone (scheduleObj) {
   if (scheduleObj) {
     const location = store.state.location
     const momentObj = moment.utc()
-    momentObj.hour(scheduleObj.hour)
-    momentObj.minute(scheduleObj.minute)
-    momentObj.tz(location)
+      .hour(scheduleObj.hour)
+      .minute(scheduleObj.minute)
+      .tz(location)
     scheduleObj.hour = momentObj.format('HH')
     scheduleObj.minute = momentObj.format('mm')
   }

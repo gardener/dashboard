@@ -77,9 +77,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { getValidationErrors } from '@/utils'
-import { required, requiredIf } from 'vuelidate/lib/validators'
-import moment from 'moment-timezone'
 import join from 'lodash/join'
 import split from 'lodash/split'
 import get from 'lodash/get'
@@ -87,6 +84,10 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+import { required, requiredIf } from 'vuelidate/lib/validators'
+
+import { getValidationErrors } from '@/utils'
+import moment from '@/utils/moment'
 
 const validationErrors = {
   selectedDays: {

@@ -6,8 +6,8 @@
 
 import './matchMedia.mock' // Must be imported before the tested file
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
+import moment from '@/utils/moment'
 import store from '@/store'
-import moment from 'moment-timezone'
 
 const currentLocation = store.state.location
 
