@@ -1,3 +1,8 @@
+/**
+ * SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 constraints_min_version(1).
 
 % This rule will enforce that a workspace MUST depend on the same version of a dependency as the one used by the other workspaces
