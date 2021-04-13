@@ -208,7 +208,7 @@ describe('kube-client', () => {
         try {
           await listPager.list(options)
         } catch (err) {
-          // eslint-disable-next-line jest/no-try-expect
+          // eslint-disable-next-line jest/no-conditional-expect, jest/no-try-expect
           expect(ApiErrors.isExpiredError(err)).toBe(true)
         }
         listPager.fullListIfExpired = true
@@ -286,7 +286,7 @@ describe('kube-client', () => {
           try {
             await reflector.watchHandler(stream)
           } catch (err) {
-            // eslint-disable-next-line jest/no-try-expect
+            // eslint-disable-next-line jest/no-conditional-expect, jest/no-try-expect
             expect(ApiErrors.isExpiredError(err)).toBe(true)
           }
 

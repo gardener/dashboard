@@ -56,7 +56,7 @@ describe('kube-client', () => {
         expect(store.listKeys()).toHaveLength(0)
       })
 
-      it('should find an element ', async () => {
+      it('should find an element', async () => {
         const a = { uid: 1, bool: false, num: 1, str: 'a' }
         const b = { uid: 2, bool: true, num: 2, str: 'b' }
         const c = { uid: 3, bool: true, num: 3, str: 'c' }
