@@ -88,8 +88,8 @@ describe('utils', () => {
     describe('localizedFormat', () => {
       it('should format a date', () => {
         const toLocalFormat = time => dayjs(time).format('lll')
-        expect(toLocalFormat(time)).toEqual('Apr 14, 2021 12:21 PM')
-        expect(toLocalFormat(date)).toEqual('Feb 17, 2012 11:35 AM')
+        expect(toLocalFormat(time)).toMatch(/^Apr \d{2}, 2021 \d{2}:\d{2} (AM|PM)$/)
+        expect(toLocalFormat(date)).toMatch(/^Feb \d{2}, 2012 \d{2}:\d{2} (AM|PM)$/)
       })
     })
   })
