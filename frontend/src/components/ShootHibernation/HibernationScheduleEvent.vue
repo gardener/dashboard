@@ -202,8 +202,8 @@ export default {
     getTime ({ hour, minute } = {}) {
       if (hour && minute) {
         const momentObj = moment()
-        momentObj.hour(hour)
-        momentObj.minute(minute)
+          .hour(hour)
+          .minute(minute)
         if (momentObj.isValid()) {
           return momentObj.format('HH:mm')
         }

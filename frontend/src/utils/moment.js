@@ -9,19 +9,21 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
+dayjs.extend(localizedFormat)
 dayjs.extend(customParseFormat)
 dayjs.extend(utc)
 dayjs.extend(timezone)
-dayjs.extend(timezoneNames)
+dayjs.extend(timezoneExtension)
 
-function timezoneNames (option, dayjsClass, dayjsFactory) {
-  const tzNames = [
+function timezoneExtension (option, dayjsClass, dayjsFactory) {
+  const locations = [
     'Africa/Abidjan',
     'Africa/Accra',
     'Africa/Addis_Ababa',
@@ -616,7 +618,13 @@ function timezoneNames (option, dayjsClass, dayjsFactory) {
     'WET',
     'Zulu'
   ]
-  dayjsFactory.tz.names = () => tzNames
+  const tz = dayjsFactory.tz
+  const tzGuess = tz.guess.bind(tz)
+  tz.guess = () => {
+    const location = tzGuess()
+    return locations.includes(location) ? location : 'UTC'
+  }
+  tz.names = () => locations
 }
 
 export default dayjs
