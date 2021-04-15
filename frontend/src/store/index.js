@@ -57,6 +57,7 @@ import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
 import moment from 'moment-timezone'
 
+import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
@@ -77,7 +78,7 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
 // plugins
-const plugins = []
+const plugins = [createMediaPlugin(window)]
 if (debug) {
   plugins.push(createLogger())
 }
@@ -142,9 +143,9 @@ const state = {
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     }
   },
-  darkMode: false
+  darkTheme: false,
+  colorScheme: 'auto'
 }
-
 class Shortcut {
   constructor (shortcut, unverified = true) {
     Object.assign(this, shortcut)
@@ -1427,9 +1428,9 @@ const actions = {
     commit('SPLITPANE_RESIZE', value)
     return state.splitpaneResize
   },
-  setDarkMode ({ commit }, darkMode) {
-    commit('SET_DARK_MODE', darkMode)
-    return state.darkMode
+  setColorScheme ({ commit }, colorScheme) {
+    commit('SET_COLOR_SCHEME', colorScheme)
+    return state.colorScheme
   }
 }
 
@@ -1497,9 +1498,12 @@ const mutations = {
   SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
-  SET_DARK_MODE (state, value) {
-    state.darkMode = value
-    localStorage.setItem('global/dark-mode', value)
+  SET_COLOR_SCHEME (state, value) {
+    state.colorScheme = value
+    localStorage.setItem('global/color-scheme', value)
+  },
+  SET_DARK_THEME (state, value) {
+    state.darkTheme = value
     Vue.vuetify.framework.theme.dark = value
   }
 }

@@ -24,24 +24,27 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "got": "^11.5.2",
-    "http-errors": "^1.8.0"
+    "@gardener-dashboard/logger": "workspace:*",
+    "http-errors": "^1.8.0",
+    "lodash": "^4.17.19",
+    "type-is": "^1.6.18"
   },
   "devDependencies": {
-    "eslint": "^7.7.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jest": "^23.20.0",
+    "@gardener-dashboard/test-utils": "workspace:*",
+    "abort-controller": "^3.0.0",
+    "eslint": "^7.23.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "jest": "^26.4.2"
+    "eslint-plugin-promise": "^4.3.1",
+    "jest": "^26.6.3"
   },
   "eslintConfig": {
     "env": {
       "browser": true,
       "commonjs": true,
-      "es2020": true,
+      "es2021": true,
       "node": true,
       "jest/globals": true
     },
@@ -52,9 +55,11 @@
       "standard",
       "plugin:jest/recommended"
     ],
-    "globals": {},
+    "globals": {
+      "fixtures": true
+    },
     "parserOptions": {
-      "ecmaVersion": 11
+      "ecmaVersion": 12
     },
     "rules": {
       "no-console": "error"
@@ -64,18 +69,28 @@
     "restoreMocks": true,
     "verbose": true,
     "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
     "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "\\.pnp\\.[^\\/]+$"
+    ],
     "coverageThreshold": {
       "global": {
-        "branches": 95,
-        "functions": 100,
-        "lines": 100,
-        "statements": 100
+        "branches": 84,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
       }
-    }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "engines": {
-    "node": "^14.15.0",
-    "yarn": "^2.3.3"
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
   }
 }

@@ -6,97 +6,87 @@
 
 'use strict'
 
-const pEvent = require('p-event')
-const http = require('http')
-const express = require('express')
-const WebSocket = require('ws')
+const { extend, mockClient } = require('@gardener-dashboard/request')
 
+const { GatewayTimeout } = require('http-errors')
 const HttpClient = require('../lib/HttpClient')
-const {
-  http: httpSymbols,
-  ws: wsSymbols
-} = require('../lib/symbols')
+const { http } = require('../lib/symbols')
+
+const { delay } = fixtures.helper
+
+class TestClient extends HttpClient {
+  request (...args) {
+    return this[http.request](...args)
+  }
+
+  stream (...args) {
+    return this[http.stream](...args)
+  }
+}
+
+async function writeNumbers (stream, max = 10) {
+  for (let i = 0; i <= max; i++) {
+    await delay(i)
+    stream.write({ object: Number(i) })
+  }
+  stream.end()
+}
 
 describe('kube-client', () => {
   describe('HttpClient', () => {
-    let server
-    let wss
-    let origin
-    let client
+    const prefixUrl = 'https://127.0.0.1:31415/test'
+    const url = 'url'
+    const method = 'GET'
 
-    const app = express()
-    app.get('/foo', (req, res) => {
-      res.send('bar')
+    let testClient
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+      testClient = new TestClient({ prefixUrl })
     })
 
-    class TestClient extends HttpClient {
-      constructor (url, options) {
-        super({
-          url,
-          throwHttpErrors: true,
-          resolveBodyOnly: true,
-          ...options
-        })
-      }
-
-      get () {
-        return this[httpSymbols.request]('foo', { method: 'get' })
-      }
-
-      echo (options) {
-        const searchParams = new URLSearchParams(options)
-        return this[wsSymbols.connect]('echo', { searchParams })
-      }
-    }
-
-    beforeEach(async () => {
-      server = http.createServer(app)
-      wss = new WebSocket.Server({ server, path: '/echo' })
-      wss.on('connection', socket => {
-        socket.on('message', message => socket.send(message))
-      })
-      server.listen(0, 'localhost')
-      await pEvent(server, 'listening', {
-        timeout: 200
-      })
-      const { address, port } = server.address()
-      origin = `http://${address}:${port}`
+    it('should create a HttpClient instance', () => {
+      expect(extend).toBeCalledTimes(1)
+      expect(extend.mock.calls[0]).toEqual([{ prefixUrl }])
+      expect(testClient[http.client]).toBe(mockClient)
     })
 
-    afterEach(() => {
-      wss.close()
-      server.close()
-      client[httpSymbols.agent].destroy()
+    it('should call the request method with empty searchParams', async () => {
+      const searchParams = new URLSearchParams()
+      await testClient.request(url, { method, searchParams })
+      expect(mockClient.request).toBeCalledTimes(1)
+      expect(mockClient.request.mock.calls[0]).toEqual([url, { method }])
     })
 
-    it('should assert "beforeRequest" hook parameters', async () => {
-      client = new TestClient(origin, {
-        headers: {
-          foo: 'bar'
-        },
-        hooks: {
-          beforeRequest: [
-            options => {
-              const { url, method, headers } = options
-              expect(url).toBeInstanceOf(URL)
-              expect(url.origin).toBe(origin)
-              expect(method).toBe('GET')
-              expect(headers.foo).toBe('bar')
-            }
-          ]
-        }
-      })
-      const body = await client.get()
-      expect(body).toBe('bar')
+    it('should call the request method with searchParams', async () => {
+      const searchParams = new URLSearchParams({ foo: 'bar' })
+      await testClient.request(url, { method, searchParams })
+      expect(mockClient.request).toBeCalledTimes(1)
+      expect(mockClient.request.mock.calls[0]).toEqual([url, { method, searchParams }])
     })
 
-    it('should open a websocket echo socket', async () => {
-      client = new TestClient(origin)
-      const echoSocket = client.echo()
-      await pEvent(echoSocket, 'open')
-      echoSocket.send('foobar')
-      const message = await pEvent(echoSocket, 'message')
-      expect(message).toBe('foobar')
+    it('should wait until the condition is met', async () => {
+      const response = await testClient.stream(url, { method })
+      writeNumbers(response)
+      expect(mockClient.stream).toBeCalledTimes(1)
+      expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
+      expect(typeof response.until).toBe('function')
+      const value = await response.until(event => [event.object > 3, event.object])
+      expect(value).toBe(4)
+    })
+
+    it('should timeout while waiting for a condition to be met', async () => {
+      TestClient.names = { plural: 'dummies' }
+      const response = await testClient.stream(url, { method })
+      const destroySpy = jest.spyOn(response, 'destroy')
+      writeNumbers(response)
+      expect(mockClient.stream).toBeCalledTimes(1)
+      expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
+      expect(typeof response.until).toBe('function')
+      await expect(response.until(event => event.object > 9, { timeout: 10 })).rejects.toThrow(GatewayTimeout)
+      expect(destroySpy).toBeCalled()
+      expect(destroySpy.mock.calls[0]).toHaveLength(1)
+      expect(destroySpy.mock.calls[0][0].message).toMatch(/"dummies" .* 10 ms/)
     })
   })
 })

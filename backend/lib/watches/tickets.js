@@ -10,23 +10,21 @@ const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
 const tickets = require('../services/tickets')
-const cache = require('../cache')
 
-module.exports = (io, retryOptions = {}) => {
+module.exports = (io, ticketCache, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for tickets feature')
     return
   }
   const nsp = io.of('/tickets')
-  const ticketCache = cache.getTicketCache()
-  ticketCache.onIssue(event => {
+  ticketCache.on('issue', event => {
     const room = 'issues'
     nsp.to(room).emit('events', {
       kind: 'issues',
       events: [event]
     })
   })
-  ticketCache.onComment(event => {
+  ticketCache.on('comment', event => {
     const { projectName, name } = event.object.metadata
     const room = `comments_${projectName}/${name}`
     nsp.to(room).emit('events', {

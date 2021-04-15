@@ -12,28 +12,24 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend } = jest.requireActual('@gardener-dashboard/request')
+const { extend, globalAgent } = jest.requireActual('@gardener-dashboard/request')
 const client = extend({
-  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
-  resolveBodyOnly: true,
-  timeout: 3000
+  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/'
 })
+
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
-  10: {
-    initialRelease: new Date('2018-04-24T00:00:00Z'),
-    activeLtsStart: new Date('2018-10-30T00:00:00Z'),
-    endOfLife: new Date('2021-04-01T23:59:59Z')
-  },
   12: {
-    initialRelease: new Date('2019-04-23T00:00:00Z'),
-    activeLtsStart: new Date('2019-10-22T00:00:00Z'),
     endOfLife: new Date('2022-04-01T23:59:59Z')
   },
   14: {
-    initialRelease: new Date('2020-04-21T00:00:00Z'),
-    activeLtsStart: new Date('2020-10-20T00:00:00Z'),
     endOfLife: new Date('2023-04-01T23:59:59Z')
+  },
+  15: {
+    endOfLife: new Date('2021-06-01T23:59:59Z')
+  },
+  16: {
+    endOfLife: new Date('2024-04-30T23:59:59Z')
   }
 }
 
@@ -50,6 +46,10 @@ async function getDashboardDockerfile () {
 
 describe('dockerfile', function () {
   const timeout = 15 * 1000
+
+  afterAll(() => {
+    globalAgent.destroy()
+  })
 
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()

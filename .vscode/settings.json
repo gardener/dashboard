@@ -32,7 +32,21 @@
   },
   "eslint.nodePath": ".yarn/sdks",
   "files.exclude": {
-    "**/.nyc_output": true,
-    "**/node_modules": true
-  }
+    ".pnp.*": true,
+    ".yarn": true,
+    "yarn.lock": true,
+    ".vscode": true,
+    ".pre-commit-config.yaml": true,
+    ".secrets.baseline": true,
+    ".docforge": true,
+    ".github": true,
+    ".reuse": true,
+    "logo": true,
+    "LICENSES": true,
+    "**/node_modules": true,
+    "**/coverage": true,
+    "**/dist": true
+  },
+  "jestrunner.enableYarnPnpSupport": true,
+  "jestrunner.jestCommand": "scripts/jest"
 }

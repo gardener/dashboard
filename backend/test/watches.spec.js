@@ -9,9 +9,7 @@
 const assert = require('assert').strict
 const EventEmitter = require('events')
 const _ = require('lodash')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
-const { registerHandler } = require('../lib/watches/common')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
@@ -19,7 +17,6 @@ const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
 
 describe('watches', function () {
-  const resourceName = 'test'
   const io = {}
   const foo = { metadata: { name: 'foo', uid: 1 }, spec: { namespace: 'foo' } }
   const bar = { metadata: { name: 'bar', uid: 2 } }
@@ -40,71 +37,23 @@ describe('watches', function () {
     }
   ]
 
-  let emitter
+  let informer
 
   beforeEach(function () {
-    emitter = new EventEmitter()
-    emitter.resourceName = resourceName
+    informer = new EventEmitter()
     jest.clearAllMocks()
-  })
-
-  describe('common', function () {
-    it('should log "connect" events', async function () {
-      registerHandler(emitter, () => {})
-      emitter.emit('connect')
-      expect(logger.debug).toHaveBeenCalledTimes(1)
-      expect(logger.debug.mock.calls[0]).toEqual(['watch %s connected', resourceName])
-    })
-
-    it('should log "disconnect" events', async function () {
-      registerHandler(emitter, () => {})
-      const error = new Error('error')
-      emitter.emit('disconnect', error)
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['watch %s disconnected', resourceName, error])
-    })
-
-    it('should log "reconnect" events', async function () {
-      registerHandler(emitter, () => {})
-      const attempt = 7
-      const delay = 1234
-      emitter.emit('reconnect', attempt, delay)
-      expect(logger.debug).toHaveBeenCalledTimes(1)
-      expect(logger.debug.mock.calls[0]).toEqual(['watch %s reconnect attempt %d after %d', resourceName, attempt, delay])
-    })
-
-    it('should log "error" events', async function () {
-      registerHandler(emitter, () => {})
-      const error = new Error('error')
-      emitter.emit('error', error)
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['watch %s error occurred', resourceName, error])
-    })
-
-    it('should log "event" events with type "ERROR"', async function () {
-      registerHandler(emitter, () => {})
-      const code = 777
-      const reason = 'Not found'
-      const message = 'Something was not found'
-      emitter.emit('event', { type: 'ERROR', object: { code, reason, message } })
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['ERROR: Code "%s", Reason "%s", message "%s, watch: %s"', code, reason, message, emitter.resourceName])
-    })
   })
 
   describe('seeds', function () {
     const kind = 'Seed'
-    const { seeds } = dashboardClient['core.gardener.cloud']
 
     it('should watch seeds', async function () {
-      const watchStub = jest.spyOn(seeds, 'watchList').mockReturnValue(emitter)
       const bootstrapStub = jest.spyOn(bootstrapper, 'bootstrapResource')
-      watches.seeds(io)
-      expect(watchStub).toHaveBeenCalledTimes(1)
-      emitter.emit('event', { type: 'ADDED', object: foo })
-      emitter.emit('event', { type: 'ADDED', object: bar })
-      emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
-      emitter.emit('event', { type: 'DELETED', object: bar })
+      watches.seeds(io, informer)
+      informer.emit('add', foo)
+      informer.emit('add', bar)
+      informer.emit('update', { kind, ...bar }, bar)
+      informer.emit('delete', bar)
       expect(bootstrapStub).toHaveBeenCalledTimes(3)
       expect(bootstrapStub.mock.calls[0]).toEqual([foo])
       expect(bootstrapStub.mock.calls[1]).toEqual([bar])
@@ -175,9 +124,6 @@ describe('watches', function () {
       }
     }
 
-    const { shoots } = dashboardClient['core.gardener.cloud']
-
-    let watchStub
     let deleteTicketsStub
     let bootstrapResourceStub
     let removeResourceStub
@@ -185,7 +131,6 @@ describe('watches', function () {
 
     beforeEach(function () {
       shootsWithIssues = new Set()
-      watchStub = jest.spyOn(shoots, 'watchListAllNamespaces').mockReturnValue(emitter)
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
       removeResourceStub = jest.spyOn(bootstrapper.bootstrapState, 'removeResource').mockReturnValue()
@@ -195,9 +140,7 @@ describe('watches', function () {
     })
 
     it('should watch shoots without issues', async function () {
-      watches.shoots(io)
-
-      expect(watchStub).toBeCalledTimes(1)
+      watches.shoots(io, informer)
 
       fooRoom = new Room('foo', [
         { type: 'ADDED', object: foobar },
@@ -215,9 +158,9 @@ describe('watches', function () {
 
       fooIssuesRoom = new Room('foo', [])
 
-      emitter.emit('event', { type: 'ADDED', object: foobar })
-      emitter.emit('event', { type: 'MODIFIED', object: foobar })
-      emitter.emit('event', { type: 'DELETED', object: foobar })
+      informer.emit('add', foobar)
+      informer.emit('update', foobar)
+      informer.emit('delete', foobar)
 
       expect(logger.error).not.toBeCalled()
       expect(bootstrapResourceStub).toBeCalledTimes(2)
@@ -234,9 +177,7 @@ describe('watches', function () {
     })
 
     it('should watch shoots with issues', async function () {
-      watches.shoots(io, { shootsWithIssues })
-
-      expect(watchStub).toBeCalledTimes(1)
+      watches.shoots(io, informer, { shootsWithIssues })
 
       fooRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
@@ -266,15 +207,15 @@ describe('watches', function () {
       ])
 
       expect(shootsWithIssues).toHaveProperty('size', 0)
-      emitter.emit('event', { type: 'ADDED', object: foobarUnhealthy })
+      informer.emit('add', foobarUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 1)
-      emitter.emit('event', { type: 'MODIFIED', object: foobar })
+      informer.emit('update', foobar)
       expect(shootsWithIssues).toHaveProperty('size', 0)
-      emitter.emit('event', { type: 'ADDED', object: foobazUnhealthy })
+      informer.emit('add', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 1)
-      emitter.emit('event', { type: 'MODIFIED', object: foobazUnhealthy })
+      informer.emit('update', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 1)
-      emitter.emit('event', { type: 'DELETED', object: foobazUnhealthy })
+      informer.emit('delete', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
       expect(bootstrapResourceStub).toBeCalledTimes(4)
@@ -296,9 +237,7 @@ describe('watches', function () {
         }
       })
 
-      watches.shoots(io)
-
-      expect(watchStub).toBeCalledTimes(1)
+      watches.shoots(io, informer)
 
       fooRoom = new Room('foo', [
         { type: 'DELETED', object: foobar },
@@ -315,8 +254,8 @@ describe('watches', function () {
 
       fooIssuesRoom = new Room('foo', [])
 
-      emitter.emit('event', { type: 'DELETED', object: foobar })
-      emitter.emit('event', { type: 'DELETED', object: foobaz })
+      informer.emit('delete', foobar)
+      informer.emit('delete', foobaz)
 
       expect(logger.error).toBeCalledTimes(1)
       expect(removeResourceStub).toBeCalledTimes(2)
@@ -379,24 +318,26 @@ describe('watches', function () {
     }
 
     const ticketCache = {
-      onIssue (handler) {
-        handler(issueEvent)
-      },
-      onComment (handler) {
-        handler(commentEvent)
+      on (eventName, handler) {
+        switch (eventName) {
+          case 'issue':
+            handler(issueEvent)
+            break
+          case 'comment':
+            handler(commentEvent)
+            break
+        }
       }
     }
 
     const gitHubConfig = config.gitHub
 
-    let getTicketCacheStub
     let gitHubStub
     let loadOpenIssuesStub
 
     beforeEach(function () {
       gitHubStub = jest.fn()
       Object.defineProperty(config, 'gitHub', { get: gitHubStub })
-      getTicketCacheStub = jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
       loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
       jest.clearAllMocks()
     })
@@ -407,7 +348,7 @@ describe('watches', function () {
 
     it('should log missing gitHub config', async function () {
       gitHubStub.mockReturnValue(false)
-      watches.tickets(io)
+      watches.tickets(io, ticketCache)
       expect(logger.warn).toBeCalledTimes(1)
     })
 
@@ -417,9 +358,7 @@ describe('watches', function () {
         status: 503
       }))
 
-      const promise = watches.tickets(io, { minTimeout: 1 })
-      expect(getTicketCacheStub).toBeCalledTimes(1)
-      await promise
+      await watches.tickets(io, ticketCache, { minTimeout: 1 })
       expect(loadOpenIssuesStub).toBeCalledTimes(2)
       expect(logger.info).toBeCalledTimes(2)
     })
@@ -428,10 +367,8 @@ describe('watches', function () {
       gitHubStub.mockReturnValue(true)
       loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
 
-      const promise = watches.tickets(io)
-      expect(getTicketCacheStub).toBeCalledTimes(1)
+      await watches.tickets(io, ticketCache)
       expect(loadOpenIssuesStub).toBeCalledTimes(1)
-      await promise
       expect(logger.error).toBeCalledTimes(1)
     })
   })

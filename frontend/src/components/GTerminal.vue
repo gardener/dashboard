@@ -216,6 +216,7 @@ import GPopper from '@/components/GPopper'
 import DragNDroppableComponent from '@/components/DragNDroppableComponent'
 import { targetText, transformHtml } from '@/utils'
 import { terminalConfig } from '@/utils/api'
+import { isGatewayTimeout } from '@/utils/error'
 import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
@@ -453,7 +454,11 @@ export default {
       try {
         await terminalSession.open()
       } catch (err) {
-        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        let message = get(err, 'response.data.message', err.message)
+        if (isGatewayTimeout(err)) {
+          message = 'Opening the terminal session timed out'
+        }
+        this.showErrorSnackbarBottom(message)
         terminalSession.setDisconnectedState()
       }
     },

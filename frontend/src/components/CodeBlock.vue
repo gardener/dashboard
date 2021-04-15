@@ -68,10 +68,10 @@ export default {
   }),
   computed: {
     ...mapState([
-      'darkMode'
+      'darkTheme'
     ]),
     codeBlockClass () {
-      if (this.darkMode) {
+      if (this.darkTheme) {
         return 'grey darken-4 code-block-dark'
       }
       return 'grey lighten-5'

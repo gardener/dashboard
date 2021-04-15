@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :confirm-disabled="!valid"
     max-width="750px"
     max-height="100vh"
-    default-color="toolbar-background"
     ref="gDialog"
   >
     <template v-slot:caption>Create Terminal Session</template>

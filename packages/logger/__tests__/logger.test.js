@@ -63,7 +63,6 @@ describe('logger', () => {
   const statusCode = 404
   const statusMessage = 'Not found'
   const responseArgs = { id, statusCode, statusMessage, body }
-  const connectArgs = { url, user, headers }
   let time
   let mockTimestamp
 
@@ -164,21 +163,14 @@ describe('logger', () => {
   it('should log a request message', () => {
     const logger = createNoisyLogger()
     logger.request(requestArgs)
-    const msg = `${method} ${url.pathname} HTTP/1.1 [${id}] ${user.type}=${user.id} ${url.host} ${body}`
+    const msg = `${method} ${url.pathname} HTTP/2 [${id}] ${user.type}=${user.id} ${url.host} ${body}`
     expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgGreen('req') + '  : ' + msg])
   })
 
   it('should log a response message', () => {
     const logger = createNoisyLogger()
     logger.response(responseArgs)
-    const msg = `HTTP/1.1 ${statusCode} ${statusMessage} [${id}]\n${logger.inspect(body)}`
+    const msg = `HTTP/2 ${statusCode} ${statusMessage} [${id}]\n${logger.inspect(body)}`
     expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgBlue('res') + '  : ' + msg])
-  })
-
-  it('should log a connect message', () => {
-    const logger = createNoisyLogger()
-    logger.connect(connectArgs)
-    const msg = `CONNECT ${url.pathname} ${user.type}=${user.id} ${url.host}`
-    expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg])
   })
 })

@@ -85,13 +85,13 @@ export default {
       description.push(this.machineImageDescription)
 
       const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
-      if (minimum && maximum) {
+      if (minimum >= 0 && maximum >= 0) {
         description.push({
           title: 'Autoscaler',
           value: `Min. ${minimum} / Max. ${maximum}`
         })
       }
-      if (maxSurge) {
+      if (maxSurge >= 0) {
         description.push({
           title: 'Max. Surge',
           value: `${maxSurge}`

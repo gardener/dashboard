@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid class="fill-height text-center">
     <v-row align="center" justify="center">
-        <v-card tile flat :class="!darkMode ? 'grey lighten-5': ''">
+        <v-card tile flat :class="!darkTheme ? 'grey lighten-5': ''">
           <v-card-title class="text-subtitle-1">
             Loading cluster {{$route.params.name}}
           </v-card-title>
@@ -29,7 +29,7 @@ export default {
   name: 'shoot-item-loading',
   computed: {
     ...mapState([
-      'darkMode'
+      'darkTheme'
     ])
   }
 }

@@ -22,28 +22,34 @@ The following colors can be configured:
 | `warning`               | Snotify warning popups, warning texts |
 | `error`                 | Snotify error popups, error texts |
 
+If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
+
 ## Logos and Icons
-It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder via a volume mount in your deployment.
 
-The simplest solution is to create a configmap and add the assets to it:
-```
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dashboard-assets
-data:
-  logo.svg: |
-    ...
+It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.assets` map.
+
+Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
+
+The files have to be encoded as base64 for the chart - to generate the encoded files for the `values.yaml` of the helm chart, you can use the following shorthand with `bash` or `zsh` on Linux systems. If you use macOS, install coreutils with brew (`brew install coreutils`) or remove the `-w0` parameter.
+
+```bash
+cat << EOF
+  ###
+  ### COPY EVERYTHING BELOW THIS LINE
+  ###
+
+  assets:
+    favicon-16x16.png: |
+      $(cat frontend/public/static/assets/favicon-16x16.png | base64 -w0)
+    favicon-32x32.png: |
+      $(cat frontend/public/static/assets/favicon-32x32.png | base64 -w0)
+    favicon-96x96.png: |
+      $(cat frontend/public/static/assets/favicon-96x96.png | base64 -w0)
+    favicon.ico: |
+      $(cat frontend/public/static/assets/favicon.ico | base64 -w0)
+    logo.svg: |
+      $(cat frontend/public/static/assets/logo.svg | base64 -w0)
+EOF
 ```
 
-then you can map the assets to your dashboard in your deployment like this:
-```
-...
-volumes:
-  - configMap:
-    items:
-    name: dashboard-assets
-  name: assets
-```
-
-Attention: You need to replace all assets in the `public/static/assets` folder, as mapping the volume will overwrite all files. It is not possible to exchange single files.
+Then, swap in the base64 encoded version of your files where needed.

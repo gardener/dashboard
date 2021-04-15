@@ -61,17 +61,7 @@ class Logger {
     return chalk.whiteBright(ts)
   }
 
-  connect ({ url, user, headers }) {
-    if (!this.isDisabled(LEVELS.trace + 1)) {
-      const ident = this.constructor.getIdentity(user)
-      const host = this.constructor.getHost(url, headers)
-      const path = this.constructor.getPath(url)
-      const msg = `CONNECT ${path} ${ident} ${host}`
-      this.console.log(this.ts + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg)
-    }
-  }
-
-  request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
+  request ({ id, url, method, httpVersion = '2', user, headers, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
       const ident = this.constructor.getIdentity(user)
       const host = this.constructor.getHost(url, headers)
@@ -85,7 +75,7 @@ class Logger {
     }
   }
 
-  response ({ id, url, method, statusCode, statusMessage = '', httpVersion = '1.1', headers, duration, body }) {
+  response ({ id, url, method, statusCode, statusMessage = '', httpVersion = '2', headers, duration, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (method && url) {

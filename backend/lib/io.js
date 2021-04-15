@@ -7,16 +7,14 @@
 'use strict'
 
 const _ = require('lodash')
-const socketIO = require('socket.io')
+const createServer = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { Forbidden, isHttpError } = require('http-errors')
+const { isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
 const kubernetesClient = require('@gardener-dashboard/kube-client')
 
-const watches = require('./watches')
-const cache = require('./cache')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { projects, shoots, tickets, authorization } = require('./services')
 
@@ -29,8 +27,9 @@ function socketAuthentication (nsp) {
       logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
       next()
     } catch (err) {
-      logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-      next(new Forbidden(err.message))
+      const level = /^ERR_JWT/.test(err.code) ? 'info' : 'error'
+      logger[level]('Socket %s authentication failed: "%s"', socket.id, err.message)
+      next(err)
     }
   })
 }
@@ -260,7 +259,7 @@ function setupShootsNamespace (shootsNsp) {
   socketAuthentication(shootsNsp)
 }
 
-function setupTicketsNamespace (ticketsNsp) {
+function setupTicketsNamespace (ticketsNsp, cache) {
   const ticketCache = cache.getTicketCache()
 
   ticketsNsp.on('connection', socket => {
@@ -318,21 +317,16 @@ function setupTicketsNamespace (ticketsNsp) {
   socketAuthentication(ticketsNsp)
 }
 
-function init () {
-  const io = socketIO({
+function initializeServer (httpServer, cache) {
+  const io = createServer(httpServer, {
     path: '/api/events',
     serveClient: false
   })
-
   // setup namespaces
   setupShootsNamespace(io.of('/shoots'))
-  setupTicketsNamespace(io.of('/tickets'))
-  // start watches
-  for (const watch of Object.values(watches)) {
-    watch(io)
-  }
+  setupTicketsNamespace(io.of('/tickets'), cache)
   // return io instance
   return io
 }
 
-module.exports = init
+module.exports = initializeServer

@@ -7,93 +7,63 @@
 'use strict'
 
 const request = require('@gardener-dashboard/request')
-const { isHttpError } = require('http-errors')
-const WebSocket = require('ws')
-const { beforeConnect } = require('./debug')
-const { http, ws } = require('./symbols')
-const Agent = require('agentkeepalive')
+const createError = require('http-errors')
+const { http } = require('./symbols')
 
 class HttpClient {
   constructor ({ url, ...options } = {}) {
-    const prefixUrl = this.constructor[http.prefixUrl](url)
-    if (!Reflect.has(options, 'agent')) {
-      options.agent = this.constructor.createAgent(prefixUrl)
-    }
-    this[http.client] = request.extend({ prefixUrl, ...options })
+    this[http.client] = request.extend({
+      prefixUrl: this.constructor[http.prefixUrl](url),
+      ...options
+    })
   }
 
-  get [http.agent] () {
-    return this[http.client].defaults.options.agent
-  }
-
-  async [http.request] (url, { searchParams, ...options } = {}) {
+  [http.request] (url, { searchParams, ...options } = {}) {
     if (searchParams && searchParams.toString()) {
       options.searchParams = searchParams
     }
-    try {
-      return await this[http.client].request(url, options)
-    } catch (err) {
-      if (isHttpError(err)) {
-        const { body = {} } = err
-        if (body.message) {
-          err.message = body.message
-        }
-      }
-      throw err
-    }
+    return this[http.client].request(url, options)
   }
 
-  [ws.connect] (url, { searchParams, ...connectOptions } = {}) {
-    const defaultOptions = this[http.client].defaults.options
-    const {
-      prefixUrl,
-      servername,
-      headers,
-      ca,
-      key,
-      cert,
-      rejectUnauthorized
-    } = defaultOptions
-    url = new URL(url, ensureTrailingSlashExists(prefixUrl))
-    if (searchParams) {
-      url.search = searchParams.toString()
-    }
-    const origin = url.origin
-    const options = {
-      origin,
-      servername,
-      headers,
-      key,
-      cert,
-      ca,
-      rejectUnauthorized
-    }
-    if (Reflect.has(connectOptions, 'agent')) {
-      options.agent = connectOptions.agent
-    } else if (Reflect.has(defaultOptions, 'agent')) {
-      options.agent = defaultOptions.agent
-    }
-    beforeConnect(url, options)
-    return this.constructor.createWebSocket(url, options)
+  async [http.stream] (url, { ...options } = {}) {
+    const response = await this[http.client].stream(url, options)
+    this.constructor.extendResponse(response)
+    return response
   }
 
   static [http.prefixUrl] (url) {
     return url
   }
 
-  static createWebSocket (url, options) {
-    return new WebSocket(url, options)
-  }
+  static extendResponse (response) {
+    const { names: { plural } = {} } = this
+    const createTimeoutError = timeout => {
+      const forResource = plural ? ` for "${plural}"` : ''
+      return createError(504, `The condition${forResource} was not met within ${timeout} ms`)
+    }
 
-  static createAgent (url, options) {
-    return /^https:/i.test(url)
-      ? new Agent.HttpsAgent(options)
-      : new Agent(options)
+    response.until = async (condition, { timeout = 60000 } = {}) => {
+      let timeoutId
+      if (timeout > 0 && timeout < Infinity) {
+        timeoutId = setTimeout(() => response.destroy(createTimeoutError(timeout)), timeout)
+      }
+      try {
+        for await (const event of response) {
+          let ok = condition(event)
+          let object
+          [ok, object] = Array.isArray(ok) ? ok : [ok, event.object]
+          if (ok) {
+            return object
+          }
+        }
+        // If the response stream ends even though the condition has not yet been met,
+        // also in this case a timeout error is thrown.
+        throw createTimeoutError(timeout)
+      } finally {
+        clearTimeout(timeoutId)
+      }
+    }
   }
-}
-
-function ensureTrailingSlashExists (url) {
-  return url.endsWith('/') ? url : url + '/'
 }
 
 module.exports = HttpClient

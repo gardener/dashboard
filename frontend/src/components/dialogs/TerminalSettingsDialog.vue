@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :confirm-disabled="!validSettings"
     max-width="750px"
     max-height="100vh"
-    default-color="primary"
     ref="gDialog"
     >
     <template v-slot:caption>Change Terminal Settings</template>

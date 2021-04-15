@@ -27,21 +27,20 @@
     "chalk": "^3.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.7.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jest": "^23.20.0",
+    "eslint": "^7.23.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "jest": "^26.4.2",
+    "eslint-plugin-promise": "^4.3.1",
+    "jest": "^26.6.3",
     "jest-date-mock": "^1.0.8"
   },
   "eslintConfig": {
     "env": {
       "browser": true,
       "commonjs": true,
-      "es2020": true,
+      "es2021": true,
       "node": true,
       "jest/globals": true
     },
@@ -54,7 +53,7 @@
     ],
     "globals": {},
     "parserOptions": {
-      "ecmaVersion": 11
+      "ecmaVersion": 12
     },
     "rules": {
       "no-console": "error"
@@ -78,7 +77,7 @@
     }
   },
   "engines": {
-    "node": "^14.15.0",
-    "yarn": "^2.3.3"
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
   }
 }

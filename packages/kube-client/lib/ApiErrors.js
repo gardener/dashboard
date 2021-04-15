@@ -8,11 +8,12 @@
 
 const { get, includes } = require('lodash')
 const { isHttpError } = require('http-errors')
-const { TimeoutError } = require('p-timeout')
 
 const CONNECTION_ERROR_CODES = [
+  'ECONNREFUSED',
   'ETIMEDOUT',
-  'ECONNREFUSED'
+  'ENETUNREACH',
+  'ERR_HTTP2_PING_CANCEL'
 ]
 
 class StatusError extends Error {
@@ -62,10 +63,6 @@ function isExpiredError (err) {
   return isResourceExpired(err) || isGone(err)
 }
 
-function isTimeoutError (err) {
-  return err instanceof TimeoutError
-}
-
 /*
   In case of multiple apiserver instances the largest resourceVersion of watch caches
   will not be in sync anymore. This could lead to situations where we try to start a watch
@@ -94,7 +91,11 @@ function isTooLargeResourceVersionError (err) {
 }
 
 function isConnectionRefused (err) {
-  return includes(CONNECTION_ERROR_CODES, err.code) || isTimeoutError(err)
+  return includes(CONNECTION_ERROR_CODES, err.code)
+}
+
+function isAbortError (err) {
+  return err.code === 'ABORT_ERR' || err.name === 'AbortError'
 }
 
 module.exports = {
@@ -103,9 +104,9 @@ module.exports = {
   isResourceExpired,
   isGone,
   isExpiredError,
-  isTimeoutError,
   isTooLargeResourceVersionError,
   isGatewayTimeout,
   hasStatusCauseResourceVersionTooLarge,
-  isConnectionRefused
+  isConnectionRefused,
+  isAbortError
 }

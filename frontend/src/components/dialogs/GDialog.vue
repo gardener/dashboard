@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
-      <v-toolbar flat :class="titleColorClass">
+      <v-toolbar flat class="toolbar-background toolbar-title--text">
         <v-toolbar-title class="dialog-title align-center justify-start">
           <slot name="caption">
             Confirm Dialog
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           dense>
         </v-text-field>
         <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
-        <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
+        <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -53,7 +53,6 @@ import { setDelayedInputFocus } from '@/utils'
 import GMessage from '@/components/GMessage'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
-import { mapState } from 'vuex'
 
 export default {
   name: 'gdialog',
@@ -76,14 +75,6 @@ export default {
     },
     detailedErrorMessage: {
       type: String
-    },
-    confirmColor: {
-      type: String,
-      default: 'toolbar-background'
-    },
-    defaultColor: {
-      type: String,
-      default: 'toolbar-background'
     },
     confirmButtonText: {
       type: String,
@@ -113,9 +104,6 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'darkMode'
-    ]),
     hasError () {
       return this.confirmValue && this.confirmValue !== this.userInput
     },
@@ -143,12 +131,6 @@ export default {
         this.$emit('update:detailed-error-message', value)
       }
     },
-    titleColorClass () {
-      return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
-    },
-    textColorClass () {
-      return this.confirmValue ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
-    },
     valid () {
       return !this.confirmDisabled && !this.hasError
     }
@@ -174,26 +156,6 @@ export default {
     },
     showDialog () {
       this.visible = true
-    },
-    titleColorClassForString (titleColorClass) {
-      switch (titleColorClass) {
-        case 'error':
-          return 'error toolbar-title--text'
-        case 'warning':
-          return 'warning toolbar-title--text'
-        default:
-          return 'toolbar-background toolbar-title--text'
-      }
-    },
-    textColorClassForString (textColorClass) {
-      switch (textColorClass) {
-        case 'error':
-          return 'error--text'
-        case 'warning':
-          return 'warning--text'
-        default:
-          return 'primary--text'
-      }
     },
     async resolveAction (value) {
       if (value && !this.valid) {

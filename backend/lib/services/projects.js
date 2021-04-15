@@ -12,7 +12,7 @@ const {
   Resources
 } = require('@gardener-dashboard/kube-client')
 
-const { PreconditionFailed } = require('http-errors')
+const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 const cache = require('../cache')
@@ -178,14 +178,16 @@ exports.create = async function ({ user, body }) {
   _.set(body, 'data.createdBy', user.id)
   let project = await client['core.gardener.cloud'].projects.create(toResource(body))
 
-  const isProjectReady = project => {
+  const isProjectReady = ({ type, object: project }) => {
+    if (type === 'DELETE') {
+      throw new InternalServerError('Project resource has been deleted')
+    }
     return _.get(project, 'status.phase') === 'Ready'
   }
   const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
-  project = await dashboardClient['core.gardener.cloud'].projects
-    .watch(name)
-    .waitFor(isProjectReady, { timeout })
+  const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
+  project = await asyncIterable.until(isProjectReady, { timeout })
 
   return fromResource(project)
 }

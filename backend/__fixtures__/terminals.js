@@ -146,7 +146,7 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
-  watch () {
+  watch ({ end = false } = {}) {
     return headers => {
       const [pathname] = split(headers[':path'], '?')
       const matchResult = matchList(pathname)
@@ -156,17 +156,18 @@ const mocks = {
       const { params: { namespace } = {} } = matchResult
       const fieldSelector = parseFieldSelector(headers)
       const items = filter(terminals.list(namespace), fieldSelector)
-      const stream = new PassThrough()
+      const stream = new PassThrough({ objectMode: true })
       process.nextTick(() => {
         for (const item of items) {
           const event = {
             type: 'ADDED',
             object: cloneDeep(item)
           }
-          const chunk = JSON.stringify(event) + '\n'
-          stream.write(chunk)
+          stream.write(event)
         }
-        stream.end()
+        if (end === true) {
+          stream.end()
+        }
       })
       return stream
     }
