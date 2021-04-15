@@ -5,7 +5,6 @@
 //
 
 // Libraries
-import Vue from 'vue'
 import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 
@@ -156,13 +155,16 @@ describe('MainNavigation.vue', () => {
     expect(projectList).toHaveLength(5)
     expect(projectList[1].metadata.name).toBe('bar')
 
-    await wrapper.setData({ projectFilter: 'foo' })
-    wrapper.vm.onInputProjectFilter()
+    const projectFilterWrapper = wrapper.findComponent({ ref: 'projectFilter' })
+    expect(projectFilterWrapper.exists()).toBe(true)
+    const projectFilterInputWrapper = projectFilterWrapper.findComponent({ ref: 'input' })
+    expect(projectFilterInputWrapper.exists()).toBe(true)
+    await projectFilterInputWrapper.setValue('foo')
+
     projectList = wrapper.vm.sortedAndFilteredProjectListWithAllProjects
     expect(projectList).toHaveLength(4)
     expect(projectList[1].metadata.name).toBe('foo')
 
-    await Vue.nextTick()
     const projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     const exactMatchListTile = projectListWrapper.findAll('.project-list-tile').at(1)
     expect(exactMatchListTile.classes()).toEqual(expect.arrayContaining(['highlighted-item']))
@@ -175,7 +177,7 @@ describe('MainNavigation.vue', () => {
     const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
 
     expect(wrapper.vm.highlightedProjectName).toBeUndefined() // undefined == first item == All Projects
-    const mockScrollIntoView = window.HTMLElement.prototype.scrollIntoView = jest.fn()
+    const mockScrollIntoView = jest.spyOn(wrapper.vm, 'scrollIntoView')
     projectMenuButton.trigger('keydown.down')
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
     expect(wrapper.vm.highlightedProjectName).toBe(projects[0].metadata.name)
@@ -205,14 +207,15 @@ describe('MainNavigation.vue', () => {
     expect(projectListWrapper.vm.$children.length).toBe(5)
 
     const projectFilterInput = wrapper.find('input')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
+    await Promise.all([
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down')
+    ])
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(7)
     expect(projectListWrapper.vm.$children.length).toBe(7)
@@ -234,9 +237,8 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 300 }) // scrolled into view
-    projectListWrapper.trigger('scroll') // scroll last element into view
+    await projectListWrapper.trigger('scroll') // scroll last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(6)
     expect(projectListWrapper.vm.$children.length).toBe(6)
@@ -245,9 +247,8 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 500 }) // NOT scrolled into view
-    projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
+    await projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(6)
     expect(projectListWrapper.vm.$children.length).toBe(6)
@@ -256,9 +257,8 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 300 }) // scrolled into view
-    projectListWrapper.trigger('scroll') // scroll last element into view
+    await projectListWrapper.trigger('scroll') // scroll last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(7)
     expect(projectListWrapper.vm.$children.length).toBe(7)
@@ -268,18 +268,17 @@ describe('MainNavigation.vue', () => {
     const projects = createProjectList(['a', 'b', 'c', 'd'])
     getters.projectList.mockReturnValue(projects)
     const wrapper = await mountMainNavigation()
-    const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
     const navigateSpy = jest.spyOn(wrapper.vm, 'navigateToProject')
 
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
+    const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
     projectMenuButton.trigger('keydown.down')
-
-    projectMenuButton.trigger('keyup.enter')
+    await projectMenuButton.trigger('keyup.enter')
     expect(navigateSpy.mock.calls[0]).toEqual([projects[0]])
 
     const projectFilterInput = wrapper.find('input')
     projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keyup.enter')
+    await projectFilterInput.trigger('keyup.enter')
     expect(navigateSpy.mock.calls[1]).toEqual([projects[1]])
   })
 

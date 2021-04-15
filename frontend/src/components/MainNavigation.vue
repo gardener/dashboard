@@ -400,8 +400,11 @@ export default {
 
       const projectListElement = projectListItem.$el
       if (projectListElement) {
-        projectListElement.scrollIntoView(false)
+        this.scrollIntoView(projectListElement, false)
       }
+    },
+    scrollIntoView (element, ...args) {
+      element.scrollIntoView(...args)
     },
     handleProjectListScroll (event) {
       const projectListElement = this.$refs.projectList.$el
