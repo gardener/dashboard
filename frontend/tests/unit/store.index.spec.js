@@ -1,16 +1,10 @@
-//
 // SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import './matchMedia.mock' // Must be imported before the tested file
 import { getters, firstItemMatchingVersionClassification } from '@/store'
 import find from 'lodash/find'
-import noop from 'lodash/noop'
-
-global.console.error = noop // do not log (expected) errors in tests
-global.matchMedia = noop
 
 describe('Store', () => {
   it('should transform machine images from cloud profile', () => {

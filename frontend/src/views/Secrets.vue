@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card class="ma-3">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
-        <v-toolbar-title class="subtitle-1">
+        <v-toolbar-title class="text-subtitle-1">
           Project Secrets
         </v-toolbar-title>
         <v-spacer></v-spacer>
@@ -58,8 +58,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-toolbar>
 
       <v-card-text v-if="!secretList.length">
-        <div class="title grey--text text--darken-1 my-4">Add Secrets to your project</div>
-        <p class="body-1">
+        <div class="text-h6 grey--text text--darken-1 my-4">Add Secrets to your project</div>
+        <p class="text-body-1">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>

@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
           <certified-kubernetes></certified-kubernetes>
         </icon-base>
         <v-toolbar-title class="white--text">
-          <div class="headline toolbar-title--text">Kubernetes Clusters</div>
-          <div class="subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
+          <div class="text-h5 toolbar-title--text">Kubernetes Clusters</div>
+          <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="shootSearch || items.length > 3"
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
           <v-card-title class="toolbar-background toolbar-title--text">
-            <div class="headline">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
+            <div class="text-h5">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
               <v-icon color="toolbar-title">mdi-close</v-icon>

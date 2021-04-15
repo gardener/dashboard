@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-card>
     <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="subtitle-1">Infrastructure</v-toolbar-title>
+      <v-toolbar-title class="text-subtitle-1">Infrastructure</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
             <router-link v-if="canLinkToSecret"
               :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
             >
-              <span class="subtitle-1">{{shootSecretBindingName}}</span>
+              <span class="text-subtitle-1">{{shootSecretBindingName}}</span>
             </router-link>
             <span v-else>{{shootSecretBindingName}}</span>
           </v-list-item-title>

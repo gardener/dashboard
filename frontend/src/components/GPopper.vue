@@ -18,10 +18,10 @@ SPDX-License-Identifier: Apache-2.0
     <div class="popper">
       <v-card class="inner-card">
         <v-toolbar ref="toolbar" :height="30" :color="toolbarColor" flat>
-          <v-toolbar-title class="subtitle-1 toolbar-title--text">{{title}}</v-toolbar-title>
+          <v-toolbar-title class="text-subtitle-1 toolbar-title--text">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn small icon @click.native.stop="closePopover">
-            <v-icon color="toolbar-title" class="subtitle-1">mdi-close</v-icon>
+            <v-icon color="toolbar-title" class="text-subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>

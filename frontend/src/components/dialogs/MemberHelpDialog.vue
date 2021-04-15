@@ -9,25 +9,25 @@ SPDX-License-Identifier: Apache-2.0
     <v-card :class="cardClass">
       <v-card-title class="toolbar-background">
         <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
-        <span class="headline ml-5 toolbar-title--text">{{ title}}</span>
+        <span class="text-h5 ml-5 toolbar-title--text">{{ title}}</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
-          <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
-          <p class="body-1">
+          <div class="text-h6 grey--text text--darken-1 my-4">Add users to your project.</div>
+          <p class="text-body-1">
             Adding users to your project allows you to collaborate across your team.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
         <template v-if="isServiceDialog">
-          <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
-          <p class="body-1">
+          <div class="text-h6 grey--text text--darken-1 my-4">Add service accounts to your project.</div>
+          <p class="text-body-1">
             Adding service accounts to your project allows you to automate processes in your project.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
-         <div class="title grey--text text--darken-1 my-4">Assign roles to your members.</div>
-          <p class="body-1">
+         <div class="text-h6 grey--text text--darken-1 my-4">Assign roles to your members.</div>
+          <p class="text-body-1">
             Add roles to your members to restrict access to resources of this project. Currently supported built-in roles are:
             <ul>
               <li>

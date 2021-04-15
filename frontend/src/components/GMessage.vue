@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
-    <div class="subtitle-1">
+    <div class="text-subtitle-1">
       {{message}}
       <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
         Details

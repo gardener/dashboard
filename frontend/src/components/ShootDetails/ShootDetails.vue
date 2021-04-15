@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="12" md="6">
         <v-card v-if="canGetSecrets" class="mb-4">
           <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-            <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
+            <v-toolbar-title class="text-subtitle-1">Access</v-toolbar-title>
           </v-toolbar>
           <shoot-access-card :shoot-item="shootItem" @add-terminal-shortcut="onAddTerminalShortcut"></shoot-access-card>
         </v-card>

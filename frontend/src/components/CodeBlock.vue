@@ -97,7 +97,7 @@ export default {
         })
         block.textContent = trim(lines.join('\n'))
       }
-      hljs.highlightBlock(block)
+      hljs.highlightElement(block)
       this.$emit('highlight-block')
     },
     onCopy () {

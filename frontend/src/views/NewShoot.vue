@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div class="newshoot-container">
     <v-container fluid class="newshoot-cards">
       <v-card flat>
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Infrastructure
         </v-card-title>
         <v-card-text>
@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Cluster Details
         </v-card-title>
         <v-card-text>
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Infrastructure Details
         </v-card-title>
         <v-card-text>
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
          Access Restrictions
         </v-card-title>
         <v-card-text>
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Worker
         </v-card-title>
         <v-card-text>
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
         <v-card-text>
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Maintenance
         </v-card-title>
         <v-card-text>
@@ -94,7 +94,7 @@ SPDX-License-Identifier: Apache-2.0
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 toolbar-title--text toolbar-background cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Hibernation
         </v-card-title>
         <v-card-text>
