@@ -7,7 +7,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
-import hash from 'object-hash'
 
 import EmitterWrapper from '@/utils/Emitter'
 import {
@@ -20,6 +19,7 @@ import {
   TargetEnum,
   isHtmlColorCode
 } from '@/utils'
+import { hash } from '@/utils/crypto'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'

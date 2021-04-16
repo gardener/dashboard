@@ -7,7 +7,6 @@
 'use strict'
 
 import semver from 'semver'
-import md5 from 'md5'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -28,6 +27,7 @@ import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
 import moment from './moment'
+import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 const { v4: uuidv4 } = require('uuid')
 
