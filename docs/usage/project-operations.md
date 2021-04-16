@@ -372,6 +372,6 @@ The name of the Secret containing the kubeconfig is in the form `<cluster-name>.
 
 ## Related Links
 
-[Working with Service Accounts](./service-accounts.md)
+[Working with Service Accounts](./working-with-service-accounts.md)
 
 [Authenticating with an Identity Provider](https://gardener.cloud/documentation/tutorials/oidc-login/).

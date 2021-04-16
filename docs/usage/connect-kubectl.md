@@ -45,4 +45,4 @@ In the previous snippet make sure to change the `<path-to-file>` with the path t
 <br>
 
 ## What's next?
-- [Using Dashboard Terminal](using-terminal)
+- [Using Dashboard Terminal](using-terminal.md)
