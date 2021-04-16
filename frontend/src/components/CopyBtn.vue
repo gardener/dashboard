@@ -127,8 +127,8 @@ export default {
   mounted () {
     this.enableCopy()
     if (this.autoHide) {
-      this.$parent.$el.addEventListener('mouseover', e => { this.hidden = true })
-      this.$parent.$el.addEventListener('mouseout', e => { this.hidden = false })
+      this.$parent.$el.addEventListener('mouseover', () => this.hidden = true)
+      this.$parent.$el.addEventListener('mouseout', () => this.hidden = false)
     }
   }
 }
