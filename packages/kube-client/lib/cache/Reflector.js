@@ -8,7 +8,7 @@
 
 const { format: fmt } = require('util')
 const delay = require('delay')
-const moment = require('moment')
+
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const ListPager = require('./ListPager')
 const BackoffManager = require('./BackoffManager')
@@ -32,7 +32,7 @@ class Reflector {
   constructor (listWatcher, store) {
     this.listWatcher = listWatcher
     this.store = store
-    this.minWatchTimeout = moment.duration(5, 'minutes')
+    this.minWatchTimeout = 300 // 5 minutes
     this.isLastSyncResourceVersionUnavailable = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
@@ -199,7 +199,7 @@ class Reflector {
     while (!this.signal.aborted) {
       const options = {
         allowWatchBookmarks: true,
-        timeoutSeconds: randomize(this.minWatchTimeout.asSeconds()),
+        timeoutSeconds: randomize(this.minWatchTimeout),
         resourceVersion: this.lastSyncResourceVersion
       }
       let asyncIterable
@@ -235,7 +235,7 @@ class Reflector {
   }
 
   async watchHandler (asyncIterable) {
-    const begin = moment()
+    const begin = Date.now()
     let count = 0
     for await (const event of asyncIterable) {
       count++
@@ -273,12 +273,11 @@ class Reflector {
         logger.error('Received event object without resource version for watch %s', this.expectedTypeName)
       }
     }
-    const end = moment()
-    const watchDuration = moment.duration(end.diff(begin))
-    if (watchDuration.asMilliseconds() < 1000 && count === 0) {
+    const duration = Date.now() - begin
+    if (duration < 1000 && count === 0) {
       throw new Error(fmt('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName))
     }
-    logger.info('Watch %s closed - total %d items received within %s', this.expectedTypeName, count, watchDuration.humanize())
+    logger.info('Watch %s closed - total %d items received within %s seconds', this.expectedTypeName, count, Math.floor(duration / 1000))
   }
 
   static create (...args) {

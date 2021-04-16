@@ -20,7 +20,7 @@ module.exports = {
     'vuetify'
   ],
   rules: {
-    'no-console': [ development ? 'off' : 'error', { allow: ['error'] }],
+    'no-console': [development ? 'off' : 'error', { allow: ['error'] }],
     'no-debugger': development ? 'off' : 'error',
     'vuetify/no-deprecated-classes': 'error',
     'vuetify/grid-unknown-attributes': 'error',

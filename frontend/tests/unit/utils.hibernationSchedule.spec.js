@@ -6,8 +6,8 @@
 
 import './matchMedia.mock' // Must be imported before the tested file
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
+import moment from '@/utils/moment'
 import store from '@/store'
-import moment from 'moment-timezone'
 
 const currentLocation = store.state.location
 
@@ -40,15 +40,19 @@ describe('utils', () => {
         expect(scheduleEvents).toBeInstanceOf(Array)
         expect(scheduleEvents).toHaveLength(2)
         const { start, location } = scheduleEvents[0]
-        expect(start).toEqual(
-          { hour: expectedStartMoment.tz(currentLocation).format('HH'), minute: expectedStartMoment.tz(currentLocation).format('mm'), weekdays: '1,2,3,4,5' }
-        )
+        expect(start).toEqual({
+          hour: expectedStartMoment.tz(currentLocation).format('HH'),
+          minute: expectedStartMoment.tz(currentLocation).format('mm'),
+          weekdays: '1,2,3,4,5'
+        })
         expect(location).toBe(currentLocation)
         const { end } = scheduleEvents[1]
         const locationEnd = scheduleEvents[1].location
-        expect(end).toEqual(
-          { hour: expectedEndMoment.tz(currentLocation).format('HH'), minute: expectedEndMoment.tz(currentLocation).format('mm'), weekdays: '1,2,4,6' }
-        )
+        expect(end).toEqual({
+          hour: expectedEndMoment.tz(currentLocation).format('HH'),
+          minute: expectedEndMoment.tz(currentLocation).format('mm'),
+          weekdays: '1,2,4,6'
+        })
         expect(locationEnd).toBe(currentLocation)
       })
     })
@@ -62,7 +66,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
-      expect(end).toEqual({ hour: '07', minute: '30', weekdays: '1,2,3,4,5,6,0' })
+      expect(end).toEqual({
+        hour: '07',
+        minute: '30',
+        weekdays: '1,2,3,4,5,6,0'
+      })
       expect(location).toBe('Europe/Berlin')
     })
 
@@ -75,7 +83,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
-      expect(end).toEqual({ hour: '07', minute: '30', weekdays: '1,2,0,3,4,5' }) // UI will handle correct sorting
+      expect(end).toEqual({
+        hour: '07',
+        minute: '30',
+        weekdays: '1,2,0,3,4,5'
+      }) // UI will handle correct sorting
       expect(location).toBe('Europe/Berlin')
     })
 
@@ -88,7 +100,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
-      expect(start).toEqual({ hour: '20', minute: '00', weekdays: '1,2,3,4,0' })
+      expect(start).toEqual({
+        hour: '20',
+        minute: '00',
+        weekdays: '1,2,3,4,0'
+      })
       expect(location).toBe('America/Los_Angeles')
     })
 
@@ -101,9 +117,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
-      expect(start).toEqual(
-        { hour: expectedStartMoment.tz(currentLocation).format('HH'), minute: expectedStartMoment.tz(currentLocation).format('mm'), weekdays: '1,2,3,4,5,6,0' }
-      )
+      expect(start).toEqual({
+        hour: expectedStartMoment.tz(currentLocation).format('HH'),
+        minute: expectedStartMoment.tz(currentLocation).format('mm'),
+        weekdays: '1,2,3,4,5,6,0'
+      })
       expect(location).toBe(currentLocation)
     })
 
@@ -116,7 +134,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
-      expect(end).toEqual({ hour: '09', minute: '12', weekdays: '1,0,2,3,4,5,6' }) // UI will handle correct sorting
+      expect(end).toEqual({
+        hour: '09',
+        minute: '12',
+        weekdays: '1,0,2,3,4,5,6'
+      }) // UI will handle correct sorting
       expect(location).toBe('Europe/Berlin')
     })
 
@@ -129,7 +151,11 @@ describe('utils', () => {
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
-      expect(end).toEqual({ hour: '09', minute: '12', weekdays: '1,2,3,4,5,6,0' }) // UI will handle correct sorting
+      expect(end).toEqual({
+        hour: '09',
+        minute: '12',
+        weekdays: '1,2,3,4,5,6,0'
+      }) // UI will handle correct sorting
       expect(location).toBe('Europe/Berlin')
     })
   })
@@ -138,12 +164,24 @@ describe('utils', () => {
     it('should produce a crontab from an array of parsedScheduleEvents', () => {
       const parsedScheduleEvents = [
         {
-          start: { hour: '17', minute: '00', weekdays: '1,2,3,4,5' },
-          end: { hour: '08', minute: '00', weekdays: '1,2,3,4,5' },
+          start: {
+            hour: '17',
+            minute: '00',
+            weekdays: '1,2,3,4,5'
+          },
+          end: {
+            hour: '08',
+            minute: '00',
+            weekdays: '1,2,3,4,5'
+          },
           location: 'Europe/Berlin'
         },
         {
-          start: { hour: '22', minute: '00', weekdays: '6,0' },
+          start: {
+            hour: '22',
+            minute: '00',
+            weekdays: '6,0'
+          },
           location: 'America/Los_Angeles'
         }
       ]
