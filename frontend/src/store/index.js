@@ -803,7 +803,7 @@ const getters = {
       })
     }
   },
-  cloudProviderSecretsByCloudProfileName (state) {
+  infrastructureSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
       return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
     }

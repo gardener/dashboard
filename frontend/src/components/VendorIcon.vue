@@ -61,7 +61,7 @@ export default {
         case 'openstack-designate':
           return require('@/assets/openstack.svg')
         case 'alicloud-dns':
-          return require('@/assets/alicloud.svg')
+          return require('@/assets/alicloud-dns.png')
         case 'cloudflare':
           return require('@/assets/cloudflare.svg')
         case 'infoblox':
