@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
               <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
                 {{ shootName }}
               </router-link>
-              <copy-btn :clipboard-text="shootName"></copy-btn>
+              <copy-btn :clipboard-text="shootName" auto-hide></copy-btn>
             </div>
           </v-col>
           <v-col class="shrink" >
@@ -53,13 +53,13 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'seed'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">
           <shoot-seed-name :shoot-item="shootItem" />
-          <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+          <copy-btn :clipboard-text="shootSeedName" auto-hide></copy-btn>
         </div>
       </template>
       <template v-if="cell.header.value === 'technicalId'">
         <div class="d-flex align-center justify-start flex-nowrap fill-height">
           <span>{{shootTechnicalId}}</span>
-          <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
+          <copy-btn :clipboard-text="shootTechnicalId" auto-hide></copy-btn>
         </div>
       </template>
       <template v-if="cell.header.value === 'createdBy'">
