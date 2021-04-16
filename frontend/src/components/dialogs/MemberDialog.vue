@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card>
       <v-card-title class="toolbar-background">
         <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
-        <span class="headline ml-5 toolbar-title--text">{{title}}</span>
+        <span class="text-h5 ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">

@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <v-card tile width="300px">
           <v-card-title primary-title>
-            <div class="content title mb-2">Gardener</div>
+            <div class="content text-h6 mb-2">Gardener</div>
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -89,9 +89,9 @@ SPDX-License-Identifier: Apache-2.0
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
-              <div class="title">{{displayName}}</div>
-              <div class="caption">{{username}}</div>
-              <div class="caption" v-if="isAdmin">Operator</div>
+              <div class="text-h6">{{displayName}}</div>
+              <div class="text-caption">{{username}}</div>
+              <div class="text-caption" v-if="isAdmin">Operator</div>
               <v-btn-toggle v-model="colorScheme" borderless mandatory @click.native.stop class="mt-3">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">

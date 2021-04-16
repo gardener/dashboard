@@ -9,11 +9,11 @@ SPDX-License-Identifier: Apache-2.0
     <v-card>
       <v-card-title class="toolbar-background">
         <v-icon x-large class="toolbar-title--text icon">mdi-alert-outline</v-icon>
-        <span class="headline ml-5 toolbar-title--text">Confirm Delete</span>
+        <span class="text-h5 ml-5 toolbar-title--text">Confirm Delete</span>
       </v-card-title>
       <v-card-text>
         <v-container fluid>
-          <span class="subtitle-1">
+          <span class="text-subtitle-1">
             Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
             <span class="error--text font-weight-bold">The operation can not be undone.</span>
           </span>

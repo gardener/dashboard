@@ -7,7 +7,8 @@ const development = process.env.NODE_ENV === 'development'
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
+    'jest/globals': true
   },
   extends: [
     'plugin:vue/essential',
@@ -17,10 +18,11 @@ module.exports = {
     parser: 'babel-eslint'
   },
   plugins: [
-    'vuetify'
+    'vuetify',
+    'jest'
   ],
   rules: {
-    'no-console': [ development ? 'off' : 'error', { allow: ['error'] }],
+    'no-console': [development ? 'off' : 'error', { allow: ['error'] }],
     'no-debugger': development ? 'off' : 'error',
     'vuetify/no-deprecated-classes': 'error',
     'vuetify/grid-unknown-attributes': 'error',

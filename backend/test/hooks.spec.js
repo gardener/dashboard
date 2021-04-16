@@ -128,11 +128,7 @@ describe('hooks', () => {
           expect(watch).toBeCalledTimes(1)
           expect(watch.mock.calls[0]).toHaveLength(2)
           expect(watch.mock.calls[0][0]).toBe(ioInstance)
-          if (key === 'tickets') {
-            expect(watch.mock.calls[0][1]).toBe(ticketCache)
-          } else {
-            expect(watch.mock.calls[0][1]).toBe(informers[key])
-          }
+          expect(watch.mock.calls[0][1]).toBe(key === 'tickets' ? ticketCache : informers[key])
         }
       })
     })

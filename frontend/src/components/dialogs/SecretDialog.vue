@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog v-model="visible" max-width="850">
     <v-card>
       <v-card-title class="toolbar-background">
-        <span class="headline toolbar-title--text">{{title}}</span>
+        <span class="text-h5 toolbar-title--text">{{title}}</span>
         <v-spacer></v-spacer>
         <v-btn
           light
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
                 ></v-text-field>
               </template>
               <template v-else>
-                <div class="title pb-4">{{name}}</div>
+                <div class="text-h6 pb-4">{{name}}</div>
               </template>
               </div>
 

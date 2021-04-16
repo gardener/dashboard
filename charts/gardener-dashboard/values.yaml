@@ -72,6 +72,12 @@ oidc:
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener
+  # assets: # See https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values.
+  #   favicon-16x16.png: |
+  #   favicon-32x32.png: |
+  #   favicon-96x96.png: |
+  #   favicon.ico: |
+  #   logo.svg: |
   helpMenuItems:
   - title: Getting Started
     icon: description

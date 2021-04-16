@@ -7,7 +7,6 @@
 'use strict'
 
 const { PassThrough, addAbortSignal } = require('stream')
-const moment = require('moment')
 
 const ApiErrors = require('../lib/ApiErrors')
 const { Reflector, Store, ListPager } = require('../lib/cache')
@@ -208,7 +207,7 @@ describe('kube-client', () => {
         try {
           await listPager.list(options)
         } catch (err) {
-          // eslint-disable-next-line jest/no-try-expect
+          // eslint-disable-next-line jest/no-conditional-expect, jest/no-try-expect
           expect(ApiErrors.isExpiredError(err)).toBe(true)
         }
         listPager.fullListIfExpired = true
@@ -229,7 +228,6 @@ describe('kube-client', () => {
       beforeEach(() => {
         ac = new AbortController()
         reflector = Reflector.create(listWatcher, store)
-        reflector.period = moment.duration(1)
         reflector.backoffManager.min = 1
         reflector.backoffManager.max = 10
       })
@@ -286,7 +284,7 @@ describe('kube-client', () => {
           try {
             await reflector.watchHandler(stream)
           } catch (err) {
-            // eslint-disable-next-line jest/no-try-expect
+            // eslint-disable-next-line jest/no-conditional-expect, jest/no-try-expect
             expect(ApiErrors.isExpiredError(err)).toBe(true)
           }
 
@@ -305,7 +303,7 @@ describe('kube-client', () => {
         let watchStub
 
         beforeEach(() => {
-          reflector.minWatchTimeout = moment.duration(30, 'seconds')
+          reflector.minWatchTimeout = 30 // 30 seconds
           reflector.setAbortSignal(ac.signal)
           pager = new TestPager()
           createPagerStub = jest.spyOn(ListPager, 'create').mockReturnValue(pager)

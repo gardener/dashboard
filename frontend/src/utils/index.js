@@ -6,9 +6,7 @@
 
 'use strict'
 
-import moment from 'moment-timezone'
 import semver from 'semver'
-import md5 from 'md5'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -28,8 +26,10 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
-import TimeWithOffset from '@/utils/TimeWithOffset'
-const { v4: uuidv4 } = require('uuid')
+import moment from './moment'
+import { md5 } from './crypto'
+import TimeWithOffset from './TimeWithOffset'
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 

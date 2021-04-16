@@ -121,38 +121,37 @@ function resolveQuotas (secretBinding) {
 }
 
 async function getcloudProviderSecrets ({ secretBindings, cloudProfileList, secretList, namespace }) {
-  return _
-    .chain(secretBindings)
-    .map(secretBinding => {
-      try {
-        const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
-        const dnsProviderName = _.get(secretBinding, ['metadata', 'labels', 'gardener.cloud/dnsProviderName'])
-        const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
-        const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
-        const name = _.get(secretBinding, 'metadata.name')
-        const secretName = _.get(secretBinding, 'secretRef.name')
-        const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
-        const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
-        if (!cloudProviderKind && !dnsProviderName) {
-          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping cloud provider secret with name %s', cloudProfileName, name))
-        }
-        const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
-        if (isOwnSecret(secretBinding) && !secret) {
-          throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping cloud provider secret with name %s', secretName))
-        }
-        return fromResource({
-          secretBinding,
-          cloudProviderKind,
-          secret,
-          quotas: resolveQuotas(secretBinding),
-          ...projectInfo
-        })
-      } catch (err) {
-        logger.info(err.message)
+  const infrastructureSecrets = []
+  for (const secretBinding of secretBindings) {
+    try {
+      const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
+      const dnsProviderName = _.get(secretBinding, ['metadata', 'labels', 'gardener.cloud/dnsProviderName'])
+      const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
+      const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
+      const name = _.get(secretBinding, 'metadata.name')
+      const secretName = _.get(secretBinding, 'secretRef.name')
+      const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
+      const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
+      if (!cloudProviderKind && !dnsProviderName) {
+        throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping cloud provider secret with name %s', cloudProfileName, name))
       }
-    })
-    .compact()
-    .value()
+      const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
+      if (isOwnSecret(secretBinding) && !secret) {
+        throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
+      }
+      const infrastructureSecret = fromResource({
+        secretBinding,
+        cloudProviderKind,
+        secret,
+        quotas: resolveQuotas(secretBinding),
+        ...projectInfo
+      })
+      infrastructureSecrets.push(infrastructureSecret)
+    } catch (err) {
+      logger.info(err.message)
+    }
+  }
+  return infrastructureSecrets
 }
 
 async function getCloudProviderKind (user, name) {

@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-card v-else>
       <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-        <v-toolbar-title class="subtitle-1">Ticket</v-toolbar-title>
+        <v-toolbar-title class="text-subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
         <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">
@@ -32,15 +32,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import template from 'lodash/template'
 import uniq from 'lodash/uniq'
-import { mapState } from 'vuex'
+
 import Ticket from '@/components/ShootTickets/Ticket'
 import { shootItem } from '@/mixins/shootItem'
-import moment from 'moment-timezone'
+import moment from '@/utils/moment'
 
 export default {
   components: {

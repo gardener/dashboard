@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
         <v-list-item-content>
           <v-list-item-title class="d-flex">
-            <span class="subtitle-1">{{item.displayName}}</span>
+            <span class="text-subtitle-1">{{item.displayName}}</span>
             <v-tooltip top v-if="foreign">
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on" small class="ml-1">mdi-account-arrow-left</v-icon>

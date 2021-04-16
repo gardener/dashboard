@@ -7,7 +7,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
-import hash from 'object-hash'
 
 import EmitterWrapper from '@/utils/Emitter'
 import {
@@ -20,6 +19,7 @@ import {
   TargetEnum,
   isHtmlColorCode
 } from '@/utils'
+import { hash } from '@/utils/crypto'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
@@ -55,8 +55,8 @@ import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
-import moment from 'moment-timezone'
 
+import moment from '@/utils/moment'
 import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -83,18 +83,6 @@ if (debug) {
   plugins.push(createLogger())
 }
 
-// Guess current location or fallback to UTC
-// Do not use moment.tz.guess() as their fallback logic can lead to unexpected behavior
-// see also https://github.com/gardener/dashboard/issues/944, https://github.com/moment/moment-timezone/issues/559
-function guessLocation () {
-  const locations = moment.tz.names()
-  let location = Intl.DateTimeFormat().resolvedOptions().timeZone
-  if (!includes(locations, location)) {
-    location = 'UTC'
-  }
-  return location
-}
-
 // initial state
 const state = {
   cfg: null,
@@ -114,7 +102,7 @@ const state = {
   alert: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  location: guessLocation(),
+  location: moment.tz.guess(),
   timezone: moment().format('Z'),
   focusedElementId: null,
   splitpaneResize: null,

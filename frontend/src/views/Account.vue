@@ -189,17 +189,18 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import CopyBtn from '@/components/CopyBtn'
-import CodeBlock from '@/components/CodeBlock'
-import ExternalLink from '@/components/ExternalLink'
-import download from 'downloadjs'
-import AccountAvatar from '@/components/AccountAvatar'
-import { getToken } from '@/utils/api'
 import { mapState, mapGetters } from 'vuex'
-import moment from 'moment-timezone'
+import download from 'downloadjs'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import get from 'lodash/get'
+
+import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
+import ExternalLink from '@/components/ExternalLink'
+import AccountAvatar from '@/components/AccountAvatar'
+import { getToken } from '@/utils/api'
+import moment from '@/utils/moment'
 
 export default {
   components: {

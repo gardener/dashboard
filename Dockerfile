@@ -13,6 +13,9 @@ COPY . .
 RUN yarn config set enableNetwork false
 RUN yarn install --immutable --immutable-cache
 
+# check that the constraints are met
+RUN yarn constraints
+
 # run lint in all workspaces
 RUN yarn workspace @gardener-dashboard/logger      run lint
 RUN yarn workspace @gardener-dashboard/request     run lint

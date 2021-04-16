@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-card v-if="items.length">
     <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="subtitle-1">External Tools</v-toolbar-title>
+      <v-toolbar-title class="text-subtitle-1">External Tools</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <template v-for="({ title, url, icon = 'link' }, index) in items">

@@ -34,11 +34,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'vuex'
-import { getValidationErrors, randomMaintenanceBegin, maintenanceWindowWithBeginAndTimezone } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
+
+import { getValidationErrors, randomMaintenanceBegin, maintenanceWindowWithBeginAndTimezone } from '@/utils'
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
-const moment = require('moment')
+import moment from '@/utils/moment'
 
 const validationErrors = {
   maintenanceBegin: {

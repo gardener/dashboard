@@ -4,108 +4,105 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import './matchMedia.mock' // Must be imported before the tested file
-import { mount } from '@vue/test-utils'
-import MainNavigation from '@/components/MainNavigation.vue'
-import Vue from 'vue'
+// Libraries
 import Vuex from 'vuex'
 import Vuetify from 'vuetify'
-import noop from 'lodash/noop'
 
-Vue.use(Vuetify)
-Vue.use(Vuex)
+// Components
+import MainNavigation from '@/components/MainNavigation'
 
-window.HTMLElement.prototype.scrollIntoView = noop
+// Utilities
+import { createLocalVue, mount } from '@vue/test-utils'
 
-// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
-global.requestAnimationFrame = cb => cb()
-
-const storeProjectList = []
-let vuetify
-
-const $store = new Vuex.Store({
-  state: {
-    namespace: 'foo',
-    sidebar: true,
-    cfg: {}
-  },
-  getters: {
-    canCreateProject: () => {
-      return true
-    },
-    projectList: () => {
-      return storeProjectList
-    }
-  },
-  actions: {
-    setSidebar: noop
-  }
-})
-
-const $route = {
-  name: 'bar',
-  path: '/'
-}
-
-const $router = {
-  options: {
-    routes: [
-      {
-        path: '/',
-        children: [
-          {
-            path: '',
-            name: 'bar',
-            meta: {
-              menu: {
-                title: 'bar',
-                icon: 'icon-foo'
-              }
-            }
-          }
-        ]
+function createProjectList (names) {
+  return names.map(name => {
+    return {
+      metadata: {
+        name,
+        namespace: `garden-${name}`
+      },
+      data: {
+        owner: 'owner'
       }
-    ]
-  },
-  push: noop
-}
-
-async function createMainNavigationComponent () {
-  const wrapper = mount(MainNavigation, {
-    vuetify,
-    mocks: {
-      $route,
-      $router,
-      $store
-    },
-    stubs: ['ProjectCreateDialog', 'RouterLink', 'StaleProjectWarning']
-  })
-  wrapper.setData({ projectMenu: true })
-
-  // need to wait for projectmenu to be rendered
-  await Vue.nextTick()
-
-  return wrapper
-}
-
-function createProjectListItem (name) {
-  return {
-    metadata: {
-      name,
-      namespace: `garden-${name}`
-    },
-    data: {
-      owner: 'owner'
     }
-  }
+  })
 }
 
 describe('MainNavigation.vue', () => {
+  const localVue = createLocalVue()
+  localVue.use(Vuetify)
+  localVue.use(Vuex)
+
+  let vuetify
+  let store
+  let getters
+  let actions
+
+  const $route = {
+    name: 'bar',
+    path: '/'
+  }
+
+  const $router = {
+    options: {
+      routes: [
+        {
+          path: '/',
+          children: [
+            {
+              path: '',
+              name: 'bar',
+              meta: {
+                menu: {
+                  title: 'bar',
+                  icon: 'icon-foo'
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    push: jest.fn()
+  }
+
+  const mountMainNavigation = async () => {
+    const wrapper = mount(MainNavigation, {
+      localVue,
+      vuetify,
+      store,
+      mocks: {
+        $route,
+        $router
+      },
+      stubs: [
+        'ProjectCreateDialog',
+        'RouterLink',
+        'StaleProjectWarning'
+      ]
+    })
+    await wrapper.setData({ projectMenu: true })
+    return wrapper
+  }
+
   beforeEach(() => {
-    storeProjectList.length = 0 // clear array
-    storeProjectList.push(createProjectListItem('foo'))
-    storeProjectList.push(createProjectListItem('bar'))
     vuetify = new Vuetify()
+    getters = {
+      canCreateProject: jest.fn().mockReturnValue(true),
+      projectList: jest.fn().mockReturnValue(createProjectList(['foo', 'bar']))
+    }
+    actions = {
+      setSidebar: jest.fn()
+    }
+    store = new Vuex.Store({
+      state: {
+        namespace: 'foo',
+        sidebar: true,
+        cfg: {}
+      },
+      getters,
+      actions
+    })
   })
 
   afterEach(() => {
@@ -113,130 +110,125 @@ describe('MainNavigation.vue', () => {
   })
 
   it('should have correct element and css class hierarchy', async () => {
-    const wrapper = await createMainNavigationComponent()
+    const wrapper = await mountMainNavigation()
 
     const topArea = wrapper.find('.v-navigation-drawer .teaser > .content')
-    expect(topArea.element).not.toBeUndefined()
+    expect(topArea.exists()).toBe(true)
 
     const projectSelector = wrapper.find('.v-navigation-drawer .project-selector')
-    expect(projectSelector.element).not.toBeUndefined()
+    expect(projectSelector.exists()).toBe(true)
 
     const listTitle = wrapper.find('.v-navigation-drawer .v-list .v-list-item__title')
-    expect(listTitle.element).not.toBeUndefined()
+    expect(listTitle.exists()).toBe(true)
 
     const mainMenu = wrapper.findComponent({ ref: 'mainMenu' })
     const listTile = mainMenu.find('.v-list-item__title')
-    expect(listTile.element).not.toBeUndefined()
+    expect(listTile.exists()).toBe(true)
 
     const projectMenuCard = wrapper.find('.v-navigation-drawer .project-menu')
-    expect(projectMenuCard.element).not.toBeUndefined()
+    expect(projectMenuCard.exists()).toBe(true)
 
     const projectMenu = wrapper.find('.v-navigation-drawer .project-menu .v-card .project-list')
-    expect(projectMenu.element).not.toBeUndefined()
+    expect(projectMenu.exists()).toBe(true)
+  })
+
+  it('Filter input should be invisible in case of less than 3 projects', async () => {
+    const wrapper = await mountMainNavigation()
+    const projectFilterInput = wrapper.findComponent({ ref: 'projectFilter' })
+    expect(projectFilterInput.exists()).toBe(false)
   })
 
   it('Filter input should be visible in case of more than 3 projects', async () => {
-    let wrapper = await createMainNavigationComponent()
-
-    let projectFilterInput = wrapper.findComponent({ ref: 'projectFilter' })
-    expect(projectFilterInput.element).toBeUndefined()
-
-    storeProjectList.push(createProjectListItem('baz'))
-    storeProjectList.push(createProjectListItem('foobar'))
-    wrapper = await createMainNavigationComponent()
-
-    projectFilterInput = wrapper.findComponent({ ref: 'projectFilter' })
-    expect(projectFilterInput.element).not.toBeUndefined()
+    getters.projectList.mockReturnValue(createProjectList(['foo', 'bar', 'baz', 'foobar']))
+    const wrapper = await mountMainNavigation()
+    const projectFilterInput = wrapper.findComponent({ ref: 'projectFilter' })
+    expect(projectFilterInput.exists()).toBe(true)
   })
 
   it('Project list should be filtered by input', async () => {
-    storeProjectList.push(createProjectListItem('fooz'))
-    storeProjectList.push(createProjectListItem('foobar'))
-    const wrapper = await createMainNavigationComponent()
+    const projects = createProjectList(['foo', 'bar', 'fooz', 'foobar'])
+    getters.projectList.mockReturnValue(projects)
+    const wrapper = await mountMainNavigation()
+    let projectList
 
-    let projectList = wrapper.vm.sortedAndFilteredProjectListWithAllProjects
+    projectList = wrapper.vm.sortedAndFilteredProjectListWithAllProjects
     expect(projectList).toHaveLength(5)
     expect(projectList[1].metadata.name).toBe('bar')
 
-    wrapper.setData({ projectFilter: 'foo' })
-    wrapper.vm.onInputProjectFilter()
+    const projectFilterWrapper = wrapper.findComponent({ ref: 'projectFilter' })
+    expect(projectFilterWrapper.exists()).toBe(true)
+    const projectFilterInputWrapper = projectFilterWrapper.findComponent({ ref: 'input' })
+    expect(projectFilterInputWrapper.exists()).toBe(true)
+    await projectFilterInputWrapper.setValue('foo')
+
     projectList = wrapper.vm.sortedAndFilteredProjectListWithAllProjects
     expect(projectList).toHaveLength(4)
     expect(projectList[1].metadata.name).toBe('foo')
 
-    await Vue.nextTick()
     const projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     const exactMatchListTile = projectListWrapper.findAll('.project-list-tile').at(1)
     expect(exactMatchListTile.classes()).toEqual(expect.arrayContaining(['highlighted-item']))
   })
 
   it('Projects can be highlighted via arrow keys', async () => {
-    storeProjectList.length = 0 // clear array
-    storeProjectList.push(createProjectListItem('a'))
-    storeProjectList.push(createProjectListItem('b'))
-    storeProjectList.push(createProjectListItem('c'))
-    storeProjectList.push(createProjectListItem('d'))
-    const wrapper = await createMainNavigationComponent()
+    const projects = createProjectList(['a', 'b', 'c', 'd'])
+    getters.projectList.mockReturnValue(projects)
+    const wrapper = await mountMainNavigation()
     const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
 
     expect(wrapper.vm.highlightedProjectName).toBeUndefined() // undefined == first item == All Projects
-    const scrollIntoViewSpy = jest.spyOn(window.HTMLElement.prototype, 'scrollIntoView')
+    const mockScrollIntoView = jest.spyOn(wrapper.vm, 'scrollIntoView')
     projectMenuButton.trigger('keydown.down')
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
-    expect(wrapper.vm.highlightedProjectName).toBe(storeProjectList[0].metadata.name)
+    expect(wrapper.vm.highlightedProjectName).toBe(projects[0].metadata.name)
     projectMenuButton.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProject()).toBe(storeProjectList[1])
+    expect(wrapper.vm.highlightedProject()).toBe(projects[1])
     projectMenuButton.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProject()).toBe(storeProjectList[0])
+    expect(wrapper.vm.highlightedProject()).toBe(projects[0])
 
     const projectFilterInput = wrapper.find('input')
     projectFilterInput.trigger('keydown.down')
     projectFilterInput.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProject()).toBe(storeProjectList[2])
+    expect(wrapper.vm.highlightedProject()).toBe(projects[2])
     projectFilterInput.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProject()).toBe(storeProjectList[1])
-    expect(scrollIntoViewSpy).toHaveBeenCalledTimes(6)
+    expect(wrapper.vm.highlightedProject()).toBe(projects[1])
+    expect(mockScrollIntoView).toHaveBeenCalledTimes(6)
   })
 
   it('Project list rendering should be lazy', async () => {
-    storeProjectList.push(createProjectListItem('fooz'))
-    storeProjectList.push(createProjectListItem('foobar'))
-    storeProjectList.push(createProjectListItem('foozz'))
-    storeProjectList.push(createProjectListItem('foobarz'))
-    const wrapper = await createMainNavigationComponent()
-    wrapper.setData({ numberOfVisibleProjects: 5 })
+    const projects = createProjectList(['foo', 'bar', 'fooz', 'foobar', 'foozz', 'foobarz'])
+    getters.projectList.mockReturnValue(projects)
+    const wrapper = await mountMainNavigation()
+    await wrapper.setData({ numberOfVisibleProjects: 5 })
+    let projectListWrapper
 
-    await Vue.nextTick()
-    let projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
-
-    await Vue.nextTick()
+    projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(5)
     expect(projectListWrapper.vm.$children.length).toBe(5)
 
     const projectFilterInput = wrapper.find('input')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keydown.down')
+    await Promise.all([
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down'),
+      projectFilterInput.trigger('keydown.down')
+    ])
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(7)
     expect(projectListWrapper.vm.$children.length).toBe(7)
   })
 
   it('Project list scrolling should trigger lazy rendering', async () => {
-    storeProjectList.push(createProjectListItem('fooz'))
-    storeProjectList.push(createProjectListItem('foobar'))
-    storeProjectList.push(createProjectListItem('foozz'))
-    storeProjectList.push(createProjectListItem('foobarz'))
-    const wrapper = await createMainNavigationComponent()
-    wrapper.setData({ numberOfVisibleProjects: 5 })
+    const projects = createProjectList(['foo', 'bar', 'fooz', 'foobar', 'foozz', 'foobarz'])
+    getters.projectList.mockReturnValue(projects)
+    const wrapper = await mountMainNavigation()
+    await wrapper.setData({ numberOfVisibleProjects: 5 })
+    let projectListWrapper
 
-    await Vue.nextTick()
-    let projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
+    projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(5)
     expect(projectListWrapper.vm.$children.length).toBe(5)
 
@@ -245,9 +237,8 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 300 }) // scrolled into view
-    projectListWrapper.trigger('scroll') // scroll last element into view
+    await projectListWrapper.trigger('scroll') // scroll last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(6)
     expect(projectListWrapper.vm.$children.length).toBe(6)
@@ -256,9 +247,8 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 500 }) // NOT scrolled into view
-    projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
+    await projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(6)
     expect(projectListWrapper.vm.$children.length).toBe(6)
@@ -267,38 +257,33 @@ describe('MainNavigation.vue', () => {
     boundingRectStub.mockReturnValueOnce({ top: 200 })
     boundingRectStub.mockReturnValueOnce({ height: 200 })
     boundingRectStub.mockReturnValueOnce({ top: 300 }) // scrolled into view
-    projectListWrapper.trigger('scroll') // scroll last element into view
+    await projectListWrapper.trigger('scroll') // scroll last element into view
 
-    await Vue.nextTick()
     projectListWrapper = wrapper.findComponent({ ref: 'projectList' })
     expect(wrapper.vm.visibleProjectList.length).toBe(7)
     expect(projectListWrapper.vm.$children.length).toBe(7)
   })
 
   it('Project list should navigate to highlighted project on enter', async () => {
-    storeProjectList.length = 0 // clear array
-    storeProjectList.push(createProjectListItem('a'))
-    storeProjectList.push(createProjectListItem('b'))
-    storeProjectList.push(createProjectListItem('c'))
-    storeProjectList.push(createProjectListItem('d'))
-    const wrapper = await createMainNavigationComponent()
-    const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
+    const projects = createProjectList(['a', 'b', 'c', 'd'])
+    getters.projectList.mockReturnValue(projects)
+    const wrapper = await mountMainNavigation()
     const navigateSpy = jest.spyOn(wrapper.vm, 'navigateToProject')
 
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
+    const projectMenuButton = wrapper.find('.v-navigation-drawer .project-selector .v-btn__content')
     projectMenuButton.trigger('keydown.down')
-
-    projectMenuButton.trigger('keyup.enter')
-    expect(navigateSpy.mock.calls[0]).toEqual([storeProjectList[0]])
+    await projectMenuButton.trigger('keyup.enter')
+    expect(navigateSpy.mock.calls[0]).toEqual([projects[0]])
 
     const projectFilterInput = wrapper.find('input')
     projectFilterInput.trigger('keydown.down')
-    projectFilterInput.trigger('keyup.enter')
-    expect(navigateSpy.mock.calls[1]).toEqual([storeProjectList[1]])
+    await projectFilterInput.trigger('keyup.enter')
+    expect(navigateSpy.mock.calls[1]).toEqual([projects[1]])
   })
 
   it('Project list should navigate to project on click', async () => {
-    const wrapper = await createMainNavigationComponent()
+    const wrapper = await mountMainNavigation()
     const projectClickSpy = jest.spyOn(wrapper.vm, 'onProjectClick')
     const navigateSpy = jest.spyOn(wrapper.vm, 'navigateToProject')
 
