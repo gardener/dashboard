@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           <infra-icon :value="infrastructureKind" :size="60" light-background></infra-icon>
         </div>
         <div class="mt-2" >
-          <span class="subtitle-1">{{infrastructureKind}}</span>
+          <span class="text-subtitle-1">{{infrastructureKind}}</span>
         </div>
       </div>
     </v-card>

@@ -6,12 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="headerContainer">
-    <div class="caption">
+    <div class="text-caption">
       <slot name="caption">
 
       </slot>
     </div>
-     <span class="title">
+     <span class="text-h6">
        <slot name="title"></slot>
      </span>
      <span class="status">

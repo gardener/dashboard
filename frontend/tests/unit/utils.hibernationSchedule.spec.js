@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import './matchMedia.mock' // Must be imported before the tested file
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import moment from '@/utils/moment'
 import store from '@/store'

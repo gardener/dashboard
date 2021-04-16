@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon>mdi-home-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="subtitle-1">Home</v-list-item-title>
+            <v-list-item-title class="text-subtitle-1">Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <template v-if="namespace">
@@ -140,7 +140,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon small color="main-navigation-title">{{route.meta.menu.icon}}</v-icon>
               </v-list-item-action>
               <v-list-item-content>
-                <v-list-item-title class="subtitle-1 main-navigation-title--text" >{{route.meta.menu.title}}</v-list-item-title>
+                <v-list-item-title class="text-subtitle-1 main-navigation-title--text" >{{route.meta.menu.title}}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </template>
@@ -400,8 +400,11 @@ export default {
 
       const projectListElement = projectListItem.$el
       if (projectListElement) {
-        projectListElement.scrollIntoView(false)
+        this.scrollIntoView(projectListElement, false)
       }
+    },
+    scrollIntoView (element, ...args) {
+      element.scrollIntoView(...args)
     },
     handleProjectListScroll (event) {
       const projectListElement = this.$refs.projectList.$el

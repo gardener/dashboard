@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
             :class="{ 'content--bounce': contentBounce }"
           >
             <template v-if="value">{{value}}</template>
-            <div v-else class="body-2 font-weight-light text--disabled">{{noValueText}}</div>
+            <div v-else class="text-body-2 font-weight-light text--disabled">{{noValueText}}</div>
           </v-col>
           <v-col class="shrink">
             <v-btn

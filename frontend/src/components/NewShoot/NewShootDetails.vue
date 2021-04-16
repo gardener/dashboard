@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{slaTitle}}</label>
-        <p class="subtitle-1" v-html="slaDescriptionHtml" />
+        <p class="text-subtitle-1" v-html="slaDescriptionHtml" />
       </v-col>
     </v-row>
 </v-container>

@@ -15,5 +15,8 @@ module.exports = {
       lines: 42,
       statements: 42
     }
-  }
+  },
+  setupFilesAfterEnv: [
+    '<rootDir>/jest.setup.js'
+  ]
 }

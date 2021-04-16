@@ -4,41 +4,38 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { shallowMount } from '@vue/test-utils'
-import CodeBlock from '@/components/CodeBlock.vue'
-import Vue from 'vue'
-import Vuetify from 'vuetify'
+// Components
+import CodeBlock from '@/components/CodeBlock'
 
-Vue.use(Vuetify)
+// Utilities
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 describe('CodeBlock.vue', () => {
+  const localVue = createLocalVue()
+
   it('should render correct contents', () => {
-    const propsData = {
-      lang: 'yaml',
-      content: `
-        ---
-        foo: true
-        bar: 42`
-    }
-    const computed = {
-      codeBlockClass () {
-        return ''
-      }
-    }
     const wrapper = shallowMount(CodeBlock, {
-      propsData,
-      computed
+      localVue,
+      propsData: {
+        lang: 'yaml',
+        content: `
+          ---
+          foo: true
+          bar: 42`
+      },
+      computed: {
+        codeBlockClass () {
+          return ''
+        }
+      }
     })
-    const vm = wrapper.vm
-    return new Promise(resolve => vm.$nextTick(resolve))
-      .then(() => {
-        const codeElement = vm.$el.querySelector('code.yaml')
-        expect(codeElement).toBeInstanceOf(HTMLElement)
-        expect(codeElement.querySelector('.hljs-meta').textContent).toBe('---')
-        expect(codeElement.querySelector('.hljs-literal').textContent).toBe('true')
-        expect(codeElement.querySelector('.hljs-number').textContent).toBe('42')
-        const attrs = Array.prototype.map.call(codeElement.querySelectorAll('.hljs-attr'), el => el.textContent)
-        expect(attrs).toEqual(['foo:', 'bar:'])
-      })
+    const codeWrapper = wrapper.find('code.yaml')
+    expect(codeWrapper.exists()).toBe(true)
+    expect(codeWrapper.element).toBeInstanceOf(HTMLElement)
+    expect(codeWrapper.find('.hljs-meta').text()).toBe('---')
+    expect(codeWrapper.find('.hljs-literal').text()).toBe('true')
+    expect(codeWrapper.find('.hljs-number').text()).toBe('42')
+    const text = w => w.text()
+    expect(codeWrapper.findAll('.hljs-attr').wrappers.map(text)).toEqual(['foo:', 'bar:'])
   })
 })

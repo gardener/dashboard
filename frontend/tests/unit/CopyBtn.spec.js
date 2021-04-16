@@ -4,19 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import Vue from 'vue'
+// Libraries
 import Vuetify from 'vuetify'
-import { mount } from '@vue/test-utils'
-import CopyBtn from '@/components/CopyBtn.vue'
 
-Vue.use(Vuetify)
-document.body.setAttribute('data-app', true)
-// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
-global.requestAnimationFrame = cb => cb()
+// Components
+import CopyBtn from '@/components/CopyBtn'
 
-const components = { CopyBtn }
+// Utilities
+import { createLocalVue, mount } from '@vue/test-utils'
 
 describe('CopyBtn.vue', () => {
+  const localVue = createLocalVue()
   let vuetify
 
   beforeEach(() => {
@@ -24,22 +22,51 @@ describe('CopyBtn.vue', () => {
   })
 
   it('should ensure that the clipboard container is the dialog content', () => {
-    const template = '<v-dialog v-model="visible" ref="dialog"><copy-btn ref="btn"/></v-dialog>'
-    const data = () => {
-      return {
-        visible: true
+    const Component = {
+      template: `
+      <v-dialog v-model="visible" ref="dialog">
+        <copy-btn ref="btn"/>
+      </v-dialog>
+      `,
+      data () {
+        return {
+          visible: true
+        }
+      },
+      components: {
+        CopyBtn
       }
     }
-    const wrapper = mount({ template, data, components }, { vuetify })
-    const { btn, dialog } = wrapper.vm.$refs
-    expect(dialog.$refs.content).toBeDefined()
-    expect(btn.clipboard.container).toBe(dialog.$refs.content)
+    const wrapper = mount(Component, {
+      localVue,
+      vuetify
+    })
+    const btn = wrapper.find({ ref: 'btn' })
+    expect(btn.exists()).toBe(true)
+    const dialog = wrapper.find({ ref: 'dialog' })
+    expect(dialog.exists()).toBe(true)
+    const content = dialog.find({ ref: 'content' })
+    expect(content.exists()).toBe(true)
+    expect(btn.vm.clipboard.container).toBe(content.element)
   })
 
   it('should ensure that the clipboard container is the document body', () => {
-    const template = '<v-card><copy-btn ref="btn"/></v-card>'
-    const wrapper = mount({ template, components })
-    const { btn } = wrapper.vm.$refs
-    expect(btn.clipboard.container).toBe(document.body)
+    const Component = {
+      template: `
+      <v-card>
+        <copy-btn ref="btn"/>
+      </v-card>
+      `,
+      components: {
+        CopyBtn
+      }
+    }
+    const wrapper = mount(Component, {
+      localVue,
+      vuetify
+    })
+    const btn = wrapper.find({ ref: 'btn' })
+    expect(btn.exists()).toBe(true)
+    expect(btn.vm.clipboard.container).toBe(document.body)
   })
 })

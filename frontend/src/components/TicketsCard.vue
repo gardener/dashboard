@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-card v-else>
       <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-        <v-toolbar-title class="subtitle-1">Ticket</v-toolbar-title>
+        <v-toolbar-title class="text-subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
         <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">

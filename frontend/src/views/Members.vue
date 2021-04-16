@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card class="ma-3">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-account-multiple</v-icon>
-        <v-toolbar-title class="subtitle-1">
+        <v-toolbar-title class="text-subtitle-1">
           Project Users
         </v-toolbar-title>
         <v-spacer></v-spacer>
@@ -57,8 +57,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-toolbar>
 
       <v-card-text v-if="!userList.length">
-        <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
-        <p class="body-1">
+        <div class="text-h6 grey--text text--darken-1 my-4">Add users to your project.</div>
+        <p class="text-body-1">
           Adding users to your project allows you to collaborate across your team.
           Access to resources within your project can be configured by assigning roles.
         </p>
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card class="ma-3 mt-6">
       <v-toolbar flat color="toolbar-background  toolbar-title--text">
         <v-icon color="toolbar-title" class="pr-2">mdi-monitor-multiple</v-icon>
-        <v-toolbar-title class="subtitle-1">
+        <v-toolbar-title class="text-subtitle-1">
           Service Accounts
         </v-toolbar-title>
         <v-spacer></v-spacer>
@@ -128,8 +128,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
-        <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
-        <p class="body-1">
+        <div class="text-h6 grey--text text--darken-1 my-4">Add service accounts to your project.</div>
+        <p class="text-body-1">
           Adding service accounts to your project allows you to automate processes in your project.
           Access to resources within your project can be configured by assigning roles.
         </p>
@@ -168,7 +168,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
       <v-card>
         <v-card-title class="toolbar-background toolbar-title--text">
-          <div class="headline">Kubeconfig <code class="toolbar-background lighten-1 toolbar-title--text">{{currentServiceAccountDisplayName}}</code></div>
+          <div class="text-h5">Kubeconfig <code class="toolbar-background lighten-1 toolbar-title--text">{{currentServiceAccountDisplayName}}</code></div>
           <v-spacer></v-spacer>
           <v-btn icon @click.native="kubeconfigDialog = false">
             <v-icon color="toolbar-title">mdi-close</v-icon>

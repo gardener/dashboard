@@ -4,71 +4,64 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import './matchMedia.mock' // Must be imported before the tested file
-import { mount } from '@vue/test-utils'
-import NewShootDetails from '@/components/NewShoot/NewShootDetails.vue'
-import Vue from 'vue'
+// Libraries
+import EventEmitter from 'events'
 import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 import Vuelidate from 'vuelidate'
-import noop from 'lodash/noop'
-const EventEmitter = require('events')
 
-Vue.use(Vuetify)
-Vue.use(Vuelidate)
-Vue.use(Vuex)
+// Components
+import NewShootDetails from '@/components/NewShoot/NewShootDetails'
 
-// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
-global.requestAnimationFrame = cb => cb()
-
-let vuetify
-
-const projectList = [
-  {
-    metadata: {
-      name: 'foo',
-      namespace: 'garden-foo'
-    },
-    data: {
-      owner: 'owner'
-    }
-  }
-]
-
-const store = new Vuex.Store({
-  state: {
-    namespace: 'garden-foo',
-    cfg: {}
-  },
-  getters: {
-    projectList: () => projectList,
-    shootByNamespaceAndName: () => noop
-  }
-})
-
-function createNewShootDetailsComponent () {
-  const propsData = {
-    userInterActionBus: new EventEmitter()
-  }
-  const wrapper = mount(NewShootDetails, {
-    vuetify,
-    propsData,
-    store,
-    computed: {
-      sortedKubernetesVersionsList: () => []
-    }
-  })
-  const machineImageComponent = wrapper.findComponent(NewShootDetails)
-  return machineImageComponent.vm
-}
+// Utilities
+import { createLocalVue, mount } from '@vue/test-utils'
 
 describe('NewShootDetails.vue', () => {
+  const localVue = createLocalVue()
+  localVue.use(Vuelidate)
+  localVue.use(Vuex)
+
+  let vuetify
+  let store
+
+  const projectList = [
+    {
+      metadata: {
+        name: 'foo',
+        namespace: 'garden-foo'
+      },
+      data: {
+        owner: 'owner'
+      }
+    }
+  ]
+
   beforeEach(() => {
     vuetify = new Vuetify()
+    store = new Vuex.Store({
+      state: {
+        namespace: 'garden-foo',
+        cfg: {}
+      },
+      getters: {
+        projectList: jest.fn().mockReturnValue(projectList),
+        shootByNamespaceAndName: jest.fn()
+      }
+    })
   })
 
   it('maximum shoot name length should depend on project name', () => {
-    const shootDetails = createNewShootDetailsComponent()
-    expect(shootDetails.maxShootNameLength).toBe(18)
+    const wrapper = mount(NewShootDetails, {
+      localVue,
+      store,
+      vuetify,
+      propsData: {
+        userInterActionBus: new EventEmitter()
+      },
+      computed: {
+        sortedKubernetesVersionsList: jest.fn().mockReturnValue([])
+      }
+    })
+    expect(wrapper.vm.maxShootNameLength).toBe(18)
   })
 })

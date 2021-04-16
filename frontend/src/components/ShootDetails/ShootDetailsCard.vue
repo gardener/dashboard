@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-card>
     <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
+      <v-toolbar-title class="text-subtitle-1">Details</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
@@ -176,7 +176,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon color="primary">mdi-puzzle</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>Add-ons <span class="caption">(not actively monitored and provided on a best-effort basis only)</span></v-list-item-subtitle>
+          <v-list-item-subtitle>Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span></v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <template v-if="this.shootAddonNames.length">
               <v-chip v-for="(name, index) in this.shootAddonNames"
