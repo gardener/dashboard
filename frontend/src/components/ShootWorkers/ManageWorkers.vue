@@ -70,7 +70,7 @@ import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
-const { v4: uuidv4 } = require('uuid')
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
 

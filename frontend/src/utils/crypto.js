@@ -6,25 +6,9 @@
 
 'use strict'
 
-import md5js from 'uuid/dist/md5-browser'
-import sha1js from 'uuid/dist/sha1-browser'
-import rngjs from 'uuid/dist/rng-browser'
+import md5 from 'md5'
 
-export function toHex (input) {
-  return Buffer.from(input).toString('hex')
-}
-
-export function md5 (value) {
-  return toHex(md5js(value))
-}
-
-export function sha1 (value) {
-  return toHex(sha1js(value))
-}
-
-export function rng (value) {
-  return toHex(rngjs(value))
-}
+export { md5 }
 
 export function normalizeObject (obj) {
   if (!obj) {

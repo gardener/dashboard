@@ -83,7 +83,7 @@ import ConstraintWarning from '@/components/ConstraintWarning'
 
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-const { v4: uuidv4 } = require('uuid')
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
   name: 'hibernation-schedule',

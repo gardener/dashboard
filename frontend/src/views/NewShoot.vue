@@ -142,10 +142,11 @@ import asyncRef from '@/mixins/asyncRef'
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+
+import EventEmitter from 'events'
+
 const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
 const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
-
-const EventEmitter = require('events')
 
 export default {
   name: 'create-cluster',
