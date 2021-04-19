@@ -23,14 +23,17 @@ function writeValues (filename, values = {}) {
       tag: '1.26.0-dev-4d529c1'
     },
     apiServerUrl: 'https://api.garden.example.org',
-    hosts: [
-      'gardener.ingress.garden.example.org'
-    ],
     ingress: {
       annotations: {
         'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
         'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true',
         'kubernetes.io/ingress.class': 'nginx'
+      },
+      hosts: [
+        'gardener.garden.example.org'
+      ],
+      tls: {
+        secretName: 'default-gardener-dashboard-tls'
       }
     },
     sessionSecret: 'sessionSecret',
@@ -39,6 +42,7 @@ function writeValues (filename, values = {}) {
       issuerUrl: 'https://identity.garden.example.org',
       clientId: 'dashboard',
       clientSecret: 'dashboardSecret',
+      redirectUri: 'https://gardener.garden.example.org/auth/callback',
       ca
     },
     frontendConfig: {
@@ -79,7 +83,7 @@ function decodeBase64 (data) {
 }
 
 describe('gardener-dashboard', function () {
-  const template = 'gardener-dashboard'
+  const chart = 'gardener-dashboard'
   let dirname
   let filename
 
@@ -108,6 +112,13 @@ describe('gardener-dashboard', function () {
   describe('templates', function () {
     describe('configmap', function () {
       const name = 'gardener-dashboard-configmap'
+      let templates
+
+      beforeEach(() => {
+        templates = [
+          'configmap'
+        ]
+      })
 
       it('should render the template', async function () {
         const values = writeValues(filename, {
@@ -119,12 +130,12 @@ describe('gardener-dashboard', function () {
             }
           }
         })
-        const documents = await helmTemplate(template, filename)
-        const config = chain(documents)
-          .find(['metadata.name', name])
-          .get('data["config.yaml"]')
-          .thru(yaml.safeLoad)
-          .value()
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        expect(configMap.metadata.name).toBe(name)
+        const config = yaml.safeLoad(configMap.data['config.yaml'])
+
         const {
           apiServerUrl,
           apiServerCaData,
@@ -139,12 +150,12 @@ describe('gardener-dashboard', function () {
 
       it('should render the template without kubeconfig download', async function () {
         const values = writeValues(filename, {})
-        const documents = await helmTemplate(template, filename)
-        const config = chain(documents)
-          .find(['metadata.name', name])
-          .get('data["config.yaml"]')
-          .thru(yaml.safeLoad)
-          .value()
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        expect(configMap.metadata.name).toBe(name)
+        const config = yaml.safeLoad(configMap.data['config.yaml'])
+
         const {
           apiServerUrl,
           apiServerCaData,
@@ -179,12 +190,12 @@ describe('gardener-dashboard', function () {
               }
             }
           })
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const {
             frontend: {
               accessRestriction: {
@@ -255,12 +266,12 @@ describe('gardener-dashboard', function () {
               }
             }
           })
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const {
             frontend: {
               accessRestriction: {
@@ -311,6 +322,10 @@ describe('gardener-dashboard', function () {
       })
 
       describe('tickets', function () {
+        beforeEach(() => {
+          templates.push('secret-github')
+        })
+
         it('should render the template', async function () {
           // eslint-disable-next-line no-unused-vars
           const values = writeValues(filename, {
@@ -335,12 +350,13 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(2)
+          const [configMap, githubSecret] = documents
+          expect(configMap.metadata.name).toBe(name)
+          expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const {
             frontend: {
               ticket
@@ -360,22 +376,14 @@ describe('gardener-dashboard', function () {
             repository: 'tickets'
           })
 
-          const githubSecret = chain(documents)
-            .find(['metadata.name', 'gardener-dashboard-github'])
-            .get('data')
-            .value()
-          const {
-            'authentication.username': username,
-            'authentication.token': token,
-            webhookSecret
-          } = githubSecret
-          expect(decodeBase64(username)).toBe('dashboard-tickets')
-          expect(decodeBase64(token)).toBe('webhookAuthenticationToken')
-          expect(decodeBase64(webhookSecret)).toBe('webhookSecret')
+          const token = decodeBase64(githubSecret.data['authentication.token'])
+          const webhookSecret = decodeBase64(githubSecret.data.webhookSecret)
+          expect(token).toBe('webhookAuthenticationToken')
+          expect(webhookSecret).toBe('webhookSecret')
         })
       })
 
-      describe('unreachableSeeds', function () {
+      describe('unreachable seeds', function () {
         it('should render the template', async function () {
           // eslint-disable-next-line no-unused-vars
           const values = writeValues(filename, {
@@ -386,12 +394,12 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const { unreachableSeeds } = config
           expect(unreachableSeeds).toEqual({
             matchLabels: {
@@ -413,12 +421,12 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const alert = config.frontend.alert
           expect(alert).toEqual({
             message: 'foo',
@@ -438,12 +446,12 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const alert = config.frontend.alert
           expect(alert).toEqual({
             message: 'foo',
@@ -453,69 +461,68 @@ describe('gardener-dashboard', function () {
         })
       })
 
-      describe('terminal', function () {
-        describe('shortcuts', function () {
-          it('should render the template', async function () {
-            // eslint-disable-next-line no-unused-vars
-            const values = writeValues(filename, {
-              frontendConfig: {
-                terminal: {
-                  shortcuts: [
-                    {
-                      title: 'title',
-                      description: 'description',
-                      target: 'foo-target',
-                      container: {
-                        command: [
-                          'command'
-                        ],
-                        image: 'repo:tag',
-                        args: [
-                          'a',
-                          'b',
-                          'c'
-                        ]
-                      }
+      describe('terminal shortcuts', function () {
+        it('should render the template', async function () {
+          // eslint-disable-next-line no-unused-vars
+          const values = writeValues(filename, {
+            frontendConfig: {
+              terminal: {
+                shortcuts: [
+                  {
+                    title: 'title',
+                    description: 'description',
+                    target: 'foo-target',
+                    container: {
+                      command: [
+                        'command'
+                      ],
+                      image: 'repo:tag',
+                      args: [
+                        'a',
+                        'b',
+                        'c'
+                      ]
                     }
-                  ]
-                }
+                  }
+                ]
               }
-            })
-
-            const documents = await helmTemplate(template, filename)
-            const config = chain(documents)
-              .find(['metadata.name', name])
-              .get('data["config.yaml"]')
-              .thru(yaml.safeLoad)
-              .value()
-            const {
-              frontend: {
-                terminal: {
-                  shortcuts
-                }
-              }
-            } = config
-            expect(shortcuts).toEqual([
-              {
-                title: 'title',
-                description: 'description',
-                target: 'foo-target',
-                container: {
-                  image: 'repo:tag',
-                  command: [
-                    'command'
-                  ],
-                  args: [
-                    'a',
-                    'b',
-                    'c'
-                  ]
-                }
-              }
-            ])
+            }
           })
+
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
+          const {
+            frontend: {
+              terminal: {
+                shortcuts
+              }
+            }
+          } = config
+          expect(shortcuts).toEqual([
+            {
+              title: 'title',
+              description: 'description',
+              target: 'foo-target',
+              container: {
+                image: 'repo:tag',
+                command: [
+                  'command'
+                ],
+                args: [
+                  'a',
+                  'b',
+                  'c'
+                ]
+              }
+            }
+          ])
         })
       })
+
       describe('themes', function () {
         it('should render the template', async function () {
           // eslint-disable-next-line no-unused-vars
@@ -534,12 +541,12 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const themes = config.frontend.themes
           expect(themes).toEqual({
             light: {
@@ -566,12 +573,12 @@ describe('gardener-dashboard', function () {
             }
           })
 
-          const documents = await helmTemplate(template, filename)
-          const config = chain(documents)
-            .find(['metadata.name', name])
-            .get('data["config.yaml"]')
-            .thru(yaml.safeLoad)
-            .value()
+          const documents = await helmTemplate(chart, templates, filename)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          expect(configMap.metadata.name).toBe(name)
+          const config = yaml.safeLoad(configMap.data['config.yaml'])
+
           const themes = config.frontend.themes
           expect(themes).toEqual({
             light: {
@@ -580,6 +587,113 @@ describe('gardener-dashboard', function () {
             }
           })
         })
+      })
+    })
+
+    describe('ingress', function () {
+      const name = 'gardener-dashboard-ingress'
+      const tlsSecretName = 'gardener-dashboard-tls'
+
+      let templates
+
+      beforeEach(() => {
+        templates = [
+          'ingress',
+          'secret-tls'
+        ]
+      })
+
+      it('should render the template with tls', async function () {
+        // eslint-disable-next-line no-unused-vars
+        const values = writeValues(filename, {
+          ingress: {
+            tls: {
+              secretName: tlsSecretName
+            }
+          }
+        })
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(2)
+        const [ingress, tlsSecret] = chain(documents)
+        expect(ingress.metadata.name).toBe(name)
+
+        expect(ingress.spec.tls).toHaveLength(1)
+        expect(ingress.spec.tls[0]).toEqual({
+          secretName: tlsSecretName,
+          hosts: ['gardener.garden.example.org']
+        })
+
+        expect(tlsSecret).toBeFalsy()
+      })
+
+      it('should render the template without tls', async function () {
+        // eslint-disable-next-line no-unused-vars
+        const values = writeValues(filename, {
+          ingress: {
+            tls: null
+          }
+        })
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(2)
+        const [ingress, tlsSecret] = documents
+        expect(ingress.metadata.name).toBe(name)
+
+        expect(ingress.spec.tls).toBeUndefined()
+
+        expect(tlsSecret).toBeFalsy()
+      })
+    })
+
+    describe('vpa', function () {
+      const name = 'gardener-dashboard-vpa'
+
+      let templates
+
+      beforeEach(() => {
+        templates = [
+          'vpa'
+        ]
+      })
+
+      it('should render the template', async function () {
+        // eslint-disable-next-line no-unused-vars
+        const values = writeValues(filename, {
+          vpa: true
+        })
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(1)
+        const [vpa] = documents
+        expect(vpa.metadata.name).toBe(name)
+
+        expect(vpa.spec).toEqual({
+          targetRef: {
+            apiVersion: 'apps/v1',
+            kind: 'Deployment',
+            name: 'gardener-dashboard'
+          },
+          updatePolicy: {
+            updateMode: 'Auto'
+          },
+          resourcePolicy: {
+            containerPolicies: [{
+              containerName: 'gardener-dashboard',
+              minAllowed: {
+                cpu: expect.stringMatching(/^\d+m$/),
+                memory: expect.stringMatching(/^\d+Mi$/)
+              }
+            }]
+          }
+        })
+      })
+      it('should not render the template', async function () {
+        // eslint-disable-next-line no-unused-vars
+        const values = writeValues(filename, {
+          vpa: false
+        })
+        const documents = await helmTemplate(chart, templates, filename)
+        expect(documents).toHaveLength(1)
+        const [vpa] = documents
+        expect(vpa).toBeFalsy()
       })
     })
   })

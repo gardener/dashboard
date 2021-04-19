@@ -11,13 +11,14 @@ const util = require('util')
 const childProcess = require('child_process')
 const exec = util.promisify(childProcess.exec)
 const yaml = require('js-yaml')
+const { flatMap } = require('lodash')
 
-async function helmTemplate (template, pathToValues) {
-  const cwd = path.resolve(__dirname, template)
+async function helmTemplate (chart, templates, pathToValues) {
+  const cwd = path.resolve(__dirname, chart)
   const cmd = [
     '/usr/local/bin/helm',
     'template',
-    template,
+    ...flatMap(templates, template => ['-s', `templates/${template}.yaml`]),
     '.',
     '--values',
     pathToValues
