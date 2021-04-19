@@ -2,6 +2,8 @@
   "recommendations": [
     "arcanis.vscode-zipfs",
     "dbaeumer.vscode-eslint",
-    "firsttris.vscode-jest-runner"
+    "firsttris.vscode-jest-runner",
+    "octref.vetur",
+    "syler.sass-indented"
   ]
 }
