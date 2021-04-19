@@ -67,7 +67,11 @@ function getShoot ({
   secretBindingName = 'foo-secret',
   seed = 'infra1-seed',
   hibernation = { enabled: false },
-  kubernetesVersion = '1.16.0'
+  kubernetesVersion = '1.16.0',
+  clientId,
+  secret,
+  issuerURL,
+  extraConfig = {}
 }) {
   uid = uid || `${namespace}--${name}`
   const shoot = {
@@ -87,7 +91,17 @@ function getShoot ({
       },
       seedName: seed,
       kubernetes: {
-        version: kubernetesVersion
+        version: kubernetesVersion,
+        kubeAPIServer: {
+          oidcConfig: {
+            clientAuthentication: {
+              secret,
+              extraConfig
+            },
+            clientId,
+            issuerURL
+          }
+        }
       },
       purpose
     },

@@ -20,7 +20,7 @@ import {
   isHtmlColorCode
 } from '@/utils'
 import { hash } from '@/utils/crypto'
-import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
+import { getSubjectRules, getKubeconfigData, getShootOidcKubeconfig, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
@@ -87,6 +87,7 @@ if (debug) {
 const state = {
   cfg: null,
   kubeconfigData: null,
+  oidcKubeconfigData: null,
   ready: false,
   namespace: null,
   subjectRules: { // selfSubjectRules for state.namespace
@@ -1341,6 +1342,10 @@ const actions = {
     const { data } = await getKubeconfigData()
     commit('SET_KUBECONFIG_DATA', data)
   },
+  async fetchOidcKubeconfigData ({ commit }, { name, namespace }) {
+    const { data } = await getShootOidcKubeconfig({ namespace: namespace, name: name })
+    commit('SET_OIDCKUBECONFIG_DATA', data)
+  },
   async ensureProjectTerminalShortcutsLoaded ({ commit, dispatch, state }) {
     const { namespace, projectTerminalShortcuts } = state
     if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
@@ -1441,6 +1446,9 @@ const mutations = {
   },
   SET_KUBECONFIG_DATA (state, value) {
     state.kubeconfigData = value
+  },
+  SET_OIDCKUBECONFIG_DATA (state, value) {
+    state.oidcKubeconfigData = value
   },
   SET_PROJECT_TERMINAL_SHORTCUTS (state, value) {
     state.projectTerminalShortcuts = value

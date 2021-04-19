@@ -5,6 +5,7 @@
 //
 
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
@@ -100,6 +101,10 @@ export const shootItem = {
     },
     shootK8sVersion () {
       return get(this.shootSpec, 'kubernetes.version')
+    },
+    shootHasOidcConfig () {
+      const oidcConfig = get(this.shootSpec, 'kubernetes.kubeAPIServer.oidcConfig', {})
+      return !isEmpty(oidcConfig)
     },
     shootCloudProfileName () {
       return this.shootSpec.cloudProfileName

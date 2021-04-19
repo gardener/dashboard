@@ -58,6 +58,8 @@ export default function createRouter (store) {
 
   /* router error */
   router.onError(err => {
+    // eslint-disable-next-line no-console
+    console.info(JSON.stringify(err))
     console.error('Router error:', err)
     store.commit('SET_LOADING', false)
     store.commit('SET_ALERT', { type: 'error', message: err.message })

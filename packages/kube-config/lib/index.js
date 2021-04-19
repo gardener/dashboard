@@ -216,6 +216,39 @@ function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namesp
   })
 }
 
+function dumpOidcKubeconfig ({ context = 'default', cluster = 'garden', namespace, server, caData, oidcArgs }) {
+  return JSON.stringify(yaml.safeDump({
+    apiVersion: 'v1',
+    kind: 'Config',
+    clusters: [{
+      name: cluster,
+      cluster: {
+        'certificate-authority-data': Buffer.from(caData).toString('base64'),
+        server
+      }
+    }],
+    users: [{
+      name: 'oidc-login',
+      user: {
+        exec: {
+          apiVersion: 'client.authentication.k8s.io/v1beta1',
+          command: 'kubectl',
+          args: oidcArgs
+        }
+      }
+    }],
+    contexts: [{
+      name: context,
+      context: {
+        cluster,
+        user: 'oidc-login',
+        namespace
+      }
+    }],
+    'current-context': context
+  }, null, 2))
+}
+
 function load (env = process.env) {
   if (/^test/.test(env.NODE_ENV)) {
     return {
@@ -244,5 +277,6 @@ exports = module.exports = {
     return fromKubeconfig(input)
   },
   dumpKubeconfig,
+  dumpOidcKubeconfig,
   load
 }

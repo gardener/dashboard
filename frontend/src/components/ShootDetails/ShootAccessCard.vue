@@ -131,7 +131,46 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
     </v-expand-transition>
 
-    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+    <v-divider v-if="isKubeconfigTileVisible && isKubeconfigOidcTileVisible" inset></v-divider>
+
+    <v-list-item v-if="isKubeconfigOidcTileVisible">
+      <v-list-item-icon>
+        <v-icon color="primary">mdi-file</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content>
+        <v-list-item-title>OpenIDConnect Kubeconfig</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action class="mx-0">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onDownloadOidc" color="action-button">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
+          <span>Download OpenIDConnect Kubeconfig</span>
+        </v-tooltip>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <copy-btn :clipboard-text="oidckubeconfig"></copy-btn>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="expansionPanelOidcKubeconfig = !expansionPanelOidcKubeconfig" color="action-button">
+              <v-icon>{{visibilityIconOidcKubeconfig}}</v-icon>
+            </v-btn>
+          </template>
+          <span>{{oidcKubeconfigVisibilityTitle}}</span>
+        </v-tooltip>
+      </v-list-item-action>
+    </v-list-item>
+    <v-expand-transition>
+      <v-card v-if="expansionPanelOidcKubeconfig" flat>
+        <code-block lang="yaml" :content="oidckubeconfig" :show-copy-button="false"></code-block>
+      </v-card>
+    </v-expand-transition>
+
+    <v-divider v-if="isKubeconfigOidcTileVisible && isGardenctlTileVisible" inset></v-divider>
 
     <gardenctl-commands v-if="isGardenctlTileVisible" :shoot-item="shootItem"></gardenctl-commands>
   </v-list>
@@ -173,6 +212,7 @@ export default {
   data () {
     return {
       expansionPanelKubeconfig: false,
+      expansionPanelOidcKubeconfig: false,
       showToken: false
     }
   },
@@ -185,7 +225,8 @@ export default {
       'isTerminalShortcutsFeatureEnabled'
     ]),
     ...mapState([
-      'cfg'
+      'cfg',
+      'oidcKubeconfigData'
     ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
@@ -219,15 +260,30 @@ export default {
     hasDashboardTokenAuth () {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
-
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')
+    },
+    oidckubeconfig () {
+      // eslint-disable-next-line no-console
+      console.debug('ShootItem is ' + JSON.stringify(this.shootItem))
+      try {
+        this.$store.dispatch('fetchOidcKubeconfigData', { name: this.shootName, namespace: this.shootNamespace })
+      } catch (err) {
+        console.error('Failed to fetch oidc kubeconfig data', err)
+      }
+      return this.oidcKubeconfigData
     },
     visibilityIconKubeconfig () {
       return this.expansionPanelKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
     },
+    visibilityIconOidcKubeconfig () {
+      return this.expansionPanelOidcKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
+    },
     kubeconfigVisibilityTitle () {
       return this.expansionPanelKubeconfig ? 'Hide Kubeconfig' : 'Show Kubeconfig'
+    },
+    oidcKubeconfigVisibilityTitle () {
+      return this.expansionPanelOidcKubeconfig ? 'Hide OpenIDCconnect Kubeconfig' : 'Show OpenIDConnect Kubeconfig'
     },
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
@@ -245,7 +301,7 @@ export default {
       return this.hasControlPlaneTerminalAccess ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
     },
     isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
+      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isKubeconfigOidcTileVisible || this.isTerminalTileVisible
     },
     isDashboardTileVisible () {
       return !!this.dashboardUrl
@@ -255,6 +311,9 @@ export default {
     },
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
+    },
+    isKubeconfigOidcTileVisible () {
+      return !!this.shootHasOidcConfig
     },
     isGardenctlTileVisible () {
       return this.isAdmin
@@ -282,10 +341,19 @@ export default {
     reset () {
       this.expansionPanelKubeconfig = false
     },
+    resetOidc () {
+      this.expansionPanelOidcKubeconfig = false
+    },
     onDownload () {
       const kubeconfig = this.kubeconfig
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')
+      }
+    },
+    onDownloadOidc () {
+      const kubeconfigOidc = this.oidckubeconfig
+      if (kubeconfigOidc) {
+        download(kubeconfigOidc, this.getQualifiedName, 'text/yaml')
       }
     },
     onAddTerminalShortcut (shortcut) {
@@ -295,6 +363,9 @@ export default {
   watch: {
     kubeconfig (value) {
       this.reset()
+    },
+    oidckubeconfig (value) {
+      this.resetOidc()
     }
   }
 }

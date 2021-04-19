@@ -121,6 +121,12 @@ export function getShootInfo ({ namespace, name }) {
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`)
 }
 
+export function getShootOidcKubeconfig ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}/oidckubeconfig`)
+}
+
 export function getShootSeedInfo ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)

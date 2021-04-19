@@ -307,6 +307,66 @@ exports.seedInfo = async function ({ user, namespace, name }) {
   return data
 }
 
+exports.oidcKubeconfig = async function ({ user, namespace, name }) {
+  logger.debug('Fetching oidcKubeconfig')
+  const client = user.client
+
+  const [
+    { value: shoot, reason: shootError },
+    { value: secret }
+  ] = await Promise.allSettled([
+    read({
+      user,
+      namespace,
+      name
+    }),
+    client.getSecret({
+      namespace,
+      name: `${name}.kubeconfig`,
+      throwNotFound: false
+    })
+  ])
+
+  if (shootError) {
+    throw shootError
+  }
+
+  const data = {}
+
+  if (secret) {
+    _
+      .chain(secret)
+      .get('data')
+      .pick('kubeconfig', 'ca.crt')
+      .forEach((value, key) => {
+        value = decodeBase64(value)
+        if (key === 'kubeconfig') {
+          try {
+            data[key] = yaml.safeDump(kubeconfig.cleanKubeconfig(value))
+          } catch (err) {
+            logger.error('failed to clean kubeconfig', err)
+          }
+        } else {
+          data.cacrt = value
+        }
+      })
+      .commit()
+  }
+  data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
+  const args = ['oidc-login', 'get-token', '--grant-type=auto']
+  if (shoot.spec.kubernetes.kubeAPIServer) {
+    const oidcConfig = shoot.spec.kubernetes.kubeAPIServer.oidcConfig
+    const extraScopes = oidcConfig.clientAuthentication.extraConfig['extra-scopes']
+    args.push('--oidc-issuer-url=' + oidcConfig.issuerURL)
+    args.push('--oidc-client-id=' + oidcConfig.clientID)
+    args.push('--oidc-client-secret=' + oidcConfig.clientAuthentication.secret)
+    for (const scope of extraScopes.split(',')) {
+      args.push('--oidc-extra-scope=' + scope)
+    }
+  }
+  return kubeconfig.dumpOidcKubeconfig({ context: 'default', cluster: name, namespace: namespace, server: data.serverUrl, caData: data.cacrt, oidcArgs: args })
+}
+
 async function getSecret (client, { namespace, name }) {
   try {
     return await client.core.secrets.get(namespace, name)
