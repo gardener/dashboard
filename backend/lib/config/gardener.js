@@ -20,6 +20,7 @@ const environmentVariableDefinitions = {
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
   OIDC_REDIRECT_URI: 'oidc.redirect_uri',
+  OIDC_CA: 'oidc.ca',
   GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
   GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
