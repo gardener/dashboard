@@ -14,18 +14,16 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.value === 'name'">
         <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
-          <auto-hide right>
-            <template v-slot:activator>
-              <v-col class="grow pa-0 ma-0">
-                <div class="d-flex align-center justify-start flex-nowrap fill-height">
-                  <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-                    {{ shootName }}
-                  </router-link>
-                </div>
-              </v-col>
-            </template>
-            <copy-btn :clipboard-text="shootName"></copy-btn>
-          </auto-hide>
+          <v-col class="grow pa-0 ma-0">
+            <auto-hide right>
+              <template v-slot:activator>
+                <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+                  {{ shootName }}
+                </router-link>
+              </template>
+              <copy-btn :clipboard-text="shootName"></copy-btn>
+            </auto-hide>
+          </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
               <self-termination-warning :expiration-timestamp="shootExpirationTimestamp" />
