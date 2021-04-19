@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-snackbar>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" icon ref="copy" :color="btnColor" :class="{ 'hidden': !hidden && autoHide }">
+        <v-btn v-on="on" icon ref="copy" :color="btnColor">
           <v-icon :small="true">{{icon}}</v-icon>
         </v-btn>
       </template>
@@ -51,9 +51,6 @@ export default {
     userFeedback: {
       type: Boolean,
       default: true
-    },
-    autoHide: {
-      type: Boolean
     }
   },
   data () {
@@ -126,20 +123,6 @@ export default {
   },
   mounted () {
     this.enableCopy()
-    if (this.autoHide) {
-      this.$parent.$el.addEventListener('mouseover', () => {
-        this.hidden = true
-      })
-      this.$parent.$el.addEventListener('mouseout', () => {
-        this.hidden = false
-      })
-    }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .hidden {
-    opacity: 0;
-  }
-</style>
