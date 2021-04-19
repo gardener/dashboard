@@ -58,8 +58,7 @@ export default {
       snackbar: false,
       clipboard: undefined,
       copySucceeded: false,
-      timeoutId: undefined,
-      hidden: false
+      timeoutId: undefined
     }
   },
   computed: {
