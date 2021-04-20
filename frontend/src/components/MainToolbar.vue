@@ -138,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" :background-color="darkTheme ? 'black' : 'white'">
+      <v-tabs slider-color="primary darken-3" class="tabbar-background">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -183,8 +183,7 @@ export default {
       'title',
       'sidebar',
       'user',
-      'cfg',
-      'darkTheme'
+      'cfg'
     ]),
     ...mapGetters([
       'username',
@@ -266,5 +265,13 @@ export default {
   .operator {
     color: white;
     font-weight: bold;
+  }
+
+  .theme--light .tabbar-background {
+    background-color: white;
+  }
+
+  .theme--dark .tabbar-background {
+    background-color: black;
   }
 </style>

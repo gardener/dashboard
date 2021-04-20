@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :color="darkTheme && !lightBackground ? 'grey darken-2' : undefined" small :size="size" class="rounded-lg" tile>
+  <v-avatar :class="{ 'icon-background' : !noBackground }" small :size="size" class="rounded-lg" tile>
     <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" class="rounded-0">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
@@ -14,7 +14,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import startsWith from 'lodash/startsWith'
-import { mapState } from 'vuex'
 
 export default {
   props: {
@@ -25,14 +24,11 @@ export default {
       type: Number,
       default: 24
     },
-    lightBackground: {
+    noBackground: {
       type: Boolean
     }
   },
   computed: {
-    ...mapState([
-      'darkTheme'
-    ]),
     iconSrc () {
       switch (this.value) {
         case 'azure':
@@ -75,3 +71,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
+
+  $grey-darken-2: map-get($grey, 'darken-2');
+
+  .theme--dark .icon-background {
+    background-color: $grey-darken-2
+  }
+</style>
