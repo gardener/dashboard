@@ -25,7 +25,8 @@ export default {
       default: 24
     },
     noBackground: {
-      type: Boolean
+      type: Boolean,
+      default: false
     }
   },
   computed: {
