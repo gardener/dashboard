@@ -267,11 +267,11 @@ export default {
     font-weight: bold;
   }
 
-  .theme--light .tabbar-background {
+  .theme--light .tabs-bar-background {
     background-color: white;
   }
 
-  .theme--dark .tabbar-background {
+  .theme--dark .tabs-bar-background {
     background-color: black;
   }
 </style>
