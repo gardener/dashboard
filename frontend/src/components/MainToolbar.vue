@@ -138,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" class="tabbar-background">
+      <v-tabs slider-color="primary darken-3" class="tabs-bar-background">
         <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
