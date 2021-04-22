@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <transition-group name="list">
-      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+    <transition-group name="list" class="alternate-row-background">
+      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
         <hibernation-schedule-event
           ref="scheduleEvents"
           :schedule-event="scheduleEvent"

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="code-block" :class="codeBlockClass" :data-lang="lang">
+  <div class="code-block" :data-lang="lang">
     <div class="code-block-wrapper" :style="{ 'max-height': height }">
       <pre><code :class="lang" ref="block"></code></pre>
       <span class="copied" :class="{ 'active': showMessage }">Copied!</span>
@@ -26,7 +26,6 @@ import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
 import hljs from 'highlight.js/lib/core'
-import { mapState } from 'vuex'
 
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'
@@ -66,17 +65,6 @@ export default {
     showMessage: false,
     clipboard: undefined
   }),
-  computed: {
-    ...mapState([
-      'darkTheme'
-    ]),
-    codeBlockClass () {
-      if (this.darkTheme) {
-        return 'grey darken-4 code-block-dark'
-      }
-      return 'grey lighten-5'
-    }
-  },
   methods: {
     prettyPrint (textContent) {
       const block = this.$refs.block
@@ -180,14 +168,7 @@ export default {
       }
     }
   }
-  .code-block-dark {
-    &:after {
-      color: rgba(#fff, .26) !important;
-    }
-    code.hljs {
-      color: $grey-lighten-4 !important;
-    }
-  }
+
   .code-block-wrapper {
     min-width: 100%;
     max-height: 450px;
@@ -218,6 +199,21 @@ export default {
     &.active {
       transition: $swift-ease-out;
       transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .theme--light .code-block {
+    background-color: rgba(0, 0, 0, .02);
+  }
+
+  .theme--dark .code-block {
+    background-color: rgba(0, 0, 0, .2);
+
+    &:after {
+      color: rgba(#fff, .26) !important;
+    }
+    code.hljs {
+      color: $grey-lighten-4 !important;
     }
   }
 </style>

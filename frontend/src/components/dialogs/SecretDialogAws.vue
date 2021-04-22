@@ -162,17 +162,6 @@ export default {
             ],
             Effect: 'Allow',
             Resource: '*'
-          },
-          {
-            Effect: 'Allow',
-            Action: [
-              'route53:GetChange',
-              'route53:GetHostedZone',
-              'route53:ListResourceRecordSets',
-              'route53:ChangeResourceRecordSets',
-              'route53:ListHostedZones'
-            ],
-            Resource: '*'
           }
         ]
       }
