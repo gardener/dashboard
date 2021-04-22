@@ -5,11 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <vue-snotify :class="darkTheme ? 'snotify-dark' : 'snotify-light'"></vue-snotify>
+  <vue-snotify class="snotify"></vue-snotify>
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 
 export default {
@@ -20,9 +20,6 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'darkTheme'
-    ]),
     ...mapGetters([
       'alertMessage',
       'alertType',
@@ -114,7 +111,7 @@ export default {
     width: 400px;
   }
 
-  .snotify-dark {
+  .theme--dark .snotify {
     .snotify-error {
       background-color: $dark-background !important;
       .snotifyToast__body {
@@ -141,7 +138,7 @@ export default {
     }
   }
 
-  .snotify-light {
+  .theme--light .snotify {
     .snotify-error {
       background-color: $error-color !important;
     }

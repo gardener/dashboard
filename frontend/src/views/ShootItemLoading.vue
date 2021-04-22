@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid class="fill-height text-center">
     <v-row align="center" justify="center">
-        <v-card tile flat :class="!darkTheme ? 'grey lighten-5': ''">
+        <v-card tile flat class="title-background">
           <v-card-title class="text-subtitle-1">
             Loading cluster {{$route.params.name}}
           </v-card-title>
@@ -23,14 +23,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
 
 export default {
-  name: 'shoot-item-loading',
-  computed: {
-    ...mapState([
-      'darkTheme'
-    ])
-  }
+  name: 'shoot-item-loading'
 }
 </script>
+
+<style lang="scss" scoped>
+  .theme--light .title-background {
+    background-color: rgba(0, 0, 0, .02);
+  }
+</style>

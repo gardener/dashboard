@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <infra-icon :value="infrastructureKind" :size="60" light-background></infra-icon>
+          <infra-icon :value="infrastructureKind" :size="60" no-background></infra-icon>
         </div>
         <div class="mt-2" >
           <span class="text-subtitle-1">{{infrastructureKind}}</span>
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import InfraIcon from '@/components/VendorIcon'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'new-shoot-select-infrastructure',
@@ -52,9 +52,6 @@ export default {
     ...mapGetters([
       'sortedCloudProviderKindList',
       'cloudProfilesByCloudProviderKind'
-    ]),
-    ...mapState([
-      'darkMode'
     ])
   },
   methods: {

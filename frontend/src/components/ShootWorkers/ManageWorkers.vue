@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <transition-group name="list">
-    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+  <transition-group name="list" class="alternate-row-background">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"

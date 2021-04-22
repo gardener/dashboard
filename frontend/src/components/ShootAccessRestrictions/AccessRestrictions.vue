@@ -5,9 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="definitions">
-    <v-row v-for="(definition, index) in definitions" :key="definition.key">
-      <v-list :class="{ 'grey lighten-5': index % 2 }">
+  <div v-if="definitions" class="alternate-row-background">
+    <v-row v-for="(definition) in definitions" :key="definition.key">
+      <v-list color="transparent">
         <v-list-item v-if="definition">
           <v-list-item-action class="action-select">
             <v-switch
