@@ -162,8 +162,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <secret-dialog-wrapper :dialog-state="dialogState" :selected-secret="selectedSecret"></secret-dialog-wrapper>
-    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
+    <secret-dialog-wrapper
+      :visible-dialog="visibleSecretDialog" :selected-secret="selectedSecret"
+      @dialog-closed="onDialogClosed"
+    ></secret-dialog-wrapper>
   </v-container>
 </template>
 
@@ -171,14 +173,12 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters } from 'vuex'
 import { isOwnSecret, mapTableHeader, dnsProviderList } from '@/utils'
 import get from 'lodash/get'
-import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 import SecretRowInfra from '@/components/SecretRowInfra.vue'
 import SecretRowDns from '@/components/SecretRowDns.vue'
 import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
-import merge from 'lodash/merge'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
@@ -186,7 +186,6 @@ import includes from 'lodash/includes'
 export default {
   name: 'secrets',
   components: {
-    DeleteDialog,
     SecretDialogWrapper,
     TableColumnSelection,
     SecretRowInfra,
@@ -196,70 +195,6 @@ export default {
   data () {
     return {
       selectedSecret: {},
-      dialogState: {
-        aws: {
-          visible: false,
-          help: false
-        },
-        azure: {
-          visible: false,
-          help: false
-        },
-        gcp: {
-          visible: false,
-          help: false
-        },
-        openstack: {
-          visible: false,
-          help: false
-        },
-        alicloud: {
-          visible: false,
-          help: false
-        },
-        metal: {
-          visible: false,
-          help: false
-        },
-        vsphere: {
-          visible: false,
-          help: false
-        },
-        'aws-route53': {
-          visible: false,
-          help: false
-        },
-        'azure-dns': {
-          visible: false,
-          help: false
-        },
-        'google-clouddns': {
-          visible: false,
-          help: false
-        },
-        'openstack-designate': {
-          visible: false,
-          help: false
-        },
-        'alicloud-dns': {
-          visible: false,
-          help: false
-        },
-        cloudflare: {
-          visible: false,
-          help: false
-        },
-        infoblox: {
-          visible: false,
-          help: false
-        },
-        netlify: {
-          visible: false,
-          help: false
-        },
-        deleteConfirm: false
-      },
-      initialDialogState: {},
       defaultInfraSecretTableOptions: {
         itemsPerPage: 10,
         sortBy: ['name'],
@@ -272,7 +207,8 @@ export default {
       dnsSecretSelectedColumns: {},
       dnsSecretTableOptions: undefined,
       dnsSecretFilter: '',
-      createDnsSecretMenu: false
+      createDnsSecretMenu: false,
+      visibleSecretDialog: undefined
     }
   },
   computed: {
@@ -431,28 +367,18 @@ export default {
     }
   },
   methods: {
-    onToogleHelp (infrastructureKind) {
-      const infrastructure = this.dialogState[infrastructureKind]
-      infrastructure.help = !infrastructure.help
-    },
-    onHideHelp (infrastructureKind) {
-      this.dialogState[infrastructureKind].help = false
-    },
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
-      this.dialogState[infrastructureKind].visible = true
+      this.visibleSecretDialog = infrastructureKind
     },
     onUpdateSecret (secret) {
       const kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
       this.selectedSecret = secret
-      this.dialogState[kind].visible = true
+      this.visibleSecretDialog = kind
     },
     onRemoveSecret (secret) {
       this.selectedSecret = secret
-      this.dialogState.deleteConfirm = true
-    },
-    hideDialogs () {
-      merge(this.dialogState, this.initialDialogState)
+      this.this.visibleSecretDialog = 'delete'
     },
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
@@ -625,6 +551,9 @@ export default {
         ...this.defaultInfraSecretTableOptions,
         ...tableOptions
       }
+    },
+    onDialogClosed () {
+      this.visibleSecretDialog = undefined
     }
   },
   watch: {
@@ -648,13 +577,6 @@ export default {
       return
     }
     this.onUpdateSecret(infrastructureSecret)
-  },
-  created () {
-    merge(this.initialDialogState, this.dialogState)
-
-    this.$bus.$on('esc-pressed', () => {
-      this.hideDialogs()
-    })
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

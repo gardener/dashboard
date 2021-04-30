@@ -38,7 +38,10 @@ SPDX-License-Identifier: Apache-2.0
         <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
       </template>
     </v-select>
-    <secret-dialog-wrapper :dialog-state="addSecretDialogState" @dialog-closed="onSecretDialogClosed"></secret-dialog-wrapper>
+    <secret-dialog-wrapper
+      :visible-dialog="visibleSecretDialog"
+      @dialog-closed="onSecretDialogClosed"
+    ></secret-dialog-wrapper>
   </div>
 </template>
 
@@ -76,38 +79,9 @@ export default {
   data () {
     return {
       valid: undefined,
-      addSecretDialogState: {
-        aws: {
-          visible: false,
-          help: false
-        },
-        azure: {
-          visible: false,
-          help: false
-        },
-        gcp: {
-          visible: false,
-          help: false
-        },
-        openstack: {
-          visible: false,
-          help: false
-        },
-        alicloud: {
-          visible: false,
-          help: false
-        },
-        metal: {
-          visible: false,
-          help: false
-        },
-        vsphere: {
-          visible: false,
-          help: false
-        }
-      },
       secretItemsBeforeAdd: undefined,
-      secret: undefined
+      secret: undefined,
+      visibleSecretDialog: undefined
     }
   },
   validations: {
@@ -221,9 +195,10 @@ export default {
         this.onInputSecret()
       })
       this.secretItemsBeforeAdd = cloneDeep(this.secretItems)
-      this.addSecretDialogState[this.infrastructureKind].visible = true
+      this.visibleSecretDialog = this.infrastructureKind
     },
-    onSecretDialogClosed (infrastructureKind) {
+    onSecretDialogClosed () {
+      this.visibleSecretDialog = undefined
       const newSecret = head(differenceWith(this.secretItems, this.secretItemsBeforeAdd, isEqual))
       if (newSecret) {
         this.secret = newSecret

@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
     </v-row>
     <transition-group name="list" class="alternate-row-background">
-      <v-row v-for="(provider, index) in dnsProviders" :key="provider.id"  class="list-item pt-2">
+      <v-row v-for="(provider, index) in dnsProviders" :key="provider.id" class="list-item pt-2">
         <dns-provider
           :provider="provider"
           @secret="onUpdateProviderSecret"
