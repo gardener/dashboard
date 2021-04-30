@@ -647,6 +647,11 @@ const getters = {
       return !!secret.metadata.dnsProviderName
     })
   },
+  dnsSecretsByProviderKind (state) {
+    return (dnsProviderName) => {
+      return filter(state.cloudProviderSecrets.all, ['metadata.dnsProviderName', dnsProviderName])
+    }
+  },
   getInfrastructureSecretByName (state, getters) {
     return ({ namespace, name }) => {
       return getters['cloudProviderSecrets/getInfrastructureSecretByName']({ namespace, name })

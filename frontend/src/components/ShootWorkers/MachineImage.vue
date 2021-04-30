@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <template v-slot:item="{ item }">
         <v-list-item-action>
-          <vendor-icon v-model="item.icon"></vendor-icon>
+          <vendor-icon :value="item.icon"></vendor-icon>
         </v-list-item-action>
         <v-list-item-content>
           <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-content>
       </template>
       <template v-slot:selection="{ item }">
-        <vendor-icon v-model="item.icon"></vendor-icon>
+        <vendor-icon :value="item.icon"></vendor-icon>
         <span class="ml-2">
          {{item.name}} [{{item.version}}]
         </span>
