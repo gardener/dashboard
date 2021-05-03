@@ -1323,6 +1323,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/charts@workspace:charts"
   dependencies:
+    "@gardener-dashboard/test-utils": "workspace:*"
     eslint: ^7.23.0
     eslint-config-standard: ^16.0.2
     eslint-plugin-import: ^2.22.1

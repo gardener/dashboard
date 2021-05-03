@@ -6,24 +6,21 @@
 
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
-const util = require('util')
-const childProcess = require('child_process')
-const exec = util.promisify(childProcess.exec)
-const yaml = require('js-yaml')
-const { flatMap } = require('lodash')
+const os = require('os')
+const fixtures = require('./__fixtures__')
 
-async function helmTemplate (chart, templates, pathToValues) {
-  const cwd = path.resolve(__dirname, chart)
-  const cmd = [
-    '/usr/local/bin/helm',
-    'template',
-    ...flatMap(templates, template => ['-s', `templates/${template}.yaml`]),
-    '.',
-    '--values',
-    pathToValues
-  ]
-  const { stdout } = await exec(cmd.join(' '), { cwd })
-  return yaml.safeLoadAll(stdout)
-}
-global.helmTemplate = helmTemplate
+beforeAll(function () {
+  process.env.HELM_VALUES_DIRNAME = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-'))
+})
+
+afterAll(function () {
+  const dirname = process.env.HELM_VALUES_DIRNAME
+  fs.rmdirSync(dirname, {
+    maxRetries: 100,
+    recursive: true
+  })
+})
+
+global.fixtures = fixtures

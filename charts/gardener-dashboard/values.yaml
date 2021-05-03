@@ -13,7 +13,14 @@ image:
   pullPolicy: Always
 
 # vertical Pod autoscaling disabled by default
-vpa: false
+# vpa:
+#   enabled: false
+#   updateMode: Off
+#   controlledValues: RequestsOnly
+#   minAllowedCpu: 50m
+#   minAllowedMemory: 100Mi
+#   maxAllowedCpu: 500m
+#   maxAllowedMemory: 500Mi
 
 logLevel: debug
 # # the external url of the apiServer
@@ -32,10 +39,10 @@ servicePort: 8080
 resources:
   limits:
     cpu: 250m
-    memory: 256Mi
+    memory: 300Mi
   requests:
     cpu: 100m
-    memory: 128Mi
+    memory: 120Mi
 
 ingress:
   annotations:

@@ -19,7 +19,7 @@ metadata:
 spec:
 {{- if .Values.ingress.tls }}
   tls:
-  - secretName: {{ .Values.ingress.tls.secretName | default "gardener-dashboard-tls" }}
+  - secretName: {{ required ".Values.ingress.tls.secretName is required" .Values.ingress.tls.secretName }}
     hosts:
     {{- range .Values.ingress.hosts }}
     - {{ . }}

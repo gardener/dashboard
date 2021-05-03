@@ -14,11 +14,16 @@ spec:
     kind: Deployment
     name: gardener-dashboard
   updatePolicy:
-    updateMode: Auto
+    updateMode: {{ .Values.vpa.updateMode | default "Off" }}
   resourcePolicy:
     containerPolicies:
-      - containerName: gardener-dashboard
+      - containerName: '*'
+        controlledValues: {{ .Values.vpa.controlledValues | default "RequestsOnly" }}
+        controlledResources: ["cpu", "memory"]
         minAllowed:
-          cpu: 30m
-          memory: 100Mi
+          cpu:    {{ .Values.vpa.minAllowedCpu | default "50m" }}
+          memory: {{ .Values.vpa.minAllowedMemory | default "100Mi" }}
+        maxAllowed:
+          cpu:    {{ .Values.vpa.maxAllowedCpu | default "500m" }}
+          memory: {{ .Values.vpa.maxAllowedMemory | default "500Mi" }}
 {{- end }}
