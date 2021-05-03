@@ -14,7 +14,6 @@ image:
 
 # vertical Pod autoscaling disabled by default
 # vpa:
-#   enabled: false
 #   updateMode: Off
 #   controlledValues: RequestsOnly
 #   minAllowedCpu: 50m
