@@ -14,9 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     max-height="60vh"
     >
     <template v-slot:actionComponent>
-      <manage-shoot-dns
-        ref="dns"
-       ></manage-shoot-dns>
+      <manage-shoot-dns></manage-shoot-dns>
     </template>
   </action-button-dialog>
 </template>

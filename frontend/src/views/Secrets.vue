@@ -378,7 +378,7 @@ export default {
     },
     onRemoveSecret (secret) {
       this.selectedSecret = secret
-      this.this.visibleSecretDialog = 'delete'
+      this.visibleSecretDialog = 'delete'
     },
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}

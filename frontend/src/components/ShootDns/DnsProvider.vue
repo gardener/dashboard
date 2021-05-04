@@ -105,6 +105,8 @@ import VendorIcon from '@/components/VendorIcon'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, dnsProviderList } from '@/utils'
 import { mapGetters } from 'vuex'
+import find from 'lodash/find'
+import head from 'lodash/head'
 
 const validationErrors = {
   type: {
@@ -156,8 +158,9 @@ export default {
     },
     onInputType () {
       this.$v.type.$touch()
-      this.validateInput()
       this.$emit('type', { id: this.id, type: this.type })
+      const secret = head(this.dnsSecretsByProviderKind(this.type))
+      this.onUpdateSecret(secret)
     },
     onUpdateSecret (secret) {
       this.secret = secret
@@ -171,10 +174,10 @@ export default {
       this.$emit('include-domains', { id: this.id, includeDomains: this.includeDomains })
     },
     onInputExcludeZones () {
-      this.$emit('excludeZones', { id: this.id, excludeZones: this.excludeZones })
+      this.$emit('exclude-zones', { id: this.id, excludeZones: this.excludeZones })
     },
     onInputIncludeZones () {
-      this.$emit('includeZones', { id: this.id, includeZones: this.includeZones })
+      this.$emit('include-zones', { id: this.id, includeZones: this.includeZones })
     },
     onSecretValid (valid) {
       if (this.secretValid !== valid) {
@@ -197,12 +200,13 @@ export default {
     if (this.provider) {
       this.id = this.provider.id
       this.type = this.provider.type
-      this.secret = this.provider.secret
+      this.secret = find(this.dnsSecretsByProviderKind(this.provider.type), ['metadata.name', this.provider.secretName])
       this.excludeDomains = this.provider.excludeDomains
       this.includeDomains = this.provider.includeDomains
       this.excludeZones = this.provider.excludeZones
       this.includeZones = this.provider.includeZones
     }
+    this.validateInput()
   }
 }
 </script>

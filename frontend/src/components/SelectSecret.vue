@@ -219,11 +219,9 @@ export default {
   },
   watch: {
     selectedSecret: function (selectedSecret) {
-      if (selectedSecret) {
-        this.secret = selectedSecret
-        this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
-        this.validateInput()
-      }
+      this.secret = selectedSecret
+      this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
+      this.validateInput()
     }
   }
 }
