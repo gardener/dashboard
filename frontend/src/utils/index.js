@@ -564,8 +564,8 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   }
 
   const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
-  beginMoment.add(windowSize, 'm')
-  const end = `${beginMoment.format('HHmm')}00${timezoneString}`
+  const endMoment = beginMoment.add(windowSize, 'm')
+  const end = `${endMoment.format('HHmm')}00${timezoneString}`
   return { begin, end }
 }
 
