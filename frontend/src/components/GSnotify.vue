@@ -1,21 +1,11 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <vue-snotify></vue-snotify>
+  <vue-snotify class="snotify"></vue-snotify>
 </template>
 
 <script>
@@ -105,18 +95,62 @@ export default {
 }
 </script>
 <style lang="scss">
-  @import '~vuetify/src/styles/styles.sass';
-  @import "~vue-snotify/styles/material.css";
+  @import "~vue-snotify/styles/material.scss";
+
+  $error-color: var(--v-error-base);
+  $warning-color: var(--v-warning-base);
+  $success-color: var(--v-success-base);
+  $info-color: var(--v-info-base);
+  $dark-background: rgba(0, 0, 0, .9);
 
   .snotify-rightTop {
     top: 75px;
   }
 
-  .snotify-info {
-    background-color: map-get($cyan, 'darken-2');
-  }
-
   .snotify {
     width: 400px;
   }
+
+  .theme--dark .snotify {
+    .snotify-error {
+      background-color: $dark-background !important;
+      .snotifyToast__body {
+        color: $error-color;
+      }
+    }
+    .snotify-warning {
+      background-color: $dark-background !important;
+      .snotifyToast__body {
+        color: $warning-color;
+      }
+    }
+    .snotify-success {
+      background-color: $dark-background !important;
+      .snotifyToast__body {
+        color: $success-color;
+      }
+    }
+    .snotify-info {
+      background-color: $dark-background !important;
+      .snotifyToast__body {
+        color: $info-color;
+      }
+    }
+  }
+
+  .theme--light .snotify {
+    .snotify-error {
+      background-color: $error-color !important;
+    }
+    .snotify-warning {
+      background-color: $warning-color !important;
+    }
+    .snotify-success {
+      background-color: $success-color !important;
+    }
+    .snotify-info {
+      background-color: $info-color !important;
+    }
+  }
+
 </style>

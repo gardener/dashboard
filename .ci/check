@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+if [[ -z "${SOURCE_PATH}" ]]; then
+  export SOURCE_PATH="$(readlink -f $(dirname ${0})/..)"
+else
+  export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
+fi
+
+cd "${SOURCE_PATH}"
+
+# Abort with an error exit code if
+# the lockfile was to be modified or
+# the cache folder was to be modified or
+# the checksums of the packages are not consistent
+yarn install --immutable --immutable-cache --check-cache

@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -31,30 +21,31 @@ limitations under the License.
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
-                <v-icon medium>help_outline</v-icon>
+              <v-btn v-on="{ ...tooltip, ...menu }" icon color="primary">
+                <v-icon medium>mdi-help-circle-outline</v-icon>
               </v-btn>
             </template>
             <span>Info</span>
           </v-tooltip>
         </template>
-        <v-card tile>
+        <v-card tile width="300px">
           <v-card-title primary-title>
-            <div class="content">
-              <div class="title mb-2">Gardener</div>
-              <v-progress-circular size="18" indeterminate v-if="!dashboardVersion"></v-progress-circular>
-              <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
-              <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
-            </div>
+            <div class="content text-h6 mb-2">Gardener</div>
           </v-card-title>
           <v-divider></v-divider>
+          <v-card-actions class="px-3">
+            <v-btn block text color="primary" class="justify-start" @click="infoDialog=true" title="About">
+              <v-icon color="primary" class="mr-3">mdi-information-outline</v-icon>
+              About
+            </v-btn>
+          </v-card-actions>
           <template v-for="(item, index) in helpMenuItems">
-            <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
+            <v-divider :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index" class="px-3">
-              <v-btn block text color="cyan darken-2" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon color="cyan darken-2" class="mr-3">{{item.icon}}</v-icon>
+              <v-btn block text color="primary" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
+                <v-icon color="primary" class="mr-3">{{item.icon}}</v-icon>
                 {{item.title}}
-                <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+                <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
               </v-btn>
             </v-card-actions>
           </template>
@@ -73,7 +64,7 @@ limitations under the License.
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="supervisor_account">
+              <v-badge v-if="isAdmin" color="primary" bottom overlap icon="mdi-account-supervisor">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
@@ -84,9 +75,9 @@ limitations under the License.
             </template>
             <span v-if="isAdmin">
               {{avatarTitle}}
-              <v-chip small color="cyan darken-2" dark>
+              <v-chip small color="primary">
                 <v-avatar>
-                  <v-icon>supervisor_account</v-icon>
+                  <v-icon>mdi-account-supervisor</v-icon>
                 </v-avatar>
                 <span class="operator">Operator</span>
               </v-chip>
@@ -98,22 +89,48 @@ limitations under the License.
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
-              <div class="title">{{displayName}}</div>
-              <div class="caption">{{username}}</div>
-              <div class="caption" v-if="isAdmin">Operator</div>
+              <div class="text-h6">{{displayName}}</div>
+              <div class="text-caption">{{username}}</div>
+              <div class="text-caption" v-if="isAdmin">Operator</div>
+              <v-btn-toggle v-model="colorScheme" borderless mandatory @click.native.stop class="mt-3">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-white-balance-sunny</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Light Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-weather-night</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Dark Mode</span>
+                </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn small v-on="on">
+                      <v-icon color="primary">mdi-brightness-auto</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Automatically choose theme based on your system settings</span>
+                </v-tooltip>
+              </v-btn-toggle>
             </div>
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
-            <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
-              <v-icon class="mr-3">account_circle</v-icon>
+            <v-btn block text color="primary" class="justify-start" :to="accountLink" title="My Account">
+              <v-icon class="mr-3">mdi-account-circle</v-icon>
               My Account
             </v-btn>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
-              <v-icon class="mr-3">exit_to_app</v-icon>
+              <v-icon class="mr-3">mdi-exit-to-app</v-icon>
               Logout
             </v-btn>
           </v-card-actions>
@@ -121,12 +138,13 @@ limitations under the License.
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="grey darken-3" background-color="white" color="black">
-        <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
+      <v-tabs slider-color="primary darken-3" class="tabs-bar-background">
+        <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
       </v-tabs>
     </template>
+    <info-dialog v-model="infoDialog" @dialog-closed="infoDialog=false"></info-dialog>
   </v-app-bar>
 </template>
 
@@ -134,32 +152,34 @@ limitations under the License.
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
 import Breadcrumb from '@/components/Breadcrumb'
-import { getInfo } from '@/utils/api'
+import InfoDialog from '@/components/dialogs/InfoDialog'
 
 export default {
-  name: 'toolbar',
+  name: 'toolbar-background',
   components: {
-    Breadcrumb
+    Breadcrumb,
+    InfoDialog
   },
   data () {
     return {
       menu: false,
       help: false,
-      gardenerVersion: undefined,
-      dashboardVersion: undefined
+      infoDialog: false
     }
   },
   methods: {
     ...mapActions([
       'setSidebar',
-      'setError'
+      'setError',
+      'setColorScheme'
     ]),
     handleLogout () {
-      this.$userManager.signout()
+      this.$auth.signout()
     }
   },
   computed: {
     ...mapState([
+      'namespace',
       'title',
       'sidebar',
       'user',
@@ -175,9 +195,9 @@ export default {
       return this.cfg.helpMenuItems || {}
     },
     tabs () {
-      const tabs = get(this.$route, 'meta.tabs', false)
+      const tabs = get(this.$route, 'meta.tabs')
       if (typeof tabs === 'function') {
-        return tabs()
+        return tabs(this.$route)
       }
       return tabs
     },
@@ -190,32 +210,37 @@ export default {
       }
     },
     accountLink () {
+      let query
+      if (this.namespace) {
+        query = { namespace: this.namespace }
+      }
       return {
         name: 'Account',
-        query: this.$route.query
+        query
       }
-    }
-  },
-  watch: {
-    async help (value) {
-      if (value && !this.dashboardVersion) {
-        try {
-          const {
-            data: {
-              gardenerVersion,
-              version
-            } = {}
-          } = await getInfo()
-          if (gardenerVersion) {
-            this.gardenerVersion = gardenerVersion.gitVersion
-          }
-          if (version) {
-            this.dashboardVersion = `${version}`
-          }
-        } catch (err) {
-          this.setError({
-            message: `Failed to fetch version information. ${err.message}`
-          })
+    },
+    colorScheme: {
+      get () {
+        switch (this.$store.state.colorScheme) {
+          case 'light':
+            return 0
+          case 'dark':
+            return 1
+          default:
+            return 2
+        }
+      },
+      set (value) {
+        switch (value) {
+          case 0:
+            this.setColorScheme('light')
+            break
+          case 1:
+            this.setColorScheme('dark')
+            break
+          default:
+            this.setColorScheme('auto')
+            break
         }
       }
     }
@@ -240,5 +265,13 @@ export default {
   .operator {
     color: white;
     font-weight: bold;
+  }
+
+  .theme--light .tabs-bar-background {
+    background-color: white;
+  }
+
+  .theme--dark .tabs-bar-background {
+    background-color: black;
   }
 </style>

@@ -1,30 +1,20 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
 const _ = require('lodash')
-const socketIO = require('socket.io')
+const createServer = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { Forbidden } = require('./errors')
+const { isHttpError } = require('http-errors')
+const { STATUS_CODES } = require('http')
 
-const kubernetesClient = require('./kubernetes-client')
-const watches = require('./watches')
-const cache = require('./cache')
+const kubernetesClient = require('@gardener-dashboard/kube-client')
+
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { projects, shoots, tickets, authorization } = require('./services')
 
@@ -37,8 +27,9 @@ function socketAuthentication (nsp) {
       logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
       next()
     } catch (err) {
-      logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-      next(new Forbidden(err.message))
+      const level = /^ERR_JWT/.test(err.code) ? 'info' : 'error'
+      logger[level]('Socket %s authentication failed: "%s"', socket.id, err.message)
+      next(err)
     }
   })
 }
@@ -172,6 +163,49 @@ async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
   })
 }
 
+async function subscribeShoot (socket, { namespace, name }) {
+  leaveShootsAndShootRoom(socket)
+
+  const user = getUserFromSocket(socket)
+  const room = `shoot_${namespace}_${name}`
+
+  try {
+    const object = await shoots.read({ user, namespace, name })
+    joinRoom(socket, room)
+    return object
+  } catch (err) {
+    let {
+      code = 500,
+      reason = 'InternalServerError',
+      status = 'Failure',
+      message = 'Failed to fetch cluster'
+    } = err
+    if (isHttpError(err)) {
+      code = err.statusCode
+      reason = STATUS_CODES[code]
+      if (code === 404) {
+        try {
+          const allowed = await authorization.canGetShoot(user, namespace, name)
+          if (allowed) {
+            status = 'Success'
+            joinRoom(socket, room)
+          }
+        } catch (err) {
+          logger.error('Socket %s: get permission to read shoot failed:  %s', socket.id, err)
+        }
+      }
+    }
+    return {
+      kind: 'Status',
+      apiVersion: 'v1',
+      status,
+      message,
+      code,
+      reason
+    }
+  }
+}
+
 function setupShootsNamespace (shootsNsp) {
   // handle socket connections
   shootsNsp.on('connection', socket => {
@@ -213,39 +247,19 @@ function setupShootsNamespace (shootsNsp) {
         })
       }
     })
-    socket.on('subscribeShoot', async ({ name, namespace }) => {
-      leaveShootsAndShootRoom(socket)
-
-      const kind = 'shoot'
-      const user = getUserFromSocket(socket)
-      const batchEmitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath: 'metadata.uid' })
-      try {
-        const projectList = await projects.list({ user })
-        const project = _.find(projectList, ['metadata.namespace', namespace])
-        if (project) {
-          const room = `shoot_${namespace}_${name}`
-          joinRoom(socket, room)
-
-          const shoot = await shoots.read({ user, name, namespace })
-          batchEmitter.batchEmitObjects([shoot], namespace)
-        }
-      } catch (error) {
-        logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, error.code, error)
-        socket.emit('subscription_error', {
-          kind,
-          code: error.code,
-          message: 'Failed to fetch cluster'
-        })
+    socket.on('subscribeShoot', async ({ name, namespace }, done) => {
+      const object = await subscribeShoot(socket, { name, namespace })
+      if (object.kind === 'Status' && object.status === 'Failure') {
+        const { code, message } = object
+        logger.error('Socket %s: failed to subscribe to shoot: (%d) %s', socket.id, code, message)
       }
-      batchEmitter.flush()
-
-      socket.emit('shootSubscriptionDone', { kind, target: { name, namespace } })
+      done(object)
     })
   })
   socketAuthentication(shootsNsp)
 }
 
-function setupTicketsNamespace (ticketsNsp) {
+function setupTicketsNamespace (ticketsNsp, cache) {
   const ticketCache = cache.getTicketCache()
 
   ticketsNsp.on('connection', socket => {
@@ -303,21 +317,16 @@ function setupTicketsNamespace (ticketsNsp) {
   socketAuthentication(ticketsNsp)
 }
 
-function init () {
-  const io = socketIO({
+function initializeServer (httpServer, cache) {
+  const io = createServer(httpServer, {
     path: '/api/events',
     serveClient: false
   })
-
   // setup namespaces
   setupShootsNamespace(io.of('/shoots'))
-  setupTicketsNamespace(io.of('/tickets'))
-  // start watches
-  for (const watch of Object.values(watches)) {
-    watch(io)
-  }
+  setupTicketsNamespace(io.of('/tickets'), cache)
   // return io instance
   return io
 }
 
-module.exports = init
+module.exports = initializeServer

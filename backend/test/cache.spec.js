@@ -1,116 +1,60 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { orderBy } = require('lodash')
 const cache = require('../lib/cache')
 const { cache: internalCache } = cache
 
 describe('cache', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-
-  const a = { metadata: { uid: 1, name: 'a', namespace: 'z' } }
-  const b = { metadata: { uid: 2, name: 'b', namespace: 'y' } }
-  const c = { metadata: { uid: 3, name: 'c', namespace: 'y' } }
-  const d = { metadata: { uid: 4, name: 'd', namespace: 'x' } }
-
-  const list = [a, b, c, d]
-
-  function replace (store, items) {
-    return new Promise(resolve => {
-      process.nextTick(() => {
-        store.replace(items)
-        resolve()
-      })
-    })
-  }
-
-  class CloudProfile {
-    syncList (store) {
-      return replace(store, [a, c])
-    }
-  }
-  CloudProfile.scope = 'Cluster'
-
-  class Quota {
-    syncListAllNamespaces (store) {
-      return replace(store, [a, b, c])
-    }
-  }
-  Quota.scope = 'Namespaced'
-
-  class Seed {
-    syncList (store) {
-      return replace(store, [a, b])
-    }
-  }
-  Seed.scope = 'Cluster'
-
-  class Project {
-    syncList (store) {
-      return replace(store, [a, b, c, d])
-    }
-  }
-  Project.scope = 'Cluster'
-
-  const gardenerCore = {
-    cloudprofiles: new CloudProfile(),
-    quotas: new Quota(),
-    seeds: new Seed(),
-    projects: new Project()
-  }
-
-  const testClient = {
-    'core.gardener.cloud': gardenerCore
-  }
-
-  afterEach(function () {
-    sandbox.restore()
-  })
-
   it('should dispatch "synchronize" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'synchronize')
-    cache.synchronize(testClient)
-    expect(stub).to.be.calledOnceWith(testClient)
+    const stub = jest.spyOn(internalCache, 'set')
+    const a = { store: { id: 1 } }
+    const b = { store: { id: 2 } }
+    cache.initialize({ a, b })
+    expect(stub).toBeCalledTimes(2)
+    expect(stub.mock.calls).toEqual([
+      ['a', { id: 1 }],
+      ['b', { id: 2 }]
+    ])
   })
 
   it('should dispatch "getCloudProfiles" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getCloudProfiles').returns(list)
-    expect(cache.getCloudProfiles()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getCloudProfiles').mockReturnValue(list)
+    expect(cache.getCloudProfiles()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getQuotas" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getQuotas').returns(list)
-    expect(cache.getQuotas()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getQuotas').mockReturnValue(list)
+    expect(cache.getQuotas()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getSeeds" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getSeeds').returns(list)
-    expect(cache.getSeeds()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getSeeds').mockReturnValue(list)
+    expect(cache.getSeeds()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getProjects" to internal cache', function () {
-    const stub = sandbox.stub(internalCache, 'getProjects').returns(list)
-    expect(cache.getProjects()).to.equal(list)
-    expect(stub).to.be.calledOnce
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getProjects').mockReturnValue(list)
+    expect(cache.getProjects()).toBe(list)
+    expect(stub).toBeCalledTimes(1)
+  })
+
+  it('should dispatch "getControllerRegistrations" to internal cache', function () {
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
+    expect(cache.getControllerRegistrations()).toEqual(list)
+    expect(stub).toBeCalledTimes(1)
   })
 
   describe('Cache', function () {
@@ -121,37 +65,10 @@ describe('cache', function () {
       cache = new Cache()
     })
 
-    describe('#synchronize', async function () {
-      let syncCloudprofilesSpy
-      let syncQuotasSpy
-      let syncSeedsSpy
-      let syncProjectsSpy
-
-      beforeEach(function () {
-        syncCloudprofilesSpy = sandbox.spy(gardenerCore.cloudprofiles, 'syncList')
-        syncQuotasSpy = sandbox.spy(gardenerCore.quotas, 'syncListAllNamespaces')
-        syncSeedsSpy = sandbox.spy(gardenerCore.seeds, 'syncList')
-        syncProjectsSpy = sandbox.spy(gardenerCore.projects, 'syncList')
-      })
-
-      it('should syncronize the cache', async function () {
-        expect(cache.synchronizationPromise).to.be.undefined
-        await cache.synchronize(testClient)
-        expect(syncCloudprofilesSpy).to.be.calledOnce
-        expect(syncQuotasSpy).to.be.calledOnce
-        expect(syncSeedsSpy).to.be.calledOnce
-        expect(syncProjectsSpy).to.be.calledOnce
-        expect(cache.synchronizationPromise).to.be.instanceof(Promise)
-        expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).to.eql([a, c])
-        expect(orderBy(cache.getQuotas(), 'metadata.uid')).to.eql([a, b, c])
-        expect(orderBy(cache.getSeeds(), 'metadata.uid')).to.eql([a, b])
-        expect(orderBy(cache.getProjects(), 'metadata.uid')).to.eql([a, b, c, d])
-      })
-    })
-
     describe('#getTicketCache', function () {
       it('should return the ticket cache', function () {
-        expect(cache.getTicketCache()).to.equal(cache.ticketCache)
+        expect(cache.size).toBe(0)
+        expect(cache.getTicketCache()).toBe(cache.ticketCache)
       })
     })
   })

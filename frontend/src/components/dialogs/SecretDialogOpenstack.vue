@@ -1,37 +1,24 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="openstack"
-    color="black"
-    infraIcon="openstack-white"
-    backgroundSrc="/static/background_openstack.svg"
-    createTitle="Add new OpenStack Secret"
-    replaceTitle="Replace OpenStack Secret"
+    cloud-provider-kind="openstack"
+    create-title="Add new OpenStack Secret"
+    replace-title="Replace OpenStack Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="domainName"
           ref="domainName"
           label="Domain Name"
@@ -42,7 +29,7 @@ limitations under the License.
       </div>
       <div>
         <v-text-field
-          color="black"
+          color="primary"
           v-model="tenantName"
           label="Project / Tenant Name"
           :error-messages="getErrorMessages('tenantName')"
@@ -51,9 +38,9 @@ limitations under the License.
         ></v-text-field>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="primary">
           <v-text-field
-          color="black"
+          color="primary"
           v-model="username"
           label="Technical User"
           :error-messages="getErrorMessages('username')"
@@ -64,9 +51,9 @@ limitations under the License.
         </hint-colorizer>
       </div>
       <div>
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="warning">
           <v-text-field
-            color="black"
+            color="primary"
             v-model="password"
             label="Password"
             :error-messages="getErrorMessages('password')"
@@ -78,6 +65,24 @@ limitations under the License.
             hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
           ></v-text-field>
         </hint-colorizer>
+      </div>
+    </template>
+
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
+          The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
+        </p>
+        <p>
+          Read the
+          <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
+            target="_blank">
+            OpenStack help section<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
+        </p>
       </div>
     </template>
 

@@ -1,28 +1,13 @@
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
-import { expect } from 'chai'
 import { getters, firstItemMatchingVersionClassification } from '@/store'
 import find from 'lodash/find'
-import noop from 'lodash/noop'
 
-global.console.error = noop // do not log (expected) errors in tests
-
-describe('Store', function () {
-  it('should transform machine images from cloud profile', function () {
+describe('Store', () => {
+  it('should transform machine images from cloud profile', () => {
     const cpMachineImages = [
       {
         name: 'garden-linux',
@@ -64,7 +49,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             machineImages: cpMachineImages
@@ -74,32 +59,32 @@ describe('Store', function () {
     }
 
     const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
-    expect(dashboardMachineImages).to.have.length(5)
+    expect(dashboardMachineImages).toHaveLength(5)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
-    expect(expiredImage.isExpired).to.equal(true)
+    expect(expiredImage.isExpired).toBe(true)
 
     const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
-    expect(invalidImage).to.equal(undefined)
+    expect(invalidImage).toBeUndefined()
 
     const suseImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191027' })
-    expect(suseImage.expirationDate).to.equal('2119-04-05T01:02:03Z')
-    expect(suseImage.expirationDateString).to.not.equal(undefined)
-    expect(suseImage.vendorName).to.equal('suse-chost')
-    expect(suseImage.icon).to.equal('suse-chost')
-    expect(suseImage.needsLicense).to.equal(true)
-    expect(suseImage.classification).to.equal('supported')
-    expect(suseImage.isSupported).to.equal(true)
-    expect(suseImage.isDeprecated).to.equal(false)
-    expect(suseImage.isPreview).to.equal(false)
-    expect(suseImage).to.equal(dashboardMachineImages[2]) // check sorting
+    expect(suseImage.expirationDate).toBe('2119-04-05T01:02:03Z')
+    expect(suseImage.expirationDateString).toBeDefined()
+    expect(suseImage.vendorName).toBe('suse-chost')
+    expect(suseImage.icon).toBe('suse-chost')
+    expect(suseImage.needsLicense).toBe(true)
+    expect(suseImage.classification).toBe('supported')
+    expect(suseImage.isSupported).toBe(true)
+    expect(suseImage.isDeprecated).toBe(false)
+    expect(suseImage.isPreview).toBe(false)
+    expect(suseImage).toBe(dashboardMachineImages[2]) // check sorting
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
-    expect(fooImage.needsLicense).to.equal(false)
-    expect(fooImage.isSupported).to.equal(false)
+    expect(fooImage.needsLicense).toBe(false)
+    expect(fooImage.isSupported).toBe(false)
   })
 
-  it('should filter kubernetes versions from cloud profile', function () {
+  it('should filter kubernetes versions from cloud profile', () => {
     const kubernetesVersions = [
       {
         version: '1.13.4'
@@ -120,7 +105,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             kubernetes: {
@@ -130,28 +115,28 @@ describe('Store', function () {
         }
       },
       kubernetesVersions (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return getters.kubernetesVersions({}, this)(cloudProfileName)
       }
     }
 
     const dashboardVersions = getters.sortedKubernetesVersions({}, storeGetters)('foo')
-    expect(dashboardVersions).to.have.length(3)
+    expect(dashboardVersions).toHaveLength(3)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
-    expect(expiredVersion.isExpired).to.equal(true)
+    expect(expiredVersion.isExpired).toBe(true)
 
     const invalidVersion = find(dashboardVersions, { version: '1.06.2' })
-    expect(invalidVersion).to.equal(undefined)
+    expect(invalidVersion).toBeUndefined()
 
     const kubernetesVersion = find(dashboardVersions, { version: '1.16.3' })
-    expect(kubernetesVersion.expirationDate).to.equal('2120-04-12T23:59:59Z')
-    expect(kubernetesVersion.expirationDateString).to.not.equal(undefined)
-    expect(kubernetesVersion.classification).to.equal('supported')
-    expect(kubernetesVersion).to.equal(dashboardVersions[0]) // check sorting
+    expect(kubernetesVersion.expirationDate).toBe('2120-04-12T23:59:59Z')
+    expect(kubernetesVersion.expirationDateString).toBeDefined()
+    expect(kubernetesVersion.classification).toBe('supported')
+    expect(kubernetesVersion).toBe(dashboardVersions[0]) // check sorting
   })
 
-  it('should return machineTypes by region and zones from cloud profile', function () {
+  it('should return machineTypes by region and zones from cloud profile', () => {
     const cpMachineTypes = [
       {
         name: 'machineType1'
@@ -166,7 +151,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             machineTypes: cpMachineTypes,
@@ -206,21 +191,21 @@ describe('Store', function () {
     }
 
     let dashboardMachineTypes = getters.machineTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
-    expect(dashboardMachineTypes).to.have.length(3)
+    expect(dashboardMachineTypes).toHaveLength(3)
 
     dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2'] })
-    expect(dashboardMachineTypes).to.have.length(2)
-    expect(dashboardMachineTypes[0].name).to.equal('machineType1')
-    expect(dashboardMachineTypes[1].name).to.equal('machineType3')
+    expect(dashboardMachineTypes).toHaveLength(2)
+    expect(dashboardMachineTypes[0].name).toBe('machineType1')
+    expect(dashboardMachineTypes[1].name).toBe('machineType3')
 
     dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1', 'zone3'] })
-    expect(dashboardMachineTypes).to.have.length(3)
+    expect(dashboardMachineTypes).toHaveLength(3)
 
     dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
-    expect(dashboardMachineTypes).to.have.length(3)
+    expect(dashboardMachineTypes).toHaveLength(3)
   })
 
-  it('should return volumeTypes by region and zones from cloud profile', function () {
+  it('should return volumeTypes by region and zones from cloud profile', () => {
     const cpVolumeTypes = [
       {
         name: 'volumeType1'
@@ -235,7 +220,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             volumeTypes: cpVolumeTypes,
@@ -282,29 +267,29 @@ describe('Store', function () {
     }
 
     let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
-    expect(dashboardVolumeTypes).to.have.length(3)
+    expect(dashboardVolumeTypes).toHaveLength(3)
 
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1'] })
-    expect(dashboardVolumeTypes).to.have.length(3)
+    expect(dashboardVolumeTypes).toHaveLength(3)
 
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2', 'zone3'] })
-    expect(dashboardVolumeTypes).to.have.length(0)
+    expect(dashboardVolumeTypes).toHaveLength(0)
 
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone3'] })
-    expect(dashboardVolumeTypes).to.have.length(1)
-    expect(dashboardVolumeTypes[0].name).to.equal('volumeType2')
+    expect(dashboardVolumeTypes).toHaveLength(1)
+    expect(dashboardVolumeTypes[0].name).toBe('volumeType2')
 
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
-    expect(dashboardVolumeTypes).to.have.length(3)
+    expect(dashboardVolumeTypes).toHaveLength(3)
   })
 
-  it('should return an empty machineType / volumeType array if no cloud profile is provided', function () {
+  it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
     const items = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, getters)({ })
-    expect(items).to.be.an.instanceof(Array)
-    expect(items).to.have.length(0)
+    expect(items).toBeInstanceOf(Array)
+    expect(items).toHaveLength(0)
   })
 
-  it('should return floating pool names by region and domain from cloud profile', function () {
+  it('should return floating pool names by region and domain from cloud profile', () => {
     const cpFloatingPools = [
       {
         name: 'global FP'
@@ -347,7 +332,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             providerConfig: {
@@ -368,51 +353,51 @@ describe('Store', function () {
     let region = 'fooRegion'
     let secretDomain = 'fooDomain'
     let dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(1)
-    expect(dashboardFloatingPools[0]).to.equal('global FP')
+    expect(dashboardFloatingPools).toHaveLength(1)
+    expect(dashboardFloatingPools[0]).toBe('global FP')
 
     region = 'region1'
     secretDomain = 'fooDomain'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(1)
-    expect(dashboardFloatingPools[0]).to.equal('regional FP')
+    expect(dashboardFloatingPools).toHaveLength(1)
+    expect(dashboardFloatingPools[0]).toBe('regional FP')
 
     region = 'region2'
     secretDomain = 'fooDomain'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(2)
-    expect(dashboardFloatingPools[0]).to.equal('global FP')
-    expect(dashboardFloatingPools[1]).to.equal('regional non constraining FP')
+    expect(dashboardFloatingPools).toHaveLength(2)
+    expect(dashboardFloatingPools[0]).toBe('global FP')
+    expect(dashboardFloatingPools[1]).toBe('regional non constraining FP')
 
     region = 'fooRegion'
     secretDomain = 'domain1'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(1)
-    expect(dashboardFloatingPools[0]).to.equal('domain specific FP')
+    expect(dashboardFloatingPools).toHaveLength(1)
+    expect(dashboardFloatingPools[0]).toBe('domain specific FP')
 
     region = 'fooRegion'
     secretDomain = 'domain2'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(2)
-    expect(dashboardFloatingPools[0]).to.equal('global FP')
-    expect(dashboardFloatingPools[1]).to.equal('domain specific non constraining FP')
+    expect(dashboardFloatingPools).toHaveLength(2)
+    expect(dashboardFloatingPools[0]).toBe('global FP')
+    expect(dashboardFloatingPools[1]).toBe('domain specific non constraining FP')
 
     region = 'region3'
     secretDomain = 'domain3'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(2)
-    expect(dashboardFloatingPools[0]).to.equal('domain specific, regional FP')
-    expect(dashboardFloatingPools[1]).to.equal('additional domain specific, regional FP')
+    expect(dashboardFloatingPools).toHaveLength(2)
+    expect(dashboardFloatingPools[0]).toBe('domain specific, regional FP')
+    expect(dashboardFloatingPools[1]).toBe('additional domain specific, regional FP')
 
     region = 'region4'
     secretDomain = 'domain4'
     dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
-    expect(dashboardFloatingPools).to.have.length(2)
-    expect(dashboardFloatingPools[0]).to.equal('global FP')
-    expect(dashboardFloatingPools[1]).to.equal('domain specific, regional non constraining FP')
+    expect(dashboardFloatingPools).toHaveLength(2)
+    expect(dashboardFloatingPools[0]).toBe('global FP')
+    expect(dashboardFloatingPools[1]).toBe('domain specific, regional non constraining FP')
   })
 
-  it('should return load balancer provider names by region from cloud profile', function () {
+  it('should return load balancer provider names by region from cloud profile', () => {
     const cpLoadBalancerProviders = [
       {
         name: 'global LB'
@@ -433,7 +418,7 @@ describe('Store', function () {
 
     const storeGetters = {
       cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).to.equal('foo')
+        expect(cloudProfileName).toBe('foo')
         return {
           data: {
             providerConfig: {
@@ -453,22 +438,22 @@ describe('Store', function () {
 
     let region = 'fooRegion'
     let dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
-    expect(dashboardLoadBalancerProviderNames).to.have.length(1)
-    expect(dashboardLoadBalancerProviderNames[0]).to.equal('global LB')
+    expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
+    expect(dashboardLoadBalancerProviderNames[0]).toBe('global LB')
 
     region = 'region1'
     dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
-    expect(dashboardLoadBalancerProviderNames).to.have.length(2)
-    expect(dashboardLoadBalancerProviderNames[0]).to.equal('regional LB')
-    expect(dashboardLoadBalancerProviderNames[1]).to.equal('additional regional LB')
+    expect(dashboardLoadBalancerProviderNames).toHaveLength(2)
+    expect(dashboardLoadBalancerProviderNames[0]).toBe('regional LB')
+    expect(dashboardLoadBalancerProviderNames[1]).toBe('additional regional LB')
 
     region = 'region2'
     dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
-    expect(dashboardLoadBalancerProviderNames).to.have.length(1)
-    expect(dashboardLoadBalancerProviderNames[0]).to.equal('other regional LB')
+    expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
+    expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
   })
 
-  it('should select default item that matches version classification', function () {
+  it('should select default item that matches version classification', () => {
     const items = [
       {
         version: '1',
@@ -484,14 +469,82 @@ describe('Store', function () {
     ]
 
     let item = firstItemMatchingVersionClassification(items)
-    expect(item.version).to.equal('3')
+    expect(item.version).toBe('3')
 
     items.pop()
     item = firstItemMatchingVersionClassification(items)
-    expect(item.version).to.equal('2')
+    expect(item.version).toBe('2')
 
     items.pop()
     item = firstItemMatchingVersionClassification(items)
-    expect(item.version).to.equal('1')
+    expect(item.version).toBe('1')
+  })
+
+  it('should return custom fields for shoots', () => {
+    const custom1 = {
+      weight: 1,
+      defaultValue: 'Default',
+      path: 'metadata.name',
+      name: 'Column Name',
+      showColumn: true,
+      showDetails: true,
+      icon: 'mdi-icon'
+    }
+    const custom2 = {
+      name: 'Name',
+      path: 'path'
+    }
+
+    const shootCustomFields = {
+      custom1,
+      custom2,
+      custom3: { // ignored, missing required property path
+        name: 'name'
+      },
+      custom4: { // ignored, missing required property name
+        path: 'path'
+      },
+      custom5: {}, // ignored
+      custom6: null, // ignored
+      custom7: { // ignored
+        name: 'Foo',
+        path: { foo: 'bar' } // no objects allowed as values of custom field properties
+      }
+    }
+
+    const storeGetters = {
+      projectFromProjectList: {
+        metadata: {
+          annotations: {
+            'dashboard.gardener.cloud/shootCustomFields': JSON.stringify(shootCustomFields)
+          }
+        }
+      }
+    }
+
+    const customFields = getters.shootCustomFields({}, storeGetters)
+    expect(customFields).toStrictEqual({
+      Z_custom1: {
+        weight: 1,
+        defaultValue: 'Default',
+        path: 'metadata.name',
+        name: 'Column Name',
+        showColumn: true,
+        showDetails: true,
+        icon: 'mdi-icon',
+        columnSelectedByDefault: true,
+        searchable: true,
+        sortable: true
+      },
+      Z_custom2: {
+        name: 'Name',
+        path: 'path',
+        columnSelectedByDefault: true,
+        searchable: true,
+        showColumn: true,
+        showDetails: true,
+        sortable: true
+      }
+    })
   })
 })

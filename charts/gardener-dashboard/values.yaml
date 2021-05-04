@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Default values for gardener-dashboard.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -68,6 +72,12 @@ oidc:
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener
+  # assets: # See https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values.
+  #   favicon-16x16.png: |
+  #   favicon-32x32.png: |
+  #   favicon-96x96.png: |
+  #   favicon.ico: |
+  #   logo.svg: |
   helpMenuItems:
   - title: Getting Started
     icon: description
@@ -76,6 +86,7 @@ frontendConfig:
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
   # ticket:
+  #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
   #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
   #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
   #   - ignore
@@ -119,11 +130,27 @@ frontendConfig:
   seedCandidateDeterminationStrategy: SameRegion
   features:
     terminalEnabled: false
+    projectTerminalShortcutsEnabled: false
   # alert:
   #   type: error
   #   message: This is an **alert** banner
+  #   # identifer: alert-identifier # Optional. If not set, a hash of the alert.message will be used as identifier. The identifier is used to store the user's decision to not show the alert message with this identifier again.
 
   # terminal:
+  #   shortcuts:
+  #   - title: "Watch Control Plane Pods"
+  #     description: Using kubectl to watch the pods of the control plane for this cluster
+  #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
+  #     container:
+  #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+  #       # command: ~
+  #       args:
+  #       - watch
+  #       - kubectl
+  #       - get
+  #       - pods
+  #       - "-o"
+  #       - wide
   #   heartbeatIntervalSeconds: 60
 
   # # costObject is used for billing purposes and is assigned to the gardener project
@@ -171,6 +198,27 @@ frontendConfig:
   #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
   #         inverted: true
 
+  # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
+  #themes:
+  #  light: # overwrite light theme colors
+  #    primary: '#0b8062'
+  #    anchor: '#0b8062'
+  #    main-background: 'grey.darken3'
+  #    main-navigation-title: 'shades.white'
+  #    toolbar-background: '#0b8062'
+  #    toolbar-title: 'shades.white'
+  #    action-button: 'grey.darken4'
+  #  dark: # overwrite dark theme colors
+  #    primary: '#0b8062'
+  #    anchor: '#0b8062'
+  #    main-background: 'grey.darken3'
+  #    main-navigation-title: 'shades.white'
+  #    toolbar-background: '#0b8062'
+  #    toolbar-title: 'shades.white'
+  #    action-button: 'grey.lighten4'
+  #    error: 'red.darken4'
+  #    warning: 'orange.darken4'
+
 # # github configuration of the ticket feature
 # gitHub:
 #   apiUrl: https://api.foo-github.com
@@ -199,8 +247,10 @@ readinessProbe:
   successThreshold: 1
 
 # terminal:
-#   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
-#   containerImageOperator: ~ # if not defined, value of containerImage will be used
+#   container:
+#     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+#   containerOperator:
+#     image: ~ # if not defined, value of terminal.container.image will be used
 #   containerImageDescriptions:
 #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
@@ -250,3 +300,7 @@ readinessProbe:
 #           -----BEGIN RSA PRIVATE KEY-----
 #           Li4u
 #           -----END RSA PRIVATE KEY-----
+
+# unreachableSeeds: # disables some UI features for seeds that are unreachable by the dashboard
+#   matchLabels:
+#     seed.gardener.cloud/network: private

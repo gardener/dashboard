@@ -1,158 +1,65 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid class="shootlist">
-    <v-card class="mr-extra">
-      <v-toolbar flat height="72" color="cyan darken-2">
-        <img src="../assets/certified_kubernetes_white.svg" height="60" class="ml-1 mr-3">
+  <v-container fluid>
+    <v-card class="ma-3">
+      <v-toolbar flat height="72" color="toolbar-background">
+        <icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
+          <certified-kubernetes></certified-kubernetes>
+        </icon-base>
         <v-toolbar-title class="white--text">
-          <div class="headline">Kubernetes Clusters</div>
-          <div class="subtitle-1">{{headlineSubtitle}}</div>
+          <div class="text-h5 toolbar-title--text">Kubernetes Clusters</div>
+          <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="search || items.length > 3"
-          prepend-inner-icon="search"
-          color="cyan darken-2"
+        <v-text-field v-if="shootSearch || items.length > 3"
+          prepend-inner-icon="mdi-magnify"
+          color="primary"
           label="Search"
           clearable
           hide-details
           flat
           solo
-          v-model="search"
-          @keyup.esc="search=''"
-          class="search_textfield"
+          v-model="shootSearch"
+          @keyup.esc="shootSearch=''"
+          class="mr-3"
         ></v-text-field>
-        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute>
-          <template v-slot:activator="{ on: menu }">
-            <v-tooltip open-delay="500" top>
-              <template v-slot:activator="{ on: tooltip }">
-                <v-btn v-on="{ ...menu, ...tooltip}" icon>
-                  <v-icon class="cursor-pointer" color="white">more_vert</v-icon>
-                </v-btn>
-              </template>
-              Table Options
-            </v-tooltip>
+        <v-tooltip top v-if="canCreateShoots && projectScope">
+          <template v-slot:activator="{ on }">
+             <v-btn v-on="on" icon :to="{ name: 'NewShoot', params: {  namespace } }">
+               <v-icon color="toolbar-title">mdi-plus</v-icon>
+             </v-btn>
           </template>
-          <v-list subheader dense>
-            <v-subheader>Column Selection</v-subheader>
-            <v-list-item v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
-              <v-list-item-action>
-                <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
-              </v-list-item-action>
-              <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>{{ item.text }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-tooltip top style="width: 100%">
-                  <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
-                      Reset
-                    </v-btn>
-                  </template>
-                  <span>Reset to Defaults</span>
-                </v-tooltip>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-          <v-list subheader dense v-if="!projectScope">
-            <v-subheader>Filter Table</v-subheader>
-            <v-list-item @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
-              <v-list-item-action>
-                <v-icon :color="checkboxColor(showOnlyShootsWithIssues)" v-text="checkboxIcon(showOnlyShootsWithIssues)"/>
-              </v-list-item-action>
-              <v-list-item-content class="grey--text text--darken-2">
-                <v-list-item-title>Show only clusters with issues</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <template v-if="isAdmin">
-              <v-list-item
-                @click.stop="toggleFilter('progressing')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('progressing'))" v-text="checkboxIcon(isFilterActive('progressing'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide progressing clusters</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('userIssues')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('userIssues'))" v-text="checkboxIcon(isFilterActive('userIssues'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide user issues</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('deactivatedReconciliation')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('deactivatedReconciliation'))" v-text="checkboxIcon(isFilterActive('deactivatedReconciliation'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide clusters with deactivated reconciliation</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item
-                @click.stop="toggleFilter('hideTicketsWithLabel')"
-                :disabled="filtersDisabled"
-                :class="disabledFilterClass"
-                v-if="!!gitHubRepoUrl && hideClustersWithLabels.length">
-                <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('hideTicketsWithLabel'))" v-text="checkboxIcon(isFilterActive('hideTicketsWithLabel'))"/>
-                </v-list-item-action>
-                <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>
-                    Hide clusters with
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <span v-on="on"><tt>configured</tt><v-icon small>mdi-help-circle-outline</v-icon></span>
-                      </template>
-                      <div v-for="label in hideClustersWithLabels" :key="label">- {{label}}</div>
-                    </v-tooltip>
-                    ticket labels
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </template>
-          </v-list>
-        </v-menu>
+          <span>Create Cluster</span>
+        </v-tooltip>
+        <table-column-selection
+          :headers="selectableHeaders"
+          :filters="selectableFilters"
+          @set-selected-header="setSelectedHeader"
+          @reset="resetTableSettings"
+          @toggle-filter="toggleFilter"
+        ></table-column-selection>
       </v-toolbar>
       <v-data-table
-        class="shootListTable"
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        must-sort
         :loading="shootsLoading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :search="shootSearch"
+        :custom-filter="searchItems"
+        must-sort
+        :custom-sort="sortItems"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
-            :shootItem="item"
-            :visibleHeaders="visibleHeaders"
-            @showDialog="showDialog"
+            :shoot-item="item"
+            :visible-headers="visibleHeaders"
+            @show-dialog="showDialog"
             :key="item.metadata.uid"
           ></shoot-list-row>
         </template>
@@ -160,97 +67,88 @@ limitations under the License.
 
       <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
-          <v-card-title class="teal darken-1 grey--text text--lighten-4">
-            <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
+          <v-card-title class="toolbar-background toolbar-title--text">
+            <div class="text-h5">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon>close</v-icon>
+              <v-icon color="toolbar-title">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
-          <shoot-access-card ref="clusterAccess" :shootItem="selectedItem"></shoot-access-card>
+          <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>
-    <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
-        <v-icon dark ref="add">add</v-icon>
-      </v-btn>
-    </v-fab-transition>
   </v-container>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import zipObject from 'lodash/zipObject'
-import map from 'lodash/map'
+import filter from 'lodash/filter'
 import get from 'lodash/get'
-import pick from 'lodash/pick'
+import isEmpty from 'lodash/isEmpty'
 import join from 'lodash/join'
+import map from 'lodash/map'
+import pick from 'lodash/pick'
+import sortBy from 'lodash/sortBy'
+import startsWith from 'lodash/startsWith'
+import upperCase from 'lodash/upperCase'
 import ShootListRow from '@/components/ShootListRow'
-import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
+import IconBase from '@/components/icons/IconBase'
+import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
+import TableColumnSelection from '@/components/TableColumnSelection.vue'
+import { mapTableHeader } from '@/utils'
+const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
-    ShootAccessCard
+    ShootAccessCard,
+    IconBase,
+    CertifiedKubernetes,
+    TableColumnSelection
   },
   data () {
     return {
-      floatingButton: false,
-      search: '',
-      allHeaders: [
-        { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'SEED', value: 'seed', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'TECHNICAL ID', value: 'technicalId', align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-        { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
-        { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
-        { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'READINESS', value: 'readiness', sortable: true, align: 'center', checked: false, defaultChecked: true, hidden: false },
-        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: false },
-        { text: 'TICKET', value: 'ticket', sortable: true, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
-        { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
-      ],
+      shootSearch: '',
       dialog: null,
-      tableMenu: false,
-      options: this.$localStorage.getObject('dataTable_options') || { itemsPerPage: 10 },
+      options: undefined,
       cachedItems: null,
-      clearSelectedShootTimerID: undefined
+      clearSelectedShootTimerID: undefined,
+      selectedColumns: undefined
     }
   },
   watch: {
     options (value) {
-      if (value) {
-        this.$localStorage.setObject('dataTable_options', pick(value, ['sortBy', 'sortDesc', 'itemsPerPage']))
-        this.setShootListSortParams(value)
+      if (!value) {
+        return
       }
-    },
-    search (value) {
-      this.setShootListSearchValue(value)
-    },
-    canGetSecrets () {
-      this.setColumnVisibility()
-    },
-    canDeleteShoots () {
-      this.setColumnVisibility()
-    },
-    projectScope () {
-      this.setColumnVisibility()
+      const { sortBy, sortDesc, itemsPerPage } = value
+      if (!sortBy || !sortBy.length) { // initial table options
+        return
+      }
+
+      if (startsWith(sortBy, 'Z_')) {
+        this.$localStorage.setObject(`project/${this.projectName}/shoot-list/options`, { sortBy, sortDesc })
+
+        const currentTableOptions = this.$localStorage.getObject('projects/shoot-list/options')
+        const tableOptions = {
+          ...this.defaultTableOptions,
+          ...currentTableOptions,
+          itemsPerPage
+        }
+        this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
+      } else {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
+        this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
+      }
     }
   },
   methods: {
     ...mapActions({
       setSelectedShootInternal: 'setSelectedShoot',
-      setShootListSortParams: 'setShootListSortParams',
-      setShootListSearchValue: 'setShootListSearchValue',
-      setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
-      setShootListFilters: 'setShootListFilters',
-      setShootListFilter: 'setShootListFilter'
+      setShootListFilter: 'setShootListFilter',
+      subscribeShoots: 'subscribeShoots'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -268,65 +166,49 @@ export default {
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
     },
-    checkboxColor (checked) {
-      return checked ? 'cyan darken-2' : ''
+    setSelectedHeader (header) {
+      this.$set(this.selectedColumns, header.value, !header.selected)
+      this.saveSelectedColumns()
     },
-    checkboxIcon (checked) {
-      return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
+    saveSelectedColumns () {
+      this.$localStorage.setObject('projects/shoot-list/selected-columns', this.currentStandardSelectedColumns)
+      if (isEmpty(this.currentCustomSelectedColumns)) {
+        this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/selected-columns`)
+      } else {
+        this.$localStorage.setObject(`project/${this.projectName}/shoot-list/selected-columns`, this.currentCustomSelectedColumns)
+      }
     },
-    setColumnChecked (header) {
-      header.checked = !header.checked
-      this.saveColumnsChecked()
+    resetTableSettings () {
+      this.selectedColumns = {
+        ...this.defaultStandardSelectedColumns,
+        ...this.defaultCustomSelectedColumns
+      }
+      this.saveSelectedColumns()
+      this.options = this.defaultTableOptions
     },
-    saveColumnsChecked () {
-      const keys = map(this.allHeaders, 'value')
-      const checkedValues = map(this.allHeaders, 'checked')
-      const checkedColumns = zipObject(keys, checkedValues)
+    updateTableSettings () {
+      const selectedColumns = this.$localStorage.getObject('projects/shoot-list/selected-columns')
+      const projectSpecificSelectedColumns = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/selected-columns`)
+      this.selectedColumns = {
+        ...selectedColumns,
+        ...projectSpecificSelectedColumns
+      }
+      const projectSpecificTableOptions = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/options`)
+      const tableOptions = this.$localStorage.getObject('projects/shoot-list/options')
+      this.options = {
+        ...this.defaultTableOptions,
+        ...tableOptions,
+        ...projectSpecificTableOptions
+      }
+    },
+    async toggleFilter ({ value }) {
+      const key = value
+      await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
 
-      this.$localStorage.setObject('dataTable_checkedColumns', checkedColumns)
-    },
-    resetColumnsChecked () {
-      for (const header of this.allHeaders) {
-        header.checked = header.defaultChecked
-      }
-      this.saveColumnsChecked()
+      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
 
-      this.options = { itemsPerPage: 10 }
-    },
-    loadColumnsChecked () {
-      const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
-      for (const header of this.allHeaders) {
-        header.checked = get(checkedColumns, header.value, header.defaultChecked)
-      }
-    },
-    setColumnVisibility () {
-      for (const header of this.allHeaders) {
-        switch (header.value) {
-          case 'ticketLabels':
-          case 'ticket':
-            header.hidden = !this.gitHubRepoUrl
-            break
-          case 'actions':
-            header.hidden = !(this.canDeleteShoots || this.canGetSecrets)
-            break
-          case 'project':
-            header.hidden = !!this.projectScope
-            break
-          case 'accessRestrictions': {
-            header.hidden = !this.cfg.accessRestriction
-            break
-          }
-          default:
-            if (get(header, 'adminOnly', false)) {
-              header.hidden = !this.isAdmin
-            }
-        }
-      }
-    },
-    toggleFilter (key) {
-      if (this.showOnlyShootsWithIssues) {
-        const filters = this.getShootListFilters
-        this.setShootListFilter({ filter: key, value: !filters[key] })
+      if (key === 'onlyShootsWithIssues') {
+        this.subscribeShoots()
       }
     },
     isFilterActive (key) {
@@ -353,14 +235,29 @@ export default {
       canPatchShoots: 'canPatchShoots',
       canDeleteShoots: 'canDeleteShoots',
       canCreateShoots: 'canCreateShoots',
-      canGetSecrets: 'canGetSecrets'
+      canGetSecrets: 'canGetSecrets',
+      onlyShootsWithIssues: 'onlyShootsWithIssues',
+      projectFromProjectList: 'projectFromProjectList',
+      projectName: 'projectName',
+      shootCustomFieldList: 'shootCustomFieldList',
+      shootCustomFields: 'shootCustomFields',
+      ticketsLabels: 'ticketsLabels',
+      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
+      sortItems: 'shoots/sortItems',
+      searchItems: 'shoots/searchItems'
     }),
     ...mapState([
       'shootsLoading',
-      'onlyShootsWithIssues',
       'cfg',
       'namespace'
     ]),
+    defaultTableOptions () {
+      return {
+        sortBy: ['name'],
+        sortDesc: [false],
+        itemsPerPage: 10
+      }
+    },
     clusterAccessDialog: {
       get () {
         return this.dialog === 'access'
@@ -374,11 +271,225 @@ export default {
     currentName () {
       return get(this.selectedItem, 'metadata.name')
     },
-    headers () {
-      return this.allHeaders.filter(e => e.hidden === false)
+    currentStandardSelectedColumns () {
+      return mapTableHeader(this.standardHeaders, 'selected')
+    },
+    currentCustomSelectedColumns () {
+      return mapTableHeader(this.customHeaders, 'selected')
+    },
+    defaultStandardSelectedColumns () {
+      return mapTableHeader(this.standardHeaders, 'defaultSelected')
+    },
+    defaultCustomSelectedColumns () {
+      return mapTableHeader(this.customHeaders, 'defaultSelected')
+    },
+    standardHeaders () {
+      const headers = [
+        {
+          text: 'PROJECT',
+          value: 'project',
+          align: 'start',
+          defaultSelected: true,
+          hidden: !!this.projectScope
+        },
+        {
+          text: 'NAME',
+          value: 'name',
+          align: 'start',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'INFRASTRUCTURE',
+          value: 'infrastructure',
+          align: 'start',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'SEED',
+          value: 'seed',
+          align: 'start',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'TECHNICAL ID',
+          value: 'technicalId',
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.isAdmin
+        },
+        {
+          text: 'CREATED BY',
+          value: 'createdBy',
+          align: 'start',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'CREATED AT',
+          value: 'createdAt',
+          align: 'start',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
+          text: 'PURPOSE',
+          value: 'purpose',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'STATUS',
+          value: 'lastOperation',
+          align: 'center',
+          cellClass: 'pl-4',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'VERSION',
+          value: 'k8sVersion',
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'READINESS',
+          value: 'readiness',
+          sortable: true,
+          align: 'center',
+          defaultSelected: true,
+          hidden: false
+        },
+        {
+          text: 'ACCESS RESTRICTIONS',
+          value: 'accessRestrictions',
+          sortable: false,
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.cfg.accessRestriction || !this.isAdmin
+        },
+        {
+          text: 'TICKET',
+          value: 'ticket',
+          sortable: true,
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'TICKET LABELS',
+          value: 'ticketLabels',
+          sortable: false,
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin
+        },
+        {
+          text: 'ACTIONS',
+          value: 'actions',
+          sortable: false,
+          align: 'end',
+          defaultSelected: true,
+          hidden: !(this.canDeleteShoots || this.canGetSecrets)
+        }
+      ]
+      return map(headers, (header, index) => ({
+        ...header,
+        class: 'nowrap',
+        weight: (index + 1) * 100,
+        selected: get(this.selectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    customHeaders () {
+      const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
+
+      return map(customHeaders, ({
+        align = 'left',
+        name,
+        key,
+        path,
+        columnSelectedByDefault: defaultSelected,
+        tooltip,
+        defaultValue,
+        sortable,
+        weight
+      }, index) => {
+        return {
+          customField: true,
+          text: upperCase(name),
+          class: 'nowrap',
+          value: key,
+          sortable,
+          align,
+          selected: get(this.selectedColumns, key, defaultSelected),
+          defaultSelected,
+          hidden: false,
+          path,
+          tooltip,
+          defaultValue,
+          weight: weight || index
+        }
+      })
+    },
+    allHeaders () {
+      const allHeaders = [...this.standardHeaders, ...this.customHeaders]
+      return sortBy(allHeaders, ['weight', 'text'])
+    },
+    selectableHeaders () {
+      return filter(this.allHeaders, ['hidden', false])
     },
     visibleHeaders () {
-      return this.headers.filter(e => e.checked === true)
+      return filter(this.selectableHeaders, ['selected', true])
+    },
+    allFilters () {
+      return [
+        {
+          text: 'Show only clusters with issues',
+          value: 'onlyShootsWithIssues',
+          selected: this.onlyShootsWithIssues,
+          hidden: this.projectScope
+        },
+        {
+          text: 'Hide progressing clusters',
+          value: 'progressing',
+          selected: this.isFilterActive('progressing'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide user issues',
+          value: 'userIssues',
+          selected: this.isFilterActive('userIssues'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with deactivated reconciliation',
+          value: 'deactivatedReconciliation',
+          selected: this.isFilterActive('deactivatedReconciliation'),
+          hidden: this.projectScope || !this.isAdmin,
+          disabled: this.filtersDisabled
+        },
+        {
+          text: 'Hide clusters with configured ticket labels',
+          value: 'hideTicketsWithLabel',
+          selected: this.isFilterActive('hideTicketsWithLabel'),
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length,
+          helpTooltip: this.hideTicketsWithLabelTooltip,
+          disabled: this.filtersDisabled
+        }
+      ]
+    },
+    selectableFilters () {
+      return filter(this.allFilters, ['hidden', false])
+    },
+    hideTicketsWithLabelTooltip () {
+      const labels = map(this.hideClustersWithLabels, label => (`- ${label}`))
+      return ['Configured Labels', ...labels]
     },
     projectScope () {
       return this.namespace !== '_all'
@@ -388,7 +499,7 @@ export default {
         return this.onlyShootsWithIssues
       },
       set (value) {
-        this.setOnlyShootsWithIssues(value)
+        this.toggleFilter('onlyShootsWithIssues')
       }
     },
     items () {
@@ -397,9 +508,7 @@ export default {
     filtersDisabled () {
       return !this.showOnlyShootsWithIssues
     },
-    disabledFilterClass () {
-      return this.filtersDisabled ? 'disabled_filter' : ''
-    },
+
     headlineSubtitle () {
       const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
@@ -426,74 +535,21 @@ export default {
       return get(this.cfg, 'ticket.hideClustersWithLabels', [])
     }
   },
-  mounted () {
-    this.floatingButton = true
-    this.loadColumnsChecked()
-    this.setColumnVisibility()
-    this.setShootListFilters({
-      progressing: true,
-      userIssues: this.isAdmin,
-      deactivatedReconciliation: this.isAdmin,
-      hideTicketsWithLabel: this.isAdmin
-    })
-  },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
+      vm.updateTableSettings()
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.search = null
+    this.shootSearch = null
+    this.updateTableSettings()
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
-    this.search = null
+    this.shootSearch = null
     next()
   }
 }
 </script>
-
-<style lang="scss" scoped >
-
-  .dashboard {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .cluster_name {
-    color: rgb(0, 137, 123);
-  }
-
-  .shootListTable table.table {
-    thead, tbody {
-      th, td {
-        padding: 10px;
-      }
-    }
-  }
-
-  .shootListTable table {
-    tbody, thead {
-      td:first-child, th:first-child {
-        padding-left: 24px;
-      }
-      td:last-child, th:last-child {
-        padding-right: 24px;
-      }
-    }
-  }
-
-  .disabled_filter {
-    opacity: 0.5;
-  }
-
-  .search_textfield {
-    min-width: 125px;
-  }
-
-  .v-input__slot {
-    margin: 0px;
-  }
-
-</style>

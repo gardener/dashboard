@@ -1,94 +1,85 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <div class="newshoot-container">
     <v-container fluid class="newshoot-cards">
       <v-card flat>
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Infrastructure
         </v-card-title>
         <v-card-text>
           <new-shoot-select-infrastructure
             ref="infrastructure"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureValid"
             ></new-shoot-select-infrastructure>
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Cluster Details
         </v-card-title>
         <v-card-text>
           <new-shoot-details
             ref="clusterDetails"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onDetailsValid"
             ></new-shoot-details>
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Infrastructure Details
         </v-card-title>
         <v-card-text>
           <new-shoot-infrastructure-details
             ref="infrastructureDetails"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureDetailsValid"
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
          Access Restrictions
         </v-card-title>
         <v-card-text>
           <access-restrictions
             ref="accessRestrictions"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
           ></access-restrictions>
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Worker
         </v-card-title>
         <v-card-text>
           <manage-workers
-            ref="manageWorkers"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onWorkersValid"
+            ref="manageWorkers"
+            v-on="$manageWorkers.hooks"
           ></manage-workers>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
-            :isCreateMode="true"
+            :is-create-mode="true"
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Maintenance
         </v-card-title>
         <v-card-text>
@@ -98,46 +89,35 @@ limitations under the License.
           ></maintenance-time>
           <maintenance-components
             ref="maintenanceComponents"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
           ></maintenance-components>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Hibernation
         </v-card-title>
         <v-card-text>
           <manage-hibernation-schedule
-            ref="hibernationSchedule"
-            :userInterActionBus="userInterActionBus"
+            :user-inter-action-bus="userInterActionBus"
             @valid="onHibernationScheduleValid"
+            ref="hibernationSchedule"
+            v-on="$hibernationSchedule.hooks"
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
-      <g-alert ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-alert>
+      <g-message ref="errorAlert" color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage" class="error-alert"></g-message>
     </v-container>
     <v-divider></v-divider>
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical></v-divider>
-      <v-btn text @click.native.stop="createClicked()" :disabled="!valid" color="cyan darken-2">Create</v-btn>
+      <v-btn text @click.native.stop="createClicked()" :disabled="!valid" color="primary">Create</v-btn>
     </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
 </template>
 
 <script>
-
-import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
-import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
-import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
-import NewShootDetails from '@/components/NewShoot/NewShootDetails'
-import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
-import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
-import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
-import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
-import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
-import GAlert from '@/components/GAlert'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
@@ -146,10 +126,27 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+
+import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
+import GMessage from '@/components/GMessage'
+import NewShootDetails from '@/components/NewShoot/NewShootDetails'
+import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
+import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
+import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+
+import asyncRef from '@/mixins/asyncRef'
+
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
-const EventEmitter = require('events')
+
+import EventEmitter from 'events'
+
+const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
+const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
 
 export default {
   name: 'create-cluster',
@@ -163,9 +160,13 @@ export default {
     MaintenanceTime,
     ManageHibernationSchedule,
     ManageWorkers,
-    GAlert,
+    GMessage,
     ConfirmDialog
   },
+  mixins: [
+    asyncRef('manageWorkers'),
+    asyncRef('hibernationSchedule')
+  ],
   data () {
     return {
       userInterActionBus: new EventEmitter(),
@@ -198,9 +199,6 @@ export default {
         this.workersValid &&
         this.maintenanceTimeValid &&
         this.hibernationScheduleValid
-    },
-    isShootContentDirty () {
-      return !isEqual(this.initialNewShootResource, this.shootResourceFromUIComponents())
     }
   },
   methods: {
@@ -226,13 +224,18 @@ export default {
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
     },
-    shootResourceFromUIComponents () {
+    async isShootContentDirty () {
+      const shootResource = await this.shootResourceFromUIComponents()
+      return !isEqual(this.initialNewShootResource, shootResource)
+    },
+    async shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const {
         infrastructureKind,
         cloudProfileName,
         region,
+        networkingType,
         secret,
         floatingPoolName,
         loadBalancerProviderName,
@@ -250,7 +253,8 @@ export default {
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
+      set(shootResource, 'spec.networking.type', networkingType)
+      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
@@ -285,7 +289,7 @@ export default {
       set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = this.$refs.manageWorkers.getWorkers()
+      const workers = await this.$manageWorkers.dispatch('getWorkers')
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -304,24 +308,24 @@ export default {
       const addons = this.$refs.addons.getAddons()
       set(shootResource, 'spec.addons', addons)
 
-      const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
       autoUpdate.machineImageVersion = osUpdates
       const maintenance = {
         timeWindow: {
-          begin: utcBegin,
-          end: utcEnd
+          begin,
+          end
         },
         autoUpdate
       }
 
       set(shootResource, 'spec.maintenance', maintenance)
 
-      const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
-      set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
-      const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
+      const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
+      set(shootResource, 'spec.hibernation.schedules', scheduleCrontab)
+      const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
@@ -330,12 +334,12 @@ export default {
 
       return shootResource
     },
-    updateShootResourceWithUIComponents () {
-      const shootResource = this.shootResourceFromUIComponents()
+    async updateShootResourceWithUIComponents () {
+      const shootResource = await this.shootResourceFromUIComponents()
       this.setNewShootResource(shootResource)
       return shootResource
     },
-    updateUIComponentsWithShootResource () {
+    async updateUIComponentsWithShootResource () {
       const shootResource = cloneDeep(this.newShootResource)
 
       const infrastructureKind = get(shootResource, 'spec.provider.type')
@@ -343,8 +347,9 @@ export default {
 
       const cloudProfileName = get(shootResource, 'spec.cloudProfileName')
       const region = get(shootResource, 'spec.region')
+      const networkingType = get(shootResource, 'spec.networking.type')
       const secretBindingName = get(shootResource, 'spec.secretBindingName')
-      const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
+      const secret = this.infrastructureSecretsByName({ secretBindingName, cloudProfileName })
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
@@ -360,6 +365,7 @@ export default {
         infrastructureKind,
         cloudProfileName,
         region,
+        networkingType,
         secret,
         floatingPoolName,
         loadBalancerProviderName,
@@ -375,31 +381,35 @@ export default {
         this.$refs.accessRestrictions.setAccessRestrictions({ shootResource, cloudProfileName, region })
       }
 
-      const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
+      const begin = get(shootResource, 'spec.maintenance.timeWindow.begin')
+      const end = get(shootResource, 'spec.maintenance.timeWindow.end')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
-      this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
+      this.$refs.maintenanceTime.setBeginTimeTimezoneString(begin)
+      this.$refs.maintenanceTime.setEndTimeTimezoneString(end)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
-      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
+      await this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 
       const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
+
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
-      this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
+
+      await this.$hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
-      const shootResource = this.updateShootResourceWithUIComponents()
+      const shootResource = await this.updateShootResourceWithUIComponents()
 
       try {
         await this.createShoot(shootResource)
@@ -438,9 +448,9 @@ export default {
         messageHtml: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
       })
     },
-    infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
+    infrastructureSecretsByName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
-      return find(secrets, ['metadata.bindingName', secretBindingName])
+      return find(secrets, ['metadata.name', secretBindingName])
     }
   },
   async beforeRouteLeave (to, from, next) {
@@ -450,10 +460,10 @@ export default {
           return next(false)
         }
       }
-      this.updateShootResourceWithUIComponents()
+      await this.updateShootResourceWithUIComponents()
       return next()
     } else {
-      if (!this.isShootCreated && this.isShootContentDirty) {
+      if (!this.isShootCreated && await this.isShootContentDirty()) {
         if (!await this.confirmNavigation()) {
           return next(false)
         }

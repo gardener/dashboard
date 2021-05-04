@@ -1,34 +1,27 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="definitions">
-    <v-row v-for="(definition, index) in definitions" :key="definition.key">
-      <v-list :class="{ 'grey lighten-5': index % 2 }">
+  <div v-if="definitions" class="alternate-row-background">
+    <v-row v-for="(definition) in definitions" :key="definition.key">
+      <v-list color="transparent">
         <v-list-item v-if="definition">
           <v-list-item-action class="action-select">
             <v-switch
               v-model="accessRestrictions[definition.key].value"
-              color="cyan darken-2"
+              color="primary"
               inset
             ></v-switch>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="wrap-text" v-html="compileMarkdown(definition.input.title)"></v-list-item-title>
-            <v-list-item-subtitle v-if="definition.input.description" class="wrap-text" v-html="compileMarkdown(definition.input.description)"></v-list-item-subtitle>
+            <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
+            <v-list-item-subtitle v-if="definition.input.description"
+              class="wrap-text pt-1"
+              v-html="transformHtml(definition.input.description)"
+            />
           </v-list-item-content>
         </v-list-item>
         <template v-if="definition">
@@ -37,12 +30,18 @@ limitations under the License.
               <v-checkbox
                 v-model="accessRestrictions[definition.key].options[optionValue.key].value"
                 :disabled="!enabled(definition)"
-                color="cyan darken-2"
+                color="primary"
               ></v-checkbox>
             </v-list-item-action>
             <v-list-item-content>
-              <v-list-item-title class="wrap-text" :class="textClass(definition)" v-html="compileMarkdown(optionValue.input.title)"></v-list-item-title>
-              <v-list-item-subtitle v-if="optionValue.input.description" class="wrap-text pt-n3" :class="textClass(definition)" v-html="compileMarkdown(optionValue.input.description)"></v-list-item-subtitle>
+              <v-list-item-title class="wrap-text" :class="textClass(definition)">
+                {{optionValue.input.title}}
+              </v-list-item-title>
+              <v-list-item-subtitle v-if="optionValue.input.description"
+                class="wrap-text pt-1"
+                :class="textClass(definition)"
+                v-html="transformHtml(optionValue.input.description)"
+              />
             </v-list-item-content>
           </v-list-item>
         </template>
@@ -55,13 +54,14 @@ limitations under the License.
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
 import cloneDeep from 'lodash/cloneDeep'
 import isEmpty from 'lodash/isEmpty'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
-import { compileMarkdown } from '@/utils'
-import { mapState, mapGetters } from 'vuex'
+
+import { transformHtml } from '@/utils'
 
 export default {
   props: {
@@ -95,8 +95,8 @@ export default {
     }
   },
   methods: {
-    compileMarkdown (value) {
-      return compileMarkdown(value)
+    transformHtml (value) {
+      return transformHtml(value)
     },
     setAccessRestrictions ({ shootResource, cloudProfileName, region }) {
       this.shootResource = shootResource
@@ -112,8 +112,9 @@ export default {
       return inverted ? !value : value
     },
     textClass (definition) {
-      const enabled = this.enabled(definition)
-      return enabled ? 'text--secondary' : 'text--disabled'
+      return this.enabled(definition)
+        ? 'text--secondary'
+        : 'text--disabled'
     },
     applyTo (shootResource) {
       const definitions = this.definitions || []

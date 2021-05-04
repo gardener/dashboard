@@ -1,35 +1,25 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-card>
-    <v-toolbar flat dark dense color="cyan darken-2">
-      <v-toolbar-title class="subtitle-1">Infrastructure</v-toolbar-title>
+    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
+      <v-toolbar-title class="text-subtitle-1">Infrastructure</v-toolbar-title>
     </v-toolbar>
     <v-list>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">cloud_queue</v-icon>
+          <v-icon color="primary">mdi-cloud-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
-            <vendor title extended :shootItem="shootItem"></vendor>
+            <vendor title extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
           </v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <vendor extended :shootItem="shootItem"></vendor>
+            <vendor extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -39,10 +29,9 @@ limitations under the License.
           <v-list-item-subtitle>Credential</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             <router-link v-if="canLinkToSecret"
-              class="cyan--text text--darken-2"
               :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
             >
-              <span class="subtitle-1">{{shootSecretBindingName}}</span>
+              <span class="text-subtitle-1">{{shootSecretBindingName}}</span>
             </router-link>
             <span v-else>{{shootSecretBindingName}}</span>
           </v-list-item-title>
@@ -52,12 +41,12 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">spa</v-icon>
+            <v-icon color="primary">mdi-spa</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Seed</v-list-item-subtitle>
             <v-list-item-title class="pt-1">
-              <shoot-seed-name :shootItem="shootItem" />
+              <shoot-seed-name :shoot-item="shootItem" />
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action>
@@ -80,7 +69,7 @@ limitations under the License.
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">settings_ethernet</v-icon>
+          <v-icon color="primary">mdi-ip-network</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Pods CIDR</v-list-item-subtitle>
@@ -111,7 +100,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-earth</v-icon>
+            <v-icon color="primary">mdi-earth</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Ingress Domain</v-list-item-subtitle>
@@ -125,7 +114,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="cyan darken-2">mdi-ip-network-outline</v-icon>
+            <v-icon color="primary">mdi-ip-network-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Available Load Balancer Classes</v-list-item-subtitle>
@@ -144,22 +133,23 @@ limitations under the License.
 </template>
 
 <script>
-
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
+
 import CopyBtn from '@/components/CopyBtn'
+import LbClass from '@/components/ShootDetails/LbClass'
 import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
-import LbClass from '@/components/ShootDetails/LbClass'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     CopyBtn,
-    ShootSeedName,
     LbClass,
+    ShootSeedName,
     Vendor
   },
   props: {

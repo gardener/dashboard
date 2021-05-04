@@ -1,585 +1,521 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { WatchBuilder } = require('../../lib/kubernetes-client')
-const { Terminal } = require('../../lib/kubernetes-client/resources/GardenerDashboard')
-const { ServiceAccount } = require('../../lib/kubernetes-client/resources/Core')
-const common = require('../support/common')
-const pEvent = require('p-event')
+const { padStart } = require('lodash')
+const { mockRequest } = require('@gardener-dashboard/request')
+const { converter } = require('../../lib/services/terminals')
 
-module.exports = function info ({ agent, sandbox, k8s, auth }) {
-  /* eslint no-unused-expressions: 0 */
-  const username = 'admin@example.org'
-  const id = username
-  const aud = ['gardener']
-  const project = 'foo'
-  const namespace = `garden-${project}`
+function getTerminalName (target, identifier) {
+  return [
+    'term',
+    target,
+    padStart(identifier, 5, '0')
+  ].join('-')
+}
 
-  const seedName = 'infra1-seed'
-  const kind = 'infra1'
-  const region = 'foo-east'
-  const ingressDomain = `ingress.${region}.${kind}.example.org`
+describe('api', function () {
+  let agent
 
-  function createWatchBuilderStub ({
-    namespace,
-    name,
-    username,
-    host,
-    serviceAccountName,
-    serviceAccountSecretName,
-    podName
-  }) {
-    const watchStub = sandbox.stub(WatchBuilder, 'create')
-
-    const terminal = {
-      metadata: {
-        namespace,
-        name,
-        annotations: {
-          'gardener.cloud/created-by': username
-        }
-      },
-      spec: {
-        host
-      },
-      status: {}
-    }
-    const status = {
-      attachServiceAccountName: serviceAccountName,
-      podName
-    }
-    const terminalReconnector = common.createReconnectorStub([
-      ['ADDED', { ...terminal }],
-      ['MODIFIED', { ...terminal, status }]
-    ])
-    watchStub
-      .withArgs(
-        sinon.match.instanceOf(Terminal),
-        `namespaces/${namespace}/terminals`,
-        sinon.match.instanceOf(URLSearchParams),
-        name
-      )
-      .callsFake(() => terminalReconnector.start())
-
-    const serviceAccount = {
-      metadata: {
-        name: serviceAccountName,
-        namespace: host.namespace
-      },
-      secrets: []
-    }
-    const secrets = [{
-      name: serviceAccountSecretName
-    }]
-    const serviceAccountReconnector = common.createReconnectorStub([
-      ['ADDED', { ...serviceAccount }],
-      ['MODIFIED', { ...serviceAccount, secrets }]
-    ])
-    watchStub
-      .withArgs(
-        sinon.match.instanceOf(ServiceAccount),
-        `namespaces/${host.namespace}/serviceaccounts`,
-        sinon.match.instanceOf(URLSearchParams),
-        serviceAccountName
-      )
-      .callsFake(() => serviceAccountReconnector.start())
-
-    return watchStub
-  }
-
-  describe('garden', function () {
-    const target = 'garden'
-    const name = 'term-garden-0815'
-    const hostNamespace = 'term-host-0815'
-
-    it('should create a terminal resource', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      common.stub.getCloudProfiles(sandbox)
-      k8s.stub.createTerminal({ bearer, username, namespace, target, seedName })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'create',
-          params: {
-            coordinate: {
-              namespace,
-              target
-            }
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          kubeApiServer: `k-g.${ingressDomain}`,
-          namespace: hostNamespace
-        },
-        imageHelpText: 'Dummy Image Description'
-      })
-    })
-
-    it('should reuse a terminal session', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      const containerImage = 'fooImage:0.1.2'
-
-      common.stub.getCloudProfiles(sandbox)
-      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'create',
-          params: {
-            coordinate: {
-              namespace,
-              target
-            }
-          }
-        })
-
-      const [, interceptor] = await pEvent(scope, 'replied', {
-        multiArgs: true,
-        filter ([, interceptor]) {
-          return interceptor.method === 'PATCH' && interceptor.statusCode === 200
-        }
-      })
-      const { metadata: { annotations } } = interceptor.replyFunction()
-      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          kubeApiServer: `k-g.${ingressDomain}`,
-          namespace: hostNamespace
-        },
-        imageHelpText: 'Foo Image Description'
-      })
-    })
-
-    it('should fetch a terminal resource', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-      const host = {
-        namespace: hostNamespace,
-        credentials: {
-          secretRef: {
-            name: 'host.kubeconfig',
-            namespace: 'garden'
-          }
-        }
-      }
-      const serviceAccountName = 'term-access-0815'
-      const serviceAccountSecretName = 'term-access-secret-0815'
-      const token = 'dG9rZW4K'
-      const podName = 'term-0815'
-      const hostUrl = 'https://garden.host.cluster.foo.bar'
-
-      common.stub.getCloudProfiles(sandbox)
-      k8s.stub.fetchTerminal({ bearer, target, hostUrl, host, serviceAccountSecretName, token })
-
-      // stub WatchBuilder
-      const watchBuilderStub = createWatchBuilderStub({
-        namespace,
-        name,
-        username,
-        host,
-        serviceAccountName,
-        serviceAccountSecretName,
-        podName
-      })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'fetch',
-          params: {
-            name,
-            namespace
-          }
-        })
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(watchBuilderStub).to.have.been.calledTwice
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          token,
-          pod: {
-            container: 'terminal',
-            name: podName
-          }
-        }
-      })
-    })
-
-    it('should read the terminal config', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.getTerminalConfig({ bearer, namespace, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'config',
-          params: {
-            coordinate: {
-              namespace,
-              target
-            }
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
-    })
-
-    it('should keep a terminal resource alive', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.keepAliveTerminal({ bearer, username, namespace, name, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'heartbeat',
-          params: {
-            name,
-            namespace
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({ ok: true })
-    })
-
-    it('should delete a terminal resource', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.deleteTerminal({ bearer, username, namespace, name, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'remove',
-          params: {
-            name,
-            namespace
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        name,
-        namespace
-      })
-    })
+  beforeAll(() => {
+    agent = createAgent()
   })
 
-  describe('cp', function () {
-    const target = 'cp'
-    const name = 'term-cp-0815'
-
-    const shootName = 'fooShoot'
-    const seedShootNamespace = `shoot--${project}--${shootName}`
-    const kubeApiServer = common.getKubeApiServer('garden', seedName, ingressDomain)
-
-    it('should create a terminal resource', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      common.stub.getCloudProfiles(sandbox)
-      k8s.stub.createTerminal({ bearer, username, namespace, target, shootName, seedName })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'create',
-          params: {
-            coordinate: {
-              name: shootName,
-              namespace,
-              target
-            }
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          kubeApiServer,
-          namespace: seedShootNamespace
-        },
-        imageHelpText: 'Dummy Image Description'
-      })
-    })
-
-    it('should read the terminal config', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.getTerminalConfig({ bearer, namespace, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'config',
-          params: {
-            coordinate: {
-              name: shootName,
-              namespace,
-              target
-            }
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
-    })
-
-    it('should keep a terminal resource alive', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.keepAliveTerminal({ bearer, username, namespace, name, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'heartbeat',
-          params: {
-            name,
-            namespace
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({ ok: true })
-    })
+  afterAll(() => {
+    return agent.close()
   })
 
-  describe('shoot', function () {
-    const target = 'shoot'
-    const name = 'term-shoot-0815'
-    const hostNamespace = 'term-host-0815'
+  beforeEach(() => {
+    mockRequest.mockReset()
+  })
 
-    const shootName = 'fooShoot'
-    const kubeApiServer = common.getKubeApiServer(namespace, shootName, ingressDomain)
+  describe('terminals', function () {
+    const admin = fixtures.auth.createUser({ id: 'admin@example.org' })
+    const namespace = 'garden-foo'
 
-    it('should create a terminal resource', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
+    let makeSanitizedHtmlStub
 
-      common.stub.getCloudProfiles(sandbox)
-      k8s.stub.createTerminal({ bearer, username, namespace, target, shootName, seedName })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'create',
-          params: {
-            coordinate: {
-              name: shootName,
-              namespace,
-              target
-            },
-            preferredHost: 'shoot'
-          }
-        })
-
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          kubeApiServer,
-          namespace: hostNamespace
-        },
-        imageHelpText: 'Dummy Image Description'
-      })
+    beforeEach(function () {
+      makeSanitizedHtmlStub = jest.spyOn(converter, 'makeSanitizedHtml').mockImplementation(text => text)
     })
 
-    it('should reuse a terminal session', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
+    describe('shortcuts', function () {
+      it('should list the project terminal shortcuts', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
+          valid: true,
+          invalid: true
+        }))
 
-      const containerImage = 'fooImage:0.1.2'
-      const preferredHost = 'shoot'
-
-      const shootName = 'fooShoot'
-      const kubeApiServer = common.getKubeApiServer(namespace, shootName, ingressDomain)
-
-      common.stub.getCloudProfiles(sandbox)
-      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, shootName, target, hostNamespace, containerImage, preferredHost })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'create',
-          params: {
-            coordinate: {
-              name: shootName,
-              namespace,
-              target
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'listProjectTerminalShortcuts',
+            params: {
+              coordinate: {
+                namespace
+              }
             }
-          }
-        })
+          })
+          .expect('content-type', /json/)
+          .expect(200)
 
-      const [, interceptor] = await pEvent(scope, 'replied', {
-        multiArgs: true,
-        filter ([, interceptor]) {
-          return interceptor.method === 'PATCH' && interceptor.statusCode === 200
-        }
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
       })
-      const { metadata: { annotations } } = interceptor.replyFunction()
-      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
 
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        metadata: {
-          namespace,
-          name
-        },
-        hostCluster: {
-          kubeApiServer,
-          namespace: hostNamespace
-        },
-        imageHelpText: 'Foo Image Description'
-      })
-    })
+      it('should return empty shortcut list for invalid shortcuts', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
+          valid: false,
+          invalid: true
+        }))
 
-
-    it('should read the terminal config', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
-
-      k8s.stub.getTerminalConfig({ bearer, namespace, shootName, target })
-
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'config',
-          params: {
-            coordinate: {
-              name: shootName,
-              namespace,
-              target
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'listProjectTerminalShortcuts',
+            params: {
+              coordinate: {
+                namespace
+              }
             }
-          }
-        })
+          })
+          .expect('content-type', /json/)
+          .expect(200)
 
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql({
-        image: 'dummyImage:1.0.0',
-        nodes: [{
-          data: {
-            kubernetesHostname: 'hostname',
-            readyStatus: 'True'
-          },
-          metadata: {
-            creationTimestamp: '2020-01-01T20:01:01Z',
-            name: 'nodename'
-          }
-        }]
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should return empty shortcut list for non existing secret', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
+          valid: false,
+          invalid: false
+        }))
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'listProjectTerminalShortcuts',
+            params: {
+              coordinate: {
+                namespace
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
       })
     })
 
-    it('should list terminal resources', async function () {
-      const user = auth.createUser({ id, aud })
-      const bearer = await user.bearer
+    describe('garden', function () {
+      const target = 'garden'
+      const identifier = '1'
 
-      k8s.stub.listTerminalResources({ bearer, username, namespace, shootName })
+      const name = getTerminalName(target, identifier)
 
-      const res = await agent
-        .post('/api/terminals')
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'list',
-          params: {
-            coordinate: {
-              target,
+      it('should create a terminal resource', async function () {
+        const identifier = '21'
+
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'create',
+            params: {
+              identifier,
+              coordinate: {
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
+
+        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should reuse a terminal session', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'create',
+            params: {
+              identifier,
+              coordinate: {
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Foo Image Description']])
+
+        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should fetch a terminal resource', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.watch())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.watch())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'fetch',
+            params: {
+              name,
               namespace
             }
-          }
-        })
+          })
+          .expect('content-type', /json/)
+          .expect(200)
 
-      expect(res).to.have.status(200)
-      expect(res).to.be.json
-      expect(res.body).to.eql([{
-        metadata: {
-          name: 'foo1',
-          namespace: 'foo',
-          identifier: '1'
-        }
-      }, {
-        metadata: {
-          name: 'foo2',
-          namespace: 'foo',
-          identifier: '2'
-        }
-      }])
+        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should read the terminal config', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'config',
+            params: {
+              coordinate: {
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should keep a terminal resource alive', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'heartbeat',
+            params: {
+              name,
+              namespace
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should delete a terminal resource', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.delete())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'remove',
+            params: {
+              name,
+              namespace
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+    })
+
+    describe('cp', function () {
+      const target = 'cp'
+      const identifier = '2'
+      const shootName = 'fooShoot'
+
+      it('should create a terminal resource', async function () {
+        const identifier = '21'
+
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'create',
+            params: {
+              identifier,
+              coordinate: {
+                name: shootName,
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
+
+        expect(mockRequest).toBeCalledTimes(6)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should read the terminal config', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'config',
+            params: {
+              coordinate: {
+                name: shootName,
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should keep a terminal resource alive', async function () {
+        const name = getTerminalName(target, identifier)
+
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'heartbeat',
+            params: {
+              name,
+              namespace
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+    })
+
+    describe('shoot', function () {
+      const target = 'shoot'
+      const identifier = '3'
+      const shootName = 'fooShoot'
+
+      it('should create a terminal resource', async function () {
+        const identifier = '21'
+
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'create',
+            params: {
+              identifier,
+              coordinate: {
+                name: shootName,
+                namespace,
+                target
+              },
+              preferredHost: 'shoot'
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
+
+        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should reuse a terminal session', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'create',
+            params: {
+              identifier,
+              coordinate: {
+                name: shootName,
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Foo Image Description']])
+
+        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should read the terminal config', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.nodes.mocks.list())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'config',
+            params: {
+              coordinate: {
+                name: shootName,
+                namespace,
+                target
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
+    })
+
+    describe('all', function () {
+      it('should list terminal resources', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+
+        const res = await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'list',
+            params: {
+              coordinate: {
+                namespace
+              }
+            }
+          })
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot()
+      })
     })
   })
-}
+})

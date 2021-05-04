@@ -1,24 +1,14 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height position-relative" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
-      :timeout="0"
+      :timeout="-1"
       :absolute="true"
       :top="true"
       multi-line
@@ -27,41 +17,40 @@ limitations under the License.
       <g-popper
         v-if="snackbarDetailsText"
         title="Details"
-        toolbarColor="cyan darken-2"
-        :popperKey="`popper_snackbar_${uuid}`"
+        :popper-key="`popper_snackbar_${uuid}`"
         placement="bottom"
-        :boundariesSelector="`#boundary_${uuid}`"
+        :boundaries-selector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
         <template v-slot:popperRef>
-          <v-btn text small color="cyan darken-2">
+          <v-btn text small color="primary">
             Details
           </v-btn>
         </template>
       </g-popper>
-      <v-btn text color="cyan darken-2" @click="retry()">
+      <v-btn text color="primary" @click="retry">
         Retry
       </v-btn>
-      <v-btn text color="cyan darken-2" @click="hideSnackbar()">
+      <v-btn text color="primary" @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
     <v-snackbar
       v-model="errorSnackbarBottom"
-      :timeout="0"
+      :timeout="-1"
       :absolute="true"
       :bottom="true"
-      color="red"
+      color="error"
     >
       {{ snackbarText }}
-      <v-btn text @click="hideSnackbar()">
+      <v-btn text @click="hideSnackbarAndClose">
         Close
       </v-btn>
     </v-snackbar>
-    <draggable-component :uuid="uuid">
+    <drag-n-droppable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag" @click="deleteTerminal">
+          <v-btn icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag" @click="deleteTerminal">
             <v-icon class="mr-0" small>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
@@ -70,17 +59,16 @@ limitations under the License.
           <v-spacer></v-spacer>
           <v-tooltip v-if="terminalSession.imageHelpText" top class="g-ignore-drag">
             <template v-slot:activator="{ on: tooltip }">
-              <!-- g-popper boundariesSelector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
+              <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
               <g-popper
                 :title="`${imageShortText} Help`"
-                toolbarColor="cyan darken-2"
-                :popperKey="`popper_${uuid}`"
+                :popper-key="`popper_${uuid}`"
                 placement="bottom"
-                :boundariesSelector="`#boundary_${uuid}`"
+                :boundaries-selector="`#boundary_${uuid}`"
               >
-                <span v-html="compiledImageHelpText"></span>
+                <span v-html="imageHelpHtml"></span>
                 <template v-slot:popperRef>
-                  <v-btn v-on="tooltip" v-if="terminalSession.imageHelpText" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag">
+                  <v-btn v-on="tooltip" v-if="terminalSession.imageHelpText" icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag">
                     <v-icon class="mr-0" small>mdi-help-circle-outline</v-icon>
                   </v-btn>
                 </template>
@@ -95,14 +83,14 @@ limitations under the License.
             min-width="400px"
           >
             <template v-slot:activator="{ on: menu }">
-              <v-btn v-on="menu" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag">
+              <v-btn v-on="menu" icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag">
                 <v-icon class="mr-0" small>mdi-menu</v-icon>
               </v-btn>
             </template>
             <v-card tile>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('horizontal')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
                   <span>Split Pane Vertically</span>
@@ -112,7 +100,7 @@ limitations under the License.
               </v-card-actions>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="split('vertical')">
-                  <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
+                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
                   <span>Split Pane Horizontally</span>
@@ -123,7 +111,7 @@ limitations under the License.
               <v-divider class="mt-1 mb-1"></v-divider>
               <v-card-actions>
                 <v-btn small block text class="justify-start" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
-                  <v-icon small class="mr-2">mdi-settings</v-icon>
+                  <v-icon small class="mr-2">mdi-cog</v-icon>
                   Settings
                 </v-btn>
               </v-card-actions>
@@ -144,7 +132,7 @@ limitations under the License.
               <v-tooltip :disabled="connectionMenu" top style="min-width: 110px">
                 <template v-slot:activator="{ on: tooltip }">
                   <v-btn v-on="{ ...tooltip, ...menu }" small text color="grey lighten-1" class="text-none systemBarButton">
-                    <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+                    <icon-base width="18" height="18" view-box="-2 -2 30 30" icon-color="#bdbdbd" class="mr-2">
                       <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                       <disconnected v-else></disconnected>
                     </icon-base>
@@ -156,7 +144,7 @@ limitations under the License.
             </template>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small text class="actionButton" @click="retry()">
+                <v-btn small text class="action-button" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>
@@ -174,7 +162,7 @@ limitations under the License.
                 <span>{{imageShortText}}</span>
               </v-btn>
             </template>
-            Image: {{terminalSession.image}}
+            Image: {{terminalSession.container.image}}
           </v-tooltip>
 
           <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
@@ -200,12 +188,11 @@ limitations under the License.
           </v-tooltip>
         </v-system-bar>
       </template>
-    </draggable-component>
+    </drag-n-droppable-component>
     <terminal-settings-dialog
       ref="settings"
       :target="target"
     ></terminal-settings-dialog>
-    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
 </template>
 
@@ -216,32 +203,20 @@ import get from 'lodash/get'
 import assign from 'lodash/assign'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import intersection from 'lodash/intersection'
-import keys from 'lodash/keys'
-import includes from 'lodash/includes'
-import pick from 'lodash/pick'
-import pTimeout from 'p-timeout'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
 
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
-import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
+
+import { TerminalSession } from '@/lib/terminal'
 import { FocusAddon } from '@/lib/xterm-addon-focus'
 import GPopper from '@/components/GPopper'
 
-import DraggableComponent from '@/components/DraggableComponent'
-import { encodeBase64Url, targetText } from '@/utils'
-import {
-  createTerminal,
-  fetchTerminalSession,
-  deleteTerminal,
-  heartbeat,
-  terminalConfig
-} from '@/utils/api'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
+import DragNDroppableComponent from '@/components/DragNDroppableComponent'
+import { targetText, transformHtml } from '@/utils'
+import { terminalConfig } from '@/utils/api'
+import { isGatewayTimeout } from '@/utils/error'
 import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
@@ -249,354 +224,9 @@ import Disconnected from '@/components/icons/Disconnected'
 import SplitVertically from '@/components/icons/SplitVertically'
 import SplitHorizontally from '@/components/icons/SplitHorizontally'
 
-const WsCloseEventEnum = {
-  NORMAL_CLOUSURE: 1000
-}
-
-const RETRY_TIMEOUT_SECONDS = 3
-const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
-
-class TerminalSession {
-  constructor (vm) {
-    this.vm = vm
-    this.cancelConnect = false
-    this.tries = 0
-    this.metadata = undefined
-    this.hostCluster = undefined
-    this.imageHelpText = undefined
-
-    this.setInitialState()
-    this.close = () => {}
-  }
-
-  setInitialState () {
-    this.connectionState = TerminalSession.DISCONNECTED
-    this.node = undefined
-    this.privileged = undefined
-    this.hostPID = undefined
-    this.hostNetwork = undefined
-    this.image = undefined
-    this.detailedConnectionStateText = undefined
-  }
-
-  setDisconnectedState () {
-    this.setInitialState()
-  }
-
-  async open () {
-    this.connectionState = TerminalSession.CREATING
-    const { metadata, hostCluster, imageHelpText } = await this.createTerminal()
-    this.metadata = pick(metadata, ['name', 'namespace'])
-    this.hostCluster = pick(hostCluster, ['kubeApiServer', 'namespace', 'pod'])
-    this.imageHelpText = imageHelpText
-
-    this.connectionState = TerminalSession.FETCHING
-    const { hostCluster: { pod, token } } = await this.fetchTerminalSession()
-    assign(this.hostCluster, { pod, token })
-
-    return this.attachTerminal()
-  }
-
-  async createTerminal () {
-    const body = this.vm.selectedConfig
-    body.identifier = this.vm.uuid
-
-    const { data } = await createTerminal({ ...this.terminalCoordinates, body })
-    return data
-  }
-
-  async fetchTerminalSession () {
-    const { data } = await fetchTerminalSession({ ...this.terminalCoordinates })
-    return data
-  }
-
-  async deleteTerminal () {
-    const { data } = await deleteTerminal({ ...this.terminalCoordinates })
-
-    this.metadata = undefined
-
-    return data
-  }
-
-  heartbeat () {
-    return heartbeat({ ...this.terminalCoordinates })
-  }
-
-  get isCreated () {
-    return !!this.metadata
-  }
-
-  get terminalCoordinates () {
-    const coordinates = pick(this.vm.data, ['name', 'namespace', 'target'])
-    if (this.metadata) {
-      coordinates.body = { ...this.metadata }
-    }
-    return coordinates
-  }
-
-  async attachTerminal () {
-    if (this.cancelConnect) {
-      return
-    }
-
-    this.tries++
-
-    try {
-      this.connectionState = TerminalSession.CONNECTING
-      await this.waitUntilPodIsRunning(60)
-      if (this.cancelConnect) {
-        return
-      }
-    } catch (err) {
-      console.error('failed to wait until pod is running', err)
-      this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
-      this.setDisconnectedState()
-      return
-    }
-
-    // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
-    const protocols = addBearerToken(['v4.channel.k8s.io'], this.hostCluster.token)
-    const ws = new WebSocket(attachUri(this.hostCluster), protocols)
-    const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
-    this.vm.term.loadAddon(attachAddon)
-    let reconnectTimeoutId
-    let heartbeatIntervalId
-
-    ws.onopen = () => {
-      if (this.cancelConnect) {
-        this.close()
-        return
-      }
-
-      this.vm.spinner.stop()
-      this.vm.hideSnackbar()
-      this.connectionState = TerminalSession.CONNECTED
-      this.tries = 0
-
-      heartbeatIntervalId = setInterval(async () => {
-        try {
-          await this.heartbeat()
-        } catch (err) {
-          console.error('heartbeat failed:', err)
-        }
-      }, this.vm.heartbeatIntervalSeconds * 1000)
-    }
-    ws.onclose = error => {
-      this.close()
-      const wasConnected = this.connectionState === TerminalSession.CONNECTED
-
-      if (this.cancelConnect) {
-        this.setDisconnectedState()
-        return
-      }
-      if (error.code === WsCloseEventEnum.NORMAL_CLOUSURE) {
-        this.setDisconnectedState()
-        this.vm.showSnackbarTop('Terminal connection lost')
-        return
-      }
-      if (this.tries >= MAX_TRIES) {
-        this.setDisconnectedState()
-        this.vm.showSnackbarTop('Could not connect to terminal')
-        return
-      }
-
-      this.connectionState = TerminalSession.CONNECTING
-
-      let timeoutSeconds
-      if (wasConnected) {
-        timeoutSeconds = 0
-        // do not start spinner as this would clear the console
-        console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
-      } else { // Try again later
-        timeoutSeconds = RETRY_TIMEOUT_SECONDS
-        this.vm.spinner.start()
-        console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
-      }
-      reconnectTimeoutId = setTimeout(() => this.attachTerminal(), timeoutSeconds * 1000)
-    }
-    this.close = () => {
-      clearTimeout(reconnectTimeoutId)
-      clearInterval(heartbeatIntervalId)
-
-      closeWsIfNotClosed(ws)
-      attachAddon.dispose()
-
-      this.close = () => {}
-    }
-  }
-
-  async waitUntilPodIsRunning (timeoutSeconds) {
-    const containerName = this.hostCluster.pod.container
-    const onPodStateChange = ({ type, object: pod }) => {
-      const containers = get(pod, 'spec.containers')
-      const terminalContainer = find(containers, ['name', containerName])
-      this.image = get(terminalContainer, 'image')
-      this.privileged = get(terminalContainer, 'securityContext.privileged', false)
-      this.hostPID = get(pod, 'spec.hostPID', false)
-      this.hostNetwork = get(pod, 'spec.hostNetwork', false)
-      this.node = get(pod, 'spec.nodeName')
-
-      const phase = get(pod, 'status.phase')
-      if (includes(['Failed', 'Succeeded'], phase) || type === 'DELETED') {
-        return
-      }
-
-      const containerStatuses = get(pod, 'status.containerStatuses')
-      const terminalContainerStatus = find(containerStatuses, ['name', containerName])
-      this.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
-      this.vm.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
-    }
-
-    const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-    addBearerToken(protocols, this.hostCluster.token)
-    const ws = new WebSocket(watchPodUri(this.hostCluster), protocols)
-
-    this.vm.spinner.text = 'Connecting to Pod'
-    try {
-      await waitForPodRunning(ws, containerName, onPodStateChange, timeoutSeconds * 1000)
-    } finally {
-      closeWsIfNotClosed(ws)
-    }
-  }
-}
-Object.assign(TerminalSession, {
-  DISCONNECTED: 0,
-  CREATING: 1,
-  FETCHING: 2,
-  CONNECTING: 3,
-  CONNECTED: 4
-})
-
-function addBearerToken (protocols, bearer) {
-  protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
-  return protocols
-}
-
-function attachUri ({ namespace, kubeApiServer, pod: { name, container } }) {
-  kubeApiServer = encodeURIComponent(kubeApiServer)
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  container = encodeURIComponent(container)
-
-  return `wss://${kubeApiServer}/api/v1/namespaces/${namespace}/pods/${name}/attach?container=${container}&stdin=true&stdout=true&tty=true`
-}
-
-function watchPodUri ({ namespace, kubeApiServer, pod: { name } }) {
-  kubeApiServer = encodeURIComponent(kubeApiServer)
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return `wss://${kubeApiServer}/api/v1/namespaces/${namespace}/pods?fieldSelector=metadata.name%3D${name}&watch=true`
-}
-
-function closeWsIfNotClosed (ws) {
-  if (ws.readyState === WsReadyStateEnum.OPEN || ws.readyState === WsReadyStateEnum.CONNECTING) {
-    ws.close()
-  }
-}
-
-async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds) {
-  const connectPromise = new Promise((resolve, reject) => {
-    const openHandler = () => {
-      ws.removeEventListener('open', openHandler)
-      ws.removeEventListener('error', errorHandler)
-
-      resolve()
-    }
-    const errorHandler = error => {
-      ws.removeEventListener('open', openHandler)
-      ws.removeEventListener('error', errorHandler)
-
-      reject(error)
-    }
-
-    ws.addEventListener('open', openHandler)
-    ws.addEventListener('error', errorHandler)
-  })
-
-  const connectTimeoutSeconds = 5
-  await pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
-
-  const podRunningPromise = new Promise((resolve, reject) => {
-    const resolveOnce = value => {
-      ws.removeEventListener('message', messageHandler)
-      ws.removeEventListener('close', closeHandler)
-
-      resolve(value)
-    }
-    const rejectOnce = reason => {
-      ws.removeEventListener('message', messageHandler)
-      ws.removeEventListener('close', closeHandler)
-
-      reject(reason)
-    }
-
-    const closeHandler = error => {
-      rejectOnce(error)
-    }
-    const messageHandler = ({ data: message }) => {
-      let event
-      try {
-        event = JSON.parse(message)
-      } catch (error) {
-        console.error('could not parse message')
-        return
-      }
-      const pod = event.object
-      if (typeof handleEvent === 'function') {
-        try {
-          handleEvent(event)
-        } catch (error) {
-          console.error('error during handleEvent', error.message)
-        }
-      }
-
-      const phase = get(pod, 'status.phase')
-      if (includes(['Failed', 'Succeeded'], phase)) {
-        rejectOnce(new Error(`Pod is in phase ${phase}`))
-        return
-      } else if (event.type === 'DELETED') {
-        rejectOnce(new Error('Pod deleted'))
-        return
-      }
-
-      const containerStatuses = get(pod, 'status.containerStatuses')
-      const terminalContainerStatus = find(containerStatuses, ['name', containerName])
-      const isContainerReady = get(terminalContainerStatus, 'ready', false)
-
-      if (phase === 'Running' && isContainerReady) {
-        resolveOnce()
-      }
-    }
-    ws.addEventListener('message', messageHandler)
-    ws.addEventListener('close', closeHandler)
-  })
-  return pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
-}
-
-function getDetailedConnectionStateText (terminalContainerStatus) {
-  const state = get(terminalContainerStatus, 'state')
-  const stateKeys = intersection(['waiting', 'running', 'terminated'], keys(state))
-  const stateType = head(stateKeys)
-
-  let text = ''
-  if (!stateType) {
-    return text
-  }
-
-  text = `Container is ${stateType}`
-
-  const reason = get(terminalContainerStatus, ['state', stateType, 'reason'])
-  if (!reason) {
-    return text
-  }
-
-  return `${text}: ${reason}`
-}
-
 export default {
   name: 'g-terminal',
   components: {
-    ConfirmDialog,
     TerminalSettingsDialog,
     IconBase,
     Connected,
@@ -604,7 +234,7 @@ export default {
     GPopper,
     SplitVertically,
     SplitHorizontally,
-    DraggableComponent
+    DragNDroppableComponent
   },
   props: {
     uuid: {
@@ -632,7 +262,9 @@ export default {
       },
       connectionMenu: false,
       config: {
-        image: undefined,
+        container: {
+          image: undefined
+        },
         nodes: []
       },
       selectedConfig: {},
@@ -650,11 +282,14 @@ export default {
       'splitpaneResize'
     ]),
     terminalTitle () {
-      let title = this.targetText
+      const title = [this.targetText]
       if (this.name) {
-        title += ` - ${this.name}`
+        title.push(this.name)
       }
-      return title
+      if (this.data.title) {
+        title.push(this.data.title)
+      }
+      return title.join(' - ')
     },
     targetText () {
       return targetText(this.target) || 'UNKNOWN'
@@ -666,7 +301,7 @@ export default {
       return this.terminalSession && this.terminalSession.isCreated
     },
     defaultImage () {
-      return this.terminalSession.image || this.config.image
+      return this.terminalSession.container.image || this.config.container.image
     },
     defaultNode () {
       const defaultNode = find(this.config.nodes, ['data.kubernetesHostname', this.terminalSession.node])
@@ -700,17 +335,11 @@ export default {
       return this.privilegedMode ? 'Privileged' : 'Unprivileged'
     },
     imageShortText () {
-      const image = this.terminalSession.image || ''
+      const image = get(this.terminalSession, 'container.image', '')
       return image.substring(image.lastIndexOf('/') + 1)
     },
-    compiledImageHelpText () {
-      const options = {
-        gfm: true,
-        breaks: true,
-        tables: true
-      }
-      const dirty = marked(get(this.terminalSession, 'imageHelpText', ''), options)
-      return DOMPurify.sanitize(dirty)
+    imageHelpHtml () {
+      return transformHtml(get(this.terminalSession, 'imageHelpText', ''))
     },
     name () {
       // name is undefined in case of garden terminal
@@ -728,25 +357,19 @@ export default {
       this.term.focus()
     },
     async deleteTerminal () {
-      if (!await this.confirmDelete()) {
+      if (!this.isTerminalSessionCreated) { // Either the terminal session is not yet established or there was an error
+        this.$emit('terminated')
         return
       }
 
       try {
         await this.terminalSession.deleteTerminal()
       } catch (err) {
-        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        // ignore error, the terminal will be cleaned up anyhow after the timeout
       }
       this.cancelConnectAndClose()
 
       this.$emit('terminated')
-    },
-    confirmDelete () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Terminate',
-        captionText: 'Confirm Termination',
-        messageHtml: 'Do you want to terminate this terminal session? This will clean up all related resources.<br/><br/><i class="grey--text text--darken-2">Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
-      })
     },
     async configure (refName) {
       this.loading[refName] = true
@@ -762,7 +385,9 @@ export default {
       }
 
       const initialState = {
-        image: this.defaultImage,
+        container: {
+          image: this.defaultImage
+        },
         defaultNode: this.defaultNode,
         currentNode: this.terminalSession.node,
         privilegedMode: this.defaultPrivilegedMode,
@@ -773,6 +398,7 @@ export default {
         try {
           await this.terminalSession.deleteTerminal()
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.log('failed to cleanup terminal session on configuration change')
         }
         this.cancelConnectAndClose()
@@ -785,6 +411,11 @@ export default {
       if (this.fitAddon) {
         this.fitAddon.fit()
       }
+    },
+    hideSnackbarAndClose () {
+      this.hideSnackbar()
+
+      return this.deleteTerminal()
     },
     hideSnackbar () {
       this.snackbarTop = false
@@ -823,7 +454,11 @@ export default {
       try {
         await terminalSession.open()
       } catch (err) {
-        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        let message = get(err, 'response.data.message', err.message)
+        if (isGatewayTimeout(err)) {
+          message = 'Opening the terminal session timed out'
+        }
+        this.showErrorSnackbarBottom(message)
         terminalSession.setDisconnectedState()
       }
     },
@@ -894,7 +529,7 @@ export default {
     margin-left: 4px;
     margin-bottom: 0;
     margin-right: 0;
-    max-height: calc(100% - 50px);
+    max-height: calc(100% - 52px);
     /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
     opacity: .99;
   }

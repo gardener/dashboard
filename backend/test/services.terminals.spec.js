@@ -1,34 +1,26 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
 const _ = require('lodash')
+const yaml = require('js-yaml')
 const pEvent = require('p-event')
-const { AssertionError } = require('assert').strict
-const common = require('./support/common')
-const config = require('../lib/config')
-const { getSeed } = require('../lib/cache')
-const { Resources } = require('../lib/kubernetes-client')
-const { Forbidden } = require('../lib/errors')
+const assert = require('assert').strict
+const { Forbidden } = require('http-errors')
+const { Resources } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
+const config = require('../lib/config')
+const { getSeed, cache } = require('../lib/cache')
+const { encodeBase64 } = require('../lib/utils')
 
 const {
   ensureTerminalAllowed,
-  findImageDescription
+  findImageDescription,
+  fromShortcutSecretResource
 } = require('../lib/services/terminals')
 
 const {
@@ -45,18 +37,24 @@ const {
 
 const {
   Handler,
-  Bootstrapper
+  Bootstrapper,
+  BootstrapStatusEnum
 } = require('../lib/services/terminals/terminalBootstrap')
 
 const {
   dashboardClient
-} = require('../lib/kubernetes-client')
+} = require('@gardener-dashboard/kube-client')
+
+const { AssertionError } = assert
+
+const nextTick = () => new Promise(process.nextTick)
 
 describe('services', function () {
   /* eslint no-unused-expressions: 0 */
   describe('terminals', function () {
     const seedName = 'infra1-seed'
-    const seedName2 = 'infra4-seed-without-secretRef'
+    const seedWithoutSecretRefName = 'infra4-seed-without-secretRef'
+    const unreachableSeedName = 'infra3-seed' // unreachable seed
     const soilName = 'soil-infra1'
     const kind = 'infra1'
     const region = 'foo-east'
@@ -67,7 +65,8 @@ describe('services', function () {
       cluster: dashboardClient.cluster,
       core: {
         secrets: {
-          list (namespace) {
+          async list (namespace) {
+            await nextTick()
             return {
               items: [
                 { metadata: { namespace, name: firstSecretName } },
@@ -77,11 +76,12 @@ describe('services', function () {
           }
         }
       },
-      getShoot ({ namespace, name }) {
+      async getShoot ({ namespace, name }) {
+        await nextTick()
         if (namespace === 'garden' && name === soilName) {
           return
         }
-        if (namespace === 'garden' && (name === seedName || name === seedName2)) {
+        if (namespace === 'garden' && _.includes([seedName, seedWithoutSecretRefName], name)) {
           return {
             kind: 'Shoot',
             metadata: { namespace, name },
@@ -107,104 +107,105 @@ describe('services', function () {
       }
     }
 
-    const sandbox = sinon.createSandbox()
-
-    function createConfigStub (terminal = {}) {
-      const stub = sandbox.stub(config, 'terminal')
-      const getTerminalConfig = () => {
-        const apiServerIngress = {
-          annotations: {
-            foo: 'bar'
+    function createTerminalConfig (terminal = {}) {
+      const apiServerIngress = {
+        annotations: {
+          foo: 'bar'
+        }
+      }
+      return _.merge({
+        containerImage: 'image:1.2.3',
+        gardenTerminalHost: {
+          apiServerIngressHost: 'gardenTerminalApiServerIngressHost'
+        },
+        garden: {
+          operatorCredentials: {
+            serviceAccountRef: {
+              name: 'operatorServiceAccountName',
+              namespace: 'garden'
+            }
+          }
+        },
+        bootstrap: {
+          disabled: true,
+          seedDisabled: true,
+          shootDisabled: true,
+          gardenTerminalHostDisabled: true,
+          apiServerIngress,
+          gardenTerminalHost: {
+            apiServerIngress
           }
         }
-        return _.merge({
-          containerImage: 'image:1.2.3',
-          gardenTerminalHost: {
-            apiServerIngressHost: 'gardenTerminalApiServerIngressHost'
-          },
-          garden: {
-            operatorCredentials: {
-              serviceAccountRef: {
-                name: 'operatorServiceAccountName',
-                namespace: 'garden'
-              }
-            }
-          },
-          bootstrap: {
-            disabled: true,
-            seedDisabled: true,
-            shootDisabled: true,
-            gardenTerminalHostDisabled: true,
-            apiServerIngress,
-            gardenTerminalHost: {
-              apiServerIngress
-            }
-          }
-        }, terminal)
-      }
-      stub.get(getTerminalConfig)
-      return stub
+      }, terminal)
     }
 
+    const terminalConfig = config.terminal
+    let terminalStub
+    let seedList
+
     beforeEach(function () {
-      common.stub.getCloudProfiles(sandbox)
+      terminalStub = jest.fn().mockReturnValue(terminalConfig)
+      Object.defineProperty(config, 'terminal', { get: terminalStub })
+      seedList = fixtures.seeds.list()
+      jest.spyOn(cache, 'getSeeds').mockReturnValue(seedList)
     })
 
     afterEach(function () {
-      sandbox.restore()
+      Object.defineProperty(config, 'terminal', { value: terminalConfig })
     })
 
-    describe('terminals', function () {
+    describe('index', function () {
       describe('#findImageDescription', function () {
         it('should match regexp', async function () {
           const containerImage = 'foo:bar'
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: '/foo:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).toBe('baz')
         })
 
         it('should not match regexp', async function () {
           const containerImage = 'foo:bar'
 
-          let imageDescriptions = [{
+          let containerImageDescriptions = [{
             image: '/dummy:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).toBeUndefined()
 
-          imageDescriptions = [{
+          containerImageDescriptions = [{
             image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).toBeUndefined()
         })
 
         it('should match exactly', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'foo:bar',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).toBe('baz')
         })
 
         it('should not match', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'bar:foo',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).toBeUndefined()
 
-          expect(findImageDescription('foo:bar', undefined)).to.be.undefined
-          expect(findImageDescription('foo:bar', [])).to.be.undefined
-          expect(findImageDescription('foo:bar', [{}])).to.be.undefined
+          expect(findImageDescription('foo:bar', undefined)).toBeUndefined()
+          expect(findImageDescription('foo:bar', [])).toBeUndefined()
+          expect(findImageDescription('foo:bar', [{}])).toBeUndefined()
         })
       })
+
       describe('#getGardenTerminalHostClusterSecretRef', function () {
         it('should return the secret reference by secretRef', async function () {
           const gardenTerminalHost = {
@@ -212,17 +213,17 @@ describe('services', function () {
               namespace: 'secretNamespace'
             }
           }
-          createConfigStub({ gardenTerminalHost })
-          const listSecretsSpy = sandbox.spy(client.core.secrets, 'list')
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const listSecretsSpy = jest.spyOn(client.core.secrets, 'list')
           const secretRef = await getGardenTerminalHostClusterSecretRef(client)
-          expect(listSecretsSpy).to.be.calledOnce
-          expect(listSecretsSpy.firstCall.args).to.eql([
+          expect(listSecretsSpy).toBeCalledTimes(1)
+          expect(listSecretsSpy.mock.calls[0]).toEqual([
             gardenTerminalHost.secretRef.namespace,
             {
               labelSelector: 'runtime=gardenTerminalHost'
             }
           ])
-          expect(secretRef).to.eql({
+          expect(secretRef).toEqual({
             namespace: gardenTerminalHost.secretRef.namespace,
             name: firstSecretName
           })
@@ -232,9 +233,9 @@ describe('services', function () {
           const gardenTerminalHost = {
             seedRef: seedName
           }
-          createConfigStub({ gardenTerminalHost })
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const secretRef = await getGardenTerminalHostClusterSecretRef(client)
-          expect(secretRef).to.eql({
+          expect(secretRef).toEqual({
             namespace: 'garden',
             name: `seedsecret-${gardenTerminalHost.seedRef}`
           })
@@ -247,9 +248,9 @@ describe('services', function () {
               name: 'shootName'
             }
           }
-          createConfigStub({ gardenTerminalHost })
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const secretRef = await getGardenTerminalHostClusterSecretRef(client)
-          expect(secretRef).to.eql({
+          expect(secretRef).toEqual({
             namespace: gardenTerminalHost.shootRef.namespace,
             name: `${gardenTerminalHost.shootRef.name}.kubeconfig`
           })
@@ -259,155 +260,212 @@ describe('services', function () {
           const gardenTerminalHost = {
             noRef: 'none'
           }
-          createConfigStub({ gardenTerminalHost })
-          try {
-            await getGardenTerminalHostClusterSecretRef(client)
-            expect.fail('Assertion error expected')
-          } catch (err) {
-            expect(err).to.be.instanceof(AssertionError)
-          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          await expect(getGardenTerminalHostClusterSecretRef(client)).rejects.toThrow(AssertionError)
         })
 
-        it('should throw a no seed error ', async function () {
+        it('should throw a no seed error', async function () {
           const gardenTerminalHost = {
             seedRef: 'none'
           }
-          createConfigStub({ gardenTerminalHost })
-          try {
-            await getGardenTerminalHostClusterSecretRef(client)
-            expect.fail('Not found expected')
-          } catch (err) {
-            expect(err).to.be.instanceof(Error)
-            expect(err.message).to.equal(`There is no seed with name ${gardenTerminalHost.seedRef}`)
-          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          await expect(getGardenTerminalHostClusterSecretRef(client)).rejects.toThrow(`There is no seed with name ${gardenTerminalHost.seedRef}`)
         })
       })
-    })
 
-    describe('#getGardenHostClusterKubeApiServer', function () {
-      it('should return the kubeApiServer by secretRef', async function () {
-        const gardenTerminalHost = {
-          apiServerIngressHost: 'apiServerIngressHost',
-          secretRef: {
-            namespace: 'secretNamespace'
+      describe('#ensureTerminalAllowed', function () {
+        it('should allow terminals for admins', function () {
+          const isAdmin = true
+          const method = 'foo'
+          const target = 'foo'
+          try {
+            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
+          } catch (err) {
+            expect.fail('No exception expected')
           }
-        }
-        createConfigStub({ gardenTerminalHost })
-        const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-        expect(kubeApiServer).to.equal(gardenTerminalHost.apiServerIngressHost)
-      })
+        })
 
-      it('should return the secret reference by shooted seedRef', async function () {
-        const gardenTerminalHost = {
-          seedRef: seedName
-        }
-        createConfigStub({ gardenTerminalHost })
-        const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-        const expectedKubeApiServer = common.getKubeApiServer('garden', gardenTerminalHost.seedRef, ingressDomain)
-        expect(kubeApiServer).to.equal(expectedKubeApiServer)
-      })
-
-      it('should return the secret reference by non-shooted seedRef', async function () {
-        const gardenTerminalHost = {
-          seedRef: 'soil-infra1'
-        }
-        createConfigStub({ gardenTerminalHost })
-        const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-        const expectedKubeApiServer = `k-g.${ingressDomain}`
-        expect(kubeApiServer).to.equal(expectedKubeApiServer)
-      })
-
-      it('should return the secret reference by shootRef', async function () {
-        const gardenTerminalHost = {
-          shootRef: {
-            namespace: 'shootNamespace',
-            name: 'shootName'
+        it('should allow terminals for project admins', function () {
+          const isAdmin = false
+          const method = 'create'
+          const target = 'shoot'
+          try {
+            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
+          } catch (err) {
+            expect.fail('No exception expected')
           }
-        }
-        createConfigStub({ gardenTerminalHost })
-        const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-        const expectedKubeApiServer = common.getKubeApiServer(gardenTerminalHost.shootRef.namespace, gardenTerminalHost.shootRef.name, ingressDomain)
-        expect(kubeApiServer).to.equal(expectedKubeApiServer)
+        })
+
+        it('should allow to list terminals for project admins', function () {
+          const isAdmin = false
+          const method = 'list'
+          const target = 'foo'
+          try {
+            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
+          } catch (err) {
+            expect.fail('No exception expected')
+          }
+        })
+
+        it('should disallow cp terminals for project admins', function () {
+          const isAdmin = false
+          const method = 'create'
+          const target = 'cp'
+          expect(() => ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })).toThrow(Forbidden)
+        })
       })
 
-      it('should throw an assertion error', async function () {
-        const gardenTerminalHost = {
-          noRef: 'none'
-        }
-        createConfigStub({ gardenTerminalHost })
-        try {
-          await getGardenHostClusterKubeApiServer(client)
-          expect.fail('Assertion error expected')
-        } catch (err) {
-          expect(err).to.be.instanceof(AssertionError)
-        }
+      it('should pick only valid fields from shortcut resource', function () {
+        let actualShortcuts = fromShortcutSecretResource({
+          data: encodeBase64(yaml.safeDump({}))
+        })
+        expect(actualShortcuts).toEqual([])
+
+        actualShortcuts = fromShortcutSecretResource({
+          data: {
+            shortcuts: undefined
+          }
+        })
+        expect(actualShortcuts).toEqual([])
+
+        actualShortcuts = fromShortcutSecretResource({
+          data: {
+            shortcuts: encodeBase64('invalid')
+          }
+        })
+        expect(actualShortcuts).toEqual([])
+
+        actualShortcuts = fromShortcutSecretResource({
+          data: {
+            shortcuts: encodeBase64(yaml.safeDump([
+              {
+                foo: 'bar'
+              }
+            ]))
+          }
+        })
+        expect(actualShortcuts).toEqual([])
+
+        actualShortcuts = fromShortcutSecretResource({
+          data: {
+            shortcuts: encodeBase64(yaml.safeDump([
+              {}, // invalid object
+              {
+                description: 'invalid due to missing required keys'
+              },
+              {
+                title: 'invalid target',
+                target: 'foo'
+              },
+              {
+                title: 'minimalistic shortcut',
+                target: 'shoot'
+              },
+              {
+                title: 'title',
+                description: 'description',
+                target: 'shoot',
+                container: {
+                  image: 'image',
+                  command: ['command'],
+                  args: ['args']
+                },
+                shootSelector: {
+                  matchLabels: {
+                    foo: 'bar'
+                  }
+                },
+                foo: 'ignore'
+              }
+            ]))
+          }
+        })
+        expect(actualShortcuts).toEqual([
+          {
+            title: 'minimalistic shortcut',
+            target: 'shoot'
+          },
+          {
+            title: 'title',
+            description: 'description',
+            target: 'shoot',
+            container: {
+              image: 'image',
+              command: ['command'],
+              args: ['args']
+            },
+            shootSelector: {
+              matchLabels: {
+                foo: 'bar'
+              }
+            }
+          }
+        ])
       })
     })
 
-    describe('#getWildcardIngressDomainForSeed', function () {
-      it('should return the wildcard ingress domain for a seed', function () {
-        const seed = { spec: { dns: { ingressDomain } } }
-        const wildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
-        expect(wildcardIngressDomain).to.equal(`*.${ingressDomain}`)
-      })
-    })
+    describe('utils', function () {
+      describe('#getGardenHostClusterKubeApiServer', function () {
+        it('should return the kubeApiServer by secretRef', async function () {
+          const gardenTerminalHost = {
+            apiServerIngressHost: 'apiServerIngressHost',
+            secretRef: {
+              namespace: 'secretNamespace'
+            }
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
+          expect(kubeApiServer).toBe(gardenTerminalHost.apiServerIngressHost)
+        })
 
-    describe('#ensureTerminalAllowed', function () {
-      it('should allow terminals for admins', function () {
-        const isAdmin = true
-        const method = 'foo'
-        const target = 'foo'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-        } catch (err) {
-          expect.fail('No exception expected')
-        }
+        it('should return the secret reference by shooted seedRef', async function () {
+          const gardenTerminalHost = {
+            seedRef: seedName
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
+          const expectedKubeApiServer = fixtures.kube.getApiServer('garden', gardenTerminalHost.seedRef, ingressDomain)
+          expect(kubeApiServer).toBe(expectedKubeApiServer)
+        })
+
+        it('should return the secret reference by non-shooted seedRef', async function () {
+          const gardenTerminalHost = {
+            seedRef: 'soil-infra1'
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
+          const expectedKubeApiServer = `k-g.${ingressDomain}`
+          expect(kubeApiServer).toBe(expectedKubeApiServer)
+        })
+
+        it('should return the secret reference by shootRef', async function () {
+          const gardenTerminalHost = {
+            shootRef: {
+              namespace: 'shootNamespace',
+              name: 'shootName'
+            }
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
+          const expectedKubeApiServer = fixtures.kube.getApiServer(gardenTerminalHost.shootRef.namespace, gardenTerminalHost.shootRef.name, ingressDomain)
+          expect(kubeApiServer).toBe(expectedKubeApiServer)
+        })
+
+        it('should throw an assertion error', async function () {
+          const gardenTerminalHost = {
+            noRef: 'none'
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          await expect(getGardenHostClusterKubeApiServer(client)).rejects.toThrow(AssertionError)
+        })
       })
 
-      it('should allow terminals for project admins', function () {
-        const isAdmin = false
-        const method = 'create'
-        const target = 'shoot'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-        } catch (err) {
-          expect.fail('No exception expected')
-        }
-      })
-
-      it('should allow to list terminals for project admins', function () {
-        const isAdmin = false
-        const method = 'list'
-        const target = 'foo'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-        } catch (err) {
-          expect.fail('No exception expected')
-        }
-      })
-
-      it('should disallow cp terminals for project admins', function () {
-        const isAdmin = false
-        const method = 'create'
-        const target = 'cp'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          expect.fail('Forbidden error expected')
-        } catch (err) {
-          expect(err).to.be.instanceof(Forbidden)
-        }
-      })
-
-      it('should disallow garden terminals for project admins', function () {
-        const isAdmin = false
-        const method = 'create'
-        const target = 'garden'
-        try {
-          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          expect.fail('Forbidden error expected')
-        } catch (err) {
-          expect(err).to.be.instanceof(Forbidden)
-        }
+      describe('#getWildcardIngressDomainForSeed', function () {
+        it('should return the wildcard ingress domain for a seed', function () {
+          const seed = { spec: { dns: { ingressDomain } } }
+          const wildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
+          expect(wildcardIngressDomain).toBe(`*.${ingressDomain}`)
+        })
       })
     })
 
@@ -436,7 +494,7 @@ describe('services', function () {
           labels
         })
         const { apiVersion, kind } = Resources.Ingress
-        expect(resource).to.eql({
+        expect(resource).toEqual({
           apiVersion,
           kind,
           metadata: {
@@ -459,7 +517,7 @@ describe('services', function () {
           labels
         })
         const { apiVersion, kind } = Resources.Service
-        expect(resource).to.eql({
+        expect(resource).toEqual({
           apiVersion,
           kind,
           metadata: {
@@ -483,7 +541,7 @@ describe('services', function () {
           labels
         })
         const { apiVersion, kind } = Resources.Endpoints
-        expect(resource).to.eql({
+        expect(resource).toEqual({
           apiVersion,
           kind,
           metadata: {
@@ -505,18 +563,20 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal('garden')
-              expect(name).to.equal('garden-host-cluster-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, 'garden')
+              assert.strictEqual(name, 'garden-host-cluster-apiserver')
               return body
             }
           }
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal('garden')
-              expect(name).to.equal('garden-host-cluster-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, 'garden')
+              assert.strictEqual(name, 'garden-host-cluster-apiserver')
               return body
             }
           }
@@ -529,18 +589,20 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal(`shoot--garden--${seedName}`)
-              expect(name).to.equal('dashboard-terminal-kube-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, `shoot--garden--${seedName}`)
+              assert.strictEqual(name, 'dashboard-terminal-kube-apiserver')
               return body
             }
           }
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal(`shoot--garden--${seedName}`)
-              expect(name).to.equal('dashboard-terminal-kube-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, `shoot--garden--${seedName}`)
+              assert.strictEqual(name, 'dashboard-terminal-kube-apiserver')
               return body
             }
           }
@@ -553,18 +615,20 @@ describe('services', function () {
         },
         core: {
           services: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal('shoot--foo--baz')
-              expect(name).to.equal('dashboard-terminal-kube-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, 'shoot--foo--baz')
+              assert.strictEqual(name, 'dashboard-terminal-kube-apiserver')
               return body
             }
           }
         },
         extensions: {
           ingresses: {
-            mergePatch (namespace, name, body) {
-              expect(namespace).to.equal('shoot--foo--baz')
-              expect(name).to.equal('dashboard-terminal-kube-apiserver')
+            async mergePatch (namespace, name, body) {
+              await nextTick()
+              assert.strictEqual(namespace, 'shoot--foo--baz')
+              assert.strictEqual(name, 'dashboard-terminal-kube-apiserver')
               return body
             }
           }
@@ -607,42 +671,92 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'dummyShoot',
+          name: 'dummy',
           uid: '3'
         },
         spec: {
-          seedName: seedName2 // seed without spec.secretRef
+          seedName: seedWithoutSecretRefName
         },
         status: {
-          technicalID: 'shoot--foo--baz',
+          technicalID: 'shoot--foo--dummy',
+          lastOperation: {
+            progress: 50
+          }
+        }
+      }, {
+        kind: 'Shoot',
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'unreachable',
+          uid: '4'
+        },
+        spec: {
+          seedName: unreachableSeedName
+        },
+        status: {
+          technicalID: 'shoot--foo--unreachable',
           lastOperation: {
             progress: 50
           }
         }
       }]
 
+      let coreStub
+      let coreGardenerCloudStub
+      const core = dashboardClient.core
+      const coreGardenerCloud = dashboardClient['core.gardener.cloud']
+
       beforeEach(function () {
-        sandbox.stub(dashboardClient, 'core').get(() => {
-          return client.core
-        })
-        sandbox.stub(dashboardClient, 'core.gardener.cloud').get(() => {
-          return {
-            seeds: {
-              get (name) {
-                return getSeed(name)
+        coreStub = jest.fn().mockReturnValue(client.core)
+        coreGardenerCloudStub = jest.fn().mockReturnValue({
+          seeds: {
+            async get (name) {
+              await nextTick()
+              return getSeed(name)
+            }
+          },
+          shoots: {
+            async get (namespace, name) {
+              await nextTick()
+              if (name === seedName) {
+                return {
+                  kind: 'Shoot',
+                  metadata: { namespace, name },
+                  spec: {
+                    seedName: soilName
+                  },
+                  status: {
+                    technicalID: `shoot--garden--${name}`
+                  }
+                }
               }
+              return _
+                .chain(shootList)
+                .find({ metadata: { namespace, name } })
+                .cloneDeep()
+                .value()
             },
-            shoots: {
-              get (namespace, name) {
-                return _.find(shootList, ({ metadata }) => metadata.name === name && metadata.namespace === namespace)
+            async listAllNamespaces (query) {
+              await nextTick()
+
+              const fieldSelector = fixtures.helper.parseFieldSelector(query.fieldSelector)
+              const items = _
+                .chain(shootList)
+                .filter(fieldSelector)
+                .tap(shoot => (delete shoot.kind))
+                .value()
+              return {
+                kind: 'ShootList',
+                items
               }
             }
           }
         })
-        sandbox.stub(dashboardClient, 'getShoot').callsFake(({ namespace, name }) => {
-          return client.getShoot({ namespace, name })
-        })
-        sandbox.stub(dashboardClient, 'createKubeconfigClient').callsFake(({ namespace, name }) => {
+        Object.defineProperty(dashboardClient, 'core', { get: coreStub })
+        Object.defineProperty(dashboardClient, 'core.gardener.cloud', { get: coreGardenerCloudStub })
+
+        jest.spyOn(dashboardClient, 'createKubeconfigClient').mockImplementation(async ({ name }) => {
+          await nextTick()
           if (name === firstSecretName) {
             return hostClient
           }
@@ -653,22 +767,32 @@ describe('services', function () {
             return seedClient
           }
         })
+        jest.clearAllMocks()
       })
+
+      afterEach(function () {
+        Object.defineProperty(dashboardClient, 'core', { value: core })
+        Object.defineProperty(dashboardClient, 'core.gardener.cloud', { value: coreGardenerCloud })
+      })
+
+      function getStates (bootstrapper, resources) {
+        return _.map(resources, resource => bootstrapper.bootstrapState.getValue(resource).state)
+      }
 
       it('should not bootstrap anything', async function () {
         const bootstrap = {
           disabled: true
         }
         const seed = getSeed(seedName)
-        createConfigStub({ bootstrap })
+        terminalStub.mockReturnValue(createTerminalConfig({ bootstrap }))
         const bootstrapper = new Bootstrapper()
         bootstrapper.push(new Handler(() => {}, { description: 'test' }))
         bootstrapper.bootstrapResource(seed)
         bootstrapper.bootstrapResource(shootList[0])
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(stats.total).to.equal(1)
-        expect(stats.successRate).to.equal(1)
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
       })
 
       it('should bootstrap the garden terminal host cluster', async function () {
@@ -681,12 +805,12 @@ describe('services', function () {
           disabled: false,
           gardenTerminalHostDisabled: false
         }
-        createConfigStub({ gardenTerminalHost, bootstrap })
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(stats.total).to.equal(1)
-        expect(stats.successRate).to.equal(1)
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
       })
 
       it('should bootstrap a seed cluster', async function () {
@@ -698,13 +822,74 @@ describe('services', function () {
           seedDisabled: false
         }
         const seed = getSeed(seedName)
-        createConfigStub({ gardenTerminalHost, bootstrap })
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
         bootstrapper.bootstrapResource(seed)
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(stats.total).to.equal(1)
-        expect(stats.successRate).to.equal(1)
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
+        expect(getStates(bootstrapper, [seed])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
+      })
+
+      it('should bootstrap a seed cluster after revision changed', async function () {
+        const gardenTerminalHost = {
+          seedRef: seedName
+        }
+        const bootstrap = {
+          disabled: false,
+          shootDisabled: false,
+          seedDisabled: false
+        }
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
+        const seed = _.find(seedList, ['metadata.name', seedName])
+        _.set(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]', 'foo')
+        const bootstrapper = new Bootstrapper()
+        bootstrapper.bootstrapResource(seed)
+        await pEvent(bootstrapper, 'drain')
+        const revision = bootstrapper.bootstrapState.getValue(seed).revision
+        let shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL
+        ])
+        _.set(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]', 'bar') // the bootstrap revision will change
+        bootstrapper.bootstrapResource(seed)
+        await pEvent(bootstrapper, 'drain')
+        const seedValue = bootstrapper.bootstrapState.getValue(seed)
+        expect(seedValue.state).toBe(BootstrapStatusEnum.BOOTSTRAPPED)
+        expect(seedValue.revision).not.toBe(revision)
+        shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.POSTPONED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.INITIAL,
+          BootstrapStatusEnum.INITIAL
+        ])
+        expect(logger.debug).toBeCalledWith('Bootstrap required for 2 shoots due to terminal bootstrap revision change')
+      })
+
+      it('should skip bootstrap of unreachable seed cluster', async function () {
+        const seedName = unreachableSeedName
+        const gardenTerminalHost = {
+          seedRef: seedName
+        }
+        const bootstrap = {
+          disabled: false,
+          seedDisabled: false
+        }
+
+        const seed = getSeed(seedName)
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
+        const bootstrapper = new Bootstrapper()
+        bootstrapper.bootstrapResource(seed)
+        await pEvent(bootstrapper, 'drain')
+        const stats = bootstrapper.getStats()
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
+        expect(logger.debug).toBeCalledWith(`Seed ${seedName} is not reachable from the dashboard, bootstrapping aborted`)
       })
 
       it('should bootstrap a shoot cluster', async function () {
@@ -715,19 +900,23 @@ describe('services', function () {
           disabled: false,
           shootDisabled: false
         }
-        createConfigStub({ gardenTerminalHost, bootstrap })
+        terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost, bootstrap }))
         const bootstrapper = new Bootstrapper()
         for (const shoot of shootList) {
           bootstrapper.bootstrapResource(shoot)
         }
-        await pEvent(bootstrapper, 'empty')
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(bootstrapper.isResourcePending(shootList[0])).to.be.true
-        expect(stats.total).to.equal(2)
-        expect(stats.successRate).to.equal(1)
-        expect(bootstrapper.bootstrapped.size).to.equal(2)
-        expect(bootstrapper.isResourceBootstrapped(shootList[1])).to.be.true
-        expect(bootstrapper.isResourceBootstrapped(shootList[2])).to.be.true
+        expect(stats.total).toBe(3)
+        expect(stats.successRate).toBe(1)
+        expect(bootstrapper.bootstrapState.size).toBe(4)
+        const shootStates = getStates(bootstrapper, shootList)
+        expect(shootStates).toEqual([
+          BootstrapStatusEnum.POSTPONED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.BOOTSTRAPPED,
+          BootstrapStatusEnum.BOOTSTRAPPED
+        ])
       })
 
       it('should not bootstrap shoot cluster', async function () {
@@ -735,19 +924,39 @@ describe('services', function () {
           disabled: false,
           shootDisabled: false
         }
-        createConfigStub({ bootstrap })
-
-        const infoSpy = sandbox.spy(logger, 'info')
+        terminalStub.mockReturnValue(createTerminalConfig({ bootstrap }))
 
         const bootstrapper = new Bootstrapper()
-        // bootstrap dummyShoot whose seed does not have .spec.secretRef set
-        bootstrapper.bootstrapResource(shootList[2])
-        await pEvent(bootstrapper, 'empty')
+        // bootstrap dummy whose seed does not have .spec.secretRef set
+        const shoot = shootList[2]
+        const { namespace, name } = shoot.metadata
+        bootstrapper.bootstrapResource(shoot)
+        await pEvent(bootstrapper, 'drain')
         const stats = bootstrapper.getStats()
-        expect(bootstrapper.isResourcePending(shootList[0])).to.be.false
-        expect(stats.total).to.equal(1)
-        expect(stats.successRate).to.equal(1)
-        expect(infoSpy).to.be.calledOnce
+        expect(getStates(bootstrapper, [shoot])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
+        expect(logger.info).toBeCalledWith(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
+      })
+
+      it('should not bootstrap unreachable shoot cluster', async function () {
+        const bootstrap = {
+          disabled: false,
+          shootDisabled: false
+        }
+        terminalStub.mockReturnValue(createTerminalConfig({ bootstrap }))
+
+        const bootstrapper = new Bootstrapper()
+        // bootstrap unreachable whose seed is flagged as unreachable
+        const shoot = shootList[3]
+        const { namespace, name } = shoot.metadata
+        bootstrapper.bootstrapResource(shoot)
+        await pEvent(bootstrapper, 'drain')
+        const stats = bootstrapper.getStats()
+        expect(getStates(bootstrapper, [shoot])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
+        expect(stats.total).toBe(1)
+        expect(stats.successRate).toBe(1)
+        expect(logger.debug).toBeCalledWith(`Seed ${unreachableSeedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
       })
     })
   })

@@ -1,41 +1,33 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :loading="isMaintenanceToBeScheduled"
-    @dialogOpened="startDialogVisible"
+    @dialog-opened="startDialogVisible"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    :buttonText="buttonText"
-    maxWidth="850"
-    confirmButtonText="Trigger now">
+    :button-text="buttonText"
+    max-width="850"
+    confirm-button-text="Trigger now">
     <template v-slot:actionComponent>
-      <v-row >
-        <v-col>
-          <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-        </v-col>
-        <maintenance-components
-          title="The following updates will be performed"
-          :selectable="false"
-          ref="maintenanceComponents"
-        ></maintenance-components>
-      </v-row>
+      <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+      <maintenance-components
+        title="The following updates will be performed"
+        :selectable="false"
+        ref="maintenanceComponents"
+      ></maintenance-components>
+      <constraint-warning
+        :value="!isMaintenancePreconditionSatisfied"
+        type="maintenance"
+        small>
+        {{maintenancePreconditionSatisfiedMessage}}
+      </constraint-warning>
     </template>
   </action-button-dialog>
 </template>
@@ -43,6 +35,7 @@ limitations under the License.
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import ConstraintWarning from '@/components/ConstraintWarning'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -52,7 +45,8 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   components: {
     ActionButtonDialog,
-    MaintenanceComponents
+    MaintenanceComponents,
+    ConstraintWarning
   },
   props: {
     shootItem: {

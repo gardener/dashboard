@@ -1,26 +1,18 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
 const _ = require('lodash')
-const assert = require('assert').strict
 const hash = require('object-hash')
+const yaml = require('js-yaml')
+const config = require('../../config')
 
-const { isHttpError } = require('../../kubernetes-client')
+const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
+const { isHttpError } = require('@gardener-dashboard/request')
 
 const {
   decodeBase64,
@@ -44,9 +36,9 @@ const {
   Bootstrapper
 } = require('./terminalBootstrap')
 
-const { getSeed } = require('../../cache')
-const { Forbidden, UnprocessableEntity } = require('../../errors')
+const { getSeed, findProjectByNamespace } = require('../../cache')
 const logger = require('../../logger')
+const markdown = require('../../markdown')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -55,6 +47,8 @@ const TargetEnum = {
   CONTROL_PLANE: 'cp',
   SHOOT: 'shoot'
 }
+
+const converter = exports.converter = markdown.createConverter()
 
 exports.create = function ({ user, body }) {
   const { coordinate: { namespace, name, target } } = body
@@ -81,6 +75,11 @@ exports.heartbeat = async function ({ user, body = {} }) {
   return heartbeatTerminalSession({ user, body })
 }
 
+exports.listProjectTerminalShortcuts = async function ({ user, body = {} }) {
+  const { coordinate: { namespace } } = body
+  return listShortcuts({ user, namespace })
+}
+
 function toTerminalMetadata (terminal) {
   const metadata = _.pick(terminal.metadata, ['name', 'namespace'])
   metadata.identifier = _.get(terminal, 'metadata.annotations["dashboard.gardener.cloud/identifier"]')
@@ -88,15 +87,15 @@ function toTerminalMetadata (terminal) {
 }
 
 function imageHelpText (terminal) {
-  const containerImage = terminal.spec.host.pod.containerImage
-  const imageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
-
-  return findImageDescription(containerImage, imageDescriptions)
+  const containerImage = _.get(terminal, 'spec.host.pod.container.image')
+  const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
+  const containerImageDescription = findImageDescription(containerImage, containerImageDescriptions)
+  return converter.makeSanitizedHtml(containerImageDescription)
 }
 
-function findImageDescription (containerImage, imageDescriptions) {
+function findImageDescription (containerImage, containerImageDescriptions) {
   return _
-    .chain(imageDescriptions)
+    .chain(containerImageDescriptions)
     .find(({ image }) => {
       if (_.startsWith(image, '/') && _.endsWith(image, '/')) {
         image = image.substring(1, image.length - 1)
@@ -111,9 +110,8 @@ function findImageDescription (containerImage, imageDescriptions) {
 exports.findImageDescription = findImageDescription
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
-  const serviceAccount = await client.core.serviceaccounts
-    .watch(namespace, serviceAccountName)
-    .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
+  const asyncIterable = await client.core.serviceaccounts.watch(namespace, serviceAccountName)
+  const serviceAccount = await asyncIterable.until(isServiceAccountReady, { timeout: 10 * 1000 })
   const secretName = getFirstServiceAccountSecret(serviceAccount)
   if (secretName) {
     const secret = await client.core.secrets.get(namespace, secretName)
@@ -130,7 +128,10 @@ function getFirstServiceAccountSecret (serviceAccount) {
     .value()
 }
 
-function isServiceAccountReady (serviceAccount) {
+function isServiceAccountReady ({ type, object: serviceAccount }) {
+  if (type === 'DELETE') {
+    throw new InternalServerError('ServiceAccount resource has been deleted')
+  }
   return !_.isEmpty(getFirstServiceAccountSecret(serviceAccount))
 }
 
@@ -147,7 +148,6 @@ async function listTerminals ({ user, namespace, identifier }) {
   const query = {
     labelSelector: selectors.join(',')
   }
-
   const terminals = await client['dashboard.gardener.cloud'].terminals.list(namespace, query)
   return _
     .chain(terminals)
@@ -159,7 +159,6 @@ async function listTerminals ({ user, namespace, identifier }) {
 
 async function findExistingTerminalResource ({ user, namespace, body }) {
   const { identifier } = body
-
   const existingTerminalList = await listTerminals({ user, namespace, identifier })
   return _.first(existingTerminalList)
 }
@@ -192,7 +191,7 @@ function getShootResource ({ user, namespace, name, target }) {
   return client.getShoot({ namespace, name })
 }
 
-async function getTargetCluster ({ user, namespace, name, target, shootResource }) {
+async function getTargetCluster ({ user, namespace, name, target, preferredHost, shootResource }) {
   const client = user.client
   const isAdmin = user.isAdmin
 
@@ -200,21 +199,67 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
     kubeconfigContextNamespace: undefined,
     namespace: undefined, // this is the namespace where the "access" service account will be created
     credentials: undefined,
-    roleName: 'cluster-admin',
-    bindingKind: undefined
+    authorization: {
+      roleBindings: undefined,
+      projectMemberships: undefined
+    },
+    apiServer: undefined
   }
 
   switch (target) {
     case TargetEnum.GARDEN: {
-      assert.strictEqual(isAdmin, true, 'user is not admin')
-
       targetCluster.kubeconfigContextNamespace = namespace
-      targetCluster.namespace = 'garden'
-      targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-      targetCluster.bindingKind = 'ClusterRoleBinding'
+      if (isAdmin) {
+        targetCluster.namespace = 'garden'
+        targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
+        targetCluster.authorization.roleBindings = [
+          {
+            roleRef: {
+              apiGroup: 'rbac.authorization.k8s.io',
+              kind: 'ClusterRole',
+              name: 'cluster-admin'
+            },
+            bindingKind: 'ClusterRoleBinding'
+          }
+        ]
+      } else {
+        const projectName = findProjectByNamespace(namespace).metadata.name
+        targetCluster.namespace = namespace
+        const serviceAccountName = 'dashboard-webterminal'
+
+        // test if service account exists
+        await client.core.serviceaccounts.get(namespace, serviceAccountName)
+
+        targetCluster.credentials = {
+          serviceAccountRef: {
+            name: serviceAccountName,
+            namespace
+          }
+        }
+        targetCluster.authorization.projectMemberships = [
+          {
+            projectName,
+            roles: [
+              'admin'
+            ]
+          }
+        ]
+        targetCluster.apiServer = {
+          server: config.apiServerUrl
+        }
+      }
+
       break
     }
     case TargetEnum.SHOOT: {
+      targetCluster.apiServer = { serviceRef: {} }
+      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+        targetCluster.apiServer.serviceRef.name = 'kube-apiserver'
+      } else {
+        targetCluster.apiServer.serviceRef.name = 'kubernetes'
+        targetCluster.apiServer.serviceRef.namespace = 'default'
+      }
+
       targetCluster.kubeconfigContextNamespace = 'default'
       targetCluster.namespace = undefined // this will create a temporary namespace
       targetCluster.credentials = {
@@ -223,7 +268,16 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
           namespace
         }
       }
-      targetCluster.bindingKind = 'ClusterRoleBinding'
+      targetCluster.authorization.roleBindings = [
+        {
+          roleRef: {
+            apiGroup: 'rbac.authorization.k8s.io',
+            kind: 'ClusterRole',
+            name: 'cluster-admin'
+          },
+          bindingKind: 'ClusterRoleBinding'
+        }
+      ]
       break
     }
     case TargetEnum.CONTROL_PLANE: {
@@ -239,7 +293,16 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
       targetCluster.credentials = {
         secretRef: _.get(seed, 'spec.secretRef')
       }
-      targetCluster.bindingKind = 'RoleBinding'
+      targetCluster.authorization.roleBindings = [
+        {
+          roleRef: {
+            apiGroup: 'rbac.authorization.k8s.io',
+            kind: 'ClusterRole',
+            name: 'cluster-admin'
+          },
+          bindingKind: 'RoleBinding'
+        }
+      ]
       break
     }
     default: {
@@ -251,7 +314,7 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
 
 async function getGardenTerminalHostCluster (client, { body }) {
   const hostCluster = {}
-  hostCluster.config = getImageConfigFromBody(body)
+  hostCluster.config = getContainerConfigFromBody(body)
 
   const [
     secretRef,
@@ -260,7 +323,6 @@ async function getGardenTerminalHostCluster (client, { body }) {
     await getGardenTerminalHostClusterSecretRef(client),
     await getGardenHostClusterKubeApiServer(client)
   ])
-
   hostCluster.namespace = undefined // this will create a temporary namespace
   hostCluster.secretRef = secretRef
   hostCluster.kubeApiServer = kubeApiServer
@@ -269,7 +331,7 @@ async function getGardenTerminalHostCluster (client, { body }) {
 
 async function getSeedHostCluster (client, { namespace, name, target, body, shootResource }) {
   const hostCluster = {}
-  hostCluster.config = getImageConfigFromBody(body)
+  hostCluster.config = getContainerConfigFromBody(body)
   if (!shootResource) {
     shootResource = await client.getShoot({ namespace, name })
   }
@@ -289,8 +351,6 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
 }
 
 async function getShootHostCluster (client, { namespace, name, target, body, shootResource }) {
-  assert.strictEqual(target, TargetEnum.SHOOT, 'unexpected target')
-
   const hostCluster = {}
   hostCluster.config = getConfigFromBody(body)
 
@@ -308,12 +368,16 @@ async function getShootHostCluster (client, { namespace, name, target, body, sho
   return hostCluster
 }
 
-function getImageConfigFromBody (body) {
-  return _.pick(body, ['containerImage'])
+function getContainerConfigFromBody ({ container }) {
+  return {
+    container: _.pick(container, ['image', 'command', 'args'])
+  }
 }
 
 function getConfigFromBody (body) {
-  return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
+  const config = _.pick(body, ['node', 'privileged', 'hostPID', 'hostNetwork', 'container'])
+  config.container = _.pick(config.container, ['image', 'command', 'args'])
+  return config
 }
 
 function getPreferredHost ({ user, body }) {
@@ -324,7 +388,7 @@ function getPreferredHost ({ user, body }) {
 function getHostCluster ({ user, namespace, name, target, preferredHost, body, shootResource }) {
   const client = user.client
 
-  if (target === TargetEnum.GARDEN) {
+  if (target === TargetEnum.GARDEN && user.isAdmin) {
     return getGardenTerminalHostCluster(client, { body })
   }
 
@@ -339,12 +403,12 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
 async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost }) {
   const client = user.client
   const isAdmin = user.isAdmin
-
-  const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
+  const image = getContainerImage({ isAdmin, preferredImage: hostCluster.config.container.image })
+  _.set(hostCluster, 'config.container.image', image)
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, ...hostCluster.config })
+  const terminalHost = createHost({ ...hostCluster.config, namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, podLabels })
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
@@ -385,8 +449,14 @@ function getPodLabels (target) {
   return labels
 }
 
-function createHost ({ secretRef, namespace, containerImage, podLabels, node, privileged = false, hostPID = false, hostNetwork = false }) {
+function createHost ({ secretRef, namespace, container, podLabels, node, hostPID = false, hostNetwork = false }) {
   const temporaryNamespace = _.isEmpty(namespace)
+  const {
+    image,
+    command,
+    args,
+    privileged = false
+  } = container
   const host = {
     credentials: {
       secretRef
@@ -395,8 +465,12 @@ function createHost ({ secretRef, namespace, containerImage, podLabels, node, pr
     temporaryNamespace,
     pod: {
       labels: podLabels,
-      containerImage,
-      privileged,
+      container: {
+        image,
+        command,
+        args,
+        privileged
+      },
       hostPID,
       hostNetwork
     }
@@ -409,23 +483,26 @@ function createHost ({ secretRef, namespace, containerImage, podLabels, node, pr
   return host
 }
 
-function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, roleName = 'cluster-admin', namespace }) {
+function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, authorization, namespace }) {
   const temporaryNamespace = _.isEmpty(namespace)
   return {
     credentials,
     kubeconfigContextNamespace,
-    bindingKind,
-    roleName,
+    apiServer,
+    authorization,
     namespace,
     temporaryNamespace
   }
 }
 
-function readTerminalUntilReady ({ user, namespace, name }) {
+async function readTerminalUntilReady ({ user, namespace, name }) {
   const username = user.id
   const client = user.client
 
-  const isTerminalReady = terminal => {
+  const isTerminalReady = ({ type, object: terminal }) => {
+    if (type === 'DELETE') {
+      throw new InternalServerError('Terminal resource has been deleted')
+    }
     if (terminal.metadata.annotations['gardener.cloud/created-by'] !== username) {
       throw new Forbidden('You are not the user who created the terminal resource')
     }
@@ -433,9 +510,8 @@ function readTerminalUntilReady ({ user, namespace, name }) {
     const attachServiceAccountName = _.get(terminal, 'status.attachServiceAccountName')
     return podName && attachServiceAccountName
   }
-  return client['dashboard.gardener.cloud'].terminals
-    .watch(namespace, name)
-    .waitFor(isTerminalReady, { timeout: 10 * 1000 })
+  const asyncIterable = await client['dashboard.gardener.cloud'].terminals.watch(namespace, name)
+  return asyncIterable.until(isTerminalReady, { timeout: 60 * 1000 })
 }
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {
@@ -457,7 +533,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     targetCluster
   ] = await Promise.all([
     getHostCluster({ user, namespace, name, target, preferredHost, body, shootResource }),
-    getTargetCluster({ user, namespace, name, target, shootResource })
+    getTargetCluster({ user, namespace, name, target, preferredHost, shootResource })
   ])
 
   if (hostCluster.isHostOrTargetHibernated) {
@@ -551,28 +627,28 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
   }
 
   // whitelist methods for terminal sessions for everybody
-  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat'], method)) {
+  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
     return
   }
 
   const { coordinate: { target } } = body
 
-  // non-admin users are only allowed to open terminals for shoots
-  if (target === TargetEnum.SHOOT) {
+  // non-admin users are only allowed to open terminals for shoots and the garden cluster
+  if (target === TargetEnum.SHOOT || target === TargetEnum.GARDEN) {
     return
   }
   throw new Forbidden('Terminal usage is not allowed')
 }
 exports.ensureTerminalAllowed = ensureTerminalAllowed
 
-function getContainerImage ({ isAdmin, preferredContainerImage }) {
-  if (preferredContainerImage) {
-    return preferredContainerImage
+function getContainerImage ({ isAdmin, preferredImage }) {
+  if (preferredImage) {
+    return preferredImage
   }
 
-  const containerImage = getConfigValue('terminal.containerImage')
+  const containerImage = getConfigValue('terminal.container.image')
   if (isAdmin) {
-    return getConfigValue('terminal.containerImageOperator', containerImage)
+    return getConfigValue('terminal.containerOperator.image', containerImage)
   }
   return containerImage
 }
@@ -618,7 +694,9 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
   const isAdmin = user.isAdmin
 
   const config = {
-    image: getContainerImage({ isAdmin })
+    container: {
+      image: getContainerImage({ isAdmin })
+    }
   }
 
   if (target === TargetEnum.SHOOT) {
@@ -636,6 +714,47 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
       .value()
   }
   return config
+}
+
+function pickShortcutValues (data) {
+  const shortcut = _.pick(data, [
+    'title',
+    'description',
+    'target',
+    'container.image',
+    'container.command',
+    'container.args',
+    'shootSelector.matchLabels'
+  ])
+  return shortcut
+}
+
+function fromShortcutSecretResource (secret) {
+  const shortcutsBase64 = _.get(secret, 'data.shortcuts')
+  const shortcuts = yaml.safeLoad(decodeBase64(shortcutsBase64))
+  return _
+    .chain(shortcuts)
+    .map(pickShortcutValues)
+    .filter(shortcut => !_.isEmpty(shortcut))
+    .filter(shortcut => !_.isEmpty(_.trim(shortcut.title)))
+    .filter(shortcut => _.includes([TargetEnum.GARDEN, TargetEnum.CONTROL_PLANE, TargetEnum.SHOOT], shortcut.target))
+    .value()
+}
+exports.fromShortcutSecretResource = fromShortcutSecretResource // for unit tests
+
+async function listShortcuts ({ user, namespace }) {
+  const client = user.client
+
+  try {
+    const shortcuts = await client.core.secrets.get(namespace, 'terminal.shortcuts')
+
+    return fromShortcutSecretResource(shortcuts)
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return []
+    }
+    throw err
+  }
 }
 
 exports.bootstrapper = new Bootstrapper()

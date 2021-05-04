@@ -1,24 +1,16 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
 const _ = require('lodash')
+const config = require('../config')
 const logger = require('../logger')
 const github = require('../github')
+const markdown = require('../markdown')
 const cache = require('../cache')
 
 function fromLabel (item) {
@@ -28,6 +20,16 @@ function fromLabel (item) {
     'color'
   ])
 }
+
+const apiUrl = _.get(config, 'gitHub.apiUrl')
+const options = {}
+
+if (apiUrl) {
+  options.ghMentions = true
+  options.ghMentionsLink = new URL(apiUrl).origin + '/{u}'
+}
+
+const converter = exports.converter = markdown.createConverter(options)
 
 function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
@@ -54,10 +56,10 @@ function fromIssue (issue) {
         'user.login',
         'user.avatar_url',
         'html_url',
-        'body',
         'comments'
       ])
       .assign({
+        body: converter.makeSanitizedHtml(issue.body),
         labels,
         ticketTitle
       })
@@ -67,27 +69,34 @@ function fromIssue (issue) {
 exports.fromIssue = fromIssue
 
 function fromComment (number, name, projectName, item) {
-  return {
-    kind: 'comment',
-    metadata: _
-      .chain(item)
-      .pick([
-        'id',
-        'created_at',
-        'updated_at'
-      ])
-      .assign({
-        number,
-        name,
-        projectName
-      })
-      .value(),
-    data: _.pick(item, [
+  const metadata = _
+    .chain(item)
+    .pick([
+      'id',
+      'created_at',
+      'updated_at'
+    ])
+    .assign({
+      number,
+      name,
+      projectName
+    })
+    .value()
+  const data = _
+    .chain(item)
+    .pick([
       'user.login',
       'user.avatar_url',
-      'body',
       'html_url'
     ])
+    .assign({
+      body: converter.makeSanitizedHtml(item.body)
+    })
+    .value()
+  return {
+    kind: 'comment',
+    metadata,
+    data
   }
 }
 exports.fromComment = fromComment

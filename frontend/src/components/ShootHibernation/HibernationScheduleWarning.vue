@@ -1,30 +1,19 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <g-popper
     title="No Hibernation Schedule"
-    toolbarColor="cyan darken-2"
-    :popperKey="`no_hibernation_${namespace}/${name}`"
+    :popper-key="`no_hibernation_${namespace}/${name}`"
   >
     <div class="message">
       To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
       <template v-if="canPatchShoots">
         Please navigate to the cluster details page to
-        <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
+        <router-link :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
         a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
       </template>
     </div>
@@ -32,7 +21,7 @@ limitations under the License.
       <v-btn icon>
         <v-tooltip top>
           <template v-slot:activator="{ on: tooltip }">
-            <v-icon v-on="tooltip" color="cyan darken-2">mdi-calendar-alert</v-icon>
+            <v-icon v-on="tooltip" color="primary">mdi-calendar-alert</v-icon>
           </template>
           <span>No Hibernation Schedule</span>
         </v-tooltip>

@@ -1,50 +1,30 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-img
-        class="white--text"
-        height="130px"
-        :src="backgroundSrc"
-      >
-        <v-container class="fill-height" >
-          <v-row class="fill-height" align="center" justify="start" >
-            <v-col cols="1">
-              <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
-            </v-col>
-            <v-col>
-              <div class="credential_title">Confirm Delete</div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-img>
-
+      <v-card-title class="toolbar-background">
+        <v-icon x-large class="toolbar-title--text icon">mdi-alert-outline</v-icon>
+        <span class="text-h5 ml-5 toolbar-title--text">Confirm Delete</span>
+      </v-card-title>
       <v-card-text>
         <v-container fluid>
-          Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
-          <span class="red--text font-weight-bold">The operation can not be undone.</span>
+          <span class="text-subtitle-1">
+            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
+            <span class="error--text font-weight-bold">The operation can not be undone.</span>
+          </span>
         </v-container>
-        <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+        <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="hide">Cancel</v-btn>
-        <v-btn text @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
+        <v-btn text @click.native="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -53,13 +33,13 @@ limitations under the License.
 <script>
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'secret-dialog-delete',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {
@@ -68,10 +48,6 @@ export default {
     },
     secret: {
       type: Object,
-      required: true
-    },
-    backgroundSrc: {
-      type: String,
       required: true
     }
   },
@@ -102,9 +78,9 @@ export default {
       this.visible = false
     },
     async onDeleteSecret () {
-      const bindingName = get(this.secret, 'metadata.bindingName')
+      const name = get(this.secret, 'metadata.name')
       try {
-        await this.deleteSecret(bindingName)
+        await this.deleteSecret(name)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

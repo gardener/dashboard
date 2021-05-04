@@ -1,11 +1,15 @@
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Default values for identity.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
 
 image:
-  repository: quay.io/dexidp/dex
-  tag: v2.24.0
+  repository: ghcr.io/dexidp/dex
+  tag: v2.27.0
   pullPolicy: IfNotPresent
 
 containerPort: 5556

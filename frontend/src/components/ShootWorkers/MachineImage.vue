@@ -1,8 +1,13 @@
+<!--
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+-->
 <template>
-  <hint-colorizer hintColor="orange">
+  <hint-colorizer hint-color="warning">
     <v-select
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="machineImages"
       item-value="key"
       return-object
@@ -27,7 +32,7 @@
       </template>
       <template v-slot:selection="{ item }">
         <vendor-icon v-model="item.icon"></vendor-icon>
-        <span class="black--text ml-2">
+        <span class="ml-2">
          {{item.name}} [{{item.version}}]
         </span>
       </template>
@@ -127,7 +132,7 @@ export default {
     },
     onInputMachineImage () {
       this.$v.worker.machine.image.$touch()
-      this.$emit('updateMachineImage', this.worker.machine.image)
+      this.$emit('update-machine-image', this.worker.machine.image)
       this.validateInput()
     },
     validateInput () {

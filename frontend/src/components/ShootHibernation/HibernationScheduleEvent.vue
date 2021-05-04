@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -20,8 +10,8 @@ limitations under the License.
       <v-row >
         <v-col class="weekday-select">
           <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           v-model="selectedDays"
           ref="selectedDays"
           @blur="touchIfNothingFocused"
@@ -38,7 +28,7 @@ limitations under the License.
         </v-col>
         <v-col class="time-select">
           <v-text-field
-            color="cyan darken-2"
+            color="primary"
             label="Wake up at"
             v-model="wakeUpTime"
             ref="wakeUpTime"
@@ -50,7 +40,7 @@ limitations under the License.
         </v-col>
         <v-col class="time-select">
           <v-text-field
-            color="cyan darken-2"
+            color="primary"
             label="Hibernate at"
             v-model="hibernateTime"
             ref="hibernateTime"
@@ -60,13 +50,14 @@ limitations under the License.
             type="time"
           ></v-text-field>
         </v-col>
-        <v-col class="timezone-select">
+        <v-col class="location-select">
           <v-autocomplete
-            color="cyan darken-2"
-            label="Timezone"
-            :items="timezones"
-            v-model="selectedTimezone"
-            @input="onInputSelectedTimezone"
+            color="primary"
+            label="Location"
+            :items="locations"
+            v-model="selectedLocation"
+            @input="onInputSelectedLocation"
+            append-icon="mdi-map-marker-outline"
             >
           </v-autocomplete>
         </v-col>
@@ -86,10 +77,6 @@ limitations under the License.
 </template>
 
 <script>
-import { getValidationErrors } from '@/utils'
-import { required, requiredIf } from 'vuelidate/lib/validators'
-import { mapState } from 'vuex'
-import moment from 'moment-timezone'
 import join from 'lodash/join'
 import split from 'lodash/split'
 import get from 'lodash/get'
@@ -97,6 +84,10 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+import { required, requiredIf } from 'vuelidate/lib/validators'
+
+import { getValidationErrors } from '@/utils'
+import moment from '@/utils/moment'
 
 const validationErrors = {
   selectedDays: {
@@ -108,8 +99,8 @@ const validationErrors = {
   wakeUpTime: {
     required: 'You need to specify at least hibernation or wake up time'
   },
-  selectedTimezone: {
-    required: 'Timezone is required'
+  selectedLocation: {
+    required: 'Location is required'
   }
 }
 
@@ -135,14 +126,11 @@ export default {
         return !this.hibernateTime
       })
     },
-    selectedTimezone: {
+    selectedLocation: {
       required
     }
   },
   computed: {
-    ...mapState([
-      'localTimezone'
-    ]),
     id () {
       return this.scheduleEvent.id
     }
@@ -150,8 +138,8 @@ export default {
   data () {
     return {
       validationErrors,
-      timezones: moment.tz.names(),
-      selectedTimezone: null,
+      locations: moment.tz.names(),
+      selectedLocation: null,
       wakeUpTime: null,
       hibernateTime: null,
       selectedDays: null,
@@ -214,8 +202,8 @@ export default {
     getTime ({ hour, minute } = {}) {
       if (hour && minute) {
         const momentObj = moment()
-        momentObj.hour(hour)
-        momentObj.minute(minute)
+          .hour(hour)
+          .minute(minute)
         if (momentObj.isValid()) {
           return momentObj.format('HH:mm')
         }
@@ -223,7 +211,7 @@ export default {
     },
     updateLocation (location) {
       const id = this.id
-      this.$emit('updateLocation', { location, id })
+      this.$emit('update-location', { location, id })
       this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
@@ -244,11 +232,11 @@ export default {
         weekdays = join(map(this.selectedDays, 'value'), ',')
       }
       const id = this.id
-      this.$emit('updateSelectedDays', { weekdays, id })
+      this.$emit('update-selected-days', { weekdays, id })
       this.validateInput()
     },
     removeScheduleEvent () {
-      this.$emit('removeScheduleEvent')
+      this.$emit('remove-schedule-event')
     },
     touchIfNothingFocused () {
       if (!get(this, '$refs.selectedDays.isFocused') &&
@@ -265,14 +253,14 @@ export default {
     },
     onInputWakeUpTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateWakeUpTime', time: this.wakeUpTime })
+      this.updateTime({ eventName: 'update-wake-up-time', time: this.wakeUpTime })
     },
     onInputHibernateTime () {
       this.$v.wakeUpTime.$touch()
-      this.updateTime({ eventName: 'updateHibernateTime', time: this.hibernateTime })
+      this.updateTime({ eventName: 'update-hibernate-time', time: this.hibernateTime })
     },
-    onInputSelectedTimezone () {
-      this.updateLocation(this.selectedTimezone)
+    onInputSelectedLocation () {
+      this.updateLocation(this.selectedLocation)
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -282,7 +270,7 @@ export default {
     }
   },
   mounted () {
-    this.selectedTimezone = this.scheduleEvent.location
+    this.selectedLocation = this.scheduleEvent.location
     this.wakeUpTime = this.getTime(this.scheduleEvent.end)
     this.hibernateTime = this.getTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
@@ -298,7 +286,7 @@ export default {
   .time-select {
     max-width: 100px;
   }
-  .timezone-select {
+  .location-select {
     max-width: 300px;
   }
 </style>

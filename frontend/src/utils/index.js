@@ -1,60 +1,43 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-import moment from 'moment-timezone'
 import semver from 'semver'
-import md5 from 'md5'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
 import toLower from 'lodash/toLower'
-import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import words from 'lodash/words'
 import find from 'lodash/find'
 import some from 'lodash/some'
+import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
-import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
-import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
-const uuidv4 = require('uuid/v4')
+import moment from './moment'
+import { md5 } from './crypto'
+import TimeWithOffset from './TimeWithOffset'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
+const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 
 export function emailToDisplayName (value) {
   if (value) {
     const names = map(words(replace(value, /@.*$/, '')), capitalize)
     const givenName = names.shift()
     return join(compact([join(names, ' '), givenName]), ', ')
-  }
-}
-
-export function serviceAccountToDisplayName (serviceAccount) {
-  if (serviceAccount) {
-    return last(split(serviceAccount, ':'))
   }
 }
 
@@ -159,9 +142,9 @@ export function fullDisplayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
-    const [namespace, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(`${namespace} / ${serviceaccount}`)
+  if (isServiceAccountUsername(username)) {
+    const [namespace, serviceAccount] = split(username, ':', 4).slice(2)
+    return `${namespace} / ${serviceAccount}`
   }
   return username
 }
@@ -173,14 +156,17 @@ export function displayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceAccount(username)) {
-    const [, serviceaccount] = split(username, ':', 4).slice(2)
-    return toUpper(serviceaccount)
+  if (isServiceAccountUsername(username)) {
+    const [, serviceAccount] = split(username, ':', 4).slice(2)
+    return serviceAccount
   }
   return username
 }
 
 export function parseSize (value) {
+  if (!value) {
+    return 0
+  }
   const sizeRegex = /^(\d+)Gi$/
   const result = sizeRegex.exec(value)
   if (result) {
@@ -202,7 +188,7 @@ export function gravatarUrlGeneric (username, size = 128) {
   if (isEmail(username)) {
     return gravatarUrlIdenticon(username, size)
   }
-  if (isServiceAccount(username)) {
+  if (isServiceAccountUsername(username)) {
     return gravatarUrlRobohash(username, size)
   }
   return gravatarUrlRetro(username, size)
@@ -229,34 +215,45 @@ export function gravatarUrl (value, image, size) {
 }
 
 export function routes (router, includeRoutesWithProjectScope) {
-  const hasChildren = route => route.children && route.children.length
-  const routes = router.options.routes
-  const defaultRoute = find(routes, hasChildren)
-  const hasMenu = route => route.meta && route.meta.menu && (includeRoutesWithProjectScope || (!includeRoutesWithProjectScope && !route.meta.projectScope))
-  return filter(defaultRoute.children, hasMenu)
+  const hasChildren = ({ children }) => {
+    return children && children.length
+  }
+  const hasMenu = ({ meta: { menu, projectScope } = {} }) => {
+    return menu && (includeRoutesWithProjectScope || projectScope === false)
+  }
+  const traverseRoutes = routes => {
+    for (const route of routes) {
+      if (hasMenu(route)) {
+        menuRoutes.push(route)
+      } else if (hasChildren(route)) {
+        traverseRoutes(route.children)
+      }
+    }
+  }
+  const menuRoutes = []
+  traverseRoutes(router.options.routes)
+  return menuRoutes
 }
 
 export function namespacedRoute (route, namespace) {
-  const params = {
-    namespace: namespace
+  return {
+    name: routeName(route),
+    params: {
+      namespace
+    }
   }
-
-  return { name: routeName(route), params }
 }
 
 export function routeName (route) {
-  const firstChild = head(route.children)
-  const toRouteName = get(route, 'meta.toRouteName')
-  if (toRouteName) {
-    return toRouteName
-  } else if (route.name) {
+  if (route.name) {
     return route.name
-  } else if (firstChild) {
-    return firstChild.name
-  } else {
-    console.error('could not determine routeName')
-    return undefined
   }
+  const firstChild = head(route.children)
+  if (firstChild && firstChild.name) {
+    return firstChild.name
+  }
+  // eslint-disable-next-line no-console
+  console.error('could not determine routeName')
 }
 
 export function getDateFormatted (timestamp) {
@@ -294,8 +291,8 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   }
 }
 
-export function isOwnSecretBinding (secret) {
-  return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
+export function isOwnSecret (infrastructureSecret) {
+  return get(infrastructureSecret, 'metadata.secretRef.namespace') === get(infrastructureSecret, 'metadata.namespace')
 }
 
 const availableK8sUpdatesCache = {}
@@ -337,7 +334,7 @@ export function getProjectDetails (project) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
-  const technicalContact = projectData.owner || ''
+  const owner = projectData.owner || ''
   const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
@@ -349,7 +346,7 @@ export function getProjectDetails (project) {
 
   return {
     projectName,
-    technicalContact,
+    owner,
     costObject,
     createdAt,
     creationTimestamp,
@@ -370,10 +367,14 @@ export function shootHasIssue (shoot) {
 }
 
 export function isReconciliationDeactivated (metadata) {
-  const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
   const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
   const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
-  return includes(truthyValues, ignore)
+  return isTruthyValue(ignore)
+}
+
+export function isTruthyValue (value) {
+  const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
+  return includes(truthyValues, value)
 }
 
 export function isStatusProgressing (metadata) {
@@ -392,22 +393,26 @@ export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
 
-export function isServiceAccount (username) {
-  return startsWith(username, 'system:serviceaccount:')
+export function isServiceAccountUsername (username) {
+  return serviceAccountRegex.test(username)
 }
 
-export function isServiceAccountFromNamespace (username, namespace) {
-  return startsWith(username, `system:serviceaccount:${namespace}:`)
-}
-
-// expect colors to be in format <color> <optional:modifier>
-export function textColor (color) {
-  const [colorStr, colorMod] = split(color, ' ')
-  let textColor = `${colorStr}--text`
-  if (colorMod) {
-    textColor = `${textColor} text--${colorMod}`
+export function isForeignServiceAccount (currentNamespace, username) {
+  if (username && currentNamespace) {
+    const { namespace } = parseServiceAccountUsername(username) || {}
+    if (namespace && namespace !== currentNamespace) {
+      return true
+    }
   }
-  return textColor
+  return false
+}
+
+export function parseServiceAccountUsername (username) {
+  if (!username) {
+    return undefined
+  }
+  const [, namespace, name] = serviceAccountRegex.exec(username) || []
+  return { namespace, name }
 }
 
 export function encodeBase64 (input) {
@@ -490,15 +495,9 @@ export const shootAddonList = [
   }
 ]
 
-export function textColorFromColor (color) {
-  const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
-  return map(split(color, ' '), iteratee)
-}
-
 function htmlToDocumentFragment (html) {
-  var template = document.createElement('template')
-  html = html.trim() // Never return a text node of whitespace as the result
-  template.innerHTML = html
+  const template = document.createElement('template')
+  template.innerHTML = html.trim() // Never return a text node of whitespace as the result
   return template.content
 }
 
@@ -508,17 +507,11 @@ function documentFragmentToHtml (documentFragment) {
   return div.innerHTML
 }
 
-export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
-  if (!text) {
+export function transformHtml (html, transformToExternalLinks = true) {
+  if (!html) {
     return undefined
   }
-  const html = DOMPurify.sanitize(marked(text, {
-    gfm: true,
-    breaks: true,
-    tables: true
-  }))
 
-  const textColorClasses = textColorFromColor(linkColor)
   const documentFragment = htmlToDocumentFragment(html)
   if (!documentFragment) {
     return html
@@ -526,60 +519,53 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
 
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
-    if (textColorClasses.length) {
-      linkElement.classList.add(...textColorClasses)
-    }
-
     if (transformToExternalLinks) {
-      linkElement.setAttribute('style', 'text-decoration: none')
+      linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')
       const linkText = linkElement.innerHTML
-      linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
+      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><i class="v-icon mdi mdi-open-in-new text-body-1"></i>`
     }
   })
 
   return documentFragmentToHtml(documentFragment)
 }
 
-export function shootAddonByName (name) {
-  return find(shootAddonList, ['name', name])
-}
-
-export function randomLocalMaintenanceBegin () {
+export function randomMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
   const randomHour = sample(hours)
-  // use local timezone offset
-  const localBegin = `${randomHour}:00`
-
-  return localBegin
+  return `${randomHour}:00`
 }
 
-export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
-  timezone = timezone || store.state.localTimezone
-  if (localBegin) {
-    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
-
-    let utcBegin
-    let utcEnd
-    if (utcMoment && utcMoment.isValid()) {
-      utcBegin = utcMoment.format('HHmm00+0000')
-      utcMoment.add(1, 'h')
-      utcEnd = utcMoment.format('HHmm00+0000')
-    }
-    return { utcBegin, utcEnd }
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = 60) {
+  const maintenanceTimezone = new TimeWithOffset(beginTimezone)
+  if (!maintenanceTimezone.isValid()) {
+    return
   }
-  return undefined
+  const timezoneString = maintenanceTimezone.getTimezoneString({ colon: false })
+
+  if (!beginTime) {
+    return undefined
+  }
+  const beginMoment = moment(beginTime, 'HH:mm')
+  if (!beginMoment || !beginMoment.isValid()) {
+    return undefined
+  }
+
+  const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
+  const endMoment = beginMoment.add(windowSize, 'm')
+  const end = `${endMoment.format('HHmm')}00${timezoneString}`
+  return { begin, end }
 }
 
 export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
-  const zones = availableZones.length ? [sample(availableZones)] : undefined
+  const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const machineType = get(head(machineTypesForZone), 'name')
+  const machineType = head(machineTypesForZone) || {}
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
-  const volumeType = get(head(volumeTypesForZone), 'name')
+  const volumeType = head(volumeTypesForZone) || {}
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
   const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
@@ -590,19 +576,26 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     maximum: 2,
     maxSurge: 1,
     machine: {
-      type: machineType,
+      type: machineType.name,
       image: machineImage
     },
     zones,
     isNew: true
   }
-  if (volumeType) {
+  if (volumeType.name) {
     worker.volume = {
-      type: volumeType,
+      type: volumeType.name,
       size: defaultVolumeSize
     }
+  } else if (!machineType.storage) {
+    worker.volume = {
+      size: defaultVolumeSize
+    }
+  } else if (machineType.storage.type !== 'fixed') {
+    worker.volume = {
+      size: machineType.storage.size
+    }
   }
-
   return worker
 }
 
@@ -632,6 +625,12 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'uam',
     displayName: 'UAM'
+  },
+  {
+    name: 'owner',
+    displayName: 'Owner',
+    notEditable: true,
+    tooltip: 'You can change the project owner on the administration page'
   }
 ]
 
@@ -767,6 +766,23 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
   })
 }
 
+export function sortedRoleDisplayNames (roleNames) {
+  const displayNames = filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
+  return sortBy(displayNames, 'displayName')
+}
+
+export function mapTableHeader (headers, valueKey) {
+  const obj = {}
+  for (const { value: key, [valueKey]: value } of headers) {
+    obj[key] = value
+  }
+  return obj
+}
+
+export function isHtmlColorCode (value) {
+  return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
+}
+
 export default {
   store,
   canI,
@@ -775,5 +791,6 @@ export default {
   k8sVersionUpdatePathAvailable,
   selectedImageIsNotLatest,
   k8sVersionExpirationForShoot,
-  expiringWorkerGroupsForShoot
+  expiringWorkerGroupsForShoot,
+  isHtmlColorCode
 }

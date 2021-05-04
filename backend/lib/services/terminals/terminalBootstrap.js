@@ -1,38 +1,28 @@
 
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 const Queue = require('better-queue')
 const _ = require('lodash')
+const hash = require('object-hash')
 const net = require('net')
-const moment = require('moment')
 
 const logger = require('../../logger')
 const config = require('../../config')
-const { NotImplemented } = require('../../errors')
+const { NotImplemented } = require('http-errors')
 
-const {
-  dashboardClient,
-  isHttpError
-} = require('../../kubernetes-client')
+const { isHttpError } = require('@gardener-dashboard/request')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
 const {
   getConfigValue,
-  getSeedNameFromShoot
+  getSeedNameFromShoot,
+  isSeedUnreachable,
+  getSeedIngressDomain
 } = require('../../utils')
 
 const {
@@ -50,43 +40,98 @@ const {
   GardenTerminalHostRefType
 } = require('./utils')
 
-const { getSeed } = require('../../cache')
-
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
+const BootstrapReasonEnum = {
+  IRRELEVANT: 0,
+  NOT_BOOTSTRAPPED: 1,
+  REVISION_CHANGED: 2
+}
+
+const BootstrapStatusEnum = {
+  INITIAL: 0,
+  POSTPONED: 1,
+  BOOTSTRAPPED: 2,
+  IN_PROGRESS: 3,
+  FAILED: 4
+}
+
 // acts as abstract class
-class BootstrapSet extends Set {
-  containsResource (resource) {
-    const key = this.constructor.keyForResource(resource)
-    return this.has(key)
-  }
-
+class BootstrapMap extends Map {
   removeResource (resource) {
-    const key = this.constructor.keyForResource(resource)
-    return this.delete(key)
+    const key = this.getKey(resource)
+    this.delete(key)
   }
 
-  addResource (resource) {
-    const key = this.constructor.keyForResource(resource)
-    return this.addResourceWithKey(key)
-  }
-
-  addResourceWithKey (key) {
-    this.add(key)
+  addResource (resource, value = {}) {
+    const key = this.getKey(resource)
+    this.set(key, value)
     return key
   }
-}
 
-class NamedKeyBootstrapSet extends BootstrapSet {
-  static keyForResource (resource) {
-    const { kind, metadata: { name, namespace } } = resource
-    return `${kind}/${namespace}/${name}`
+  setSucceeded (item, { revision }) {
+    const key = this.getKey(item)
+    const value = {
+      state: BootstrapStatusEnum.BOOTSTRAPPED,
+      revision
+    }
+    this.set(key, value)
   }
-}
 
-class UidKeyBootstrapSet extends BootstrapSet {
-  static keyForResource (resource) {
-    const { metadata: { uid } } = resource
+  setBootstrapRequired (item) {
+    const key = this.getKey(item)
+    const currentValue = this.getValue(key)
+    const value = {
+      state: BootstrapStatusEnum.INITIAL,
+      revision: undefined, // reset revision
+      failure: currentValue.failure // keep failure in case there is any
+    }
+    this.set(key, value)
+  }
+
+  setFailed (item, doNotRetry = false) {
+    const key = this.getKey(item)
+    const currentValue = this.getValue(key)
+    const failureCounter = _.get(currentValue, 'failure.counter', 0)
+    const value = {
+      state: BootstrapStatusEnum.FAILED,
+      revision: currentValue.revision, // keep previous revision, in case handleDependentShoots needs to be triggered
+      failure: {
+        date: new Date(),
+        counter: failureCounter + 1,
+        doNotRetry
+      }
+    }
+    this.set(key, value)
+  }
+
+  setInProgress (item) {
+    const key = this.getKey(item)
+    const value = this.getValue(key)
+    value.state = BootstrapStatusEnum.IN_PROGRESS
+    this.set(key, value)
+  }
+
+  setPostponed (item) {
+    const key = this.getKey(item)
+    const value = this.getValue(key)
+    value.state = BootstrapStatusEnum.POSTPONED
+    this.set(key, value)
+  }
+
+  getValue (item) {
+    const key = this.getKey(item)
+    return this.get(key) || {
+      state: BootstrapStatusEnum.INITIAL
+    }
+  }
+
+  getKey (arg) {
+    if (typeof arg === 'string') {
+      return arg
+    }
+
+    const { metadata: { uid } } = arg
     return uid
   }
 }
@@ -94,6 +139,23 @@ class UidKeyBootstrapSet extends BootstrapSet {
 function taskIdForResource (resource) {
   const { metadata: { uid } } = resource
   return uid
+}
+
+function bootstrapRevision (seed) {
+  if (!seed) {
+    return
+  }
+
+  const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
+  const ingressDomain = getSeedIngressDomain(seed)
+  const trigger = _.get(seed, 'metadata.annotations["dashboard.gardener.cloud/terminal-bootstrap-trigger"]')
+
+  const revisionObj = {
+    ingressClass,
+    ingressDomain,
+    trigger
+  }
+  return hash(revisionObj)
 }
 
 class Handler {
@@ -226,14 +288,16 @@ function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, 
   return replaceResource(client.core.services, { namespace, name, body })
 }
 
-async function handleSeed ({ name }) {
+async function handleSeed (seed) {
+  const { metadata: { name, deletionTimestamp } } = seed
   const namespace = 'garden'
 
-  // get latest seed resource from cache
-  const seed = getSeed(name)
-
-  if (!_.isEmpty(seed.metadata.deletionTimestamp)) {
+  if (deletionTimestamp) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
+    return
+  }
+  if (isSeedUnreachable(seed)) {
+    logger.debug(`Seed ${name} is not reachable from the dashboard, bootstrapping aborted`)
     return
   }
 
@@ -242,17 +306,18 @@ async function handleSeed ({ name }) {
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
   const shoot = await dashboardClient.getShoot({ namespace, name, throwNotFound: false })
   if (shoot) {
-    await ensureTrustedCertForShootApiServer(dashboardClient, shoot)
+    const seedName = getSeedNameFromShoot(shoot)
+    const seedForShoot = await dashboardClient['core.gardener.cloud'].seeds.get(seedName)
+    await ensureTrustedCertForShootApiServer(dashboardClient, shoot, seedForShoot)
   } else {
     await ensureTrustedCertForSeedApiServer(dashboardClient, seed)
   }
 }
 
-async function handleShoot ({ name, namespace }) {
+async function handleShoot (shoot, seed) {
+  const { metadata: { namespace, name } } = shoot
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
-  // read the latest shoot resource version
-  const latestShootResource = await dashboardClient['core.gardener.cloud'].shoots.get(namespace, name)
-  await ensureTrustedCertForShootApiServer(dashboardClient, latestShootResource)
+  await ensureTrustedCertForShootApiServer(dashboardClient, shoot, seed)
 }
 
 /*
@@ -262,16 +327,19 @@ async function handleShoot ({ name, namespace }) {
   Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube-apiserver.
   https://github.com/gardener/gardener/issues/1413
 */
-async function ensureTrustedCertForShootApiServer (client, shootResource) {
-  const { metadata: { namespace, name } } = shootResource
-  if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
+async function ensureTrustedCertForShootApiServer (client, shootResource, seedResource) {
+  const { metadata: { namespace, name, deletionTimestamp } } = shootResource
+  if (deletionTimestamp) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return
   }
 
-  // fetch seed resource
-  const seedName = getSeedNameFromShoot(shootResource)
-  const seedResource = await client['core.gardener.cloud'].seeds.get(seedName)
+  const seedName = seedResource.metadata.name
+
+  if (isSeedUnreachable(seedResource)) {
+    logger.debug(`Seed ${seedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
+    return
+  }
 
   if (!seedResource.spec.secretRef) {
     logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
@@ -292,6 +360,12 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
 
   const serviceName = 'kube-apiserver'
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
+
+  const ingressClass = _.get(seedResource, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
+  if (ingressClass && annotations) {
+    annotations['kubernetes.io/ingress.class'] = ingressClass
+  }
+
   await replaceIngressApiServer(seedClient, {
     namespace: seedShootNamespace,
     serviceName,
@@ -346,6 +420,12 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
   const apiServerIngressHost = getKubeApiServerHostForSeed(seed)
   const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
   const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
+
+  const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
+  if (ingressClass && ingressAnnotations) {
+    ingressAnnotations['kubernetes.io/ingress.class'] = ingressClass
+  }
+
   await ensureTrustedCertForApiServer(seedClient, {
     namespace,
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
@@ -426,8 +506,7 @@ function verifyRequiredConfigExists () {
 class Bootstrapper extends Queue {
   constructor () {
     super(Bootstrapper.process, Bootstrapper.options)
-    this.bootstrapPending = new NamedKeyBootstrapSet()
-    this.bootstrapped = new UidKeyBootstrapSet()
+    this.bootstrapState = new BootstrapMap()
     this.requiredConfigExists = verifyRequiredConfigExists()
     if (this.isBootstrapKindAllowed('gardenTerminalHost')) {
       const description = 'garden host cluster'
@@ -454,24 +533,20 @@ class Bootstrapper extends Queue {
 
   handleResourceEvent ({ type, object }) {
     switch (type) {
-      case 'ADDED':
+      case 'ADDED': {
         this.bootstrapResource(object)
         break
-      case 'MODIFIED':
-        if (this.isResourcePending(object)) {
-          this.bootstrapResource(object)
-        }
+      }
+      case 'MODIFIED': {
+        this.bootstrapResource(object)
         break
-      case 'DELETED':
+      }
+      case 'DELETED': {
         this.cancelTask(object)
 
-        if (this.isResourcePending(object)) {
-          this.removePendingResource(object)
-        }
-        if (this.isResourceBootstrapped(object)) {
-          this.removeBootstrappedResource(object)
-        }
+        this.bootstrapState.removeResource(object)
         break
+      }
     }
   }
 
@@ -480,20 +555,97 @@ class Bootstrapper extends Queue {
     this.cancel(taskId)
   }
 
-  isResourceBootstrapped (resource) {
-    return this.bootstrapped.containsResource(resource)
-  }
+  bootstrapStatus (resource) {
+    const { kind, metadata: { namespace, name, uid } } = resource
 
-  removeBootstrappedResource (resource) {
-    return this.bootstrapped.removeResource(resource)
-  }
+    const qualifiedName = namespace ? namespace + '/' + name : name
+    const description = `${kind} - ${qualifiedName} (${uid})`
 
-  isResourcePending (resource) {
-    return this.bootstrapPending.containsResource(resource)
-  }
+    if (!this.isBootstrapKindAllowed(kind)) {
+      return {
+        required: false,
+        reason: BootstrapReasonEnum.IRRELEVANT
+      }
+    }
 
-  removePendingResource (resource) {
-    return this.bootstrapPending.removeResource(resource)
+    // do not bootstrap if resource is beeing deleted
+    if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
+      return {
+        required: false,
+        reason: BootstrapReasonEnum.IRRELEVANT
+      }
+    }
+
+    const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
+    if (isBootstrapDisabledForResource) {
+      return {
+        required: false,
+        reason: BootstrapReasonEnum.IRRELEVANT
+      }
+    }
+
+    const value = this.bootstrapState.getValue(resource)
+
+    if (value.state === BootstrapStatusEnum.IN_PROGRESS) { // task already running or in queue, can ignore
+      return {
+        required: false,
+        reason: BootstrapReasonEnum.IRRELEVANT
+      }
+    }
+
+    if (value.failure) { // failed previously
+      if (value.failure.doNotRetry) {
+        return {
+          required: false,
+          reason: BootstrapReasonEnum.IRRELEVANT
+        }
+      }
+
+      const lastFailure = value.failure.date.getTime()
+      const multiplier = Math.min(value.failure.counter * 2, 24)
+      const needsWait = Date.now() - lastFailure <= multiplier * 60 * 60 * 1000
+      if (needsWait) {
+        return {
+          required: false,
+          reason: BootstrapReasonEnum.IRRELEVANT
+        }
+      }
+    }
+
+    // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
+    if (kind === 'Shoot' && !seedShootNamespaceExists(resource)) {
+      if (value.state === BootstrapStatusEnum.INITIAL) {
+        logger.debug(`bootstrapping of ${description} postponed`)
+        this.bootstrapState.setPostponed(resource)
+      }
+      return {
+        required: false,
+        reason: BootstrapReasonEnum.IRRELEVANT
+      }
+    }
+
+    if (!value.revision) { // not yet bootstrapped
+      return {
+        required: true,
+        reason: BootstrapReasonEnum.NOT_BOOTSTRAPPED
+      }
+    }
+
+    if (kind === 'Seed') {
+      if (value.revision !== bootstrapRevision(resource)) { // revision changed
+        logger.debug(`terminal bootstrap revision changed for ${description}. Needs bootstrap`)
+        return {
+          required: true,
+          reason: BootstrapReasonEnum.REVISION_CHANGED
+        }
+      }
+    }
+
+    // already bootstrapped
+    return {
+      required: false,
+      reason: BootstrapReasonEnum.IRRELEVANT
+    }
   }
 
   bootstrapResource (resource) {
@@ -502,69 +654,65 @@ class Bootstrapper extends Queue {
     const qualifiedName = namespace ? namespace + '/' + name : name
     const description = `${kind} - ${qualifiedName} (${uid})`
 
-    if (!this.isBootstrapKindAllowed(kind)) {
+    const { required, reason } = this.bootstrapStatus(resource)
+    if (!required) {
       return
     }
 
-    // do not bootstrap if resource is beeing deleted
-    if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
-      return
-    }
+    const key = this.bootstrapState.getKey(resource)
+    this.bootstrapState.setInProgress(key)
 
-    const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
-    if (isBootstrapDisabledForResource) {
-      logger.debug(`terminal bootstrap disabled for ${description}`)
-      return
-    }
-
-    if (this.bootstrapped.containsResource(resource)) {
-      logger.debug(`terminal bootstrap already executed for ${description}`)
-      return
-    }
-
-    // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
-    if (kind === 'Shoot' && !seedShootNamespaceExists(resource)) {
-      if (this.bootstrapPending.containsResource(resource)) {
-        return
-      }
-      this.bootstrapPending.addResource(resource)
-      logger.debug(`bootstrapping of ${description} postponed`)
-      return
-    }
-
-    if (this.bootstrapPending.containsResource(resource)) {
-      this.bootstrapPending.removeResource(resource)
-    }
-
-    const key = UidKeyBootstrapSet.keyForResource(resource)
     const taskId = taskIdForResource(resource)
     const fn = async session => {
-      if (session.canceled) {
-        logger.debug(`Canceling handler of ${description} as requested`)
-        return
-      }
-
-      switch (kind) {
-        case 'Seed': {
-          await handleSeed({ name })
-          break
-        }
-        case 'Shoot': {
-          await handleShoot({ name, namespace })
-          break
-        }
-        default: {
-          logger.error(`can't bootstrap unsupported kind ${kind}`)
+      try {
+        if (session.canceled) {
+          logger.debug(`Canceling handler of ${description} as requested`)
+          this.bootstrapState.delete(key) // tasks are canceled only for deleted resources, hence remove from state
           return
         }
-      }
 
-      if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
-        logger.debug(`Canceling handler of ${description} as requested after handling resource`)
-        return
+        let seed
+        switch (kind) {
+          case 'Seed': {
+            seed = await dashboardClient['core.gardener.cloud'].seeds.get(name)
+            await handleSeed(seed)
+            if (reason === BootstrapReasonEnum.REVISION_CHANGED) {
+              await this.handleDependentShoots(name)
+            }
+            break
+          }
+          case 'Shoot': {
+            const shoot = await dashboardClient['core.gardener.cloud'].shoots.get(namespace, name)
+            const seedName = getSeedNameFromShoot(shoot)
+            seed = await dashboardClient['core.gardener.cloud'].seeds.get(seedName)
+            await handleShoot(shoot, seed)
+            break
+          }
+          default: {
+            logger.error(`can't bootstrap unsupported kind ${kind}`)
+            this.bootstrapState.setFailed(key, true)
+            return
+          }
+        }
+
+        if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
+          logger.debug(`Canceling handler of ${description} as requested after handling resource`)
+          this.bootstrapState.delete(key) // tasks are canceled only for deleted resources, hence remove from state
+          return
+        }
+
+        logger.debug(`Successfully bootstrapped ${description}`)
+        const revision = bootstrapRevision(seed)
+        this.bootstrapState.setSucceeded(key, { revision })
+      } catch (err) {
+        if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
+          logger.debug(`Handler canceled of ${description}`)
+          this.bootstrapState.delete(key) // tasks are canceled only for deleted resources, hence remove from state
+        } else {
+          this.bootstrapState.setFailed(key)
+        }
+        throw err
       }
-      logger.debug(`Successfully bootstrapped ${description}`)
-      this.bootstrapped.addResourceWithKey(key)
     }
     const handler = new Handler(fn, {
       id: taskId, // with the id we make sure that the task for one shoot is not added multiple times (e.g. on another ADDED event when the shoot watch is re-established)
@@ -573,9 +721,22 @@ class Bootstrapper extends Queue {
     this.push(handler)
   }
 
+  async handleDependentShoots (seedName) {
+    const query = {
+      fieldSelector: `spec.seedName=${seedName}`
+    }
+    const { items } = await dashboardClient['core.gardener.cloud'].shoots.listAllNamespaces(query)
+    logger.debug(`Bootstrap required for ${items.length} shoots due to terminal bootstrap revision change`)
+    _.forEach(items, shoot => {
+      shoot.kind = 'Shoot' // patch missing kind
+      this.bootstrapState.setBootstrapRequired(shoot)
+      this.bootstrapResource(shoot)
+    })
+  }
+
   static get options () {
     const defaultOptions = {
-      maxTimeout: moment.duration(10, 'minutes').asMilliseconds()
+      maxTimeout: 600000 // 10 minutes
     }
     const configOptions = _
       .chain(config)
@@ -601,5 +762,6 @@ class Bootstrapper extends Queue {
 
 module.exports = {
   Handler,
-  Bootstrapper
+  Bootstrapper,
+  BootstrapStatusEnum
 }

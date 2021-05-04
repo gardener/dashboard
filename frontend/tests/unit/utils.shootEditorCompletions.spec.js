@@ -1,30 +1,12 @@
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
-//
-// Licensed under the Apache License, Version 2.0 (the 'License');
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an 'AS IS' BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
+// SPDX-License-Identifier: Apache-2.0
 
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
 
 import repeat from 'lodash/repeat'
-
-import chai from 'chai'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
-const expect = chai.expect
 
 const shootCompletions = {
   spec: {
@@ -72,14 +54,14 @@ const shootCompletions = {
   }
 }
 
-describe('utils', function () {
-  describe('shootEditorCompletions', function () {
+describe('utils', () => {
+  describe('shootEditorCompletions', () => {
     let editor
     let setEditorContentAndCursor
     let setEditorCursor
     let shootEditorCompletions
 
-    before(function () {
+    beforeAll(() => {
       // cannot stub via sandbo as Jest does not implement the function and
       // non existant functions cannot be stubbed using a sinon sandbox
       document.body.createTextRange = function () {
@@ -120,210 +102,219 @@ describe('utils', function () {
       shootEditorCompletions = new ShootEditorCompletions(shootCompletions, editor.options.indentUnit)
     })
 
-    after(function () {
+    afterAll(() => {
       document.body.createTextRange = undefined
     })
 
-    describe('#yamlHint', function () {
-      it('should return a simple hint', function () {
+    describe('#yamlHint', () => {
+      it('should return a simple hint', () => {
         setEditorContentAndCursor('', 0, 0)
         const completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.be.an.instanceof(Array)
-        expect(completions).to.have.length(1)
+        expect(completions).toBeInstanceOf(Array)
+        expect(completions).toHaveLength(1)
         const { text, string, property, type, description } = completions[0]
-        expect(text).to.equal('spec:\n   ')
-        expect(string).to.equal('spec')
-        expect(property).to.equal('spec')
-        expect(type).to.equal('Object')
-        expect(description).to.equal('spec description')
+        expect(text).toBe('spec:\n   ')
+        expect(string).toBe('spec')
+        expect(property).toBe('spec')
+        expect(type).toBe('Object')
+        expect(description).toBe('spec description')
       })
 
-      it('should return properties of an object', function () {
+      it('should return properties of an object', () => {
         setEditorContentAndCursor('spec:\n   ', 0, 0)
         let completions = shootEditorCompletions.yamlHint(editor).list
         // completions length is 0 because we filter completion if already in this line - avoid duplicate completions
-        expect(completions).to.have.length(0)
+        expect(completions).toHaveLength(0)
 
         setEditorCursor(1, 0)
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
+        expect(completions).toHaveLength(1)
 
         setEditorCursor(1, 3)
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(3)
+        expect(completions).toHaveLength(3)
 
         const { text: text0, type: type0 } = completions[0]
-        expect(text0).to.equal('apiVersion: ')
-        expect(type0).to.equal('String')
+        expect(text0).toBe('apiVersion: ')
+        expect(type0).toBe('String')
 
         const { text: text2, type: type2 } = completions[2]
-        expect(text2).to.equal('metadata:\n      ')
-        expect(type2).to.equal('Object')
+        expect(text2).toBe('metadata:\n      ')
+        expect(type2).toBe('Object')
       })
 
-      it('should provide code completion for array start', function () {
+      it('should provide code completion for array start', () => {
         setEditorContentAndCursor('spec:\n  metadata:\n      ', 2, 0)
         let completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
+        expect(completions).toHaveLength(1)
 
         setEditorCursor(2, 6)
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(2)
+        expect(completions).toHaveLength(2)
 
         const { text: text0, type: type0 } = completions[0]
-        expect(text0).to.equal('annotations:\n         ')
-        expect(type0).to.equal('Object')
+        expect(text0).toBe('annotations:\n         ')
+        expect(type0).toBe('Object')
 
         const { text: text1, type: type1 } = completions[1]
-        expect(text1).to.equal('managedFields:\n         - ')
-        expect(type1).to.equal('Array')
+        expect(text1).toBe('managedFields:\n         - ')
+        expect(type1).toBe('Array')
       })
 
-      it('should provide code completion for first array item', function () {
+      it('should provide code completion for first array item', () => {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - ', 3, 11)
         let completions = shootEditorCompletions.yamlHint(editor).list
 
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(3)
+        expect(completions).toHaveLength(3)
 
         const { text: text0, type: type0 } = completions[0]
-        expect(text0).to.equal('- apiVersion: ')
-        expect(type0).to.equal('String')
+        expect(text0).toBe('- apiVersion: ')
+        expect(type0).toBe('String')
 
         const { text: text1, type: type1 } = completions[1]
-        expect(text1).to.equal('- fieldsType: ')
-        expect(type1).to.equal('String')
+        expect(text1).toBe('- fieldsType: ')
+        expect(type1).toBe('String')
       })
 
-      it('should provide code completion for second array item', function () {
+      it('should provide code completion for second array item', () => {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - apiVersion: foo\n           ', 4, 11)
         const completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(3)
+        expect(completions).toHaveLength(3)
 
         const { text, type } = completions[1]
-        expect(text).to.equal('fieldsType: ')
-        expect(type).to.equal('String')
+        expect(text).toBe('fieldsType: ')
+        expect(type).toBe('String')
       })
 
-      it('should provide code completion if first item of an array is an object', function () {
+      it('should provide code completion if first item of an array is an object', () => {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - ma', 3, 12)
         const completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
+        expect(completions).toHaveLength(1)
         const { text, type } = completions[0]
 
-        expect(text).to.equal('- managedObjects:\n              ')
-        expect(type).to.equal('Object')
+        expect(text).toBe('- managedObjects:\n              ')
+        expect(type).toBe('Object')
       })
 
-      it('should provide code completion if context has object as first array item', function () {
-        setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - managedObjects:\n              ', 4, 14)
-        const completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
-        const { text, type } = completions[0]
-        expect(text).to.equal('foo: ')
-        expect(type).to.equal('String')
-      })
+      it(
+        'should provide code completion if context has object as first array item',
+        () => {
+          setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - managedObjects:\n              ', 4, 14)
+          const completions = shootEditorCompletions.yamlHint(editor).list
+          expect(completions).toHaveLength(1)
+          const { text, type } = completions[0]
+          expect(text).toBe('foo: ')
+          expect(type).toBe('String')
+        }
+      )
 
-      it('should filter completions according to typed text', function () {
+      it('should filter completions according to typed text', () => {
         setEditorContentAndCursor('spec:\n   ', 1, 3)
         let completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(3)
+        expect(completions).toHaveLength(3)
 
         setEditorContentAndCursor('spec:\n   ki', 1, 5)
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
+        expect(completions).toHaveLength(1)
 
         const { text, type } = completions[0]
-        expect(text).to.equal('kind: ')
-        expect(type).to.equal('String')
+        expect(text).toBe('kind: ')
+        expect(type).toBe('String')
       })
 
-      it('should traverse path correctly, do not add properties on same level to path', function () {
-        setEditorContentAndCursor('spec:\n   metadata:\n      annotations:\n         foo: bar\n      managedFields:\n         - apiVersion: foo\n            ', 6, 12)
-        const completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(3)
+      it(
+        'should traverse path correctly, do not add properties on same level to path',
+        () => {
+          setEditorContentAndCursor('spec:\n   metadata:\n      annotations:\n         foo: bar\n      managedFields:\n         - apiVersion: foo\n            ', 6, 12)
+          const completions = shootEditorCompletions.yamlHint(editor).list
+          expect(completions).toHaveLength(3)
 
-        const { text, type } = completions[1]
-        expect(text).to.equal('fieldsType: ')
-        expect(type).to.equal('String')
-      })
+          const { text, type } = completions[1]
+          expect(text).toBe('fieldsType: ')
+          expect(type).toBe('String')
+        }
+      )
     })
-    describe('#editorTooltip', function () {
-      it('should return a simple tooltip', function () {
+    describe('#editorTooltip', () => {
+      it('should return a simple tooltip', () => {
         setEditorContentAndCursor('spec:', 0, 0)
         editor.coordsChar = () => {
           return { line: 0, ch: 1 }
         }
         const tooltip = shootEditorCompletions.editorTooltip({}, editor)
-        expect(tooltip.type).to.equal('Object')
+        expect(tooltip.type).toBe('Object')
       })
 
-      it('should return tooltips for nested properties', function () {
+      it('should return tooltips for nested properties', () => {
         setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n', 0, 0)
         editor.coordsChar = () => {
           return { line: 1, ch: 1 }
         }
         let tooltip = shootEditorCompletions.editorTooltip({}, editor)
-        expect(tooltip).to.be.undefined
+        expect(tooltip).toBeUndefined()
 
         editor.coordsChar = () => {
           return { line: 1, ch: 3 }
         }
         tooltip = shootEditorCompletions.editorTooltip({}, editor)
-        expect(tooltip.type).to.equal('Object')
+        expect(tooltip.type).toBe('Object')
 
         editor.coordsChar = () => {
           return { line: 2, ch: 5 }
         }
         tooltip = shootEditorCompletions.editorTooltip({}, editor)
-        expect(tooltip.type).to.equal('Array')
-        expect(tooltip.description).to.equal('Demo Array')
+        expect(tooltip.type).toBe('Array')
+        expect(tooltip.description).toBe('Demo Array')
 
         editor.coordsChar = () => {
           return { line: 2, ch: 18 }
         }
         tooltip = shootEditorCompletions.editorTooltip({}, editor)
-        expect(tooltip).to.be.undefined
+        expect(tooltip).toBeUndefined()
       })
     })
-    describe('#editorEnter', function () {
-      const sandbox = sinon.createSandbox()
-
-      afterEach(function () {
-        sandbox.restore()
+    describe('#editorEnter', () => {
+      afterEach(() => {
+        jest.restoreAllMocks()
       })
 
-      it('should return a simple line break', function () {
-        const spy = sandbox.spy(editor, 'replaceSelection')
+      it('should return a simple line break', () => {
+        const spy = jest.spyOn(editor, 'replaceSelection')
         setEditorContentAndCursor('', 0, 0)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith('\n')
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith('\n')
 
-        spy.resetHistory()
+        spy.mockReset()
         setEditorContentAndCursor('test', 0, 0)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith('\n')
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith('\n')
       })
 
-      it('should preserve indent after a regular line', function () {
-        const spy = sandbox.spy(editor, 'replaceSelection')
+      it('should preserve indent after a regular line', () => {
+        const spy = jest.spyOn(editor, 'replaceSelection')
         setEditorContentAndCursor('spec:\n  foo:bar', 1, 9)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith('\n  ')
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith('\n  ')
       })
 
-      it('should increase indent after an object or array', function () {
-        const spy = sandbox.spy(editor, 'replaceSelection')
+      it('should increase indent after an object or array', () => {
+        const spy = jest.spyOn(editor, 'replaceSelection')
         setEditorContentAndCursor('spec:\n  foo:', 1, 6)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith(`\n  ${repeat(' ', editor.options.indentUnit)}`)
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith(`\n  ${repeat(' ', editor.options.indentUnit)}`)
       })
 
-      it('should increase indent after first item of an array', function () {
-        const spy = sandbox.spy(editor, 'replaceSelection')
+      it('should increase indent after first item of an array', () => {
+        const spy = jest.spyOn(editor, 'replaceSelection')
         setEditorContentAndCursor('spec:\n  foo:\n    - foo:bar', 2, 13)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith('\n      ')
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith('\n      ')
       })
     })
   })

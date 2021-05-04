@@ -1,28 +1,19 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <div class="fill-height">
     <shoot-editor
-      :modificationWarning="modificationWarning"
-      @dismissModificationWarning="onDismissModificationWarning"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      :shootContent="newShootResource"
-      ref="shootEditor">
+      alert-banner-identifier="newShootEditorWarning"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
+      :shoot-content="newShootResource"
+      ref="shootEditor"
+      v-on="$shootEditor.hooks"
+    >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
@@ -30,7 +21,7 @@ limitations under the License.
       <template v-slot:toolbarItemsRight>
         <v-divider vertical></v-divider>
         <v-col class="d-flex fill-height align-center" >
-          <v-btn text @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
+          <v-btn text @click.native.stop="createClicked()" class="primary--text">Create</v-btn>
         </v-col>
       </template>
     </shoot-editor>
@@ -40,26 +31,28 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
-import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
+
+import asyncRef from '@/mixins/asyncRef'
 
 // lodash
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 
-// js-yaml
-import jsyaml from 'js-yaml'
+const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
+  name: 'shoot-create-editor',
   components: {
     ShootEditor,
     ConfirmDialog
   },
-  name: 'shoot-create-editor',
+  mixins: [
+    asyncRef('shootEditor')
+  ],
   data () {
     return {
-      modificationWarning: true,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false
@@ -79,10 +72,6 @@ export default {
       'setNewShootResource',
       'createShoot'
     ]),
-    onDismissModificationWarning () {
-      this.modificationWarning = false
-      this.$localStorage.setItem('showNewShootEditorWarning', 'false')
-    },
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Leave',
@@ -90,10 +79,13 @@ export default {
         messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
       })
     },
+    async getShootResource () {
+      const content = await this.$shootEditor.dispatch('getContent')
+      return this.$yaml.safeLoad(content)
+    },
     async createClicked () {
-      const shootResource = jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-
       try {
+        const shootResource = await this.getShootResource()
         await this.createShoot(shootResource)
         this.isShootCreated = true
         this.$router.push({
@@ -111,19 +103,15 @@ export default {
       }
     },
     async isShootContentDirty () {
-      const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-      return !isEqual(this.initialNewShootResource, data)
+      const shootResource = await this.getShootResource()
+      return !isEqual(this.initialNewShootResource, shootResource)
     }
-  },
-  mounted () {
-    const modificationWarning = this.$localStorage.getItem('showNewShootEditorWarning')
-    this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-        this.setNewShootResource(data)
+        const shootResource = await this.getShootResource()
+        this.setNewShootResource(shootResource)
         return next()
       } catch (err) {
         this.errorMessage = get(err, 'response.data.message', err.message)
@@ -135,7 +123,7 @@ export default {
     }
     if (!this.isShootCreated && await this.isShootContentDirty()) {
       if (!await this.confirmEditorNavigation()) {
-        this.$refs.shootEditor.focus()
+        this.$shootEditor.dispatch('focus')
         return next(false)
       }
     }

@@ -1,23 +1,13 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { Server } = require('http')
-const delay = require('delay')
+const http = require('http')
+const terminus = require('@godaddy/terminus')
 const createServer = require('../lib/server')
 
 function createApplication (port) {
@@ -25,72 +15,109 @@ function createApplication (port) {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
   }
-  app.synchronizing = false
-  app.io = {}
-  app.log = []
-  app.get = key => {
-    switch (key) {
-      case 'port':
-        return port
-      case 'periodSeconds':
-        return 1
-      case 'logger':
-        return {
-          debug (...args) {
-            app.log.push(['debug', ...args])
-          },
-          log (...args) {
-            app.log.push(['log', ...args])
-          },
-          warn (...args) {
-            app.log.push(['warn', ...args])
-          },
-          error (...args) {
-            app.log.push(['error', ...args])
-          },
-          info (...args) {
-            app.log.push(['info', ...args])
-          }
-        }
-      case 'healthCheck':
-        return (req, res) => {
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end('ok', 'utf8')
-        }
-      case 'io':
-        return () => {
-          return {
-            attach (server) {
-              app.io.server = server
-            }
-          }
-        }
-      case 'synchronizer':
-        return () => {
-          app.synchronizing = true
-          return delay(1)
-        }
+  const map = new Map()
+  map.set('port', port)
+  map.set('periodSeconds', 1)
+  map.set('healthCheck', jest.fn())
+  map.set('hooks', {
+    cleanup: jest.fn(() => Promise.resolve()),
+    beforeListen: jest.fn(() => Promise.resolve())
+  })
+  map.set('logger', {
+    log: jest.fn(),
+    debug (...args) {
+      this.log('debug', ...args)
+    },
+    warn (...args) {
+      this.log('warn', ...args)
+    },
+    error (...args) {
+      this.log('error', ...args)
+    },
+    info (...args) {
+      this.log('info', ...args)
     }
-  }
+  })
+  app.get = Map.prototype.get.bind(map)
   return app
 }
 
-describe('server', function () {
-  /* eslint no-unused-expressions: 0 */
-  const port = 1234
+jest.useFakeTimers()
 
-  it('should create a server', async function () {
-    const app = createApplication(port)
-    const server = createServer(app)
-    expect(server).to.be.instanceof(Server)
-    expect(server).to.equal(app.io.server)
-    try {
-      await server.startListening()
-      expect(app.synchronizing).to.be.true
-      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %d ms'])
-      expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
-    } finally {
-      server.close()
+describe('server', () => {
+  const port = 1234
+  const mockServer = {
+    listen: jest.fn((_, callback) => setImmediate(callback))
+  }
+  const mockTerminus = {}
+  let app
+  let hooks
+  let logger
+  let healthCheck
+  let server
+  let mockCreateServer
+  let mockCreateTerminus
+
+  beforeEach(() => {
+    mockCreateServer = jest.spyOn(http, 'createServer').mockReturnValue(mockServer)
+    mockCreateTerminus = jest.spyOn(terminus, 'createTerminus').mockReturnValue(mockTerminus)
+    app = createApplication(port)
+    hooks = app.get('hooks')
+    logger = app.get('logger')
+    healthCheck = app.get('healthCheck')
+    server = createServer(app)
+  })
+
+  it('should create and run the server', async () => {
+    expect(mockCreateServer).toBeCalledTimes(1)
+    expect(mockCreateServer.mock.calls[0]).toHaveLength(1)
+    expect(mockCreateServer.mock.calls[0][0]).toBe(app)
+    expect(mockCreateTerminus).toBeCalledTimes(1)
+    expect(mockCreateTerminus.mock.calls[0]).toHaveLength(2)
+    expect(mockCreateTerminus.mock.calls[0][0]).toBe(mockServer)
+    const terminusOptions = mockCreateTerminus.mock.calls[0][1]
+    expect(terminusOptions.beforeShutdown).toEqual(expect.any(Function))
+    expect(terminusOptions.onSignal).toEqual(expect.any(Function))
+    await server.run()
+    expect(hooks.beforeListen).toBeCalledTimes(1)
+    expect(hooks.beforeListen.mock.calls[0]).toHaveLength(1)
+    expect(hooks.beforeListen.mock.calls[0][0]).toEqual(mockServer)
+    expect(logger.log.mock.calls).toEqual([
+      ['debug', 'Before listen hook succeeded after %d ms', expect.any(Number)],
+      ['info', 'Server listening on port %d', 1234]
+    ])
+  })
+
+  it('should initialize terminus', async () => {
+    expect(terminus.createTerminus).toBeCalledTimes(1)
+    expect(terminus.createTerminus.mock.calls[0]).toHaveLength(2)
+    const { healthChecks, beforeShutdown, onSignal, onShutdown, logger: error } = terminus.createTerminus.mock.calls[0][1]
+    for (const key in healthChecks) {
+      healthChecks[key]()
     }
+    expect(healthCheck).toBeCalledTimes(2)
+    expect(healthCheck.mock.calls).toEqual([[false], [true]])
+
+    setTimeout.mockClear()
+    beforeShutdown()
+    jest.runAllTimers()
+    expect(setTimeout).toHaveBeenCalledTimes(1)
+    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 1200)
+
+    logger.log.mockClear()
+    onSignal()
+    expect(hooks.cleanup).toHaveBeenCalledTimes(1)
+    expect(logger.log).toHaveBeenCalledTimes(1)
+    expect(logger.log.mock.calls).toEqual([['debug', 'Server is starting cleanup']])
+
+    logger.log.mockClear()
+    onShutdown()
+    expect(logger.log).toHaveBeenCalledTimes(1)
+    expect(logger.log.mock.calls).toEqual([['debug', 'Cleanup has been finished. Server is shutting down']])
+
+    logger.log.mockClear()
+    error('Failed')
+    expect(logger.log).toHaveBeenCalledTimes(1)
+    expect(logger.log.mock.calls).toEqual([['error', 'Failed']])
   })
 })

@@ -1,51 +1,61 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{ title}}</span>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
+        <span class="text-h5 ml-5 toolbar-title--text">{{ title}}</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
-          <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
-          <p class="body-1">
+          <div class="text-h6 grey--text text--darken-1 my-4">Add users to your project.</div>
+          <p class="text-body-1">
             Adding users to your project allows you to collaborate across your team.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
         <template v-if="isServiceDialog">
-          <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
-          <p class="body-1">
+          <div class="text-h6 grey--text text--darken-1 my-4">Add service accounts to your project.</div>
+          <p class="text-body-1">
             Adding service accounts to your project allows you to automate processes in your project.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
+         <div class="text-h6 grey--text text--darken-1 my-4">Assign roles to your members.</div>
+          <p class="text-body-1">
+            Add roles to your members to restrict access to resources of this project. Currently supported built-in roles are:
+            <ul>
+              <li>
+                <code>owner</code> - Access to all resources and ability to manage members. Currently there can only be one owner per project. You can change the owner on the project administration page.
+              </li>
+              <li>
+                <code>admin</code> - Access to all resources of this project, except for member management.
+              </li>
+              <li>
+                <code>viewer</code> - Read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read infrastructure secrets.
+              </li>
+              <li>
+                <code>UAM</code> - Give the member User Access Management rights. Members with this role can manage members, should be used in combination with admin role to extend rights. In case an external UAM system is connected via a service account, only this account should get the <code>UAM</code> role.
+              </li>
+            </ul>
+          </p>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.stop="hide" :class="buttonClass" tabindex="2">Ok</v-btn>
+        <v-btn text @click.stop="hide" class="primary--text" tabindex="2">Ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+
 export default {
   name: 'help-member-dialog',
   props: {
@@ -83,14 +93,6 @@ export default {
         return 'help_service'
       }
       return ''
-    },
-    buttonClass () {
-      if (this.isUserDialog) {
-        return 'green--text darken-2'
-      } else if (this.isServiceDialog) {
-        return 'blue-grey--text'
-      }
-      return ''
     }
   },
   methods: {
@@ -100,22 +102,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .help_user, .help_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .help_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .help_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>

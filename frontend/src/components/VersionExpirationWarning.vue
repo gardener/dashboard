@@ -1,25 +1,15 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <g-popper
     v-if="k8sExpiration || expiredWorkerGroups.length"
     :title="`Update Information for ${this.shootName}`"
-    :toolbarColor="overallStatusColor"
-    :popperKey="`version_warning_${shootName}`"
+    :toolbar-color="overallStatusColor"
+    :popper-key="`version_warning_${shootName}`"
   >
     <template v-slot:popperRef>
       <v-btn icon>
@@ -34,7 +24,15 @@ limitations under the License.
     <ul class="update-warning-box" :class="listClass">
       <template v-if="k8sExpiration">
         <li>
-          <span v-if="k8sExpiration.isValidTerminationDate">Kubernetes version of this cluster expires <span class="font-weight-bold"><time-string :date-time="k8sExpiration.expirationDate"></time-string></span>. </span>
+          <span v-if="k8sExpiration.isValidTerminationDate">Kubernetes version of this cluster expires
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate" mode="future"></time-string></span>
+              </template>
+              <span>{{getDateFormatted(k8sExpiration.expirationDate)}}</span>
+            </v-tooltip>
+            <span>. </span>
+          </span>
           <span v-else>Kubernetes version of this cluster is expired. </span>
           <span v-if="k8sExpiration.isInfo">Version will be updated in the next maintenance window</span>
           <template v-if="k8sExpiration.isWarning">
@@ -47,7 +45,15 @@ limitations under the License.
 
       <li v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
         <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
-        <span v-if="isValidTerminationDate">expires <span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>. </span>
+        <span v-if="isValidTerminationDate">expires
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
+            </template>
+            <span>{{getDateFormatted(expirationDate)}}</span>
+          </v-tooltip>
+          <span>. </span>
+        </span>
         <span v-else>is expired. </span>
         <span v-if="isInfo">Version will be updated in the next maintenance window</span>
         <template v-if="isWarning">
@@ -66,9 +72,8 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import some from 'lodash/some'
 import get from 'lodash/get'
-import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
-import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot } from '@/utils'
+import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot, getDateFormatted } from '@/utils'
 
 export default {
   name: 'VerisonUpdateWarning',
@@ -89,10 +94,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'kubernetesVersions',
-      'machineImagesByCloudProfileName'
-    ]),
     k8sExpiration () {
       if (this.onlyMachineImageWarnings) {
         return undefined
@@ -116,7 +117,7 @@ export default {
       if (this.isOverallStatusWarning) {
         return 'warning'
       }
-      return 'cyan darken-2'
+      return 'primary'
     },
     listClass () {
       if ((this.k8sExpiration && this.expiredWorkerGroups.length) || this.expiredWorkerGroups.length > 1) {
@@ -129,6 +130,11 @@ export default {
         return 'Version Update Warning'
       }
       return 'Version Update Information'
+    }
+  },
+  methods: {
+    getDateFormatted (date) {
+      return getDateFormatted(date)
     }
   }
 }

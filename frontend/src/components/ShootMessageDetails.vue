@@ -1,24 +1,14 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-list>
     <v-list-item>
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">info_outline</v-icon>
+        <v-icon color="primary">mdi-information-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Status</v-list-item-subtitle>
@@ -31,7 +21,7 @@ limitations under the License.
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
-          <v-icon color="cyan darken-2">mdi-post-outline</v-icon>
+          <v-icon color="primary">mdi-post-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Last Message</v-list-item-subtitle>
@@ -42,15 +32,15 @@ limitations under the License.
       </v-list-item>
     </template>
     <v-divider inset></v-divider>
-    <v-list-item>
+    <v-list-item v-if="lastUpdateTime">
       <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
+        <v-icon color="primary">mdi-clock-outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
           <v-lazy>
-            <time-string :dateTime="lastUpdateTime" :pointInTime="-1"></time-string>
+            <time-string :date-time="lastUpdateTime" mode="past"></time-string>
           </v-lazy>
         </v-list-item-title>
       </v-list-item-content>
@@ -61,7 +51,7 @@ limitations under the License.
         <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
           <v-lazy>
-            <time-string :dateTime="lastTransitionTime" :pointInTime="-1"></time-string>
+            <time-string :date-time="lastTransitionTime" mode="past"></time-string>
           </v-lazy>
         </v-list-item-title>
       </v-list-item-content>
@@ -80,7 +70,6 @@ limitations under the License.
               <v-alert
                 v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
-                dark
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError ? true : false"
               >
@@ -89,12 +78,11 @@ limitations under the License.
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
-                        class="cyan--text text--darken-2"
-                        :to="{ name: 'Secret', params: { name: secretName, namespace: namespace } }"
+                        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
                       >
-                        <span>{{secretName}}</span>
+                        <span>{{secretBindingName}}</span>
                       </router-link>
-                      <span v-else>{{secretName}}</span>
+                      <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
                   {{description}}
                 </span>
@@ -134,17 +122,11 @@ export default {
     lastTransitionTime: {
       type: String
     },
-    secretName: {
+    secretBindingName: {
       type: String
     },
     namespace: {
       type: String
-    }
-  },
-  data () {
-    return {
-      showLastUpdateTimePlaceholder: true,
-      showLastTransitionTimePlaceholder: true
     }
   },
   computed: {
@@ -152,7 +134,7 @@ export default {
       return !isEmpty(this.errorDescriptions)
     },
     canLinkToSecret () {
-      return this.secretName && this.namespace
+      return this.secretBindingName && this.namespace
     }
   }
 }

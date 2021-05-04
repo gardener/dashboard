@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 import { Netmask } from 'netmask'
@@ -64,7 +54,6 @@ export function getSpecTemplate (infrastructureKind) {
       return {
         provider: getProviderTemplate(infrastructureKind),
         networking: {
-          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
           nodes: defaultWorkerCIDR
         }
       }
@@ -282,7 +271,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     if (availableNetworksLength < newUniqueZones.length) {
       return undefined
     }
-    return map(newUniqueZones, zone => {
+    const newZonesNetworkConfiguration = map(newUniqueZones, zone => {
       let zoneConfiguration = find(existingZonesNetworkConfiguration, { name: zone })
       if (zoneConfiguration) {
         return zoneConfiguration
@@ -293,11 +282,15 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
         ...zoneConfiguration
       }
     })
+
+    // order is important => keep oldZonesNetworkConfiguration order
+    return uniq([...oldZonesNetworkConfiguration, ...newZonesNetworkConfiguration])
   }
 
   if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {
     return defaultZonesNetworkConfiguration
   }
+
   return existingZonesNetworkConfiguration
 }
 

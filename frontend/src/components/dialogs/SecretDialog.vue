@@ -1,72 +1,71 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="750">
+  <v-dialog v-model="visible" max-width="850">
     <v-card>
-      <v-img
-        class="white--text align-center justify-start"
-        height="130px"
-        :src="backgroundSrc"
-      >
-        <v-card-title>
-          <infra-icon v-model="infraIcon" :width="42"></infra-icon>
-          <span class="headline ml-5">{{title}}</span>
-        </v-card-title>
-      </v-img>
+      <v-card-title class="toolbar-background">
+        <span class="text-h5 toolbar-title--text">{{title}}</span>
+        <v-spacer></v-spacer>
+        <v-btn
+          light
+          icon
+          :class="helpVisible ? 'toolbar-title toolbar--text' : 'toolbar toolbar-title--text'"
+          @click="helpVisible=!helpVisible"
+        >
+          <v-icon>mdi-help</v-icon>
+        </v-btn>
+      </v-card-title>
       <v-card-text>
-        <v-container fluid>
-          <div>
-            <template v-if="isCreateMode">
-              <v-text-field
-                :color="color"
-                ref="secretName"
-                v-model.trim="secretName"
-                label="Secret Name"
-                :error-messages="getErrorMessages('secretName')"
-                @input="$v.secretName.$touch()"
-                @blur="$v.secretName.$touch()"
-              ></v-text-field>
-            </template>
-            <template v-else>
-              <div class="title pb-4">{{secretName}}</div>
-            </template>
+        <div class="d-flex flex-row pa-3">
+          <div class="d-flex flex-column flex-grow-1" ref="secretDetails">
+            <div>
+              <template v-if="isCreateMode">
+                <v-text-field
+                  color="primary"
+                  ref="name"
+                  v-model.trim="name"
+                  label="Secret Name"
+                  :error-messages="getErrorMessages('name')"
+                  @input="$v.name.$touch()"
+                  @blur="$v.name.$touch()"
+                ></v-text-field>
+              </template>
+              <template v-else>
+                <div class="text-h6 pb-4">{{name}}</div>
+              </template>
+              </div>
+
+            <div v-show="cloudProfiles.length !== 1">
+              <cloud-profile
+                ref="cloudProfile"
+                v-model="cloudProfileName"
+                :is-create-mode="isCreateMode"
+                :cloud-profiles="cloudProfiles">
+              </cloud-profile>
             </div>
 
-          <div v-show="cloudProfiles.length !== 1">
-            <cloud-profile
-              ref="cloudProfile"
-              v-model="cloudProfileName"
-              :isCreateMode="isCreateMode"
-              :cloudProfiles="cloudProfiles"
-              :color="color">
-            </cloud-profile>
+            <slot name="secret-slot"></slot>
+            <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </div>
-
-          <slot name="data-slot"></slot>
-          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
-        </v-container>
+          <v-slide-x-reverse-transition>
+            <div v-if="helpVisible" class="d-flex pa-3 ml-3 help" :style="helpStyle">
+              <slot name="help-slot"></slot>
+            </div>
+          </v-slide-x-reverse-transition>
+       </div>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click.native="cancel">Cancel</v-btn>
-        <v-btn text @click.native="submit" :class="textColor" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-btn text @click.native="submit" color="primary" :disabled="!valid">{{submitButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -76,19 +75,18 @@ limitations under the License.
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
 import CloudProfile from '@/components/CloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
-import GAlert from '@/components/GAlert'
-import InfraIcon from '@/components/VendorIcon'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
-  secretName: {
+  name: {
     required: 'You can\'t leave this empty.',
     maxLength: 'It exceeds the maximum length of 128 characters.',
     resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
@@ -100,8 +98,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    GAlert,
-    InfraIcon
+    GMessage
   },
   props: {
     value: {
@@ -120,10 +117,6 @@ export default {
       type: String,
       required: true
     },
-    backgroundSrc: {
-      type: String,
-      required: true
-    },
     createTitle: {
       type: String,
       required: true
@@ -134,23 +127,16 @@ export default {
     },
     secret: {
       type: Object
-    },
-    color: {
-      type: String,
-      required: true
-    },
-    infraIcon: {
-      type: String,
-      required: true
     }
   },
   data () {
     return {
       selectedCloudProfile: undefined,
-      secretName: undefined,
+      name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors
+      validationErrors,
+      helpVisible: false
     }
   },
   validations () {
@@ -172,18 +158,11 @@ export default {
       },
       set (cloudProfileName) {
         this.selectedCloudProfile = cloudProfileName
-        this.$emit('cloudProfileName', cloudProfileName)
+        this.$emit('cloud-profile-name', cloudProfileName)
       }
     },
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
-    },
-    bindingName () {
-      if (this.isCreateMode) {
-        return this.secretName
-      } else {
-        return get(this.secret, 'metadata.bindingName')
-      }
     },
     visible: {
       get () {
@@ -203,7 +182,7 @@ export default {
     validators () {
       const validators = {}
       if (this.isCreateMode) {
-        validators.secretName = {
+        validators.name = {
           required,
           maxLength: maxLength(128),
           resourceName,
@@ -224,21 +203,22 @@ export default {
     title () {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
     },
-    textColor () {
-      return textColor(this.color)
-    },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const secretName = get(this.secret, 'metadata.name')
-      if (secretName) {
-        const predicate = item => {
-          return get(item, 'spec.secretBindingName') === secretName
-        }
-        return filter(this.shootList, predicate)
+      const name = get(this.secret, 'metadata.name')
+      return filter(this.shootList, ['spec.secretBindingName', name])
+    },
+    helpStyle () {
+      const detailsRef = this.$refs.secretDetails
+      let detailsHeight = 0
+      if (detailsRef) {
+        detailsHeight = detailsRef.getBoundingClientRect().height
       }
-      return []
+      return {
+        maxHeight: `${detailsHeight}px`
+      }
     }
   },
   methods: {
@@ -272,8 +252,8 @@ export default {
           const errorDetails = errorDetailsFromError(err)
           if (this.isCreateMode) {
             if (isConflict(err)) {
-              this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
-              setInputFocus(this, 'secretName')
+              this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+              setInputFocus(this, 'name')
             } else {
               this.errorMessage = 'Failed to create Infrastructure Secret.'
             }
@@ -288,11 +268,14 @@ export default {
     save () {
       if (this.isCreateMode) {
         const metadata = {
-          name: this.secretName,
+          name: this.name,
           namespace: this.namespace,
+          secretRef: {
+            name: this.name,
+            namespace: this.namespace
+          },
           cloudProviderKind: this.cloudProviderKind,
-          cloudProfileName: this.cloudProfileName,
-          bindingName: this.bindingName
+          cloudProfileName: this.cloudProfileName
         }
 
         return this.createInfrastructureSecret({ metadata, data: this.data })
@@ -313,7 +296,7 @@ export default {
       this.secretAccessKey = ''
 
       if (this.isCreateMode) {
-        this.secretName = `my-${this.cloudProviderKind}-secret`
+        this.name = `my-${this.cloudProviderKind}-secret`
 
         if (this.cloudProfiles.length === 1) {
           this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -321,9 +304,9 @@ export default {
           this.cloudProfileName = undefined
         }
 
-        setDelayedInputFocus(this, 'secretName')
+        setDelayedInputFocus(this, 'name')
       } else {
-        this.secretName = get(this.secret, 'metadata.name')
+        this.name = get(this.secret, 'metadata.name')
         this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
         setDelayedInputFocus(this, 'accessKeyId')
       }
@@ -344,3 +327,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .help {
+    max-width: 80%;
+    overflow-y: scroll;
+  }
+
+</style>

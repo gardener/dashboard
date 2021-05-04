@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
@@ -19,9 +9,9 @@
 const assert = require('assert').strict
 const _ = require('lodash')
 const yaml = require('js-yaml')
-const { existsSync, readFileSync } = require('fs')
+const fs = require('fs')
 const { homedir } = require('os')
-const { join: joinPath } = require('path')
+const { join } = require('path')
 
 const environmentVariableDefinitions = {
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
@@ -80,35 +70,37 @@ module.exports = {
     }
   },
   getFilename ({ argv, env } = process) {
-    if (/^test/.test(env.NODE_ENV)) {
-      return joinPath(__dirname, 'test.yaml')
-    }
     if (env.GARDENER_CONFIG) {
       return env.GARDENER_CONFIG
     }
-    if (argv[2]) {
+    if (argv[2] && env.NODE_ENV !== 'test') {
       return argv[2]
     }
-    return joinPath(homedir(), '.gardener', 'config.yaml')
+    return join(homedir(), '.gardener', 'config.yaml')
   },
   loadConfig (filename, { env } = process) {
     const config = this.getDefaults({ env })
     if (filename) {
       try {
-        if (this.existsSync(filename)) {
-          _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
-        }
+        _.merge(config, this.readConfig(filename))
       } catch (err) { /* ignore */ }
     }
     this.assignEnvironmentVariables(config, env)
     const requiredConfigurationProperties = [
       'sessionSecret',
-      'apiServerUrl',
-      'oidc.issuer',
-      'oidc.client_id',
-      'oidc.client_secret',
-      'oidc.redirect_uri'
+      'apiServerUrl'
     ]
+
+    // When OIDC is configured, some more configuration is required
+    if (config.oidc) {
+      requiredConfigurationProperties.push(
+        'oidc.issuer',
+        'oidc.client_id',
+        'oidc.client_secret',
+        'oidc.redirect_uri'
+      )
+    }
+
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
@@ -121,6 +113,7 @@ module.exports = {
 
     return config
   },
-  existsSync,
-  readFileSync
+  readConfig (path) {
+    return yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+  }
 }

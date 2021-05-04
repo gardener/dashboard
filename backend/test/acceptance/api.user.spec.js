@@ -1,92 +1,85 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { encodeBase64 } = require('../../lib/utils')
-const { apiServerUrl, apiServerCaData, oidc = {} } = require('../../lib/config')
+const { mockRequest } = require('@gardener-dashboard/request')
 
-module.exports = function ({ agent, sandbox, k8s, auth }) {
-  /* eslint no-unused-expressions: 0 */
-  const name = 'bar'
-  const username = `${name}@example.org`
-  const id = username
-  const user = auth.createUser({ id })
+describe('api', function () {
+  let agent
 
-  it('should return information about the user', async function () {
-    const bearer = await user.bearer
-    k8s.stub.getPrivileges({ bearer })
-    const res = await agent
-      .get('/api/user/privileges')
-      .set('cookie', await user.cookie)
+  beforeAll(() => {
+    agent = createAgent()
+  })
 
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql({
-      isAdmin: false
+  afterAll(() => {
+    return agent.close()
+  })
+
+  beforeEach(() => {
+    mockRequest.mockReset()
+  })
+  describe('user', function () {
+    const user = fixtures.auth.createUser({ id: 'bar@example.org' })
+
+    it('should return information about the user', async function () {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get('/api/user/privileges')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return the bearer token of the user', async function () {
+      const res = await agent
+        .get('/api/user/token')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).not.toBeCalled()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return selfsubjectrules for the user', async function () {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectRules())
+
+      const res = await agent
+        .post('/api/user/subjectrules/')
+        .set('cookie', await user.cookie)
+        .send({
+          namespace: 'garden-foo'
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return the kubeconfig data the user', async function () {
+      const res = await agent
+        .get('/api/user/kubeconfig')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).not.toBeCalled()
+
+      expect(res.body).toMatchSnapshot()
     })
   })
-
-  it('should return the bearer token of the user', async function () {
-    const bearer = await user.bearer
-    const res = await agent
-      .get('/api/user/token')
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body.token).to.equal(bearer)
-  })
-
-  it('should return selfsubjectrules for the user', async function () {
-    const bearer = await user.bearer
-    const project = 'foo'
-    const namespace = `garden-${project}`
-    k8s.stub.getSelfSubjectRulesReview({ bearer, namespace })
-    const res = await agent
-      .post('/api/user/subjectrules/')
-      .set('cookie', await user.cookie)
-      .send({ namespace })
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.have.property('resourceRules')
-    expect(res.body).to.have.property('nonResourceRules')
-    expect(res.body).to.have.property('incomplete')
-    expect(res.body.resourceRules.length).to.equal(2)
-  })
-
-  it('should return the kubeconfig data the user', async function () {
-    const bearer = await user.bearer
-    const res = await agent
-      .get('/api/user/kubeconfig')
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql({
-      server: apiServerUrl,
-      certificateAuthorityData: apiServerCaData,
-      oidc: {
-        issuerUrl: oidc.issuer,
-        clientId: oidc.public.clientId,
-        clientSecret: oidc.public.clientSecret,
-        certificateAuthorityData: encodeBase64(oidc.ca),
-        extraScopes: ['email', 'profile', 'groups']
-      }
-    })
-  })
-}
+})

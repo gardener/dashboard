@@ -1,51 +1,52 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-list>
     <link-list-tile v-if="isAdmin"
-      icon="developer_board"
-      appTitle="Grafana"
+      icon="mdi-developer-board"
+      app-title="Grafana"
       :url="grafanaUrlOperators"
-      :urlText="grafanaUrlOperators"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlOperators"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-else
-      icon="developer_board"
-      appTitle="Grafana"
+      icon="mdi-developer-board"
+      app-title="Grafana"
       :url="grafanaUrlUsers"
-      :urlText="grafanaUrlUsers"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="grafanaUrlUsers"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile v-if="isAdmin"
-      appTitle="Prometheus"
+      app-title="Prometheus"
       :url="prometheusUrl"
-      :urlText="prometheusUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="prometheusUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <link-list-tile v-if="hasAlertmanager"
-      appTitle="Alertmanager"
+      app-title="Alertmanager"
       :url="alertmanagerUrl"
-      :urlText="alertmanagerUrl"
-      :isShootStatusHibernated="isShootStatusHibernated"
+      :url-text="alertmanagerUrl"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
     ></link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
-    <username-password :username="username" :password="password"></username-password>
+    <username-password v-if="isAdmin" :username="username" :password="password" :show-not-available-placeholder="isSeedUnreachable">
+      <template v-slot:notAvailablePlaceholder>
+        <v-list-item-content>
+          <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
+          <v-list-item-title class="wrap-text pt-1">
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
+            Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
+          </v-list-item-title>
+        </v-list-item-content>
+      </template>
+    </username-password>
+    <username-password v-else :username="username" :password="password"></username-password>
   </v-list>
 </template>
 
@@ -85,10 +86,10 @@ export default {
       return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_username', '') : get(this.shootItem, 'info.monitoring_username', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringUsername', '') : get(this.shootItem, 'info.monitoringUsername', '')
     },
     password () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_password', '') : get(this.shootItem, 'info.monitoring_password', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringPassword', '') : get(this.shootItem, 'info.monitoringPassword', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])
@@ -97,3 +98,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .wrap-text {
+    white-space: normal;
+  }
+</style>

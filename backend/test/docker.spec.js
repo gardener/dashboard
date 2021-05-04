@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
@@ -22,28 +12,24 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend } = require('../lib/http-client')
+const { extend, globalAgent } = jest.requireActual('@gardener-dashboard/request')
 const client = extend({
-  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
-  resolveBodyOnly: true,
-  timeout: 3000
+  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/'
 })
+
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
-  10: {
-    initialRelease: new Date('2018-04-24T00:00:00Z'),
-    activeLtsStart: new Date('2018-10-30T00:00:00Z'),
-    endOfLife: new Date('2021-04-01T23:59:59Z')
-  },
   12: {
-    initialRelease: new Date('2019-04-23T00:00:00Z'),
-    activeLtsStart: new Date('2019-10-22T00:00:00Z'),
     endOfLife: new Date('2022-04-01T23:59:59Z')
   },
   14: {
-    initialRelease: new Date('2020-04-21T00:00:00Z'),
-    activeLtsStart: new Date('2020-10-20T00:00:00Z'),
     endOfLife: new Date('2023-04-01T23:59:59Z')
+  },
+  15: {
+    endOfLife: new Date('2021-06-01T23:59:59Z')
+  },
+  16: {
+    endOfLife: new Date('2024-04-30T23:59:59Z')
   }
 }
 
@@ -59,13 +45,16 @@ async function getDashboardDockerfile () {
 }
 
 describe('dockerfile', function () {
-  this.timeout(15000)
-  this.slow(5000)
+  const timeout = 15 * 1000
+
+  afterAll(() => {
+    globalAgent.destroy()
+  })
 
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
-    expect(dashboardDockerfile.getFROMs()).to.have.length(2)
+    expect(dashboardDockerfile.getFROMs()).toHaveLength(2)
     const buildStages = _
       .chain(dashboardDockerfile.getFROMs())
       .map(from => [from.getBuildStage(), from])
@@ -73,14 +62,16 @@ describe('dockerfile', function () {
       .value()
     const imageTag = buildStages.builder.getImageTag()
     const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine/.exec(imageTag) || []
-    expect(_.keys(activeNodeReleases), `Node release ${nodeRelease} is not in the range of active LTS releases`).to.include(nodeRelease)
+    expect(_.keys(activeNodeReleases)).toContain(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
-    expect(endOfLife, `Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.`).to.be.above(new Date())
+    // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
+    expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
     const dashboardReleaseBaseImage = buildStages.release.getImage()
-    const [, alpineVersion] = /^alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
+    const [, alpineVersion] = /alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
     const nodeDockerfile = await getNodeDockerfile(nodeRelease, alpineVersion)
-    expect(nodeDockerfile.getFROMs()).to.have.length(1)
+    expect(nodeDockerfile.getFROMs()).toHaveLength(1)
     const nodeBaseImage = _.first(nodeDockerfile.getFROMs()).getImage()
-    expect(nodeBaseImage, 'Alpine base images of "dashboard-release" image and "node" image do not match!').to.be.equal(dashboardReleaseBaseImage)
-  })
+    // Alpine base images of "dashboard-release" image and "node" image do not match!
+    expect(dashboardReleaseBaseImage.endsWith(nodeBaseImage)).toBe(true)
+  }, timeout)
 })

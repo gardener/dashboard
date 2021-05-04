@@ -1,48 +1,69 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
-import axios from 'axios'
 import get from 'lodash/get'
 
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
-
 /* General Purpose */
+async function request (method, url, data) {
+  const options = {
+    method,
+    cache: 'no-cache',
+    headers: {
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  }
+  if (data) {
+    options.headers['Content-Type'] = 'application/json'
+    options.body = JSON.stringify(data)
+  }
+  let response = await fetch(url, options)
+  const { status, statusText, headers } = response
+  response = {
+    status,
+    statusText,
+    headers,
+    data: await response.json()
+  }
+  if (status >= 200 && status < 300) {
+    return response
+  }
+  const error = new Error(`Request failed with status code ${status}`)
+  error.response = response
+  throw error
+}
 
 function getResource (url) {
-  return axios.get(url)
+  return request('GET', url)
 }
 
 function deleteResource (url) {
-  return axios.delete(url)
+  return request('DELETE', url)
 }
 
 function createResource (url, data) {
   return callResourceMethod(url, data)
 }
 
-function updateResource (url, data) {
-  return axios.put(url, data)
+async function updateResource (url, data) {
+  return request('PUT', url, data)
 }
 
-function patchResource (url, data) {
-  return axios.patch(url, data)
+async function patchResource (url, data) {
+  return request('PATCH', url, data)
 }
 
-function callResourceMethod (url, data) {
-  return axios.post(url, data)
+async function callResourceMethod (url, data) {
+  return request('POST', url, data)
+}
+
+/* Configuration */
+
+export function getConfiguration () {
+  return getResource('/config.json')
 }
 
 /* Infrastructures Secrets */
@@ -52,10 +73,10 @@ export function getInfrastructureSecrets ({ namespace }) {
   return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`)
 }
 
-export function updateInfrastructureSecret ({ namespace, bindingName, data }) {
+export function updateInfrastructureSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
-  bindingName = encodeURIComponent(bindingName)
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, data)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`, data)
 }
 
 export function createInfrastructureSecret ({ namespace, data }) {
@@ -63,10 +84,10 @@ export function createInfrastructureSecret ({ namespace, data }) {
   return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, data)
 }
 
-export function deleteInfrastructureSecret ({ namespace, bindingName }) {
+export function deleteInfrastructureSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
-  bindingName = encodeURIComponent(bindingName)
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
+  name = encodeURIComponent(name)
+  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
 }
 
 /* Shoot Clusters */
@@ -159,6 +180,12 @@ export function getCloudprofiles () {
   return getResource('/api/cloudprofiles')
 }
 
+/* Seeds */
+
+export function getSeeds () {
+  return getResource('/api/seeds')
+}
+
 /* Projects */
 
 export function getProjects () {
@@ -212,6 +239,14 @@ export function deleteMember ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
+}
+
+export function rotateServiceAccountSecret ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return callResourceMethod(`/api/namespaces/${namespace}/members/${name}`, {
+    method: 'rotateSecret'
+  })
 }
 
 /* User */
@@ -301,4 +336,23 @@ function invokeTerminalMethod (method, body) {
     method,
     params: body
   })
+}
+
+/* Terminal Shortcuts */
+
+export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
+  body.coordinate = {
+    namespace
+  }
+  return invokeTerminalMethod('listProjectTerminalShortcuts', body)
+}
+
+/* Controller Registrations */
+
+export function getGardenerExtensions () {
+  return getResource('/api/gardener-extensions')
+}
+
+export function getNetworkingTypes () {
+  return getResource('/api/networking-types')
 }

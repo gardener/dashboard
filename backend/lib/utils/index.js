@@ -1,18 +1,8 @@
 
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
@@ -53,17 +43,16 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
-function joinMemberRoleAndRoles (role, roles) {
-  if (roles) {
-    // uniq to also support test scenarios, gardener discards duplicate roles
-    return _.uniq([role, ...roles])
-  }
-  return [role]
+function getSeedIngressDomain (seed) {
+  return _.get(seed, 'spec.dns.ingressDomain') || _.get(seed, 'spec.ingress.domain')
 }
 
-function splitMemberRolesIntoRoleAndRoles (roles) {
-  const role = _.head(roles) // do not shift role, gardener ignores duplicate role in roles array and will remove role field in future API version
-  return { role, roles }
+function isSeedUnreachable (seed) {
+  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
+  if (!matchLabels) {
+    return false
+  }
+  return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
 module.exports = {
@@ -72,6 +61,6 @@ module.exports = {
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
-  joinMemberRoleAndRoles,
-  splitMemberRolesIntoRoleAndRoles
+  isSeedUnreachable,
+  getSeedIngressDomain
 }

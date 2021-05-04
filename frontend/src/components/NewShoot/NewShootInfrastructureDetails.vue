@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -21,18 +11,18 @@ limitations under the License.
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
-          :isCreateMode="true"
-          :cloudProfiles="cloudProfiles"
+          :is-create-mode="true"
+          :cloud-profiles="cloudProfiles"
           @valid="onCloudProfileNameValid"
           @input="onUpdateCloudProfileName"
-          color="cyan darken-2">
+          color="primary">
         </cloud-profile>
       </v-col>
       <v-col cols="3">
         <v-select
           ref="secret"
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Secret"
           :items="secretItems"
           item-value="metadata.name"
@@ -51,21 +41,21 @@ limitations under the License.
             </template>
             <template v-else>
               <span>{{get(item, 'metadata.name')}}</span>
-              <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
+              <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
             </template>
           </template>
           <template v-slot:selection="{ item }">
             <span>
               {{get(item, 'metadata.name')}}
             </span>
-            <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
+            <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
           </template>
         </v-select>
       </v-col>
       <v-col cols="3">
         <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Region"
           :items="regionItems"
           :hint="regionHint"
@@ -76,19 +66,32 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-col>
+      <v-col cols="3">
+        <v-select
+          color="primary"
+          item-color="primary"
+          label="Networking Type"
+          :items="networkingTypeList"
+          persistent-hint
+          v-model="networkingType"
+          :error-messages="getErrorMessages('networkingType')"
+          @input="$v.networkingType.$touch()"
+          @blur="$v.networkingType.$touch()"
+          ></v-select>
+      </v-col>
       <template v-if="infrastructureKind === 'openstack'">
         <v-col cols="3">
           <wildcard-select
             v-model="floatingPoolName"
-            :wildcardSelectItems="allFloatingPoolNames"
-            wildcardSelectLabel="Floating Pool"
+            :wildcard-select-items="allFloatingPoolNames"
+            wildcard-select-label="Floating Pool"
             @valid="onFloatingPoolWildcardValid"
             ></wildcard-select>
         </v-col>
         <v-col cols="3">
           <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
+          color="primary"
+          item-color="primary"
           label="Load Balancer Provider"
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
@@ -102,8 +105,8 @@ limitations under the License.
       <template v-else-if="infrastructureKind === 'metal'">
         <v-col cols="3">
           <v-text-field
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Project ID"
             v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
@@ -115,8 +118,8 @@ limitations under the License.
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Partition ID"
             :items="partitionIDs"
             v-model="partitionID"
@@ -129,8 +132,8 @@ limitations under the License.
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
             v-model="firewallImage"
@@ -141,8 +144,8 @@ limitations under the License.
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
             v-model="firewallSize"
@@ -153,8 +156,8 @@ limitations under the License.
         </v-col>
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Firewall Networks"
             :items="allFirewallNetworks"
             v-model="firewallNetworks"
@@ -171,8 +174,8 @@ limitations under the License.
       <template v-else-if="infrastructureKind === 'vsphere'">
         <v-col cols="3">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
             v-model="loadBalancerClassNames"
@@ -187,7 +190,7 @@ limitations under the License.
           >
             <template v-slot:item="{ item }">
                 <v-list-item-action >
-                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
+                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
                 </v-list-item-action>
                 <v-list-item-content :class="{ 'grey--text': item.disabled }">
                   <v-list-item-title>{{ item.text }}</v-list-item-title>
@@ -197,7 +200,7 @@ limitations under the License.
         </v-col>
       </template>
     </v-row>
-    <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
+    <secret-dialog-wrapper :dialog-state="addSecretDialogState" @dialog-closed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
 </template>
 
@@ -206,7 +209,7 @@ import CloudProfile from '@/components/CloudProfile'
 import WildcardSelect from '@/components/WildcardSelect'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
+import { getValidationErrors, isOwnSecret, selfTerminationDaysForSecret } from '@/utils'
 import { includesIfAvailable, requiresCostObjectIfEnabled } from '@/utils/validators'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
@@ -230,6 +233,9 @@ const validations = {
     requiresCostObjectIfEnabled
   },
   region: {
+    required
+  },
+  networkingType: {
     required
   },
   loadBalancerProviderName: {
@@ -289,8 +295,11 @@ export default {
       cloudProfileName: undefined,
       secret: undefined,
       region: undefined,
+      networkingType: undefined,
       floatingPoolName: undefined,
+      // default validation status of subcomponents is true, as they are not shown in all cases
       floatingPoolValid: true,
+      cloudProfileValid: true,
       fpname: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
@@ -300,7 +309,6 @@ export default {
       firewallNetworks: undefined,
       projectID: undefined,
       valid: false,
-      cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
         aws: {
           visible: false,
@@ -353,7 +361,8 @@ export default {
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegionAndZones',
       'projectFromProjectList',
-      'costObjectSettings'
+      'costObjectSettings',
+      'networkingTypeList'
     ]),
     validationErrors () {
       const validationErrors = {
@@ -369,6 +378,9 @@ export default {
         },
         region: {
           required: 'Region is required'
+        },
+        networkingType: {
+          required: 'Networking Type is required'
         },
         loadBalancerProviderName: {
           required: 'Load Balancer Providers required'
@@ -430,8 +442,10 @@ export default {
     regionsWithoutSeed () {
       return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
     },
+    showAllRegions () {
+      return this.cfg.seedCandidateDeterminationStrategy && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+    },
     regionItems () {
-      const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {
         regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
@@ -439,7 +453,7 @@ export default {
       forEach(this.regionsWithSeed, region => {
         regionItems.push({ text: region })
       })
-      if (showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
+      if (this.showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
         regionItems.push({ header: 'Supported Regions (API servers in another region)' })
         forEach(this.regionsWithoutSeed, region => {
           regionItems.push({ text: region })
@@ -453,9 +467,9 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    isOwnSecretBinding () {
+    isOwnSecret () {
       return (secret) => {
-        return isOwnSecretBinding(secret)
+        return isOwnSecret(secret)
       }
     },
     allLoadBalancerProviderNames () {
@@ -508,9 +522,17 @@ export default {
       return getValidationErrors(this, field)
     },
     setDefaultsDependingOnCloudProfile () {
+      // Reset subcomponent valid states
+      // default validation status of subcomponents is true, as they are not shown in all cases
+      this.floatingPoolValid = true
+      this.cloudProfileValid = true
+
       this.secret = head(this.infrastructureSecretsByProfileName)
       this.onInputSecret()
       this.region = head(this.regionsWithSeed)
+      if (!this.region && this.showAllRegions) {
+        this.region = head(this.regionsWithoutSeed)
+      }
       this.onInputRegion()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
@@ -620,6 +642,7 @@ export default {
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
         region: this.region,
+        networkingType: this.networkingType,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
         loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),
@@ -635,6 +658,7 @@ export default {
       cloudProfileName,
       secret,
       region,
+      networkingType,
       floatingPoolName,
       loadBalancerProviderName,
       loadBalancerClasses,
@@ -648,6 +672,7 @@ export default {
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
+      this.networkingType = networkingType
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
       this.loadBalancerClassNames = map(loadBalancerClasses, 'name')
@@ -657,6 +682,7 @@ export default {
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
       this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
+      this.$v.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
       this.validateInput()
     },
     isAddNewSecret (item) {

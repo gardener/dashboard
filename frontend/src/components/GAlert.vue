@@ -1,83 +1,104 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
-    <div class="subtitle-1">
-      {{message}}
-      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
-        Details
-      </v-btn>
-    </div>
-    <transition name="fade">
-      <div v-if="!!detailedMessageVisible">
-        <code>{{detailedMessage}}</code>
-      </div>
-    </transition>
+  <v-alert
+    class="alertBanner"
+    :type="type"
+    v-model="alertVisible"
+    :color="color"
+    :transition="transition"
+    @input="closeBanner"
+    dismissible
+  >
+    <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
+    <slot v-else name="message"></slot>
   </v-alert>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import { transformHtml } from '@/utils'
+
+const LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES = 'global/alert-banner/hidden-messages'
+
 export default {
-  name: 'galert',
   props: {
-    message: {
+    message: { // alternatively, use message slot
       type: String
     },
-    detailedMessage: {
+    type: {
+      type: String,
+      default: 'error'
+    },
+    identifier: { // pass identifier to permanently hide the message on close
       type: String
     },
     color: {
-      type: String,
-      required: true
+      type: String
     },
-    tile: {
-      type: Boolean
-    },
-    dark: {
-      type: Boolean,
-      default: true
+    transition: {
+      type: String
     }
   },
   data () {
     return {
-      detailedMessageVisible: false
+      alertVisible: false
     }
   },
   computed: {
-    alertVisible: {
-      get () {
-        return !!this.message
-      },
-      set (value) {
-        if (!value) {
-          this.$emit('update:message', undefined)
-          this.$emit('update:detailedMessage', undefined)
-        }
+    messageHtml () {
+      return transformHtml(this.message)
+    }
+  },
+  methods: {
+    ...mapActions([
+      'setAlertBanner'
+    ]),
+    async closeBanner () {
+      if (this.identifier) { // hide permanently
+        this.hidePermanently(this.identifier)
       }
+
+      this.setAlertVisibility(false)
+    },
+    hidePermanently (identifier) {
+      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
+      permanentlyHiddenIds[identifier] = true
+      this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
+    },
+    isPermanentlyHidden (identifier) {
+      if (!identifier) {
+        return false
+      }
+
+      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
+      return permanentlyHiddenIds[this.identifier] === true
+    },
+    updateAlertVisibility () {
+      const visible = !!this.message && !this.isPermanentlyHidden(this.identifier)
+      this.setAlertVisibility(visible)
+    },
+    setAlertVisibility (visible) {
+      this.alertVisible = visible
+    }
+  },
+  mounted () {
+    this.updateAlertVisibility()
+  },
+  watch: {
+    identifier (value) {
+      this.updateAlertVisibility()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
-  }
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
+  .alertBanner {
+    margin-top: 0px;
   }
 </style>

@@ -1,36 +1,32 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
-import Vuex from 'vuex'
-import { expect } from 'chai'
 import {
-  state,
-  actions,
-  getters,
-  mutations,
-  modules,
   mapAccessRestrictionForInput
 } from '@/store'
 
-let store
+import getters from '@/store/modules/shoots/getters'
 
-describe('Store.Shoots', function () {
-  beforeEach(function () {
-    const shootItems = {
-      shoot2_foo: {
+describe('store.shoots.getters', () => {
+  let shootItems
+  const rootGetters = {
+    ticketsLabels: undefined,
+    shootCustomFields: {
+      Z_Foo: {
+        path: 'metadata.namespace'
+      }
+    },
+    shootCustomFieldList: undefined,
+    latestUpdatedTicketByNameAndNamespace: undefined
+  }
+  const sortItems = getters.sortItems(undefined, undefined, undefined, rootGetters)
+
+  beforeEach(() => {
+    shootItems = [
+      {
         metadata: {
           name: 'shoot2',
           namespace: 'foo'
@@ -59,7 +55,7 @@ describe('Store.Shoots', function () {
           ]
         }
       },
-      shoot1_foo: {
+      {
         metadata: {
           name: 'shoot1',
           namespace: 'foo'
@@ -88,10 +84,10 @@ describe('Store.Shoots', function () {
           ]
         }
       },
-      shoot3_foo: {
+      {
         metadata: {
           name: 'shoot3',
-          namespace: 'foo'
+          namespace: 'bar'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -111,7 +107,7 @@ describe('Store.Shoots', function () {
           },
           lastErrors: [
             {
-              description: 'foo'
+              description: 'bar'
             }
           ],
           conditions: [
@@ -122,92 +118,101 @@ describe('Store.Shoots', function () {
           ]
         }
       }
-    }
-
-    // Modifies state of module even if we do not include state in the root store
-    // TODO: This is all a bit hacky, think of a cleaner solution on how to create the store
-    state.shoots.shoots = shootItems
-
-    store = new Vuex.Store({
-      actions,
-      getters,
-      mutations,
-      modules
-    })
+    ]
   })
 
-  it('should sort shoots by name', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['name'], sortDesc: [true] })
+  it('should sort shoots by name', () => {
+    const sortBy = ['name']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot3')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot2')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot1')
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot2')
+    expect(sortedShoots[2].metadata.name).toBe('shoot1')
   })
 
-  it('should sort shoots by purpose', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['purpose'], sortDesc: [true] })
+  it('should sort shoots by purpose', () => {
+    const sortBy = ['purpose']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot2')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot3')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot1')
+    expect(sortedShoots[0].metadata.name).toBe('shoot2')
+    expect(sortedShoots[1].metadata.name).toBe('shoot3')
+    expect(sortedShoots[2].metadata.name).toBe('shoot1')
   })
 
-  it('should sort shoots by creationTimestamp', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['creationTimestamp'], sortDesc: [false] })
+  it('should sort shoots by creationTimestamp', () => {
+    const sortBy = ['creationTimestamp']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot1')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot2')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot3')
+    expect(sortedShoots[0].metadata.name).toBe('shoot1')
+    expect(sortedShoots[1].metadata.name).toBe('shoot2')
+    expect(sortedShoots[2].metadata.name).toBe('shoot3')
   })
 
-  it('should sort shoots by kubernetes version', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['k8sVersion'], sortDesc: [false] })
+  it('should sort shoots by kubernetes version', () => {
+    const sortBy = ['k8sVersion']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot2')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot3')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot1')
+    expect(sortedShoots[0].metadata.name).toBe('shoot2')
+    expect(sortedShoots[1].metadata.name).toBe('shoot3')
+    expect(sortedShoots[2].metadata.name).toBe('shoot1')
   })
 
-  it('should sort shoots by infrastructure', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['infrastructure'], sortDesc: [true] })
+  it('should sort shoots by infrastructure', () => {
+    const sortBy = ['infrastructure']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot1')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot3')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot2')
+    expect(sortedShoots[0].metadata.name).toBe('shoot1')
+    expect(sortedShoots[1].metadata.name).toBe('shoot3')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
   })
 
-  it('should sort shoots by lastOperation (status)', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['lastOperation'], sortDesc: [true] })
+  it('should sort shoots by lastOperation (status)', () => {
+    const sortBy = ['lastOperation']
+    const sortDesc = [true]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
-
-    expect(sortedShoots[0].metadata.name).to.equal('shoot2')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot1')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot3')
+    expect(sortedShoots[0].metadata.name).toBe('shoot2')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot3')
   })
 
-  it('should sort shoots by readiness', function () {
-    store.dispatch('setShootListSortParams', { sortBy: ['readiness'], sortDesc: [false] })
+  it('should sort shoots by readiness', () => {
+    const sortBy = ['readiness']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    const sortedShoots = store.getters.shootList
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
+  })
 
-    expect(sortedShoots[0].metadata.name).to.equal('shoot3')
-    expect(sortedShoots[1].metadata.name).to.equal('shoot1')
-    expect(sortedShoots[2].metadata.name).to.equal('shoot2')
+  it('should sort shoots by readiness', () => {
+    const sortBy = ['readiness']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
+  })
+
+  it('should sort shoots by custom column', () => {
+    const sortBy = ['Z_Foo']
+    const sortDesc = [false]
+    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+    expect(sortedShoots[0].metadata.name).toBe('shoot3')
+    expect(sortedShoots[1].metadata.name).toBe('shoot1')
+    expect(sortedShoots[2].metadata.name).toBe('shoot2')
   })
 })
 
-describe('Store.AccessRestrictions', function () {
+describe('store.AccessRestrictions', () => {
   let definition
   let shootResource
 
@@ -263,9 +268,9 @@ describe('Store.AccessRestrictions', function () {
     }
   })
 
-  it('should map definition and shoot resources to access restriction data model', function () {
+  it('should map definition and shoot resources to access restriction data model', () => {
     const accessRestrictionPair = mapAccessRestrictionForInput(definition, shootResource)
-    expect(accessRestrictionPair).to.eql([
+    expect(accessRestrictionPair).toEqual([
       'foo',
       {
         value: true,
@@ -287,21 +292,21 @@ describe('Store.AccessRestrictions', function () {
     ])
   })
 
-  it('should invert access restriction', function () {
+  it('should invert access restriction', () => {
     definition.input.inverted = true
     const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-    expect(accessRestriction.value).to.equal(false)
+    expect(accessRestriction.value).toBe(false)
   })
 
-  it('should not invert option', function () {
+  it('should not invert option', () => {
     definition.options[1].input.inverted = false
     const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-    expect(accessRestriction.options['foo-option-2'].value).to.equal(false)
+    expect(accessRestriction.options['foo-option-2'].value).toBe(false)
   })
 
-  it('should invert option', function () {
+  it('should invert option', () => {
     definition.options[1].input.inverted = true
     const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-    expect(accessRestriction.options['foo-option-2'].value).to.equal(true)
+    expect(accessRestriction.options['foo-option-2'].value).toBe(true)
   })
 })

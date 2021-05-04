@@ -1,32 +1,20 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-main>
-    <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
-      <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
-    </v-alert>
+    <g-alert :message="alertBannerMessage" :type="alertBannerType" :identifier="alertBannerIdentifier"></g-alert>
     <router-view :key="key"></router-view>
   </v-main>
 </template>
 
 <script>
 import set from 'lodash/set'
-import { mapGetters, mapActions } from 'vuex'
-import { compileMarkdown } from '@/utils'
+import GAlert from '@/components/GAlert'
+import { mapGetters } from 'vuex'
 
 function setElementStyle (element, key, value) {
   if (element) {
@@ -44,24 +32,15 @@ function setWrapElementHeight (element, value) {
 
 export default {
   name: 'main-content',
+  components: {
+    GAlert
+  },
   computed: {
     ...mapGetters([
       'alertBannerMessage',
-      'alertBannerType'
+      'alertBannerType',
+      'alertBannerIdentifier'
     ]),
-    alertBannerVisible: {
-      get () {
-        return !!this.alertBannerMessage
-      },
-      set (value) {
-        if (!value) {
-          this.setAlertBanner(null)
-        }
-      }
-    },
-    alertBannerMessageCompiledMarkdown () {
-      return compileMarkdown(this.alertBannerMessage)
-    },
     key () {
       if (this.$route.name !== 'ShootItemTerminal') {
         return undefined
@@ -71,9 +50,6 @@ export default {
 
   },
   methods: {
-    ...mapActions([
-      'setAlertBanner'
-    ]),
     getWrapElement () {
       return this.$el.querySelector(':scope > div[class$="wrap"]')
     },
@@ -96,18 +72,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-  .alertBannerMessage {
-    a {
-      color: white !important;
-    }
-    p {
-      display: inline !important;
-    }
-  }
-
-  .alertBanner {
-    margin-top: 0px;
-  }
-</style>

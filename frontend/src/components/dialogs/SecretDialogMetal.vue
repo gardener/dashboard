@@ -1,37 +1,24 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="metal"
-    color="blue"
-    infraIcon="metal-white"
-    backgroundSrc="/static/background_metal.svg"
-    createTitle="Add new Metal Secret"
-    replaceTitle="Replace Metal Secret"
+    cloud-provider-kind="metal"
+    create-title="Add new Metal Secret"
+    replace-title="Replace Metal Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
-          color="blue"
+          color="primary"
           v-model="apiUrl"
           ref="apiUrl"
           label="API URL"
@@ -42,7 +29,7 @@ limitations under the License.
       </div>
       <div>
         <v-text-field
-          color="blue"
+          color="primary"
           v-model="apiHmac"
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
@@ -52,6 +39,14 @@ limitations under the License.
           @input="$v.apiHmac.$touch()"
           @blur="$v.apiHmac.$touch()"
         ></v-text-field>
+      </div>
+    </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+        </p>
       </div>
     </template>
 

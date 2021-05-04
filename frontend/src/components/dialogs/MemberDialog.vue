@@ -1,25 +1,15 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template >
-  <v-dialog v-model="visible" max-width="650">
-    <v-card :class="cardClass">
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-account-plus</v-icon>
-        <span class="headline ml-5">{{title}}</span>
+  <v-dialog v-model="visible" max-width="650" persistent>
+    <v-card>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-account-plus</v-icon>
+        <span class="text-h5 ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
@@ -27,12 +17,12 @@ limitations under the License.
             <v-col cols="8">
               <v-text-field
                 :disabled="isUpdateDialog"
-                color="black"
+                color="primary"
                 ref="internalName"
                 :label="nameLabel"
                 v-model.trim="internalName"
                 :error-messages="getErrorMessages('internalName')"
-                @input="$v.internalName.$touch()"
+                @input="$v.$touch()"
                 @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
@@ -41,8 +31,8 @@ limitations under the License.
             </v-col>
             <v-col cols="4">
               <v-select
-                color="black"
-                item-color="black"
+                color="primary"
+                item-color="primary"
                 label="Roles"
                 :items="roleItems"
                 multiple
@@ -52,23 +42,38 @@ limitations under the License.
                 v-model="internalRoles"
                 :error-messages="getErrorMessages('internalRoles')"
                 @input="$v.internalRoles.$touch()"
+                :hint="rolesHint"
+                persistent-hint
+                tabindex="2"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small color="black" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
+                  <v-chip small color="primary" outlined close @update:active="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
                     <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>
               </v-select>
             </v-col>
           </v-row>
-          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+          <v-row v-if="isServiceDialog">
+            <v-col cols="12">
+              <v-text-field
+                color="primary"
+                label="Description"
+                v-model.trim="internalDescription"
+                @keyup.enter="submitAddMember()"
+                tabindex="3"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
-        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">Add</v-btn>
+        <v-btn text @click.stop="cancel" tabindex="5">Cancel</v-btn>
+        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="primary--text" tabindex="4">Update</v-btn>
+        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="primary--text" tabindex="4">{{addMemberButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -77,25 +82,26 @@ limitations under the License.
 <script>
 import toLower from 'lodash/toLower'
 import { mapActions, mapState, mapGetters } from 'vuex'
-import { required } from 'vuelidate/lib/validators'
+import { required, requiredIf } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setDelayedInputFocus, getValidationErrors, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
+import negate from 'lodash/negate'
+import get from 'lodash/get'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
-const defaultRole = 'admin'
 
 export default {
   name: 'member-dialog',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {
@@ -109,6 +115,9 @@ export default {
     name: {
       type: String
     },
+    description: {
+      type: String
+    },
     roles: {
       type: Array
     },
@@ -120,6 +129,7 @@ export default {
     return {
       internalName: undefined,
       internalRoles: undefined,
+      internalDescription: undefined,
       unsupportedRoles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -151,49 +161,82 @@ export default {
     },
     validators () {
       const validators = {
-        internalRoles: {
-          required
-        },
+        internalRoles: {},
         internalName: {}
       }
       if (!this.isUpdateDialog) {
         if (this.isUserDialog) {
+          validators.internalRoles = {
+            required
+          }
           validators.internalName = {
             required,
-            unique: unique('projectUserNames')
+            unique: unique('projectUsernames'),
+            isNoServiceAccount: value => !isServiceAccountUsername(value)
           }
         } else if (this.isServiceDialog) {
+          validators.internalRoles = {
+            required: requiredIf(function () {
+              return isForeignServiceAccount(this.namespace, this.internalName)
+            })
+          }
           validators.internalName = {
             required,
-            resourceName,
-            unique: unique('serviceAccountNames')
+            serviceAccountResource: value => {
+              if (isServiceAccountUsername(this.internalName)) {
+                return true
+              }
+              return resourceName(value)
+            },
+            unique: value => {
+              if (isServiceAccountUsername(value)) {
+                return unique('serviceAccountUsernames')(value, this)
+              }
+              return unique('serviceAccountNames')(value, this)
+            }
           }
         }
       }
       return validators
     },
     validationErrors () {
-      const validationErrors = {
-        internalRoles: {
-          required: 'You need to configure roles'
-        }
-      }
+      const validationErrors = {}
       if (this.isUserDialog) {
+        validationErrors.internalRoles = {
+          required: 'You need to assign roles to this user'
+        }
         validationErrors.internalName = {
           required: 'User is required',
-          unique: `User '${this.internalName}' is already member of this project.`
+          unique: `User '${this.internalName}' is already member of this project.`,
+          isNoServiceAccount: 'Please use add service account to add service accounts'
         }
       } else if (this.isServiceDialog) {
+        validationErrors.internalRoles = {
+          required: 'You need to assign roles for service accounts that you want to invite to this project'
+        }
         validationErrors.internalName = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
+          serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
           unique: `Service Account '${this.internalName}' already exists. Please try a different name.`
         }
       }
       return validationErrors
     },
     title () {
-      return this.isUpdateDialog ? `Update ${this.nameLabel}` : `Add ${this.nameLabel} to Project`
+      if (this.isUpdateDialog) {
+        return `Change Roles of ${this.nameLabel}`
+      }
+      if (this.isServiceDialog) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+          return 'Invite Service Account'
+        }
+        return 'Create Service Account'
+      }
+      if (this.isUserDialog) {
+        return 'Add User to Project'
+      }
+      return undefined
     },
     isUserDialog () {
       return this.type === 'adduser' || this.type === 'updateuser'
@@ -205,36 +248,40 @@ export default {
       return this.type === 'updateuser' || this.type === 'updateservice'
     },
     roleItems () {
-      return MEMBER_ROLE_DESCRIPTORS
+      return filter(MEMBER_ROLE_DESCRIPTORS, role => {
+        return !role.notEditable
+      })
     },
     nameLabel () {
       return this.isUserDialog ? 'User' : 'Service Account'
     },
     nameHint () {
       if (this.isUserDialog) {
-        return 'Enter the username that should become a user of this project'
+        return 'Enter the username that should become a member of this project'
       }
       if (this.isServiceDialog) {
-        return 'Enter the name of a Kubernetes Service Account'
+        return 'Enter service account name'
+      }
+
+      return undefined
+    },
+    rolesHint () {
+      if (this.isServiceDialog) {
+        return 'Assign roles to make this service account a member of this project'
       }
       return undefined
     },
-    cardClass () {
-      if (this.isUserDialog) {
-        return 'add_user'
-      }
-      if (this.isServiceDialog) {
-        return 'add_service'
-      }
-      return undefined
+    memberUsernames () {
+      return map(this.memberList, 'username')
+    },
+    serviceAccountUsernames () {
+      return filter(this.memberUsernames, isServiceAccountUsername)
     },
     serviceAccountNames () {
-      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
-      return map(serviceAccounts, ({ username }) => serviceAccountToDisplayName(username))
+      return map(this.serviceAccountUsernames, username => get(parseServiceAccountUsername(username), 'name'))
     },
-    projectUserNames () {
-      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
-      return map(users, 'username')
+    projectUsernames () {
+      return filter(this.memberUsernames, negate(isServiceAccountUsername))
     },
     memberName () {
       const name = toLower(this.internalName)
@@ -242,9 +289,21 @@ export default {
         return name
       }
       if (this.isServiceDialog) {
+        if (isServiceAccountUsername(name)) {
+          return name
+        }
         return `system:serviceaccount:${this.namespace}:${name}`
       }
       return undefined
+    },
+    addMemberButtonText () {
+      if (this.isServiceDialog) {
+        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+          return 'Invite'
+        }
+        return 'Create'
+      }
+      return 'Add'
     }
   },
   methods: {
@@ -265,7 +324,7 @@ export default {
         const name = this.memberName
         const roles = this.internalRoles
         try {
-          await this.addMember({ name, roles })
+          await this.addMember({ name, roles, description: this.internalDescription })
           this.hide()
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
@@ -289,7 +348,8 @@ export default {
         try {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          await this.updateMember({ name, roles })
+          await this.updateMember({ name, roles, description: this.internalDescription })
+
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
           }
@@ -309,6 +369,7 @@ export default {
     reset () {
       this.$v.$reset()
 
+      this.internalDescription = this.description
       if (this.isUserDialog) {
         if (this.name) {
           this.internalName = this.name
@@ -317,7 +378,7 @@ export default {
         }
       } else if (this.isServiceDialog) {
         if (this.name) {
-          this.internalName = serviceAccountToDisplayName(this.name)
+          this.internalName = get(parseServiceAccountUsername(this.name), 'name')
         } else {
           this.internalName = this.defaultServiceName()
         }
@@ -334,7 +395,7 @@ export default {
           }
         })
       } else {
-        this.internalRoles = [defaultRole]
+        this.internalRoles = []
         this.unsupportedRoles = []
       }
 
@@ -366,22 +427,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .add_user, .add_service {
-    .dialog-title {
-      background-size: cover;
-      height: 130px;
-    }
-  }
-  .add_user {
-    .dialog-title {
-      background-image: url('../../assets/add_user_background.svg');
-    }
-  }
-  .add_service {
-    .dialog-title {
-      background-image: url('../../assets/add_service_background.svg');
-    }
-  }
-</style>

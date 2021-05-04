@@ -1,26 +1,15 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
+const assert = require('assert').strict
 const EventEmitter = require('events')
 const _ = require('lodash')
-const { dashboardClient } = require('../lib/kubernetes-client')
 const logger = require('../lib/logger')
-const { registerHandler } = require('../lib/watches/common')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
@@ -28,9 +17,6 @@ const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
 
 describe('watches', function () {
-  /* eslint no-unused-expressions: 0 */
-  const sandbox = sinon.createSandbox()
-  const resourceName = 'test'
   const io = {}
   const foo = { metadata: { name: 'foo', uid: 1 }, spec: { namespace: 'foo' } }
   const bar = { metadata: { name: 'bar', uid: 2 } }
@@ -51,103 +37,49 @@ describe('watches', function () {
     }
   ]
 
-  let emitter
+  let informer
 
   beforeEach(function () {
-    emitter = new EventEmitter()
-    emitter.resourceName = resourceName
-  })
-
-  afterEach(function () {
-    sandbox.restore()
-  })
-
-  describe('common', function () {
-    it('should log "connect" events', async function () {
-      const spy = sandbox.spy(logger, 'debug')
-      registerHandler(emitter, () => {})
-      emitter.emit('connect')
-      expect(spy).to.be.calledOnceWith('watch %s connected', resourceName)
-    })
-
-    it('should log "disconnect" events', async function () {
-      const spy = sandbox.spy(logger, 'error')
-      registerHandler(emitter, () => {})
-      const error = new Error('error')
-      emitter.emit('disconnect', error)
-      expect(spy).to.be.calledOnceWith('watch %s disconnected', resourceName, error)
-    })
-
-    it('should log "reconnect" events', async function () {
-      const spy = sandbox.spy(logger, 'debug')
-      registerHandler(emitter, () => {})
-      const attempt = 7
-      const delay = 1234
-      emitter.emit('reconnect', attempt, delay)
-      expect(spy).to.be.calledOnceWith('watch %s reconnect attempt %d after %d', resourceName, attempt, delay)
-    })
-
-    it('should log "error" events', async function () {
-      const spy = sandbox.spy(logger, 'error')
-      registerHandler(emitter, () => {})
-      const error = new Error('error')
-      emitter.emit('error', error)
-      expect(spy).to.be.calledOnceWith('watch %s error occurred', resourceName, error)
-    })
-
-    it('should log "event" events with type "ERROR"', async function () {
-      const spy = sandbox.spy(logger, 'error')
-      registerHandler(emitter, () => {})
-      const code = 777
-      const reason = 'Not found'
-      const message = 'Something was not found'
-      emitter.emit('event', { type: 'ERROR', object: { code, reason, message } })
-      expect(spy).to.be.calledOnceWith('ERROR: Code "%s", Reason "%s", message "%s, watch: %s"', code, reason, message, emitter.resourceName)
-    })
+    informer = new EventEmitter()
+    jest.clearAllMocks()
   })
 
   describe('seeds', function () {
-    const kind = 'Seeds'
-    const { seeds } = dashboardClient['core.gardener.cloud']
+    const kind = 'Seed'
 
     it('should watch seeds', async function () {
-      const watchStub = sandbox.stub(seeds, 'watchList').returns(emitter)
-      const bootstrapStub = sandbox.stub(bootstrapper, 'bootstrapResource')
-      watches.seeds(io)
-      expect(watchStub).to.be.calledOnce
-      emitter.emit('event', { type: 'ADDED', object: foo })
-      emitter.emit('event', { type: 'ADDED', object: bar })
-      emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
-      emitter.emit('event', { type: 'DELETED', object: bar })
-      expect(bootstrapStub).to.be.calledTwice
-      expect(bootstrapStub.firstCall).to.be.calledWith(foo)
-      expect(bootstrapStub.secondCall).to.be.calledWith(bar)
+      const bootstrapStub = jest.spyOn(bootstrapper, 'bootstrapResource')
+      watches.seeds(io, informer)
+      informer.emit('add', foo)
+      informer.emit('add', bar)
+      informer.emit('update', { kind, ...bar }, bar)
+      informer.emit('delete', bar)
+      expect(bootstrapStub).toHaveBeenCalledTimes(3)
+      expect(bootstrapStub.mock.calls[0]).toEqual([foo])
+      expect(bootstrapStub.mock.calls[1]).toEqual([bar])
+      expect(bootstrapStub.mock.calls[2]).toEqual([{ kind, ...bar }])
     })
   })
 
   describe('shoots', function () {
     class Room {
-      constructor (namespace, events) {
+      constructor (namespace, events, kind = 'shoots') {
+        this.kind = kind
         this.namespace = namespace
         this.events = events
       }
 
-      emit (event, { kind, namespaces }) {
-        expect(event).to.equal('namespacedEvents')
-        expect(kind).to.equal('shoots')
-        expect(namespaces[this.namespace]).to.have.length(1)
+      emit (name, { kind, namespaces }) {
+        assert.strictEqual(name, 'namespacedEvents')
+        assert.strictEqual(kind, this.kind)
+        assert.strictEqual(namespaces[this.namespace].length, 1)
         const { objectKey, ...actualEvent } = namespaces[this.namespace][0]
-        expect(objectKey).to.equal(actualEvent.object.metadata.uid)
-        expect(this.events).to.be.not.empty
+        assert.strictEqual(objectKey, actualEvent.object.metadata.uid)
+        assert.notStrictEqual(this.events.length, 0)
         const expectedEvent = this.events[0]
-        expect(actualEvent).to.eql(expectedEvent)
+        assert.deepStrictEqual(actualEvent, expectedEvent)
         this.events.shift()
       }
-    }
-
-    function qualifiedName ({ metadata: { namespace, name } }) {
-      const projectName = _.find(projectList, ['spec.namespace', namespace]).metadata.name
-      return { projectName, name }
     }
 
     const foobarUnhealthy = _
@@ -180,47 +112,35 @@ describe('watches', function () {
           case 'shoots_foo_issues':
             return fooIssuesRoom
           default:
-            expect.fail(`Unexpect room ${room}`)
+            assert.fail(`Unexpect room ${room}`)
         }
       }
     }
 
     const io = {
       of (namespace) {
-        expect(namespace).to.equal('/shoots')
+        assert.strictEqual(namespace, '/shoots')
         return nsp
       }
     }
 
-    const { shoots } = dashboardClient['core.gardener.cloud']
-
-    let watchStub
-    let errorSpy
     let deleteTicketsStub
     let bootstrapResourceStub
-    let isResourcePendingStub
-    let removePendingResourceStub
+    let removeResourceStub
     let findProjectByNamespaceStub
 
     beforeEach(function () {
       shootsWithIssues = new Set()
-      watchStub = sandbox.stub(shoots, 'watchListAllNamespaces').returns(emitter)
-      errorSpy = sandbox.spy(logger, 'error')
-      deleteTicketsStub = sandbox.stub(tickets, 'deleteTickets')
-      bootstrapResourceStub = sandbox.stub(bootstrapper, 'bootstrapResource')
-      isResourcePendingStub = sandbox.stub(bootstrapper, 'isResourcePending')
-      removePendingResourceStub = sandbox.stub(bootstrapper, 'removePendingResource')
-      findProjectByNamespaceStub = sandbox
-        .stub(cache, 'findProjectByNamespace')
-        .callsFake(namespace => _.find(projectList, ['spec.namespace', namespace]))
+      deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
+      bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
+      removeResourceStub = jest.spyOn(bootstrapper.bootstrapState, 'removeResource').mockReturnValue()
+      findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockImplementation(namespace => {
+        return _.find(projectList, ['spec.namespace', namespace])
+      })
     })
 
     it('should watch shoots without issues', async function () {
-      isResourcePendingStub.withArgs(foobar).returns(true)
-
-      watches.shoots(io)
-
-      expect(watchStub).to.be.calledOnce
+      watches.shoots(io, informer)
 
       fooRoom = new Room('foo', [
         { type: 'ADDED', object: foobar },
@@ -232,37 +152,32 @@ describe('watches', function () {
         { type: 'ADDED', object: foobar },
         { type: 'MODIFIED', object: foobar },
         { type: 'DELETED', object: foobar }
-      ])
+      ], 'shoot')
 
-      fooBazRoom = new Room('foo', [])
+      fooBazRoom = new Room('foo', [], 'shoot')
 
       fooIssuesRoom = new Room('foo', [])
 
-      emitter.emit('event', { type: 'ADDED', object: foobar })
-      emitter.emit('event', { type: 'MODIFIED', object: foobar })
-      emitter.emit('event', { type: 'DELETED', object: foobar })
+      informer.emit('add', foobar)
+      informer.emit('update', foobar)
+      informer.emit('delete', foobar)
 
-      expect(errorSpy).to.not.be.called
-      expect(bootstrapResourceStub).to.be.calledTwice
-      expect(isResourcePendingStub).to.be.calledTwice
-      expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteTicketsStub).to.be.calledOnce
-      expect(findProjectByNamespaceStub).to.be.calledOnceWithExactly('foo')
+      expect(logger.error).not.toBeCalled()
+      expect(bootstrapResourceStub).toBeCalledTimes(2)
+      expect(removeResourceStub).toBeCalledTimes(1)
+      expect(removeResourceStub.mock.calls).toEqual([[foobar]])
+      expect(deleteTicketsStub).toBeCalledTimes(1)
+      expect(findProjectByNamespaceStub).toBeCalledTimes(1)
+      expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
 
-      expect(fooRoom.events).to.be.empty
-      expect(fooBarRoom.events).to.be.empty
-      expect(fooBazRoom.events).to.be.empty
-      expect(fooIssuesRoom.events).to.be.empty
+      expect(fooRoom.events).toHaveLength(0)
+      expect(fooBarRoom.events).toHaveLength(0)
+      expect(fooBazRoom.events).toHaveLength(0)
+      expect(fooIssuesRoom.events).toHaveLength(0)
     })
 
     it('should watch shoots with issues', async function () {
-      isResourcePendingStub.withArgs(foobar).returns(false)
-      isResourcePendingStub.withArgs(foobazUnhealthy).returns(true)
-      removePendingResourceStub.withArgs(foobazUnhealthy)
-
-      watches.shoots(io, { shootsWithIssues })
-
-      expect(watchStub).to.be.calledOnce
+      watches.shoots(io, informer, { shootsWithIssues })
 
       fooRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
@@ -275,13 +190,13 @@ describe('watches', function () {
       fooBarRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
         { type: 'MODIFIED', object: foobar }
-      ])
+      ], 'shoot')
 
       fooBazRoom = new Room('foo', [
         { type: 'ADDED', object: foobazUnhealthy },
         { type: 'MODIFIED', object: foobazUnhealthy },
         { type: 'DELETED', object: foobazUnhealthy }
-      ])
+      ], 'shoot')
 
       fooIssuesRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
@@ -291,38 +206,38 @@ describe('watches', function () {
         { type: 'DELETED', object: foobazUnhealthy }
       ])
 
-      expect(shootsWithIssues).to.have.length(0)
-      emitter.emit('event', { type: 'ADDED', object: foobarUnhealthy })
-      expect(shootsWithIssues).to.have.length(1)
-      emitter.emit('event', { type: 'MODIFIED', object: foobar })
-      expect(shootsWithIssues).to.have.length(0)
-      emitter.emit('event', { type: 'ADDED', object: foobazUnhealthy })
-      expect(shootsWithIssues).to.have.length(1)
-      emitter.emit('event', { type: 'MODIFIED', object: foobazUnhealthy })
-      expect(shootsWithIssues).to.have.length(1)
-      emitter.emit('event', { type: 'DELETED', object: foobazUnhealthy })
-      expect(shootsWithIssues).to.have.length(0)
+      expect(shootsWithIssues).toHaveProperty('size', 0)
+      informer.emit('add', foobarUnhealthy)
+      expect(shootsWithIssues).toHaveProperty('size', 1)
+      informer.emit('update', foobar)
+      expect(shootsWithIssues).toHaveProperty('size', 0)
+      informer.emit('add', foobazUnhealthy)
+      expect(shootsWithIssues).toHaveProperty('size', 1)
+      informer.emit('update', foobazUnhealthy)
+      expect(shootsWithIssues).toHaveProperty('size', 1)
+      informer.emit('delete', foobazUnhealthy)
+      expect(shootsWithIssues).toHaveProperty('size', 0)
 
-      expect(bootstrapResourceStub).to.be.calledThrice
-      expect(isResourcePendingStub).to.be.calledThrice
-      expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteTicketsStub).to.be.calledOnce
+      expect(bootstrapResourceStub).toBeCalledTimes(4)
+      expect(removeResourceStub).toBeCalledTimes(1)
+      expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
+      expect(deleteTicketsStub).toBeCalledTimes(1)
 
-      expect(fooRoom.events).to.be.empty
-      expect(fooBarRoom.events).to.be.empty
-      expect(fooBazRoom.events).to.be.empty
-      expect(fooIssuesRoom.events).to.be.empty
+      expect(fooRoom.events).toHaveLength(0)
+      expect(fooBarRoom.events).toHaveLength(0)
+      expect(fooBazRoom.events).toHaveLength(0)
+      expect(fooIssuesRoom.events).toHaveLength(0)
     })
 
     it('should delete tickets for a deleted shoot', async function () {
-      deleteTicketsStub.withArgs(qualifiedName(foobaz)).throws(new Error('TicketError'))
-      isResourcePendingStub.withArgs(foobar).returns(true)
-      isResourcePendingStub.withArgs(foobaz).returns(false)
-      removePendingResourceStub.withArgs(foobar)
+      deleteTicketsStub.mockImplementation(({ projectName, name }) => {
+        const namespace = _.find(projectList, ['metadata.name', projectName]).spec.namespace
+        if (namespace === 'foo' && name === 'baz') {
+          throw new Error('TicketError')
+        }
+      })
 
-      watches.shoots(io)
-
-      expect(watchStub).to.be.calledOnce
+      watches.shoots(io, informer)
 
       fooRoom = new Room('foo', [
         { type: 'DELETED', object: foobar },
@@ -331,40 +246,38 @@ describe('watches', function () {
 
       fooBarRoom = new Room('foo', [
         { type: 'DELETED', object: foobar }
-      ])
+      ], 'shoot')
 
       fooBazRoom = new Room('foo', [
         { type: 'DELETED', object: foobaz }
-      ])
+      ], 'shoot')
 
       fooIssuesRoom = new Room('foo', [])
 
-      emitter.emit('event', { type: 'DELETED', object: foobar })
-      emitter.emit('event', { type: 'DELETED', object: foobaz })
+      informer.emit('delete', foobar)
+      informer.emit('delete', foobaz)
 
-      expect(errorSpy).to.be.calledOnce
-      expect(isResourcePendingStub).to.be.calledTwice
-      expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteTicketsStub).to.be.calledTwice
+      expect(logger.error).toBeCalledTimes(1)
+      expect(removeResourceStub).toBeCalledTimes(2)
+      expect(removeResourceStub.mock.calls).toEqual([[foobar], [foobaz]])
+      expect(deleteTicketsStub).toBeCalledTimes(2)
 
-      expect(fooRoom.events).to.be.empty
-      expect(fooBarRoom.events).to.be.empty
-      expect(fooBazRoom.events).to.be.empty
-      expect(fooIssuesRoom.events).to.be.empty
+      expect(fooRoom.events).toHaveLength(0)
+      expect(fooBarRoom.events).toHaveLength(0)
+      expect(fooBazRoom.events).toHaveLength(0)
+      expect(fooIssuesRoom.events).toHaveLength(0)
     })
   })
 
   describe('tickets', function () {
-    const serviceUnavailable = new Error('Service Unavailable')
-    serviceUnavailable.status = 503
-
     const issueEvent = {}
     const issuesRoom = {
-      emit (...args) {
-        expect(args).to.eql(['events', {
+      emit (name, payload) {
+        assert.strictEqual(name, 'events')
+        assert.deepStrictEqual(payload, {
           kind: 'issues',
           events: [issueEvent]
-        }])
+        })
       }
     }
 
@@ -377,11 +290,12 @@ describe('watches', function () {
       }
     }
     const commentsRoom = {
-      emit (...args) {
-        expect(args).to.eql(['events', {
+      emit (name, payload) {
+        assert.strictEqual(name, 'events')
+        assert.deepStrictEqual(payload, {
           kind: 'comments',
           events: [commentEvent]
-        }])
+        })
       }
     }
 
@@ -398,62 +312,64 @@ describe('watches', function () {
 
     const io = {
       of (namespace) {
-        expect(namespace).to.equal('/tickets')
+        assert.strictEqual(namespace, '/tickets')
         return nsp
       }
     }
 
     const ticketCache = {
-      onIssue (handler) {
-        handler(issueEvent)
-      },
-      onComment (handler) {
-        handler(commentEvent)
+      on (eventName, handler) {
+        switch (eventName) {
+          case 'issue':
+            handler(issueEvent)
+            break
+          case 'comment':
+            handler(commentEvent)
+            break
+        }
       }
     }
-    let gitHubConfigStub
-    let warnSpy
-    let infoSpy
-    let errorSpy
-    let cacheStub
+
+    const gitHubConfig = config.gitHub
+
+    let gitHubStub
     let loadOpenIssuesStub
 
     beforeEach(function () {
-      gitHubConfigStub = sandbox.stub(config, 'gitHub')
-      infoSpy = sandbox.spy(logger, 'info')
-      warnSpy = sandbox.spy(logger, 'warn')
-      errorSpy = sandbox.spy(logger, 'error')
-      cacheStub = sandbox.stub(cache, 'getTicketCache')
-      loadOpenIssuesStub = sandbox.stub(tickets, 'loadOpenIssues')
+      gitHubStub = jest.fn()
+      Object.defineProperty(config, 'gitHub', { get: gitHubStub })
+      loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
+      jest.clearAllMocks()
+    })
+
+    afterEach(function () {
+      Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
     })
 
     it('should log missing gitHub config', async function () {
-      gitHubConfigStub.get(() => false)
-      watches.tickets(io)
-      expect(warnSpy).to.be.calledOnce
+      gitHubStub.mockReturnValue(false)
+      watches.tickets(io, ticketCache)
+      expect(logger.warn).toBeCalledTimes(1)
     })
 
     it('should watch tickets', async function () {
-      gitHubConfigStub.get(() => true)
-      cacheStub.returns(ticketCache)
-      loadOpenIssuesStub.onCall(0).throws(serviceUnavailable)
-      const promise = watches.tickets(io, { minTimeout: 1 })
-      expect(cacheStub).to.be.calledOnce
-      await promise
-      expect(loadOpenIssuesStub).to.be.calledTwice
-      expect(infoSpy).to.be.calledTwice
+      gitHubStub.mockReturnValue(true)
+      loadOpenIssuesStub.mockRejectedValueOnce(Object.assign(new Error('Service Unavailable'), {
+        status: 503
+      }))
+
+      await watches.tickets(io, ticketCache, { minTimeout: 1 })
+      expect(loadOpenIssuesStub).toBeCalledTimes(2)
+      expect(logger.info).toBeCalledTimes(2)
     })
 
     it('should fail to fetch tickets', async function () {
-      gitHubConfigStub.get(() => true)
-      cacheStub.returns(ticketCache)
-      loadOpenIssuesStub.throws(new Error('Unexpected'))
+      gitHubStub.mockReturnValue(true)
+      loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
 
-      const promise = watches.tickets(io)
-      expect(cacheStub).to.be.calledOnce
-      expect(loadOpenIssuesStub).to.be.calledOnce
-      await promise
-      expect(errorSpy).to.be.calledOnce
+      await watches.tickets(io, ticketCache)
+      expect(loadOpenIssuesStub).toBeCalledTimes(1)
+      expect(logger.error).toBeCalledTimes(1)
     })
   })
 })

@@ -1,42 +1,39 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row dense>
-    <v-col style="max-width: 60px;">
+  <v-list-item>
+    <v-list-item-avatar v-if="avatarUrl" class="align-self-start">
       <v-avatar size="40px">
         <img :src="avatarUrl" :title="login"/>
       </v-avatar>
-    </v-col>
-    <v-col class="fluid" >
-      <div class="comment">
-        <div class="comment-header">
-          <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" :pointInTime="-1"></time-string></a>
-        </div>
-        <div class="comment-body" v-html="compiledMarkdown"></div>
-      </div>
-    </v-col>
-  </v-row>
-
+    </v-list-item-avatar>
+    <v-list-item-icon v-else class="align-self-start">
+      <v-icon color="primary">mdi-comment-outline</v-icon>
+    </v-list-item-icon>
+    <v-list-item-content class="comment">
+      <v-list-item-title class="comment-header toolbar-background toolbar-title--text">
+        <span class="font-weight-bold">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :date-time="createdAt" mode="past" class="toolbar-title--text"></time-string></a>
+      </v-list-item-title>
+      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
+    </v-list-item-content>
+    </v-list-item>
 </template>
 
 <script>
 import get from 'lodash/get'
-import { compileMarkdown } from '@/utils'
+import { gravatarUrlIdenticon, transformHtml } from '@/utils'
 import TimeString from '@/components/TimeString'
+import { mapState } from 'vuex'
+
+const AvatarEnum = {
+  GITHUB: 'github', // default
+  GRAVATAR: 'gravatar',
+  NONE: 'none'
+}
 
 export default {
   components: {
@@ -49,8 +46,11 @@ export default {
     }
   },
   computed: {
-    compiledMarkdown () {
-      return compileMarkdown(get(this.comment, 'data.body', ''))
+    ...mapState([
+      'cfg'
+    ]),
+    commentHtml () {
+      return transformHtml(get(this.comment, 'data.body', ''))
     },
     login () {
       return get(this.comment, 'data.user.login')
@@ -58,8 +58,18 @@ export default {
     createdAt () {
       return get(this.comment, 'metadata.created_at')
     },
+    avatarSource () {
+      return get(this.cfg, 'ticket.avatarSource', AvatarEnum.GITHUB)
+    },
     avatarUrl () {
-      return get(this.comment, 'data.user.avatar_url')
+      switch (this.avatarSource) {
+        case AvatarEnum.GITHUB:
+          return get(this.comment, 'data.user.avatar_url')
+        case AvatarEnum.GRAVATAR:
+          return gravatarUrlIdenticon(this.login)
+        default:
+          return undefined
+      }
     },
     htmlUrl () {
       return get(this.comment, 'data.html_url')
@@ -69,31 +79,69 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
+
+  $gh-code-background-color: map-get($grey, 'lighten-4');
+  $gh-code-color: map-get($grey, 'darken-4');
 
   .comment {
-    border-radius: 2px;
-    border: 0.5px;
-    border-color: #00acc1;
-    border-style: solid;
-    margin-right: 16px;
+    padding: 0;
+    margin-bottom: 12px;
   }
+  .wrap-text {
+    white-space: normal;
+  }
+
   .comment-header {
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border: 0.5px;
-    padding: 5px;
-    border-bottom: 0.5px solid #00acc1;
-    background-color: #00acc1;
-    color: white;
-    font-weight: 400;
+
+    padding: 4px 8px;
+    margin-bottom: 0;
   }
+
   .comment-body {
-    padding: 5px;
+    border: 0.5px solid;
+
+    padding: 4px 8px;
 
     /* not needed for chrome, but kept for firefox */
     word-wrap: break-word;
     /* does not work with firefox */
     word-break: break-word;
+
+    ::v-deep pre {
+      padding: 8px;
+      border-radius: 3px;
+      white-space: pre;
+      overflow: auto;
+      background-color: $gh-code-background-color;
+      & > code {
+        padding: 0;
+        color: $gh-code-color;
+        background-color: transparent;
+        background-attachment: scroll;
+        font-weight: normal;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        &:before {
+          content: none;
+        }
+      }
+    }
+
+    ::v-deep code {
+      padding: .2em .4em;
+      border-radius: 3px;
+      font-weight: normal;
+      color: $gh-code-color;
+      background-color: $gh-code-background-color;
+    }
+
+    ::v-deep img {
+      max-width: 100%;
+    }
 
     ::v-deep > h1 {
       font-size: 21px;
@@ -132,7 +180,6 @@ export default {
 
   a {
     text-decoration: none;
-    color: white;
   }
 
   a:hover{

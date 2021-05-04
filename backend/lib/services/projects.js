@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
@@ -20,12 +10,13 @@ const _ = require('lodash')
 const {
   dashboardClient,
   Resources
-} = require('../kubernetes-client')
-const { PreconditionFailed } = require('../errors')
+} = require('@gardener-dashboard/kube-client')
+
+const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 const cache = require('../cache')
-
+const Member = require('./members/Member')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function fromResource ({ metadata, spec = {}, status = {} }) {
@@ -127,16 +118,35 @@ function getProjectName (namespace) {
 exports.list = async function ({ user, qs = {} }) {
   const projects = cache.getProjects()
   const isAdmin = await authorization.isAdmin(user)
+  const isMemberOf = project => {
+    const hasGroupMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'Group'])
+      .map('name')
+      .intersection(user.groups)
+      .size()
+      .gt(0)
+      .value()
 
-  const isMemberOf = project => _
-    .chain(project)
-    .get('spec.members')
-    .findIndex({
-      kind: 'User',
-      name: user.id
-    })
-    .gte(0)
-    .value()
+    const hasUserMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'User'])
+      .map('name')
+      .includes(user.id)
+      .value()
+
+    const member = Member.parseUsername(user.id)
+    const hasServiceAccountMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'ServiceAccount'])
+      .find(member)
+      .value()
+
+    return hasGroupMembership || hasUserMembership || hasServiceAccountMembership
+  }
 
   const phases = _
     .chain(qs)
@@ -168,14 +178,16 @@ exports.create = async function ({ user, body }) {
   _.set(body, 'data.createdBy', user.id)
   let project = await client['core.gardener.cloud'].projects.create(toResource(body))
 
-  const isProjectReady = project => {
+  const isProjectReady = ({ type, object: project }) => {
+    if (type === 'DELETE') {
+      throw new InternalServerError('Project resource has been deleted')
+    }
     return _.get(project, 'status.phase') === 'Ready'
   }
   const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
-  project = await dashboardClient['core.gardener.cloud'].projects
-    .watch(name)
-    .waitFor(isProjectReady, { timeout })
+  const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
+  project = await asyncIterable.until(isProjectReady, { timeout })
 
   return fromResource(project)
 }

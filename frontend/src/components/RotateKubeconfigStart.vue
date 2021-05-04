@@ -1,37 +1,27 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :loading="isActionToBeScheduled"
-    @dialogOpened="startDialogOpened"
+    @dialog-opened="startDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    maxWidth="600"
-    :buttonText="buttonText"
-    :confirmRequired="true"
-    confirmButtonText="Rotate">
+    max-width="600"
+    :button-text="buttonText"
+    :confirm-required="true"
+    confirm-button-text="Rotate">
     <template v-slot:actionComponent>
       <v-row >
         <v-col>
           <div class="py-4">Do you want to start rotation of kubeconfig credentials?
           </div>
-          <v-alert dense color="warning" icon="priority_high" outlined>
+          <v-alert dense color="warning" icon="mdi-exclamation-thick" outlined>
             The current kubeconfig credentials will be revoked.
           </v-alert>
           <div class="pt-4">Type <strong>{{shootName}}</strong> below and confirm revokation of current kubeconfig credentials.
@@ -75,7 +65,7 @@ export default {
       if (this.isActionToBeScheduled) {
         return 'Requesting to schedule kubeconfig credentials rotation'
       }
-      return this.buttonText
+      return this.buttonTitle
     },
     buttonTitle () {
       return 'Start Kubeconfig Rotation'
@@ -84,7 +74,7 @@ export default {
       if (!this.text) {
         return
       }
-      return this.buttonTitle
+      return 'Rotate Kubeconfig'
     }
   },
   methods: {

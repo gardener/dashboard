@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -35,7 +25,7 @@ import CopyBtn from '@/components/CopyBtn'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
-import hljs from 'highlight.js/lib/highlight.js'
+import hljs from 'highlight.js/lib/core'
 
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'
@@ -95,8 +85,8 @@ export default {
         })
         block.textContent = trim(lines.join('\n'))
       }
-      hljs.highlightBlock(block)
-      this.$emit('highlightBlock')
+      hljs.highlightElement(block)
+      this.$emit('highlight-block')
     },
     onCopy () {
       this.showMessage = true
@@ -119,14 +109,12 @@ export default {
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
 
-  $grey-lighten-5: map-get($grey, 'lighten-5');
+  $grey-lighten-4: map-get($grey, 'lighten-4');
 
   .code-block {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: $grey-lighten-5;
-    color: $grey-lighten-5;
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;
@@ -180,6 +168,7 @@ export default {
       }
     }
   }
+
   .code-block-wrapper {
     min-width: 100%;
     max-height: 450px;
@@ -210,6 +199,21 @@ export default {
     &.active {
       transition: $swift-ease-out;
       transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .theme--light .code-block {
+    background-color: rgba(0, 0, 0, .02);
+  }
+
+  .theme--dark .code-block {
+    background-color: rgba(0, 0, 0, .2);
+
+    &:after {
+      color: rgba(#fff, .26) !important;
+    }
+    code.hljs {
+      color: $grey-lighten-4 !important;
     }
   }
 </style>

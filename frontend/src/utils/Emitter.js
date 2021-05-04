@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 import io from 'socket.io-client'
@@ -33,8 +23,10 @@ class Connector {
 
   onConnect (attempt) {
     if (attempt) {
+      // eslint-disable-next-line no-console
       console.log(`socket connection ${this.socket.id} established after '${attempt}' attempt(s)`)
     } else {
+      // eslint-disable-next-line no-console
       console.log(`socket connection ${this.socket.id} established`)
     }
     store.dispatch('unsetWebsocketConnectionError')
@@ -52,6 +44,7 @@ class Connector {
   }
 
   disconnect () {
+    // eslint-disable-next-line no-console
     console.log(`Disconnect socket ${this.socket.id}`)
     if (this.socket.connected) {
       this.socket.disconnect()
@@ -189,29 +182,9 @@ class ShootSubscription extends AbstractSubscription {
   constructor (connector) {
     super(connector)
 
-    /* currently we only throttle NamespacedEvents (for shoots) as for this kind
-    * we expect many events coming in in a short period of time */
-    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
-
     this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
       if (kind === 'shoot') {
-        throttledNsEventEmitter.emit(kind, namespaces)
-      }
-    })
-    this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
-      const { name, namespace } = target
-      throttledNsEventEmitter.flush()
-      const promises = []
-      if (store.getters.canGetSecrets) {
-        promises.push(store.dispatch('getShootInfo', { name, namespace }))
-      }
-      if (store.getters.isAdmin) {
-        promises.push(store.dispatch('getShootSeedInfo', { name, namespace }))
-      }
-      try {
-        await Promise.all(promises)
-      } catch (err) {
-        console.error('SubscribeShootDone error:', err.message)
+        this.emit(kind, namespaces)
       }
     })
   }
@@ -224,8 +197,9 @@ class ShootSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
-
-    this.socket.emit('subscribeShoot', { namespace, name })
+    this.socket.emit('subscribeShoot', { namespace, name }, object => {
+      store.dispatch('subscribeShootAcknowledgement', object)
+    })
     return true
   }
 
@@ -320,10 +294,12 @@ forEach([shootsConnector, ticketsConnector], connector => {
     console.error(`socket ${socket.id} connection timeout`)
   })
   socket.on('reconnect_attempt', () => {
+    // eslint-disable-next-line no-console
     console.log(`socket ${socket.id} reconnect attempt`)
   })
   socket.on('reconnecting', attempt => {
     store.dispatch('setWebsocketConnectionError', { reconnectAttempt: attempt })
+    // eslint-disable-next-line no-console
     console.log(`socket ${socket.id} reconnecting attempt number '${attempt}'`)
   })
   socket.on('reconnect_error', err => {
@@ -338,7 +314,7 @@ forEach([shootsConnector, ticketsConnector], connector => {
   socket.on('subscription_error', error => {
     const { kind, code, message } = error
     console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
-    store.dispatch('setError', error)
+    store.dispatch('setSubscriptionError', error)
   })
 })
 

@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 import Vue from 'vue'
@@ -25,18 +15,26 @@ import {
   fullDisplayName,
   getDateFormatted,
   canI,
-  getProjectName
+  getProjectName,
+  TargetEnum,
+  isHtmlColorCode
 } from '@/utils'
-import { getSubjectRules, getKubeconfigData } from '@/utils/api'
+import { hash } from '@/utils/crypto'
+import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
+import isObject from 'lodash/isObject'
 import uniq from 'lodash/uniq'
+import uniqBy from 'lodash/uniqBy'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
+import camelCase from 'lodash/camelCase'
 import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
@@ -46,6 +44,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
@@ -54,23 +53,32 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
-import moment from 'moment-timezone'
+import assign from 'lodash/assign'
+import forOwn from 'lodash/forOwn'
 
+import moment from '@/utils/moment'
+import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
+import gardenerExtensions from './modules/gardenerExtensions'
+import networkingTypes from './modules/networkingTypes'
+import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import tickets from './modules/tickets'
 import semver from 'semver'
+import colors from 'vuetify/lib/util/colors'
+
+const localStorage = Vue.localStorage
 
 Vue.use(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
 // plugins
-const plugins = []
+const plugins = [createMediaPlugin(window)]
 if (debug) {
   plugins.push(createLogger())
 }
@@ -87,19 +95,19 @@ const state = {
     incomplete: false,
     evaluationError: null
   },
-  onlyShootsWithIssues: true,
   sidebar: true,
   user: null,
   redirectPath: null,
   loading: false,
   alert: null,
-  alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  localTimezone: moment.tz.guess(),
+  location: moment.tz.guess(),
+  timezone: moment().format('Z'),
   focusedElementId: null,
   splitpaneResize: null,
   splitpaneLayouts: {},
+  projectTerminalShortcuts: null,
   conditionCache: {
     APIServerAvailable: {
       displayName: 'API Server',
@@ -122,11 +130,27 @@ const state = {
       shortName: 'SC',
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     }
+  },
+  darkTheme: false,
+  colorScheme: 'auto'
+}
+class Shortcut {
+  constructor (shortcut, unverified = true) {
+    Object.assign(this, shortcut)
+    Object.defineProperty(this, 'id', {
+      value: hash(shortcut)
+    })
+    Object.defineProperty(this, 'unverified', {
+      value: unverified
+    })
   }
 }
 
-const getFilterValue = (state) => {
-  return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
+function getFilterValue (state, getters) {
+  if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
+    return 'issues'
+  }
+  return null
 }
 
 const vendorNameFromImageName = imageName => {
@@ -284,6 +308,14 @@ function firstItemMatchingVersionClassification (items) {
   return head(items)
 }
 
+function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && getters.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && getters.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
+  shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && getters.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
+  shortcuts = filter(shortcuts, ({ target }) => includes(targetsFilter, target))
+  return shortcuts
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -292,9 +324,19 @@ const getters = {
   cloudProfileList (state) {
     return state.cloudProfiles.all
   },
+  seedList (state) {
+    return state.seeds.all
+  },
   cloudProfileByName (state, getters) {
-    return (name) => {
-      return getters['cloudProfiles/cloudProfileByName'](name)
+    return name => getters['cloudProfiles/cloudProfileByName'](name)
+  },
+  seedByName (state, getters) {
+    return name => getters['seeds/seedByName'](name)
+  },
+  isSeedUnreachableByName (state, getters) {
+    return name => {
+      const seed = getters.seedByName(name)
+      return get(seed, 'metadata.unreachable')
     }
   },
   cloudProfilesByCloudProviderKind (state) {
@@ -303,6 +345,13 @@ const getters = {
       const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
+  },
+  gardenerExtensionsList (state) {
+    return state.gardenerExtensions.all
+  },
+  networkingTypeList (state, getters) {
+    const networkList = state.networkingTypes.all
+    return sortBy(networkList)
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -482,7 +531,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems']
+    return getters['shoots/filteredItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -500,6 +549,53 @@ const getters = {
   },
   projectNamesFromProjectList (state, getters) {
     return map(getters.projectList, 'metadata.name')
+  },
+  shootCustomFieldList (state, getters) {
+    return map(getters.shootCustomFields, (customFields, key) => {
+      return {
+        ...customFields,
+        key
+      }
+    })
+  },
+  shootCustomFields (state, getters) {
+    let shootCustomFields = get(getters.projectFromProjectList, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    if (!shootCustomFields) {
+      return
+    }
+
+    try {
+      shootCustomFields = JSON.parse(shootCustomFields)
+    } catch (error) {
+      console.error('could not parse custom fields', error.message)
+      return
+    }
+
+    shootCustomFields = pickBy(shootCustomFields, customField => {
+      if (isEmpty(customField)) {
+        return false // omit null values
+      }
+      if (some(customField, isObject)) {
+        return false // omit custom fields with object values
+      }
+      return customField.name && customField.path
+    })
+
+    const defaultProperties = {
+      showColumn: true,
+      columnSelectedByDefault: true,
+      showDetails: true,
+      sortable: true,
+      searchable: true
+    }
+    shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
+    shootCustomFields = mapValues(shootCustomFields, customField => {
+      return {
+        ...defaultProperties,
+        ...customField
+      }
+    })
+    return shootCustomFields
   },
   costObjectSettings (state) {
     const costObject = state.cfg.costObject
@@ -525,13 +621,16 @@ const getters = {
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
   },
-  getInfrastructureSecretByBindingName (state, getters) {
+  getInfrastructureSecretByName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByBindingName']({ namespace, name })
+      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
     return map(state.projects.all, 'metadata.namespace')
+  },
+  defaultNamespace (state, getters) {
+    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
   },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
@@ -545,14 +644,18 @@ const getters = {
       if (!cloudProfile) {
         return []
       }
-      const seeds = cloudProfile.data.seeds
-      if (!seeds) {
+      const seedNames = cloudProfile.data.seedNames
+      if (!seedNames) {
         return []
       }
+      const seeds = getters.seedsByNames(seedNames)
       const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
       const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
       return uniqueSeedRegionsWithZones
     }
+  },
+  seedsByNames (state, getters) {
+    return seedNames => map(seedNames, getters.seedByName)
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -662,12 +765,6 @@ const getters = {
       })
     }
   },
-
-  infrastructureSecretsByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])
-    }
-  },
   infrastructureSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
@@ -772,10 +869,20 @@ const getters = {
     return get(state, 'alert.type', 'error')
   },
   alertBannerMessage (state) {
-    return get(state, 'alertBanner.message', '')
+    return get(state, 'cfg.alert.message')
   },
   alertBannerType (state) {
-    return get(state, 'alertBanner.type', 'error')
+    return get(state, 'cfg.alert.type', 'error')
+  },
+  alertBannerIdentifier (state, getters) {
+    if (!getters.alertBannerMessage) {
+      return
+    }
+    const defaultIdentifier = hash(getters.alertBannerMessage)
+    const configIdentifier = get(state, 'cfg.alert.identifier')
+    const identifier = camelCase(configIdentifier) || defaultIdentifier
+    // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
+    return `cfg.${identifier}`
   },
   currentNamespaces (state, getters) {
     if (state.namespace === '_all') {
@@ -805,7 +912,7 @@ const getters = {
     return getters['shoots/initialNewShootResource']
   },
   hasGardenTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals
   },
   hasControlPlaneTerminalAccess (state, getters) {
     return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
@@ -815,6 +922,12 @@ const getters = {
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
+  },
+  isTerminalShortcutsFeatureEnabled (state, getters) {
+    return !isEmpty(getters.terminalShortcutsByTargetsFilter()) || getters.isProjectTerminalShortcutsEnabled
+  },
+  isProjectTerminalShortcutsEnabled (state, getters) {
+    return get(state, 'cfg.features.projectTerminalShortcutsEnabled', false)
   },
   canCreateTerminals (state) {
     return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
@@ -830,6 +943,21 @@ const getters = {
   },
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canCreateSecrets (state) {
+    return canI(state.subjectRules, 'create', '', 'secrets')
+  },
+  canPatchSecrets (state) {
+    return canI(state.subjectRules, 'patch', '', 'secrets')
+  },
+  canDeleteSecrets (state) {
+    return canI(state.subjectRules, 'delete', '', 'secrets')
+  },
+  canGetProjectTerminalShortcuts (state, getters) {
+    return getters.canGetSecrets
+  },
+  canUseProjectTerminalShortcuts (state, getters) {
+    return getters.isProjectTerminalShortcutsEnabled && getters.canGetProjectTerminalShortcuts && getters.canCreateTerminals
   },
   canCreateProject (state) {
     return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
@@ -858,8 +986,30 @@ const getters = {
   splitpaneResize (state) {
     return state.splitpaneResize
   },
+  terminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
+      let shortcuts = get(state, 'cfg.terminal.shortcuts', [])
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, false))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
+    }
+  },
+  projectTerminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
+      if (get(state, 'projectTerminalShortcuts.namespace') !== state.namespace) {
+        return
+      }
+      let shortcuts = get(state, 'projectTerminalShortcuts.items', [])
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, true))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
+    }
+  },
   isKubeconfigEnabled (state) {
     return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
+  },
+  onlyShootsWithIssues (state, getters) {
+    return getters['shoots/onlyShootsWithIssues']
   }
 }
 
@@ -878,6 +1028,27 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  async fetchGardenerExtensions ({ dispatch }) {
+    try {
+      await dispatch('gardenerExtensions/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
+  async fetchNetworkingTypes ({ dispatch }) {
+    try {
+      await dispatch('networkingTypes/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
+  },
+  async fetchSeeds ({ dispatch }) {
+    try {
+      await dispatch('seeds/getAll')
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   fetchProjects ({ dispatch }) {
     return dispatch('projects/getAll')
@@ -915,12 +1086,73 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoot ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/clearAll')
-      .then(() => EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace }))
-      .catch(err => {
-        dispatch('setError', err)
+  async subscribeShoot ({ dispatch, getters }, { name, namespace }) {
+    await dispatch('shoots/clearAll')
+    return new Promise((resolve, reject) => {
+      const done = err => {
+        unsubscribe()
+        clearTimeout(timeoutId)
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+      const handleSubscriptionTimeout = () => {
+        done(Object.assign(new Error('Cluster subscription timed out'), {
+          code: 504,
+          reason: 'Timeout'
+        }))
+      }
+      const handleSubscriptionAcknowledgement = object => {
+        if (object.kind === 'Status') {
+          let { code, reason, message } = object
+          if (code === 404) {
+            reason = 'Cluster not found'
+            message = 'The cluster you are looking for doesn\'t exist'
+          } else if (code === 403) {
+            reason = 'Access to cluster denied'
+          } else if (code >= 500) {
+            reason = 'Oops, something went wrong'
+            message = 'An unexpected error occurred. Please try again later'
+          }
+          done(Object.assign(new Error(message), { code, reason }))
+        } else {
+          done()
+        }
+      }
+      const unsubscribe = store.subscribeAction(({ type, payload }, state) => {
+        if (type === 'subscribeShootAcknowledgement') {
+          handleSubscriptionAcknowledgement(payload)
+        }
       })
+      const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
+      EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+    })
+  },
+  subscribeShootAcknowledgement ({ commit, state }, object) {
+    if (object.kind === 'Shoot') {
+      commit('shoots/HANDLE_EVENTS', {
+        rootState: state,
+        events: [{
+          type: 'ADDED',
+          object
+        }]
+      })
+      const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
+        const promises = [store.dispatch('getShootInfo', metadata)]
+        const seedName = spec.seedName
+        if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
+          promises.push(store.dispatch('getShootSeedInfo', metadata))
+        }
+        try {
+          await Promise.all(promises)
+        } catch (err) {
+          console.error('Failed to fetch shoot or shootSeed info:', err.message)
+        }
+      }
+      fetchShootAndShootSeedInfo(object)
+    }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
@@ -934,20 +1166,20 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoots ({ dispatch, commit, state }) {
-    return EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+  async subscribeShoots ({ dispatch, commit, state, getters }) {
+    try {
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state, getters) })
+    } catch (err) { /* ignore error */ }
   },
-  subscribeComments ({ dispatch, commit }, { name, namespace }) {
-    return new Promise((resolve, reject) => {
+  async subscribeComments ({ dispatch, commit }, { name, namespace }) {
+    try {
       EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
-      resolve()
-    })
+    } catch (err) { /* ignore error */ }
   },
-  unsubscribeComments ({ dispatch, commit }) {
-    return new Promise((resolve, reject) => {
+  async unsubscribeComments ({ dispatch, commit }) {
+    try {
       EmitterWrapper.ticketCommentsEmitter.unsubscribe()
-      resolve()
-    })
+    } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
@@ -955,29 +1187,19 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, options) {
-    return dispatch('shoots/setListSortParams', options)
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilters ({ dispatch, getters }, value) {
+    try {
+      await dispatch('shoots/setShootListFilters', value)
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
-  setShootListFilters ({ dispatch, commit }, value) {
-    return dispatch('shoots/setShootListFilters', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  setShootListFilter ({ dispatch, commit }, { filter, value }) {
-    return dispatch('shoots/setShootListFilter', { filter, value })
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  setShootListSearchValue ({ dispatch }, searchValue) {
-    return dispatch('shoots/setListSearchValue', searchValue)
-      .catch(err => {
-        dispatch('setError', err)
-      })
+  async setShootListFilter ({ dispatch, getters }, { filter, value }) {
+    try {
+      await dispatch('shoots/setShootListFilter', { filter, value })
+    } catch (err) {
+      dispatch('setError', err)
+    }
   },
   setNewShootResource ({ dispatch }, data) {
     return dispatch('shoots/setNewShootResource', data)
@@ -1063,16 +1285,41 @@ const actions = {
       await dispatch('setError', { message: `Delete member failed. ${err.message}` })
     }
   },
+  async rotateServiceAccountSecret ({ dispatch, commit }, payload) {
+    try {
+      const result = await dispatch('members/rotateServiceAccountSecret', payload)
+      await dispatch('setAlert', { message: 'Service Account Secret Rotation started', type: 'success' })
+      return result
+    } catch (err) {
+      await dispatch('setError', { message: `Failed to Rotate Service Account Secret ${err.message}` })
+    }
+  },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
-
-    if (get(value, 'alert')) {
-      commit('SET_ALERT_BANNER', get(value, 'alert'))
-    }
 
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
       commit('setCondition', { conditionKey, conditionValue })
     })
+
+    const themes = get(Vue, 'vuetify.framework.theme.themes')
+    if (themes) {
+      const applyCustomThemeConfiguration = (name) => {
+        const customTheme = get(state, ['cfg', 'themes', name])
+        if (customTheme) {
+          forOwn(customTheme, (value, key) => {
+            const color = get(colors, value)
+            if (color) {
+              customTheme[key] = color
+            } else if (!isHtmlColorCode(value)) {
+              delete customTheme[key]
+            }
+          })
+          assign(themes[name], customTheme)
+        }
+      }
+      applyCustomThemeConfiguration('light')
+      applyCustomThemeConfiguration('dark')
+    }
 
     return state.cfg
   },
@@ -1092,14 +1339,23 @@ const actions = {
     return state.subjectRules
   },
   async fetchKubeconfigData ({ commit }) {
-    if (!store.state.kubeconfigData) {
-      const { data } = await getKubeconfigData()
-      commit('SET_KUBECONFIG_DATA', data)
-    }
+    const { data } = await getKubeconfigData()
+    commit('SET_KUBECONFIG_DATA', data)
   },
-  setOnlyShootsWithIssues ({ commit }, value) {
-    commit('SET_ONLYSHOOTSWITHISSUES', value)
-    return state.onlyShootsWithIssues
+  async ensureProjectTerminalShortcutsLoaded ({ commit, dispatch, state }) {
+    const { namespace, projectTerminalShortcuts } = state
+    if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
+      try {
+        const { data: items } = await listProjectTerminalShortcuts({ namespace })
+        commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+          namespace,
+          items
+        })
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to list project terminal shortcuts:', err.message)
+      }
+    }
   },
   setUser ({ dispatch, commit }, value) {
     commit('SET_USER', value)
@@ -1139,6 +1395,13 @@ const actions = {
     commit('SET_WEBSOCKETCONNECTIONERROR', null)
     return state.websocketConnectionError
   },
+  setSubscriptionError ({ dispatch, commit }, value) {
+    const { kind, code, message } = value
+    if (kind === 'shoot') {
+      return commit('shoots/SET_SUBSCRIPTION_ERROR', { code, message })
+    }
+    return dispatch('setError', value)
+  },
   setError ({ commit }, value) {
     commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
     return state.alert
@@ -1147,16 +1410,16 @@ const actions = {
     commit('SET_ALERT', value)
     return state.alert
   },
-  setAlertBanner ({ commit }, value) {
-    commit('SET_ALERT_BANNER', value)
-    return state.alertBanner
-  },
   setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
     return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
   },
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SPLITPANE_RESIZE', value)
     return state.splitpaneResize
+  },
+  setColorScheme ({ commit }, colorScheme) {
+    commit('SET_COLOR_SCHEME', colorScheme)
+    return state.colorScheme
   }
 }
 
@@ -1180,10 +1443,8 @@ const mutations = {
   SET_KUBECONFIG_DATA (state, value) {
     state.kubeconfigData = value
   },
-  SET_ONLYSHOOTSWITHISSUES (state, value) {
-    state.onlyShootsWithIssues = value
-    // subscribe again for shoots as the filter has changed
-    EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+  SET_PROJECT_TERMINAL_SHORTCUTS (state, value) {
+    state.projectTerminalShortcuts = value
   },
   SET_USER (state, value) {
     state.user = value
@@ -1212,9 +1473,6 @@ const mutations = {
   SET_ALERT (state, value) {
     state.alert = value
   },
-  SET_ALERT_BANNER (state, value) {
-    state.alertBanner = value
-  },
   setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)
   },
@@ -1228,6 +1486,14 @@ const mutations = {
   },
   SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
+  },
+  SET_COLOR_SCHEME (state, value) {
+    state.colorScheme = value
+    localStorage.setItem('global/color-scheme', value)
+  },
+  SET_DARK_THEME (state, value) {
+    state.darkTheme = value
+    Vue.vuetify.framework.theme.dark = value
   }
 }
 
@@ -1236,6 +1502,9 @@ const modules = {
   members,
   draggable,
   cloudProfiles,
+  gardenerExtensions,
+  networkingTypes,
+  seeds,
   shoots,
   infrastructureSecrets,
   tickets

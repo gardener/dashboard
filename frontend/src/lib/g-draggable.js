@@ -1,18 +1,6 @@
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
-//
-// Licensed under the Apache License, Version 2.0 (the "License")
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
+// SPDX-License-Identifier: Apache-2.0
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -21,11 +9,11 @@ import forEach from 'lodash/forEach'
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 
 const DragAndDropEventsEnum = {
-  DRAG_START: 'dragStart',
-  DRAG_END: 'dragEnd',
-  DRAG_ENTER: 'dragEnter',
-  DRAG_OVER: 'dragOver',
-  DRAG_LEAVE: 'dragLeave',
+  DRAG_START: 'drag-start',
+  DRAG_END: 'drag-end',
+  DRAG_ENTER: 'drag-enter',
+  DRAG_OVER: 'drag-over',
+  DRAG_LEAVE: 'drag-leave',
   DROPPED: 'dropped'
 }
 

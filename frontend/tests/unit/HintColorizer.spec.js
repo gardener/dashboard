@@ -1,147 +1,131 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
-import { expect } from 'chai'
-import { mount } from '@vue/test-utils'
-import HintColorizer from '@/components/HintColorizer.vue'
-import Vue from 'vue'
+// Libraries
 import Vuetify from 'vuetify'
-import { VSelect, VTextField } from 'vuetify/lib'
-Vue.use(Vuetify)
 
-// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
-global.requestAnimationFrame = cb => cb()
+// Components
+import HintColorizer from '@/components/HintColorizer'
 
-describe('HintColorizer.vue', function () {
+// Utilities
+import { createLocalVue, mount } from '@vue/test-utils'
+
+describe('HintColorizer.vue', () => {
+  const localVue = createLocalVue()
   let vuetify
+
+  const selector = '.v-messages__message'
+  const findHintElement = wrapper => wrapper.find(selector)
 
   beforeEach(() => {
     vuetify = new Vuetify()
   })
 
-  it('should be able to apply classname', async function () {
-    const propsData = {
-      hintColor: 'orange'
-    }
-    const wrapper = mount(HintColorizer, {
+  const Component = {
+    template: `
+      <hint-colorizer :hint-color="hintColor">
+        <component
+          :is="component"
+          :error-messages="errorMessage"
+          hint="test"
+          persistent-hint
+        >
+        </component>
+      </hint-colorizer>
+      `,
+    props: {
+      component: {
+        type: String,
+        required: true
+      },
+      hintColor: {
+        type: String,
+        default: 'default'
+      },
+      errorMessage: {
+        type: String
+      }
+    },
+    components: { HintColorizer }
+  }
+
+  it('should be able to apply (theme-) color', async () => {
+    const wrapper = mount(Component, {
+      localVue,
       vuetify,
-      propsData
+      propsData: {
+        component: 'v-select',
+        hintColor: 'warning'
+      }
     })
-    const colorizerComponent = wrapper.find(HintColorizer).vm
-    expect(colorizerComponent.$el.className).to.contain('hintColor-orange')
+    const colorizerHintElement = findHintElement(wrapper)
+    const previousColor = colorizerHintElement.element.style.color
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
 
-    wrapper.setProps({ hintColor: 'cyan' })
+    await wrapper.setProps({
+      hintColor: 'primary'
+    })
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
+    expect(colorizerHintElement.element.style.color).not.toBe(previousColor) // check that color value has been changed
 
-    await Vue.nextTick()
-    expect(colorizerComponent.$el.className).to.contain('hintColor-cyan')
-    expect(colorizerComponent.$el.className).to.not.contain('hintColor-orange')
-
-    wrapper.setProps({ hintColor: 'default' })
-
-    await Vue.nextTick()
-    expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
+    await wrapper.setProps({
+      hintColor: 'default'
+    })
+    expect(colorizerHintElement.element.style.color).toBe('')
   })
 
-  it('should not overwrite error color class for v-text-field', async function () {
-    let data = () => {
-      return {
-        errorMessage: undefined
+  it('should not overwrite error color for v-text-field', async () => {
+    let wrapper
+    let colorizerHintElement
+    wrapper = mount(Component, {
+      localVue,
+      vuetify,
+      propsData: {
+        component: 'v-text-field',
+        hintColor: 'warning'
       }
-    }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage"></v-text-field></hint-colorizer>'
-    let wrapper = mount({ template, data, components: { HintColorizer } }, {
-      vuetify
     })
-    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.contain('hintColor-orange')
-
-    data = () => {
-      return {
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
+    wrapper = mount(Component, {
+      localVue,
+      vuetify,
+      propsData: {
+        component: 'v-text-field',
+        hintColor: 'warning',
         errorMessage: 'invalid'
       }
-    }
-    wrapper = mount({ template, data, components: { HintColorizer } }, {
-      vuetify
     })
-    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.not.contain('hintColor-orange')
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toBe('') // check that color has not been set
   })
 
-  it('should not overwrite error color class for v-select', async function () {
-    let data = () => {
-      return {
-        errorMessage: undefined
+  it('should not overwrite error color for v-select', async () => {
+    let wrapper
+    let colorizerHintElement
+    wrapper = mount(Component, {
+      localVue,
+      vuetify,
+      propsData: {
+        component: 'v-select',
+        hintColor: 'warning'
       }
-    }
-    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage"></v-select></hint-colorizer>'
-    let wrapper = mount({ template, data, components: { HintColorizer } }, {
-      vuetify
     })
-    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.contain('hintColor-orange')
-
-    data = () => {
-      return {
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toMatch(/rgb\(\d+, \d+, \d+\)/) // check that color has been replaced by color value from theme
+    wrapper = mount(Component, {
+      localVue,
+      vuetify,
+      propsData: {
+        component: 'v-select',
+        hintColor: 'warning',
         errorMessage: 'invalid'
       }
-    }
-    wrapper = mount({ template, data, components: { HintColorizer } }, {
-      vuetify
     })
-    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.not.contain('hintColor-orange')
-  })
-})
-
-describe('VSelect', function () {
-  let vuetify
-
-  beforeEach(() => {
-    vuetify = new Vuetify()
-  })
-
-  it('should be able to overwrite v-select hint color class', function () {
-    const hint = 'hint test'
-    const propsData = {
-      hint,
-      'persistent-hint': true
-    }
-    const wrapper = mount(VSelect, {
-      vuetify,
-      propsData
-    })
-    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
-    expect(hintElement.text()).to.equal(hint)
-  })
-})
-
-describe('VTextField', function () {
-  let vuetify
-
-  beforeEach(() => {
-    vuetify = new Vuetify()
-  })
-
-  it('should be able to overwrite v-text-field hint color class', function () {
-    const hint = 'hint test'
-    const propsData = {
-      hint,
-      'persistent-hint': true
-    }
-    const wrapper = mount(VTextField, {
-      vuetify,
-      propsData
-    })
-    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
-    expect(hintElement.text()).to.equal(hint)
+    colorizerHintElement = findHintElement(wrapper)
+    expect(colorizerHintElement.element.style.color).toBe('') // check that color has not been set
   })
 })

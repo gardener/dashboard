@@ -1,148 +1,416 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { fromKubeconfig } = require('../../lib/kubernetes-config')
-const _ = require('lodash')
-const { cache } = require('../../lib/cache')
+const { mockRequest } = require('@gardener-dashboard/request')
 
-module.exports = function ({ agent, k8s, auth }) {
-  /* eslint no-unused-expressions: 0 */
-  const name = 'bar'
-  const project = 'foo'
-  const namespace = `garden-${project}`
-  const members = k8s.readProjectMembers(namespace)
-  const metadata = {}
-  const username = `${name}@example.org`
-  const id = username
-  const user = auth.createUser({ id })
+describe('api', function () {
+  let agent
 
-  beforeEach(function () {
-    cache.projects.replace(k8s.projectList)
+  beforeAll(() => {
+    agent = createAgent()
   })
 
-  it('should return two project members', async function () {
-    const bearer = await user.bearer
-    k8s.stub.getMembers({ bearer, namespace })
-    const res = await agent
-      .get(`/api/namespaces/${namespace}/members`)
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql(members)
+  afterAll(() => {
+    return agent.close()
   })
 
-  it('should not return members but respond "not found"', async function () {
-    const bearer = await user.bearer
-    const namespace = 'garden-baz'
-    k8s.stub.getMembers({ bearer, namespace })
-    const res = await agent
-      .get(`/api/namespaces/${namespace}/members`)
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(404)
-    expect(res).to.be.json
-    expect(res.body.message).to.match(/not related to a gardener project/i)
+  beforeEach(() => {
+    mockRequest.mockReset()
   })
 
-  it('should return a service account', async function () {
-    const bearer = await user.bearer
-    const serviceAccountName = 'robot'
-    const name = `system:serviceaccount:${namespace}:${serviceAccountName}`
-    k8s.stub.getMember({ bearer, namespace, name })
-    const res = await agent
-      .get(`/api/namespaces/${namespace}/members/${name}`)
-      .set('cookie', await user.cookie)
+  describe('members', function () {
+    const namespace = 'garden-foo'
+    const user = fixtures.auth.createUser({ id: 'bar@example.org' })
 
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body.name).to.equal(name)
-    expect(res.body.kind).to.equal('ServiceAccount')
-    expect(res.body).to.have.property('kubeconfig')
-    expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes.external.foo.bar')
+    it('should return all project members, including service accounts without entry in project', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not return members but respond "not found"', async function () {
+      const namespace = 'garden-baz'
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(404)
+
+      expect(mockRequest).not.toBeCalled()
+
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
+    })
+
+    it('should return a service account', async function () {
+      const name = `system:serviceaccount:${namespace}:robot`
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should add a project member', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: 'baz@example.org',
+          roles: ['admin', 'owner']
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not add member that is already a project member', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: 'foo@example.org',
+          roles: ['admin']
+        })
+        .expect('content-type', /json/)
+        .expect(409)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
+    })
+
+    it('should update roles of a project member', async function () {
+      const name = 'bar@example.org'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          roles: ['newRole']
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a project member', async function () {
+      const name = 'bar@example.org'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .delete(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not delete a member that is not a project member', async function () {
+      const name = 'baz@example.org'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+
+      const res = await agent
+        .delete(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should create a service account without roles', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.create())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: `system:serviceaccount:${namespace}:foo`,
+          roles: []
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a service account', async function () {
+      const name = `system:serviceaccount:${namespace}:robot`
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .delete(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should add a service account and assign member roles', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: `system:serviceaccount:${namespace}:foo`,
+          roles: ['myrole'],
+          description: 'description'
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not create service account if already exists', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: `system:serviceaccount:${namespace}:robot`,
+          roles: ['myrole']
+        })
+        .expect('content-type', /json/)
+        .expect(409)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object)
+      })
+    })
+
+    it('should update roles of existing service account', async function () {
+      const name = `system:serviceaccount:${namespace}:robot`
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.patch())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          roles: ['myrole'],
+          description: 'newDescription'
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should add roles to existing service account without roles => add member', async function () {
+      const name = `system:serviceaccount:${namespace}:robot-nomember`
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          roles: ['myrole']
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should remove all roles of existing service account => delete member', async function () {
+      const name = `system:serviceaccount:${namespace}:robot`
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          roles: []
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should add a foreign service account as member to project', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: 'system:serviceaccount:othernamespace:fsa',
+          roles: ['myrole']
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not add a foreign service account without roles as member to project', async function () {
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members`)
+        .set('cookie', await user.cookie)
+        .send({
+          name: 'system:serviceaccount:othernamespace:fsa-noroles',
+          roles: []
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a foreign service account', async function () {
+      const name = 'system:serviceaccount:garden-baz:robot'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+
+      const res = await agent
+        .delete(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should rotate a service account secret', async function () {
+      const name = 'system:serviceaccount:garden-foo:robot'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+
+      await agent
+        .post(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'rotateSecret'
+        })
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+    })
   })
-
-  it('should add a project member', async function () {
-    const bearer = await user.bearer
-    const name = 'baz@example.org'
-    const roles = ['admin', 'owner']
-    k8s.stub.addMember({ bearer, namespace, name, roles })
-    const res = await agent
-      .post(`/api/namespaces/${namespace}/members`)
-      .set('cookie', await user.cookie)
-      .send({ metadata, name, roles })
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql(_.concat(members, { username: name, roles }))
-  })
-
-  it('should not add member that is already a project member', async function () {
-    const bearer = await user.bearer
-    const name = 'foo@example.org'
-    const roles = ['admin']
-    k8s.stub.addMember({ bearer, namespace, name, roles })
-    const res = await agent
-      .post(`/api/namespaces/${namespace}/members`)
-      .set('cookie', await user.cookie)
-      .send({ metadata, name })
-    expect(res).to.have.status(409)
-  })
-
-  it('should update roles of a project member', async function () {
-    const bearer = await user.bearer
-    const name = 'bar@example.org'
-    const roles = ['newRole']
-    k8s.stub.updateMember({ bearer, namespace, name, roles })
-    const res = await agent
-      .put(`/api/namespaces/${namespace}/members/${name}`)
-      .set('cookie', await user.cookie)
-      .send({ metadata, roles })
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    const member = _.find(res.body, { username: name })
-    expect(member).to.eql({ username: name, roles })
-  })
-
-  it('should delete a project member', async function () {
-    const bearer = await user.bearer
-    const name = 'bar@example.org'
-    k8s.stub.removeMember({ bearer, namespace, name })
-    const res = await agent
-      .delete(`/api/namespaces/${namespace}/members/${name}`)
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql(_.filter(members, ({ username }) => username !== name))
-  })
-
-  it('should not delete member that is not a project member', async function () {
-    const bearer = await user.bearer
-    const name = 'baz@example.org'
-    k8s.stub.removeMember({ bearer, namespace, name })
-    const res = await agent
-      .delete(`/api/namespaces/${namespace}/members/${name}`)
-      .set('cookie', await user.cookie)
-
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
-    expect(res.body).to.eql(members)
-  })
-}
+})

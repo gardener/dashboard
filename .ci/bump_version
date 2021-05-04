@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+if [ -z "${REPO_DIR}" ]; then
+  export REPO_DIR="$(readlink -f $(dirname ${0})/..)"
+else
+  export REPO_DIR="$(readlink -f "${REPO_DIR}")"
+fi
+
+# change current working directory
+WORK_DIR=$PWD
+cd "${REPO_DIR}"
+
+# get effective version
+if [ -z "${EFFECTIVE_VERSION}" ]; then
+    export EFFECTIVE_VERSION="$(cat "VERSION")"
+    if [ -z "${EFFECTIVE_VERSION}" ]; then
+      echo "Version not found"
+      exit 1
+    fi
+fi
+
+# install yarn
+if ! which yarn > /dev/null; then
+  apk update
+  apk add yarn
+fi
+
+# bump version
+yarn workspaces foreach --include "*/(frontend|backend)" version "${EFFECTIVE_VERSION}"
+
+# restore previous working directory
+cd "${WORK_DIR}"

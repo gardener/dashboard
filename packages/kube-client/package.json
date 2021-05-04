@@ -1,0 +1,103 @@
+{
+  "name": "@gardener-dashboard/kube-client",
+  "version": "1.0.0",
+  "description": "Kubernetes Client",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/kube-client"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "lint": "eslint --ext .js .",
+    "test": "jest",
+    "test-coverage": "yarn test --coverage"
+  },
+  "dependencies": {
+    "@gardener-dashboard/kube-config": "workspace:*",
+    "@gardener-dashboard/logger": "workspace:*",
+    "@gardener-dashboard/request": "workspace:*",
+    "delay": "^4.3.0",
+    "http-errors": "^1.8.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.19",
+    "mixwith": "^0.1.1",
+    "node-forge": "^0.10.0",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@gardener-dashboard/test-utils": "workspace:*",
+    "abort-controller": "^3.0.0",
+    "eslint": "^7.23.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "express": "^4.17.1",
+    "jest": "^26.6.3"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2021": true,
+      "node": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {
+      "fixtures": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 12
+    },
+    "rules": {
+      "no-console": "error"
+    }
+  },
+  "jest": {
+    "restoreMocks": true,
+    "verbose": true,
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "\\.pnp\\.[^\\/]+$"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 95,
+        "lines": 92,
+        "statements": 92
+      }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
+  },
+  "engines": {
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
+  }
+}

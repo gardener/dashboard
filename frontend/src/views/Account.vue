@@ -1,36 +1,26 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-6">
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="teal darken-2">
+          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list dense>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">{{icon}}</v-icon>
+                <v-icon color="primary">{{icon}}</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title class="label pb-2">User</v-list-item-title>
                 <v-list-item-subtitle class="content pb-2">
-                  <account-avatar :account-name="username" mail-to color="teal darken-2" :size="32"/>
+                  <account-avatar :account-name="username" mail-to :size="32"/>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
@@ -63,7 +53,7 @@ limitations under the License.
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">timelapse</v-icon>
+                <v-icon color="primary">mdi-timelapse</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title class="label">Session</v-list-item-title>
@@ -77,13 +67,13 @@ limitations under the License.
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dark dense class="teal darken-2">
+          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
-                <v-icon color="teal darken-2">mdi-key </v-icon>
+                <v-icon color="primary">mdi-key</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title>Token</v-list-item-title>
@@ -97,7 +87,7 @@ limitations under the License.
               <v-divider inset class="my-2"/>
               <v-list-item>
                 <v-list-item-avatar>
-                  <v-icon color="teal darken-2">insert_drive_file</v-icon>
+                  <v-icon color="primary">mdi-file</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
@@ -106,7 +96,7 @@ limitations under the License.
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="onDownload">
+                      <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
                         <v-icon>mdi-download</v-icon>
                       </v-btn>
                     </template>
@@ -114,12 +104,12 @@ limitations under the License.
                   </v-tooltip>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
-                  <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
+                  <copy-btn :clipboard-text="kubeconfigYaml" tooltip-text="Copy kubeconfig to clipboard"></copy-btn>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel">
+                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel" color="action-button">
                         <v-icon>{{expansionPanelIcon}}</v-icon>
                       </v-btn>
                     </template>
@@ -130,30 +120,30 @@ limitations under the License.
               <v-expand-transition>
                 <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
                   <v-card-text class="pt-0">
-                    <div class="grey--text text--darken-2">
+                    <div>
                       The downloaded <tt>kubeconfig</tt> will initiate
-                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="teal darken-2">
+                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
                         OIDC
                       </external-link>
                       authentication via <tt>kubelogin</tt>.
                       If not already done, please install <tt>kubelogin</tt>
                       according to the
-                      <external-link url="https://github.com/int128/kubelogin#setup" color="teal darken-2">
+                      <external-link url="https://github.com/int128/kubelogin#setup">
                         setup instructions
                       </external-link>.
                       For more information please refer to the <tt>kubelogin</tt> documentation.
                       <br>
                       Below you can configure and preview the <tt>kubeconfig</tt> file before download.
                     </div>
-                    <v-tabs slider-color="grey lighten-1" background-color="grey lighten-3" class="mt-2 elevation-1" color="black">
+                    <v-tabs slider-color="grey lighten-1" class="mt-2 elevation-1">
                       <v-tab>Configure</v-tab>
                       <v-tab>Preview</v-tab>
                       <v-tab-item class="pa-4">
-                        <v-row >
+                        <v-row>
                           <v-col cols="12">
                             <v-select
-                              color="teal darken-1"
-                              item-color="teal darken-1"
+                              color="primary"
+                              item-color="primary"
                               v-model="projectName"
                               :items="projectNames"
                               label="Project"
@@ -163,8 +153,8 @@ limitations under the License.
                           </v-col>
                           <v-col cols="12">
                             <v-select
-                              color="teal darken-1"
-                              item-color="teal darken-1"
+                              color="primary"
+                              item-color="primary"
                               v-model="grantType"
                               :items="grantTypes"
                               label="Grant Type"
@@ -174,7 +164,7 @@ limitations under the License.
                           </v-col>
                           <v-col cols="12">
                             <v-switch
-                              color="teal darken-1"
+                              color="primary"
                               v-model="skipOpenBrowser"
                               label="Skip Open Browser"
                               hint="If true, it does not open the browser on authentication"
@@ -184,7 +174,7 @@ limitations under the License.
                         </v-row>
                       </v-tab-item>
                       <v-tab-item>
-                        <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
+                        <code-block lang="yaml" :content="kubeconfigYaml" :show-copy-button="false"></code-block>
                       </v-tab-item>
                     </v-tabs>
                   </v-card-text>
@@ -199,26 +189,18 @@ limitations under the License.
 </template>
 
 <script>
-import CopyBtn from '@/components/CopyBtn'
-import CodeBlock from '@/components/CodeBlock'
-import ExternalLink from '@/components/ExternalLink'
-import download from 'downloadjs'
-import AccountAvatar from '@/components/AccountAvatar'
-import { getToken } from '@/utils/api'
 import { mapState, mapGetters } from 'vuex'
-import moment from 'moment-timezone'
+import download from 'downloadjs'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import get from 'lodash/get'
 
-// js-yaml
-import jsyaml from 'js-yaml'
-
-function safeDump (value) {
-  return jsyaml.safeDump(value, {
-    skipInvalid: true
-  })
-}
+import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
+import ExternalLink from '@/components/ExternalLink'
+import AccountAvatar from '@/components/AccountAvatar'
+import { getToken } from '@/utils/api'
+import moment from '@/utils/moment'
 
 export default {
   components: {
@@ -237,20 +219,11 @@ export default {
       grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
       idToken: undefined,
       showToken: false,
-      floatingButton: false,
-      showMessage: false
+      showMessage: false,
+      kubeconfigYaml: ''
     }
   },
-  async mounted () {
-    try {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      this.projectName = get(project, 'metadata.name', '')
-      const { data } = await getToken()
-      this.idToken = data.token
-    } catch (err) {
-      console.error(err.message)
-    }
-  },
+
   computed: {
     ...mapState([
       'user',
@@ -267,13 +240,13 @@ export default {
       'isKubeconfigEnabled'
     ]),
     expansionPanelIcon () {
-      return this.expansionPanel ? 'expand_less' : 'expand_more'
+      return this.expansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
     },
     expansionPanelTooltip () {
       return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'
     },
     icon () {
-      return this.isAdmin ? 'supervisor_account' : 'mdi-account'
+      return this.isAdmin ? 'mdi-account-supervisor' : 'mdi-account'
     },
     id () {
       return this.user.id
@@ -348,7 +321,7 @@ export default {
           args
         }
       }
-      return safeDump({
+      return {
         kind: 'Config',
         apiVersion: 'v1',
         clusters: [{
@@ -365,12 +338,33 @@ export default {
           user
         }],
         preferences: {}
-      })
+      }
     }
   },
   methods: {
-    onDownload () {
-      download(this.kubeconfig, this.kubeconfigFilename, 'text/yaml')
+    async onDownload () {
+      const kubeconfig = this.kubeconfigYaml
+      const filename = this.kubeconfigFilename
+      download(kubeconfig, filename, 'text/yaml')
+    },
+    async updateKubeconfigYaml (value) {
+      this.kubeconfigYaml = await this.$yaml.safeDump(value)
+    }
+  },
+  async mounted () {
+    try {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      this.projectName = get(project, 'metadata.name', '')
+      const { data } = await getToken()
+      this.idToken = data.token
+      this.updateKubeconfigYaml(this.kubeconfig)
+    } catch (err) {
+      console.error(err.message)
+    }
+  },
+  watch: {
+    kubeconfig (value) {
+      this.updateKubeconfigYaml(value)
     }
   }
 }
@@ -380,7 +374,6 @@ export default {
   .label {
     font-size: 14px !important;
     font-weight: 400 !important;
-    color: rgba(0,0,0,0.54) !important;
   }
   .content {
     font-size: 16px !important;

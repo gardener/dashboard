@@ -1,37 +1,24 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <secret-dialog
     :value=value
     :data="secretData"
-    :dataValid="valid"
+    :data-valid="valid"
     :secret="secret"
-    cloudProviderKind="alicloud"
-    color="grey darken-4"
-    infraIcon="alicloud-white"
-    backgroundSrc="/static/background_alicloud.svg"
-    createTitle="Add new Alibaba Cloud Secret"
-    replaceTitle="Replace Alibaba Cloud Secret"
+    cloud-provider-kind="alicloud"
+    create-title="Add new Alibaba Cloud Secret"
+    replace-title="Replace Alibaba Cloud Secret"
     @input="onInput">
 
-    <template v-slot:data-slot>
+    <template v-slot:secret-slot>
       <div>
         <v-text-field
-          color="grey darken-4"
+          color="primary"
           v-model="accessKeyId"
           ref="accessKeyId"
           label="Access Key Id"
@@ -44,7 +31,7 @@ limitations under the License.
       </div>
       <div>
         <v-text-field
-          color="grey darken-4"
+          color="primary"
           v-model="accessKeySecret"
           label="Access Key Secret"
           :error-messages="getErrorMessages('accessKeySecret')"
@@ -58,6 +45,28 @@ limitations under the License.
         ></v-text-field>
       </div>
     </template>
+    <template v-slot:help-slot>
+      <div>
+        <p>
+          Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
+          credentials for Alibaba Cloud Resource Access Management (RAM), use the
+          <a href="https://ram.console.aliyun.com/overview" target="_blank">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
+        </p>
+        <p>
+          Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
+          (<a href="https://www.alibabacloud.com/help/doc-detail/59643.htm" target="_blank">official
+          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
+        </p>
+        <p>
+          Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
+          (<a href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
+          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>). Alternatively, you can assign following permissions to the RAM
+          user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
+        </p>
+        <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      </div>
+    </template>
 
   </secret-dialog>
 
@@ -65,6 +74,7 @@ limitations under the License.
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import CodeBlock from '@/components/CodeBlock'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
@@ -82,7 +92,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    CodeBlock
   },
   props: {
     value: {
@@ -98,7 +109,36 @@ export default {
       accessKeyId: undefined,
       accessKeySecret: undefined,
       hideSecret: true,
-      validationErrors
+      validationErrors,
+      template: {
+        Statement: [
+          {
+            Action: 'vpc:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: 'ecs:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: 'slb:*',
+            Effect: 'Allow',
+            Resource: '*'
+          },
+          {
+            Action: [
+              'ram:GetRole',
+              'ram:CreateRole',
+              'ram:CreateServiceLinkedRole'
+            ],
+            Effect: 'Allow',
+            Resource: '*'
+          }
+        ],
+        Version: '1'
+      }
     }
   },
   validations () {

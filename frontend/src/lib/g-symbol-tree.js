@@ -1,28 +1,15 @@
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
-//
-// Licensed under the Apache License, Version 2.0 (the "License")
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
+// SPDX-License-Identifier: Apache-2.0
 
 import Vue from 'vue'
-import cloneDeep from 'lodash/cloneDeep'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import keys from 'lodash/keys'
 import compact from 'lodash/compact'
 import values from 'lodash/values'
 import SymbolTree from 'symbol-tree'
-const uuidv4 = require('uuid/v4')
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 export const PositionEnum = {
   TOP: 'top',
@@ -36,11 +23,24 @@ export class Leaf {
     this.uuid = uuid
     this.data = data
   }
+
+  toJSON () {
+    return {
+      uuid: this.uuid,
+      data: this.data
+    }
+  }
 }
 
 export class SplitpaneTree {
   constructor ({ horizontal = false } = {}) {
     this.horizontal = horizontal
+  }
+
+  toJSON () {
+    return {
+      horizontal: this.horizontal
+    }
   }
 }
 
@@ -140,16 +140,16 @@ export class GSymbolTree extends SymbolTree {
   }
 
   toJSON (parent) {
-    const clonedParent = cloneDeep(parent)
     if (!this.hasChildren(parent)) {
       return undefined
     }
+    const clonedParent = parent.toJSON()
     const items = []
     for (const child of this.childrenIterator(parent)) {
       if (child instanceof SplitpaneTree) {
         items.push(this.toJSON(child))
       } else {
-        items.push(cloneDeep(child))
+        items.push(child.toJSON())
       }
     }
     clonedParent.items = compact(items)

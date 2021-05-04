@@ -1,31 +1,21 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div>
-    <transition-group name="list">
-      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+    <transition-group name="list" class="alternate-row-background">
+      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
         <hibernation-schedule-event
           ref="scheduleEvents"
-          :scheduleEvent="scheduleEvent"
-          @removeScheduleEvent="onRemoveSchedule(index)"
-          @updateWakeUpTime="onUpdateWakeUpTime"
-          @updateHibernateTime="onUpdateHibernateTime"
-          @updateSelectedDays="onUpdateSelectedDays"
-          @updateLocation="onUpdateLocation"
+          :schedule-event="scheduleEvent"
+          @remove-schedule-event="onRemoveSchedule(index)"
+          @update-wake-up-time="onUpdateWakeUpTime"
+          @update-hibernate-time="onUpdateHibernateTime"
+          @update-selected-days="onUpdateSelectedDays"
+          @update-location="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
@@ -37,13 +27,13 @@ limitations under the License.
             outlined
             fab
             icon
-            color="cyan darken-2">
-            <v-icon class="cyan--text text--darken-2">add</v-icon>
+            color="primary">
+            <v-icon class="primary--text">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
             text
-            color="cyan darken-2">
+            color="primary">
             Add Hibernation Schedule
           </v-btn>
         </v-col>
@@ -53,7 +43,7 @@ limitations under the License.
       <v-col>
         <v-checkbox
           v-model="confirmNoSchedule"
-          color="cyan darken-2"
+          color="primary"
           class="my-0"
           :label="noScheduleCheckboxLabel"
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
@@ -69,32 +59,37 @@ limitations under the License.
     </v-row>
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
-        <v-alert type="warning" outlined>
-          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-          <div>{{hibernationPossibleMessage}}</div>
-        </v-alert>
+        <constraint-warning
+          :value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
+          type="hibernation">
+          {{hibernationPossibleMessage}}
+        </constraint-warning>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script>
-import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import { mapState } from 'vuex'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
+
+import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import ConstraintWarning from '@/components/ConstraintWarning'
+
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-import { mapState } from 'vuex'
-const uuidv4 = require('uuid/v4')
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
   name: 'hibernation-schedule',
   components: {
-    HibernationScheduleEvent
+    HibernationScheduleEvent,
+    ConstraintWarning
   },
   props: {
     userInterActionBus: {
@@ -122,7 +117,7 @@ export default {
   computed: {
     ...mapState([
       'cfg',
-      'localTimezone'
+      'location'
     ]),
     showNoScheduleCheckbox () {
       return purposeRequiresHibernationSchedule(this.purpose) &&
@@ -143,6 +138,7 @@ export default {
         })
         this.setParsedSchedules(parsedScheduleEvents)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn(error)
         this.parseError = true
       }
@@ -151,10 +147,10 @@ export default {
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
-        crontabBlock.location = this.localTimezone
+        crontabBlock.location = this.location
         const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
-          parsedScheduleEvent.location = this.localTimezone
+          parsedScheduleEvent.location = this.location
         })
         return parsedScheduleEvents
       })
@@ -186,7 +182,7 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
-      const location = this.localTimezone
+      const location = this.location
       const valid = false
       this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false

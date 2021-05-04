@@ -1,26 +1,16 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div>
-    <div class="subtitle-1 pt-4 ml-3">{{title}}</div>
+    <div class="text-subtitle-1 pt-4 ml-3">{{title}}</div>
     <v-list class="pt-0" two-line>
       <v-list-item v-if="selectable || osUpdates">
         <v-list-item-action>
-          <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates"></v-checkbox>
+          <v-checkbox v-if="selectable" color="primary" v-model="osUpdates"></v-checkbox>
           <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
         </v-list-item-action>
         <v-list-item-content>
@@ -33,7 +23,7 @@ limitations under the License.
       </v-list-item>
       <v-list-item v-if="selectable || k8sUpdates">
         <v-list-item-action>
-          <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
+          <v-checkbox v-if="selectable" color="primary" v-model="k8sUpdates"></v-checkbox>
           <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
         </v-list-item-action>
         <v-list-item-content>

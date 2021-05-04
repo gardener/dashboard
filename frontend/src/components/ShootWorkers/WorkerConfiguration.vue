@@ -1,34 +1,25 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="workersValid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    maxWidth="760"
+    max-width="760"
     confirmRequired
-    confirmMessage="Please confirm changes to the worker groups as this may affect your workload"
+    confirm-message="Please confirm changes to the worker groups as this may affect your workload"
     caption="Configure Workers"
     disable-confirm-input-focus>
     <template v-slot:actionComponent>
       <manage-workers
-      ref="manageWorkers"
-      @valid="onWorkersValid"
+        @valid="onWorkersValid"
+        ref="manageWorkers"
+        v-on="$manageWorkers.hooks"
       ></manage-workers>
     </template>
   </action-button-dialog>
@@ -36,13 +27,14 @@ limitations under the License.
 
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { patchShootProvider } from '@/utils/api'
-import { shootItem } from '@/mixins/shootItem'
+import shootItem from '@/mixins/shootItem'
+import asyncRef from '@/mixins/asyncRef'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
+const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
 
 export default {
   name: 'worker-configuration',
@@ -61,19 +53,23 @@ export default {
       workers: undefined
     }
   },
-  mixins: [shootItem],
+  mixins: [
+    shootItem,
+    asyncRef('manageWorkers')
+  ],
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
+      await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.updateConfiguration()
+        await this.updateConfiguration()
       }
     },
     async updateConfiguration () {
       try {
-        const workers = this.$refs.manageWorkers.getWorkers()
-        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
+        const vm = await this.$manageWorkers.vm()
+        const workers = vm.getWorkers()
+        const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
         const data = { workers }
         if (zonesNetworkConfiguration) {
           data.infrastructureConfig = {
@@ -91,7 +87,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    reset () {
+    async reset () {
       this.workersValid = false
 
       const workers = cloneDeep(this.shootWorkerGroups)
@@ -100,7 +96,8 @@ export default {
       const region = this.shootRegion
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
+
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
     },
     onWorkersValid (value) {
       this.workersValid = value

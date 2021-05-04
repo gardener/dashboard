@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
@@ -21,8 +11,8 @@ limitations under the License.
         <v-row no-gutters class="flex-column">
           <v-col class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
-                <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
+              <v-toolbar flat dense :color="toolbarColor">
+                <v-toolbar-title class="text-subtitle-1">Details</v-toolbar-title>
               </v-toolbar>
               <v-list>
                 <v-list-item>
@@ -36,7 +26,7 @@ limitations under the License.
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <copy-btn :color="color" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
+                    <copy-btn color="action-button" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
@@ -48,7 +38,7 @@ limitations under the License.
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="description"
                         :save="updateDescription"
                       />
@@ -66,7 +56,13 @@ limitations under the License.
                       <v-list-item-subtitle>Stale Project Information</v-list-item-subtitle>
                       <v-list-item-title class="d-flex align-center pt-1">
                         <span v-if="staleAutoDeleteTimestamp">
-                          This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
+                          This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project on
+                          <v-tooltip right>
+                            <template v-slot:activator="{ on }">
+                              <span class="font-weight-bold" v-on="on">{{staleAutoDeleteDate}}</span>
+                            </template>
+                            <time-string :date-time="staleAutoDeleteTimestamp" mode="future"></time-string>
+                          </v-tooltip>
                         </span>
                         <span v-else>
                           This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
@@ -81,17 +77,17 @@ limitations under the License.
                     <v-icon :color="color">mdi-account-cog-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
-                    <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
+                    <v-list-item-subtitle>Owner</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
-                        :color="color"
-                        :value="technicalContact"
+                        color="action-button"
+                        :value="owner"
                         :items="userList"
-                        :rules="[rules.technicalContact]"
-                        placeholder="Select the technical contact"
+                        :rules="[rules.owner]"
+                        placeholder="Select the owner"
                         no-data-text="No project member available"
-                        :save="updateTechnicalContact"
+                        :save="updateOwner"
                       ></editable-account>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -104,7 +100,7 @@ limitations under the License.
                   <v-list-item-content>
                     <v-list-item-subtitle>Created By</v-list-item-subtitle>
                     <v-list-item-title>
-                      <account-avatar :account-name="createdBy" mail-to :color="color"></account-avatar>
+                      <account-avatar :account-name="createdBy" mail-to></account-avatar>
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -117,9 +113,9 @@ limitations under the License.
                     <v-list-item-title>
                       <v-tooltip right>
                         <template v-slot:activator="{ on }">
-                          <span v-on="on" class="subtitle-1">{{createdAt}}</span>
+                          <span v-on="on" class="text-subtitle-1">{{createdAt}}</span>
                         </template>
-                        <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
+                        <time-string :date-time="creationTimestamp" :point-in-time="-1"></time-string>
                       </v-tooltip>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -134,14 +130,14 @@ limitations under the License.
                     <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="purpose"
                         :save="updatePurpose"
                       />
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-                <template v-if="slaDescriptionCompiledMarkdown">
+                <template v-if="slaDescriptionHtml">
                   <v-divider inset/>
                   <v-list-item>
                     <v-list-item-avatar>
@@ -149,7 +145,51 @@ limitations under the License.
                     </v-list-item-avatar>
                     <v-list-item-content>
                       <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionCompiledMarkdown"></v-list-item-title>
+                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionHtml"></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
+                <template v-if="shootCustomFieldList">
+                  <v-divider inset/>
+                  <v-list-item>
+                    <v-list-item-avatar>
+                      <v-icon :color="color">mdi-playlist-star</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-subtitle>Custom Fields for Shoots</v-list-item-subtitle>
+                      <v-list-item-title class="d-flex flex-wrap align-center pt-1">
+                        <shoot-custom-field
+                          class="mr-2 mb-2"
+                          v-for="{
+                            key,
+                            name,
+                            path,
+                            icon,
+                            tooltip,
+                            defaultValue,
+                            showColumn,
+                            weight,
+                            columnSelectedByDefault,
+                            showDetails,
+                            searchable,
+                            sortable
+                          } in shootCustomFieldList"
+                          :color="color"
+                          :key="key"
+                          :name="name"
+                          :path="path"
+                          :icon="icon"
+                          :tooltip="tooltip"
+                          :default-value="defaultValue"
+                          :show-column="showColumn"
+                          :weight="weight"
+                          :column-selected-by-default="columnSelectedByDefault"
+                          :show-details="showDetails"
+                          :searchable="searchable"
+                          :sortable="sortable"
+                        ></shoot-custom-field>
+                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text--disabled">Not defined</span>
+                      </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </template>
@@ -162,8 +202,8 @@ limitations under the License.
         <v-row no-gutters class="flex-column">
           <v-col v-if="canDeleteProject" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
-                <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
+              <v-toolbar flat dense :color="toolbarColor">
+                <v-toolbar-title class="text-subtitle-1">Lifecycle</v-toolbar-title>
               </v-toolbar>
               <v-list>
                 <v-list-item>
@@ -177,7 +217,7 @@ limitations under the License.
                     <v-tooltip v-if="canDeleteProject" top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                          <v-btn color="action-button" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
                             <v-icon>mdi-delete</v-icon>
                           </v-btn>
                         </div>
@@ -191,8 +231,8 @@ limitations under the License.
           </v-col>
           <v-col v-if="costObjectSettingEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
-                <v-toolbar-title class="subtitle-1">Billing</v-toolbar-title>
+              <v-toolbar flat dense :color="toolbarColor">
+                <v-toolbar-title class="text-subtitle-1">Billing</v-toolbar-title>
               </v-toolbar>
               <v-list>
                 <v-list-item>
@@ -204,14 +244,14 @@ limitations under the License.
                     <v-list-item-title>
                       <editable-text
                         :read-only="!canPatchProject"
-                        :color="color"
+                        color="action-button"
                         :value="costObject"
                         :rules="[rules.costObject]"
                         :save="updateCostObject"
                       >
-                        <template v-if="costObjectDescriptionCompiledMarkdown" v-slot:info>
+                        <template v-if="costObjectDescriptionHtml" v-slot:info>
                           <v-alert icon="mdi-information-outline" dense text tile :color="color" class="mb-0" >
-                            <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                            <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"></div>
                           </v-alert>
                         </template>
                       </editable-text>
@@ -223,8 +263,8 @@ limitations under the License.
           </v-col>
           <v-col v-if="isKubeconfigEnabled" class="pa-3">
             <v-card>
-              <v-toolbar flat dark dense :color="color">
-                <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
+              <v-toolbar flat dense :color="toolbarColor">
+                <v-toolbar-title class="text-subtitle-1">Access</v-toolbar-title>
               </v-toolbar>
               <v-list>
                 <v-list-item>
@@ -235,7 +275,7 @@ limitations under the License.
                     <v-list-item-title>Command Line Interface Access</v-list-item-title>
                     <v-list-item-subtitle class="wrap-text">
                       Go to
-                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }" :class="textColor">
+                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
                         My Account
                       </router-link>
                       to download the <tt>kubeconfig</tt> for this project.
@@ -250,17 +290,16 @@ limitations under the License.
     </v-row>
 
     <g-dialog
-      defaultColor="red"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
+      :error-message.sync="errorMessage"
+      :detailed-error-message.sync="detailedErrorMessage"
       ref="gDialog">
       <template v-slot:caption>
         Confirm Delete
       </template>
       <template v-slot:message>
-        Are you sure to delete the project <b>{{projectName}}</b>?
+        Are you sure to delete the project <span class="font-weight-bold">{{projectName}}</span>?
         <br />
-        <i class="red--text">The operation can not be undone.</i>
+        <span class="error--text font-weight-bold">The operation can not be undone.</span>
       </template>
     </g-dialog>
 
@@ -275,8 +314,9 @@ import EditableAccount from '@/components/editable/EditableAccount'
 import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
+import ShootCustomField from '@/components/ShootCustomField'
 import { errorDetailsFromError } from '@/utils/error'
-import { compileMarkdown, getProjectDetails, textColor, isServiceAccount, gravatarUrlGeneric } from '@/utils'
+import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -290,23 +330,25 @@ export default {
     EditableText,
     AccountAvatar,
     GDialog,
-    TimeString
+    TimeString,
+    ShootCustomField
   },
   data () {
     return {
-      color: 'blue-grey darken-2',
+      color: 'primary',
+      toolbarColor: 'toolbar-background toolbar-title--text',
       edit: false,
-      editTechnicalContact: false,
-      technicalContactMessages: [],
+      editOwner: false,
+      ownerMessages: [],
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       rules: {
-        technicalContact: value => {
+        owner: value => {
           if (!value) {
-            return 'Technical Contact is required'
+            return 'Owner is required'
           }
           if (!includes(this.userList, value)) {
-            return 'Technical Contact must be a project member'
+            return 'Owner must be a project member'
           }
           return true
         },
@@ -333,7 +375,8 @@ export default {
       'canDeleteProject',
       'projectFromProjectList',
       'costObjectSettings',
-      'isKubeconfigEnabled'
+      'isKubeconfigEnabled',
+      'shootCustomFieldList'
     ]),
     project () {
       return this.projectFromProjectList
@@ -344,12 +387,12 @@ export default {
     userList () {
       const members = new Set()
       for (const { username } of this.memberList) {
-        if (!isServiceAccount(username)) {
+        if (!isServiceAccountUsername(username)) {
           members.add(username)
         }
       }
-      if (this.technicalContact) {
-        members.add(this.technicalContact)
+      if (this.owner) {
+        members.add(this.owner)
       }
       return Array.from(members)
     },
@@ -366,18 +409,18 @@ export default {
     costObjectErrorMessage () {
       return get(this.costObjectSettings, 'errorMessage')
     },
-    costObjectDescriptionCompiledMarkdown () {
+    costObjectDescriptionHtml () {
       const description = get(this.costObjectSettings, 'description')
-      return compileMarkdown(description)
+      return transformHtml(description)
     },
     projectName () {
       return this.projectDetails.projectName
     },
-    technicalContact () {
-      return this.projectDetails.technicalContact
+    owner () {
+      return this.projectDetails.owner
     },
-    technicalContactAvatarUrl () {
-      return gravatarUrlGeneric(this.technicalContact, 48)
+    ownerAvatarUrl () {
+      return gravatarUrlGeneric(this.owner, 48)
     },
     costObject () {
       return this.projectDetails.costObject
@@ -403,20 +446,20 @@ export default {
     staleAutoDeleteTimestamp () {
       return this.projectDetails.staleAutoDeleteTimestamp
     },
+    staleAutoDeleteDate () {
+      return getDateFormatted(this.staleAutoDeleteTimestamp)
+    },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0
     },
     sla () {
       return this.cfg.sla || {}
     },
-    slaDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.sla.description, this.color)
+    slaDescriptionHtml () {
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title
-    },
-    textColor () {
-      return textColor(this.color)
     }
   },
   methods: {
@@ -424,13 +467,13 @@ export default {
       'patchProject',
       'deleteProject'
     ]),
-    onEditTechnicalContact () {
-      this.editTechnicalContact = !this.editTechnicalContact
-      if (this.editTechnicalContact) {
-        this.$nextTick(() => this.$refs.technicalContact.activateMenu())
+    onEditOwner () {
+      this.editOwner = !this.editOwner
+      if (this.editOwner) {
+        this.$nextTick(() => this.$refs.owner.activateMenu())
       }
     },
-    updateTechnicalContact (value) {
+    updateOwner (value) {
       return this.updateProperty('owner', value)
     },
     updateDescription (value) {

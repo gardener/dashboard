@@ -1,17 +1,7 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 import get from 'lodash/get'
@@ -22,18 +12,20 @@ import find from 'lodash/find'
 import { mapGetters } from 'vuex'
 
 import {
-  getDateFormatted,
+  getTimestampFormatted,
   getCreatedBy,
   isShootStatusHibernated,
   isReconciliationDeactivated,
   getProjectName,
-  isTypeDelete
+  isTypeDelete,
+  isTruthyValue
 } from '@/utils'
 
 export const shootItem = {
   computed: {
     ...mapGetters([
-      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion'
+      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
+      'isSeedUnreachableByName'
     ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
@@ -49,13 +41,13 @@ export const shootItem = {
       const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
       const deletionTimestamp = this.shootDeletionTimestamp
 
-      return !!deletionTimestamp && confirmation === 'true'
+      return !!deletionTimestamp && isTruthyValue(confirmation)
     },
     shootCreatedBy () {
       return getCreatedBy(this.shootMetadata)
     },
     shootCreatedAt () {
-      return getDateFormatted(this.shootMetadata.creationTimestamp)
+      return getTimestampFormatted(this.shootMetadata.creationTimestamp)
     },
     shootCreationTimestamp () {
       return this.shootMetadata.creationTimestamp
@@ -156,9 +148,20 @@ export const shootItem = {
     canLinkToSeed () {
       return get(this.shootItem, 'info.canLinkToSeed', false)
     },
-
     isShootLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)
+    },
+    isShootLastOperationTypeControlPlaneMigrating () {
+      return this.shootLastOperation.type === 'Migrate' || this.shootLastOperation.type === 'Restore'
+    },
+    shootLastOperationTypeControlPlaneMigrationMessage () {
+      switch (this.shootLastOperation.type) {
+        case 'Migrate':
+          return 'Deleting Resources on old Seed'
+        case 'Restore':
+          return 'Creating Resources on new Seed'
+      }
+      return ''
     },
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
@@ -178,14 +181,14 @@ export const shootItem = {
     shootSeedName () {
       return get(this.shootSpec, 'seedName')
     },
+    isSeedUnreachable () {
+      return this.isSeedUnreachableByName(this.shootSeedName)
+    },
     shootStatusSeedName () {
       return get(this.shootItem, 'status.seed')
     },
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
-    },
-    isControlPlaneMigrating () {
-      return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName
     },
     hibernationPossibleConstraint () {
       const constraints = get(this.shootItem, 'status.constraints')
@@ -197,6 +200,17 @@ export const shootItem = {
     },
     hibernationPossibleMessage () {
       return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
+    },
+    maintenancePreconditionSatisfiedConstraint () {
+      const constraints = get(this.shootItem, 'status.constraints')
+      return find(constraints, ['type', 'MaintenancePreconditionsSatisfied'])
+    },
+    isMaintenancePreconditionSatisfied () {
+      const status = get(this.maintenancePreconditionSatisfiedConstraint, 'status', 'True')
+      return status !== 'False'
+    },
+    maintenancePreconditionSatisfiedMessage () {
+      return get(this.maintenancePossibleConstraint, 'message', 'It may not be safe to trigger maintenance for this cluster')
     }
   },
   methods: {
@@ -204,7 +218,9 @@ export const shootItem = {
       if (!this.isShootActionsDisabledForPurpose) {
         return tooltip
       }
-      return 'Actions disabled for cluster purpose infrastructure'
+      return 'Actions disabled for cluster with purpose infrastructure'
     }
   }
 }
+
+export default shootItem

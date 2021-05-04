@@ -1,30 +1,62 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
 const _ = require('lodash')
-const config = require('./config')
 const logger = require('./logger')
-const { isHttpError } = require('./kubernetes-client')
-const { NotFound, InternalServerError } = require('./errors')
+const markdown = require('./markdown')
+const { NotFound, InternalServerError, isHttpError } = require('http-errors')
+const { STATUS_CODES } = require('http')
 
-function frontendConfig (req, res, next) {
-  const frontendConfig = {}
-  res.json(Object.assign(frontendConfig, config.frontend))
+function frontendConfig (config) {
+  const converter = markdown.createConverter()
+  const convertAndSanitize = (obj, key) => {
+    if (obj[key]) {
+      obj[key] = converter.makeSanitizedHtml(obj[key])
+    }
+  }
+
+  const frontendConfig = _.cloneDeep(config.frontend)
+  const {
+    alert = {},
+    costObject = {},
+    sla = {},
+    addonDefinition = {},
+    accessRestriction: {
+      items = []
+    } = {}
+  } = frontendConfig
+
+  convertAndSanitize(alert, 'message')
+  convertAndSanitize(costObject, 'description')
+  convertAndSanitize(sla, 'description')
+  convertAndSanitize(addonDefinition, 'description')
+
+  for (const item of items) {
+    const {
+      display = {},
+      input = {},
+      options = []
+    } = item
+    convertAndSanitize(display, 'description')
+    convertAndSanitize(input, 'description')
+    for (const option of options) {
+      const {
+        display = {},
+        input = {}
+      } = option
+      convertAndSanitize(display, 'description')
+      convertAndSanitize(input, 'description')
+    }
+  }
+
+  return (req, res, next) => {
+    res.json(frontendConfig)
+  }
 }
 
 function noCache () {
@@ -52,47 +84,37 @@ function notFound (req, res, next) {
 }
 
 function errorToLocals (err, req) {
-  const message = err.message
-  let reason = err.reason || 'Internal Error'
-  const name = err.name
-  const stack = err.stack
-
-  const error = req.app.get('env') === 'development' ? { name, stack } : { name }
-  let status = 500
-  if (isHttpError(err) && err.response) {
-    status = err.response.statusCode
-    reason = err.response.statusMessage
-  } else if (_.isInteger(err.code)) {
-    status = err.code
-  } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
-    status = parseInt(err.code)
-  } else {
-    logger.error(`Error with invalid code ${err.code}:`, err.message, err.stack)
+  const { message, name, stack } = err
+  const details = req.app.get('env') !== 'production'
+    ? { name, stack }
+    : { name }
+  let code = 500
+  let reason = STATUS_CODES[code]
+  if (isHttpError(err)) {
+    code = err.statusCode
+    reason = STATUS_CODES[code]
   }
-  if (status < 100 || status >= 600) {
-    status = 500
+  if (code < 100 || code >= 600) {
+    code = 500
   }
-  if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
-    status = 401
-    reason = 'Authentication Error'
-  }
-  if (status >= 500) {
+  const status = code < 400 ? 'Success' : 'Failure'
+  if (code >= 500) {
     logger.error(err.message, err.stack)
   }
-  return { message, reason, status, error }
+  return { code, reason, message, status, details }
 }
 
 function sendError (err, req, res, next) {
   const locals = errorToLocals(err, req)
-  res.status(locals.status).send(locals)
+  res.status(locals.code).send(locals)
 }
 
 function renderError (err, req, res, next) {
   const locals = errorToLocals(err, req)
 
   res.format({
-    json: () => res.status(locals.status).send(locals),
-    default: () => res.status(locals.status).send(ErrorTemplate(locals))
+    json: () => res.status(locals.code).send(locals),
+    default: () => res.status(locals.code).send(ErrorTemplate(locals))
   })
 }
 
@@ -117,8 +139,8 @@ const ErrorTemplate = _.template(`<!doctype html>
 </head>
 <body>
   <h1><%= message %></h1>
-  <h2><%= status %></h2>
-  <% if (error.stack) { %><pre><%= error.stack %></pre><% } %>
+  <h2><%= code %></h2>
+  <% if (details.stack) { %><pre><%= details.stack %></pre><% } %>
 </body>
 </html>`)
 

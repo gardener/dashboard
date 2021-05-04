@@ -2,24 +2,38 @@
   "name": "gardener-dashboard",
   "description": "Gardener Dashboard",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "packages/*",
+    "charts"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/gardener/dashboard"
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "."
   },
   "contributors": [
     "Gross, Lukas <lukas.gross@sap.com>",
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
-  "scripts": {
-    "postinstall": "yarn --cwd frontend install && yarn --cwd backend install",
-    "start": "yarn --cwd frontend build && yarn --cwd backend start",
-    "lint": "yarn --cwd backend lint && yarn --cwd frontend lint",
-    "test": "yarn --cwd backend test:coverage && yarn --cwd frontend test:unit",
-    "serve": "concurrently --raw --kill-others  --handle-input \"yarn --cwd backend serve\" \"yarn --cwd frontend serve\""
+  "dependenciesMeta": {
+    "deasync": {
+      "built": false
+    },
+    "fsevents": {
+      "built": false
+    }
   },
   "devDependencies": {
-    "concurrently": "^5.0.0"
+    "eslint": "^7.23.0",
+    "jest": "^26.6.3",
+    "node-gyp": "latest"
+  },
+  "engines": {
+    "node": "^15.11.0",
+    "yarn": "^2.4.1"
   }
 }

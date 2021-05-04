@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -20,7 +10,7 @@ limitations under the License.
       <v-col cols="3">
         <v-text-field
           ref="name"
-          color="cyan darken-2"
+          color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
           v-model="name"
@@ -31,10 +21,10 @@ limitations under the License.
           ></v-text-field>
       </v-col>
       <v-col cols="3">
-        <hint-colorizer hintColor="orange">
+        <hint-colorizer hint-color="warning">
           <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
+            color="primary"
+            item-color="primary"
             label="Kubernetes Version"
             item-text="version"
             item-value="version"
@@ -59,34 +49,39 @@ limitations under the License.
       </v-col>
       <v-col cols="3">
         <purpose
-          ref="purpose"
           :secret="secret"
-          @updatePurpose="onUpdatePurpose"
-          @valid="onPurposeValid">
-        </purpose>
+          @update-purpose="onUpdatePurpose"
+          @valid="onPurposeValid"
+          ref="purpose"
+          v-on="$purpose.hooks"
+        ></purpose>
       </v-col>
     </v-row>
-    <v-row  v-if="slaDescriptionCompiledMarkdown">
+    <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
-        <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
-        <p class="subtitle-1" v-html="slaDescriptionCompiledMarkdown" />
+        <label>{{slaTitle}}</label>
+        <p class="text-subtitle-1" v-html="slaDescriptionHtml" />
       </v-col>
     </v-row>
 </v-container>
 </template>
 
 <script>
-
-import HintColorizer from '@/components/HintColorizer'
-import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
-import { required, maxLength } from 'vuelidate/lib/validators'
-import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import join from 'lodash/join'
 import filter from 'lodash/filter'
+import { required, maxLength } from 'vuelidate/lib/validators'
+
+import HintColorizer from '@/components/HintColorizer'
+
+import asyncRef from '@/mixins/asyncRef'
+
+import { getValidationErrors, transformHtml, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
+import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+
+const Purpose = () => import('@/components/Purpose')
 
 const validationErrors = {
   name: {
@@ -108,6 +103,9 @@ export default {
     HintColorizer,
     Purpose
   },
+  mixins: [
+    asyncRef('purpose')
+  ],
   props: {
     userInterActionBus: {
       type: Object,
@@ -169,8 +167,8 @@ export default {
     sla () {
       return this.cfg.sla || {}
     },
-    slaDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.sla.description)
+    slaDescriptionHtml () {
+      return transformHtml(this.sla.description)
     },
     slaTitle () {
       return this.sla.title
@@ -239,14 +237,14 @@ export default {
         purpose: this.purpose
       }
     },
-    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
+    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
       this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.updateK8sMaintenance = updateK8sMaintenance
 
-      this.$refs.purpose.setPurpose(purpose)
+      await this.$purpose.dispatch('setPurpose', purpose)
 
       this.validateInput()
     },
@@ -264,7 +262,7 @@ export default {
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.$refs.purpose.setDefaultPurpose()
+      this.$purpose.dispatch('setDefaultPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName

@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -27,12 +17,11 @@ limitations under the License.
             rounded
             @click="showUpdateDialog"
             :outlined="!k8sPatchAvailable"
-            :dark="k8sPatchAvailable"
             :ripple="canUpdate"
             depressed
-            color="cyan darken-2"
+            color="primary"
           >
-            <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
+            <v-icon small v-if="availableK8sUpdates">mdi-menu-up</v-icon>
             {{shootK8sVersion}}
           </v-btn>
           <v-btn
@@ -40,6 +29,7 @@ limitations under the License.
             @click="showUpdateDialog"
             icon
             :disabled="!canUpdate"
+            color="action-button"
           >
             <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
@@ -49,25 +39,23 @@ limitations under the License.
       <span>{{tooltipText}}</span>
     </v-tooltip>
     <g-dialog
-      :confirmValue="confirm"
-      confirmButtonText="Update"
-      :confirmDisabled="selectedVersionInvalid"
-      :errorMessage.sync="updateErrorMessage"
-      :detailedErrorMessage.sync="updateDetailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
+      :confirm-value="confirm"
+      confirm-button-text="Update"
+      :confirm-disabled="selectedVersionInvalid"
+      :error-message.sync="updateErrorMessage"
+      :detailed-error-message.sync="updateDetailedErrorMessage"
       ref="gDialog"
       >
       <template v-slot:caption>Update Cluster</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
       <template v-slot:message>
         <shoot-version-update
-          :availableK8sUpdates="availableK8sUpdates"
-          :currentK8sVersion="kubernetesVersion"
-          @selectedVersion="onSelectedVersion"
-          @selectedVersionType="onSelectedVersionType"
-          @selectedVersionInvalid="onSelectedVersionInvalid"
-          @confirmRequired="onConfirmRequired"
+          :available-k8s-updates="availableK8sUpdates"
+          :current-k8s-version="kubernetesVersion"
+          @selected-version="onSelectedVersion"
+          @selected-version-type="onSelectedVersionType"
+          @selected-version-invalid="onSelectedVersionInvalid"
+          @confirm-required="onConfirmRequired"
           ref="shootVersionUpdate"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
@@ -85,13 +73,13 @@ limitations under the License.
           <p>
             Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           </p>
-          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+          <i class="warning--text">This action cannot be undone.</i>
         </template>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
           <p>
             Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
           </p>
-          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+          <i class="warning--text">This action cannot be undone.</i>
         </template>
       </template>
     </g-dialog>

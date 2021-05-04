@@ -1,43 +1,32 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <div class="d-flex flex-column fill-height position-relative">
-    <div v-if="!clean && !!modificationWarning" class="flex-shrink-1">
-      <v-alert
-        tile
+    <div v-if="!clean" class="flex-shrink-1">
+      <g-alert
         type="warning"
-        dismissible
-        color="cyan darken-2"
+        :identifier="alertBannerIdentifier"
+        color="primary"
         transition="slide-y-transition"
-        class="ma-0"
-        :value="modificationWarning"
-        @input="onDismissModificationWarning"
       >
-        <slot name="modificationWarning"></slot>
-      </v-alert>
+        <template v-slot:message>
+          <slot name="modificationWarning"></slot>
+        </template>
+      </g-alert>
     </div>
     <div ref="container" :style="containerStyles"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
-      <g-alert
+      <g-message
         color="error"
         class="ma-0"
         :message.sync="errorMessageInternal"
-        :detailedMessage.sync="detailedErrorMessageInternal"
-      ></g-alert>
+        :detailed-message.sync="detailedErrorMessageInternal"
+        tile
+      ></g-message>
     </div>
     <v-divider></v-divider>
     <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
@@ -99,9 +88,22 @@ limitations under the License.
               tooltip-text='Copy'
               :user-feedback="false"
               @copy="onCopy"
-              @copyFailed="onCopyFailed"
+              @copy-failed="onCopyFailed"
             >
             </copy-btn>
+          </div>
+          <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
+                    <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+            </v-tooltip>
           </div>
           <v-divider vertical></v-divider>
         </div>
@@ -129,6 +131,7 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import GMessage from '@/components/GMessage'
 import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
@@ -143,6 +146,7 @@ import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/seti.css'
 
 // lodash
 import get from 'lodash/get'
@@ -151,27 +155,19 @@ import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
 
-// js-yaml
-import jsyaml from 'js-yaml'
-
-function safeDump (value) {
-  return jsyaml.safeDump(value, {
-    skipInvalid: true
-  })
-}
-
 export default {
   components: {
     CopyBtn,
+    GMessage,
     GAlert
   },
   name: 'shoot-editor',
   props: {
+    alertBannerIdentifier: {
+      type: String
+    },
     shootContent: {
       type: Object
-    },
-    modificationWarning: {
-      type: Boolean
     },
     errorMessage: {
       type: String
@@ -207,21 +203,27 @@ export default {
         property: undefined,
         type: undefined,
         description: undefined
-      }
+      },
+      showManagedFields: false
     }
   },
   mixins: [shootItem],
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'darkTheme'
     ]),
     ...mapGetters([
       'canPatchShoots'
     ]),
     value () {
-      const data = cloneDeep(this.shootContent)
+      let data = cloneDeep(this.shootContent)
       if (data) {
-        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        if (!this.showManagedFields) {
+          delete data.metadata.managedFields
+        }
+        return data
       }
       return undefined
     },
@@ -247,7 +249,7 @@ export default {
         return this.errorMessage
       },
       set (value) {
-        this.$emit('update:errorMessage', value)
+        this.$emit('update:error-message', value)
       }
     },
     detailedErrorMessageInternal: {
@@ -255,7 +257,7 @@ export default {
         return this.detailedErrorMessage
       },
       set (value) {
-        this.$emit('update:detailedErrorMessage', value)
+        this.$emit('update:detailed-error-message', value)
       }
     },
     isReadOnly () {
@@ -268,9 +270,6 @@ export default {
       const namespace = this.namespace
       const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
-    },
-    onDismissModificationWarning () {
-      this.$emit('dismissModificationWarning')
     },
     undo () {
       if (this.$instance) {
@@ -295,7 +294,7 @@ export default {
     },
     setConflictPath (conflictPath) {
       this.conflictPath = conflictPath
-      this.$emit('conflictPath', conflictPath)
+      this.$emit('conflict-path', conflictPath)
     },
     reload () {
       this.update(this.value)
@@ -352,7 +351,8 @@ export default {
         lineWrapping: true,
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
-        extraKeys
+        extraKeys,
+        theme: this.darkTheme ? 'seti' : 'default'
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -436,9 +436,9 @@ export default {
         this.clearHistory()
       }
     },
-    update (value = this.value) {
+    async update (value = this.value) {
       if (value) {
-        this.setContent(safeDump(value))
+        this.setContent(await this.$yaml.safeDump(value))
       }
     },
     onCopy () {
@@ -459,7 +459,8 @@ export default {
 
     const shootSchemaDefinition = await getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
+    const indentUnit = get(this.$instance, 'options.indentUnit', 2)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit)
   },
   watch: {
     canPatchShoots (value) {
@@ -483,6 +484,9 @@ export default {
           }
         }
       }
+    },
+    darkTheme (value) {
+      this.$instance.setOption('theme', value ? 'seti' : 'default')
     }
   },
   beforeDestroy () {
@@ -546,4 +550,25 @@ export default {
     background-color: map-get($grey, 'lighten-4') !important;
   }
 
+  .CodeMirror-hints.seti {
+    background-color: #000;
+  }
+
+  .seti {
+    .CodeMirror-hint {
+      .ghint-type  {
+        color: #fff;
+      }
+    }
+
+    .CodeMirror-hint .ghint-desc  {
+      .description {
+        color: map-get($grey, 'lighten-3');
+      }
+    }
+
+    .CodeMirror-hint-active {
+      background-color: map-get($grey, 'darken-4') !important;
+    }
+  }
 </style>

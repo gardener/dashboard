@@ -1,30 +1,21 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
+    :shoot-item="shootItem"
     :valid="maintenanceTimeValid"
-    @dialogOpened="onConfigurationDialogOpened"
+    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Maintenance">
     <template v-slot:actionComponent>
       <maintenance-time
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"
+        :time-window-end="data.timeWindowEnd"
         @valid="onMaintenanceTimeValid"
       ></maintenance-time>
       <maintenance-components
@@ -35,13 +26,16 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
+import assign from 'lodash/assign'
+
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+
 import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import get from 'lodash/get'
-import assign from 'lodash/assign'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -78,11 +72,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+        const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
         const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
         assign(this.data, {
-          timeWindowBegin: utcBegin,
-          timeWindowEnd: utcEnd,
+          timeWindowBegin: begin,
+          timeWindowEnd: end,
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates
         })

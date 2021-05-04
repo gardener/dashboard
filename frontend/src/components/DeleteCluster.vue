@@ -1,33 +1,21 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <action-button-dialog
-    :shootItem="shootItem"
-    @dialogOpened="onDeleteDialogOpened"
+    :shoot-item="shootItem"
+    @dialog-opened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
-    icon="delete"
-    :iconColor="iconColor"
-    dialogColor="red"
-    confirmButtonText="Delete"
+    icon="mdi-delete"
+    confirm-button-text="Delete"
     confirm-required
-    :buttonText="buttonText"
-    :smallIcon="small"
-    maxWidth="600"
+    :button-text="buttonText"
+    :small-icon="small"
+    max-width="600"
   >
     <template v-slot:actionComponent>
       <v-list>
@@ -41,14 +29,14 @@ limitations under the License.
         </v-list-item-content>
       </v-list>
       <p>
-        Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
+        Type <span class="font-weight-bold">{{shootName}}</span> below and confirm the deletion of the cluster and all of its content.
       </p>
-      <p>
-        <i class="red--text text--darken-2">This action cannot be undone.</i>
+      <p class="mt-2 error--text font-weight-bold">
+        This action cannot be undone.
       </p>
       <p v-if="isShootReconciliationDeactivated">
         <v-row class="fill-height" >
-          <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
+          <v-icon color="warning" class="mr-1">mdi-alert-box</v-icon>
           <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
         </v-row>
       </p>
@@ -75,9 +63,6 @@ export default {
     small: {
       type: Boolean,
       default: false
-    },
-    iconColor: {
-      type: String
     },
     text: {
       type: Boolean

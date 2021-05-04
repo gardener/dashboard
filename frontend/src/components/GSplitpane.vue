@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
@@ -22,8 +12,8 @@ limitations under the License.
     @pane-add="resize"
     @pane-remove="resize"
   >
-    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2">
-      <g-splitpane v-if="hasChildren(item)" :splitpaneTree="item">
+    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" class="position-relative">
+      <g-splitpane v-if="hasChildren(item)" :splitpane-tree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
@@ -38,7 +28,6 @@ limitations under the License.
 import { mapActions } from 'vuex'
 import { Splitpanes, Pane } from 'splitpanes'
 import GSplitpane from '@/components/GSplitpane'
-import { SplitpaneTree } from '@/lib/g-symbol-tree'
 
 export default {
   name: 'GSplitpane',
@@ -58,7 +47,8 @@ export default {
       'setSplitpaneResize'
     ]),
     hasChildren (item) {
-      return item instanceof SplitpaneTree
+      const isSplitpaneTree = Reflect.has(item, 'horizontal')
+      return isSplitpaneTree
     },
     resize () {
       // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
@@ -77,6 +67,10 @@ export default {
 </script>
 
 <style lang="scss">
+  .position-relative {
+    position: relative;
+  }
+
   .splitpanes--vertical > .splitpanes__splitter {
     min-width: 2px !important;
     background-color: #000

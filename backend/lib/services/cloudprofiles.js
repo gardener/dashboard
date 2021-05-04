@@ -1,41 +1,24 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { NotFound } = require('../errors')
+const { NotFound, Forbidden } = require('http-errors')
+const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
-function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
+function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
   const cloudProviderKind = spec.type
   const name = _.get(metadata, 'name')
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
   const resourceVersion = _.get(metadata, 'resourceVersion')
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
-  const data = { seeds, ...spec }
-  return { metadata, data }
-}
-
-function fromSeedResource ({ metadata, spec }) {
-  metadata = _.pick(metadata, ['name'])
-  const provider = _.get(spec, 'provider')
-  const volume = _.get(spec, 'volume')
-  const data = { volume, ...provider }
+  const data = { seedNames, ...spec }
   return { metadata, data }
 }
 
@@ -45,41 +28,56 @@ function emptyToUndefined (value) {
 
 function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
+    function filterProviderType (seed) {
+      const seedProviderType = _.get(seed, 'spec.provider.type')
+      return _.includes(providerTypes, seedProviderType)
+    }
     const providerType = cloudProfileResource.spec.type
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
+    const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [providerType])
 
-    const seedsForCloudProfile = _
+    const seedNamesForCloudProfile = _
       .chain(seeds)
-      .filter(['spec.provider.type', providerType])
+      .filter(filterProviderType)
       .filter({ metadata: { labels: matchLabels } })
-      .map(fromSeedResource)
+      .map('metadata.name')
       .thru(emptyToUndefined)
       .value()
 
     return fromResource({
       cloudProfile: cloudProfileResource,
-      seeds: seedsForCloudProfile
+      seedNames: seedNamesForCloudProfile
     })
   }
 }
 
-exports.list = function () {
+exports.list = async function ({ user }) {
+  const allowed = await authorization.canListCloudProfiles(user)
+  if (!allowed) {
+    throw new Forbidden('You are not allowed to list cloudprofiles')
+  }
+
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
   return _
     .chain(cloudProfiles)
     .map(assignSeedsToCloudProfileIteratee(seeds))
     .filter(cloudProfile => {
-      if (!_.isEmpty(cloudProfile.data.seeds)) {
+      if (!_.isEmpty(cloudProfile.data.seedNames)) {
         return true
       }
-      logger.warn(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
+      logger.info(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
       return false
     })
     .value()
 }
 
-exports.read = function ({ name }) {
+exports.read = async function ({ user, name }) {
+  const allowed = await authorization.canGetCloudProfiles(user, name)
+  if (!allowed) {
+    throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)
+  }
+
   const cloudProfiles = getCloudProfiles()
   const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
   if (!cloudProfileResource) {
@@ -88,7 +86,7 @@ exports.read = function ({ name }) {
 
   const seeds = getVisibleAndNotProtectedSeeds()
   const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
-  if (!cloudProfile.data.seeds) {
+  if (!cloudProfile.data.seedNames) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }
 

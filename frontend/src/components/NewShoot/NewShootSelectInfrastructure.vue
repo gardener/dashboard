@@ -1,35 +1,25 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-row >
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
-      class="select_infra_card"
-      :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
-      @click="selectInfrastructure(infrastructureKind)"
+      class="select_infra_card cursor-pointer"
+      :class="{ 'select_infra_card_active elevation-8' : infrastructureKind == selectedInfrastructure }"
+      @click.native.stop="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
       hover
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
+          <infra-icon :value="infrastructureKind" :size="60" no-background></infra-icon>
         </div>
         <div class="mt-2" >
-          <span class="subtitle-1">{{infrastructureKind}}</span>
+          <span class="text-subtitle-1">{{infrastructureKind}}</span>
         </div>
       </div>
     </v-card>
@@ -89,23 +79,20 @@ export default {
   .select_infra_card {
     padding: 10px;
     opacity: 0.8;
-    cursor: pointer;
     margin: 10px 20px 10px 0px;
     min-width: 120px;
-    filter: grayscale(70%);
-    background-color: #f9f9f9;
+    filter: grayscale(80%);
   }
 
   .select_infra_card:hover {
-    padding: 10px;
     opacity: 1;
     filter: grayscale(50%);
   }
 
   .select_infra_card_active {
+    border: 1px solid var(--v-primary-base);
     opacity: 1;
     filter: grayscale(0%);
-    background-color: transparent;
   }
 
   .select_infra_card_active:hover {

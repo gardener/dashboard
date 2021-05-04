@@ -1,17 +1,7 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -48,9 +38,8 @@ export default {
     dateTime: {
       type: String
     },
-    pointInTime: {
-      type: Number,
-      default: 0 // negative = force past date, positive = force future date
+    mode: {
+      type: String
     },
     currentString: {
       type: String // access the datetime string from outside of the component
@@ -78,7 +67,7 @@ export default {
         }
       }
 
-      this.$emit('update:currentString', timeString)
+      this.$emit('update:current-string', timeString)
       return timeString
     }
   },
@@ -87,9 +76,9 @@ export default {
       const currentDate = new Date().getTime()
       const refDate = new Date(dateTimeValue).getTime()
       let diffInMilliseconds
-      if (this.pointInTime < 0) {
+      if (this.mode === 'past') {
         this.negativeRefDate = true
-      } else if (this.pointInTime > 0) {
+      } else if (this.mode === 'future') {
         this.negativeRefDate = false
       } else if (currentDate > refDate) {
         this.negativeRefDate = true

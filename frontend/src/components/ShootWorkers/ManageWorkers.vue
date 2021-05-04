@@ -1,34 +1,24 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <transition-group name="list">
-    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+  <transition-group name="list" class="alternate-row-background">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"
         :workers="internalWorkers"
-        :cloudProfileName="cloudProfileName"
+        :cloud-profile-name="cloudProfileName"
         :region="region"
-        :allZones="allZones"
-        :availableZones="availableZones"
-        :zonedCluster="zonedCluster"
+        :all-zones="allZones"
+        :available-zones="availableZones"
+        :zoned-cluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
-        :isNew="isNewCluster || worker.isNew"
-        :maxAdditionalZones="maxAdditionalZones"
+        :is-new="isNewCluster || worker.isNew"
+        :max-additional-zones="maxAdditionalZones"
         @valid="onWorkerValid">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
@@ -52,14 +42,14 @@ limitations under the License.
           fab
           icon
           class="ml-1"
-          color="cyan darken-2">
-          <v-icon class="cyan--text text--darken-2">add</v-icon>
+          color="primary">
+          <v-icon class="primary--text">mdi-plus</v-icon>
         </v-btn>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           text
-          class="cyan--text text--darken-2">
+          class="primary--text">
           Add Worker Group
         </v-btn>
       </v-col>
@@ -78,7 +68,11 @@ import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
-const uuidv4 = require('uuid/v4')
+import flatMap from 'lodash/flatMap'
+import difference from 'lodash/difference'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
+const NO_LIMIT = -1
 
 export default {
   name: 'manage-workers',
@@ -115,6 +109,10 @@ export default {
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+    unusedZones () {
+      const usedZones = flatMap(this.internalWorkers, 'zones')
+      return difference(this.allZones, usedZones)
+    },
     currentZonesWithNetworkConfigInShoot () {
       return map(this.currentZonesNetworkConfiguration, 'name')
     },
@@ -140,15 +138,15 @@ export default {
     },
     maxAdditionalZones () {
       if (this.isNewCluster) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
       const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
       if (!clusterRequiresZoneNetworkConfiguration) {
-        return -1 // not applicable - no limit
+        return NO_LIMIT
       }
-      const totalNumberOfPossibleNetworkConfigurations = this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length
-      if (totalNumberOfPossibleNetworkConfigurations >= this.allZones.length) {
-        return -1 // enough free networks - no limit
+      const hasFreeNetworks = this.currentFreeNetworks.length >= this.unusedZones.length
+      if (hasFreeNetworks) {
+        return NO_LIMIT
       }
       return this.currentFreeNetworks.length
     },

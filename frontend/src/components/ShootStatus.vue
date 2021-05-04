@@ -1,21 +1,11 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper :title="statusTitle" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
     <template v-slot:popperRef>
       <div class="shoot-status-div d-flex flex-row">
         <v-tooltip top>
@@ -49,7 +39,7 @@ limitations under the License.
             </div>
           </div>
         </v-tooltip>
-        <retry-operation :shootItem="shootItem"></retry-operation>
+        <retry-operation :shoot-item="shootItem"></retry-operation>
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
       <template v-if="showStatusText">
@@ -59,31 +49,33 @@ limitations under the License.
       </template>
     </template>
     <shoot-message-details
-      :statusTitle="statusTitle"
-      :lastMessage="lastMessage"
-      :errorDescriptions="errorDescriptions"
-      :lastUpdateTime="shootLastOperation.lastUpdateTime"
-      :secretName="shootSecretBindingName"
+      :status-title="statusTitle"
+      :last-message="lastMessage"
+      :error-descriptions="errorDescriptions"
+      :last-update-time="shootLastOperation.lastUpdateTime"
+      :secret-binding-name="shootSecretBindingName"
       :namespace="shootNamespace"
     />
   </g-popper>
 </template>
 
 <script>
-import GPopper from '@/components/GPopper'
-import ShootMessageDetails from '@/components/ShootMessageDetails'
-import RetryOperation from '@/components/RetryOperation'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
+
+import GPopper from '@/components/GPopper'
+import RetryOperation from '@/components/RetryOperation'
+import ShootMessageDetails from '@/components/ShootMessageDetails'
+
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     GPopper,
-    ShootMessageDetails,
-    RetryOperation
+    RetryOperation,
+    ShootMessageDetails
   },
   props: {
     shootItem: {
@@ -173,7 +165,7 @@ export default {
       } else if (this.isError) {
         return 'error'
       } else {
-        return 'cyan darken-2'
+        return 'primary'
       }
     },
     errorDescriptions () {
@@ -207,10 +199,6 @@ export default {
     text-align: center;
     height: auto;
     max-height:  30px;
-  }
-
-  .cursor-pointer {
-    cursor: pointer;
   }
 
   .vertical-align-middle {

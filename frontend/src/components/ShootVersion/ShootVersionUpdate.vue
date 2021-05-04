@@ -1,27 +1,17 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div>
-    <hint-colorizer hintColor="orange">
+    <hint-colorizer hint-color="warning">
       <v-select
         :items="items"
-        color="cyan darken-2"
+        color="primary"
         class="mb-2"
-        item-color="cyan darken-2"
+        item-color="primary"
         item-value="version"
         v-model="selectedItem"
         :label="label"
@@ -137,14 +127,14 @@ export default {
     },
     selectedVersionIsPatch () {
       const isPatch = get(this.selectedItem, 'type') === 'patch'
-      this.$emit('confirmRequired', !isPatch)
+      this.$emit('confirm-required', !isPatch)
       return isPatch
     },
     selectedMinorVersionIsNotNextMinor () {
       const version = get(this, 'selectedItem.version')
       const type = get(this, 'selectedItem.type')
       const invalid = !version || this.itemIsNotNextMinor(version, type)
-      this.$emit('selectedVersionInvalid', invalid)
+      this.$emit('selected-version-invalid', invalid)
       return invalid
     },
     isError () {
@@ -201,8 +191,8 @@ export default {
     selectedItem (value) {
       const version = get(value, 'version')
       const type = get(value, 'type')
-      this.$emit('selectedVersion', version)
-      this.$emit('selectedVersionType', type)
+      this.$emit('selected-version', version)
+      this.$emit('selected-version-type', type)
     }
   }
 }

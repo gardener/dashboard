@@ -1,25 +1,15 @@
 <!--
-Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <v-card-title class="dialog-title white--text align-center justify-start">
-        <v-icon large dark>mdi-cube</v-icon>
-        <span class="headline ml-5">Create Project</span>
+      <v-card-title class="toolbar-background">
+        <v-icon large class="toolbar-title--text">mdi-cube</v-icon>
+        <span class="text-h5 ml-5 toolbar-title--text">Create Project</span>
       </v-card-title>
       <v-card-text class="dialog-content">
         <form>
@@ -27,7 +17,7 @@ limitations under the License.
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="projectName"
                   label="Name"
                   v-model.trim="projectName"
@@ -42,7 +32,7 @@ limitations under the License.
             <v-row v-if="costObjectSettingEnabled">
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="costObject"
                   :label="costObjectTitle"
                   v-model="costObject"
@@ -51,8 +41,8 @@ limitations under the License.
                   @blur="$v.costObject.$touch()"
                   >
                 </v-text-field>
-                <v-alert v-if="!!costObjectDescriptionCompiledMarkdown" dense type="info" outlined :color="color">
-                  <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" outlined color="primary">
+                  <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
               </v-col>
             </v-row>
@@ -60,7 +50,7 @@ limitations under the License.
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   ref="description"
                   label="Description"
                   v-model="description"
@@ -70,19 +60,20 @@ limitations under the License.
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  :color="color"
+                  color="primary"
                   label="Purpose"
                   v-model="purpose"
                   ></v-text-field>
               </v-col>
             </v-row>
-            <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+            <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </v-container>
         </form>
-        <v-snackbar :value="loading" bottom right absolute :timeout="0">
+        <v-snackbar :value="loading" bottom right absolute :timeout="-1">
           <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
@@ -97,7 +88,7 @@ limitations under the License.
           :loading="loading"
           :disabled="!valid || loading"
           @click.stop="submit"
-          :color="color"
+          color="primary"
         >
           Create
         </v-btn>
@@ -110,7 +101,7 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccountUsername, transformHtml, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -118,14 +109,14 @@ import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
-import GAlert from '@/components/GAlert'
+import GMessage from '@/components/GMessage'
 
 const defaultProjectName = ''
 
 export default {
   name: 'project-dialog',
   components: {
-    GAlert
+    GMessage
   },
   props: {
     value: {
@@ -141,12 +132,11 @@ export default {
       projectName: undefined,
       description: undefined,
       purpose: undefined,
-      technicalContact: undefined,
+      owner: undefined,
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      loading: false,
-      color: 'blue-grey darken-2'
+      loading: false
     }
   },
   validations () {
@@ -183,9 +173,9 @@ export default {
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
     },
-    costObjectDescriptionCompiledMarkdown () {
+    costObjectDescriptionHtml () {
       const description = get(this.costObjectSettings, 'description')
-      return compileMarkdown(description)
+      return transformHtml(description)
     },
     costObjectRegex () {
       return get(this.costObjectSettings, 'regex')
@@ -202,17 +192,17 @@ export default {
     currentPurpose () {
       return this.projectDetails.purpose
     },
-    currentTechnicalContact () {
-      return this.projectDetails.technicalContact
+    currentOwner () {
+      return this.projectDetails.owner
     },
     currentCostObject () {
       return this.projectDetails.costObject
     },
     memberItems () {
-      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
-      const technicalContact = this.currentTechnicalContact
-      if (technicalContact && !includes(members, technicalContact)) {
-        members.push(technicalContact)
+      const members = filter(map(this.memberList, 'username'), username => !isServiceAccountUsername(username))
+      const owner = this.currentOwner
+      if (owner && !includes(members, owner)) {
+        members.push(owner)
       }
 
       return members
@@ -222,7 +212,7 @@ export default {
     },
     validators () {
       const validators = {
-        technicalContact: {
+        owner: {
           required
         },
         costObject: {
@@ -254,8 +244,8 @@ export default {
           noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
           noStartEndHyphen: 'Name must not start or end with a hyphen'
         },
-        technicalContact: {
-          required: 'Technical Contact is required'
+        owner: {
+          required: 'Owner is required'
         },
         costObject: {
           validCostObject: this.costObjectErrorMessage
@@ -330,7 +320,7 @@ export default {
       this.projectName = defaultProjectName
       this.description = undefined
       this.purpose = undefined
-      this.technicalContact = this.username
+      this.owner = this.username
       this.costObject = undefined
 
       setDelayedInputFocus(this, 'projectName')
@@ -347,11 +337,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .dialog-title {
-    background-size: cover;
-    height: 130px;
-    background-image: url('../../assets/project_background.svg');
-  }
   .dialog-content {
     height: auto;
   }

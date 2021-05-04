@@ -1,121 +1,53 @@
 //
-// Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const ioClient = require('socket.io-client')
-const http = require('http')
+const assert = require('assert').strict
 const pEvent = require('p-event')
 const { filter, map, pick, groupBy, find, includes } = require('lodash')
-
-const kubernetesClient = require('../../lib/kubernetes-client')
-const io = require('../../lib/io')
-const watches = require('../../lib/watches')
+const kubeClient = require('@gardener-dashboard/kube-client')
 const cache = require('../../lib/cache')
 const { projects, shoots, authorization, tickets } = require('../../lib/services')
 
-module.exports = function ({ sandbox, auth }) {
-  /* eslint no-unused-expressions: 0 */
+describe('socket.io', function () {
+  const id = 'foo@example.org'
+  const user = fixtures.auth.createUser({ id })
 
-  const username = 'foo@example.org'
-  const id = username
-  const user = auth.createUser({ id })
-
+  let agent
   let socket
-  let server
-  let ioServer
 
   const client = {}
-  const ticketCache = {
-    issues: [],
-    getIssues () {
-      return this.issues
-    },
-    getIssueNumbersForNameAndProjectName ({ projectName, name }) {
-      const issues = filter(this.issues, { projectName, name })
-      return map(issues, 'id')
-    }
-  }
   let createClientStub
   let isAdminStub
 
-  function setupIoServer (server) {
-    try {
-      const getTicketCacheStub = sandbox.stub(cache, 'getTicketCache').returns(ticketCache)
-      const stubs = {}
-      for (const key of Object.keys(watches)) {
-        stubs[key] = sandbox.stub(watches, key)
-      }
-      ioServer = io()
-      for (const stub of Object.values(watches)) {
-        expect(stub).to.be.calledOnce
-        expect(stub.firstCall.args).to.have.length(1)
-        expect(stub.firstCall.args[0]).to.be.equal(ioServer)
-      }
-      expect(getTicketCacheStub).to.be.calledOnce
-      ioServer.attach(server)
-    } finally {
-      sandbox.restore()
-    }
-  }
-
-  async function connect (key) {
-    const { address: hostname, port } = server.address()
-    const origin = `http://[${hostname}]:${port}`
-    const cookie = await user.cookie
-    const socket = ioClient(origin + '/' + key, {
-      path: '/api/events',
-      extraHeaders: { cookie },
-      reconnectionDelay: 0,
-      forceNew: true,
-      autoConnect: false,
-      transports: ['websocket']
-    })
-    socket.connect()
-    await pEvent(socket, 'connect', {
-      timeout: 1000,
-      rejectionEvents: ['error', 'connect_error']
-    })
-    return socket
-  }
-
-  before(async function () {
-    server = http.createServer()
-    server.listen(0, 'localhost')
-    await pEvent(server, 'listening', {
-      timeout: 1000
-    })
-    setupIoServer(server)
+  beforeAll(function () {
+    cache.cache.resetTicketCache()
+    agent = createAgent('io', cache)
   })
 
-  after(function () {
-    server.close()
-    if (ioServer) {
-      ioServer.close()
-    }
+  afterAll(function () {
+    (async () => {
+      try {
+        await agent.close()
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to close socket server', err.message)
+      }
+    })()
   })
 
   beforeEach(async function () {
-    createClientStub = sandbox.stub(kubernetesClient, 'createClient').returns(client)
-    isAdminStub = sandbox.stub(authorization, 'isAdmin')
+    createClientStub = jest.spyOn(kubeClient, 'createClient').mockReturnValue(client)
+    isAdminStub = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
   })
 
   afterEach(function () {
-    if (socket.connected) {
-      socket.disconnect()
+    if (socket && socket.connected) {
+      socket.destroy()
     }
   })
 
@@ -123,14 +55,26 @@ module.exports = function ({ sandbox, auth }) {
     { metadata: { namespace: 'foo', name: 'foo' } },
     { metadata: { namespace: 'bar', name: 'bar' } }
   ]
-  describe('shoots', function () {
 
+  describe('shoots', function () {
     const shootList = [
       { metadata: { namespace: 'foo', name: 'foo' } },
       { metadata: { namespace: 'foo', name: 'bar' } },
       { metadata: { namespace: 'foo', name: 'baz' } },
       { metadata: { namespace: 'bar', name: 'foo' } }
     ]
+
+    function listShootsImplementation ({ namespace }) {
+      const items = !namespace
+        ? shootList
+        : filter(shootList, ['metadata.namespace', namespace])
+      return Promise.resolve({ items })
+    }
+
+    function readShootImplementation ({ namespace, name }) {
+      const item = find(shootList, { metadata: { namespace, name } })
+      return Promise.resolve(item)
+    }
 
     async function emitSubscribe (...args) {
       const asyncIterator = pEvent.iterator(socket, 'namespacedEvents', {
@@ -153,91 +97,65 @@ module.exports = function ({ sandbox, auth }) {
     let readShootStub
 
     beforeEach(async function () {
-      listProjectsStub = sandbox.stub(projects, 'list')
-      listShootsStub = sandbox.stub(shoots, 'list')
-      readShootStub = sandbox.stub(shoots, 'read')
-      socket = await connect('shoots')
-      expect(socket.connected).to.be.true
-      expect(createClientStub).to.be.calledOnce
-      const bearer = await user.bearer
-      expect(createClientStub).to.be.calledWith({ auth: { bearer } })
+      listProjectsStub = jest.spyOn(projects, 'list').mockResolvedValue(projectList)
+      listShootsStub = jest.spyOn(shoots, 'list').mockImplementation(listShootsImplementation)
+      readShootStub = jest.spyOn(shoots, 'read').mockImplementation(readShootImplementation)
+      socket = await agent.connect('/shoots', {
+        cookie: await user.cookie
+      })
+      assert.strictEqual(socket.connected, true)
+      assert.strictEqual(createClientStub.mock.calls.length, 1)
+      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
+        auth: {
+          bearer: await user.bearer
+        }
+      })
     })
 
     it('should subscribe shoots for a namespace', async function () {
-      listProjectsStub.callsFake(() => projectList)
-      listShootsStub.callsFake(({ namespace }) => {
-        const items = filter(shootList, ['metadata.namespace', namespace])
-        return { items }
-      })
       const shootsByNamespace = await emitSubscribe('subscribeShoots', {
         namespaces: [{ namespace: 'foo' }]
       })
-      expect(isAdminStub).to.not.be.called
-      expect(listProjectsStub).to.be.calledOnce
-      expect(listShootsStub).to.be.calledOnce
-      expect(shootsByNamespace).to.eql(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
+      expect(isAdminStub).toBeCalledTimes(0)
+      expect(listProjectsStub).toBeCalledTimes(1)
+      expect(listShootsStub).toBeCalledTimes(1)
+      expect(shootsByNamespace).toEqual(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
     })
 
     it('should subscribe shoots for all namespaces', async function () {
-      isAdminStub.callsFake(() => false)
-      listProjectsStub.callsFake(() => projectList)
-      listShootsStub.callsFake(({ namespace }) => {
-        const items = filter(shootList, ['metadata.namespace', namespace])
-        return { items }
-      })
+      isAdminStub.mockResolvedValueOnce(false)
       const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
-      expect(isAdminStub).to.be.calledOnce
-      expect(listProjectsStub).to.be.calledOnce
-      expect(listShootsStub).to.be.calledTwice
-      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+      expect(isAdminStub).toBeCalledTimes(1)
+      expect(listProjectsStub).toBeCalledTimes(1)
+      expect(listShootsStub).toBeCalledTimes(2)
+      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
     })
 
     it('should subscribe shoots for all namespaces as admin', async function () {
-      isAdminStub.callsFake(() => true)
-      listProjectsStub.callsFake(() => projectList)
-      listShootsStub.callsFake(() => {
-        const items = shootList
-        return { items }
-      })
+      isAdminStub.mockResolvedValueOnce(true)
       const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
-      expect(isAdminStub).to.be.calledOnce
-      expect(listProjectsStub).to.be.calledOnce
-      expect(listShootsStub).to.be.calledOnce
-      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+      expect(isAdminStub).toBeCalledTimes(1)
+      expect(listProjectsStub).toBeCalledTimes(1)
+      expect(listShootsStub).toBeCalledTimes(1)
+      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
     })
 
     it('should subscribe single shoot', async function () {
-      listProjectsStub.callsFake(() => projectList)
-      readShootStub.callsFake(({ namespace, name }) => {
-        return find(shootList, { metadata: { namespace, name } })
-      })
       const metadata = {
         namespace: 'foo',
         name: 'bar'
       }
-      const shootsByNamespace = await emitSubscribe('subscribeShoot', metadata)
-      expect(isAdminStub).to.not.be.called
-      expect(listProjectsStub).to.be.calledOnce
-      expect(listShootsStub).to.not.be.called
-      expect(shootsByNamespace).to.eql({ [metadata.namespace]: [find(shootList, { metadata })] })
+      const event = await new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
+      expect(isAdminStub).toBeCalledTimes(0)
+      expect(readShootStub).toBeCalledTimes(1)
+      expect(listShootsStub).toBeCalledTimes(0)
+      expect(event).toEqual(find(shootList, { metadata }))
     })
   })
 
   describe('tickets', function () {
-    const issues = [
-      { id: 1, namespace: 'foo', name: 'bar' },
-      { id: 2, namespace: 'foo', name: 'baz' },
-      { id: 3, namespace: 'foo', name: 'bar' }
-    ]
-
-    const comments = [
-      { id: 1, issue: 1 },
-      { id: 2, issue: 2 },
-      { id: 3, issue: 1 },
-      { id: 4, issue: 2 },
-      { id: 5, issue: 3 },
-      { id: 6, issue: 3 }
-    ]
+    const commentList = fixtures.github.comments.list()
+    let ticketCache
 
     async function emitSubscribe (...args) {
       const asyncIterator = pEvent.iterator(socket, 'events', {
@@ -253,37 +171,41 @@ module.exports = function ({ sandbox, auth }) {
       return items
     }
 
-    let getIssueCommentsStub
-    let findProjectByNamespaceStub
-
     beforeEach(async function () {
-      findProjectByNamespaceStub = sandbox.stub(cache, 'findProjectByNamespace')
-      ticketCache.issues = issues
-      getIssueCommentsStub = sandbox.stub(tickets, 'getIssueComments')
-        .callsFake(({ number }) => filter(comments, ['issue', number]))
-      socket = await connect('tickets')
-      expect(socket.connected).to.be.true
-      expect(createClientStub).to.be.calledOnce
-      const bearer = await user.bearer
-      expect(createClientStub).to.be.calledWith({ auth: { bearer } })
+      ticketCache = cache.getTicketCache()
+      socket = await agent.connect('/tickets', {
+        cookie: await user.cookie
+      })
+      assert.strictEqual(socket.connected, true)
+      assert.strictEqual(createClientStub.mock.calls.length, 1)
+      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
+        auth: {
+          bearer: await user.bearer
+        }
+      })
     })
 
     it('should subscribe tickets', async function () {
+      const issues = ticketCache.getIssues()
+
       const actualIssues = await emitSubscribe('subscribeIssues')
-      expect(actualIssues).to.eql(issues)
+      expect(actualIssues).toEqual(issues)
     })
 
     it('should subscribe ticket comments', async function () {
-      const name = 'bar'
-      const namespace = 'foo'
-      const projectName = 'foo'
+      const namespace = 'garden-test'
+      const name = 'test'
+      const projectName = 'garden-test'
+      const project = { metadata: { name: projectName } }
+      const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
+      const comments = filter(commentList, ({ number }) => includes(numbers, number))
+      const expectedComments = map(comments, comment => tickets.fromComment(comment.number, name, projectName, comment))
 
-      findProjectByNamespaceStub.callsFake(namespace => find(projectList, ['metadata.namespace', namespace]))
-      const issueComments = await emitSubscribe('subscribeComments', { namespace, name })
-      const numbers = map(filter(issues, { projectName, name }), 'id')
-      expect(getIssueCommentsStub).to.have.callCount(numbers.length)
-      const predicate = ({ issue: id }) => includes(numbers, id)
-      expect(issueComments).to.eql(filter(comments, predicate))
+      const findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockReturnValue(project)
+
+      const actualComments = await emitSubscribe('subscribeComments', { namespace, name })
+      expect(findProjectByNamespaceStub).toBeCalledTimes(1)
+      expect(actualComments).toEqual(expectedComments)
     })
   })
-}
+})
