@@ -38,8 +38,9 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regularInput">
         <container-runtime
-        :machineImageCri="machineImageCri"
+        :machine-image-cri="machineImageCri"
         :worker="worker"
+        :immutable-cri="immutableCri"
         @valid="onContainerRuntimeValid">
         </container-runtime>
       </div>
@@ -138,7 +139,6 @@ import find from 'lodash/find'
 import concat from 'lodash/concat'
 import last from 'lodash/last'
 import difference from 'lodash/difference'
-import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
@@ -223,7 +223,8 @@ export default {
       machineImageValid: undefined,
       containerRuntimeValid: undefined,
       immutableZones: undefined,
-      volumeSizeInternal: undefined
+      volumeSizeInternal: undefined,
+      immutableCri: undefined
     }
   },
   validations () {
@@ -502,6 +503,7 @@ export default {
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
     this.immutableZones = this.isNew ? [] : this.worker.zones
+    this.immutableCri = !this.isNew
   }
 }
 </script>

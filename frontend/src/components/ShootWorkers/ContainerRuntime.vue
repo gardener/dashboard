@@ -1,28 +1,59 @@
+
+<!--
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="d-flex flex-row">
     <v-select
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="containerRuntimeItems"
       :error-messages="getErrorMessages('containerRuntime')"
       @input="onInputContainerRuntime"
       @blur="$v.containerRuntime.$touch()"
       v-model="containerRuntime"
       label="Container Runtime"
-    ></v-select>
+      :disabled="immutableCri"
+      :hint="criHint"
+      persistent-hint
+    >
+      <template v-slot:item="{ item }">
+        <span v-if="!immutableCri && item===defaultCir">default ({{item}})</span>
+        <span v-else>{{item}}</span>
+      </template>
+      <template v-slot:selection="{ item }">
+        <span v-if="!immutableCri && item===defaultCir">default ({{item}})</span>
+        <span v-else>{{item}}</span>
+      </template>
+    </v-select>
     <v-select
       v-if="ociRuntimeItems.length"
       class="ml-1"
-      color="cyan darken-2"
-      item-color="cyan darken-2"
+      color="primary"
+      item-color="primary"
       :items="ociRuntimeItems"
       :error-messages="getErrorMessages('ociRuntime')"
       @input="onInputOciRuntime"
       @blur="$v.ociRuntime.$touch()"
       v-model="ociRuntime"
-      label="OCI Runtime"
+      label="OCI Runtimes"
       multiple
-    ></v-select>
+      :disabled="immutableCri"
+      :hint="ociHint"
+      persistent-hint
+    >
+      <template v-slot:item="{ item }">
+        <span v-if="!immutableCri && item===defaultOci">default ({{item}})</span>
+        <span v-else>{{item}}</span>
+      </template>
+      <template v-slot:selection="{ item }">
+        <span v-if="!immutableCri && item===defaultOci">default ({{item}})</span>
+        <span v-else>{{item}}</span>
+      </template>
+    </v-select>
   </div>
 </template>
 
@@ -39,6 +70,7 @@ import unset from 'lodash/unset'
 
 // The following runtimes are defaults that are always offered.
 // Selecting a default Container / OCI Runtime will not create a CRI config in the shoot worker
+// Currently, this is hard-coded in Gardener. Once this can be configured or default is removed, we need to adapt
 const DEFAULT_CONTAINER_RUNTIME = 'docker'
 const DEFAULT_OCI_RUNTIME = 'runc'
 
@@ -71,6 +103,10 @@ export default {
     machineImageCri: {
       type: Array,
       default: () => []
+    },
+    immutableCri: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -78,7 +114,9 @@ export default {
       validationErrors,
       valid: undefined,
       containerRuntime: undefined,
-      ociRuntime: undefined
+      ociRuntime: undefined,
+      defaultCir: DEFAULT_CONTAINER_RUNTIME,
+      defaultOci: DEFAULT_OCI_RUNTIME
     }
   },
   validations,
@@ -94,6 +132,18 @@ export default {
       const containerRuntime = find(this.machineImageCri, { name: this.containerRuntime })
       const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
       return map(ociRuntimes, 'type')
+    },
+    criHint () {
+      if (this.immutableCri) {
+        return 'Container runtime cannot be changed after worker has been created'
+      }
+      return undefined
+    },
+    ociHint () {
+      if (this.immutableCri) {
+        return 'OCI runtimes cannot be changed after worker has been created'
+      }
+      return undefined
     }
   },
   methods: {
