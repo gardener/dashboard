@@ -24,7 +24,7 @@
     "inspect": "vue-cli-service inspect",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
+    "lint": "vue-cli-service lint --no-fix",
     "test": "vue-cli-service test:unit",
     "test-coverage": "yarn test --coverage"
   },
