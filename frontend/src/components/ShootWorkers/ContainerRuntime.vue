@@ -20,13 +20,12 @@ SPDX-License-Identifier: Apache-2.0
       :hint="criHint"
       persistent-hint
     >
+```suggestion
       <template v-slot:item="{ item }">
-        <span v-if="!immutableCri && item===defaultCir">default ({{item}})</span>
-        <span v-else>{{item}}</span>
+        <span>{{criItemText(item)}}</span>
       </template>
       <template v-slot:selection="{ item }">
-        <span v-if="!immutableCri && item===defaultCir">default ({{item}})</span>
-        <span v-else>{{item}}</span>
+        <span>{{criItemText(item)}}</span>
       </template>
     </v-select>
     <v-select
@@ -46,12 +45,10 @@ SPDX-License-Identifier: Apache-2.0
       persistent-hint
     >
       <template v-slot:item="{ item }">
-        <span v-if="!immutableCri && item===defaultOci">default ({{item}})</span>
-        <span v-else>{{item}}</span>
+        <span>{{ociItemText(item)}}</span>
       </template>
       <template v-slot:selection="{ item }">
-        <span v-if="!immutableCri && item===defaultOci">default ({{item}})</span>
-        <span v-else>{{item}}</span>
+        <span>{{ociItemText(item)}}</span>
       </template>
     </v-select>
   </div>
@@ -115,7 +112,7 @@ export default {
       valid: undefined,
       containerRuntime: undefined,
       ociRuntime: undefined,
-      defaultCir: DEFAULT_CONTAINER_RUNTIME,
+      defaultCri: DEFAULT_CONTAINER_RUNTIME,
       defaultOci: DEFAULT_OCI_RUNTIME
     }
   },
@@ -129,7 +126,7 @@ export default {
       if (this.containerRuntime === DEFAULT_CONTAINER_RUNTIME) {
         return [DEFAULT_OCI_RUNTIME]
       }
-      const containerRuntime = find(this.machineImageCri, { name: this.containerRuntime })
+      const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
       const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
       return map(ociRuntimes, 'type')
     },
@@ -147,6 +144,12 @@ export default {
     }
   },
   methods: {
+    ociItemText (item) {
+      return !this.immutableCri && item === this.defaultOci ? `default (${item})` : item
+    },
+    criItemText (item) {
+      return !this.immutableCri && item === this.defaultCri ? `default (${item})` : item
+    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },

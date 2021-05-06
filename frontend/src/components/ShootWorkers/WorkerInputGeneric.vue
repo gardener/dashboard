@@ -38,10 +38,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regularInput">
         <container-runtime
-        :machine-image-cri="machineImageCri"
-        :worker="worker"
-        :immutable-cri="immutableCri"
-        @valid="onContainerRuntimeValid">
+          :machine-image-cri="machineImageCri"
+          :worker="worker"
+          :immutable-cri="immutableCri"
+          @valid="onContainerRuntimeValid">
         </container-runtime>
       </div>
       <div v-if="volumeInCloudProfile" class="regularInput">
