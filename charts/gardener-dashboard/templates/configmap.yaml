@@ -18,7 +18,7 @@ data:
     port: {{ .Values.containerPort }}
     logLevel: {{ .Values.logLevel }}
     logFormat: text
-    apiServerUrl: {{ .Values.apiServerUrl }}
+    apiServerUrl: {{ required ".Values.apiServerUrl is required" .Values.apiServerUrl }}
     {{- if .Values.apiServerCaData }}
     apiServerCaData: {{ .Values.apiServerCaData }}
     {{- else if .Values.apiServerCa }}
