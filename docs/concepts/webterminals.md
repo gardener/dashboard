@@ -2,7 +2,8 @@
 
 <img width="180" alt="gardener-terminal-ascii" src="https://user-images.githubusercontent.com/5526658/66032047-ecfacc80-e504-11e9-9864-57d4f0bbaf5d.png">
 
-
+## Architecture Overview
+<img src="../images/webterminals-1.png">
 
 ## Motivation
 We want to give garden operators and "regular" users of the Gardener dashboard an easy way to have a preconfigured shell directly in the browser.

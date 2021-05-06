@@ -449,7 +449,7 @@ const getters = {
           return semver.rcompare(a.version, b.version)
         })
 
-        return map(versions, ({ version, expirationDate, classification }) => {
+        return map(versions, ({ version, expirationDate, cri, classification }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
           const name = machineImage.name
 
@@ -457,6 +457,7 @@ const getters = {
             key: name + '/' + version,
             name,
             version,
+            cri,
             classification,
             isPreview: classification === 'preview',
             isSupported: classification === 'supported',

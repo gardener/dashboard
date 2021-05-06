@@ -140,6 +140,7 @@ export default {
               'iam:GetRole',
               'iam:GetRolePolicy',
               'iam:ListPolicyVersions',
+              "iam:ListRolePolicies",
               'iam:ListAttachedRolePolicies',
               'iam:ListInstanceProfilesForRole',
               'iam:CreateInstanceProfile',
