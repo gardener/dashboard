@@ -22,7 +22,7 @@ RUN yarn workspace @gardener-dashboard/request     run lint
 RUN yarn workspace @gardener-dashboard/kube-config run lint
 RUN yarn workspace @gardener-dashboard/kube-client run lint
 RUN yarn workspace @gardener-dashboard/backend     run lint
-RUN yarn workspace @gardener-dashboard/frontend    run lint
+RUN yarn workspace @gardener-dashboard/frontend    run lint --no-fix
 
 # run test in all workspaces
 RUN yarn workspace @gardener-dashboard/logger      run test-coverage
