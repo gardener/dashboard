@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <action-button-dialog
     :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure DNS"
     max-width="900"
@@ -28,7 +27,7 @@ export default {
   name: 'dns-configuration',
   components: {
     ActionButtonDialog,
-    shootItem
+    ManageShootDns
   },
   props: {
     shootItem: {
