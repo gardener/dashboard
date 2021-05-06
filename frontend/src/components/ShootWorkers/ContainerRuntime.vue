@@ -20,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
       :hint="criHint"
       persistent-hint
     >
-```suggestion
       <template v-slot:item="{ item }">
         <span>{{criItemText(item)}}</span>
       </template>
