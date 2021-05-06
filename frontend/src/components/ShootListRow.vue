@@ -15,12 +15,14 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'name'">
         <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
           <v-col class="grow pa-0 ma-0">
-            <div class="d-flex align-center justify-start flex-nowrap fill-height">
-              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-                {{ shootName }}
-              </router-link>
+            <auto-hide right>
+              <template v-slot:activator>
+                <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+                  {{ shootName }}
+                </router-link>
+              </template>
               <copy-btn :clipboard-text="shootName"></copy-btn>
-            </div>
+            </auto-hide>
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
@@ -51,16 +53,20 @@ SPDX-License-Identifier: Apache-2.0
         <vendor :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
       </template>
       <template v-if="cell.header.value === 'seed'">
-        <div class="d-flex align-center justify-start flex-nowrap fill-height">
-          <shoot-seed-name :shoot-item="shootItem" />
+        <auto-hide right>
+          <template v-slot:activator>
+            <shoot-seed-name :shoot-item="shootItem" />
+          </template>
           <copy-btn :clipboard-text="shootSeedName"></copy-btn>
-        </div>
+        </auto-hide>
       </template>
       <template v-if="cell.header.value === 'technicalId'">
-        <div class="d-flex align-center justify-start flex-nowrap fill-height">
-          <span>{{shootTechnicalId}}</span>
+        <auto-hide right>
+          <template v-slot:activator>
+            <span>{{shootTechnicalId}}</span>
+          </template>
           <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-        </div>
+        </auto-hide>
       </template>
       <template v-if="cell.header.value === 'createdBy'">
         <account-avatar :account-name="shootCreatedBy"></account-avatar>
@@ -177,6 +183,7 @@ import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
 import ConstraintWarning from '@/components/ConstraintWarning'
+import AutoHide from '@/components/AutoHide'
 
 import {
   isTypeDelete,
@@ -203,7 +210,8 @@ export default {
     Vendor,
     VersionExpirationWarning,
     ShootListRowActions,
-    ConstraintWarning
+    ConstraintWarning,
+    AutoHide
   },
   props: {
     shootItem: {
