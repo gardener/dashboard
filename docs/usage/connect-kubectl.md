@@ -17,15 +17,15 @@ On this page:
 ### Downloading kubeconfig for a cluster
 1. Select your project from the dropdown on the left, then choose **CLUSTERS** and locate your cluster in the list. Choose the *key* icon to bring up a dialog with the access options.
 
-   <img src="images/01-select-cluster.png">
-   
-   In the **Kubeconfig** section the options are to *download*, *copy* or *view* the `kubeconfig` for the cluster.   
+   <img src="../images/01-select-cluster.png">
+
+   In the **Kubeconfig** section the options are to *download*, *copy* or *view* the `kubeconfig` for the cluster.
    The same options are available also in the **Access** section in the cluster details screen. To find it, choose a cluster from the list.
 
-   <img src="images/01-access-1.png">
+   <img src="../images/01-access-1.png">
 2. Choose the download icon to download `kubeconfig` as file on your local system.
 
-   <img style="max-width: 40%" src="images/02-download.png">
+   <img style="max-width: 40%" src="../images/02-download.png">
 
 ### Connecting to the cluster
 
@@ -45,4 +45,4 @@ In the previous snippet make sure to change the `<path-to-file>` with the path t
 <br>
 
 ## What's next?
-- [Using Dashboard Terminal](using-terminal)
+- [Using Dashboard Terminal](using-terminal.md)
