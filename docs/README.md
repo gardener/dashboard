@@ -15,8 +15,8 @@
 * [Project Operations](usage/project-operations.md)
 * [Working with Service Accounts](usage/working-with-service-accounts.md)
 * [Use the Webterminal](usage/using-terminal.md)
-* [Connect kubectl](usage/connect-kubectl.md)
 * [Terminal Shortcuts](usage/terminal-shortcuts.md)
+* [Connect kubectl](usage/connect-kubectl.md)
 * [Custom Shoot Fields](usage/custom-fields.md)
 
 ## Development
