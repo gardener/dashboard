@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <dns-configuration></dns-configuration>
+          <dns-configuration :shootItem="shootItem"></dns-configuration>
         </v-list-item-action>
       </v-list-item>
       <template v-if="!!shootIngressDomainText">

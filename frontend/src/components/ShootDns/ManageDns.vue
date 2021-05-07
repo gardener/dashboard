@@ -256,7 +256,6 @@ export default {
     if (primaryProvider) {
       this.primaryProvider = find(this.dnsProviders, { type: primaryProvider.type, secretName: primaryProvider.secretName })
     }
-    this.saveComponentState()
   }
 }
 </script>

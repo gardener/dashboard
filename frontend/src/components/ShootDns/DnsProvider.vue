@@ -5,98 +5,96 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container>
-    <div class="d-flex flex-nowrap align-center">
-      <v-row align="center" class="mr-4">
-        <v-row >
-          <v-col>
-            <v-select
-              color="primary"
-              item-color="primary"
-              v-model="type"
-              @blur="$v.type.$touch()"
-              @input="onInputType"
-              :items="dnsProviderList"
-              :error-messages="getErrorMessages('type')"
-              label="Dns Provider Type"
-            >
-              <template v-slot:item="{ item }">
-                <v-list-item-action>
-                  <vendor-icon :value="item"></vendor-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>{{item}}</v-list-item-title>
-                </v-list-item-content>
-              </template>
-              <template v-slot:selection="{ item }">
+  <v-row align="center">
+    <v-col cols="11">
+      <v-row class="ma-0">
+        <v-col>
+          <v-select
+            color="primary"
+            item-color="primary"
+            v-model="type"
+            @blur="$v.type.$touch()"
+            @input="onInputType"
+            :items="dnsProviderList"
+            :error-messages="getErrorMessages('type')"
+            label="Dns Provider Type"
+          >
+            <template v-slot:item="{ item }">
+              <v-list-item-action>
                 <vendor-icon :value="item"></vendor-icon>
-                <span class="ml-2">
-                {{item}}
-                </span>
-              </template>
-            </v-select>
-          </v-col>
-          <v-col>
-            <select-secret
-              :dns-provider-kind="type"
-              :selected-secret="secret"
-              @update-secret="onUpdateSecret"
-              @valid="onSecretValid"></select-secret>
-          </v-col>
-          <v-col>
-            <v-combobox
-              v-model="excludeDomains"
-              label="Exclude Domains"
-              multiple
-              small-chips
-              @input="onInputExcludeDomains"
-            >
-            </v-combobox>
-          </v-col>
-          <v-col>
-            <v-combobox
-              v-model="includeDomains"
-              label="Include Domains"
-              multiple
-              small-chips
-              @input="onInputIncludeDomains"
-            >
-            </v-combobox>
-          </v-col>
-          <v-col>
-            <v-combobox
-              v-model="excludeZones"
-              label="Exclude Zones"
-              multiple
-              small-chips
-              @input="onInputExcludeZones"
-            >
-            </v-combobox>
-          </v-col>
-          <v-col>
-            <v-combobox
-              v-model="includeZones"
-              label="Include Zones"
-              multiple
-              small-chips
-              @input="onInputIncludeZones"
-            >
-            </v-combobox>
-          </v-col>
-        </v-row>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>{{item}}</v-list-item-title>
+              </v-list-item-content>
+            </template>
+            <template v-slot:selection="{ item }">
+              <vendor-icon :value="item"></vendor-icon>
+              <span class="ml-2">
+              {{item}}
+              </span>
+            </template>
+          </v-select>
+        </v-col>
+        <v-col>
+          <select-secret
+            :dns-provider-kind="type"
+            :selected-secret="secret"
+            @update-secret="onUpdateSecret"
+            @valid="onSecretValid"></select-secret>
+        </v-col>
+        <v-col>
+          <v-combobox
+            v-model="excludeDomains"
+            label="Exclude Domains"
+            multiple
+            small-chips
+            @input="onInputExcludeDomains"
+          >
+          </v-combobox>
+        </v-col>
+        <v-col>
+          <v-combobox
+            v-model="includeDomains"
+            label="Include Domains"
+            multiple
+            small-chips
+            @input="onInputIncludeDomains"
+          >
+          </v-combobox>
+        </v-col>
+        <v-col>
+          <v-combobox
+            v-model="excludeZones"
+            label="Exclude Zones"
+            multiple
+            small-chips
+            @input="onInputExcludeZones"
+          >
+          </v-combobox>
+        </v-col>
+        <v-col>
+          <v-combobox
+            v-model="includeZones"
+            label="Include Zones"
+            multiple
+            small-chips
+            @input="onInputIncludeZones"
+          >
+          </v-combobox>
+        </v-col>
       </v-row>
-      <div class="mr-2">
-        <v-btn
-          small
-          outlined
-          icon
-          color="grey"
-          @click.native.stop="removeDnsProvider">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </div>
-    </div>
-  </v-container>
+    </v-col>
+    <v-col cols="1">
+      <v-btn
+        small
+        outlined
+        icon
+        color="grey"
+        @click.native.stop="removeDnsProvider">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
