@@ -17,16 +17,16 @@ metadata:
 {{ toYaml . | indent 4 }}
   {{- end }}
 spec:
-{{- if .Values.tls }}
+{{- if .Values.ingress.tls }}
   tls:
-  - secretName: {{ .Values.tlsSecretName | default "gardener-dashboard-tls" }}
+  - secretName: {{ required ".Values.ingress.tls.secretName is required" .Values.ingress.tls.secretName }}
     hosts:
-    {{- range .Values.hosts }}
+    {{- range .Values.ingress.hosts }}
     - {{ . }}
     {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.hosts }}
+  {{- range .Values.ingress.hosts }}
   - host: {{ . }}
     http:
       paths:

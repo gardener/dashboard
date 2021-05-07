@@ -111,6 +111,13 @@ spec:
               secretKeyRef:
                 name: gardener-dashboard-oidc
                 key: client_secret
+          {{- if .Values.oidc.caSecretKeyRef }}
+          - name: OIDC_CA
+            valueFrom:
+              secretKeyRef:
+                name: {{  required ".Values.oidc.caSecretKeyRef.name is required" .Values.oidc.caSecretKeyRef.name }}
+                key: {{ .Values.oidc.caSecretKeyRef.key | default "ca.crt" }}
+          {{- end }}
           {{- end }}
           {{- if .Values.gitHub }}
           - name: GITHUB_AUTHENTICATION_USERNAME

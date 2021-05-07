@@ -18,7 +18,7 @@ data:
     port: {{ .Values.containerPort }}
     logLevel: {{ .Values.logLevel }}
     logFormat: text
-    apiServerUrl: {{ .Values.apiServerUrl }}
+    apiServerUrl: {{ required ".Values.apiServerUrl is required" .Values.apiServerUrl }}
     {{- if .Values.apiServerCaData }}
     apiServerCaData: {{ .Values.apiServerCaData }}
     {{- else if .Values.apiServerCa }}
@@ -50,11 +50,7 @@ data:
     {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
-      {{- if .Values.oidc.redirectUri }}
-      redirect_uri: {{ .Values.oidc.redirectUri }}
-      {{- else }}
-      redirect_uri: https://{{ first .Values.hosts }}/auth/callback
-      {{- end }}
+      redirect_uri: {{ required ".Values.oidc.redirectUri is required" .Values.oidc.redirectUri }}
       {{- if .Values.oidc.scope }}
       scope: {{ .Values.oidc.scope }}
       {{- else }}

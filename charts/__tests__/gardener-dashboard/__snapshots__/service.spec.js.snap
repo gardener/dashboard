@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gardener-dashboard service should render the template 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": Object {
+    "labels": Object {
+      "app": "gardener-dashboard",
+      "chart": "gardener-dashboard-0.2.0",
+      "heritage": "Helm",
+      "release": "dashboard",
+    },
+    "name": "gardener-dashboard-service",
+    "namespace": "garden",
+  },
+  "spec": Object {
+    "ports": Array [
+      Object {
+        "name": "http",
+        "port": 8080,
+        "protocol": "TCP",
+        "targetPort": 8080,
+      },
+    ],
+    "selector": Object {
+      "app": "gardener-dashboard",
+      "release": "dashboard",
+    },
+    "sessionAffinity": "ClientIP",
+    "type": "ClusterIP",
+  },
+}
+`;
