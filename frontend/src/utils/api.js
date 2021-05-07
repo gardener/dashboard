@@ -163,6 +163,12 @@ export function updateShootAddons ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
 }
 
+export function updateShootDns ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`, data)
+}
+
 export async function getShootSchemaDefinition () {
   const definitions = await getResource('/api/openapi')
   return get(definitions, ['data', 'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'])

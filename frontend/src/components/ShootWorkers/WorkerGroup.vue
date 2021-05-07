@@ -15,7 +15,8 @@ SPDX-License-Identifier: Apache-2.0
         class="cursor-pointer my-0 ml-0"
         outlined
         color="primary">
-        {{workerGroup.name}}
+          <vendor-icon :value="machineImage.icon" :size="20"></vendor-icon>
+          {{workerGroup.name}}
       </v-chip>
     </template>
     <v-list class="pa-0">
@@ -32,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import GPopper from '@/components/GPopper'
+import VendorIcon from '@/components/VendorIcon'
 import find from 'lodash/find'
 import join from 'lodash/join'
 import get from 'lodash/get'
@@ -40,7 +42,8 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'worker-group',
   components: {
-    GPopper
+    GPopper,
+    VendorIcon
   },
   props: {
     workerGroup: {

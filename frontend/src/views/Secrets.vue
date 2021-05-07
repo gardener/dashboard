@@ -181,6 +181,7 @@ import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
+import find from 'lodash/find'
 import includes from 'lodash/includes'
 
 export default {
@@ -514,7 +515,11 @@ export default {
       return shootsByInfrastructureSecret.length
     },
     relatedShootCountDns (secret) {
-      return 0 // TODO
+      const name = secret.metadata.name
+      const shootsByDnsSecret = filter(this.shootList, shoot => {
+        return find(shoot.spec.dns.providers, { type: secret.metadata.dnsProviderName, secretName: secret.metadata.name })
+      })
+      return shootsByDnsSecret.length
     },
     relatedShootCountLabel (count) {
       if (count === 0) {

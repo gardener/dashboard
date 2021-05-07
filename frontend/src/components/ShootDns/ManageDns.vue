@@ -14,7 +14,9 @@ SPDX-License-Identifier: Apache-2.0
           v-model="domain"
           @blur="$v.primaryProvider.$touch()"
           @input="onInputDomain"
-          hint="External available domain of the cluster"
+          :disabled="!createMode"
+          :persistent-hint="!createMode"
+          :hint="domainHint"
         ></v-text-field>
       </v-col>
       <v-col cols="3">
@@ -48,9 +50,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-select>
       </v-col>
     </v-row>
+    <v-divider></v-divider>
     <transition-group name="list" class="alternate-row-background">
       <v-row v-for="(provider, index) in dnsProviders" :key="provider.id" class="list-item pt-2">
-        <dns-provider
+        <dns-provider-row
           :provider="provider"
           @type="onUpdateProviderType"
           @secret="onUpdateProviderSecret"
@@ -60,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           @include-zones="onUpdateIncludeZones"
           @remove-dns-provider="onRemoveProvider(index)"
           @valid="onProviderValid">
-        </dns-provider>
+        </dns-provider-row>
       </v-row>
       <v-row key="addProvider" class="list-item">
         <v-col>
@@ -86,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import DnsProvider from '@/components/ShootDns/DnsProvider'
+import DnsProviderRow from '@/components/ShootDns/DnsProviderRow'
 import VendorIcon from '@/components/VendorIcon'
 import { getValidationErrors, dnsProviderList } from '@/utils'
 import { requiredIf } from 'vuelidate/lib/validators'
@@ -111,8 +114,14 @@ const validations = {
 export default {
   name: 'manage-dns',
   components: {
-    DnsProvider,
+    DnsProviderRow,
     VendorIcon
+  },
+  props: {
+    createMode: {
+      type: Boolean,
+      default: false
+    }
   },
   data () {
     return {
@@ -134,6 +143,12 @@ export default {
           required: 'Provider is required if a custom domain is defined'
         }
       }
+    },
+    domainHint () {
+      if (this.createMode) {
+        return 'External available domain of the cluster'
+      }
+      return 'Domain cannot be changed after cluster creation'
     }
   },
   methods: {

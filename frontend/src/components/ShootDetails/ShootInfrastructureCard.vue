@@ -111,17 +111,16 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content class="pt-0">
           <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <v-chip
-              v-for="({ primary, secretName, type }, index) in shootDnsProviders"
-              small
-              color="primary"
-              outlined
-              :key="index"
-              class="mr-2">
-              <vendor-icon :value="type" :size="20"></vendor-icon>
-              {{secretName}}
-              <v-icon v-if="primary" small>mdi-star</v-icon>
-            </v-chip>
+            <dns-provider
+              class="mr-2 mb-2"
+              v-for="({ primary, secretName, type, domains, zones }, index) in shootDnsProviders"
+              :primary="primary"
+              :secretName="secretName"
+              :type="type"
+              :domains="domains"
+              :zones="zones"
+              :key="index">
+            </dns-provider>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
@@ -174,7 +173,7 @@ import CopyBtn from '@/components/CopyBtn'
 import LbClass from '@/components/ShootDetails/LbClass'
 import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
-import VendorIcon from '@/components/VendorIcon'
+import DnsProvider from '@/components/ShootDns/DnsProvider'
 import DnsConfiguration from '@/components/ShootDns/DnsConfiguration'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -185,7 +184,7 @@ export default {
     LbClass,
     ShootSeedName,
     Vendor,
-    VendorIcon,
+    DnsProvider,
     DnsConfiguration
   },
   props: {

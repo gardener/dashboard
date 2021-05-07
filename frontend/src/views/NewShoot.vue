@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
           DNS Configuration
         </v-card-title>
         <v-card-text>
-          <manage-shoot-dns></manage-shoot-dns>
+          <manage-shoot-dns create-mode></manage-shoot-dns>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
