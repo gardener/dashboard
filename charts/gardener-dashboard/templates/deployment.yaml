@@ -120,11 +120,6 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.gitHub }}
-          - name: GITHUB_AUTHENTICATION_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.username
           - name: GITHUB_AUTHENTICATION_TOKEN
             valueFrom:
               secretKeyRef:
