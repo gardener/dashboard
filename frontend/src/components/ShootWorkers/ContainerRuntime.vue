@@ -19,14 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="immutableCri"
       :hint="criHint"
       persistent-hint
-    >
-      <template v-slot:item="{ item }">
-        <span>{{criItemText(item)}}</span>
-      </template>
-      <template v-slot:selection="{ item }">
-        <span>{{criItemText(item)}}</span>
-      </template>
-    </v-select>
+    ></v-select>
     <v-select
       v-if="ociRuntimeItems.length"
       class="ml-1"
@@ -42,14 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="immutableCri"
       :hint="ociHint"
       persistent-hint
-    >
-      <template v-slot:item="{ item }">
-        <span>{{ociItemText(item)}}</span>
-      </template>
-      <template v-slot:selection="{ item }">
-        <span>{{ociItemText(item)}}</span>
-      </template>
-    </v-select>
+    ></v-select>
   </div>
 </template>
 
@@ -119,15 +105,19 @@ export default {
   computed: {
     containerRuntimeItems () {
       const containerRuntimes = map(this.machineImageCri, 'name')
-      return uniq([...containerRuntimes, DEFAULT_CONTAINER_RUNTIME])
+      const items = uniq([...containerRuntimes, DEFAULT_CONTAINER_RUNTIME])
+      return map(items, item => ({ value: item, text: this.criItemText(item) }))
     },
     ociRuntimeItems () {
+      let items
       if (this.containerRuntime === DEFAULT_CONTAINER_RUNTIME) {
-        return [DEFAULT_OCI_RUNTIME]
+        items = [DEFAULT_OCI_RUNTIME]
+      } else {
+        const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
+        const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
+        items = map(ociRuntimes, 'type')
       }
-      const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
-      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
-      return map(ociRuntimes, 'type')
+      return map(items, item => ({ value: item, text: this.ociItemText(item) }))
     },
     criHint () {
       if (this.immutableCri) {
