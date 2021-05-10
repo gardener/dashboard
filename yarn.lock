@@ -1298,7 +1298,7 @@ __metadata:
     jose: ^1.24.0
     js-yaml: ^3.13.1
     jsonwebtoken: ^8.5.1
-    lodash: ^4.17.19
+    lodash: 4.17.21
     morgan: ^1.9.1
     nodemon: ^2.0.2
     object-hash: ^2.0.3
@@ -1332,7 +1332,7 @@ __metadata:
     eslint-plugin-promise: ^4.3.1
     jest: ^26.6.3
     js-yaml: ^3.13.1
-    lodash: ^4.17.19
+    lodash: 4.17.21
   languageName: unknown
   linkType: soft
 
@@ -1372,7 +1372,7 @@ __metadata:
     jest-serializer-vue: ^2.0.2
     js-yaml: ^3.13.1
     jwt-decode: ^2.2.0
-    lodash: ^4.17.19
+    lodash: 4.17.21
     md5: ^2.3.0
     netmask: ^1.0.6
     ora: ^3.4.0
@@ -1425,7 +1425,7 @@ __metadata:
     http-errors: ^1.8.0
     jest: ^26.6.3
     jsonwebtoken: ^8.5.1
-    lodash: ^4.17.19
+    lodash: 4.17.21
     mixwith: ^0.1.1
     node-forge: ^0.10.0
     uuid: ^8.3.0
@@ -1444,7 +1444,7 @@ __metadata:
     eslint-plugin-promise: ^4.3.1
     jest: ^26.6.3
     js-yaml: ^3.13.1
-    lodash: ^4.17.19
+    lodash: 4.17.21
   languageName: unknown
   linkType: soft
 
@@ -1479,7 +1479,7 @@ __metadata:
     eslint-plugin-promise: ^4.3.1
     http-errors: ^1.8.0
     jest: ^26.6.3
-    lodash: ^4.17.19
+    lodash: 4.17.21
     type-is: ^1.6.18
   languageName: unknown
   linkType: soft
@@ -8967,9 +8967,9 @@ fsevents@^1.2.7:
   linkType: hard
 
 "hosted-git-info@npm:^2.1.4":
-  version: 2.8.8
-  resolution: "hosted-git-info@npm:2.8.8"
-  checksum: 3ecc389dc6ecbd5463fada7e04461e96f3c817fe2f989ca41e9dd3b503745a0bfa26fba405861b2831ca64edc1abc5d2fbc97ee977303f89650dac4fbfdc2d7a
+  version: 2.8.9
+  resolution: "hosted-git-info@npm:2.8.9"
+  checksum: cf4dfac9b94aa601ae889e7e3cb5a7021a8517b517f933fec0b3a8dc5002edece01475c82f70cc18a051a5a8105bcb2fbe4e64f0b8f321eb99054a49a75b5aa3
   languageName: node
   linkType: hard
 
@@ -11856,7 +11856,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.21, lodash@npm:^4.17.3, lodash@npm:^4.17.4":
+"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.21, lodash@npm:^4.17.3, lodash@npm:^4.17.4":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 4983720b9abca930a4a46f18db163d7dad8dd00dbed6db0cc7b499b33b717cce69f80928b27bbb1ff2cbd3b19d251ee90669a8b5ea466072ca81c2ebe91e7468
