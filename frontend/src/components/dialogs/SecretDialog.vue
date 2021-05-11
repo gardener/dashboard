@@ -332,12 +332,8 @@ export default {
       return getValidationErrors(this, field)
     }
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    }
+  mounted () {
+    this.reset()
   }
 }
 </script>

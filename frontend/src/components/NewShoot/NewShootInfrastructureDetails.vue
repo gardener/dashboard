@@ -415,7 +415,6 @@ export default {
       this.cloudProfileValid = true
 
       this.secret = head(this.infrastructureSecretsByProfileName)
-      this.onInputSecret()
       this.region = head(this.regionsWithSeed)
       if (!this.region && this.showAllRegions) {
         this.region = head(this.regionsWithoutSeed)
