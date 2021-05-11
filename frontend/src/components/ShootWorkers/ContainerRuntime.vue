@@ -26,53 +26,44 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="ociRuntimeItems"
-      :error-messages="getErrorMessages('ociRuntime')"
       @input="onInputOciRuntime"
-      @blur="$v.ociRuntime.$touch()"
       v-model="ociRuntime"
-      label="OCI Runtimes"
+      label="Additional OCI Runtimes"
       multiple
       :disabled="immutableCri"
       :hint="ociHint"
       persistent-hint
+      chips
+      small-chips
+      deletable-chips
     ></v-select>
   </div>
 </template>
 
 <script>
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import uniq from 'lodash/uniq'
 import find from 'lodash/find'
 import map from 'lodash/map'
-import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
 
-// The following runtimes are defaults that are always offered.
+// The following runtime is a default that is always offered.
 // Selecting a default Container / OCI Runtime will not create a CRI config in the shoot worker
 // Currently, this is hard-coded in Gardener. Once this can be configured or default is removed, we need to adapt
 const DEFAULT_CONTAINER_RUNTIME = 'docker'
-const DEFAULT_OCI_RUNTIME = 'runc'
 
 const validationErrors = {
   containerRuntime: {
     required: 'Container Runtime is required'
-  },
-  ociRuntime: {
-    required: 'OCI Runtime is required'
   }
 }
 
 const validations = {
   containerRuntime: {
     required
-  },
-  ociRuntime: {
-    required: requiredIf(function () {
-      return this.ociRuntimeItems.length
-    })
   }
 }
 
@@ -96,28 +87,19 @@ export default {
       validationErrors,
       valid: undefined,
       containerRuntime: undefined,
-      ociRuntime: undefined,
-      defaultCri: DEFAULT_CONTAINER_RUNTIME,
-      defaultOci: DEFAULT_OCI_RUNTIME
+      ociRuntime: undefined
     }
   },
   validations,
   computed: {
     containerRuntimeItems () {
       const containerRuntimes = map(this.machineImageCri, 'name')
-      const items = uniq([...containerRuntimes, DEFAULT_CONTAINER_RUNTIME])
-      return map(items, item => ({ value: item, text: this.criItemText(item) }))
+      return uniq([...containerRuntimes, DEFAULT_CONTAINER_RUNTIME])
     },
     ociRuntimeItems () {
-      let items
-      if (this.containerRuntime === DEFAULT_CONTAINER_RUNTIME) {
-        items = [DEFAULT_OCI_RUNTIME]
-      } else {
-        const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
-        const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
-        items = map(ociRuntimes, 'type')
-      }
-      return map(items, item => ({ value: item, text: this.ociItemText(item) }))
+      const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
+      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
+      return map(ociRuntimes, 'type')
     },
     criHint () {
       if (this.immutableCri) {
@@ -133,12 +115,6 @@ export default {
     }
   },
   methods: {
-    ociItemText (item) {
-      return !this.immutableCri && item === this.defaultOci ? `default (${item})` : item
-    },
-    criItemText (item) {
-      return !this.immutableCri && item === this.defaultCri ? `default (${item})` : item
-    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -153,14 +129,12 @@ export default {
       this.validateInput()
     },
     onInputOciRuntime (value) {
-      if (value.length && !isEqual(value, [DEFAULT_OCI_RUNTIME])) {
+      if (value.length) {
         const containerRuntimes = map(value, ociRuntime => ({ type: ociRuntime }))
         set(this.worker, 'cri.containerRuntimes', containerRuntimes)
       } else {
         unset(this.worker, 'cri.containerRuntimes')
       }
-      this.$v.ociRuntime.$touch()
-      this.validateInput()
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -174,8 +148,6 @@ export default {
     const ociRuntime = get(this.worker, 'cri.containerRuntimes')
     if (ociRuntime) {
       this.ociRuntime = map(ociRuntime, 'type')
-    } else {
-      this.ociRuntime = [DEFAULT_OCI_RUNTIME]
     }
     this.$v.$touch()
     this.validateInput()
