@@ -17,7 +17,7 @@ The backend is currently a monolithic Node.js application, but it performs sever
 * Static web server for the frontend single page application
 * Forward real time events of the apiserver to the frontend
 * Provide a HTTP Api 
-* Bootstrapping shoot and seed clusters to support web terminals
+* [Bootstrapping](../concepts/webterminals.md#bootstrapping) shoot and seed clusters to support web terminals 
 * Initiate and manage the end user login flow in order to obtain an ID Token
 * Bidirectional integration with the github issue management
 
