@@ -60,7 +60,7 @@
     "sanitize-html": "^2.1.1",
     "semver": "^7.2.1",
     "showdown": "^1.9.1",
-    "socket.io": "^2.3.0",
+    "socket.io": "^4.1.2",
     "swagger-parser": "^8.0.1",
     "uuid": "^8.3.0"
   },
@@ -79,7 +79,7 @@
     "p-event": "^4.1.0",
     "path-to-regexp": "^6.2.0",
     "set-cookie-parser": "^2.3.5",
-    "socket.io-client": "^2.3.0",
+    "socket.io-client": "^4.1.2",
     "supertest": "^6.0.1"
   },
   "eslintConfig": {

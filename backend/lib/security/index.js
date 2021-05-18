@@ -219,6 +219,9 @@ function authenticate (options = {}) {
   }
   const setUserAuth = async (req, res) => {
     const { cookies = {}, user = {} } = req
+    if (user.auth && user.client) {
+      return
+    }
     const encryptedBearer = cookies[COOKIE_TOKEN]
     if (!encryptedBearer) {
       throw new Unauthorized('No bearer token found in request')
@@ -229,7 +232,7 @@ function authenticate (options = {}) {
 
     Object.defineProperty(user, 'client', {
       value: options.createClient({ auth }),
-      enumerable: false
+      configurable: true
     })
   }
   return async (req, res, next) => {
