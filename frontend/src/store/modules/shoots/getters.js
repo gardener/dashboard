@@ -7,7 +7,6 @@
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 import split from 'lodash/split'
-import some from 'lodash/some'
 import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import head from 'lodash/head'
@@ -15,6 +14,7 @@ import orderBy from 'lodash/orderBy'
 import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import find from 'lodash/find'
 import padStart from 'lodash/padStart'
 import semver from 'semver'
 
@@ -26,6 +26,7 @@ import {
 } from '@/utils'
 import { findItem } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import { forEach } from 'lodash'
 
 export function getRawVal (rootGetters, item, column) {
   const metadata = item.metadata
@@ -150,38 +151,59 @@ export default {
     return state.initialNewShootResource
   },
   searchItems (state, getters, rootState, rootGetters) {
+    let searchQuery
+    let lastSearchString
+    const exactMatchPattern = /^"(.+)"$/
     return (value, search, item) => {
+      if (search !== lastSearchString) {
+        searchQuery = []
+        lastSearchString = search
+        let negative = false
+        let or = false
+        forEach(split(search, ' '), searchTerm => {
+          if (searchTerm === 'NOT') {
+            negative = true
+          } else if (searchTerm === 'OR') {
+            or = true
+          } else {
+            const exactValue = exactMatchPattern.exec(searchTerm)
+            const exact = exactValue && exactValue.length > 0
+            searchQuery.push({
+              value: exact ? exactValue[1] : searchTerm,
+              exact,
+              negative,
+              or
+            })
+          }
+        })
+      }
+
       const searchableCustomFields = filter(rootGetters.shootCustomFieldList, ['searchable', true])
+      const values = [
+        getRawVal(rootGetters, item, 'name'),
+        getRawVal(rootGetters, item, 'infrastructure'),
+        getRawVal(rootGetters, item, 'seed'),
+        getRawVal(rootGetters, item, 'project'),
+        getRawVal(rootGetters, item, 'createdBy'),
+        getRawVal(rootGetters, item, 'purpose'),
+        getRawVal(rootGetters, item, 'k8sVersion'),
+        getRawVal(rootGetters, item, 'ticketLabels'),
+        ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
+      ]
 
-      const searchValue = split(search, ' ')
-      return some(searchValue, value => {
-        if (includes(getRawVal(rootGetters, item, 'name'), value)) {
-          return true
+      let result = true
+      forEach(searchQuery, searchTerm => {
+        let found = find(values, value => searchTerm.exact ? value === searchTerm.value : includes(value, searchTerm.value))
+        if (searchTerm.negative) {
+          found = !found
         }
-        if (includes(getRawVal(rootGetters, item, 'infrastructure'), value)) {
-          return true
+        if (searchTerm.or) {
+          result = result || found
+        } else {
+          result = result && found
         }
-        if (includes(getRawVal(rootGetters, item, 'seed'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'project'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'createdBy'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'purpose'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'k8sVersion'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'ticketLabels'), value)) {
-          return true
-        }
-
-        return some(searchableCustomFields, ({ key }) => includes(getRawVal(rootGetters, item, key), value))
       })
+      return result
     }
   },
   sortItems (state, getters, rootState, rootGetters) {

@@ -16,18 +16,27 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="shootSearch || items.length > 3"
-          prepend-inner-icon="mdi-magnify"
-          color="primary"
-          label="Search"
-          clearable
-          hide-details
-          flat
-          solo
-          v-model="shootSearch"
-          @keyup.esc="shootSearch=''"
-          class="mr-3"
-        ></v-text-field>
+        <v-tooltip top v-if="shootSearch || items.length > 3">
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-on="on"
+              prepend-inner-icon="mdi-magnify"
+              color="primary"
+              label="Search"
+              clearable
+              hide-details
+              flat
+              solo
+              @input="onInputSearch"
+              @keyup.esc="shootSearch=''"
+              class="mr-3"
+            ></v-text-field>
+          </template>
+          <span>Search params are ANDed by defaut. You can use the following keywords to customize your search:</span><br />
+          <v-chip label color="primary" small>OR</v-chip> <span>if you want the params to be ORed. Example: <i>project-a OR project-b</i></span><br />
+          <v-chip label color="primary" small>NOT</v-chip> <span>if you want a param to be negative. Example: <i>NOT project-a</i></span><br />
+          <v-chip label color="primary" small>Quotes</v-chip> <span>if you want a param to match exact only. Example: <i>"project"</i> will only match <i>project</i>, not <i>project-a</i></span>
+        </v-tooltip>
         <v-tooltip top v-if="canCreateShoots && projectScope">
           <template v-slot:activator="{ on }">
              <v-btn v-on="on" icon :to="{ name: 'NewShoot', params: {  namespace } }">
@@ -115,7 +124,8 @@ export default {
       options: undefined,
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
-      selectedColumns: undefined
+      selectedColumns: undefined,
+      setSearchValueWithDelayTimerID: undefined
     }
   },
   watch: {
@@ -223,6 +233,12 @@ export default {
       this.clearSelectedShootTimerID = setTimeout(() => {
         this.setSelectedShootInternal(null)
       }, 500)
+    },
+    onInputSearch (value) {
+      clearTimeout(this.setSearchValueWithDelayTimerID)
+      this.setSearchValueWithDelayTimerID = setTimeout(() => {
+        this.shootSearch = value
+      }, 800)
     }
   },
   computed: {
