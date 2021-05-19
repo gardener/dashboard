@@ -16,6 +16,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import padStart from 'lodash/padStart'
+import forEach from 'lodash/forEach'
 import semver from 'semver'
 
 import {
@@ -26,7 +27,6 @@ import {
 } from '@/utils'
 import { findItem } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
-import { forEach } from 'lodash'
 
 export function getRawVal (rootGetters, item, column) {
   const metadata = item.metadata
