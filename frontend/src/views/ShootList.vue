@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
               class="mr-3"
             ></v-text-field>
           </template>
-          <span>Search params are ANDed by defaut. You can use the following keywords to customize your search:</span><br />
+          <span>Search params are ANDed by default. You can use the following keywords to customize your search:</span><br />
           <v-chip label color="primary" small>OR</v-chip> <span>if you want the params to be ORed. Example: <i>project-a OR project-b</i></span><br />
           <v-chip label color="primary" small>NOT</v-chip> <span>if you want a param to be negative. Example: <i>NOT project-a</i></span><br />
           <v-chip label color="primary" small>Quotes</v-chip> <span>if you want a param to match exact only. Example: <i>"project"</i> will only match <i>project</i>, not <i>project-a</i></span>
