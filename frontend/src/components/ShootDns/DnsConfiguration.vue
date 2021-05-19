@@ -46,7 +46,7 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapState('componentStates', { storedComponentState: 'manageDns' }),
+    ...mapState('componentStates', { storedComponentState: 'manageDns' })
   },
   methods: {
     ...mapMutations('componentStates', ['SET_MANAGE_DNS']),

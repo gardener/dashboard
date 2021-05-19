@@ -64,7 +64,7 @@ export default {
     zones: {
       type: Object,
       required: false
-    },
+    }
   },
   computed: {
     dnsProviderDescriptions () {
