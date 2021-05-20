@@ -38,7 +38,7 @@ metadata:
           "name": "Shoot Status",
           "path": "metadata.labels[\"shoot.gardener.cloud/status\"]",
           "icon": "mdi-heart-pulse",
-          "tooltip": "Indicates the health status of the cluster"
+          "tooltip": "Indicates the health status of the cluster",
           "defaultValue": "unknown",
           "showColumn": true,
           "columnSelectedByDefault": true,
