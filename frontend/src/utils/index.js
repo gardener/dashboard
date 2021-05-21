@@ -704,12 +704,11 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
   const version = find(allVersions, { version: shootK8sVersion })
   if (!version) {
-    const isWarning = true
     return {
       version: shootK8sVersion,
       expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
       isValidTerminationDate: false,
-      color: isWarning ? 'warning' : 'primary'
+      color: 'warning'
     }
   }
   if (!version.expirationDate) {
@@ -728,7 +727,7 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
     return undefined
   }
 
-  let color = 'primary'
+  let color = 'info'
   if (isWarning) {
     color = 'warning'
   }
@@ -757,7 +756,8 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
         expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
         isWarning: true,
         workerName: worker.name,
-        isValidTerminationDate: false
+        isValidTerminationDate: false,
+        color: 'warning'
       }
     }
 
@@ -766,13 +766,23 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
     const isError = !updateAvailable
     const isWarning = !imageAutoPatch && updateAvailable
     const isInfo = imageAutoPatch && updateAvailable
+
+    let color = 'info'
+    if (isWarning) {
+      color = 'warning'
+    }
+    if (isError) {
+      color = 'error'
+    }
+
     return {
       ...workerImageDetails,
       isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
       workerName: worker.name,
       isError,
       isWarning,
-      isInfo
+      isInfo,
+      color
     }
   })
   return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {

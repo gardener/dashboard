@@ -300,7 +300,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: false,
-          isInfo: true
+          isInfo: true,
+          color: 'info'
         })
       })
 
@@ -311,7 +312,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: true,
-          isInfo: false
+          isInfo: false,
+          color: 'warning'
         })
       })
 
@@ -322,7 +324,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: true,
-          isInfo: false
+          isInfo: false,
+          color: 'warning'
         })
 
         versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
@@ -331,7 +334,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: true,
-          isInfo: false
+          isInfo: false,
+          color: 'warning'
         })
       })
 
@@ -342,7 +346,8 @@ describe('utils', () => {
           isValidTerminationDate: false,
           isError: true,
           isWarning: false,
-          isInfo: false
+          isInfo: false,
+          color: 'error'
         })
       })
 
@@ -441,7 +446,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: false,
-          isInfo: true
+          isInfo: true,
+          color: 'info'
         })
       })
 
@@ -456,7 +462,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: true,
-          isInfo: false
+          isInfo: false,
+          color: 'warning'
         })
       })
 
@@ -471,7 +478,8 @@ describe('utils', () => {
           isValidTerminationDate: true,
           isError: false,
           isWarning: false,
-          isInfo: true
+          isInfo: true,
+          color: 'info'
         })
         expect(expiredWorkerGroups[1]).toEqual({
           ...sampleMachineImages[3],
@@ -480,7 +488,8 @@ describe('utils', () => {
           isError: true,
           isWarning: false,
           isInfo: false,
-          isPreview: true
+          isPreview: true,
+          color: 'error'
         })
         expect(expiredWorkerGroups[2]).toEqual({
           ...sampleMachineImages[4],
@@ -488,7 +497,8 @@ describe('utils', () => {
           isValidTerminationDate: false,
           isError: true,
           isWarning: false,
-          isInfo: false
+          isInfo: false,
+          color: 'error'
         })
       })
 
