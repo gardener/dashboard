@@ -25,9 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             </auto-hide>
           </v-col>
           <v-col class="shrink" >
-            <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <shoot-warning :shoot-item="shootItem" all-warnings />
-            </div>
+            <shoot-warning :shoot-item="shootItem" all-warnings />
           </v-col>
         </v-row>
       </template>
