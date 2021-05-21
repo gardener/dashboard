@@ -26,25 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="shrink" >
             <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
-              <self-termination-warning :expiration-timestamp="shootExpirationTimestamp" />
-              <version-expiration-warning :shoot-item="shootItem" />
-              <constraint-warning
-                :value="!isMaintenancePreconditionSatisfied"
-                type="maintenance"
-                icon>
-                {{maintenancePreconditionSatisfiedMessage}}
-              </constraint-warning>
-              <constraint-warning
-                :value="!isHibernationPossible && shootHibernationSchedules.length > 0"
-                type="hibernation"
-                icon>
-                {{hibernationPossibleMessage}}
-              </constraint-warning>
-              <hibernation-schedule-warning
-                v-if="isShootHasNoHibernationScheduleWarning"
-                :name="shootName"
-                :namespace="shootNamespace"
-                :purpose="shootPurpose" />
+              <shoot-warning :shoot-item="shootItem" all-warnings />
             </div>
           </v-col>
         </v-row>
@@ -177,17 +159,13 @@ import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import TicketLabel from '@/components/ShootTickets/TicketLabel'
-import SelfTerminationWarning from '@/components/SelfTerminationWarning'
-import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import ShootSeedName from '@/components/ShootSeedName'
-import VersionExpirationWarning from '@/components/VersionExpirationWarning'
+import ShootWarning from '@/components/ShootWarning'
 import ShootListRowActions from '@/components/ShootListRowActions'
-import ConstraintWarning from '@/components/ConstraintWarning'
 import AutoHide from '@/components/AutoHide'
 
 import {
   isTypeDelete,
-  isShootHasNoHibernationScheduleWarning,
   getTimestampFormatted
 } from '@/utils'
 
@@ -202,15 +180,12 @@ export default {
     TimeString,
     ShootVersion,
     TicketLabel,
-    SelfTerminationWarning,
-    HibernationScheduleWarning,
     AccountAvatar,
     CopyBtn,
     ShootSeedName,
     Vendor,
-    VersionExpirationWarning,
+    ShootWarning,
     ShootListRowActions,
-    ConstraintWarning,
     AutoHide
   },
   props: {
@@ -263,9 +238,6 @@ export default {
       return this.isClusterAccessDialogDisabled
         ? 'Cluster Access'
         : 'Show Cluster Access'
-    },
-    isShootHasNoHibernationScheduleWarning () {
-      return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     shootLastUpdatedTicketTimestamp () {
       return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)

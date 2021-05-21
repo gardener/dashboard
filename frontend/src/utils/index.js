@@ -382,7 +382,10 @@ export function isStatusProgressing (metadata) {
 }
 
 export function isSelfTerminationWarning (expirationTimestamp) {
-  return expirationTimestamp && new Date(expirationTimestamp) - new Date() < 24 * 60 * 60 * 1000 // 1 day
+  if (!isValidTerminationDate(expirationTimestamp)) {
+    return true
+  }
+  return new Date(expirationTimestamp) - new Date() < 24 * 60 * 60 * 1000 * 3 // 3 days
 }
 
 export function isValidTerminationDate (expirationTimestamp) {
@@ -701,11 +704,12 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
   const version = find(allVersions, { version: shootK8sVersion })
   if (!version) {
+    const isWarning = true
     return {
       version: shootK8sVersion,
       expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
-      isWarning: true,
-      isValidTerminationDate: false
+      isValidTerminationDate: false,
+      color: isWarning ? 'warning' : 'primary'
     }
   }
   if (!version.expirationDate) {
@@ -723,12 +727,22 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   if (!isError && !isWarning && !isInfo) {
     return undefined
   }
+
+  let color = 'primary'
+  if (isWarning) {
+    color = 'warning'
+  }
+  if (isError) {
+    color = 'error'
+  }
+
   return {
     expirationDate: version.expirationDate,
     isValidTerminationDate: isValidTerminationDate(version.expirationDate),
     isError,
     isWarning,
-    isInfo
+    isInfo,
+    color
   }
 }
 

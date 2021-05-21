@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           <copy-btn :clipboard-text="shootName"></copy-btn>
         </v-list-item-action>
       </v-list-item>
-      <template v-if="expirationTimestamp && !isShootMarkedForDeletion">
+      <template v-if="shootExpirationTimestamp && !isShootMarkedForDeletion">
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-list-item-title class="d-flex align-center pt-1">
               <v-icon
                 v-if="!isSelfTerminationWarning"
-                color="primary"
+                color="info"
                 left
                 size="18"
               >mdi-information</v-icon>
@@ -254,21 +254,18 @@ export default {
     ...mapGetters([
       'canGetSecrets'
     ]),
-    expirationTimestamp () {
-      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
-    },
     selfTerminationMessage () {
       if (this.isValidTerminationDate) {
-        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
+        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.shootExpirationTimestamp))}`
       } else {
         return 'This cluster is about to self terminate'
       }
     },
     isSelfTerminationWarning () {
-      return isSelfTerminationWarning(this.expirationTimestamp)
+      return isSelfTerminationWarning(this.shootExpirationTimestamp)
     },
     isValidTerminationDate () {
-      return isValidTerminationDate(this.expirationTimestamp)
+      return isValidTerminationDate(this.shootExpirationTimestamp)
     },
     addon () {
       return (name) => {
