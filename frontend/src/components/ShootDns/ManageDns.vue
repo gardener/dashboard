@@ -264,7 +264,9 @@ export default {
         includeDomains: get(provider, 'domains.include', []).slice(),
         excludeZones: get(provider, 'zones.exclude', []).slice(),
         includeZones: get(provider, 'zones.include', []).slice(),
-        id: uuidv4()
+        id: uuidv4(),
+        primary: provider.primary,
+        createMode: this.createMode
       }
     })
     const primaryProvider = find(providers, ['primary', true])

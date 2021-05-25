@@ -18,6 +18,9 @@ SPDX-License-Identifier: Apache-2.0
             :items="dnsProviderList"
             :error-messages="getErrorMessages('type')"
             label="Dns Provider Type"
+            :disabled="primary && !createMode"
+            :hint="typeHint"
+            persistent-hint
           >
             <template v-slot:item="{ item }">
               <v-list-item-action>
@@ -134,7 +137,9 @@ export default {
       excludeDomains: undefined,
       includeDomains: undefined,
       excludeZones: undefined,
-      includeZones: undefined
+      includeZones: undefined,
+      primary: false,
+      createMode: false
     }
   },
   validations: {
@@ -148,6 +153,12 @@ export default {
     ]),
     dnsProviderList () {
       return dnsProviderList
+    },
+    typeHint () {
+      if (this.primary && !this.createMode) {
+        return 'Primary Provider type cannot be changed after cluster creation'
+      }
+      return undefined
     }
   },
   methods: {
@@ -203,6 +214,8 @@ export default {
       this.includeDomains = this.provider.includeDomains
       this.excludeZones = this.provider.excludeZones
       this.includeZones = this.provider.includeZones
+      this.primary = this.provider.primary
+      this.createMode = this.provider.createMode
     }
     this.validateInput()
   }
