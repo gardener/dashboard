@@ -66,25 +66,25 @@ export function getConfiguration () {
   return getResource('/config.json')
 }
 
-/* Infrastructures Secrets */
+/* CloudProviders Secrets */
 
-export function getInfrastructureSecrets ({ namespace }) {
+export function getCloudProviderSecrets ({ namespace }) {
   namespace = encodeURIComponent(namespace)
   return getResource(`/api/namespaces/${namespace}/cloudprovider-secrets`)
 }
 
-export function updateInfrastructureSecret ({ namespace, name, data }) {
+export function updateCloudProviderSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`, data)
 }
 
-export function createInfrastructureSecret ({ namespace, data }) {
+export function createCloudProviderSecret ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
   return createResource(`/api/namespaces/${namespace}/cloudprovider-secrets`, data)
 }
 
-export function deleteInfrastructureSecret ({ namespace, name }) {
+export function deleteCloudProviderSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return deleteResource(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`)

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="primary"
                   ref="name"
                   v-model.trim="name"
-                  label="Secret Name"
+                  label="Secret Binding Name"
                   :error-messages="getErrorMessages('name')"
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"
@@ -234,8 +234,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'createInfrastructureSecret',
-      'updateInfrastructureSecret'
+      'createCloudProviderSecret',
+      'updateCloudProviderSecret'
     ]),
     isValid (component) {
       let isValid = true
@@ -246,9 +246,6 @@ export default {
     },
     hide () {
       this.visible = false
-      if (get(this.$route.params, 'name')) {
-        this.$router.replace({ name: 'Secrets', params: { namespace: this.namespace } })
-      }
     },
     cancel () {
       this.hide()
@@ -296,11 +293,11 @@ export default {
           metadata.dnsProviderName = this.vendor
         }
 
-        return this.createInfrastructureSecret({ metadata, data: this.data })
+        return this.createCloudProviderSecret({ metadata, data: this.data })
       } else {
         const metadata = cloneDeep(this.secret.metadata)
 
-        return this.updateInfrastructureSecret({ metadata, data: this.data })
+        return this.updateCloudProviderSecret({ metadata, data: this.data })
       }
     },
     reset () {

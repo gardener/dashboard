@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       ref="secret"
       color="primary"
       item-color="primary"
-      label="Secret"
+      label="Secret Binding"
       :items="secretItems"
       item-value="metadata.name"
       return-object

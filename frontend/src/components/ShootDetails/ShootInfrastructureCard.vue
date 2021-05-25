@@ -116,6 +116,7 @@ SPDX-License-Identifier: Apache-2.0
               v-for="({ primary, secretName, type, domains, zones }, index) in shootDnsProviders"
               :primary="primary"
               :secretName="secretName"
+              :shootNamespace="shootNamespace"
               :type="type"
               :domains="domains"
               :zones="zones"

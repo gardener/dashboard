@@ -215,7 +215,7 @@ export default {
   computed: {
     ...mapGetters([
       'cloudProfilesByCloudProviderKind',
-      'getInfrastructureSecretByName',
+      'getCloudProviderSecretByName',
       'infrastructureSecretList',
       'dnsSecretList',
       'shootList',
@@ -576,11 +576,11 @@ export default {
     if (!get(this.$route.params, 'name')) {
       return
     }
-    const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
-    if (!infrastructureSecret || !isOwnSecret(infrastructureSecret)) {
+    const secret = this.getCloudProviderSecretByName(this.$route.params)
+    if (!secret || !isOwnSecret(secret)) {
       return
     }
-    this.onUpdateSecret(infrastructureSecret)
+    this.onUpdateSecret(secret)
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

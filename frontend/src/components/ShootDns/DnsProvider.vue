@@ -21,10 +21,15 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description}) in dnsProviderDescriptions" :key="title" class="px-0">
+      <v-list-item v-for="({title, value, description, to}) in dnsProviderDescriptions" :key="title" class="px-0">
         <v-list-item-content class="pt-1">
           <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-          <v-list-item-title>{{value}} {{description}}</v-list-item-title>
+          <v-list-item-title v-if="to">
+            <router-link :to="to">
+              {{value}} {{description}}
+            </router-link>
+          </v-list-item-title>
+          <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </v-list>
@@ -53,6 +58,10 @@ export default {
       type: String,
       required: true
     },
+    shootNamespace: {
+      type: String,
+      required: true
+    },
     primary: {
       type: Boolean,
       default: false
@@ -74,8 +83,15 @@ export default {
         value: this.type
       })
       description.push({
-        title: 'Secret',
-        value: this.secretName
+        title: 'Credential',
+        value: this.secretName,
+        to: {
+          name: 'Secret',
+          params: {
+            name: this.secretName,
+            namespace: this.shootNamespace
+          }
+        }
       })
       description.push({
         title: 'Primary DNS Provider',

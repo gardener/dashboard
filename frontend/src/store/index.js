@@ -644,6 +644,11 @@ const getters = {
       return !!secret.metadata.cloudProviderKind
     })
   },
+  infrastructureSecretsByCloudProfileName (state) {
+    return (cloudProfileName) => {
+      return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
+    }
+  },
   dnsSecretList (state) {
     return filter(state.cloudProviderSecrets.all, secret => {
       return !!secret.metadata.dnsProviderName
@@ -654,9 +659,9 @@ const getters = {
       return filter(state.cloudProviderSecrets.all, ['metadata.dnsProviderName', dnsProviderName])
     }
   },
-  getInfrastructureSecretByName (state, getters) {
+  getCloudProviderSecretByName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['cloudProviderSecrets/getInfrastructureSecretByName']({ namespace, name })
+      return getters['cloudProviderSecrets/getCloudProviderSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -796,11 +801,6 @@ const getters = {
           text: `${key} [${value}]`
         }
       })
-    }
-  },
-  infrastructureSecretsByCloudProfileName (state) {
-    return (cloudProfileName) => {
-      return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
     }
   },
   shootByNamespaceAndName (state, getters) {
@@ -1264,24 +1264,24 @@ const actions = {
         return res
       })
   },
-  createInfrastructureSecret ({ dispatch, commit }, data) {
+  createCloudProviderSecret ({ dispatch, commit }, data) {
     return dispatch('cloudProviderSecrets/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret created', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret created', type: 'success' })
         return res
       })
   },
-  updateInfrastructureSecret ({ dispatch, commit }, data) {
+  updateCloudProviderSecret ({ dispatch, commit }, data) {
     return dispatch('cloudProviderSecrets/update', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret updated', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret updated', type: 'success' })
         return res
       })
   },
-  deleteInfrastructureSecret ({ dispatch, commit }, data) {
+  deleteCloudProviderSecret ({ dispatch, commit }, data) {
     return dispatch('cloudProviderSecrets/delete', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret deleted', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret deleted', type: 'success' })
         return res
       })
   },
