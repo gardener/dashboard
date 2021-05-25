@@ -60,7 +60,6 @@ export default {
     async updateConfiguration () {
       try {
         const dnsConfiguration = this.storedComponentState
-        console.log(dnsConfiguration)
         await updateShootDns({ namespace: this.shootNamespace, name: this.shootName, data: dnsConfiguration })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
