@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #### Builder ####
-FROM eu.gcr.io/gardener-project/3rd/node:15-alpine3.13 as builder
+FROM eu.gcr.io/gardener-project/3rd/node:16-alpine3.13 as builder
 
 WORKDIR /usr/src/app
 

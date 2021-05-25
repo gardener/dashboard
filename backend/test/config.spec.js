@@ -131,6 +131,16 @@ describe('config', function () {
         expect(config.sessionSecret).toBe(env.SESSION_SECRET)
         expect(config.logLevel).toBe('debug')
       })
+
+      it('should return the config with oidc.ca overridden by environment variables', function () {
+        const env = Object.assign({
+          OIDC_CA: 'ca'
+        }, requiredEnvironmentVariables)
+
+        const filename = '/etc/gardener/4/config.yaml'
+        const config = gardener.loadConfig(filename, { env })
+        expect(config.oidc.ca).toBe('ca')
+      })
     })
   })
 })

@@ -121,6 +121,12 @@ configMap.set('/etc/gardener/3/config.yaml', {
   sessionSecret: undefined
 })
 
+configMap.set('/etc/gardener/4/config.yaml', {
+  oidc: {
+    ca
+  }
+})
+
 module.exports = {
   default: defaultConfig,
   get (key) {

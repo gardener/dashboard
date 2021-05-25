@@ -48,5 +48,7 @@
     "**/dist": true
   },
   "jestrunner.enableYarnPnpSupport": true,
-  "jestrunner.jestCommand": "scripts/jest"
+  "jestrunner.jestCommand": "scripts/jest",
+  "vetur.useWorkspaceDependencies": true,
+  "vetur.experimental.templateInterpolationService": true
 }

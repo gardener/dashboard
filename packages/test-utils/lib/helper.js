@@ -37,10 +37,25 @@ function hash (data, { algorithm = 'md5', encoding = 'hex' } = {}) {
     .digest(encoding)
 }
 
+function decodeBase64 (data) {
+  return Buffer.from(data, 'base64').toString('utf8')
+}
+
+function encodeBase64 (data) {
+  return Buffer.from(data, 'utf8').toString('base64')
+}
+
+function randomNumber () {
+  return crypto.randomBytes(4).readUInt32LE(0)
+}
+
 module.exports = {
   getOwnSymbol,
   getOwnSymbolProperty,
   nextTick,
   delay,
-  hash
+  hash,
+  randomNumber,
+  encodeBase64,
+  decodeBase64
 }
