@@ -26,7 +26,7 @@ const {
   HTTP2_METHOD_GET
 } = http2.constants
 
-const EOL = 10
+const EOL = '\n'
 
 class Client {
   constructor ({ prefixUrl, agent = globalAgent, ...options } = {}) {
@@ -151,9 +151,9 @@ class Client {
         stream.destroy(error)
       },
       async body () {
-        let data = Buffer.from([])
+        let data = ''
         for await (const chunk of stream) {
-          data = Buffer.concat([data, chunk], data.length + chunk.length)
+          data += chunk
         }
         switch (this.type) {
           case 'text':
@@ -165,10 +165,10 @@ class Client {
         }
       },
       async * [Symbol.asyncIterator] () {
-        let data = Buffer.from([])
+        let data = ''
         const transform = transformFactory(this.type)
         for await (const chunk of stream) {
-          data = Buffer.concat([data, chunk], data.length + chunk.length)
+          data += chunk
           let index
           while ((index = data.indexOf(EOL)) !== -1) {
             yield transform(data.slice(0, index))
