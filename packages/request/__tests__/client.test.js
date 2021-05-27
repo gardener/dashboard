@@ -16,6 +16,7 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
+  HTTP2_HEADER_ACCEPT_ENCODING,
   HTTP2_METHOD_GET,
   HTTP2_METHOD_POST,
   HTTP2_HEADER_STATUS
@@ -51,6 +52,7 @@ describe('Client', () => {
       async getHeaders () {
         return this.mockHeaders()
       },
+      setEncoding: jest.fn(),
       async * [Symbol.asyncIterator] () {
         yield Buffer.from('{')
         let separator
@@ -123,6 +125,7 @@ describe('Client', () => {
       [HTTP2_HEADER_AUTHORITY]: '127.0.0.1:31415',
       [HTTP2_HEADER_METHOD]: HTTP2_METHOD_GET,
       [HTTP2_HEADER_PATH]: '/test',
+      [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
       'x-request-id': xRequestId
     }
 

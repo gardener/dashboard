@@ -19,7 +19,8 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_STATUS,
   HTTP2_HEADER_CONTENT_TYPE,
-  HTTP2_HEADER_CONTENT_LENGTH
+  HTTP2_HEADER_CONTENT_LENGTH,
+  HTTP2_HEADER_ACCEPT_ENCODING
 } = http2.constants
 
 jest.useFakeTimers()
@@ -172,7 +173,10 @@ describe('Acceptance Tests', function () {
         }
         const url = new URL(headers[HTTP2_HEADER_SCHEME] + '://' + headers[HTTP2_HEADER_AUTHORITY] + headers[HTTP2_HEADER_PATH])
         const body = {
-          headers,
+          headers: {
+            ...headers,
+            [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
+          },
           body: ''
         }
         const response = await client.fetch('echo')
@@ -180,7 +184,7 @@ describe('Acceptance Tests', function () {
         expect(response.redirected).toBe(false)
         expect(response.request.options).toEqual({
           body: undefined,
-          headers,
+          headers: body.headers,
           method,
           url
         })
@@ -195,10 +199,6 @@ describe('Acceptance Tests', function () {
         const statusCode = 418
         const statusMessage = http.STATUS_CODES[statusCode]
         const body = statusMessage
-        const headers = {
-          [HTTP2_HEADER_CONTENT_LENGTH]: body.length.toString(),
-          [HTTP2_HEADER_CONTENT_TYPE]: 'text/plain'
-        }
         expect.assertions(2)
         try {
           await client.request('status/418')
@@ -208,7 +208,10 @@ describe('Acceptance Tests', function () {
           expect(err).toMatchObject({
             statusCode,
             statusMessage,
-            headers,
+            headers: {
+              [HTTP2_HEADER_CONTENT_LENGTH]: body.length.toString(),
+              [HTTP2_HEADER_CONTENT_TYPE]: 'text/plain'
+            },
             body
           })
         }
@@ -222,7 +225,8 @@ describe('Acceptance Tests', function () {
             [HTTP2_HEADER_AUTHORITY]: server.options.hostname + ':' + server.options.port,
             [HTTP2_HEADER_METHOD]: method,
             [HTTP2_HEADER_PATH]: '/echo',
-            [HTTP2_HEADER_SCHEME]: 'https'
+            [HTTP2_HEADER_SCHEME]: 'https',
+            [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
           }
         })
       })
@@ -240,6 +244,7 @@ describe('Acceptance Tests', function () {
             [HTTP2_HEADER_METHOD]: method,
             [HTTP2_HEADER_PATH]: '/echo',
             [HTTP2_HEADER_SCHEME]: 'https',
+            [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
             'x-requested-with': 'XmlHttpRequest',
             [HTTP2_HEADER_CONTENT_TYPE]: 'application/json'
           }
