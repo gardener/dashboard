@@ -7,6 +7,7 @@
 'use strict'
 
 const http2 = require('http2')
+const zlib = require('zlib')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { Client, extend } = require('../lib')
 const {
@@ -250,6 +251,26 @@ describe('Client', () => {
     it('should create a http client', () => {
       const client = extend({ prefixUrl })
       expect(client).toBeInstanceOf(Client)
+    })
+  })
+
+  describe('#createDecompressor', () => {
+    it('should create a decompressor', () => {
+      expect(Client.createDecompressor('br')).toBeInstanceOf(zlib.BrotliDecompress)
+      expect(Client.createDecompressor('gzip')).toBeInstanceOf(zlib.Gunzip)
+      expect(Client.createDecompressor('deflate')).toBeInstanceOf(zlib.Inflate)
+      expect(Client.createDecompressor('foo')).toBeUndefined()
+    })
+  })
+
+  describe('#transformFactory', () => {
+    it('should create a transform function', () => {
+      const data = 'foo'
+      expect(Client.transformFactory('text')(data)).toBe(data)
+      expect(Client.transformFactory('json')(JSON.stringify(data))).toBe(data)
+      const buffer = Client.transformFactory(false)(data)
+      expect(Buffer.isBuffer(buffer)).toBe(true)
+      expect(buffer.toString('utf8')).toBe(data)
     })
   })
 })
