@@ -8,20 +8,26 @@
 
 const http = require('http')
 const http2 = require('http2')
+const zlib = require('zlib')
+const stream = require('stream')
 const { promisify } = require('util')
 const typeis = require('type-is')
 const { Client, Agent, isHttpError } = require('../lib')
 
+const pipeline = promisify(stream.pipeline)
 const {
   HTTP2_HEADER_AUTHORITY,
   HTTP2_HEADER_SCHEME,
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_STATUS,
+  HTTP2_HEADER_ACCEPT_ENCODING,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
-  HTTP2_HEADER_ACCEPT_ENCODING
+  HTTP2_HEADER_CONTENT_ENCODING
 } = http2.constants
+
+const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
 jest.useFakeTimers()
 
@@ -87,11 +93,11 @@ function createSecureServer ({ cert, key }) {
     server.on('stream', async (stream, headers) => {
       const path = headers[HTTP2_HEADER_PATH]
       const contentType = headers[HTTP2_HEADER_CONTENT_TYPE]
-      const chunks = []
+      stream.setEncoding('utf8')
+      let body = ''
       for await (const chunk of stream) {
-        chunks.push(chunk)
+        body += chunk
       }
-      let body = Buffer.concat(chunks).toString('utf8')
       if (typeis.is(contentType, ['json']) === 'json') {
         body = JSON.parse(body)
       }
@@ -105,17 +111,44 @@ function createSecureServer ({ cert, key }) {
           [HTTP2_HEADER_CONTENT_LENGTH]: Buffer.byteLength(body)
         })
         stream.end(body)
+      } else if (path.startsWith('/gzip/')) {
+        const message = path.substring(6)
+        const headers = {
+          [HTTP2_HEADER_STATUS]: statusCode,
+          [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
+          [HTTP2_HEADER_CONTENT_ENCODING]: 'gzip'
+        }
+        const streams = [
+          async function * generate () {
+            yield JSON.stringify({ message })
+          },
+          zlib.createGzip(),
+          stream
+        ]
+        stream.respond(headers)
+        await pipeline(streams)
       } else if (path.startsWith('/events/')) {
-        stream.respond({
+        const message = path.substring(8)
+        const headers = {
           [HTTP2_HEADER_STATUS]: statusCode,
           [HTTP2_HEADER_CONTENT_TYPE]: 'application/json'
-        })
-        const entries = Object.entries(path.substring(8))
-        for (const [i, y] of entries) {
-          await new Promise(resolve => process.nextTick(resolve))
-          stream.write(JSON.stringify({ x: +i + 1, y }) + '\n')
         }
-        stream.end()
+        const streams = [
+          async function * generate () {
+            const entries = Object.entries(message)
+            for (const [i, y] of entries) {
+              await nextTick()
+              yield JSON.stringify({ x: +i + 1, y }) + '\n'
+            }
+          },
+          stream
+        ]
+        if (message === 'gzip') {
+          headers[HTTP2_HEADER_CONTENT_ENCODING] = 'gzip'
+          streams.splice(1, 0, zlib.createGzip())
+        }
+        stream.respond(headers)
+        await pipeline(streams)
       } else {
         body = JSON.stringify({
           headers,
@@ -217,6 +250,12 @@ describe('Acceptance Tests', function () {
         }
       })
 
+      it('should handle GET requests with content compression', async function () {
+        await expect(client.request('gzip/hello')).resolves.toEqual({
+          message: 'hello'
+        })
+      })
+
       it('should send a GET request', async function () {
         const method = 'GET'
         await expect(client.request('echo')).resolves.toEqual({
@@ -265,6 +304,20 @@ describe('Acceptance Tests', function () {
           { x: 3, y: 'c' },
           { x: 4, y: 'd' },
           { x: 5, y: 'e' }
+        ])
+      })
+
+      it('should handle GET request with content compression', async function () {
+        const stream = await client.stream('events/gzip')
+        const events = []
+        for await (const event of stream) {
+          events.push(event)
+        }
+        expect(events).toEqual([
+          { x: 1, y: 'g' },
+          { x: 2, y: 'z' },
+          { x: 3, y: 'i' },
+          { x: 4, y: 'p' }
         ])
       })
     })
