@@ -33,18 +33,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Cluster Termination</v-list-item-subtitle>
             <v-list-item-title class="d-flex align-center pt-1">
-              <v-icon
-                v-if="!isSelfTerminationWarning"
-                color="info"
-                left
-                size="18"
-              >mdi-information</v-icon>
-              <v-icon
-                v-else
-                color="warning"
-                left
-                size="18"
-              >mdi-alert-circle</v-icon>
+              <shoot-warning :shoot-item="shootItem" cluster-expiration-warning small class="mr-1" />
               <span>{{selfTerminationMessage}}</span>
             </v-list-item-title>
           </v-list-item-content>
@@ -62,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shoot-item="shootItem" only-k8s-warnings></version-expiration-warning>
+          <shoot-warning :shoot-item="shootItem" k8s-warning />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>
@@ -87,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shoot-item="shootItem" onlyMachineImageWarnings></version-expiration-warning>
+          <shoot-warning :shoot-item="shootItem" machine-image-warning />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <worker-configuration :shoot-item="shootItem"></worker-configuration>
@@ -213,12 +202,11 @@ import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
 import AccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/AccessRestrictionsConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import VersionExpirationWarning from '@/components/VersionExpirationWarning'
+import ShootWarning from '@/components/ShootWarning'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
 import CopyBtn from '@/components/CopyBtn'
 
 import {
-  isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
@@ -238,7 +226,7 @@ export default {
     PurposeConfiguration,
     AddonConfiguration,
     ShootVersion,
-    VersionExpirationWarning,
+    ShootWarning,
     CopyBtn
   },
   props: {
@@ -260,9 +248,6 @@ export default {
       } else {
         return 'This cluster is about to self terminate'
       }
-    },
-    isSelfTerminationWarning () {
-      return isSelfTerminationWarning(this.shootExpirationTimestamp)
     },
     isValidTerminationDate () {
       return isValidTerminationDate(this.shootExpirationTimestamp)

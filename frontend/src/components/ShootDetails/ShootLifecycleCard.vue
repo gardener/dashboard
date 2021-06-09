@@ -17,20 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-warning :shoot-item="shootItem" hibernation-constraint-warning small class="mr-1" />
-            <v-icon
-              v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
-              small
-              class="pr-1"
-              color="info"
-            >mdi-calendar-alert</v-icon>
-            <v-progress-circular v-if="isShootStatusHibernationProgressing"
-              indeterminate
-              size="12"
-              width="2"
-              color="grey"
-              class="mr-1"
-            ></v-progress-circular>
+            <shoot-warning :shoot-item="shootItem" hibernation-constraint-warning no-hibernation-schedule-warning small class="mr-1" />
             {{hibernationDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
