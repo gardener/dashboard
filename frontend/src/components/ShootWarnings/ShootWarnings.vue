@@ -46,6 +46,7 @@ import ClusterExpirationMessage from '@/components/ShootWarnings/ClusterExpirati
 import ConstraintWarningMessage from '@/components/ShootWarnings/ConstraintWarningMessage'
 import some from 'lodash/some'
 import get from 'lodash/get'
+import map from 'lodash/map'
 import forEach from 'lodash/forEach'
 import { shootItem } from '@/mixins/shootItem'
 import {
@@ -193,33 +194,6 @@ export default {
 
       return items
     },
-    icon () {
-      const icons = []
-      if (this.isK8sWarning || this.isMachineImageWarning) {
-        icons.push('mdi-update')
-      }
-      if (this.isNoHibernationScheduleWarning) {
-        icons.push('mdi-calendar-alert')
-      }
-      if (this.isClusterExpirationWarning) {
-        if (this.isClusterExpirationWarningState) {
-          icons.push('mdi-clock-alert-outline')
-        } else {
-          icons.push('mdi-clock-outline')
-        }
-      }
-      if (this.isConstraintWarning) {
-        icons.push('mdi-alert-circle-outline')
-      }
-      if (icons.length === 1) {
-        return icons[0]
-      }
-
-      if (this.overallStatus === 'info') {
-        return 'mdi-information-outline'
-      }
-      return 'mdi-alert-circle-outline'
-    },
     isK8sWarning () {
       if (!this.k8sWarning && !this.allWarnings) {
         return false
@@ -278,28 +252,22 @@ export default {
     isConstraintWarning () {
       return this.constraintWarnings.length
     },
-    overallStatus () {
-      let isError
-      let isWarning
-      if (this.isK8sWarning) {
-        isError = this.k8sExpiration.severity === 'error'
-        isWarning = this.k8sExpiration.severity === 'warning'
-      }
-      if (this.isMachineImageWarning) {
-        isError = some(this.expiredWorkerGroups, { severity: 'error' })
-        isWarning = some(this.expiredWorkerGroups, { severity: 'warning' })
-      }
-      if (this.isClusterExpirationWarning) {
-        isWarning = isWarning || this.isClusterExpirationWarningState
-      }
-      if (this.isConstraintWarning) {
-        isWarning = true
+    icon () {
+      const icons = map(this.warningItems, 'icon')
+      if (icons.length === 1) {
+        return icons[0]
       }
 
-      if (isError) {
+      if (this.overallStatus === 'info') {
+        return 'mdi-information-outline'
+      }
+      return 'mdi-alert-circle-outline'
+    },
+    overallStatus () {
+      if (some(this.warningItems, { color: 'error' })) {
         return 'error'
       }
-      if (isWarning) {
+      if (some(this.warningItems, { color: 'warning' })) {
         return 'warning'
       }
       return 'info'
