@@ -22,97 +22,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-btn>
     </template>
     <v-list>
-      <v-list-item v-if="isK8sWarning">
+      <v-list-item
+        v-for="({key, icon, color, messageComponent, messageComponentProperties}) in warningItems"
+        :key="key">
         <v-list-item-icon>
-          <v-icon :color="k8sExpiration.color">mdi-update</v-icon>
+          <v-icon :color="color">{{icon}}</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <div class="message">
-            <span v-if="k8sExpiration.isValidTerminationDate">Kubernetes version of this cluster expires
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate" mode="future"></time-string></span>
-                </template>
-                <span>{{getDateFormatted(k8sExpiration.expirationDate)}}</span>
-              </v-tooltip>
-              <span>. </span>
-            </span>
-            <span v-else>Kubernetes version of this cluster is expired. </span>
-            <span v-if="k8sExpiration.isInfo">Version will be updated in the next maintenance window</span>
-            <template v-if="k8sExpiration.isWarning">
-              <span v-if="k8sExpiration.isValidTerminationDate">Version update will be enforced after that date</span>
-              <span v-else>Version update will be enforced soon</span>
-            </template>
-            <span v-if="k8sExpiration.isError">Version update not possible due to missing update path. Please contact your landscape administrator</span>
-          </div>
-        </v-list-item-content>
-      </v-list-item>
-
-      <v-list-item v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError, color}) in expiredWorkerGroups" :key="key">
-        <v-list-item-icon>
-          <v-icon :color="color">mdi-update</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <div class="message">
-            <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
-            <span v-if="isValidTerminationDate">expires
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
-                </template>
-                <span>{{getDateFormatted(expirationDate)}}</span>
-              </v-tooltip>
-              <span>. </span>
-            </span>
-            <span v-else>is expired. </span>
-            <span v-if="isInfo">Version will be updated in the next maintenance window</span>
-            <template v-if="isWarning">
-              <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
-                <span v-else>Machine Image update will be enforced soon</span>
-            </template>
-            <span v-if="isError">Machine Image update not possible as no newer version is available. Please choose another operating system</span>
-          </div>
-        </v-list-item-content>
-      </v-list-item>
-
-      <v-list-item v-if="isNoHibernationScheduleWarning">
-        <v-list-item-icon>
-          <v-icon color="info">mdi-calendar-alert</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <div class="message">
-            To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
-            <template v-if="canPatchShoots">
-              Please navigate to the cluster details page to
-              <router-link :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, namespace: shootNamespace } }">configure</router-link>
-              a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
-            </template>
-          </div>
-        </v-list-item-content>
-      </v-list-item>
-
-      <v-list-item v-if="isClusterExpirationWarning">
-        <v-list-item-icon>
-          <v-icon color="warning" v-if="isClusterExpirationWarningState">mdi-clock-alert-outline</v-icon>
-          <v-icon color="info" v-else>mdi-clock-outline</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <div class="message">
-            <span v-if="isValidTerminationDate">This cluster will self terminate <span class="font-weight-bold"><time-string :date-time="shootExpirationTimestamp" mode="future"></time-string></span></span>
-            <span v-else>This cluster is about to self terminate</span>
-          </div>
-        </v-list-item-content>
-      </v-list-item>
-
-      <v-list-item v-for="({constraintCaption, constraintMessage}) in constraintWarnings" :key="constraintCaption">
-        <v-list-item-icon>
-          <v-icon color="warning">mdi-alert-circle-outline</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <div class="message">
-            <span class="font-weight-bold">{{constraintCaption}}: </span>
-            <span>{{constraintMessage}}</span>
-          </div>
+          <component :is="messageComponent" v-bind="messageComponentProperties" class="message" />
         </v-list-item-content>
       </v-list-item>
     </v-list>
@@ -121,26 +38,33 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
+import K8sExpirationMessage from '@/components/ShootWarnings/K8sExpirationMessage'
+import WorkerGroupExpirationMessage from '@/components/ShootWarnings/WorkerGroupExpirationMessage'
+import NoHibernationScheduleMessage from '@/components/ShootWarnings/NoHibernationScheduleMessage'
+import ClusterExpirationMessage from '@/components/ShootWarnings/ClusterExpirationMessage'
+import ConstraintWarningMessage from '@/components/ShootWarnings/ConstraintWarningMessage'
 import some from 'lodash/some'
 import get from 'lodash/get'
+import forEach from 'lodash/forEach'
 import { shootItem } from '@/mixins/shootItem'
 import {
   k8sVersionExpirationForShoot,
   expiringWorkerGroupsForShoot,
-  getDateFormatted,
   isShootHasNoHibernationScheduleWarning,
-  isSelfTerminationWarning,
-  isValidTerminationDate
+  isSelfTerminationWarning
 } from '@/utils'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'VerisonUpdateWarning',
+  name: 'ShootWarnings',
   components: {
-    TimeString,
-    GPopper
+    GPopper,
+    K8sExpirationMessage,
+    WorkerGroupExpirationMessage,
+    NoHibernationScheduleMessage,
+    ClusterExpirationMessage,
+    ConstraintWarningMessage
   },
   props: {
     shootItem: {
@@ -190,8 +114,84 @@ export default {
         this.isMachineImageWarning ||
         this.isNoHibernationScheduleWarning ||
         this.isClusterExpirationWarning ||
-        this.constraintWarnings.length
+        this.isConstraintWarning
       )
+    },
+    warningItems () {
+      const items = []
+      if (this.isK8sWarning) {
+        const { expirationDate, isValidTerminationDate, severity } = this.k8sExpiration
+        items.push({
+          key: 'k8sWarning',
+          icon: 'mdi-update',
+          color: this.colorForSeverity(severity),
+          messageComponent: 'K8sExpirationMessage',
+          messageComponentProperties: {
+            expirationDate,
+            isValidTerminationDate,
+            severity
+          }
+        })
+      }
+      if (this.isMachineImageWarning) {
+        forEach(this.expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity }) => {
+          items.push({
+            key: `image_${workerName}_${name}`,
+            icon: 'mdi-update',
+            color: this.colorForSeverity(severity),
+            messageComponent: 'WorkerGroupExpirationMessage',
+            messageComponentProperties: {
+              expirationDate,
+              isValidTerminationDate,
+              severity,
+              name,
+              workerName,
+              version
+            }
+          })
+        })
+      }
+      if (this.isNoHibernationScheduleWarning) {
+        items.push({
+          key: 'noHibernationSchedule',
+          icon: 'mdi-calendar-alert',
+          color: 'info',
+          messageComponent: 'NoHibernationScheduleMessage',
+          messageComponentProperties: {
+            purposeText: this.shootPurpose || '',
+            shootName: this.shootName || '',
+            shootNamespace: this.shootNamespace || '',
+            showNavigationLink: this.canPatchShoots
+          }
+        })
+      }
+      if (this.isClusterExpirationWarning) {
+        items.push({
+          key: 'clusterExpiration',
+          icon: this.isClusterExpirationWarningState ? 'mdi-clock-alert-outline' : 'mdi-clock-outline',
+          color: this.isClusterExpirationWarningState ? 'warning' : 'info',
+          messageComponent: 'ClusterExpirationMessage',
+          messageComponentProperties: {
+            shootExpirationTimestamp: this.shootExpirationTimestamp
+          }
+        })
+      }
+      if (this.isConstraintWarning) {
+        forEach(this.constraintWarnings, ({ constraintCaption, constraintMessage }) => {
+          items.push({
+            key: `constraint_${constraintCaption}`,
+            icon: 'mdi-alert-circle-outline',
+            color: 'warning',
+            messageComponent: 'ConstraintWarningMessage',
+            messageComponentProperties: {
+              constraintCaption,
+              constraintMessage
+            }
+          })
+        })
+      }
+
+      return items
     },
     icon () {
       const icons = []
@@ -208,7 +208,7 @@ export default {
           icons.push('mdi-clock-outline')
         }
       }
-      if (this.constraintWarnings.length) {
+      if (this.isConstraintWarning) {
         icons.push('mdi-alert-circle-outline')
       }
       if (icons.length === 1) {
@@ -240,9 +240,6 @@ export default {
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
       return expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
     },
-    purposeText () {
-      return this.shootPurpose || ''
-    },
     isNoHibernationScheduleWarning () {
       if (!this.noHibernationScheduleWarning && !this.allWarnings) {
         return false
@@ -254,9 +251,6 @@ export default {
         return false
       }
       return !!this.shootExpirationTimestamp
-    },
-    isValidTerminationDate () {
-      return isValidTerminationDate(this.shootExpirationTimestamp)
     },
     isClusterExpirationWarningState () {
       return isSelfTerminationWarning(this.shootExpirationTimestamp)
@@ -281,22 +275,24 @@ export default {
       }
       return warnings
     },
-
+    isConstraintWarning () {
+      return this.constraintWarnings.length
+    },
     overallStatus () {
       let isError
       let isWarning
       if (this.isK8sWarning) {
-        isError = this.k8sExpiration.isError
-        isWarning = this.k8sExpiration.isWarning
+        isError = this.k8sExpiration.severity === 'error'
+        isWarning = this.k8sExpiration.severity === 'warning'
       }
       if (this.isMachineImageWarning) {
-        isError = some(this.expiredWorkerGroups, { isError: true })
-        isWarning = some(this.expiredWorkerGroups, { isWarning: true })
+        isError = some(this.expiredWorkerGroups, { severity: 'error' })
+        isWarning = some(this.expiredWorkerGroups, { severity: 'warning' })
       }
       if (this.isClusterExpirationWarning) {
         isWarning = isWarning || this.isClusterExpirationWarningState
       }
-      if (this.constraintWarnings.length) {
+      if (this.isConstraintWarning) {
         isWarning = true
       }
 
@@ -319,8 +315,15 @@ export default {
     }
   },
   methods: {
-    getDateFormatted (date) {
-      return getDateFormatted(date)
+    colorForSeverity (severity) {
+      switch (severity) {
+        case 'error':
+        case 'warning':
+        case 'info':
+          return severity
+        default:
+          return 'primary'
+      }
     }
   }
 }

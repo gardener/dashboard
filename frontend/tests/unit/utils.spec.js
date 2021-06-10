@@ -298,10 +298,7 @@ describe('utils', () => {
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[0].expirationDate,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: false,
-          isInfo: true,
-          color: 'info'
+          severity: 'info'
         })
       })
 
@@ -310,10 +307,7 @@ describe('utils', () => {
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[0].expirationDate,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: true,
-          isInfo: false,
-          color: 'warning'
+          severity: 'warning'
         })
       })
 
@@ -322,20 +316,14 @@ describe('utils', () => {
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[1].expirationDate,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: true,
-          isInfo: false,
-          color: 'warning'
+          severity: 'warning'
         })
 
         versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[1].expirationDate,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: true,
-          isInfo: false,
-          color: 'warning'
+          severity: 'warning'
         })
       })
 
@@ -344,10 +332,7 @@ describe('utils', () => {
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[7].expirationDate,
           isValidTerminationDate: false,
-          isError: true,
-          isWarning: false,
-          isInfo: false,
-          color: 'error'
+          severity: 'error'
         })
       })
 
@@ -444,10 +429,7 @@ describe('utils', () => {
           ...sampleMachineImages[0],
           workerName: workers[0].name,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: false,
-          isInfo: true,
-          color: 'info'
+          severity: 'info'
         })
       })
 
@@ -460,10 +442,7 @@ describe('utils', () => {
           ...sampleMachineImages[0],
           workerName: workers[0].name,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: true,
-          isInfo: false,
-          color: 'warning'
+          severity: 'warning'
         })
       })
 
@@ -476,29 +455,19 @@ describe('utils', () => {
           ...sampleMachineImages[0],
           workerName: workers[0].name,
           isValidTerminationDate: true,
-          isError: false,
-          isWarning: false,
-          isInfo: true,
-          color: 'info'
+          severity: 'info'
         })
         expect(expiredWorkerGroups[1]).toEqual({
           ...sampleMachineImages[3],
           workerName: workers[2].name,
           isValidTerminationDate: true,
-          isError: true,
-          isWarning: false,
-          isInfo: false,
-          isPreview: true,
-          color: 'error'
+          severity: 'error'
         })
         expect(expiredWorkerGroups[2]).toEqual({
           ...sampleMachineImages[4],
           workerName: workers[3].name,
           isValidTerminationDate: false,
-          isError: true,
-          isWarning: false,
-          isInfo: false,
-          color: 'error'
+          severity: 'error'
         })
       })
 

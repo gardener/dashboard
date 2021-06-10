@@ -708,7 +708,7 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
       version: shootK8sVersion,
       expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
       isValidTerminationDate: false,
-      color: 'warning'
+      severity: 'warning'
     }
   }
   if (!version.expirationDate) {
@@ -719,29 +719,21 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   const updatePathAvailable = k8sVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
   const updateAvailable = !patchAvailable && updatePathAvailable
 
-  const isError = !updatePathAvailable
-  const isWarning = !isError && ((!k8sAutoPatch && patchAvailable) || updateAvailable)
-  const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
-
-  if (!isError && !isWarning && !isInfo) {
+  let severity
+  if (!updatePathAvailable) {
+    severity = 'error'
+  } else if ((!k8sAutoPatch && patchAvailable) || updateAvailable) {
+    severity = 'warning'
+  } else if (k8sAutoPatch && patchAvailable) {
+    severity = 'info'
+  } else {
     return undefined
-  }
-
-  let color = 'info'
-  if (isWarning) {
-    color = 'warning'
-  }
-  if (isError) {
-    color = 'error'
   }
 
   return {
     expirationDate: version.expirationDate,
     isValidTerminationDate: isValidTerminationDate(version.expirationDate),
-    isError,
-    isWarning,
-    isInfo,
-    color
+    severity
   }
 }
 
@@ -754,40 +746,31 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
       return {
         ...workerImage,
         expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
-        isWarning: true,
         workerName: worker.name,
         isValidTerminationDate: false,
-        color: 'warning'
+        severity: 'warning'
       }
     }
 
     const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
 
-    const isError = !updateAvailable
-    const isWarning = !imageAutoPatch && updateAvailable
-    const isInfo = imageAutoPatch && updateAvailable
-
-    let color = 'info'
-    if (isWarning) {
-      color = 'warning'
-    }
-    if (isError) {
-      color = 'error'
+    let severity
+    if (!updateAvailable) {
+      severity = 'error'
+    } else if (!imageAutoPatch) {
+      severity = 'warning'
+    } else {
+      severity = 'info'
     }
 
     return {
       ...workerImageDetails,
       isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
       workerName: worker.name,
-      isError,
-      isWarning,
-      isInfo,
-      color
+      severity
     }
   })
-  return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {
-    return expirationDate && (isError || isWarning || isInfo)
-  })
+  return filter(workerGroups, 'expirationDate')
 }
 
 export function sortedRoleDisplayNames (roleNames) {

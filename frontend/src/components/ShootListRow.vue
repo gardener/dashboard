@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             </auto-hide>
           </v-col>
           <v-col class="shrink" >
-            <shoot-warning :shoot-item="shootItem" all-warnings />
+            <shoot-warnings :shoot-item="shootItem" all-warnings />
           </v-col>
         </v-row>
       </template>
@@ -158,7 +158,7 @@ import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import ShootSeedName from '@/components/ShootSeedName'
-import ShootWarning from '@/components/ShootWarning'
+import ShootWarnings from '@/components/ShootWarnings/ShootWarnings'
 import ShootListRowActions from '@/components/ShootListRowActions'
 import AutoHide from '@/components/AutoHide'
 
@@ -182,7 +182,7 @@ export default {
     CopyBtn,
     ShootSeedName,
     Vendor,
-    ShootWarning,
+    ShootWarnings,
     ShootListRowActions,
     AutoHide
   },

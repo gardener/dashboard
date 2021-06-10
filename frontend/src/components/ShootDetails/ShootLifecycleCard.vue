@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-warning :shoot-item="shootItem" hibernation-constraint-warning no-hibernation-schedule-warning small class="mr-1" />
+            <shoot-warnings :shoot-item="shootItem" hibernation-constraint-warning no-hibernation-schedule-warning small class="mr-1" />
             {{hibernationDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-warning :shoot-item="shootItem" maintenance-constraint-warning small class="mr-1" />
+            <shoot-warnings :shoot-item="shootItem" maintenance-constraint-warning small class="mr-1" />
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -106,7 +106,7 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
-import ShootWarning from '@/components/ShootWarning'
+import ShootWarnings from '@/components/ShootWarnings/ShootWarnings'
 
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 import TimeWithOffset from '@/utils/TimeWithOffset'
@@ -122,7 +122,7 @@ export default {
     DeleteCluster,
     ReconcileStart,
     RotateKubeconfigStart,
-    ShootWarning
+    ShootWarnings
   },
   props: {
     shootItem: {
