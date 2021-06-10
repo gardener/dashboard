@@ -79,8 +79,8 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 84,
-        "functions": 95,
+        "branches": 85,
+        "functions": 97,
         "lines": 95,
         "statements": 95
       }
@@ -90,7 +90,7 @@
     ]
   },
   "engines": {
-    "node": "^15.11.0",
+    "node": "^16.1.0",
     "yarn": "^2.4.1"
   }
 }
