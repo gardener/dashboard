@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
           </div>
           <v-slide-x-reverse-transition>
-            <div v-if="helpVisible" class="d-flex pa-3 ml-3 help" :style="helpStyle">
+            <div v-if="helpVisible" class="pa-3 ml-3 help" :style="helpStyle">
               <slot name="help-slot"></slot>
             </div>
           </v-slide-x-reverse-transition>

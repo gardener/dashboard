@@ -471,7 +471,7 @@ export default {
               value: secretData.subscriptionID
             }
           ]
-        case 'google-clouddns':
+        case 'google-cloud-dns':
           return [
             {
               label: 'Project',

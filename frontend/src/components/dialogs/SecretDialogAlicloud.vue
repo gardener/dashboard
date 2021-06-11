@@ -50,25 +50,29 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
-          <a href="https://ram.console.aliyun.com/overview" target="_blank">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+          <external-link url="https://ram.console.aliyun.com/overview">RAM Console</external-link>.
           The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
-          (<a href="https://www.alibabacloud.com/help/doc-detail/59643.htm" target="_blank">official
-          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
+          (<external-link url="https://www.alibabacloud.com/help/doc-detail/59643.htm">official
+          documentation</external-link>).
         </p>
         <p>
           Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
-          (<a href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
-          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>). Alternatively, you can assign following permissions to the RAM
+          (<external-link url="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp">official
+          documentation</external-link>). Alternatively, you can assign following permissions to the RAM
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>
         <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
       </div>
       <div v-if="vendor==='alicloud-dns'">
-        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
-        <p>Make sure that you configure your account for DNS usage</p>
+        <p>
+          You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
+        </p>
+        <p>
+          For details see <external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">AccessKey Client</external-link>. Currently the regionId is fixed to cn-shanghai.
+        </p>
       </div>
     </template>
 
@@ -79,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
 import CodeBlock from '@/components/CodeBlock'
+import ExternalLink from '@/components/ExternalLink'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
@@ -97,7 +102,8 @@ const validationErrors = {
 export default {
   components: {
     SecretDialog,
-    CodeBlock
+    CodeBlock,
+    ExternalLink
   },
   props: {
     value: {

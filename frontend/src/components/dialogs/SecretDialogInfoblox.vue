@@ -44,8 +44,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <template v-slot:help-slot>
       <div>
-        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
-        <p>Make sure that you configure your account for DNS usage</p>
+        <p>Before you can use an Infoblox DNS provider, you need to add account credentials.</p>
+        <p>Please enter account information for a technical user.</p>
       </div>
     </template>
 

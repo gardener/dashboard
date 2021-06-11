@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <a :href="url" target="_blank">
-    <span :style="{ fontSize: size + 'px' }"><slot></slot></span><v-icon :size="size" >mdi-open-in-new</v-icon>
+    <span><slot>{{url}}</slot></span> <v-icon  style="font-size: 80%">mdi-open-in-new</v-icon>
   </a>
 </template>
 
@@ -16,14 +16,8 @@ export default {
   name: 'external-link',
   props: {
     url: {
-      type: String
-    },
-    text: {
-      type: String
-    },
-    size: {
-      type: Number,
-      default: 14
+      type: String,
+      required: true
     }
   }
 }

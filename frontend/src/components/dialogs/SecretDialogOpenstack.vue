@@ -87,17 +87,15 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
         </p>
-        <p>
-          Read the
-          <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
-            target="_blank">
-            OpenStack help section<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
-        </p>
       </div>
       <div v-if="vendor==='openstack-designate'">
-        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
-        <p>Make sure that you configure your account for DNS usage</p>
+        <p>Make sure that you configure your account for DNS usage.</p>
+        <p>Required Roles: dns_viewer, dns_webmaster</p>
       </div>
+      <p>
+        Read the
+        <external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</external-link> on how to create and manage roles.
+      </p>
     </template>
 
   </secret-dialog>
@@ -110,6 +108,7 @@ import SecretDialog from '@/components/dialogs/SecretDialog'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
+import ExternalLink from '@/components/ExternalLink'
 
 const validationErrors = {
   domainName: {
@@ -132,7 +131,8 @@ const validationErrors = {
 export default {
   components: {
     SecretDialog,
-    HintColorizer
+    HintColorizer,
+    ExternalLink
   },
   props: {
     value: {

@@ -33,8 +33,18 @@ SPDX-License-Identifier: Apache-2.0
 
     <template v-slot:help-slot>
       <div>
-        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
-        <p>Make sure that you configure your account for DNS usage</p>
+        <p>
+          You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate to Netlify DNS API.
+        </p>
+        <p>
+          Then base64 encode the token. For eg. if the generated token in 1234567890123456, use
+        </p>
+        <p>
+          <pre>$ echo -n '1234567890123456789' | base64</pre>
+        </p>
+        <p>
+          For details see <external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui"></external-link>
+        </p>
       </div>
     </template>
 
@@ -44,6 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import ExternalLink from '@/components/ExternalLink'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 
@@ -55,7 +66,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    ExternalLink
   },
   props: {
     value: {

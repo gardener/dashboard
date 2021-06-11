@@ -298,7 +298,7 @@ export function isOwnSecret (infrastructureSecret) {
 export const dnsProviderList = [
   'aws-route53',
   'azure-dns',
-  'google-clouddns',
+  'google-cloud-dns',
   'openstack-designate',
   'alicloud-dns',
   'cloudflare',

@@ -72,14 +72,12 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Read the
-          <a href="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure"
-          target="_blank">
-          IAM Console help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to manage your credentials and subscriptions.
+          <external-link url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
+          IAM Console help section</external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
       <div v-if="vendor==='azure-dns'">
-        <p>Before you can use an external DNS provider, you need to add account credentials.</p>
-        <p>Make sure that you configure your account for DNS usage</p>
+        <p>Follow the steps as described in the Azure documentation to <external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
       </div>
     </template>
 
@@ -89,6 +87,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import ExternalLink from '@/components/ExternalLink'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
 
@@ -109,7 +108,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    ExternalLink
   },
   props: {
     value: {

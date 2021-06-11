@@ -174,8 +174,8 @@ const vendorNameFromImageName = imageName => {
     return 'aws-route53'
   } else if (lowerCaseName.includes('azure-dns')) {
     return 'azure-dns'
-  } else if (lowerCaseName.includes('google-clouddns')) {
-    return 'google-clouddns'
+  } else if (lowerCaseName.includes('google-cloud-dns')) {
+    return 'google-cloud-dns'
   } else if (lowerCaseName.includes('openstack-designate')) {
     return 'openstack-designate'
   } else if (lowerCaseName.includes('alicloud-dns')) {
