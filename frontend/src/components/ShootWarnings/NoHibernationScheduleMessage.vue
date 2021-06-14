@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 export default {
-  name: 'NoHibernationScheduleMessage',
   props: {
     purposeText: {
       type: String,

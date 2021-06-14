@@ -9,19 +9,17 @@ SPDX-License-Identifier: Apache-2.0
     <span v-if="isValidTerminationDate">Kubernetes version of this cluster expires
       <v-tooltip right>
         <template v-slot:activator="{ on }">
-          <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
+          <time-string v-on="on" :date-time="expirationDate" mode="future" class="font-weight-bold"></time-string>
         </template>
-        <span>{{getDateFormatted(expirationDate)}}</span>
-      </v-tooltip>
-      <span>. </span>
-    </span>
+        {{getDateFormatted(expirationDate)}}
+      </v-tooltip>. </span>
     <span v-else>Kubernetes version of this cluster is expired. </span>
-    <span v-if="severity==='info'">Version will be updated in the next maintenance window</span>
-    <template v-if="severity==='warning'">
+    <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
+    <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
       <span v-else>Version update will be enforced soon</span>
     </template>
-    <span v-if="severity==='error'">Version update not possible due to missing update path. Please contact your landscape administrator</span>
+    <span v-else-if="severity === 'error'">Version update not possible due to missing update path. Please contact your landscape administrator</span>
   </div>
 </template>
 
@@ -31,7 +29,6 @@ import { getDateFormatted } from '@/utils'
 import TimeString from '@/components/TimeString'
 
 export default {
-  name: 'K8sExpirationMessage',
   components: {
     TimeString
   },

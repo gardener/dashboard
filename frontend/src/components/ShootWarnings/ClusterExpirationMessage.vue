@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span v-if="isValidTerminationDate()">This cluster will self terminate <span class="font-weight-bold"><time-string :date-time="shootExpirationTimestamp" mode="future"></time-string></span></span>
+    <span v-if="isValidTerminationDate">This cluster will self terminate <time-string :date-time="shootExpirationTimestamp" mode="future" class="font-weight-bold"></time-string></span>
     <span v-else>This cluster is about to self terminate</span>
   </div>
 </template>
@@ -17,7 +17,6 @@ import { isValidTerminationDate } from '@/utils'
 import TimeString from '@/components/TimeString'
 
 export default {
-  name: 'ClusterExpirationMessage',
   components: {
     TimeString
   },
@@ -27,7 +26,7 @@ export default {
       required: true
     }
   },
-  methods: {
+  computed: {
     isValidTerminationDate () {
       return isValidTerminationDate(this.shootExpirationTimestamp)
     }

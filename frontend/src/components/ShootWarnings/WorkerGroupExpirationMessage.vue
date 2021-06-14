@@ -32,7 +32,6 @@ import { getDateFormatted } from '@/utils'
 import TimeString from '@/components/TimeString'
 
 export default {
-  name: 'WorkerGroupExpirationMessage.',
   components: {
     TimeString
   },
