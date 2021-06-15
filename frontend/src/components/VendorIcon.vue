@@ -56,6 +56,8 @@ export default {
           return require('@/assets/metal.svg')
         case 'gardenlinux':
           return require('@/assets/gardenlinux.svg')
+        case 'hcloud':
+          return require('@/assets/hcloud.svg')
       }
       return undefined
     },

@@ -120,6 +120,9 @@ export default {
       return findFreeNetworks(this.currentZonesNetworkConfiguration, this.existingWorkerCIDR, this.cloudProviderKind, this.allZones.length)
     },
     availableZones () {
+      if (!this.zonedCluster) {
+        return []
+      }
       if (this.isNewCluster) {
         return this.allZones
       }
