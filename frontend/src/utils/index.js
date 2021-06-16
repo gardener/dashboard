@@ -298,12 +298,12 @@ export function isOwnSecret (infrastructureSecret) {
 export const dnsProviderList = [
   'aws-route53',
   'azure-dns',
-  'google-cloud-dns',
+  'google-clouddns',
   'openstack-designate',
   'alicloud-dns',
-  'cloudflare',
-  'infoblox',
-  'netlify'
+  'cloudflare-dns',
+  'infoblox-dns',
+  'netlify-dns'
 ]
 
 const availableK8sUpdatesCache = {}

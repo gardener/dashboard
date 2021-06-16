@@ -471,7 +471,7 @@ export default {
               value: secretData.subscriptionID
             }
           ]
-        case 'google-cloud-dns':
+        case 'google-clouddns':
           return [
             {
               label: 'Project',
@@ -485,21 +485,21 @@ export default {
               value: secretData.accessKeyID
             }
           ]
-        case 'infoblox':
+        case 'infoblox-dns':
           return [
             {
               label: 'Infoblox Username',
               value: secretData.USERNAME
             }
           ]
-        case 'cloudflare':
+        case 'cloudflare-dns':
           return [
             {
               label: 'API Key',
               value: 'hidden'
             }
           ]
-        case 'netlify':
+        case 'netlify-dns':
           return [
             {
               label: 'API Key',

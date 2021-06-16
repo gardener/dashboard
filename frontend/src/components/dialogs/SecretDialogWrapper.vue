@@ -16,13 +16,13 @@ SPDX-License-Identifier: Apache-2.0
 
     <aws-dialog v-if="visibleDialog==='aws-route53'" v-model="visibleDialogState" :secret="selectedSecret" vendor="aws-route53" @input="onInput('aws-route53')"></aws-dialog>
     <azure-dialog v-if="visibleDialog==='azure-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="azure-dns" @input="onInput('azure-dns')"></azure-dialog>
-    <gcp-dialog v-if="visibleDialog==='google-cloud-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="google-cloud-dns" @input="onInput('google-cloud-dns')"></gcp-dialog>
+    <gcp-dialog v-if="visibleDialog==='google-clouddns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="google-clouddns" @input="onInput('google-clouddns')"></gcp-dialog>
     <openstack-dialog v-if="visibleDialog==='openstack-designate'" v-model="visibleDialogState" :secret="selectedSecret" vendor="openstack-designate" @input="onInput('openstack-designate')"></openstack-dialog>
     <alicloud-dialog v-if="visibleDialog==='alicloud-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="alicloud-dns" @input="onInput('alicloud-dns')"></alicloud-dialog>
-    <cloudflare-dialog v-if="visibleDialog==='cloudflare'" v-model="visibleDialogState" :secret="selectedSecret" vendor="cloudflare" @input="onInput('cloudflare')"></cloudflare-dialog>
-    <infoblox-dialog v-if="visibleDialog==='infoblox'" v-model="visibleDialogState"
-     :secret="selectedSecret" vendor="infoblox" @input="onInput('infoblox')"></infoblox-dialog>
-    <netlify-dialog v-if="visibleDialog==='netlify'" v-model="visibleDialogState" :secret="selectedSecret" vendor="netlify" @input="onInput('netlify')"></netlify-dialog>
+    <cloudflare-dialog v-if="visibleDialog==='cloudflare-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="cloudflare-dns" @input="onInput('cloudflare-dns')"></cloudflare-dialog>
+    <infoblox-dialog v-if="visibleDialog==='infoblox-dns'" v-model="visibleDialogState"
+     :secret="selectedSecret" vendor="infoblox-dns" @input="onInput('infoblox-dns')"></infoblox-dialog>
+    <netlify-dialog v-if="visibleDialog==='netlify-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="netlify-dns" @input="onInput('netlify-dns')"></netlify-dialog>
     <delete-dialog v-if="visibleDialog==='delete'" v-model="visibleDialogState" :secret="selectedSecret"></delete-dialog>
   </div>
 </template>

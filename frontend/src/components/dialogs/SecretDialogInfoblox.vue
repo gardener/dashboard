@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    vendor="infoblox"
+    vendor="infoblox-dns"
     create-title="Add new Infoblox Secret"
     replace-title="Replace Infoblox Secret"
     @input="onInput">
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <template v-slot:help-slot>
       <div>
-        <p>Before you can use an Infoblox DNS provider, you need to add account credentials.</p>
+        <p>Before you can use Infoblox DNS provider, you need to add account credentials.</p>
         <p>Please enter account information for a technical user.</p>
       </div>
     </template>

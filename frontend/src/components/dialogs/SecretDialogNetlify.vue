@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    vendor="netlify"
+    vendor="netlify-dns"
     create-title="Add new Netlify Secret"
     replace-title="Replace Netlify Secret"
     @input="onInput">

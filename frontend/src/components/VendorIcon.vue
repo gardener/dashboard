@@ -53,18 +53,18 @@ export default {
           return require('@/assets/aws-route53.svg')
         case 'azure-dns':
           return require('@/assets/azure-dns.svg')
-        case 'google-cloud-dns':
-          return require('@/assets/google-cloud-dns.svg')
+        case 'google-clouddns':
+          return require('@/assets/google-clouddns.svg')
         case 'openstack-designate':
           return require('@/assets/openstack.svg')
         case 'alicloud-dns':
           return require('@/assets/alicloud-dns.png')
-        case 'cloudflare':
-          return require('@/assets/cloudflare.svg')
-        case 'infoblox':
-          return require('@/assets/infoblox.svg')
-        case 'netlify':
-          return require('@/assets/netlify.svg')
+        case 'cloudflare-dns':
+          return require('@/assets/cloudflare-dns.svg')
+        case 'infoblox-dns':
+          return require('@/assets/infoblox-dns.svg')
+        case 'netlify-dns':
+          return require('@/assets/netlify-dns.svg')
 
         // os
         case 'coreos':

@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    vendor="cloudflare"
+    vendor="cloudflare-dns"
     create-title="Add new Cloudflare Secret"
     replace-title="Replace Cloudflare Secret"
     @input="onInput">

@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
           to service accounts.
         </p>
       </div>
-      <div v-if="vendor==='google-cloud-dns'">
+      <div v-if="vendor==='google-clouddns'">
         <p>
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
@@ -146,7 +146,7 @@ export default {
       if (this.vendor === 'gcp') {
         return 'Google'
       }
-      if (this.vendor === 'google-cloud-dns') {
+      if (this.vendor === 'google-clouddns') {
         return 'Google Cloud DNS'
       }
       return undefined
