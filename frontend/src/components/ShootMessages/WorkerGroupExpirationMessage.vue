@@ -6,23 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
+    Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span>
     <span v-if="isValidTerminationDate">expires
       <v-tooltip right>
         <template v-slot:activator="{ on }">
           <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
         </template>
-        <span>{{getDateFormatted(expirationDate)}}</span>
+        {{getDateFormatted(expirationDate)}}
       </v-tooltip>
       <span>. </span>
     </span>
     <span v-else>is expired. </span>
-    <span v-if="severity==='info'">Version will be updated in the next maintenance window</span>
-    <template v-if="severity==='warning'">
+    <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
+    <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
-        <span v-else>Machine Image update will be enforced soon</span>
+      <span v-else>Machine Image update will be enforced soon</span>
     </template>
-    <span v-if="severity==='error'">Machine Image update not possible as no newer version is available. Please choose another operating system</span>
+    <span v-else-if="severity === 'error'">Machine Image update not possible as no newer version is available. Please choose another operating system</span>
   </div>
 </template>
 

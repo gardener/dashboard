@@ -48,7 +48,7 @@ import some from 'lodash/some'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
-import forEach from 'lodash/forEach'
+import isEmpty from 'lodash/isEmpty'
 import { shootItem } from '@/mixins/shootItem'
 import {
   k8sVersionExpirationForShoot,
@@ -148,7 +148,7 @@ export default {
       })
     },
     noHibernationScheduleMessage () {
-      if (!this.filterMatches('no-hibernation-schedule') {
+      if (!this.filterMatches('no-hibernation-schedule')) {
         return []
       }
       if (!isShootHasNoHibernationScheduleWarning(this.shootItem)) {
@@ -170,7 +170,7 @@ export default {
       }]
     },
     clusterExpirationMessage () {
-      if (!this.filterMatches('cluster-expiration') {
+      if (!this.filterMatches('cluster-expiration')) {
         return []
       }
       if (!this.shootExpirationTimestamp) {
@@ -190,44 +190,44 @@ export default {
       }]
     },
     hibernationConstraintMessage () {
-      if (!this.filterMatches('hibernation-constraint') {
+      if (!this.filterMatches('hibernation-constraint')) {
         return []
       }
       if (this.isHibernationPossible || !this.shootHibernationSchedules.length) {
         return []
       }
       return [{
-            key: 'hibernationConstraintWarning',
-            icon: 'mdi-alert-circle-outline',
-            color: 'warning',
-            component: {
-              name: 'constraint-message',
-              props: {
-                constraintCaption: 'Your hibernation schedule may not have any effect',
-                constraintMessage: this.hibernationPossibleMessage
-              }
-            }
-          }]
+        key: 'hibernationConstraintWarning',
+        icon: 'mdi-alert-circle-outline',
+        color: 'warning',
+        component: {
+          name: 'constraint-message',
+          props: {
+            constraintCaption: 'Your hibernation schedule may not have any effect',
+            constraintMessage: this.hibernationPossibleMessage
+          }
+        }
+      }]
     },
     maintenanceConstraintMessage () {
-      if (!this.filterMatches('maintenance-constraint') {
+      if (!this.filterMatches('maintenance-constraint')) {
         return []
       }
       if (this.isMaintenancePreconditionSatisfied) {
         return []
       }
       return [{
-            key: 'maintenanceConstraintWarning',
-            icon: 'mdi-alert-circle-outline',
-            color: 'warning',
-            component: {
-              name: 'constraint-message',
-              props: {
-                constraintCaption: 'Maintenance precondition check failed. It may not be safe to start maintenance for your cluster due to the following reason',
-                constraintMessage: this.maintenancePreconditionSatisfiedMessage
-              }
-            }
-          }]
+        key: 'maintenanceConstraintWarning',
+        icon: 'mdi-alert-circle-outline',
+        color: 'warning',
+        component: {
+          name: 'constraint-message',
+          props: {
+            constraintCaption: 'Maintenance precondition check failed. It may not be safe to start maintenance for your cluster due to the following reason',
+            constraintMessage: this.maintenancePreconditionSatisfiedMessage
+          }
+        }
+      }]
     },
     icon () {
       const icons = map(this.shootMessages, 'icon')
@@ -268,7 +268,7 @@ export default {
         return includes(this.filter, value)
       }
       return this.filter === value
-    }
+    },
     colorForSeverity (severity) {
       switch (severity) {
         case 'error':
@@ -293,21 +293,23 @@ export default {
     overflow-y: auto;
   }
 
-  ::v-deep .v-card__text {
-    padding: 0px;
-  }
+  ::v-deep .v-card {
+    .v-card__text {
+      padding: 0px;
+    }
 
-  ::v-deep .v-list-item__icon {
-    padding: 8px 16px 8px 0px;
-    margin: 0px !important;
-  }
+    .v-list-item__icon {
+      padding: 8px 16px 8px 0px;
+      margin: 0px !important;
+    }
 
-  ::v-deep .v-list-item__content {
-    padding: 0px;
-  }
+    .v-list-item__content {
+      padding: 0px;
+    }
 
-  ::v-deep .v-list-item {
-    min-height: 0px;
+    .v-list-item {
+      min-height: 0px;
+    }
   }
 
 </style>

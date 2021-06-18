@@ -717,7 +717,6 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
 
   const patchAvailable = k8sVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
   const updatePathAvailable = k8sVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
-  const updateAvailable = !patchAvailable && updatePathAvailable
 
   let severity
   if (!updatePathAvailable) {
