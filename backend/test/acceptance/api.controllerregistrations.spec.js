@@ -40,17 +40,5 @@ describe('api', function () {
 
       expect(res.body).toMatchSnapshot()
     })
-
-    it('should return all networking types', async function () {
-      const res = await agent
-        .get('/api/networking-types')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).not.toBeCalled()
-
-      expect(res.body).toMatchSnapshot()
-    })
   })
 })
