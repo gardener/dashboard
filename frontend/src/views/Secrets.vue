@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-list subheader dense>
             <v-subheader>Create DNS Secret</v-subheader>
-            <v-list-item v-for="dnsProvider in dnsProviderList" :key="dnsProvider" @click="openSecretAddDialog(dnsProvider)">
+            <v-list-item v-for="dnsProvider in dnsProviderTypes" :key="dnsProvider" @click="openSecretAddDialog(dnsProvider)">
               <v-list-item-action>
                  <infra-icon :value="dnsProvider" :size="24"></infra-icon>
               </v-list-item-action>
@@ -171,7 +171,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
-import { isOwnSecret, mapTableHeader, dnsProviderList } from '@/utils'
+import { isOwnSecret, mapTableHeader } from '@/utils'
 import get from 'lodash/get'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
@@ -220,7 +220,8 @@ export default {
       'dnsSecretList',
       'shootList',
       'canCreateSecrets',
-      'sortedCloudProviderKindList'
+      'sortedCloudProviderKindList',
+      'dnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
@@ -296,8 +297,8 @@ export default {
         secret
       }))
     },
-    dnsProviderList () {
-      return dnsProviderList
+    dnsProviderTypes () {
+      return map(this.dnsProviderList, 'type')
     },
     dnsSecretTableHeaders () {
       const headers = [
@@ -362,7 +363,7 @@ export default {
         details: this.getSecretDetailsDns(secret),
         relatedShootCount: this.relatedShootCountDns(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
-        isSupportedCloudProvider: includes(this.dnsProviderList, secret.metadata.dnsProviderName),
+        isSupportedCloudProvider: includes(this.dnsProviderTypes, secret.metadata.dnsProviderName),
         secret
       }))
     }

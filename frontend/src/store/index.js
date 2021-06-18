@@ -61,7 +61,6 @@ import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
-import networkingTypes from './modules/networkingTypes'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
@@ -367,11 +366,11 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  gardenerExtensionsList (state) {
-    return state.gardenerExtensions.all
+  gardenerExtensionsList (state, getters) {
+    return getters['gardenerExtensions/items']
   },
   networkingTypeList (state, getters) {
-    const networkList = state.networkingTypes.all
+    const networkList = getters['gardenerExtensions/networkingTypes']
     return sortBy(networkList)
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
@@ -675,6 +674,13 @@ const getters = {
   },
   sortedCloudProviderKindList (state, getters) {
     return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere'], getters.cloudProviderKindList)
+  },
+  sortedDnsProviderList (state, getters) {
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const dnsProviderList = getters['gardenerExtensions/dnsProviderList']
+    return compact(map(supportedProviderTypes, poviderType => {
+      return find(dnsProviderList, ['type', poviderType])
+    }))
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -1065,13 +1071,6 @@ const actions = {
   async fetchGardenerExtensions ({ dispatch }) {
     try {
       await dispatch('gardenerExtensions/getAll')
-    } catch (err) {
-      dispatch('setError', err)
-    }
-  },
-  async fetchNetworkingTypes ({ dispatch }) {
-    try {
-      await dispatch('networkingTypes/getAll')
     } catch (err) {
       dispatch('setError', err)
     }
@@ -1536,7 +1535,6 @@ const modules = {
   draggable,
   cloudProfiles,
   gardenerExtensions,
-  networkingTypes,
   seeds,
   shoots,
   cloudProviderSecrets,

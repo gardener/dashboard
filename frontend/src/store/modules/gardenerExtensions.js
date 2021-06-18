@@ -6,6 +6,10 @@
 
 import { getGardenerExtensions } from '@/utils/api'
 
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import filter from 'lodash/filter'
+
 // initial state
 const state = {
   all: []
@@ -15,6 +19,15 @@ const state = {
 const getters = {
   items (state) {
     return state.all
+  },
+  networkingTypes (state) {
+    const resources = flatMap(state.all, 'resources')
+    const networkingResources = filter(resources, ['kind', 'Network'])
+    return map(networkingResources, 'type')
+  },
+  dnsProviderList (state) {
+    const resources = flatMap(state.all, 'resources')
+    return filter(resources, ['kind', 'DNSProvider'])
   }
 }
 

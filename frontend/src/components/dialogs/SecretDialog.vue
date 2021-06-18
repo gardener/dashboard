@@ -75,10 +75,11 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus, dnsProviderList } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
 import CloudProfile from '@/components/CloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
+import map from 'lodash/map'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
@@ -152,10 +153,11 @@ export default {
       'infrastructureSecretList',
       'cloudProfilesByCloudProviderKind',
       'shootList',
-      'sortedCloudProviderKindList'
+      'sortedCloudProviderKindList',
+      'sortedDnsProviderList'
     ]),
-    dnsProviderList () {
-      return dnsProviderList
+    dnsProviderTypes () {
+      return map(this.sortedDnsProviderList, 'type')
     },
     cloudProfileName: {
       get () {
@@ -229,7 +231,7 @@ export default {
       return includes(this.sortedCloudProviderKindList, this.vendor)
     },
     isDnsProviderSecret () {
-      return includes(this.dnsProviderList, this.vendor)
+      return includes(this.dnsProviderTypes, this.vendor)
     }
   },
   methods: {

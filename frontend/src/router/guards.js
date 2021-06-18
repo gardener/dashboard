@@ -97,7 +97,8 @@ function ensureDataLoaded (store, localStorage) {
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
-        ensureKubeconfigDataLoaded(store)
+        ensureKubeconfigDataLoaded(store),
+        ensureExtensionInformationLoaded(store)
       ])
 
       await setNamespace(store, to.params.namespace || to.query.namespace)
@@ -114,8 +115,7 @@ function ensureDataLoaded (store, localStorage) {
         case 'NewShoot':
         case 'NewShootEditor': {
           const promises = [
-            store.dispatch('subscribeShoots'),
-            store.dispatch('fetchNetworkingTypes')
+            store.dispatch('subscribeShoots')
           ]
           if (store.getters.canGetSecrets) {
             promises.push(store.dispatch('fetchcloudProviderSecrets'))
@@ -198,5 +198,11 @@ function ensureSeedsLoaded (store) {
 function ensureKubeconfigDataLoaded (store) {
   if (isEmpty(store.state.kubeconfigData)) {
     return store.dispatch('fetchKubeconfigData')
+  }
+}
+
+function ensureExtensionInformationLoaded (store) {
+  if (isEmpty(store.getters.gardenerExtensionsList)) {
+    return store.dispatch('fetchGardenerExtensions')
   }
 }

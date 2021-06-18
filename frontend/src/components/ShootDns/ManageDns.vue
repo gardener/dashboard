@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="primaryProvider"
           @blur="$v.primaryProvider.$touch()"
           @input="onInputPrimaryProvider"
-          :items="dnsProviders"
+          :items="dnsProvidersWithPrimarySupport"
           :error-messages="getErrorMessages('primaryProvider')"
           label="Primary DNS Provider"
         >
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import DnsProviderRow from '@/components/ShootDns/DnsProviderRow'
 import VendorIcon from '@/components/VendorIcon'
-import { getValidationErrors, dnsProviderList } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import { requiredIf } from 'vuelidate/lib/validators'
 import { mapGetters, mapState, mapMutations } from 'vuex'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -102,6 +102,7 @@ import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import set from 'lodash/set'
+import filter from 'lodash/filter'
 
 const validations = {
   primaryProvider: {
@@ -135,7 +136,8 @@ export default {
   computed: {
     ...mapState('componentStates', { storedComponentState: 'manageDns' }),
     ...mapGetters([
-      'dnsSecretsByProviderKind'
+      'dnsSecretsByProviderKind',
+      'sortedDnsProviderList'
     ]),
     validationErrors () {
       return {
@@ -149,8 +151,18 @@ export default {
         return 'External available domain of the cluster'
       }
       return 'Domain cannot be changed after cluster creation'
+    },
+    dnsProviderTypes () {
+      return map(this.sortedDnsProviderList, 'type')
+    },
+    dnsProvidersWithPrimarySupport () {
+      return filter(this.dnsProviders, ({ type }) => {
+        const provider = find(this.sortedDnsProviderList, ['type', type])
+        return get(provider, 'primary', false)
+      })
     }
   },
+
   methods: {
     ...mapMutations('componentStates', ['SET_MANAGE_DNS']),
     saveComponentState () {
@@ -186,7 +198,7 @@ export default {
     },
     addProvider () {
       const id = uuidv4()
-      const type = head(dnsProviderList)
+      const type = head(this.dnsProviderTypes)
       const secretName = get(head(this.dnsSecretsByProviderKind(type)), 'metadata.name')
       const excludeDomains = []
       const includeDomains = []

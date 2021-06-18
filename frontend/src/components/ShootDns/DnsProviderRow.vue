@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="type"
             @blur="$v.type.$touch()"
             @input="onInputType"
-            :items="dnsProviderList"
+            :items="dnsProviderTypes"
             :error-messages="getErrorMessages('type')"
             label="Dns Provider Type"
             :disabled="primary && !createMode"
@@ -51,6 +51,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Exclude Domains"
             multiple
             small-chips
+            deletable-chips
             @input="onInputExcludeDomains"
           >
           </v-combobox>
@@ -61,6 +62,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Include Domains"
             multiple
             small-chips
+            deletable-chips
             @input="onInputIncludeDomains"
           >
           </v-combobox>
@@ -71,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Exclude Zones"
             multiple
             small-chips
+            deletable-chips
             @input="onInputExcludeZones"
           >
           </v-combobox>
@@ -81,6 +84,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Include Zones"
             multiple
             small-chips
+            deletable-chips
             @input="onInputIncludeZones"
           >
           </v-combobox>
@@ -104,10 +108,11 @@ SPDX-License-Identifier: Apache-2.0
 import SelectSecret from '@/components/SelectSecret'
 import VendorIcon from '@/components/VendorIcon'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, dnsProviderList } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import { mapGetters } from 'vuex'
 import find from 'lodash/find'
 import head from 'lodash/head'
+import map from 'lodash/map'
 
 const validationErrors = {
   type: {
@@ -149,10 +154,11 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'dnsSecretsByProviderKind'
+      'dnsSecretsByProviderKind',
+      'sortedDnsProviderList'
     ]),
-    dnsProviderList () {
-      return dnsProviderList
+    dnsProviderTypes () {
+      return map(this.sortedDnsProviderList, 'type')
     },
     typeHint () {
       if (this.primary && !this.createMode) {

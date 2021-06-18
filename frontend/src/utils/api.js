@@ -358,7 +358,3 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 export function getGardenerExtensions () {
   return getResource('/api/gardener-extensions')
 }
-
-export function getNetworkingTypes () {
-  return getResource('/api/networking-types')
-}

@@ -73,7 +73,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchGardenerExtensions',
       'setError'
     ]),
     async fetchVersions () {
@@ -96,11 +95,6 @@ export default {
         })
       }
     },
-    async fetchExtensions () {
-      if (this.isAdmin) {
-        await this.fetchGardenerExtensions()
-      }
-    },
     onDialogClosed () {
       this.$emit('dialog-closed')
     }
@@ -110,7 +104,6 @@ export default {
       if (value) {
         this.$refs.gDialog.showDialog()
         this.fetchVersions()
-        this.fetchExtensions()
       }
     }
   }

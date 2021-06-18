@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title class="pt-1">{{shootDomain}}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
-      <v-list-item v-if="shootDnsProviders && shootDnsProviders.length">
+      <v-list-item>
         <v-list-item-icon/>
         <v-list-item-content class="pt-0">
           <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
@@ -122,6 +122,7 @@ SPDX-License-Identifier: Apache-2.0
               :zones="zones"
               :key="index">
             </dns-provider>
+            <span v-if="!shootDnsProviders">No DNS Provider configured</span>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
