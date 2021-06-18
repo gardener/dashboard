@@ -76,7 +76,7 @@ export default {
       default: false
     },
     filter: {
-      type: String,
+      type: [String, Array],
       required: false
     }
   },
@@ -92,13 +92,14 @@ export default {
       return [
         ...this.k8sMessage,
         ...this.machineImageMessages,
-        ...this.noHibernationScheduleWarning,
+        ...this.noHibernationScheduleMessage,
         ...this.clusterExpirationMessage,
-        ...this.constraintWarningMessages
+        ...this.hibernationConstraintMessage,
+        ...this.maintenanceConstraintMessage
       ]
     },
     k8sMessage () {
-      if (this.filter && !includes(this.filter, 'k8sMessage')) {
+      if (!this.filterMatches('k8s')) {
         return []
       }
       const k8sAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
@@ -122,14 +123,13 @@ export default {
       }]
     },
     machineImageMessages () {
-      if (this.filter && !includes(this.filter, 'machineImageMessages')) {
+      if (!this.filterMatches('machine-image')) {
         return []
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
       const expiredWorkerGroups = expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
-      const items = []
-      forEach(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity }) => {
-        items.push({
+      return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity }) => {
+        return {
           key: `image_${workerName}_${name}`,
           icon: 'mdi-update',
           color: this.colorForSeverity(severity),
@@ -144,12 +144,11 @@ export default {
               version
             }
           }
-        })
+        }
       })
-      return items
     },
-    noHibernationScheduleWarning () {
-      if (this.filter && !includes(this.filter, 'noHibernationScheduleWarning')) {
+    noHibernationScheduleMessage () {
+      if (!this.filterMatches('no-hibernation-schedule') {
         return []
       }
       if (!isShootHasNoHibernationScheduleWarning(this.shootItem)) {
@@ -171,7 +170,7 @@ export default {
       }]
     },
     clusterExpirationMessage () {
-      if (this.filter && !includes(this.filter, 'clusterExpirationMessage')) {
+      if (!this.filterMatches('cluster-expiration') {
         return []
       }
       if (!this.shootExpirationTimestamp) {
@@ -190,11 +189,14 @@ export default {
         }
       }]
     },
-    constraintWarningMessages () {
-      const warnings = []
-      if (!this.filter || includes(this.filter, 'hibernationConstraintWarning')) {
-        if (!this.isHibernationPossible && this.shootHibernationSchedules.length > 0) {
-          warnings.push({
+    hibernationConstraintMessage () {
+      if (!this.filterMatches('hibernation-constraint') {
+        return []
+      }
+      if (this.isHibernationPossible || !this.shootHibernationSchedules.length) {
+        return []
+      }
+      return [{
             key: 'hibernationConstraintWarning',
             icon: 'mdi-alert-circle-outline',
             color: 'warning',
@@ -205,12 +207,16 @@ export default {
                 constraintMessage: this.hibernationPossibleMessage
               }
             }
-          })
-        }
+          }]
+    },
+    maintenanceConstraintMessage () {
+      if (!this.filterMatches('maintenance-constraint') {
+        return []
       }
-      if (!this.filter || includes(this.filter, 'maintenanceConstraintWarning')) {
-        if (!this.isMaintenancePreconditionSatisfied) {
-          warnings.push({
+      if (this.isMaintenancePreconditionSatisfied) {
+        return []
+      }
+      return [{
             key: 'maintenanceConstraintWarning',
             icon: 'mdi-alert-circle-outline',
             color: 'warning',
@@ -221,10 +227,7 @@ export default {
                 constraintMessage: this.maintenancePreconditionSatisfiedMessage
               }
             }
-          })
-        }
-      }
-      return warnings
+          }]
     },
     icon () {
       const icons = map(this.shootMessages, 'icon')
@@ -257,6 +260,15 @@ export default {
     }
   },
   methods: {
+    filterMatches (value) {
+      if (isEmpty(this.filter)) {
+        return true
+      }
+      if (Array.isArray(this.filter)) {
+        return includes(this.filter, value)
+      }
+      return this.filter === value
+    }
     colorForSeverity (severity) {
       switch (severity) {
         case 'error':

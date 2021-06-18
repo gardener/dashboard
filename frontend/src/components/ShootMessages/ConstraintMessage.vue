@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span class="font-weight-bold">{{constraintCaption}}: </span>
-    <span>{{constraintMessage}}</span>
+    <span class="font-weight-bold">{{constraintCaption}}:</span>
+    {{constraintMessage}}
   </div>
 </template>
 

@@ -722,7 +722,7 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   let severity
   if (!updatePathAvailable) {
     severity = 'error'
-  } else if ((!k8sAutoPatch && patchAvailable) || updateAvailable) {
+  } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
     severity = 'warning'
   } else if (k8sAutoPatch && patchAvailable) {
     severity = 'info'

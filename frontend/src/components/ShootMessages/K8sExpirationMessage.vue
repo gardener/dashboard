@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         {{getDateFormatted(expirationDate)}}
       </v-tooltip>. </span>
-    <span v-else>Kubernetes version of this cluster is expired. </span>
+    <span v-else>Kubernetes version of this cluster is expired.</span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
     <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>

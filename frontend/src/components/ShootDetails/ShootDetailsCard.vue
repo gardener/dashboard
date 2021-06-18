@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Cluster Termination</v-list-item-subtitle>
             <v-list-item-title class="d-flex align-center pt-1">
-              <shoot-messages :shoot-item="shootItem" filter="clusterExpirationMessage" small class="mr-1" />
+              <shoot-messages :shoot-item="shootItem" filter="cluster-expiration" small class="mr-1" />
               <span>{{selfTerminationMessage}}</span>
             </v-list-item-title>
           </v-list-item-content>
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <shoot-messages :shoot-item="shootItem" filter="k8sMessage" />
+          <shoot-messages :shoot-item="shootItem" filter="k8s" />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <shoot-messages :shoot-item="shootItem" filter="machineImageMessages" />
+          <shoot-messages :shoot-item="shootItem" filter="machine-image" />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <worker-configuration :shoot-item="shootItem"></worker-configuration>

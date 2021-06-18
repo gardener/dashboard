@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-messages :shoot-item="shootItem" filter="noHibernationScheduleWarning hibernationConstraintWarning" small class="mr-1" />
+            <shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
             {{hibernationDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Maintenance</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-messages :shoot-item="shootItem" filter="maintenanceConstraintWarning" small class="mr-1" />
+            <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
             {{maintenanceDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
