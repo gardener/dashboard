@@ -32,9 +32,8 @@ SPDX-License-Identifier: Apache-2.0
               class="mr-3"
             ></v-text-field>
           </template>
-          <span>Search terms are ANDed by default. You can use the following keywords to customize your search:</span><br />
-          <v-chip label color="primary" small>OR</v-chip> <span>if you want the terms to be ORed. Example: <i>project-a OR project-b</i></span><br />
-          <v-chip label color="primary" small>NOT</v-chip> <span>if you want a term to be negative. Example: <i>NOT project-a</i></span><br />
+          <span>Search terms are ANDed. You can use the following keywords to customize your search:</span><br />
+          <v-chip label color="primary" small>- Prefix</v-chip> <span>if you want a term to be negative. Example: <i>-project-a</i></span><br />
           <v-chip label color="primary" small>Quotes</v-chip> <span>if you want a term to match exact only. Example: <i>"project"</i> will only match <i>project</i>, not <i>project-a</i></span>
         </v-tooltip>
         <v-tooltip top v-if="canCreateShoots && projectScope">

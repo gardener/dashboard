@@ -6,7 +6,6 @@
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
-import split from 'lodash/split'
 import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import head from 'lodash/head'
@@ -17,6 +16,7 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import padStart from 'lodash/padStart'
 import forEach from 'lodash/forEach'
+import compact from 'lodash/compact'
 import semver from 'semver'
 
 import {
@@ -151,31 +151,28 @@ export default {
     return state.initialNewShootResource
   },
   searchItems (state, getters, rootState, rootGetters) {
+    const searchPattern = /(-?"[^"]+")*([\S]+)*/g
+    const termPattern = /^(-)?("?)([^"]+)("?)$/g
     let searchQuery
     let lastSearchString
-    const exactMatchPattern = /^"(.+)"$/
+
     return (value, search, item) => {
       if (search !== lastSearchString) {
-        searchQuery = []
         lastSearchString = search
-        let negative = false
-        let or = false
-        forEach(split(search, ' '), searchTerm => {
-          if (searchTerm === 'NOT') {
-            negative = true
-          } else if (searchTerm === 'OR') {
-            or = true
-          } else {
-            const exactValue = exactMatchPattern.exec(searchTerm)
-            const exact = exactValue && exactValue.length > 0
-            searchQuery.push({
-              value: exact ? exactValue[1] : searchTerm,
-              exact,
-              negative,
-              or
-            })
+        const searchTerms = search.match(searchPattern)
+        searchQuery = compact(map(searchTerms, searchTerm => {
+          const result = termPattern.exec(searchTerm)
+          if (result) {
+            const [, negative, startQuote, value, endQuote] = result
+            console.log(negative, startQuote, value, endQuote)
+            return {
+              negative: !!negative,
+              exact: !!startQuote && !!endQuote,
+              value
+            }
           }
-        })
+          return undefined
+        }))
       }
 
       const searchableCustomFields = filter(rootGetters.shootCustomFieldList, ['searchable', true])
@@ -197,11 +194,7 @@ export default {
         if (searchTerm.negative) {
           found = !found
         }
-        if (searchTerm.or) {
-          result = result || found
-        } else {
-          result = result && found
-        }
+        result = result && found
       })
       return result
     }
