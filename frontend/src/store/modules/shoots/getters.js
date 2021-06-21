@@ -164,7 +164,6 @@ export default {
           const result = termPattern.exec(searchTerm)
           if (result) {
             const [, negative, startQuote, value, endQuote] = result
-            console.log(negative, startQuote, value, endQuote)
             return {
               negative: !!negative,
               exact: !!startQuote && !!endQuote,
