@@ -132,9 +132,6 @@ export const shootItem = {
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')
     },
-    shootDnsProviders () {
-      return get(this.shootSpec, 'dns.providers')
-    },
     shootHibernationSchedules () {
       return get(this.shootSpec, 'hibernation.schedules', [])
     },
