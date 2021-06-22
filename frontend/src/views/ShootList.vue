@@ -467,8 +467,8 @@ export default {
           hidden: this.projectScope || !this.isAdmin,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
-            '- CLusters with user issues',
-            '- Clusters with temporary issue that will be retried automatically'
+            '- Clusters with user issues',
+            '- Clusters with temporary issues that will be retried automatically'
           ],
           disabled: this.filtersDisabled
         },
