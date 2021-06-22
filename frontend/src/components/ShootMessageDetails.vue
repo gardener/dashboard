@@ -68,9 +68,9 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
+                v-for="({ description, userError, temporaryError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
-                :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
+                :icon="icon(userError, temporaryError)"
                 :prominent="!!userError ? true : false"
               >
                 <h4 v-if="userError">Action required</h4>
@@ -135,6 +135,17 @@ export default {
     },
     canLinkToSecret () {
       return this.secretBindingName && this.namespace
+    }
+  },
+  methods: {
+    icon (userError, temporaryError) {
+      if (userError) {
+        return 'mdi-account-alert'
+      }
+      if (temporaryError) {
+        return 'mdi-clock-alert'
+      }
+      return 'mdi-alert'
     }
   }
 }

@@ -205,7 +205,7 @@ export default {
       const key = value
       await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
 
-      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'userIssues', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'noOperatorAction', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
 
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
@@ -461,10 +461,15 @@ export default {
           disabled: this.filtersDisabled
         },
         {
-          text: 'Hide user issues',
-          value: 'userIssues',
-          selected: this.isFilterActive('userIssues'),
+          text: 'Hide no operator action required issues',
+          value: 'noOperatorAction',
+          selected: this.isFilterActive('noOperatorAction'),
           hidden: this.projectScope || !this.isAdmin,
+          helpTooltip: [
+            'Hide clusters that do not require action by an operator',
+            '- CLusters with user issues',
+            '- Clusters with temporary issue that will be retried automatically'
+          ],
           disabled: this.filtersDisabled
         },
         {
@@ -516,7 +521,7 @@ export default {
         if (this.isFilterActive('progressing')) {
           subtitle.push('Progressing Clusters')
         }
-        if (this.isFilterActive('userIssues')) {
+        if (this.isFilterActive('noOperatorAction')) {
           subtitle.push('User Errors')
         }
         if (this.isFilterActive('deactivatedReconciliation')) {

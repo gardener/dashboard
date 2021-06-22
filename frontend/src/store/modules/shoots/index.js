@@ -37,7 +37,7 @@ import {
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone
 } from '@/utils'
-import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
 import find from 'lodash/find'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -287,13 +287,15 @@ function setFilteredItems (state, rootState) {
       }
       items = filter(items, predicate)
     }
-    if (get(state, 'shootListFilters.userIssues', false)) {
+    if (get(state, 'shootListFilters.noOperatorAction', false)) {
       const predicate = item => {
         const lastErrors = get(item, 'status.lastErrors', [])
         const allLastErrorCodes = errorCodesFromArray(lastErrors)
         const conditions = get(item, 'status.conditions', [])
         const allConditionCodes = errorCodesFromArray(conditions)
-        return !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
+        const noUserError = !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
+        const noTemporaryError = !isTemporaryError(allLastErrorCodes)
+        return noUserError && noTemporaryError
       }
       items = filter(items, predicate)
     }

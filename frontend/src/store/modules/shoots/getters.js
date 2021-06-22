@@ -25,7 +25,7 @@ import {
   isReconciliationDeactivated
 } from '@/utils'
 import { findItem } from './helper'
-import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
+import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
   const metadata = item.metadata
@@ -85,6 +85,7 @@ export function getSortVal (rootGetters, item, sortBy) {
       const isError = operation.state === 'Failed' || lastErrors.length
       const allErrorCodes = errorCodesFromArray(lastErrors)
       const userError = isUserError(allErrorCodes)
+      const temporaryError = isTemporaryError(allErrorCodes)
       const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
@@ -95,6 +96,8 @@ export function getSortVal (rootGetters, item, sortBy) {
         }
       } else if (userError && !inProgress) {
         return 200
+      } else if (temporaryError) {
+        return 250
       } else if (userError && inProgress) {
         const progress = padStart(operation.progress, 2, '0')
         return `3${progress}`
