@@ -199,6 +199,7 @@ class SessionPool {
     const { origin, hostname } = this.id
     const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'pingInterval'])
     Object.assign(options, {
+      maxSessionMemory: 20,
       servername: !net.isIP(hostname) ? hostname : '',
       session: this.tlsSession
     })

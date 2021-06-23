@@ -7,7 +7,7 @@
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
-import Emitter from 'component-emitter'
+import EventEmitter from 'events'
 import ThrottledNamespacedEventEmitter from './ThrottledEmitter'
 import store from '../store'
 
@@ -58,8 +58,9 @@ class Connector {
   }
 }
 
-class AbstractSubscription {
+class AbstractSubscription extends EventEmitter {
   constructor (connector) {
+    super()
     connector.addHandler(this)
 
     this.connector = connector
@@ -265,20 +266,19 @@ class CommentsSubscription extends AbstractTicketsSubscription {
   }
 }
 
-const url = window.location.origin
 const socketConfig = {
   path: '/api/events',
   transports: ['websocket'],
   autoConnect: false
 }
 
-const shootsConnector = new Connector(io(`${url}/shoots`, socketConfig))
-const ticketsConnector = new Connector(io(`${url}/tickets`, socketConfig))
+const shootsConnector = new Connector(io('/shoots', socketConfig))
+const ticketsConnector = new Connector(io('/tickets', socketConfig))
 
-const shootsEmitter = Emitter(new ShootsSubscription(shootsConnector))
-const shootEmitter = Emitter(new ShootSubscription(shootsConnector))
-const ticketIssuesEmitter = Emitter(new IssuesSubscription(ticketsConnector))
-const ticketCommentsEmitter = Emitter(new CommentsSubscription(ticketsConnector))
+const shootsEmitter = new ShootsSubscription(shootsConnector)
+const shootEmitter = new ShootSubscription(shootsConnector)
+const ticketIssuesEmitter = new IssuesSubscription(ticketsConnector)
+const ticketCommentsEmitter = new CommentsSubscription(ticketsConnector)
 
 /* Web Socket Connection */
 

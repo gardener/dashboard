@@ -26,7 +26,9 @@ Custom fields do not show up on the `ALL_PROJECTS` page.
 | searchable | Bool | true | | Field shall appear in a dedicated card (`Custom Fields`) on the cluster details page |
 | showDetails | Bool | true | | Indicates if field shall appear in a dedicated card (`Custom Fields`) on the cluster details page |
 
-Example project yaml:
+As there is currently no way to configure the custom shoot fields for a project in the gardener dashboard, you have to use `kubectl` to update the `project` resource. See https://github.com/gardener/dashboard/blob/master/docs/usage/project-operations.md#download-kubeconfig-for-a-user on how to get a `kubeconfig` for the `garden` cluster in order to edit the `project`.
+
+The following is an example project yaml:
 ```yaml
 apiVersion: core.gardener.cloud/v1beta1
 kind: Project
@@ -38,7 +40,7 @@ metadata:
           "name": "Shoot Status",
           "path": "metadata.labels[\"shoot.gardener.cloud/status\"]",
           "icon": "mdi-heart-pulse",
-          "tooltip": "Indicates the health status of the cluster"
+          "tooltip": "Indicates the health status of the cluster",
           "defaultValue": "unknown",
           "showColumn": true,
           "columnSelectedByDefault": true,

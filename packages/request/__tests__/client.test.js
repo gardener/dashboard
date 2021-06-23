@@ -7,6 +7,7 @@
 'use strict'
 
 const http2 = require('http2')
+const zlib = require('zlib')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { Client, extend } = require('../lib')
 const {
@@ -16,6 +17,7 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
+  HTTP2_HEADER_ACCEPT_ENCODING,
   HTTP2_METHOD_GET,
   HTTP2_METHOD_POST,
   HTTP2_HEADER_STATUS
@@ -51,6 +53,7 @@ describe('Client', () => {
       async getHeaders () {
         return this.mockHeaders()
       },
+      setEncoding: jest.fn(),
       async * [Symbol.asyncIterator] () {
         yield Buffer.from('{')
         let separator
@@ -123,6 +126,7 @@ describe('Client', () => {
       [HTTP2_HEADER_AUTHORITY]: '127.0.0.1:31415',
       [HTTP2_HEADER_METHOD]: HTTP2_METHOD_GET,
       [HTTP2_HEADER_PATH]: '/test',
+      [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
       'x-request-id': xRequestId
     }
 
@@ -247,6 +251,26 @@ describe('Client', () => {
     it('should create a http client', () => {
       const client = extend({ prefixUrl })
       expect(client).toBeInstanceOf(Client)
+    })
+  })
+
+  describe('#createDecompressor', () => {
+    it('should create a decompressor', () => {
+      expect(Client.createDecompressor('br')).toBeInstanceOf(zlib.BrotliDecompress)
+      expect(Client.createDecompressor('gzip')).toBeInstanceOf(zlib.Gunzip)
+      expect(Client.createDecompressor('deflate')).toBeInstanceOf(zlib.Inflate)
+      expect(Client.createDecompressor('foo')).toBeUndefined()
+    })
+  })
+
+  describe('#transformFactory', () => {
+    it('should create a transform function', () => {
+      const data = 'foo'
+      expect(Client.transformFactory('text')(data)).toBe(data)
+      expect(Client.transformFactory('json')(JSON.stringify(data))).toBe(data)
+      const buffer = Client.transformFactory(false)(data)
+      expect(Buffer.isBuffer(buffer)).toBe(true)
+      expect(buffer.toString('utf8')).toBe(data)
     })
   })
 })

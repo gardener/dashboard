@@ -9,11 +9,13 @@
 const { join } = require('path')
 const http = require('http')
 const http2 = require('http2')
+const zlib = require('zlib')
 const typeis = require('type-is')
 const { pick } = require('lodash')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { createHttpError } = require('./errors')
 const { globalAgent } = require('./Agent')
+const { pipeline } = require('stream')
 
 const {
   HTTP2_HEADER_STATUS,
@@ -23,10 +25,12 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
-  HTTP2_METHOD_GET
+  HTTP2_METHOD_GET,
+  HTTP2_HEADER_ACCEPT_ENCODING,
+  HTTP2_HEADER_CONTENT_ENCODING
 } = http2.constants
 
-const EOL = 10
+const EOL = '\n'
 
 class Client {
   constructor ({ prefixUrl, agent = globalAgent, ...options } = {}) {
@@ -84,7 +88,8 @@ class Client {
         [HTTP2_HEADER_SCHEME]: url.protocol.replace(/:$/, ''),
         [HTTP2_HEADER_AUTHORITY]: url.host,
         [HTTP2_HEADER_METHOD]: method.toUpperCase(),
-        [HTTP2_HEADER_PATH]: url.pathname + url.search
+        [HTTP2_HEADER_PATH]: url.pathname + url.search,
+        [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
       },
       normalizeHeaders(this.defaults.options.headers),
       normalizeHeaders(headers)
@@ -120,9 +125,11 @@ class Client {
     stream.end()
 
     const { responseType } = this.defaults.options
-    const { transformFactory } = this.constructor
+    const { createDecompressor, concat, transformFactory } = this.constructor
 
     headers = await stream.getHeaders()
+    const decompressor = createDecompressor(headers[HTTP2_HEADER_CONTENT_ENCODING])
+
     return {
       request: { options: requestOptions },
       headers,
@@ -150,25 +157,47 @@ class Client {
       destroy (error) {
         stream.destroy(error)
       },
-      async body () {
-        let data = Buffer.from([])
-        for await (const chunk of stream) {
-          data = Buffer.concat([data, chunk], data.length + chunk.length)
+      body () {
+        const streams = [
+          stream,
+          async source => {
+            switch (this.type) {
+              case 'text':
+                return concat(source)
+              case 'json':
+                return JSON.parse(await concat(source))
+              default:
+                return Buffer.from(concat(source), 'utf8')
+            }
+          }
+        ]
+        if (decompressor) {
+          streams.splice(1, 0, decompressor)
         }
-        switch (this.type) {
-          case 'text':
-            return data.toString('utf8')
-          case 'json':
-            return JSON.parse(data)
-          default:
-            return data
-        }
+        return new Promise((resolve, reject) => {
+          pipeline(streams, (err, body) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(body)
+            }
+          })
+        })
       },
       async * [Symbol.asyncIterator] () {
-        let data = Buffer.from([])
+        let data = ''
         const transform = transformFactory(this.type)
-        for await (const chunk of stream) {
-          data = Buffer.concat([data, chunk], data.length + chunk.length)
+        let readable = stream
+        if (decompressor) {
+          readable = pipeline(stream, decompressor, err => {
+            if (err) {
+              logger.debug('Stream decompress pipeline error: %s', err.message)
+            }
+          })
+        }
+        readable.setEncoding('utf8')
+        for await (const chunk of readable) {
+          data += chunk
           let index
           while ((index = data.indexOf(EOL)) !== -1) {
             yield transform(data.slice(0, index))
@@ -240,7 +269,7 @@ class Client {
   static transformFactory (type) {
     switch (type) {
       case 'text':
-        return data => data.toString('utf8')
+        return data => data
       case 'json':
         return data => {
           try {
@@ -250,7 +279,27 @@ class Client {
           }
         }
       default:
-        return data => data
+        return data => Buffer.from(data, 'utf8')
+    }
+  }
+
+  static async concat (source) {
+    let data = ''
+    source.setEncoding('utf8')
+    for await (const chunk of source) {
+      data += chunk
+    }
+    return data
+  }
+
+  static createDecompressor (contentEncoding) {
+    switch (contentEncoding) {
+      case 'br':
+        return zlib.createBrotliDecompress()
+      case 'gzip':
+        return zlib.createGunzip()
+      case 'deflate':
+        return zlib.createInflate()
     }
   }
 
