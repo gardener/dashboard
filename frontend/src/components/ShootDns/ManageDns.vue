@@ -290,6 +290,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+
+  ::v-deep .v-select__slot {
+    div {
+     flex-wrap: nowrap;
+    }
+  }
 
 </style>
