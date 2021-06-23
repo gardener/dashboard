@@ -205,7 +205,13 @@ export default {
       const key = value
       await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
 
-      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, ['onlyShootsWithIssues', 'progressing', 'noOperatorAction', 'deactivatedReconciliation', 'hideTicketsWithLabel']))
+      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, [
+        'onlyShootsWithIssues',
+        'progressing',
+        'noOperatorAction',
+        'deactivatedReconciliation',
+        'hideTicketsWithLabel'
+      ]))
 
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
