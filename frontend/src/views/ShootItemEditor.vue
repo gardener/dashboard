@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       alert-banner-identifier="shootEditorWarning"
       :error-message.sync="errorMessage"
       :detailed-error-message.sync="detailedErrorMessage"
-      :shoot-content="shootContent"
+      :shoot-item="shootItem"
       :extra-keys="extraKeys"
       @clean="onClean"
       @conflict-path="onConflictPath"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
-import { mapGetters, mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
 import asyncRef from '@/mixins/asyncRef'
@@ -76,7 +76,7 @@ export default {
     ...mapGetters([
       'shootByNamespaceAndName'
     ]),
-    shootContent () {
+    shootItem () {
       return this.shootByNamespaceAndName(this.$route.params)
     }
   },
@@ -107,7 +107,7 @@ export default {
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
         const shootResource = await this.getShootResource()
         const data = pick(shootResource, paths)
-        const { metadata: { namespace, name } } = this.shootContent
+        const { metadata: { namespace, name } } = this.shootItem
         const { data: value } = await replaceShoot({ namespace, name, data })
         await this.$shootEditor.dispatch('update', value)
 

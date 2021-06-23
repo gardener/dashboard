@@ -23,11 +23,6 @@ import { addShootAnnotation } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   data () {
     return {
       retryingOperation: false

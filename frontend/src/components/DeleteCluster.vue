@@ -57,9 +57,6 @@ export default {
     AccountAvatar
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     small: {
       type: Boolean,
       default: false

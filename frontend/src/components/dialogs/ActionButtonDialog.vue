@@ -68,9 +68,6 @@ export default {
     }
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     icon: {
       type: String,
       default: 'mdi-cog-outline'

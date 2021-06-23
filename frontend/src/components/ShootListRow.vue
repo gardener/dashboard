@@ -187,10 +187,6 @@ export default {
     AutoHide
   },
   props: {
-    shootItem: {
-      type: Object,
-      required: true
-    },
     visibleHeaders: {
       type: Array,
       required: true

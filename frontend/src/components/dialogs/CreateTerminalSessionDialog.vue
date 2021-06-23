@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         ref="unverified"
       ></unverified-terminal-shortcuts-dialog>
       <webterminal-service-account-dialog
-        :namespace="namespace"
+        :namespace="shootNamespace"
         ref="serviceAccount"
       ></webterminal-service-account-dialog>
     </template>
@@ -85,7 +85,6 @@ import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalSer
 import { mapGetters } from 'vuex'
 import { getMembers, terminalConfig } from '@/utils/api'
 import { TargetEnum } from '@/utils'
-import { shootItem } from '@/mixins/shootItem'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
@@ -103,13 +102,9 @@ export default {
     UnverifiedTerminalShortcutsDialog,
     WebterminalServiceAccountDialog
   },
-  mixins: [shootItem],
   props: {
-    name: {
-      type: String
-    },
-    namespace: {
-      type: String
+    shootItem: {
+      type: Object
     }
   },
   data () {
@@ -134,12 +129,14 @@ export default {
       'hasShootTerminalAccess',
       'hasGardenTerminalAccess',
       'isAdmin',
-      'shootByNamespaceAndName',
       'isTerminalShortcutsFeatureEnabled',
       'projectList'
     ]),
-    shootItem () {
-      return this.shootByNamespaceAndName({ name: this.name, namespace: this.namespace })
+    shootName () {
+      return get(this.shootItem, 'metadata.name')
+    },
+    shootNamespace () {
+      return get(this.shootItem, 'metadata.namespace')
     },
     valid () {
       switch (this.tab) {
@@ -207,8 +204,10 @@ export default {
             return true
           }
 
-          const { data: projectMembers } = await getMembers({ namespace: this.namespace })
-          const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
+          const { data: projectMembers } = await getMembers({
+            namespace: this.shootNamespace
+          })
+          const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
           if (includes(roles, 'admin')) {
@@ -256,7 +255,11 @@ export default {
       this.targetTab.selectedConfig = undefined
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
-        const { data: config } = await terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
+        const { data: config } = await terminalConfig({
+          name: this.shootName,
+          namespace: this.shootNamespace,
+          target: this.targetTab.selectedTarget
+        })
         this.$refs.settings.initialize(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined

@@ -56,11 +56,6 @@ export default {
     CopyBtn,
     CodeBlock
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   data () {
     return {

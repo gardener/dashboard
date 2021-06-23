@@ -103,9 +103,6 @@ export default {
     GDialog
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     chip: {
       type: Boolean
     }

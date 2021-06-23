@@ -68,9 +68,6 @@ export default {
     ConstraintMessage
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     small: {
       type: Boolean,
       default: false
@@ -164,7 +161,7 @@ export default {
             purposeText: this.shootPurpose || '',
             shootName: this.shootName || '',
             shootNamespace: this.shootNamespace || '',
-            showNavigationLink: this.canPatchShoots
+            showNavigationLink: this.canPatchShoots && !isEmpty(this.shootName) && !isEmpty(this.shootNamespace)
           }
         }
       }]

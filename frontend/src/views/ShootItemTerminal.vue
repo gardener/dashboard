@@ -18,16 +18,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import get from 'lodash/get'
 import TerminalSplitpanes from '@/components/TerminalSplitpanes'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {
     TerminalSplitpanes
   },
   computed: {
-    ...mapGetters([
-      'shootByNamespaceAndName'
-    ]),
     name () {
       return get(this.$route.params, 'name')
     },

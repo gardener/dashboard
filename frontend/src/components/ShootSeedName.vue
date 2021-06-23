@@ -24,11 +24,6 @@ SPDX-License-Identifier: Apache-2.0
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem]
 }
 </script>

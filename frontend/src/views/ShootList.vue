@@ -228,7 +228,6 @@ export default {
   computed: {
     ...mapGetters({
       mappedItems: 'shootList',
-      item: 'shootByNamespaceAndName',
       selectedItem: 'selectedShoot',
       isAdmin: 'isAdmin',
       getShootListFilters: 'getShootListFilters',

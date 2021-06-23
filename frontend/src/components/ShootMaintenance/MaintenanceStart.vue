@@ -45,9 +45,6 @@ export default {
     MaintenanceComponents
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     text: {
       type: Boolean
     }

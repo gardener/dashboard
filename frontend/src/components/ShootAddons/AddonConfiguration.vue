@@ -37,11 +37,6 @@ export default {
     ActionButtonDialog,
     ManageShootAddons
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   methods: {
     async onConfigurationDialogOpened () {

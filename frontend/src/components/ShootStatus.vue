@@ -78,9 +78,6 @@ export default {
     ShootMessageDetails
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     popperKey: {
       type: String,
       required: true

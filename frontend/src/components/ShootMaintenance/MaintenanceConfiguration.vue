@@ -45,11 +45,6 @@ export default {
     MaintenanceComponents,
     MaintenanceTime
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   data () {
     return {
