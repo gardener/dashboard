@@ -68,14 +68,14 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="errorCodeObject in lastErrorDescription.errorCodeObjects" :key="errorCodeObject.description"
+                v-for="({description, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
-                :icon="icon(errorCodeObject)"
-                :prominent="!!errorCodeObject.userError"
+                :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
+                :prominent="!!userError"
               >
-                <h4 v-if="errorCodeObject.userError">Action required</h4>
+                <h4 v-if="userError">Action required</h4>
                 <span class="wrap">
-                  <span v-if="errorCodeObject.infraAccountError">There is a problem with your secret
+                  <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
                         :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
@@ -84,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
                       </router-link>
                       <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
-                  {{errorCodeObject.description}}
+                  {{description}}
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
@@ -135,14 +135,6 @@ export default {
     },
     canLinkToSecret () {
       return this.secretBindingName && this.namespace
-    }
-  },
-  methods: {
-    icon ({ userError, temporaryError }) {
-      if (userError) {
-        return 'mdi-account-alert'
-      }
-      return 'mdi-alert'
     }
   }
 }
