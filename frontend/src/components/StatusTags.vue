@@ -29,9 +29,6 @@ export default {
     StatusTag
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     popperPlacement: {
       type: String
     }

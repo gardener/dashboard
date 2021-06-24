@@ -60,11 +60,6 @@ export default {
     ShootExternalToolsCard
   },
   mixins: [shootItem],
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   computed: {
     ...mapGetters([
       'ticketsByNamespaceAndName',

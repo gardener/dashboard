@@ -229,11 +229,6 @@ export default {
     ShootMessages,
     CopyBtn
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   computed: {
     ...mapState([

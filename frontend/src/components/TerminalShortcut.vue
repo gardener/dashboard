@@ -78,10 +78,6 @@ import CodeBlock from '@/components/CodeBlock'
 
 export default {
   props: {
-    shootItem: {
-      type: Object,
-      required: false
-    },
     shortcut: {
       type: Object,
       required: true

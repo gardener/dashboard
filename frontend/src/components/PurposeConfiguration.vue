@@ -44,13 +44,9 @@ export default {
     ActionButtonDialog,
     Purpose
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [
-    shootItem, asyncRef('purpose')
+    shootItem,
+    asyncRef('purpose')
   ],
   data () {
     return {

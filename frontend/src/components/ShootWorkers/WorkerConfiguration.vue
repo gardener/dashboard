@@ -42,11 +42,6 @@ export default {
     ActionButtonDialog,
     ManageWorkers
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   data () {
     return {
       workersValid: false,

@@ -31,8 +31,6 @@ import TerminalSplitpanes from '@/components/TerminalSplitpanes'
 
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
-import { shootItem } from '@/mixins/shootItem'
-
 export default {
   name: 'shoot-item',
   components: {
@@ -40,16 +38,18 @@ export default {
     TerminalSplitpanes,
     PositionalDropzone
   },
-  mixins: [shootItem],
   computed: {
     ...mapGetters([
       'shootByNamespaceAndName'
     ]),
-    value () {
-      return this.shootByNamespaceAndName(this.$route.params)
+    shootName () {
+      return get(this.$route.params, 'name')
+    },
+    shootNamespace () {
+      return get(this.$route.params, 'namespace')
     },
     shootItem () {
-      return get(this, 'value', {})
+      return this.shootByNamespaceAndName(this.$route.params) || {}
     }
   },
   methods: {

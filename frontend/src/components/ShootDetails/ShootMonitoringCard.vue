@@ -69,11 +69,6 @@ export default {
     StatusTags,
     ClusterMetrics
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   computed: {
     metricsNotAvailableText () {

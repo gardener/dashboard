@@ -85,7 +85,6 @@ import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalSer
 import { mapGetters } from 'vuex'
 import { getMembers, terminalConfig } from '@/utils/api'
 import { TargetEnum } from '@/utils'
-import { shootItem } from '@/mixins/shootItem'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
@@ -103,7 +102,6 @@ export default {
     UnverifiedTerminalShortcutsDialog,
     WebterminalServiceAccountDialog
   },
-  mixins: [shootItem],
   props: {
     name: {
       type: String

@@ -50,10 +50,6 @@ export default {
   props: {
     tickets: {
       type: Array
-    },
-    shootItem: {
-      type: Object,
-      required: true
     }
   },
   mixins: [shootItem],
