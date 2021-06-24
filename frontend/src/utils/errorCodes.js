@@ -31,7 +31,7 @@ export function isTemporaryError (errorCodesArray) {
     return false
   }
 
-  return find(objectsFromErrorCodes(errorCodesArray), { temporaryError: true })
+  return !!find(objectsFromErrorCodes(errorCodesArray), 'temporaryError')
 }
 
 export function objectsFromErrorCodes (errorCodesArray) {
