@@ -33,10 +33,8 @@ SPDX-License-Identifier: Apache-2.0
           <div>
             <span class="font-weight-bold">{{tooltip.title}}</span>
             <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
-            <div v-for="({ shortDescription, userError, temporaryError }) in tooltip.errorCodeObjects" :key="shortDescription">
-              <v-icon v-if="userError" class="mr-1" color="white" small>mdi-account-alert</v-icon>
-              <v-icon v-else-if="temporaryError" class="mr-1" color="white" small>mdi-clock-alert</v-icon>
-              <v-icon v-else class="mr-1" color="white" small>mdi-alert</v-icon>
+            <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects" :key="shortDescription">
+              <v-icon v-if="userError" class="mr-1" color="white" small>{{ userError ? 'mdi-account-alert' : 'mdi-alert' }}</v-icon>
               <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
             </div>
           </div>

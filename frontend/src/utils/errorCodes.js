@@ -23,7 +23,7 @@ export function isUserError (errorCodesArray) {
     return false
   }
 
-  return find(objectsFromErrorCodes(errorCodesArray), { userError: true })
+  return !!find(objectsFromErrorCodes(errorCodesArray), 'userError')
 }
 
 export function isTemporaryError (errorCodesArray) {

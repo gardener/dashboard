@@ -71,11 +71,11 @@ SPDX-License-Identifier: Apache-2.0
                 v-for="errorCodeObject in lastErrorDescription.errorCodeObjects" :key="errorCodeObject.description"
                 color="error"
                 :icon="icon(errorCodeObject)"
-                :prominent="!!userError ? true : false"
+                :prominent="!!errorCodeObject.userError"
               >
-                <h4 v-if="userError">Action required</h4>
+                <h4 v-if="errorCodeObject.userError">Action required</h4>
                 <span class="wrap">
-                  <span v-if="infraAccountError">There is a problem with your secret
+                  <span v-if="errorCodeObject.infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
                         :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
@@ -84,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
                       </router-link>
                       <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
-                  {{description}}
+                  {{errorCodeObject.description}}
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
@@ -141,9 +141,6 @@ export default {
     icon ({ userError, temporaryError }) {
       if (userError) {
         return 'mdi-account-alert'
-      }
-      if (temporaryError) {
-        return 'mdi-clock-alert'
       }
       return 'mdi-alert'
     }
