@@ -22,12 +22,10 @@ SPDX-License-Identifier: Apache-2.0
         :selectable="false"
         ref="maintenanceComponents"
       ></maintenance-components>
-      <constraint-warning
-        :value="!isMaintenancePreconditionSatisfied"
-        type="maintenance"
-        small>
+      <v-alert type="warning" outlined :value="!isMaintenancePreconditionSatisfied">
+        <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
         {{maintenancePreconditionSatisfiedMessage}}
-      </constraint-warning>
+      </v-alert>
     </template>
   </action-button-dialog>
 </template>
@@ -35,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
-import ConstraintWarning from '@/components/ConstraintWarning'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -45,8 +42,7 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   components: {
     ActionButtonDialog,
-    MaintenanceComponents,
-    ConstraintWarning
+    MaintenanceComponents
   },
   props: {
     shootItem: {
