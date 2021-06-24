@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         ref="unverified"
       ></unverified-terminal-shortcuts-dialog>
       <webterminal-service-account-dialog
-        :namespace="shootNamespace"
+        :namespace="namespace"
         ref="serviceAccount"
       ></webterminal-service-account-dialog>
     </template>
@@ -103,8 +103,11 @@ export default {
     WebterminalServiceAccountDialog
   },
   props: {
-    shootItem: {
-      type: Object
+    name: {
+      type: String
+    },
+    namespace: {
+      type: String
     }
   },
   data () {
@@ -129,14 +132,12 @@ export default {
       'hasShootTerminalAccess',
       'hasGardenTerminalAccess',
       'isAdmin',
+      'shootByNamespaceAndName',
       'isTerminalShortcutsFeatureEnabled',
       'projectList'
     ]),
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
+    shootItem () {
+      return this.shootByNamespaceAndName({ name: this.name, namespace: this.namespace })
     },
     valid () {
       switch (this.tab) {
@@ -204,10 +205,8 @@ export default {
             return true
           }
 
-          const { data: projectMembers } = await getMembers({
-            namespace: this.shootNamespace
-          })
-          const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
+          const { data: projectMembers } = await getMembers({ namespace: this.namespace })
+          const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
           if (includes(roles, 'admin')) {
@@ -255,11 +254,7 @@ export default {
       this.targetTab.selectedConfig = undefined
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
-        const { data: config } = await terminalConfig({
-          name: this.shootName,
-          namespace: this.shootNamespace,
-          target: this.targetTab.selectedTarget
-        })
+        const { data: config } = await terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
         this.$refs.settings.initialize(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined

@@ -30,7 +30,8 @@ SPDX-License-Identifier: Apache-2.0
     </g-splitpane>
     <create-terminal-session-dialog
       ref="newTerminal"
-      :shoot-item="shootItem"
+      :name="name"
+      :namespace="namespace"
     ></create-terminal-session-dialog>
   </div>
 </template>
@@ -87,15 +88,8 @@ export default {
     ...mapGetters([
       'focusedElementId',
       'hasControlPlaneTerminalAccess',
-      'hasShootTerminalAccess',
-      'shootByNamespaceAndName'
+      'hasShootTerminalAccess'
     ]),
-    shootItem () {
-      return this.shootByNamespaceAndName({
-        namespace: this.namespace,
-        name: this.name
-      })
-    },
     terminalCoordinates () {
       const coordinates = {
         name: this.name,
