@@ -40,7 +40,6 @@ SPDX-License-Identifier: Apache-2.0
         <container-runtime
           :machine-image-cri="machineImageCri"
           :worker="worker"
-          :immutable-cri="immutableCri"
           @valid="onContainerRuntimeValid">
         </container-runtime>
       </div>
@@ -223,8 +222,7 @@ export default {
       machineImageValid: undefined,
       containerRuntimeValid: undefined,
       immutableZones: undefined,
-      volumeSizeInternal: undefined,
-      immutableCri: undefined
+      volumeSizeInternal: undefined
     }
   },
   validations () {
@@ -503,7 +501,6 @@ export default {
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
     this.immutableZones = this.isNew ? [] : this.worker.zones
-    this.immutableCri = !this.isNew
   }
 }
 </script>

@@ -16,9 +16,6 @@ SPDX-License-Identifier: Apache-2.0
       @blur="$v.containerRuntime.$touch()"
       v-model="containerRuntime"
       label="Container Runtime"
-      :disabled="immutableCri"
-      :hint="criHint"
-      persistent-hint
     ></v-select>
     <v-select
       v-if="ociRuntimeItems.length"
@@ -30,9 +27,6 @@ SPDX-License-Identifier: Apache-2.0
       v-model="ociRuntime"
       label="Additional OCI Runtimes"
       multiple
-      :disabled="immutableCri"
-      :hint="ociHint"
-      persistent-hint
       chips
       small-chips
       deletable-chips
@@ -76,10 +70,6 @@ export default {
     machineImageCri: {
       type: Array,
       default: () => []
-    },
-    immutableCri: {
-      type: Boolean,
-      default: false
     }
   },
   data () {
@@ -100,18 +90,6 @@ export default {
       const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
       const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
       return map(ociRuntimes, 'type')
-    },
-    criHint () {
-      if (this.immutableCri) {
-        return 'Container runtime cannot be changed after worker has been created'
-      }
-      return undefined
-    },
-    ociHint () {
-      if (this.immutableCri) {
-        return 'OCI runtimes cannot be changed after worker has been created'
-      }
-      return undefined
     }
   },
   methods: {
