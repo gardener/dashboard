@@ -6,17 +6,13 @@
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
-import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import head from 'lodash/head'
 import orderBy from 'lodash/orderBy'
 import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import find from 'lodash/find'
 import padStart from 'lodash/padStart'
-import forEach from 'lodash/forEach'
-import compact from 'lodash/compact'
 import semver from 'semver'
 
 import {
@@ -25,7 +21,7 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated
 } from '@/utils'
-import { findItem } from './helper'
+import { findItem, parseSearch } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
@@ -151,29 +147,10 @@ export default {
     return state.initialNewShootResource
   },
   searchItems (state, getters, rootState, rootGetters) {
-    const searchPattern = /(-?"[^"]+")*([\S]+)*/g
-    const termPattern = /^(-)?("?)([^"]+)("?)$/g
     let searchQuery
     let lastSearchString
 
     return (value, search, item) => {
-      if (search !== lastSearchString) {
-        lastSearchString = search
-        const searchTerms = search.match(searchPattern)
-        searchQuery = compact(map(searchTerms, searchTerm => {
-          const result = termPattern.exec(searchTerm)
-          if (result) {
-            const [, negative, startQuote, value, endQuote] = result
-            return {
-              negative: !!negative,
-              exact: !!startQuote && !!endQuote,
-              value
-            }
-          }
-          return undefined
-        }))
-      }
-
       const searchableCustomFields = filter(rootGetters.shootCustomFieldList, ['searchable', true])
       const values = [
         getRawVal(rootGetters, item, 'name'),
@@ -187,15 +164,11 @@ export default {
         ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
       ]
 
-      let result = true
-      forEach(searchQuery, searchTerm => {
-        let found = find(values, value => searchTerm.exact ? value === searchTerm.value : includes(value, searchTerm.value))
-        if (searchTerm.negative) {
-          found = !found
-        }
-        result = result && found
-      })
-      return result
+      if (search !== lastSearchString) {
+        lastSearchString = search
+        searchQuery = parseSearch(search)
+      }
+      return searchQuery.matches(values)
     }
   },
   sortItems (state, getters, rootState, rootGetters) {
