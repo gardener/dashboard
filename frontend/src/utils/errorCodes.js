@@ -97,5 +97,11 @@ const errorCodes = {
     description: 'Cloud provider rate limit exceeded. The operation will be retried automatically.',
     temporaryError: true,
     userError: false
+  },
+  ERR_RETRYABLE_INFRA_DEPENDENCIES: {
+    shortDescription: 'Retryable Infrastructure Error',
+    description: 'Error occurred due to dependent objects on the infrastructure level. The operation will be retried automatically.',
+    temporaryError: true,
+    userError: false
   }
 }
