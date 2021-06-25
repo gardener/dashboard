@@ -190,11 +190,11 @@ export default {
 
       const selectedConfig = {
         container: {
-          image: this.selectedContainerImage
+          image: this.selectedContainerImage,
+          privileged: this.selectedPrivilegedMode
         },
         node,
         preferredHost,
-        privileged: this.selectedPrivilegedMode,
         hostPID: this.selectedPrivilegedMode,
         hostNetwork: this.selectedPrivilegedMode
       }
