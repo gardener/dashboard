@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :immutable-cri="immutableCri"
+          :kubernetesVersion="kubernetesVersion"
           @valid="onContainerRuntimeValid">
         </container-runtime>
       </div>
@@ -212,6 +213,9 @@ export default {
     },
     maxAdditionalZones: {
       type: Number
+    },
+    kubernetesVersion: {
+      type: String
     }
   },
   data () {

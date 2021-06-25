@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         :updateOSMaintenance="updateOSMaintenance"
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
+        :kubernetesVersion="kubernetesVersion"
         @valid="onWorkerValid">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
@@ -94,7 +95,8 @@ export default {
       zonedCluster: undefined,
       updateOSMaintenance: undefined,
       isNewCluster: false,
-      existingWorkerCIDR: undefined
+      existingWorkerCIDR: undefined,
+      kubernetesVersion: undefined
     }
   },
   computed: {
@@ -171,7 +173,7 @@ export default {
       this.validateInput()
     },
     addWorker () {
-      const worker = generateWorker(this.availableZones, this.cloudProfileName, this.region)
+      const worker = generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
     },
@@ -224,7 +226,7 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, kubernetesVersion }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
@@ -233,6 +235,7 @@ export default {
       this.zonedCluster = zonedCluster
       this.isNewCluster = !existingWorkerCIDR
       this.existingWorkerCIDR = existingWorkerCIDR
+      this.kubernetesVersion = kubernetesVersion
     }
   },
   mounted () {
@@ -253,6 +256,9 @@ export default {
       })
       this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
         this.updateOSMaintenance = updateOSMaintenance
+      })
+      this.userInterActionBus.on('updateKubernetesVersion', updatedVersion => {
+        this.kubernetesVersion = updatedVersion
       })
     }
   }

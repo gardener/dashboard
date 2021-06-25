@@ -43,7 +43,6 @@ import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import pick from 'lodash/pick'
 import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
@@ -526,8 +525,7 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      const defaultMachineImage = firstItemMatchingVersionClassification(machineImages)
-      return pick(defaultMachineImage, 'name', 'version')
+      return firstItemMatchingVersionClassification(machineImages)
     }
   },
   shootList (state, getters) {

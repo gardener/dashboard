@@ -231,7 +231,7 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
-    const worker = omit(generateWorker(zones, cloudProfileName, region), ['id', 'isNew'])
+    const worker = omit(generateWorker(zones, cloudProfileName, region, kubernetesVersion.version), ['id', 'isNew'])
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
 

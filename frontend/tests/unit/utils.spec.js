@@ -479,19 +479,18 @@ describe('utils', () => {
       })
     })
 
-    describe('html color code', () => {
-      it('should not fail when zero', () => {
-        expect(utils.isHtmlColorCode(undefined)).toBe(false)
-        expect(utils.isHtmlColorCode(null)).toBe(false)
+    describe('defaultCRIForWorker', () => {
+      it('should return docker for k8s < 1.22.0', () => {
+        expect(utils.defaultCRIForWorker('1.21.3', ['cri1', 'docker', 'containerd', 'cri2'])).toBe('docker')
       })
 
-      it('should return true on html color code', () => {
-        expect(utils.isHtmlColorCode('#0b8062')).toBe(true)
-        expect(utils.isHtmlColorCode('#FfFfFf')).toBe(true)
+      it('should return containerd for k8s >= 1.22.0', () => {
+        expect(utils.defaultCRIForWorker('1.22.0', ['cri1', 'docker', 'containerd', 'cri2'])).toBe('containerd')
       })
 
-      it('should return false on non-html color code', () => {
-        expect(utils.isHtmlColorCode('foo')).toBe(false)
+      it('should return first cri as fallback', () => {
+        expect(utils.defaultCRIForWorker('1.21.3', ['cri1', 'cri2'])).toBe('cri1')
+        expect(utils.defaultCRIForWorker('1.22.0', ['cri1', 'cri2'])).toBe('cri1')
       })
     })
   })

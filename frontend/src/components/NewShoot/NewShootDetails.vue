@@ -209,6 +209,7 @@ export default {
     },
     onInputKubernetesVersion () {
       this.$v.kubernetesVersion.$touch()
+      this.userInterActionBus.emit('updateKubernetesVersion', this.version)
       this.validateInput()
     },
     onUpdatePurpose (purpose) {

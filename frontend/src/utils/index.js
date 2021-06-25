@@ -561,7 +561,7 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
-export function generateWorker (availableZones, cloudProfileName, region) {
+export function generateWorker (availableZones, cloudProfileName, region, kubernetesVersion) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
   const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
@@ -580,9 +580,15 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     maxSurge: 1,
     machine: {
       type: machineType.name,
-      image: machineImage
+      image: {
+        name: machineImage.name,
+        version: machineImage.version
+      }
     },
     zones,
+    cri: {
+      name: defaultCRIForWorker(kubernetesVersion, map(machineImage.cri, 'name'))
+    },
     isNew: true
   }
   if (volumeType.name) {
@@ -600,6 +606,14 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     }
   }
   return worker
+}
+
+export function defaultCRIForWorker (kubernetesVersion, containerRuntimes) {
+  if (semver.lt(kubernetesVersion, '1.22.0')) {
+    return includes(containerRuntimes, 'docker') ? 'docker' : head(containerRuntimes)
+  } else {
+    return includes(containerRuntimes, 'containerd') ? 'containerd' : head(containerRuntimes)
+  }
 }
 
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
@@ -798,5 +812,6 @@ export default {
   selectedImageIsNotLatest,
   k8sVersionExpirationForShoot,
   expiringWorkerGroupsForShoot,
-  isHtmlColorCode
+  isHtmlColorCode,
+  defaultCRIForWorker
 }
