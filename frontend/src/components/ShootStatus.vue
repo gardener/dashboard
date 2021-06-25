@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             <div v-on="on">
               <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
                 <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
-                <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" color="error">mdi-account-alert</v-icon>
+                <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" :color="color">mdi-account-alert</v-icon>
                 <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
                 <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
                 <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
@@ -33,8 +33,8 @@ SPDX-License-Identifier: Apache-2.0
           <div>
             <span class="font-weight-bold">{{tooltip.title}}</span>
             <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
-            <div v-for="({ shortDescription }) in tooltip.userErrorCodeObjects" :key="shortDescription">
-              <v-icon class="mr-1" color="white" small>mdi-account-alert</v-icon>
+            <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects" :key="shortDescription">
+              <v-icon v-if="userError" class="mr-1" color="white" small>{{ userError ? 'mdi-account-alert' : 'mdi-alert' }}</v-icon>
               <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
             </div>
           </div>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
       <template v-if="showStatusText">
-        <div v-for="({ description }) in tooltip.userErrorCodeObjects" :key="description">
+        <div v-for="({ description }) in tooltip.errorCodeObjects" :key="description">
           <div class="font-weight-bold error--text wrap">{{description}}</div>
         </div>
       </template>
@@ -62,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import join from 'lodash/join'
 import map from 'lodash/map'
-import filter from 'lodash/filter'
 
 import GPopper from '@/components/GPopper'
 import RetryOperation from '@/components/RetryOperation'
@@ -147,7 +146,7 @@ export default {
       return {
         title: this.statusTitle,
         progress: this.showProgress ? this.shootLastOperation.progress : undefined,
-        userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
+        errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes)
       }
     },
     operationType () {
