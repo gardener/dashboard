@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           Search terms are <span class="font-weight-bold">ANDed</span>.<br />
           <span class="font-weight-bold">Use quotes</span> for exact words or phrases: <v-chip label color="primary" small>"my-shoot"</v-chip> <v-chip label color="primary" small>"John Doe"</v-chip><br />
-          <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-project_a</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
+          <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
         </v-tooltip>
         <v-tooltip top v-if="canCreateShoots && projectScope">
           <template v-slot:activator="{ on }">
