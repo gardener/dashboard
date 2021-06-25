@@ -100,6 +100,7 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
+import debounce from 'lodash/debounce'
 import ShootListRow from '@/components/ShootListRow'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
@@ -123,8 +124,7 @@ export default {
       options: undefined,
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
-      selectedColumns: undefined,
-      setSearchValueWithDelayTimerID: undefined
+      selectedColumns: undefined
     }
   },
   watch: {
@@ -233,12 +233,9 @@ export default {
         this.setSelectedShootInternal(null)
       }, 500)
     },
-    onInputSearch (value) {
-      clearTimeout(this.setSearchValueWithDelayTimerID)
-      this.setSearchValueWithDelayTimerID = setTimeout(() => {
-        this.shootSearch = value
-      }, 800)
-    }
+    onInputSearch: debounce(function (value) {
+      this.shootSearch = value
+    }, 500)
   },
   computed: {
     ...mapGetters({

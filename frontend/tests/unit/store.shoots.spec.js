@@ -9,6 +9,7 @@ import {
 } from '@/store'
 
 import getters from '@/store/modules/shoots/getters'
+import { parseSearch } from '@/store/modules/shoots/helper'
 
 describe('store.shoots.getters', () => {
   let shootItems
@@ -308,5 +309,44 @@ describe('store.AccessRestrictions', () => {
     definition.options[1].input.inverted = true
     const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
     expect(accessRestriction.options['foo-option-2'].value).toBe(true)
+  })
+})
+
+describe('store.shoots.helper', () => {
+  describe('#parseSearch', () => {
+    it('should parse search text', () => {
+      const searchQuery = parseSearch('a "b""s" -"c" -d')
+      expect(searchQuery.terms).toEqual([
+        {
+          exact: false,
+          exclude: false,
+          value: 'a'
+        },
+        {
+          exact: true,
+          exclude: false,
+          value: 'b"s'
+        },
+        {
+          exact: true,
+          exclude: true,
+          value: 'c'
+        },
+        {
+          exact: false,
+          exclude: true,
+          value: 'd'
+        }
+      ])
+    })
+
+    it('should match values correctly', () => {
+      const searchQuery = parseSearch('a "b""s" -"c" -d')
+      expect(searchQuery.matches(['$a', 'b"s', '$c'])).toBe(true)
+      expect(searchQuery.matches(['$a', 'b"s', '$d'])).toBe(false)
+      expect(searchQuery.matches(['$a', 'b"s', 'c'])).toBe(false)
+      expect(searchQuery.matches(['$a', '$b"s'])).toBe(false)
+      expect(searchQuery.matches(['b"s'])).toBe(false)
+    })
   })
 })
