@@ -23,8 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="ociRuntimeItems"
-      @input="onInputOciRuntime"
-      v-model="ociRuntime"
+      v-model="ociRuntimes"
       label="Additional OCI Runtimes"
       multiple
       chips
@@ -74,9 +73,7 @@ export default {
   data () {
     return {
       validationErrors,
-      valid: undefined,
-      containerRuntime: undefined,
-      ociRuntime: undefined
+      valid: undefined
     }
   },
   validations,
@@ -86,8 +83,33 @@ export default {
     },
     ociRuntimeItems () {
       const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
-      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
-      return map(ociRuntimes, 'type')
+      const ociRuntimess = get(containerRuntime, 'containerRuntimes', [])
+      return map(ociRuntimess, 'type')
+    },
+    containerRuntime: {
+      get () {
+        return get(this.worker, 'cri.name')
+      },
+      set (value) {
+        set(this.worker, 'cri.name', value)
+      }
+    },
+    ociRuntimes: {
+      get () {
+        const ociRuntimes = get(this.worker, 'cri.containerRuntimes')
+        if (!ociRuntimes) {
+          return undefined
+        }
+        return map(ociRuntimes, 'type')
+      },
+      set (value) {
+        if (value && value.length) {
+          const containerRuntimes = map(value, ociRuntimes => ({ type: ociRuntimes }))
+          set(this.worker, 'cri.containerRuntimes', containerRuntimes)
+        } else {
+          unset(this.worker, 'cri.containerRuntimes')
+        }
+      }
     }
   },
   methods: {
@@ -95,19 +117,9 @@ export default {
       return getValidationErrors(this, field)
     },
     onInputContainerRuntime (value) {
-      console.log('TEST')
-      this.worker.cri.name = value
-      this.ociRuntime = undefined
+      this.ociRuntimes = undefined
       this.$v.containerRuntime.$touch()
       this.validateInput()
-    },
-    onInputOciRuntime (value) {
-      if (value.length) {
-        const containerRuntimes = map(value, ociRuntime => ({ type: ociRuntime }))
-        set(this.worker, 'cri.containerRuntimes', containerRuntimes)
-      } else {
-        unset(this.worker, 'cri.containerRuntimes')
-      }
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -117,18 +129,14 @@ export default {
     }
   },
   mounted () {
-    this.containerRuntime = get(this.worker, 'cri.name', defaultCRIForWorker(this.kubernetesVersion, this.containerRuntimeItems))
-    const ociRuntime = get(this.worker, 'cri.containerRuntimes')
-    if (ociRuntime) {
-      this.ociRuntime = map(ociRuntime, 'type')
-    }
     this.$v.$touch()
     this.validateInput()
   },
   watch: {
     containerRuntimeItems (containerRuntimeItems) {
       if (!includes(containerRuntimeItems, this.containerRuntime)) {
-        this.containerRuntime = get(this.worker, 'cri.name', defaultCRIForWorker(this.kubernetesVersion, containerRuntimeItems))
+        this.containerRuntime = defaultCRIForWorker(this.kubernetesVersion, this.containerRuntimeItems)
+        this.onInputContainerRuntime()
       }
     }
   }
