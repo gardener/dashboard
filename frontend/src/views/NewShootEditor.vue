@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       alert-banner-identifier="newShootEditorWarning"
       :error-message.sync="errorMessage"
       :detailed-error-message.sync="detailedErrorMessage"
-      :shoot-content="newShootResource"
+      :shoot-item="newShootResource"
       ref="shootEditor"
       v-on="$shootEditor.hooks"
     >
