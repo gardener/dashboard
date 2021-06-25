@@ -10,11 +10,11 @@ SPDX-License-Identifier: Apache-2.0
       <v-toolbar-title class="text-subtitle-1">External Tools</v-toolbar-title>
     </v-toolbar>
     <v-list>
-      <template v-for="({ title, url, icon = 'link' }, index) in items">
+      <template v-for="({ title, url, icon }, index) in items">
         <v-divider v-if="index" :key="index" inset class="my-2"></v-divider>
         <v-list-item :key="title">
           <v-list-item-icon>
-            <v-icon color="primary">{{icon}}</v-icon>
+            <v-icon color="primary">{{icon || 'link'}}</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
@@ -42,11 +42,6 @@ export default {
     ExternalLink
   },
   mixins: [shootItem],
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   computed: {
     ...mapState([
       'cfg'

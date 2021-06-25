@@ -42,11 +42,6 @@ export default {
     ActionButtonDialog,
     ManageHibernationSchedule
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [
     shootItem,
     asyncRef('hibernationSchedule')

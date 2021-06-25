@@ -34,9 +34,6 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   mixins: [shootItem],
   props: {
-    shootItem: {
-      type: Object
-    },
     target: {
       type: String
     },

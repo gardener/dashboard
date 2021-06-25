@@ -64,9 +64,6 @@ import includes from 'lodash/includes'
 export default {
   mixins: [shootItem],
   props: {
-    shootItem: {
-      type: Object
-    },
     popperBoundariesSelector: {
       type: String
     }

@@ -166,9 +166,6 @@ export default {
     alertBannerIdentifier: {
       type: String
     },
-    shootContent: {
-      type: Object
-    },
     errorMessage: {
       type: String
     },
@@ -217,7 +214,7 @@ export default {
       'canPatchShoots'
     ]),
     value () {
-      let data = cloneDeep(this.shootContent)
+      let data = cloneDeep(this.shootItem)
       if (data) {
         data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
         if (!this.showManagedFields) {
@@ -226,9 +223,6 @@ export default {
         return data
       }
       return undefined
-    },
-    shootItem () { // needed for mixin
-      return this.shootContent
     },
     containerStyles () {
       return {

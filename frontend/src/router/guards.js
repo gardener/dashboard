@@ -134,7 +134,7 @@ function ensureDataLoaded (store, localStorage) {
           const defaultFilter = {
             onlyShootsWithIssues: isAdmin,
             progressing: true,
-            userIssues: isAdmin,
+            noOperatorAction: isAdmin,
             deactivatedReconciliation: isAdmin,
             hideTicketsWithLabel: isAdmin
           }

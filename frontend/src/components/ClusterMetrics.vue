@@ -62,12 +62,6 @@ export default {
     UsernamePassword,
     LinkListTile
   },
-  props: {
-    shootItem: {
-      type: Object,
-      required: true
-    }
-  },
   mixins: [shootItem],
   computed: {
     ...mapGetters([

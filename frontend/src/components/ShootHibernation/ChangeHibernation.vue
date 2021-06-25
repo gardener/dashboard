@@ -40,9 +40,6 @@ export default {
     ActionButtonDialog
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     text: {
       type: Boolean
     }

@@ -22,6 +22,12 @@ import {
 } from '@/utils'
 
 export const shootItem = {
+  props: {
+    shootItem: {
+      type: Object,
+      required: true
+    }
+  },
   computed: {
     ...mapGetters([
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',

@@ -189,11 +189,6 @@ export default {
     DnsProvider,
     DnsConfiguration
   },
-  props: {
-    shootItem: {
-      type: Object
-    }
-  },
   mixins: [shootItem],
   computed: {
     ...mapGetters([

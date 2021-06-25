@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           <copy-btn :clipboard-text="shootName"></copy-btn>
         </v-list-item-action>
       </v-list-item>
-      <template v-if="expirationTimestamp && !isShootMarkedForDeletion">
+      <template v-if="shootExpirationTimestamp && !isShootMarkedForDeletion">
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
@@ -33,18 +33,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Cluster Termination</v-list-item-subtitle>
             <v-list-item-title class="d-flex align-center pt-1">
-              <v-icon
-                v-if="!isSelfTerminationWarning"
-                color="primary"
-                left
-                size="18"
-              >mdi-information</v-icon>
-              <v-icon
-                v-else
-                color="warning"
-                left
-                size="18"
-              >mdi-alert-circle</v-icon>
+              <shoot-messages :shoot-item="shootItem" filter="cluster-expiration" small class="mr-1" />
               <span>{{selfTerminationMessage}}</span>
             </v-list-item-title>
           </v-list-item-content>
@@ -62,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shoot-item="shootItem" only-k8s-warnings></version-expiration-warning>
+          <shoot-messages :shoot-item="shootItem" filter="k8s" />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <shoot-version :shoot-item="shootItem"></shoot-version>
@@ -87,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
-          <version-expiration-warning :shoot-item="shootItem" onlyMachineImageWarnings></version-expiration-warning>
+          <shoot-messages :shoot-item="shootItem" filter="machine-image" />
         </v-list-item-action>
         <v-list-item-action class="mx-0">
           <worker-configuration :shoot-item="shootItem"></worker-configuration>
@@ -213,12 +202,11 @@ import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
 import AccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/AccessRestrictionsConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import VersionExpirationWarning from '@/components/VersionExpirationWarning'
+import ShootMessages from '@/components/ShootMessages/ShootMessages'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
 import CopyBtn from '@/components/CopyBtn'
 
 import {
-  isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
@@ -238,13 +226,8 @@ export default {
     PurposeConfiguration,
     AddonConfiguration,
     ShootVersion,
-    VersionExpirationWarning,
+    ShootMessages,
     CopyBtn
-  },
-  props: {
-    shootItem: {
-      type: Object
-    }
   },
   mixins: [shootItem],
   computed: {
@@ -254,21 +237,15 @@ export default {
     ...mapGetters([
       'canGetSecrets'
     ]),
-    expirationTimestamp () {
-      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
-    },
     selfTerminationMessage () {
       if (this.isValidTerminationDate) {
-        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
+        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.shootExpirationTimestamp))}`
       } else {
         return 'This cluster is about to self terminate'
       }
     },
-    isSelfTerminationWarning () {
-      return isSelfTerminationWarning(this.expirationTimestamp)
-    },
     isValidTerminationDate () {
-      return isValidTerminationDate(this.expirationTimestamp)
+      return isValidTerminationDate(this.shootExpirationTimestamp)
     },
     addon () {
       return (name) => {

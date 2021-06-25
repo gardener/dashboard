@@ -162,9 +162,6 @@ export default {
     TerminalShortcutsTile
   },
   props: {
-    shootItem: {
-      type: Object
-    },
     hideTerminalShortcuts: {
       type: Boolean,
       default: false
