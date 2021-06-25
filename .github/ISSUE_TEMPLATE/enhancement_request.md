@@ -1,7 +1,9 @@
 ---
 name: Enhancement Request
 about: Suggest an enhancement
-labels: kind/enhancement
+title: ''
+labels: component/dashboard, kind/enhancement
+assignees: ''
 
 ---
 
