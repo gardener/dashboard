@@ -7,13 +7,15 @@
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
+import concat from 'lodash/concat'
+import reduce from 'lodash/reduce'
 import EventEmitter from 'events'
 import ThrottledNamespacedEventEmitter from './ThrottledEmitter'
-import store from '../store'
 
 class Connector {
-  constructor (socket) {
+  constructor (socket, store) {
     this.socket = socket
+    this.store = store
     this.handlers = []
   }
 
@@ -29,13 +31,13 @@ class Connector {
       // eslint-disable-next-line no-console
       console.log(`socket connection ${this.socket.id} established`)
     }
-    store.dispatch('unsetWebsocketConnectionError')
+    this.store.dispatch('unsetWebsocketConnectionError')
     forEach(this.handlers, handler => handler.onConnect())
   }
 
   onDisconnect (reason) {
     console.error('socket connection lost because', reason)
-    store.dispatch('setWebsocketConnectionError', { reason })
+    this.store.dispatch('setWebsocketConnectionError', { reason })
     forEach(this.handlers, handler => handler.onDisconnect())
   }
 
@@ -68,6 +70,10 @@ class AbstractSubscription extends EventEmitter {
 
   get socket () {
     return this.connector.socket
+  }
+
+  get store () {
+    return this.connector.store
   }
 
   onConnect () {
@@ -150,7 +156,7 @@ class ShootsSubscription extends AbstractSubscription {
     })
     this.socket.on('batchNamespacedEventsDone', ({ kind, namespaces }) => {
       if (kind === 'shoots') {
-        store.dispatch('unsetShootsLoading', namespaces)
+        this.store.dispatch('unsetShootsLoading', namespaces)
         throttledNsEventEmitter.flush()
       }
     })
@@ -158,7 +164,7 @@ class ShootsSubscription extends AbstractSubscription {
 
   async subscribeShoots ({ namespace, filter }) {
     // immediately clear, also if not authenticated to avoid outdated content is shown to the user
-    await store.dispatch('clearShoots')
+    await this.store.dispatch('clearShoots')
     this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
@@ -166,7 +172,7 @@ class ShootsSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, filter } = this.subscribeTo
 
-    await store.dispatch('setShootsLoading')
+    await this.store.dispatch('setShootsLoading')
     if (namespace === '_all') {
       this.socket.emit('subscribeAllShoots', { filter })
     } else if (namespace) {
@@ -199,7 +205,7 @@ class ShootSubscription extends AbstractSubscription {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
     this.socket.emit('subscribeShoot', { namespace, name }, object => {
-      store.dispatch('subscribeShootAcknowledgement', object)
+      this.store.dispatch('subscribeShootAcknowledgement', object)
     })
     return true
   }
@@ -236,7 +242,7 @@ class IssuesSubscription extends AbstractTicketsSubscription {
 
   async _subscribe () {
     await Promise.all([
-      store.dispatch('clearIssues')
+      this.store.dispatch('clearIssues')
     ])
 
     this.socket.emit('subscribeIssues')
@@ -252,7 +258,7 @@ class CommentsSubscription extends AbstractTicketsSubscription {
 
   async _subscribe () {
     await Promise.all([
-      store.dispatch('clearComments')
+      this.store.dispatch('clearComments')
     ])
 
     const { name, namespace } = this.subscribeTo
@@ -272,18 +278,9 @@ const socketConfig = {
   autoConnect: false
 }
 
-const shootsConnector = new Connector(io('/shoots', socketConfig))
-const ticketsConnector = new Connector(io('/tickets', socketConfig))
-
-const shootsEmitter = new ShootsSubscription(shootsConnector)
-const shootEmitter = new ShootSubscription(shootsConnector)
-const ticketIssuesEmitter = new IssuesSubscription(ticketsConnector)
-const ticketCommentsEmitter = new CommentsSubscription(ticketsConnector)
-
 /* Web Socket Connection */
-
-forEach([shootsConnector, ticketsConnector], connector => {
-  const socket = connector.socket
+function initializeConnector (connector) {
+  const { socket, store } = connector
   socket.on('connect', attempt => connector.onConnect(attempt))
   socket.on('reconnect', attempt => connector.onConnect(attempt))
   socket.on('disconnect', reason => connector.onDisconnect(reason))
@@ -316,21 +313,107 @@ forEach([shootsConnector, ticketsConnector], connector => {
     console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
     store.dispatch('setSubscriptionError', error)
   })
-})
-
-const wrapper = {
-  connect (forceful) {
-    shootsConnector.connect()
-    ticketsConnector.connect()
-  },
-  disconnect () {
-    shootsConnector.disconnect()
-    ticketsConnector.disconnect()
-  },
-  shootsEmitter,
-  shootEmitter,
-  ticketIssuesEmitter,
-  ticketCommentsEmitter
 }
 
-export default wrapper
+export const ioPlugin = store => {
+  const shootsConnector = new Connector(io('/shoots', socketConfig), store)
+  const ticketsConnector = new Connector(io('/tickets', socketConfig), store)
+
+  const shootsEmitter = new ShootsSubscription(shootsConnector)
+  const shootEmitter = new ShootSubscription(shootsConnector)
+  // eslint-disable-next-line no-unused-vars
+  const ticketIssuesEmitter = new IssuesSubscription(ticketsConnector)
+  const ticketCommentsEmitter = new CommentsSubscription(ticketsConnector)
+
+  forEach([shootsConnector, ticketsConnector], initializeConnector)
+
+  const { state, getters } = store
+
+  const handleSetUser = user => {
+    if (user) {
+      shootsConnector.connect()
+      ticketsConnector.connect()
+    } else {
+      shootsConnector.disconnect()
+      ticketsConnector.disconnect()
+    }
+  }
+
+  const handleSubscribe = ([key, value] = []) => {
+    try {
+      switch (key) {
+        case 'shoot':
+          shootEmitter.subscribeShoot(value)
+          break
+        case 'shoots':
+          shootsEmitter.subscribeShoots(value)
+          break
+        case 'comments':
+          ticketCommentsEmitter.subscribeComments(value)
+          break
+      }
+    } catch (err) { /* ignore error */ }
+  }
+
+  const handleUnsubscribe = key => {
+    try {
+      switch (key) {
+        case 'comments':
+          ticketCommentsEmitter.unsubscribe()
+          break
+      }
+    } catch (err) { /* ignore error */ }
+  }
+
+  store.subscribe(mutation => {
+    const { type, payload } = mutation
+    switch (type) {
+      case 'SET_USER':
+        handleSetUser(payload)
+        break
+      case 'SUBSCRIBE':
+        handleSubscribe(payload)
+        break
+      case 'UNSUBSCRIBE':
+        handleUnsubscribe(payload)
+        break
+    }
+  })
+
+  const filterNamespacedEvents = namespacedEvents => {
+    const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
+    return reduce(getters.currentNamespaces, concatEventsForNamespace, [])
+  }
+
+  /* handle 'shoots' events */
+  shootsEmitter.on('shoots', namespacedEvents => {
+    store.commit('shoots/HANDLE_EVENTS', {
+      rootState: state,
+      rootGetters: getters,
+      events: filterNamespacedEvents(namespacedEvents)
+    })
+  })
+
+  /* handle 'shoot' events */
+  shootEmitter.on('shoot', namespacedEvents => {
+    store.commit('shoots/HANDLE_EVENTS', {
+      rootState: state,
+      rootGetters: getters,
+      events: filterNamespacedEvents(namespacedEvents)
+    })
+  })
+
+  /* handle 'issues' events */
+  ticketIssuesEmitter.on('issues', events => {
+    store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
+  })
+
+  /* handle 'comments' events */
+  ticketCommentsEmitter.on('comments', events => {
+    store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
+  })
+}
+
+export default {
+  plugin: ioPlugin
+}

@@ -16,7 +16,6 @@ import {
   getCreatedBy,
   isShootStatusHibernated,
   isReconciliationDeactivated,
-  getProjectName,
   isTypeDelete,
   isTruthyValue
 } from '@/utils'
@@ -31,7 +30,8 @@ export const shootItem = {
   computed: {
     ...mapGetters([
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
-      'isSeedUnreachableByName'
+      'isSeedUnreachableByName',
+      'projectNameByNamespace'
     ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
@@ -68,7 +68,7 @@ export const shootItem = {
       return this.shootMetadata.deletionTimestamp
     },
     shootProjectName () {
-      return getProjectName(this.shootMetadata)
+      return this.projectNameByNamespace(this.shootMetadata)
     },
 
     shootAnnotations () {

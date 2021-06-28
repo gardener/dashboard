@@ -108,7 +108,6 @@ import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
 
-import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 import TimeWithOffset from '@/utils/TimeWithOffset'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -127,7 +126,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'canPatchShoots'
+      'canPatchShoots',
+      'isShootHasNoHibernationScheduleWarning'
     ]),
     hibernationDescription () {
       if (this.isShootStatusHibernationProgressing) {
@@ -140,7 +140,7 @@ export default {
       const purpose = this.shootPurpose || ''
       if (this.shootHibernationSchedules.length > 0) {
         return 'Hibernation schedule configured'
-      } else if (this.isShootHasNoHibernationScheduleWarning) {
+      } else if (this.isShootHasNoHibernationScheduleWarning(this.shootItem)) {
         return this.canPatchShoots ? `Please configure a schedule for this ${purpose} cluster` : `A schedule should be configured for this ${purpose} cluster`
       } else {
         return 'No hibernation schedule configured'
@@ -154,9 +154,6 @@ export default {
       }
 
       return `Start time: ${maintenanceStartTime.toString()}`
-    },
-    isShootHasNoHibernationScheduleWarning () {
-      return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     reconcileDescription () {
       if (this.isShootReconciliationDeactivated) {
