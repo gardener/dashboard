@@ -32,8 +32,8 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:help-slot>
       <div>
         <p>
-          Before you can provision and access a Kubernetes cluster on Hetzner Cloud, you need to add a HCloud Token.
-          The Gardener needs these credentials to provision and operate HCloud infrastructure for your Kubernetes cluster.
+          Before you can provision and access a Kubernetes cluster on Hetzner Cloud, you need to add a Hetzner Cloud token.
+          The Gardener needs these credentials to provision and operate Hetzner Cloud infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Please read the

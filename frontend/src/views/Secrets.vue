@@ -320,7 +320,7 @@ export default {
         case 'hcloud':
           return [
             {
-              label: 'HCloud Token',
+              label: 'Hetzner Cloud Token',
               value: secretData.hcloudToken
             }
           ]
