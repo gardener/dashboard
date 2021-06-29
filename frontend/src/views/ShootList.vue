@@ -16,18 +16,26 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="shootSearch || items.length > 3"
-          prepend-inner-icon="mdi-magnify"
-          color="primary"
-          label="Search"
-          clearable
-          hide-details
-          flat
-          solo
-          v-model="shootSearch"
-          @keyup.esc="shootSearch=''"
-          class="mr-3"
-        ></v-text-field>
+        <v-tooltip top v-if="shootSearch || items.length > 3">
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-on="on"
+              prepend-inner-icon="mdi-magnify"
+              color="primary"
+              label="Search"
+              clearable
+              hide-details
+              flat
+              solo
+              @input="onInputSearch"
+              @keyup.esc="shootSearch=''"
+              class="mr-3"
+            ></v-text-field>
+          </template>
+          Search terms are <span class="font-weight-bold">ANDed</span>.<br />
+          <span class="font-weight-bold">Use quotes</span> for exact words or phrases: <v-chip label color="primary" small>"my-shoot"</v-chip> <v-chip label color="primary" small>"John Doe"</v-chip><br />
+          <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
+        </v-tooltip>
         <v-tooltip top v-if="canCreateShoots && projectScope">
           <template v-slot:activator="{ on }">
              <v-btn v-on="on" icon :to="{ name: 'NewShoot', params: {  namespace } }">
@@ -92,6 +100,7 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
+import debounce from 'lodash/debounce'
 import ShootListRow from '@/components/ShootListRow'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
@@ -229,7 +238,10 @@ export default {
       this.clearSelectedShootTimerID = setTimeout(() => {
         this.setSelectedShootInternal(null)
       }, 500)
-    }
+    },
+    onInputSearch: debounce(function (value) {
+      this.shootSearch = value
+    }, 500)
   },
   computed: {
     ...mapGetters({
