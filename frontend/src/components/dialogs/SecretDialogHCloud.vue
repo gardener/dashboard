@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     cloud-provider-kind="hcloud"
-    create-title="Add new HCloud Secret"
-    replace-title="Replace HCloud Secret"
+    create-title="Add new Hetzner Cloud Secret"
+    replace-title="Replace Hetzner Cloud Secret"
     @input="onInput">
 
     <template v-slot:secret-slot>
