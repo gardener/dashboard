@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import utils from '@/utils'
 import map from 'lodash/map'
 
-const { canI, selectedImageIsNotLatest } = utils
+import { getters } from '@/store'
+import { canI, selectedImageIsNotLatest, isHtmlColorCode } from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -155,7 +155,7 @@ describe('utils', () => {
       })
     })
   })
-  describe('#availableK8sUpdatesForShoot', () => {
+  describe('#availableKubernetesUpdatesForShoot', () => {
     const kubernetesVersions = [
       {
         classification: 'preview',
@@ -188,23 +188,22 @@ describe('utils', () => {
       }
     ]
 
+    let availableKubernetesUpdatesForShoot
     beforeEach(() => {
-      utils.store.getters = {
-        kubernetesVersions: () => {
-          return kubernetesVersions
-        }
-      }
+      availableKubernetesUpdatesForShoot = getters.availableKubernetesUpdatesForShoot(null, {
+        kubernetesVersions: () => kubernetesVersions
+      })
     })
 
     it('should return available K8sUpdates for given version', () => {
-      const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
+      const availableK8sUpdates = availableKubernetesUpdatesForShoot('1.16.9', 'foo')
       expect(availableK8sUpdates.minor[0]).toBe(kubernetesVersions[1])
       expect(availableK8sUpdates.patch[0]).toBe(kubernetesVersions[4])
       expect(availableK8sUpdates.major[0]).toBe(kubernetesVersions[0])
     })
 
     it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-      const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
+      const availableK8sUpdates = availableKubernetesUpdatesForShoot('1.16.9', 'foo')
       expect(availableK8sUpdates.patch.length).toBe(1)
       expect(availableK8sUpdates.minor.length).toBe(2)
       expect(availableK8sUpdates.major.length).toBe(1)
@@ -247,54 +246,66 @@ describe('utils', () => {
       }
     ]
 
+    let kubernetesVersionIsNotLatestPatch
+    let kubernetesVersionUpdatePathAvailable
+    let kubernetesVersionExpirationForShoot
     beforeEach(() => {
-      utils.store.getters = {
+      kubernetesVersionIsNotLatestPatch = getters.kubernetesVersionIsNotLatestPatch(null, {
         kubernetesVersions: () => kubernetesVersions
-      }
+      })
+      kubernetesVersionUpdatePathAvailable = getters.kubernetesVersionUpdatePathAvailable(null, {
+        kubernetesVersions: () => kubernetesVersions,
+        kubernetesVersionIsNotLatestPatch
+      })
+      kubernetesVersionExpirationForShoot = getters.kubernetesVersionExpirationForShoot(null, {
+        kubernetesVersions: () => kubernetesVersions,
+        kubernetesVersionIsNotLatestPatch,
+        kubernetesVersionUpdatePathAvailable
+      })
     })
 
-    describe('#k8sVersionIsNotLatestPatch', () => {
+    describe('#kubernetesVersionIsNotLatestPatch', () => {
       it('selected kubernetes version should be latest (multiple same minor)', () => {
-        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
+        const result = kubernetesVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
         expect(result).toBe(false)
       })
 
       it('selected kubernetes version should be latest (one minor, one major, one preview update available)', () => {
-        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
+        const result = kubernetesVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
         expect(result).toBe(false)
       })
 
       it('selected kubernetes version should not be latest', () => {
-        const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
+        const result = kubernetesVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
         expect(result).toBe(true)
       })
     })
 
     describe('#k8sVersionUpdatePathAvailable', () => {
       it('selected kubernetes version should have update path (minor update available)', () => {
-        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
+        const result = kubernetesVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
         expect(result).toBe(true)
       })
 
       it('selected kubernetes version should have update path (patch update available)', () => {
-        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
+        const result = kubernetesVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
         expect(result).toBe(true)
       })
 
       it('selected kubernetes version should not have update path (minor update is preview)', () => {
-        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
+        const result = kubernetesVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
         expect(result).toBe(false)
       })
 
       it('selected kubernetes version should not have update path (no next minor version update available)', () => {
-        const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
+        const result = kubernetesVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
         expect(result).toBe(false)
       })
     })
 
     describe('#k8sVersionExpirationForShoot ', () => {
       it('should be info level (patch avialable, auto update enabled))', () => {
-        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
+        const versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[0].expirationDate,
           isValidTerminationDate: true,
@@ -303,7 +314,7 @@ describe('utils', () => {
       })
 
       it('should be warning level (patch available, auto update disabled))', () => {
-        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
+        const versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[0].expirationDate,
           isValidTerminationDate: true,
@@ -312,14 +323,14 @@ describe('utils', () => {
       })
 
       it('should be warning level (update available, auto update enabled / disabled))', () => {
-        let versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
+        let versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[1].expirationDate,
           isValidTerminationDate: true,
           severity: 'warning'
         })
 
-        versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
+        versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[1].expirationDate,
           isValidTerminationDate: true,
@@ -328,7 +339,7 @@ describe('utils', () => {
       })
 
       it('should be error level (no update path available))', () => {
-        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
+        const versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
         expect(versionExpirationWarning).toEqual({
           expirationDate: kubernetesVersions[7].expirationDate,
           isValidTerminationDate: false,
@@ -337,7 +348,7 @@ describe('utils', () => {
       })
 
       it('should be error level (version not expired))', () => {
-        const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
+        const versionExpirationWarning = kubernetesVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
         expect(versionExpirationWarning).toBeUndefined()
       })
     })
@@ -396,10 +407,11 @@ describe('utils', () => {
       })
     }
 
+    let expiringWorkerGroupsForShoot
     beforeEach(() => {
-      utils.store.getters = {
+      expiringWorkerGroupsForShoot = getters.expiringWorkerGroupsForShoot(null, {
         machineImagesByCloudProfileName: () => sampleMachineImages
-      }
+      })
     })
 
     describe('#selectedImageIsNotLatest', () => {
@@ -419,10 +431,10 @@ describe('utils', () => {
       })
     })
 
-    describe('#selectedImageIsNotLatest', () => {
+    describe('#expiringWorkerGroupsForShoot', () => {
       it('one should be info level (update available, auto update enabled))', () => {
         const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1]])
-        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        const expiredWorkerGroups = expiringWorkerGroupsForShoot(workers, 'foo', true)
         expect(expiredWorkerGroups).toBeInstanceOf(Array)
         expect(expiredWorkerGroups).toHaveLength(1)
         expect(expiredWorkerGroups[0]).toEqual({
@@ -435,7 +447,7 @@ describe('utils', () => {
 
       it('one should be warning level (update available, auto update disabled))', () => {
         const workers = generateWorkerGroups([sampleMachineImages[0]])
-        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', false)
+        const expiredWorkerGroups = expiringWorkerGroupsForShoot(workers, 'foo', false)
         expect(expiredWorkerGroups).toBeInstanceOf(Array)
         expect(expiredWorkerGroups).toHaveLength(1)
         expect(expiredWorkerGroups[0]).toEqual({
@@ -448,7 +460,7 @@ describe('utils', () => {
 
       it('one should be info level, two error (update available, auto update enabled))', () => {
         const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1], sampleMachineImages[3], sampleMachineImages[4]])
-        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        const expiredWorkerGroups = expiringWorkerGroupsForShoot(workers, 'foo', true)
         expect(expiredWorkerGroups).toBeInstanceOf(Array)
         expect(expiredWorkerGroups).toHaveLength(3)
         expect(expiredWorkerGroups[0]).toEqual({
@@ -473,7 +485,7 @@ describe('utils', () => {
 
       it('should be empty array (ignore versions without expiration date))', () => {
         const workers = generateWorkerGroups([sampleMachineImages[1], sampleMachineImages[2]])
-        const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        const expiredWorkerGroups = expiringWorkerGroupsForShoot(workers, 'foo', true)
         expect(expiredWorkerGroups).toBeInstanceOf(Array)
         expect(expiredWorkerGroups).toHaveLength(0)
       })
@@ -481,17 +493,17 @@ describe('utils', () => {
 
     describe('html color code', () => {
       it('should not fail when zero', () => {
-        expect(utils.isHtmlColorCode(undefined)).toBe(false)
-        expect(utils.isHtmlColorCode(null)).toBe(false)
+        expect(isHtmlColorCode(undefined)).toBe(false)
+        expect(isHtmlColorCode(null)).toBe(false)
       })
 
       it('should return true on html color code', () => {
-        expect(utils.isHtmlColorCode('#0b8062')).toBe(true)
-        expect(utils.isHtmlColorCode('#FfFfFf')).toBe(true)
+        expect(isHtmlColorCode('#0b8062')).toBe(true)
+        expect(isHtmlColorCode('#FfFfFf')).toBe(true)
       })
 
       it('should return false on non-html color code', () => {
-        expect(utils.isHtmlColorCode('foo')).toBe(false)
+        expect(isHtmlColorCode('foo')).toBe(false)
       })
     })
   })

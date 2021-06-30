@@ -17,7 +17,6 @@ import semver from 'semver'
 
 import {
   getCreatedBy,
-  getProjectName,
   isShootStatusHibernated,
   isReconciliationDeactivated
 } from '@/utils'
@@ -37,7 +36,7 @@ export function getRawVal (rootGetters, item, column) {
     case 'createdBy':
       return getCreatedBy(metadata)
     case 'project':
-      return getProjectName(metadata)
+      return rootGetters.projectNameByNamespace(metadata)
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':

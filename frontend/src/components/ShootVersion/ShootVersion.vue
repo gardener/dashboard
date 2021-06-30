@@ -90,7 +90,6 @@ SPDX-License-Identifier: Apache-2.0
 import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
 import GDialog from '@/components/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
-import { availableK8sUpdatesForShoot } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
@@ -121,7 +120,8 @@ export default {
   computed: {
     ...mapGetters([
       'canPatchShoots',
-      'kubernetesVersions'
+      'kubernetesVersions',
+      'availableKubernetesUpdatesForShoot'
     ]),
     kubernetesVersion () {
       const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
@@ -146,7 +146,7 @@ export default {
       return this.confirmRequired ? this.shootName : undefined
     },
     availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
+      return this.availableKubernetesUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {

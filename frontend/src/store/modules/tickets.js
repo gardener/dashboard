@@ -63,20 +63,20 @@ const getters = {
 
 // actions
 const actions = {
-  getCommentsList ({ commit, rootState }, { name, projectName }) {
+  getCommentsList ({ state }, { name, projectName }) {
     return state.comments
   },
-  clearIssues ({ commit, dispatch }) {
+  clearIssues ({ commit, state }) {
     commit('CLEAR_ISSUES')
     return state.all
   },
-  clearComments ({ commit, dispatch }) {
+  clearComments ({ commit, state }) {
     commit('CLEAR_COMMENTS')
     return state.comments
   }
 }
 
-const orderTicketsByUpdatedAt = () => {
+const orderTicketsByUpdatedAt = state => {
   state.all = orderBy(state.all, ['metadata.updated_at'], ['desc'])
 }
 // mutations
@@ -95,7 +95,7 @@ const mutations = {
           console.error('undhandled event type', event.type)
       }
     })
-    orderTicketsByUpdatedAt()
+    orderTicketsByUpdatedAt(state)
   },
   HANDLE_COMMENTS_EVENTS (state, events) {
     forEach(events, event => {
@@ -111,7 +111,7 @@ const mutations = {
           console.error('undhandled event type', event.type)
       }
     })
-    orderTicketsByUpdatedAt()
+    orderTicketsByUpdatedAt(state)
   },
   CLEAR_ISSUES (state) {
     state.all = []

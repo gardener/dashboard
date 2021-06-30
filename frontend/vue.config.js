@@ -4,6 +4,7 @@
 
 const path = require('path')
 const fs = require('fs')
+const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
@@ -48,6 +49,18 @@ module.exports = {
     config.performance
       .maxAssetSize(1 * MiB)
       .maxEntrypointSize(2 * MiB)
+
+    config
+      .plugin('circular-dependency')
+      .use(CircularDependencyPlugin, [
+        {
+          exclude: /\.yarn/,
+          include: /src/,
+          failOnError: true,
+          allowAsyncCycles: false,
+          cwd: process.cwd()
+        }
+      ])
   },
   devServer: {
     proxy: {

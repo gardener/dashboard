@@ -471,7 +471,7 @@ export default {
   mounted () {
     const term = this.term = new Terminal()
     const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid)
+    const focusAddon = new FocusAddon(this.uuid, this.$store)
     focusAddon.onFocus = () => {
       term.setOption('theme', { background: '#000' })
       this.hasFocus = true

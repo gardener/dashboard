@@ -28,7 +28,7 @@ const getters = {
 
 // actions
 const actions = {
-  getAll: ({ commit, rootState }) => {
+  getAll: ({ commit, state, rootState }) => {
     const namespace = rootState.namespace
     return getInfrastructureSecrets({ namespace })
       .then(res => {

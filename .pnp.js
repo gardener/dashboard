@@ -2430,6 +2430,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vue/test-utils", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.4"],
             ["ansi-html", "npm:0.0.7"],
             ["babel-eslint", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.1.0"],
+            ["circular-dependency-plugin", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],
             ["clipboard", "npm:2.0.6"],
             ["codemirror", "npm:5.58.1"],
             ["core-js", "npm:3.6.5"],
@@ -7039,6 +7040,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cipher-base", "npm:1.0.4"],
             ["inherits", "npm:2.0.4"],
             ["safe-buffer", "npm:5.2.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["circular-dependency-plugin", [
+        ["npm:5.2.2", {
+          "packageLocation": "./.yarn/cache/circular-dependency-plugin-npm-5.2.2-f7f25d48eb-1f60639470.zip/node_modules/circular-dependency-plugin/",
+          "packageDependencies": [
+            ["circular-dependency-plugin", "npm:5.2.2"]
+          ],
+          "linkType": "SOFT",
+        }],
+        ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2", {
+          "packageLocation": "./.yarn/$$virtual/circular-dependency-plugin-virtual-1e10571d23/0/cache/circular-dependency-plugin-npm-5.2.2-f7f25d48eb-1f60639470.zip/node_modules/circular-dependency-plugin/",
+          "packageDependencies": [
+            ["circular-dependency-plugin", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],
+            ["@types/webpack", null],
+            ["webpack", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.44.2"]
+          ],
+          "packagePeers": [
+            "@types/webpack",
+            "webpack"
           ],
           "linkType": "HARD",
         }]
