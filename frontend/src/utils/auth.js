@@ -40,7 +40,8 @@ export class UserManager {
 
   signinWithOidc (redirectPath = '/') {
     const url = new URL('/auth', this.origin)
-    url.searchParams.set('redirectUrl', new URL(redirectPath, this.origin))
+    const redirectUrl = new URL(redirectPath, this.origin)
+    url.searchParams.set('redirectUrl', redirectUrl)
     window.location = url
   }
 

@@ -112,10 +112,13 @@ async function authorizationUrl (req, res) {
   if (redirectUrl) {
     try {
       const url = new URL(redirectUrl)
-      // update host of redirectUri for OIDC redirection
+      // update origin of redirectUri for OIDC redirection
+      if (process.env.NODE_ENV !== 'production') {
+        actualRedirectUri.protocol = url.protocol
+      }
       actualRedirectUri.host = url.host
       // set redirectPath for frontend redirection
-      query.redirectPath = url.path
+      query.redirectPath = url.pathname + url.search
     } catch (err) {
       logger.warn('Received invalid redirectUrl query parameter value: "%s"', redirectUrl)
     }
