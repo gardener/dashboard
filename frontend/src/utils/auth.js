@@ -31,19 +31,17 @@ export class UserManager {
 
   signout (err) {
     this.removeUser()
-    let path = '/auth/logout'
+    const url = new URL('/auth/logout', this.origin)
     if (err) {
-      path += `?error[message]=${encodeURIComponent(err.message)}`
+      url.searchParams.set('error[message]', err.message)
     }
-    window.location = this.origin + path
+    window.location = url
   }
 
-  signinWithOidc (redirectPath) {
-    let path = '/auth'
-    if (redirectPath) {
-      path += `?redirectPath=${encodeURIComponent(redirectPath)}`
-    }
-    window.location = this.origin + path
+  signinWithOidc (redirectPath = '/') {
+    const url = new URL('/auth', this.origin)
+    url.searchParams.set('redirectUrl', new URL(redirectPath, this.origin))
+    window.location = url
   }
 
   signinWithToken (token) {

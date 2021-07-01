@@ -102,10 +102,28 @@ function getIssuerClient (url = issuer) {
 }
 
 async function authorizationUrl (req, res) {
-  const state = encodeState(req.query)
+  const {
+    redirectUrl,
+    redirectPath = '/',
+    ...query
+  } = req.query
+  query.redirectPath = redirectPath
+  const actualRedirectUri = new URL(redirectUri)
+  if (redirectUrl) {
+    try {
+      const url = new URL(redirectUrl)
+      // update host of redirectUri for OIDC redirection
+      actualRedirectUri.host = url.host
+      // set redirectPath for frontend redirection
+      query.redirectPath = url.path
+    } catch (err) {
+      logger.warn('Received invalid redirectUrl query parameter value: "%s"', redirectUrl)
+    }
+  }
+  const state = encodeState(query)
   const client = await exports.getIssuerClient()
   return client.authorizationUrl({
-    redirect_uri: redirectUri,
+    redirect_uri: actualRedirectUri.toString(),
     state,
     scope
   })
