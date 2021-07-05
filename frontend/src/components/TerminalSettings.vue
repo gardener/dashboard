@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-content>
         </template>
         <template v-slot:selection="{ item }">
-          <span :class="nodeTextColor" class="ml-2">
+          <span :class="{'grey--text': !selectedRunOnShootWorker}" class="ml-2">
             <template v-if="item !== autoSelectNodeItem">
               {{item.data.kubernetesHostname}} [{{item.data.version}}]
             </template>
@@ -178,9 +178,6 @@ export default {
         this.shootNodesInternal = value
       }
     },
-    nodeTextColor () {
-      return this.selectedRunOnShootWorker ? 'black--text' : 'grey--text'
-    },
     selectedConfig () {
       const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname
         ? undefined
@@ -190,11 +187,11 @@ export default {
 
       const selectedConfig = {
         container: {
-          image: this.selectedContainerImage
+          image: this.selectedContainerImage,
+          privileged: this.selectedPrivilegedMode
         },
         node,
         preferredHost,
-        privileged: this.selectedPrivilegedMode,
         hostPID: this.selectedPrivilegedMode,
         hostNetwork: this.selectedPrivilegedMode
       }

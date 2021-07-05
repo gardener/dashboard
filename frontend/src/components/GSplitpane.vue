@@ -27,14 +27,12 @@ SPDX-License-Identifier: Apache-2.0
 
 import { mapActions } from 'vuex'
 import { Splitpanes, Pane } from 'splitpanes'
-import GSplitpane from '@/components/GSplitpane'
 
 export default {
-  name: 'GSplitpane',
+  name: 'g-splitpane',
   components: {
     Splitpanes,
-    Pane,
-    GSplitpane
+    Pane
   },
   props: {
     splitpaneTree: {

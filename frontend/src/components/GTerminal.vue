@@ -172,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0
                 <span>{{privilegedModeText}}</span>
               </v-btn>
             </template>
-            <strong>Privileged:</strong> {{terminalSession.privileged}}<br/>
+            <strong>Privileged:</strong> {{terminalSession.container.privileged}}<br/>
             <strong>Host PID:</strong> {{terminalSession.hostPID}}<br/>
             <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
           </v-tooltip>
@@ -268,7 +268,9 @@ export default {
         nodes: []
       },
       selectedConfig: {},
-      terminalSession: {},
+      terminalSession: {
+        container: {}
+      },
       TerminalSession,
       showMenu: false
     }
@@ -311,7 +313,7 @@ export default {
       return this.privilegedMode || false
     },
     privilegedMode () {
-      return this.terminalSession.privileged || this.terminalSession.hostPID || this.terminalSession.hostNetwork
+      return get(this.terminalSession, 'container.privileged') || this.terminalSession.hostPID || this.terminalSession.hostNetwork
     },
     connectionStateText () {
       switch (this.terminalSession.connectionState) {
@@ -469,7 +471,7 @@ export default {
   mounted () {
     const term = this.term = new Terminal()
     const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid)
+    const focusAddon = new FocusAddon(this.uuid, this.$store)
     focusAddon.onFocus = () => {
       term.setOption('theme', { background: '#000' })
       this.hasFocus = true

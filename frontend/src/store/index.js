@@ -8,21 +8,25 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
-import EmitterWrapper from '@/utils/Emitter'
 import {
   gravatarUrlGeneric,
   displayName,
   fullDisplayName,
   getDateFormatted,
   canI,
-  getProjectName,
   TargetEnum,
   isHtmlColorCode,
-  isOwnSecret
+  parseSize,
+  isOwnSecret,
+  shortRandomString,
+  isValidTerminationDate,
+  selectedImageIsNotLatest,
+  availableKubernetesUpdatesCache,
+  UNKNOWN_EXPIRED_TIMESTAMP
 } from '@/utils'
+import { v4 as uuidv4 } from '@/utils/uuid'
 import { hash } from '@/utils/crypto'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
-import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
 import mapValues from 'lodash/mapValues'
@@ -36,7 +40,6 @@ import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import camelCase from 'lodash/camelCase'
-import concat from 'lodash/concat'
 import compact from 'lodash/compact'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
@@ -56,8 +59,11 @@ import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
+import replace from 'lodash/replace'
+import sample from 'lodash/sample'
 
 import moment from '@/utils/moment'
+import { ioPlugin } from '@/utils/Emitter'
 import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -79,7 +85,10 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
 // plugins
-const plugins = [createMediaPlugin(window)]
+const plugins = [
+  ioPlugin,
+  createMediaPlugin(window)
+]
 if (debug) {
   plugins.push(createLogger())
 }
@@ -133,7 +142,8 @@ const state = {
     }
   },
   darkTheme: false,
-  colorScheme: 'auto'
+  colorScheme: 'auto',
+  subscriptions: {}
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -819,7 +829,7 @@ const getters = {
   },
   ticketsByNamespaceAndName (state, getters) {
     return ({ namespace, name }) => {
-      const projectName = getProjectName({ namespace })
+      const projectName = getters.projectNameByNamespace({ namespace })
       return getters['tickets/issues']({ projectName, name })
     }
   },
@@ -830,13 +840,13 @@ const getters = {
   },
   latestUpdatedTicketByNameAndNamespace (state, getters) {
     return ({ namespace, name }) => {
-      const projectName = getProjectName({ namespace })
+      const projectName = getters.projectNameByNamespace({ namespace })
       return getters['tickets/latestUpdated']({ projectName, name })
     }
   },
   ticketsLabels (state, getters) {
     return ({ namespace, name }) => {
-      const projectName = getProjectName({ namespace })
+      const projectName = getters.projectNameByNamespace({ namespace })
       return getters['tickets/labels']({ projectName, name })
     }
   },
@@ -1052,6 +1062,198 @@ const getters = {
   },
   onlyShootsWithIssues (state, getters) {
     return getters['shoots/onlyShootsWithIssues']
+  },
+  projectNameByNamespace (state, getters) {
+    return ({ namespace } = {}) => {
+      const project = find(getters.projectList, ['metadata.namespace', namespace])
+      return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
+    }
+  },
+  purposeRequiresHibernationSchedule (state) {
+    return purpose => {
+      const defaultHibernationSchedules = get(state, 'cfg.defaultHibernationSchedule')
+      if (defaultHibernationSchedules) {
+        if (isEmpty(purpose)) {
+          return true
+        }
+        return !isEmpty(get(defaultHibernationSchedules, purpose))
+      }
+      return false
+    }
+  },
+  isShootHasNoHibernationScheduleWarning (state, getters) {
+    return shoot => {
+      const purpose = get(shoot, 'spec.purpose')
+      const annotations = get(shoot, 'metadata.annotations', {})
+      if (getters.purposeRequiresHibernationSchedule(purpose)) {
+        const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+        if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
+          return true
+        }
+      }
+      return false
+    }
+  },
+  generateWorker (state, getters) {
+    return (availableZones, cloudProfileName, region) => {
+      const id = uuidv4()
+      const name = `worker-${shortRandomString(5)}`
+      const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      const machineType = head(machineTypesForZone) || {}
+      const volumeTypesForZone = getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      const volumeType = head(volumeTypesForZone) || {}
+      const machineImage = getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+      const minVolumeSize = getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+      const worker = {
+        id,
+        name,
+        minimum: 1,
+        maximum: 2,
+        maxSurge: 1,
+        machine: {
+          type: machineType.name,
+          image: machineImage
+        },
+        zones,
+        isNew: true
+      }
+      if (volumeType.name) {
+        worker.volume = {
+          type: volumeType.name,
+          size: defaultVolumeSize
+        }
+      } else if (!machineType.storage) {
+        worker.volume = {
+          size: defaultVolumeSize
+        }
+      } else if (machineType.storage.type !== 'fixed') {
+        worker.volume = {
+          size: machineType.storage.size
+        }
+      }
+      return worker
+    }
+  },
+  availableKubernetesUpdatesForShoot (state, getters) {
+    return (shootVersion, cloudProfileName) => {
+      const key = `${shootVersion}_${cloudProfileName}`
+      let newerVersions = availableKubernetesUpdatesCache.get(key)
+      if (newerVersions !== undefined) {
+        return newerVersions
+      }
+      newerVersions = {}
+      const allVersions = getters.kubernetesVersions(cloudProfileName)
+
+      const validVersions = filter(allVersions, ({ isExpired }) => !isExpired)
+      const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
+      forEach(newerVersionsForShoot, version => {
+        const diff = semver.diff(version.version, shootVersion)
+        if (!newerVersions[diff]) {
+          newerVersions[diff] = []
+        }
+        newerVersions[diff].push(version)
+      })
+      newerVersions = newerVersionsForShoot.length ? newerVersions : null
+      availableKubernetesUpdatesCache.set(key, newerVersions)
+
+      return newerVersions
+    }
+  },
+  kubernetesVersionIsNotLatestPatch (state, getters) {
+    return (kubernetesVersion, cloudProfileName) => {
+      const allVersions = getters.kubernetesVersions(cloudProfileName)
+      return some(allVersions, ({ version, isPreview }) => {
+        return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+      })
+    }
+  },
+  kubernetesVersionUpdatePathAvailable (state, getters) {
+    return (kubernetesVersion, cloudProfileName) => {
+      const allVersions = getters.kubernetesVersions(cloudProfileName)
+      if (getters.kubernetesVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
+        return true
+      }
+      const versionMinorVersion = semver.minor(kubernetesVersion)
+      return some(allVersions, ({ version, isPreview }) => {
+        return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+      })
+    }
+  },
+  kubernetesVersionExpirationForShoot (state, getters) {
+    return (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) => {
+      const allVersions = getters.kubernetesVersions(shootCloudProfileName)
+      const version = find(allVersions, { version: shootK8sVersion })
+      if (!version) {
+        return {
+          version: shootK8sVersion,
+          expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
+          isValidTerminationDate: false,
+          severity: 'warning'
+        }
+      }
+      if (!version.expirationDate) {
+        return undefined
+      }
+
+      const patchAvailable = getters.kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
+      const updatePathAvailable = getters.kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
+
+      let severity
+      if (!updatePathAvailable) {
+        severity = 'error'
+      } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
+        severity = 'warning'
+      } else if (k8sAutoPatch && patchAvailable) {
+        severity = 'info'
+      } else {
+        return undefined
+      }
+
+      return {
+        expirationDate: version.expirationDate,
+        isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+        severity
+      }
+    }
+  },
+  expiringWorkerGroupsForShoot (state, getters) {
+    return (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) => {
+      const allMachineImages = getters.machineImagesByCloudProfileName(shootCloudProfileName)
+      const workerGroups = map(shootWorkerGroups, worker => {
+        const workerImage = get(worker, 'machine.image')
+        const workerImageDetails = find(allMachineImages, workerImage)
+        if (!workerImageDetails) {
+          return {
+            ...workerImage,
+            expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
+            workerName: worker.name,
+            isValidTerminationDate: false,
+            severity: 'warning'
+          }
+        }
+
+        const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+
+        let severity
+        if (!updateAvailable) {
+          severity = 'error'
+        } else if (!imageAutoPatch) {
+          severity = 'warning'
+        } else {
+          severity = 'info'
+        }
+
+        return {
+          ...workerImageDetails,
+          isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
+          workerName: worker.name,
+          severity
+        }
+      })
+      return filter(workerGroups, 'expirationDate')
+    }
   }
 }
 
@@ -1121,7 +1323,7 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  async subscribeShoot ({ dispatch, getters }, { name, namespace }) {
+  async subscribeShoot ({ commit, dispatch, getters }, { name, namespace }) {
     await dispatch('shoots/clearAll')
     return new Promise((resolve, reject) => {
       const done = err => {
@@ -1162,23 +1364,24 @@ const actions = {
         }
       })
       const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
-      EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+      commit('SUBSCRIBE', ['shoot', { name, namespace }])
     })
   },
-  subscribeShootAcknowledgement ({ commit, state }, object) {
+  subscribeShootAcknowledgement ({ commit, dispatch, state, getters }, object) {
     if (object.kind === 'Shoot') {
       commit('shoots/HANDLE_EVENTS', {
         rootState: state,
+        rootGetters: getters,
         events: [{
           type: 'ADDED',
           object
         }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = [store.dispatch('getShootInfo', metadata)]
+        const promises = [dispatch('getShootInfo', metadata)]
         const seedName = spec.seedName
-        if (store.getters.isAdmin && !store.getters.isSeedUnreachableByName(seedName)) {
-          promises.push(store.dispatch('getShootSeedInfo', metadata))
+        if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
+          promises.push(dispatch('getShootSeedInfo', metadata))
         }
         try {
           await Promise.all(promises)
@@ -1203,17 +1406,19 @@ const actions = {
   },
   async subscribeShoots ({ dispatch, commit, state, getters }) {
     try {
-      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state, getters) })
+      const namespace = state.namespace
+      const filter = getFilterValue(state, getters)
+      commit('SUBSCRIBE', ['shoots', { namespace, filter }])
     } catch (err) { /* ignore error */ }
   },
   async subscribeComments ({ dispatch, commit }, { name, namespace }) {
     try {
-      EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
+      commit('SUBSCRIBE', ['comments', { name, namespace }])
     } catch (err) { /* ignore error */ }
   },
   async unsubscribeComments ({ dispatch, commit }) {
     try {
-      EmitterWrapper.ticketCommentsEmitter.unsubscribe()
+      commit('UNSUBSCRIBE', 'comments')
     } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
@@ -1483,11 +1688,6 @@ const mutations = {
   },
   SET_USER (state, value) {
     state.user = value
-    if (value) {
-      EmitterWrapper.connect()
-    } else {
-      EmitterWrapper.disconnect()
-    }
   },
   SET_SIDEBAR (state, value) {
     state.sidebar = value
@@ -1529,6 +1729,12 @@ const mutations = {
   SET_DARK_THEME (state, value) {
     state.darkTheme = value
     Vue.vuetify.framework.theme.dark = value
+  },
+  SUBSCRIBE (state, [key, value]) {
+    Vue.set(state.subscriptions, key, value)
+  },
+  UNSUBSCRIBE (state, key) {
+    Vue.delete(state.subscriptions, key)
   }
 }
 
@@ -1547,50 +1753,20 @@ const modules = {
 
 const store = new Vuex.Store({
   state,
-  actions,
   getters,
+  actions,
   mutations,
   modules,
   strict: debug,
   plugins
 })
 
-const { shootsEmitter, shootEmitter, ticketIssuesEmitter, ticketCommentsEmitter } = EmitterWrapper
-
-/* Shoots */
-function filterNamespacedEvents (namespacedEvents) {
-  const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
-  return reduce(store.getters.currentNamespaces, concatEventsForNamespace, [])
-}
-shootsEmitter.on('shoots', namespacedEvents => {
-  store.commit('shoots/HANDLE_EVENTS', {
-    rootState: state,
-    events: filterNamespacedEvents(namespacedEvents)
-  })
-})
-shootEmitter.on('shoot', namespacedEvents => {
-  store.commit('shoots/HANDLE_EVENTS', {
-    rootState: state,
-    events: filterNamespacedEvents(namespacedEvents)
-  })
-})
-
-/* Ticket Issues */
-ticketIssuesEmitter.on('issues', events => {
-  store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
-})
-
-/* Ticket Comments */
-ticketCommentsEmitter.on('comments', events => {
-  store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
-})
-
 export default store
 
 export {
   state,
-  actions,
   getters,
+  actions,
   mutations,
   modules,
   plugins,

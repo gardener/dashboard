@@ -20,7 +20,6 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import store from '../../'
 import getters from './getters'
 import { keyForShoot, findItem } from './helper'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -33,7 +32,6 @@ import {
   purposesForSecret,
   shortRandomString,
   shootAddonList,
-  generateWorker,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone
 } from '@/utils'
@@ -58,9 +56,8 @@ const actions = {
    * Return all shoots in the given namespace.
    * This ends always in a server/backend call.
    */
-  clearAll ({ commit, dispatch }) {
+  clearAll ({ commit }) {
     commit('CLEAR_ALL')
-    return getters.items
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -116,7 +113,7 @@ const actions = {
       throw error
     }
   },
-  setSelection ({ commit, dispatch }, metadata) {
+  setSelection ({ commit, dispatch, state }, metadata) {
     if (!metadata) {
       return commit('SET_SELECTION', null)
     }
@@ -128,22 +125,22 @@ const actions = {
       }
     }
   },
-  setShootListFilters ({ commit, rootState }, value) {
-    commit('SET_SHOOT_LIST_FILTERS', { rootState, value })
+  setShootListFilters ({ commit, state, rootState, rootGetters }, value) {
+    commit('SET_SHOOT_LIST_FILTERS', { rootState, rootGetters, value })
     return state.shootListFilters
   },
-  setShootListFilter ({ commit, rootState }, filterValue) {
+  setShootListFilter ({ commit, state, rootState, rootGetters }, filterValue) {
     if (state.shootListFilters) {
-      commit('SET_SHOOT_LIST_FILTER', { rootState, filterValue })
+      commit('SET_SHOOT_LIST_FILTER', { rootState, rootGetters, filterValue })
       return state.shootListFilters
     }
   },
-  setNewShootResource ({ commit }, data) {
+  setNewShootResource ({ commit, state }, data) {
     commit('SET_NEW_SHOOT_RESOURCE', { data })
 
     return state.newShootResource
   },
-  resetNewShootResource ({ commit, rootState, rootGetters }) {
+  resetNewShootResource ({ commit, state, rootState, rootGetters }) {
     const shootResource = {
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
@@ -231,7 +228,7 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
-    const worker = omit(generateWorker(zones, cloudProfileName, region), ['id', 'isNew'])
+    const worker = omit(rootGetters.generateWorker(zones, cloudProfileName, region), ['id', 'isNew'])
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
 
@@ -274,12 +271,8 @@ const actions = {
   }
 }
 
-function shoots (state) {
-  return map(Object.keys(state.shoots), (key) => state.shoots[key])
-}
-
-function setFilteredItems (state, rootState) {
-  let items = shoots(state)
+function setFilteredItems (state, rootState, rootGetters) {
+  let items = Object.values(state.shoots)
   if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
     if (get(state, 'shootListFilters.progressing', false)) {
       const predicate = item => {
@@ -311,8 +304,7 @@ function setFilteredItems (state, rootState) {
         if (!hideClustersWithLabels) {
           return true
         }
-
-        const ticketsForCluster = store.getters.ticketsByNamespaceAndName(get(item, 'metadata', {}))
+        const ticketsForCluster = rootGetters.ticketsByNamespaceAndName(get(item, 'metadata', {}))
         if (!ticketsForCluster.length) {
           return true
         }
@@ -367,10 +359,10 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
-  ITEM_PUT (state, { newItem, rootState }) {
+  ITEM_PUT (state, { newItem }) {
     putItem(state, newItem)
   },
-  HANDLE_EVENTS (state, { rootState, events }) {
+  HANDLE_EVENTS (state, { rootState, rootGetters, events }) {
     const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
     let setFilteredItemsRequired = false
     forEach(events, event => {
@@ -394,21 +386,21 @@ const mutations = {
       }
     })
     if (setFilteredItemsRequired) {
-      setFilteredItems(state, rootState)
+      setFilteredItems(state, rootState, rootGetters)
     }
   },
   CLEAR_ALL (state) {
     state.shoots = {}
     state.filteredShoots = []
   },
-  SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
+  SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value
-    setFilteredItems(state, rootState)
+    setFilteredItems(state, rootState, rootGetters)
   },
-  SET_SHOOT_LIST_FILTER (state, { rootState, filterValue }) {
+  SET_SHOOT_LIST_FILTER (state, { rootState, rootGetters, filterValue }) {
     const { filter, value } = filterValue
     state.shootListFilters[filter] = value
-    setFilteredItems(state, rootState)
+    setFilteredItems(state, rootState, rootGetters)
   },
   SET_NEW_SHOOT_RESOURCE (state, { data }) {
     state.newShootResource = data

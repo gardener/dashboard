@@ -14,7 +14,6 @@ import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
 import range from 'lodash/range'
 import toUpper from 'lodash/toUpper'
-import store from '../store'
 import moment from './moment'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -61,9 +60,8 @@ function scheduleEventObjFromRegex (regexVal) {
   return undefined
 }
 
-function convertScheduleEventObjToLocalTimezone (scheduleObj) {
+function convertScheduleEventObjToLocalTimezone (scheduleObj, location) {
   if (scheduleObj) {
-    const location = store.state.location
     const momentObj = moment.utc()
       .hour(scheduleObj.hour)
       .minute(scheduleObj.minute)
@@ -74,7 +72,7 @@ function convertScheduleEventObjToLocalTimezone (scheduleObj) {
   return scheduleObj
 }
 
-export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
+export function parsedScheduleEventsFromCrontabBlock (crontabBlock, defaultLocation) {
   const cronStart = crontabBlock.start
   const cronEnd = crontabBlock.end
   let location = crontabBlock.location
@@ -82,9 +80,9 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
   let end = scheduleEventObjFromRegex(cronEnd)
 
   if (!location) {
-    location = store.state.location
-    start = convertScheduleEventObjToLocalTimezone(start)
-    end = convertScheduleEventObjToLocalTimezone(end)
+    location = defaultLocation
+    start = convertScheduleEventObjToLocalTimezone(start, location)
+    end = convertScheduleEventObjToLocalTimezone(end, location)
   }
 
   let parseError = false

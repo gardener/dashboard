@@ -6,9 +6,8 @@
 
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import moment from '@/utils/moment'
-import store from '@/store'
 
-const currentLocation = store.state.location
+const currentLocation = moment.tz.guess()
 
 describe('utils', () => {
   describe('hibernationSchedule', () => {
@@ -19,7 +18,7 @@ describe('utils', () => {
           end: '00 08 * * 1,2,3,4,5',
           location: 'Europe/Berlin'
         }
-        const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+        const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
         expect(scheduleEvents).toBeInstanceOf(Array)
         expect(scheduleEvents).toHaveLength(1)
         const { start, end, location } = scheduleEvents[0]
@@ -35,7 +34,7 @@ describe('utils', () => {
         }
         const expectedStartMoment = moment.utc('1700', 'HHmm')
         const expectedEndMoment = moment.utc('0800', 'HHmm')
-        const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+        const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
         expect(scheduleEvents).toBeInstanceOf(Array)
         expect(scheduleEvents).toHaveLength(2)
         const { start, location } = scheduleEvents[0]
@@ -61,7 +60,7 @@ describe('utils', () => {
         end: '30 07 * * 1-2,3,4-6,0',
         location: 'Europe/Berlin'
       }
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
@@ -78,7 +77,7 @@ describe('utils', () => {
         end: '30 07 * * 1-2,Sun,3-5',
         location: 'Europe/Berlin'
       }
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
@@ -95,7 +94,7 @@ describe('utils', () => {
         start: '00 20 * * mon,TUE,wEd,Thu,7',
         location: 'America/Los_Angeles'
       }
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
@@ -112,7 +111,7 @@ describe('utils', () => {
         start: '00 20 * * *'
       }
       const expectedStartMoment = moment.utc('2000', 'HHmm')
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { start, location } = scheduleEvents[0]
@@ -129,7 +128,7 @@ describe('utils', () => {
         end: '12 09 * * 1,1,Mon,7,Tue-Thu,4-6',
         location: 'Europe/Berlin'
       }
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]
@@ -146,7 +145,7 @@ describe('utils', () => {
         end: '12 09 * * Mon,Tue,Wed,Thu,Fri,Sat,Sun',
         location: 'Europe/Berlin'
       }
-      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, currentLocation)
       expect(scheduleEvents).toBeInstanceOf(Array)
       expect(scheduleEvents).toHaveLength(1)
       const { end, location } = scheduleEvents[0]

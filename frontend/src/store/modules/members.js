@@ -16,7 +16,7 @@ const getters = {}
 
 // actions
 const actions = {
-  async getAll ({ commit, rootState }) {
+  async getAll ({ commit, state, rootState }) {
     const namespace = rootState.namespace
     try {
       const res = await getMembers({ namespace })

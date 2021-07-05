@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
@@ -78,7 +78,6 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
 import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
-import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -115,8 +114,11 @@ export default {
       'cfg',
       'location'
     ]),
+    ...mapGetters([
+      'purposeRequiresHibernationSchedule'
+    ]),
     showNoScheduleCheckbox () {
-      return purposeRequiresHibernationSchedule(this.purpose) &&
+      return this.purposeRequiresHibernationSchedule(this.purpose) &&
       isEmpty(this.parsedScheduleEvents) &&
       !this.parseError
     },
@@ -130,7 +132,7 @@ export default {
       try {
         this.parseError = false
         const parsedScheduleEvents = flatMap(scheduleCrontab, crontabBlock => {
-          return parsedScheduleEventsFromCrontabBlock(crontabBlock)
+          return parsedScheduleEventsFromCrontabBlock(crontabBlock, this.location)
         })
         this.setParsedSchedules(parsedScheduleEvents)
       } catch (error) {
@@ -144,7 +146,7 @@ export default {
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
         crontabBlock.location = this.location
-        const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+        const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock, this.location)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
           parsedScheduleEvent.location = this.location
         })

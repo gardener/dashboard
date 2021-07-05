@@ -51,9 +51,6 @@ import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import { shootItem } from '@/mixins/shootItem'
 import {
-  k8sVersionExpirationForShoot,
-  expiringWorkerGroupsForShoot,
-  isShootHasNoHibernationScheduleWarning,
   isSelfTerminationWarning
 } from '@/utils'
 import { mapGetters } from 'vuex'
@@ -80,7 +77,10 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'canPatchShoots'
+      'canPatchShoots',
+      'isShootHasNoHibernationScheduleWarning',
+      'kubernetesVersionExpirationForShoot',
+      'expiringWorkerGroupsForShoot'
     ]),
     visible () {
       return !this.isShootMarkedForDeletion && this.shootMessages.length
@@ -100,7 +100,7 @@ export default {
         return []
       }
       const k8sAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-      const k8sExpiration = k8sVersionExpirationForShoot(this.shootK8sVersion, this.shootCloudProfileName, k8sAutoPatch)
+      const k8sExpiration = this.kubernetesVersionExpirationForShoot(this.shootK8sVersion, this.shootCloudProfileName, k8sAutoPatch)
       if (!k8sExpiration) {
         return []
       }
@@ -124,7 +124,7 @@ export default {
         return []
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-      const expiredWorkerGroups = expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
+      const expiredWorkerGroups = this.expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
       return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity }) => {
         return {
           key: `image_${workerName}_${name}`,
@@ -148,7 +148,7 @@ export default {
       if (!this.filterMatches('no-hibernation-schedule')) {
         return []
       }
-      if (!isShootHasNoHibernationScheduleWarning(this.shootItem)) {
+      if (!this.isShootHasNoHibernationScheduleWarning(this.shootItem)) {
         return []
       }
       return [{
