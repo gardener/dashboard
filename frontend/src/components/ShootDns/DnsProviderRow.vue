@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
       <template v-slot:activator="{ on }">
         <v-col cols="11" v-on="on">
-          <v-row class="ma-0" :class="{ 'disabled-row': secretBindingMissing }">
-            <v-col>
+          <div class="d-flex flex-wrap">
+            <div class="regularInput">
               <v-select
                 color="primary"
                 item-color="primary"
@@ -39,15 +39,15 @@ SPDX-License-Identifier: Apache-2.0
                   </span>
                 </template>
               </v-select>
-            </v-col>
-            <v-col>
+            </div>
+            <div class="regularInput">
               <select-secret
                 :dns-provider-kind="type"
                 :selected-secret="secret"
                 @update-secret="onUpdateSecret"
                 @valid="onSecretValid"></select-secret>
-            </v-col>
-            <v-col>
+            </div>
+            <div class="regularInput">
               <v-combobox
                 v-model="excludeDomains"
                 label="Exclude Domains"
@@ -57,8 +57,8 @@ SPDX-License-Identifier: Apache-2.0
                 @input="onInputExcludeDomains"
               >
               </v-combobox>
-            </v-col>
-            <v-col>
+            </div>
+            <div class="regularInput">
               <v-combobox
                 v-model="includeDomains"
                 label="Include Domains"
@@ -68,8 +68,8 @@ SPDX-License-Identifier: Apache-2.0
                 @input="onInputIncludeDomains"
               >
               </v-combobox>
-            </v-col>
-            <v-col>
+            </div>
+            <div class="regularInput">
               <v-combobox
                 v-model="excludeZones"
                 label="Exclude Zones"
@@ -79,8 +79,8 @@ SPDX-License-Identifier: Apache-2.0
                 @input="onInputExcludeZones"
               >
               </v-combobox>
-            </v-col>
-            <v-col>
+            </div>
+            <div class="regularInput">
               <v-combobox
                 v-model="includeZones"
                 label="Include Zones"
@@ -90,8 +90,8 @@ SPDX-License-Identifier: Apache-2.0
                 @input="onInputIncludeZones"
               >
               </v-combobox>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
         </v-col>
         <v-col cols="1">
           <v-btn
@@ -251,6 +251,12 @@ export default {
   .disabled-row {
     pointer-events: none;
     opacity: 0.5;
+  }
+
+  .regularInput {
+    max-width: 300px;
+    flex: 1 1 auto;
+    padding: 12px;
   }
 
 </style>

@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :shoot-item="shootItem"
     ref="actionDialog"
     caption="Configure DNS"
-    max-width="900"
+    width="1750px"
     confirmRequired
     @dialog-opened="onConfigurationDialogOpened"
     >

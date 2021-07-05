@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="gDialog"
     confirm-button-text="Ok"
     cancel-button-text=""
-    maxWidth="600"
+    width="600"
     @dialog-closed="onDialogClosed()"
     >
     <template v-slot:caption>About</template>

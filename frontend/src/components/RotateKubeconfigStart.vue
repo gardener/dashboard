@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
-    max-width="600"
+    width="600"
     :button-text="buttonText"
     :confirm-required="true"
     confirm-button-text="Rotate">

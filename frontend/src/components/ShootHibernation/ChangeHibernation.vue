@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :confirm-required="confirmRequired"
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
     :button-text="buttonText"
-     max-width="600">
+     width="600">
     <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
