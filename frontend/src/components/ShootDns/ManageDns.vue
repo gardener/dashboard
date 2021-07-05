@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container class="pa-0 ma-0">
-    <v-row>
+    <v-row v-if="dnsProviders.length">
       <v-col cols="3">
         <v-text-field
           color="primary"
@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           :items="dnsProvidersWithPrimarySupport"
           :error-messages="getErrorMessages('primaryProvider')"
           label="Primary DNS Provider"
+          :disabled="!createMode"
         >
           <template v-slot:item="{ item }">
             <v-list-item-action>
@@ -50,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-select>
       </v-col>
     </v-row>
-    <v-divider></v-divider>
+    <v-divider v-if="dnsProviders.length"></v-divider>
     <transition-group name="list" class="alternate-row-background">
       <v-row v-for="(provider, index) in dnsProviders" :key="provider.id" class="list-item pt-2">
         <dns-provider-row
@@ -210,6 +211,9 @@ export default {
     },
     onRemoveProvider (index) {
       this.dnsProviders.splice(index, 1)
+      if (this.dnsProviders.length === 0) {
+        this.domain = undefined
+      }
       this.saveComponentState()
     },
     onProviderValid ({ valid, id }) {
@@ -222,6 +226,13 @@ export default {
       this.saveComponentState()
     },
     onInputDomain () {
+      if (this.domain.length > 0) {
+        if (!this.primaryProvider) {
+          this.primaryProvider = head(this.dnsProvidersWithPrimarySupport)
+        }
+      } else {
+        this.primaryProvider = undefined
+      }
       this.saveComponentState()
     },
     onUpdateProviderType ({ type, id }) {

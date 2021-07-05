@@ -17,7 +17,8 @@ import {
   canI,
   getProjectName,
   TargetEnum,
-  isHtmlColorCode
+  isHtmlColorCode,
+  isOwnSecret
 } from '@/utils'
 import { hash } from '@/utils/crypto'
 import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
@@ -650,12 +651,14 @@ const getters = {
   },
   dnsSecretList (state) {
     return filter(state.cloudProviderSecrets.all, secret => {
-      return !!secret.metadata.dnsProviderName
+      return !!secret.metadata.dnsProviderName && isOwnSecret(secret) // secret binding not supported
     })
   },
   dnsSecretsByProviderKind (state) {
     return (dnsProviderName) => {
-      return filter(state.cloudProviderSecrets.all, ['metadata.dnsProviderName', dnsProviderName])
+      return filter(state.cloudProviderSecrets.all, secret => {
+        return secret.metadata.dnsProviderName === dnsProviderName && isOwnSecret(secret) // secret binding not supported
+      })
     }
   },
   getCloudProviderSecretByName (state, getters) {

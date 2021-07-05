@@ -6,101 +6,108 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-row align="center">
-    <v-col cols="11">
-      <v-row class="ma-0">
-        <v-col>
-          <v-select
-            color="primary"
-            item-color="primary"
-            v-model="type"
-            @blur="$v.type.$touch()"
-            @input="onInputType"
-            :items="dnsProviderTypes"
-            :error-messages="getErrorMessages('type')"
-            label="Dns Provider Type"
-            :disabled="primary && !createMode"
-            :hint="typeHint"
-            persistent-hint
-          >
-            <template v-slot:item="{ item }">
-              <v-list-item-action>
-                <vendor-icon :value="item"></vendor-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>{{item}}</v-list-item-title>
-              </v-list-item-content>
-            </template>
-            <template v-slot:selection="{ item }">
-              <vendor-icon :value="item"></vendor-icon>
-              <span class="ml-2">
-              {{item}}
-              </span>
-            </template>
-          </v-select>
+    <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
+      <template v-slot:activator="{ on }">
+        <v-col cols="11" v-on="on">
+          <v-row class="ma-0" :class="{ 'disabled-row': secretBindingMissing }">
+            <v-col>
+              <v-select
+                color="primary"
+                item-color="primary"
+                v-model="type"
+                @blur="$v.type.$touch()"
+                @input="onInputType"
+                :items="dnsProviderTypes"
+                :error-messages="getErrorMessages('type')"
+                label="Dns Provider Type"
+                :disabled="primary && !createMode"
+                :hint="typeHint"
+                persistent-hint
+              >
+                <template v-slot:item="{ item }">
+                  <v-list-item-action>
+                    <vendor-icon :value="item"></vendor-icon>
+                  </v-list-item-action>
+                  <v-list-item-content>
+                    <v-list-item-title>{{item}}</v-list-item-title>
+                  </v-list-item-content>
+                </template>
+                <template v-slot:selection="{ item }">
+                  <vendor-icon :value="item"></vendor-icon>
+                  <span class="ml-2">
+                  {{item}}
+                  </span>
+                </template>
+              </v-select>
+            </v-col>
+            <v-col>
+              <select-secret
+                :dns-provider-kind="type"
+                :selected-secret="secret"
+                @update-secret="onUpdateSecret"
+                @valid="onSecretValid"></select-secret>
+            </v-col>
+            <v-col>
+              <v-combobox
+                v-model="excludeDomains"
+                label="Exclude Domains"
+                multiple
+                small-chips
+                deletable-chips
+                @input="onInputExcludeDomains"
+              >
+              </v-combobox>
+            </v-col>
+            <v-col>
+              <v-combobox
+                v-model="includeDomains"
+                label="Include Domains"
+                multiple
+                small-chips
+                deletable-chips
+                @input="onInputIncludeDomains"
+              >
+              </v-combobox>
+            </v-col>
+            <v-col>
+              <v-combobox
+                v-model="excludeZones"
+                label="Exclude Zones"
+                multiple
+                small-chips
+                deletable-chips
+                @input="onInputExcludeZones"
+              >
+              </v-combobox>
+            </v-col>
+            <v-col>
+              <v-combobox
+                v-model="includeZones"
+                label="Include Zones"
+                multiple
+                small-chips
+                deletable-chips
+                @input="onInputIncludeZones"
+              >
+              </v-combobox>
+            </v-col>
+          </v-row>
         </v-col>
-        <v-col>
-          <select-secret
-            :dns-provider-kind="type"
-            :selected-secret="secret"
-            @update-secret="onUpdateSecret"
-            @valid="onSecretValid"></select-secret>
+        <v-col cols="1">
+          <v-btn
+            small
+            outlined
+            icon
+            color="grey"
+            @click.native.stop="removeDnsProvider"
+            :disabled="primary && !createMode">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-col>
-        <v-col>
-          <v-combobox
-            v-model="excludeDomains"
-            label="Exclude Domains"
-            multiple
-            small-chips
-            deletable-chips
-            @input="onInputExcludeDomains"
-          >
-          </v-combobox>
-        </v-col>
-        <v-col>
-          <v-combobox
-            v-model="includeDomains"
-            label="Include Domains"
-            multiple
-            small-chips
-            deletable-chips
-            @input="onInputIncludeDomains"
-          >
-          </v-combobox>
-        </v-col>
-        <v-col>
-          <v-combobox
-            v-model="excludeZones"
-            label="Exclude Zones"
-            multiple
-            small-chips
-            deletable-chips
-            @input="onInputExcludeZones"
-          >
-          </v-combobox>
-        </v-col>
-        <v-col>
-          <v-combobox
-            v-model="includeZones"
-            label="Include Zones"
-            multiple
-            small-chips
-            deletable-chips
-            @input="onInputIncludeZones"
-          >
-          </v-combobox>
-        </v-col>
-      </v-row>
-    </v-col>
-    <v-col cols="1">
-      <v-btn
-        small
-        outlined
-        icon
-        color="grey"
-        @click.native.stop="removeDnsProvider">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-col>
+      </template>
+      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br />
+      SecretBinding for secret {{provider.secretName}} not found in poject namespace
+    </v-tooltip>
   </v-row>
 </template>
 
@@ -144,7 +151,8 @@ export default {
       excludeZones: undefined,
       includeZones: undefined,
       primary: false,
-      createMode: false
+      createMode: false,
+      secretBindingMissing: false
     }
   },
   validations: {
@@ -215,7 +223,7 @@ export default {
     if (this.provider) {
       this.id = this.provider.id
       this.type = this.provider.type
-      this.secret = find(this.dnsSecretsByProviderKind(this.provider.type), ['metadata.name', this.provider.secretName])
+      this.secret = find(this.dnsSecretsByProviderKind(this.provider.type), ['metadata.secretRef.name', this.provider.secretName])
       this.excludeDomains = this.provider.excludeDomains
       this.includeDomains = this.provider.includeDomains
       this.excludeZones = this.provider.excludeZones
@@ -223,8 +231,12 @@ export default {
       this.primary = this.provider.primary
       this.createMode = this.provider.createMode
     }
+    if (!this.secret && !this.createMode) {
+      this.secretBindingMissing = true
+    }
     this.validateInput()
   }
+
 }
 </script>
 
@@ -234,6 +246,11 @@ export default {
     div {
      flex-wrap: nowrap;
     }
+  }
+
+  .disabled-row {
+    pointer-events: none;
+    opacity: 0.5;
   }
 
 </style>

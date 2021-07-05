@@ -84,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <v-card class="ma-3">
+    <v-card class="ma-3 mt-6">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="text-subtitle-1">
@@ -221,7 +221,7 @@ export default {
       'shootList',
       'canCreateSecrets',
       'sortedCloudProviderKindList',
-      'dnsProviderList'
+      'sortedDnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
@@ -298,7 +298,7 @@ export default {
       }))
     },
     dnsProviderTypes () {
-      return map(this.dnsProviderList, 'type')
+      return map(this.sortedDnsProviderList, 'type')
     },
     dnsSecretTableHeaders () {
       const headers = [

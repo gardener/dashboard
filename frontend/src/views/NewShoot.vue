@@ -293,12 +293,18 @@ export default {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
       }
 
-      const { domain, providers } = this.storedComponentStateManageDns
-      if (!isEmpty(domain)) {
-        set(shootResource, 'spec.dns.domain', domain)
+      const dns = {}
+      if (this.storedComponentStateManageDns.domain) {
+        dns.domain = this.storedComponentStateManageDns.domain
       }
-      if (!isEmpty(providers)) {
-        set(shootResource, 'spec.dns.providers', providers)
+      if (this.storedComponentStateManageDns.providers.length) {
+        dns.providers = this.storedComponentStateManageDns.providers
+      }
+
+      if (!isEmpty(dns)) {
+        set(shootResource, 'spec.dns', dns)
+      } else {
+        unset(shootResource, 'spec.dns', this.storedComponentStateManageDns)
       }
 
       if (this.$refs.accessRestrictions) {
