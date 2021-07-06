@@ -21,7 +21,8 @@ const defaults = {
       'kubernetes.io/ingress.class': 'nginx'
     },
     hosts: [
-      'gardener.garden.example.org'
+      'dashboard.garden.example.org',
+      'dashboard.ingress.garden.example.org'
     ],
     tls: {
       secretName: 'default-gardener-dashboard-tls'
@@ -64,7 +65,6 @@ const defaults = {
     issuerUrl: 'https://identity.garden.example.org',
     clientId: 'dashboard',
     clientSecret: 'dashboardSecret',
-    redirectUri: 'https://gardener.garden.example.org/auth/callback',
     ca: getCertificate('...')
   },
   frontendConfig: {

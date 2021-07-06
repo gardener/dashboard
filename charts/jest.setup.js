@@ -17,7 +17,7 @@ beforeAll(function () {
 
 afterAll(function () {
   const dirname = process.env.HELM_VALUES_DIRNAME
-  fs.rmdirSync(dirname, {
+  fs.rmSync(dirname, {
     maxRetries: 100,
     recursive: true
   })

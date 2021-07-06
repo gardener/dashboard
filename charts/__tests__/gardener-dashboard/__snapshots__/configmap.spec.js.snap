@@ -108,7 +108,10 @@ Li4u
       "clientId": "kube-kubectl",
       "clientSecret": "kube-kubectl-secret",
     },
-    "redirect_uri": "https://gardener.garden.example.org/auth/callback",
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
     "rejectUnauthorized": true,
     "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
   },
@@ -192,7 +195,10 @@ Object {
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "redirect_uri": "https://gardener.garden.example.org/auth/callback",
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
     "rejectUnauthorized": true,
     "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
   },
