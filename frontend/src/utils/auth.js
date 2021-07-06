@@ -35,13 +35,17 @@ export class UserManager {
     if (err) {
       url.searchParams.set('error[message]', err.message)
     }
-    window.location = url
+    this.redirect(url)
   }
 
   signinWithOidc (redirectPath = '/') {
     const url = new URL('/auth', this.origin)
     const redirectUrl = new URL(redirectPath, this.origin)
     url.searchParams.set('redirectUrl', redirectUrl)
+    this.redirect(url)
+  }
+
+  redirect (url) {
     window.location = url
   }
 
