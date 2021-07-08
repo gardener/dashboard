@@ -9,13 +9,14 @@
 const _ = require('lodash')
 const { isIP } = require('net')
 const { isHttpError } = require('@gardener-dashboard/request')
+const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { NotFound } = require('http-errors')
 const { decodeBase64, setAuthorization } = require('./util')
 const debug = require('./debug')
 const resources = require('./resources')
 const nonResourceEndpoints = require('./nonResourceEndpoints')
 
-const { fromKubeconfig } = require('@gardener-dashboard/kube-config')
+const { fromKubeconfig, refreshAuthProviderConfig } = require('@gardener-dashboard/kube-config')
 
 const cluster = Symbol('cluster')
 
@@ -70,7 +71,17 @@ class Client {
     if (!kubeconfigBase64) {
       throw NotFound('No kubeconfig found in secret')
     }
-    return decodeBase64(kubeconfigBase64)
+    let kubeconfigYaml = decodeBase64(kubeconfigBase64)
+    const serviceaccountJsonBase64 = _.get(secret, 'data["serviceaccount.json"]')
+    if (serviceaccountJsonBase64) {
+      try {
+        const credentials = JSON.parse(decodeBase64(serviceaccountJsonBase64))
+        kubeconfigYaml = await refreshAuthProviderConfig(kubeconfigYaml, credentials)
+      } catch (err) {
+        logger.warn(`Failed to refresh auth-provider config of kubeconfig secret "${name}" in namespace "${namespace}"`)
+      }
+    }
+    return kubeconfigYaml
   }
 
   async createKubeconfigClient (secretRef) {

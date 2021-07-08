@@ -11,6 +11,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const yaml = require('js-yaml')
+const { GoogleToken } = require('gtoken')
 
 function getInCluster ({
   KUBERNETES_SERVICE_HOST: host,
@@ -93,7 +94,10 @@ function cleanKubeconfig (input) {
     return { name, context }
   }
   const cleanAuthInfo = ({ name, user }) => {
-    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password'])
+    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password', 'auth-provider'])
+    if (user['auth-provider'] && user['auth-provider'].name !== 'gcp') {
+      delete user['auth-provider']
+    }
     return { name, user }
   }
   const cleanConfig = ({
@@ -114,6 +118,54 @@ function cleanKubeconfig (input) {
     }
   }
   return cleanConfig(parseKubeconfig(input))
+}
+
+async function refreshAuthProviderConfig (input, options = {}) {
+  const kubeconfig = parseKubeconfig(input)
+  const {
+    'current-context': currentContext,
+    contexts,
+    users
+  } = kubeconfig
+
+  const context = _
+    .chain(contexts)
+    .find(['name', currentContext])
+    .get('context')
+    .value()
+  const user = _
+    .chain(users)
+    .find(['name', context.user])
+    .get('user')
+    .value()
+
+  if (user['auth-provider']) {
+    const { name, config = {} } = user['auth-provider']
+    switch (name) {
+      case 'gcp': {
+        const {
+          private_key: key,
+          client_email: email
+        } = options
+        const gToken = new GoogleToken({
+          key,
+          email,
+          scope: ['https://www.googleapis.com/auth/cloud-platform'],
+          eagerRefreshThresholdMillis: 5 * 60 * 1000
+        })
+        gToken.expiresAt = new Date(config.expiry || '1970-01-01T00:00:00.000Z').getTime()
+        gToken.rawToken = {
+          access_token: config['access-token'],
+          token_type: 'Bearer'
+        }
+        await gToken.getToken()
+        config['access-token'] = gToken.accessToken
+        config.expiry = new Date(gToken.expiresAt).toISOString()
+        return yaml.safeDump(kubeconfig)
+      }
+    }
+  }
+  return input
 }
 
 function fromKubeconfig (input) {
@@ -181,6 +233,25 @@ function fromKubeconfig (input) {
         user: user.username,
         pass: user.password
       }
+    } else if (user['auth-provider']) {
+      const {
+        name,
+        config: authProviderConfig = {}
+      } = user['auth-provider']
+      switch (name) {
+        case 'gcp': {
+          const {
+            'access-token': accessToken,
+            expiry = '1970-01-01T00:00:00.000Z'
+          } = authProviderConfig
+          if (new Date() < new Date(expiry)) {
+            config.auth = {
+              bearer: accessToken
+            }
+          }
+          break
+        }
+      }
     }
   }
 
@@ -243,6 +314,7 @@ exports = module.exports = {
     input = exports.cleanKubeconfig(input)
     return fromKubeconfig(input)
   },
+  refreshAuthProviderConfig,
   dumpKubeconfig,
   load
 }
