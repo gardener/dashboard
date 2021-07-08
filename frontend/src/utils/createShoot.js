@@ -165,6 +165,22 @@ function getProviderTemplate (infrastructureKind) {
           kind: 'ControlPlaneConfig'
         }
       }
+    case 'hcloud':
+      return {
+        type: 'hcloud',
+        infrastructureConfig: {
+          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR
+          }
+        },
+        controlPlaneConfig: {
+          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+          loadBalancerProvider: 'provider'
+        }
+      }
   }
 }
 

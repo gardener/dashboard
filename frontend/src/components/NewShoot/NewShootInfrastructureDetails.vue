@@ -337,6 +337,10 @@ export default {
         vsphere: {
           visible: false,
           help: false
+        },
+        hcloud: {
+          visible: false,
+          help: false
         }
       },
       secretItemsBeforeAdd: undefined
