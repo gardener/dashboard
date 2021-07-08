@@ -94,6 +94,7 @@ describe('auth', function () {
   it('should redirect to authorization url without frontend redirectUrl', async function () {
     const redirectPath = '/'
     const redirectUri = head(oidc.redirect_uris)
+    const redirectOrigin = new URL(redirectUri).origin
 
     const res = await agent
       .get('/auth')
@@ -108,13 +109,14 @@ describe('auth', function () {
     const state = url.searchParams.get('state')
     expect(decodeState(state)).toEqual({
       redirectPath,
-      redirectUri
+      redirectOrigin
     })
   })
 
   it('should redirect to authorization url with frontend redirectUrl', async function () {
     const redirectPath = '/namespace/garden-foo/administration'
     const redirectUri = head(oidc.redirect_uris)
+    const redirectOrigin = new URL(redirectUri).origin
     const redirectUrl = new URL(redirectPath, redirectUri).toString()
 
     const res = await agent
@@ -129,7 +131,7 @@ describe('auth', function () {
     const state = url.searchParams.get('state')
     expect(decodeState(state)).toEqual({
       redirectPath,
-      redirectUri
+      redirectOrigin
     })
   })
 

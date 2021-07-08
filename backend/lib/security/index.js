@@ -107,23 +107,34 @@ function getIssuerClient (url = issuer) {
   return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
 }
 
+function getBackendRedirectUri (origin) {
+  return origin
+    ? new URL('/auth/callback', origin).toString()
+    : head(redirectUris)
+}
+
+function getFrontendRedirectUrl (redirectUrl) {
+  return redirectUrl
+    ? new URL(redirectUrl)
+    : new URL('/', head(redirectUris))
+}
+
 async function authorizationUrl (req, res) {
   const { query } = req
-  const redirectUrl = query.redirectUrl
-    ? new URL(query.redirectUrl)
-    : new URL('/', head(redirectUris))
-  const redirectPath = redirectUrl.pathname + redirectUrl.search
-  const redirectUri = new URL('/auth/callback', redirectUrl.origin).toString()
+  const frontendRedirectUrl = getFrontendRedirectUrl(query.redirectUrl)
+  const redirectPath = frontendRedirectUrl.pathname + frontendRedirectUrl.search
+  const redirectOrigin = frontendRedirectUrl.origin
+  const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const state = encodeState({
     redirectPath,
-    redirectUri
+    redirectOrigin
   })
   const client = await exports.getIssuerClient()
-  if (!includes(redirectUris, redirectUri)) {
+  if (!includes(redirectUris, backendRedirectUri)) {
     throw new BadRequest('The \'redirectUrl\' parameter must match a redirect URI in the settings')
   }
   return client.authorizationUrl({
-    redirect_uri: redirectUri,
+    redirect_uri: backendRedirectUri,
     state,
     scope
   })
@@ -171,15 +182,16 @@ async function authorizationCallback (req, res) {
   const parameters = { code }
   const {
     redirectPath,
-    redirectUri
+    redirectOrigin
   } = decodeState(state)
+  const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code'
   }
   const {
     id_token: token,
     expires_in: expiresIn
-  } = await client.callback(redirectUri, parameters, checks)
+  } = await client.callback(backendRedirectUri, parameters, checks)
   req.body = { token, expiresIn }
   await authorizeToken(req, res)
   return { redirectPath }
