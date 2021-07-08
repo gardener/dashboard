@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="primary"
                   ref="name"
                   v-model.trim="name"
-                  label="Secret Binding Name"
+                  label="Secret Name"
                   :error-messages="getErrorMessages('name')"
                   @input="$v.name.$touch()"
                   @blur="$v.name.$touch()"

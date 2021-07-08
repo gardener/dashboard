@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="text-subtitle-1">
-          Infrastructure Secret Bindings
+          Infrastructure Secrets
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="infrastructureSecretItems.length > 3"
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="text-subtitle-1">
-          DNS Secret Bindings
+          DNS Secrets
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="dnsSecretItems.length > 3"

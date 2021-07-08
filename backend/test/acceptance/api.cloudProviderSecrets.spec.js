@@ -23,15 +23,18 @@ describe('api', function () {
 
   describe('cloudProviderSecrets', function () {
     const namespace = 'garden-foo'
-    const name = 'foo-infra3'
-    const secretBinding = fixtures.secretbindings.get(namespace, name)
+    const infraName = 'foo-infra3'
+    const dnsName = 'foo-dns1'
+    const infraSecretBinding = fixtures.secretbindings.get(namespace, infraName)
+    const dnsSecretBinding = fixtures.secretbindings.get(namespace, dnsName)
     // project
     const project = fixtures.projects.getByNamespace(namespace)
     // user
     const id = project.spec.owner.name
     const user = fixtures.auth.createUser({ id })
     // cloudProfile
-    const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
+    const cloudProfileName = infraSecretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
+    const dnsProviderName = dnsSecretBinding.metadata.labels['gardener.cloud/dnsProviderName']
 
     it('should return three cloudprovider secrets', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -69,7 +72,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should create a cloudprovider secret', async function () {
+    it('should create a cloudprovider infrastructure secret', async function () {
       const metadata = {
         name: 'new-infra1',
         cloudProfileName
@@ -96,6 +99,33 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should create a cloudprovider dns secret', async function () {
+      const metadata = {
+        name: 'new-dns1',
+        dnsProviderName
+      }
+      const data = {
+        key: 'myKey',
+        secret: 'mySecret'
+      }
+
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/cloudprovider-secrets`)
+        .set('cookie', await user.cookie)
+        .send({ metadata, data })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
     it('should patch an own cloudprovider secret', async function () {
       const data = {
         key: 'myKey',
@@ -107,7 +137,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .put(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`)
+        .put(`/api/namespaces/${namespace}/cloudprovider-secrets/${infraName}`)
         .set('cookie', await user.cookie)
         .send({ data })
         .expect('content-type', /json/)
@@ -146,7 +176,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
       const res = await agent
-        .delete(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`)
+        .delete(`/api/namespaces/${namespace}/cloudprovider-secrets/${infraName}`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
