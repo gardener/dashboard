@@ -139,9 +139,9 @@ async function refreshAuthProviderConfig (input, options = {}) {
     .get('user')
     .value()
 
-  if (user['auth-provider']) {
-    const { name, config = {} } = user['auth-provider']
-    switch (name) {
+  const authProvider = user['auth-provider']
+  if (authProvider) {
+    switch (authProvider.name) {
       case 'gcp': {
         const {
           private_key: key,
@@ -153,14 +153,21 @@ async function refreshAuthProviderConfig (input, options = {}) {
           scope: ['https://www.googleapis.com/auth/cloud-platform'],
           eagerRefreshThresholdMillis: 5 * 60 * 1000
         })
-        gToken.expiresAt = new Date(config.expiry || '1970-01-01T00:00:00.000Z').getTime()
-        gToken.rawToken = {
-          access_token: config['access-token'],
-          token_type: 'Bearer'
+        authProvider.config = authProvider.config || {}
+        const {
+          'access-token': accessToken,
+          expiry = '1970-01-01T00:00:00.000Z'
+        } = authProvider.config
+        if (accessToken) {
+          gToken.expiresAt = new Date(expiry).getTime()
+          gToken.rawToken = {
+            access_token: accessToken,
+            token_type: 'Bearer'
+          }
         }
         await gToken.getToken()
-        config['access-token'] = gToken.accessToken
-        config.expiry = new Date(gToken.expiresAt).toISOString()
+        authProvider.config['access-token'] = gToken.accessToken
+        authProvider.config.expiry = new Date(gToken.expiresAt).toISOString()
         return yaml.safeDump(kubeconfig)
       }
     }
