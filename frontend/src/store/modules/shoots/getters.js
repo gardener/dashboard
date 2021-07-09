@@ -6,9 +6,6 @@
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
-import split from 'lodash/split'
-import some from 'lodash/some'
-import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
 import head from 'lodash/head'
 import orderBy from 'lodash/orderBy'
@@ -20,11 +17,10 @@ import semver from 'semver'
 
 import {
   getCreatedBy,
-  getProjectName,
   isShootStatusHibernated,
   isReconciliationDeactivated
 } from '@/utils'
-import { findItem } from './helper'
+import { findItem, parseSearch } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
@@ -40,7 +36,7 @@ export function getRawVal (rootGetters, item, column) {
     case 'createdBy':
       return getCreatedBy(metadata)
     case 'project':
-      return getProjectName(metadata)
+      return rootGetters.projectNameByNamespace(metadata)
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
@@ -150,38 +146,28 @@ export default {
     return state.initialNewShootResource
   },
   searchItems (state, getters, rootState, rootGetters) {
+    let searchQuery
+    let lastSearchString
+
     return (value, search, item) => {
       const searchableCustomFields = filter(rootGetters.shootCustomFieldList, ['searchable', true])
+      const values = [
+        getRawVal(rootGetters, item, 'name'),
+        getRawVal(rootGetters, item, 'infrastructure'),
+        getRawVal(rootGetters, item, 'seed'),
+        getRawVal(rootGetters, item, 'project'),
+        getRawVal(rootGetters, item, 'createdBy'),
+        getRawVal(rootGetters, item, 'purpose'),
+        getRawVal(rootGetters, item, 'k8sVersion'),
+        getRawVal(rootGetters, item, 'ticketLabels'),
+        ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
+      ]
 
-      const searchValue = split(search, ' ')
-      return some(searchValue, value => {
-        if (includes(getRawVal(rootGetters, item, 'name'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'infrastructure'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'seed'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'project'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'createdBy'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'purpose'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'k8sVersion'), value)) {
-          return true
-        }
-        if (includes(getRawVal(rootGetters, item, 'ticketLabels'), value)) {
-          return true
-        }
-
-        return some(searchableCustomFields, ({ key }) => includes(getRawVal(rootGetters, item, key), value))
-      })
+      if (search !== lastSearchString) {
+        lastSearchString = search
+        searchQuery = parseSearch(search)
+      }
+      return searchQuery.matches(values)
     }
   },
   sortItems (state, getters, rootState, rootGetters) {

@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { generateWorker, isZonedCluster } from '@/utils'
+import { isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
@@ -103,7 +103,8 @@ export default {
     ...mapGetters([
       'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion',
-      'cloudProfileByName'
+      'cloudProfileByName',
+      'generateWorker'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -122,6 +123,9 @@ export default {
       return findFreeNetworks(this.currentZonesNetworkConfiguration, this.existingWorkerCIDR, this.cloudProviderKind, this.allZones.length)
     },
     availableZones () {
+      if (!this.zonedCluster) {
+        return []
+      }
       if (this.isNewCluster) {
         return this.allZones
       }
@@ -173,7 +177,7 @@ export default {
       this.validateInput()
     },
     addWorker () {
-      const worker = generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
+      const worker = this.generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
     },

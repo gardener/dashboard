@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret" @input="onInput('alicloud')"></alicloud-dialog>
     <metal-dialog v-model="dialogState.metal.visible" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
     <vsphere-dialog v-model="dialogState.vsphere.visible" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
+    <hcloud-dialog v-model="dialogState.hcloud.visible" :secret="selectedSecret" @input="onInput('hcloud')"></hcloud-dialog>
   </div>
 </template>
 
@@ -24,6 +25,7 @@ import OpenstackDialog from '@/components/dialogs/SecretDialogOpenstack'
 import AlicloudDialog from '@/components/dialogs/SecretDialogAlicloud'
 import MetalDialog from '@/components/dialogs/SecretDialogMetal'
 import VsphereDialog from '@/components/dialogs/SecretDialogVSphere'
+import HcloudDialog from '@/components/dialogs/SecretDialogHCloud'
 
 export default {
   name: 'secret-dialog-wrapper',
@@ -34,7 +36,8 @@ export default {
     OpenstackDialog,
     AlicloudDialog,
     MetalDialog,
-    VsphereDialog
+    VsphereDialog,
+    HcloudDialog
   },
   props: {
     dialogState: {

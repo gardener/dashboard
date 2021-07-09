@@ -50,7 +50,11 @@ data:
     {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
-      redirect_uri: {{ required ".Values.oidc.redirectUri is required" .Values.oidc.redirectUri }}
+      redirect_uris:
+      {{- $protocol := ternary "http" "https" ( empty .Values.ingress.tls ) }}
+      {{- range .Values.ingress.hosts }}
+      - "{{ $protocol }}://{{ . }}/auth/callback"
+      {{- end }}
       {{- if .Values.oidc.scope }}
       scope: {{ .Values.oidc.scope }}
       {{- else }}

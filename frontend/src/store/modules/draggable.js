@@ -16,7 +16,7 @@ const getters = {
 
 // actions
 const actions = {
-  setDraggingDragAndDropId: ({ commit, rootState }, draggingDragAndDropId) => {
+  setDraggingDragAndDropId: ({ commit, state }, draggingDragAndDropId) => {
     commit('SET_DRAGGING_DRAG_AND_DROP_ID', draggingDragAndDropId)
     return state.draggingDragAndDropId
   }

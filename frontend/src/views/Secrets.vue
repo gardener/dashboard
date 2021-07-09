@@ -145,6 +145,10 @@ export default {
           visible: false,
           help: false
         },
+        hcloud: {
+          visible: false,
+          help: false
+        },
         deleteConfirm: false,
         speedDial: false
       },
@@ -311,6 +315,13 @@ export default {
             {
               label: 'Access Key ID',
               value: secretData.accessKeyID
+            }
+          ]
+        case 'hcloud':
+          return [
+            {
+              label: 'Hetzner Cloud Token',
+              value: secretData.hcloudToken
             }
           ]
       }

@@ -78,7 +78,7 @@ import HintColorizer from '@/components/HintColorizer'
 
 import asyncRef from '@/mixins/asyncRef'
 
-import { getValidationErrors, transformHtml, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
+import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 
 const Purpose = () => import('@/components/Purpose')
@@ -137,7 +137,8 @@ export default {
       'sortedKubernetesVersions',
       'defaultKubernetesVersionForCloudProfileName',
       'shootByNamespaceAndName',
-      'projectList'
+      'projectList',
+      'kubernetesVersionIsNotLatestPatch'
     ]),
     sortedKubernetesVersionsList () {
       return filter(this.sortedKubernetesVersions(this.cloudProfileName), ({ isExpired }) => {
@@ -162,7 +163,7 @@ export default {
       return join(hintText, ' / ')
     },
     versionIsNotLatestPatch () {
-      return k8sVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)
+      return this.kubernetesVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)
     },
     sla () {
       return this.cfg.sla || {}

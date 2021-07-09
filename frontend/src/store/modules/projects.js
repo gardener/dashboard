@@ -22,13 +22,13 @@ const getters = {
 
 // actions
 const actions = {
-  async getAll ({ commit, rootState }) {
+  async getAll ({ commit, state }) {
     const res = await getProjects()
     const list = res.data
     commit('RECEIVE', list)
     return state.all
   },
-  async create ({ commit, rootState }, { metadata, data }) {
+  async create ({ commit }, { metadata, data }) {
     const res = await createProject({ data: { metadata, data } })
     commit('ITEM_PUT', res.data)
     return res.data
@@ -45,7 +45,7 @@ const actions = {
     commit('ITEM_PUT', res.data)
     return res.data
   },
-  async delete ({ commit, rootState }, { metadata }) {
+  async delete ({ commit, state }, { metadata }) {
     const namespace = metadata.namespace
     await deleteProject({ namespace })
     commit('ITEM_DELETED', metadata)

@@ -1352,6 +1352,7 @@ __metadata:
     "@vue/test-utils": ^1.1.4
     ansi-html: ^0.0.7
     babel-eslint: ^10.1.0
+    circular-dependency-plugin: ^5.2.2
     clipboard: ^2.0.6
     codemirror: ^5.52.2
     core-js: ^3.6.5
@@ -5140,6 +5141,15 @@ __metadata:
     inherits: ^2.0.1
     safe-buffer: ^5.0.1
   checksum: ec80001ec91dbb7c5c08facc00ffc9c75fed7abd6d720c7a9c62c260aa2e5cb2655c183e011b50b8b711f755b1753c7fdd2ca44c091ee78d81c377ca74ed83c9
+  languageName: node
+  linkType: hard
+
+"circular-dependency-plugin@npm:^5.2.2":
+  version: 5.2.2
+  resolution: "circular-dependency-plugin@npm:5.2.2"
+  peerDependencies:
+    webpack: ">=4.0.1"
+  checksum: 1f6063947017b6b4e4c2111cd097a5bd33e46a20beab07717b2a378641f49c9a5627f89c3e1afee01b032d9758865f61e1c0c11cfc3acaa81068ce900c1cdb81
   languageName: node
   linkType: hard
 

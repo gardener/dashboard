@@ -375,8 +375,8 @@ function getContainerConfigFromBody ({ container }) {
 }
 
 function getConfigFromBody (body) {
-  const config = _.pick(body, ['node', 'privileged', 'hostPID', 'hostNetwork', 'container'])
-  config.container = _.pick(config.container, ['image', 'command', 'args'])
+  const config = _.pick(body, ['node', 'hostPID', 'hostNetwork', 'container'])
+  config.container = _.pick(config.container, ['image', 'command', 'args', 'privileged'])
   return config
 }
 

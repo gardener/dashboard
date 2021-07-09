@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`identity configmap should render the template w/ defaults values 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": Object {
+    "name": "identity-configmap",
+    "namespace": "garden",
+  },
+}
+`;
+
+exports[`identity configmap should render the template w/ defaults values 2`] = `
+Object {
+  "connectors": Array [
+    Object {
+      "config": Object {
+        "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
+        "emailAttr": "email",
+        "entityIssuer": "identity.ingress.example.org",
+        "groupsAttr": "groups",
+        "nameIDPolicyFormat": "unspecified",
+        "redirectURI": "https://identity.ingress.example.org/callback",
+        "ssoIssuer": "saml.example.org",
+        "ssoURL": "https://saml.example.org/sso",
+        "usernameAttr": "name",
+      },
+      "id": "saml",
+      "name": "SAML",
+      "type": "saml",
+    },
+  ],
+  "enablePasswordDB": false,
+  "issuer": "https://identity.ingress.example.org",
+  "oauth2": Object {
+    "responseTypes": Array [
+      "token",
+      "code",
+      "id_token",
+    ],
+    "skipApprovalScreen": true,
+  },
+  "staticClients": Array [
+    Object {
+      "id": "dashboard",
+      "name": "Gardener Dashboard",
+      "redirectURIs": Array [
+        "https://dashboard.garden.example.org/auth/callback",
+        "https://dashboard.ingress.garden.example.org/auth/callback",
+        "http://localhost:8080/auth/callback",
+      ],
+      "secret": "sHq4vLoiQcIWbO3h",
+    },
+    Object {
+      "id": "kube-kubectl",
+      "name": "Kubectl",
+      "public": true,
+      "secret": "if6ji0dTFE4rQfj8",
+      "trustedPeers": Array [
+        "dashboard",
+      ],
+    },
+  ],
+  "staticPasswords": Array [],
+  "storage": Object {
+    "config": Object {
+      "inCluster": true,
+    },
+    "type": "kubernetes",
+  },
+  "web": Object {
+    "allowedOrigins": Array [
+      "https://dashboard.garden.example.org",
+      "https://dashboard.ingress.garden.example.org",
+      "http://localhost:8080",
+    ],
+    "http": "0.0.0.0:5556",
+  },
+}
+`;

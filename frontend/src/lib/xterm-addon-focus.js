@@ -2,22 +2,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import store from '../store'
-
 export class FocusAddon {
-  constructor (uuid) {
+  constructor (uuid, store) {
     this.uuid = uuid
+    this.store = store
   }
 
   activate (terminal) {
     terminal.textarea.onfocus = () => {
-      store.commit('SET_FOCUSED_ELEMENT_ID', this.uuid)
+      this.store.commit('SET_FOCUSED_ELEMENT_ID', this.uuid)
       if (typeof this.onFocus === 'function') {
         this.onFocus()
       }
     }
     terminal.textarea.onblur = () => {
-      store.commit('UNSET_FOCUSED_ELEMENT_ID', this.uuid)
+      this.store.commit('UNSET_FOCUSED_ELEMENT_ID', this.uuid)
       if (typeof this.onBlur === 'function') {
         this.onBlur()
       }

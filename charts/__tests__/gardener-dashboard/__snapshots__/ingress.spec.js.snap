@@ -22,7 +22,22 @@ Object {
   "spec": Object {
     "rules": Array [
       Object {
-        "host": "gardener.garden.example.org",
+        "host": "dashboard.garden.example.org",
+        "http": Object {
+          "paths": Array [
+            Object {
+              "backend": Object {
+                "serviceName": "gardener-dashboard-service",
+                "servicePort": 8080,
+              },
+              "path": "/",
+              "pathType": "Prefix",
+            },
+          ],
+        },
+      },
+      Object {
+        "host": "dashboard.ingress.garden.example.org",
         "http": Object {
           "paths": Array [
             Object {
@@ -40,7 +55,8 @@ Object {
     "tls": Array [
       Object {
         "hosts": Array [
-          "gardener.garden.example.org",
+          "dashboard.garden.example.org",
+          "dashboard.ingress.garden.example.org",
         ],
         "secretName": "other-gardener-dashboard-tls",
       },

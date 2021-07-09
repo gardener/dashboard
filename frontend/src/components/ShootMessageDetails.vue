@@ -68,10 +68,10 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
+                v-for="({description, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
-                :prominent="!!userError ? true : false"
+                :prominent="!!userError"
               >
                 <h4 v-if="userError">Action required</h4>
                 <span class="wrap">

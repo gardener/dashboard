@@ -134,7 +134,6 @@ import CopyBtn from '@/components/CopyBtn'
 import GMessage from '@/components/GMessage'
 import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
-import { getProjectName } from '@/utils'
 import { getShootSchemaDefinition } from '@/utils/api'
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import download from 'downloadjs'
@@ -211,7 +210,8 @@ export default {
       'darkTheme'
     ]),
     ...mapGetters([
-      'canPatchShoots'
+      'canPatchShoots',
+      'projectNameByNamespace'
     ]),
     value () {
       let data = cloneDeep(this.shootItem)
@@ -262,7 +262,7 @@ export default {
     getQualifiedName () {
       const name = get(this, 'value.metadata.name', 'unnamed')
       const namespace = this.namespace
-      const projectName = getProjectName({ namespace })
+      const projectName = this.projectNameByNamespace({ namespace })
       return `shoot--${projectName}--${name}.yaml`
     },
     undo () {
