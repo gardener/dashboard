@@ -81,6 +81,8 @@ export default {
           return require('@/assets/flatcar.svg')
         case 'memoryone':
           return require('@/assets/vsmp-memoryone.svg')
+        case 'hcloud':
+          return require('@/assets/hcloud.svg')
       }
       return undefined
     },

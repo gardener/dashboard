@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <alicloud-dialog v-if="visibleDialog==='alicloud'" v-model="visibleDialogState" :secret="selectedSecret" vendor="alicloud" @input="onInput('alicloud')"></alicloud-dialog>
     <metal-dialog v-if="visibleDialog==='metal'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
     <vsphere-dialog v-if="visibleDialog==='vsphere'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
+    <hcloud-dialog v-if="visibleDialog==='hcloud'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('hcloud')"></hcloud-dialog>
 
     <aws-dialog v-if="visibleDialog==='aws-route53'" v-model="visibleDialogState" :secret="selectedSecret" vendor="aws-route53" @input="onInput('aws-route53')"></aws-dialog>
     <azure-dialog v-if="visibleDialog==='azure-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="azure-dns" @input="onInput('azure-dns')"></azure-dialog>
@@ -39,6 +40,7 @@ import CloudflareDialog from '@/components/dialogs/SecretDialogCloudflare'
 import InfobloxDialog from '@/components/dialogs/SecretDialogInfoblox'
 import NetlifyDialog from '@/components/dialogs/SecretDialogNetlify'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
+import HcloudDialog from '@/components/dialogs/SecretDialogHCloud'
 
 export default {
   name: 'secret-dialog-wrapper',
@@ -53,6 +55,7 @@ export default {
     CloudflareDialog,
     InfobloxDialog,
     NetlifyDialog,
+    HcloudDialog,
     DeleteDialog
   },
   data () {

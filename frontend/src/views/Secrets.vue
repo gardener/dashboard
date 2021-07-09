@@ -442,6 +442,13 @@ export default {
               value: secretData.metalAPIURL
             }
           ]
+        case 'hcloud':
+          return [
+            {
+              label: 'Hetzner Cloud Token',
+              value: secretData.hcloudToken
+            }
+          ]
       }
     },
     getSecretDetailsDns (secret) {

@@ -148,6 +148,11 @@ export default {
             ],
             Effect: 'Allow',
             Resource: '*'
+          },
+          {
+            Action: 'ros:*',
+            Effect: 'Allow',
+            Resource: '*'
           }
         ],
         Version: '1'
