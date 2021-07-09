@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { pick } = require('lodash')
+const { pick, head } = require('lodash')
 const assert = require('assert').strict
 const setCookieParser = require('set-cookie-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
@@ -15,7 +15,8 @@ const security = require('../../lib/security')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
-  COOKIE_TOKEN
+  COOKIE_TOKEN,
+  decodeState
 } = security
 
 const ZERO_DATE = new Date(0)
@@ -26,16 +27,21 @@ class Client {
     user,
     issuer,
     client_id: clientId,
-    client_secret: clientSecret
+    client_secret: clientSecret,
+    redirect_uris: redirectUris,
+    response_types: responseTypes
   }) {
     this.user = user
     this.issuer = issuer
     this.clientId = clientId
     this.clientSecret = clientSecret
+    this.redirectUris = redirectUris
+    this.responseTypes = responseTypes
   }
 
   authorizationUrl ({
     redirect_uri: redirectUri,
+    state,
     scope
   }) {
     const url = new URL(this.issuer)
@@ -43,8 +49,9 @@ class Client {
     const params = url.searchParams
     params.append('client_id', this.clientId)
     params.append('redirect_uri', redirectUri)
+    params.append('state', state)
     params.append('scope', scope)
-    params.append('response_type', 'code')
+    params.append('response_type', head(this.responseTypes))
     return url.toString()
   }
 
@@ -84,7 +91,11 @@ describe('auth', function () {
     getIssuerClientStub = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
   })
 
-  it('should redirect to authorization url', async function () {
+  it('should redirect to authorization url without frontend redirectUrl', async function () {
+    const redirectPath = '/'
+    const redirectUri = head(oidc.redirect_uris)
+    const redirectOrigin = new URL(redirectUri).origin
+
     const res = await agent
       .get('/auth')
       .redirects(0)
@@ -93,8 +104,35 @@ describe('auth', function () {
     expect(getIssuerClientStub).toBeCalledTimes(1)
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('client_id')).toBe(oidc.client_id)
-    expect(url.searchParams.get('redirect_uri')).toBe(oidc.redirect_uri)
+    expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
     expect(url.searchParams.get('scope')).toBe(oidc.scope)
+    const state = url.searchParams.get('state')
+    expect(decodeState(state)).toEqual({
+      redirectPath,
+      redirectOrigin
+    })
+  })
+
+  it('should redirect to authorization url with frontend redirectUrl', async function () {
+    const redirectPath = '/namespace/garden-foo/administration'
+    const redirectUri = head(oidc.redirect_uris)
+    const redirectOrigin = new URL(redirectUri).origin
+    const redirectUrl = new URL(redirectPath, redirectUri).toString()
+
+    const res = await agent
+      .get('/auth')
+      .query({ redirectUrl })
+      .redirects(0)
+      .expect(302)
+
+    expect(getIssuerClientStub).toBeCalledTimes(1)
+    const url = new URL(res.headers.location)
+    expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
+    const state = url.searchParams.get('state')
+    expect(decodeState(state)).toEqual({
+      redirectPath,
+      redirectOrigin
+    })
   })
 
   it('should fail to redirect to authorization url', async function () {

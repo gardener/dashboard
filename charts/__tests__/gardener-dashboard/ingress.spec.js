@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 //
 // SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //
@@ -8,7 +7,13 @@
 'use strict'
 
 const { basename } = require('path')
-const { helm, helper } = fixtures
+const {
+  helm,
+  helper,
+  'gardener-dashboard': {
+    defaults
+  }
+} = fixtures
 const { getPrivateKey, getCertificate } = helper
 
 const chart = basename(__dirname)
@@ -63,7 +68,7 @@ describe('gardener-dashboard', function () {
       expect(ingress.spec.tls).toHaveLength(1)
       expect(ingress.spec.tls[0]).toEqual({
         secretName: tlsSecretName,
-        hosts: ['gardener.garden.example.org']
+        hosts: defaults.ingress.hosts
       })
 
       expect(tlsSecret).toBeFalsy()

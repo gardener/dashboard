@@ -19,7 +19,6 @@ const environmentVariableDefinitions = {
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
-  OIDC_REDIRECT_URI: 'oidc.redirect_uri',
   OIDC_CA: 'oidc.ca',
   GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
@@ -94,11 +93,16 @@ module.exports = {
 
     // When OIDC is configured, some more configuration is required
     if (config.oidc) {
+      const redirectUri = _.get(config, 'oidc.redirect_uri')
+      const redirectUris = _.get(config, 'oidc.redirect_uris')
+      if (redirectUri && _.isEmpty(redirectUris)) {
+        _.set(config, 'oidc.redirect_uris', [redirectUri])
+      }
       requiredConfigurationProperties.push(
         'oidc.issuer',
         'oidc.client_id',
         'oidc.client_secret',
-        'oidc.redirect_uri'
+        'oidc.redirect_uris'
       )
     }
 

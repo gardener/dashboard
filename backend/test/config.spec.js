@@ -68,13 +68,9 @@ describe('config', function () {
     })
 
     describe('#loadConfig', function () {
-      const requiredEnvironmentVariables = {
+      const environmentVariables = {
         API_SERVER_URL: 'apiServerUrl',
-        SESSION_SECRET: 'secret', // pragma: whitelist secret
-        OIDC_ISSUER: 'issuer',
-        OIDC_CLIENT_ID: 'client_id',
-        OIDC_CLIENT_SECRET: 'client_secret', // pragma: whitelist secret
-        OIDC_REDIRECT_URI: 'redirect_uri'
+        SESSION_SECRET: 'secret'
       }
 
       beforeEach(() => {
@@ -84,7 +80,7 @@ describe('config', function () {
       it('should return the config in test environment', function () {
         const env = Object.assign({
           NODE_ENV: 'test'
-        }, requiredEnvironmentVariables)
+        }, environmentVariables)
 
         const config = gardener.loadConfig(undefined, { env })
         const defaults = gardener.getDefaults({ env })
@@ -94,7 +90,7 @@ describe('config', function () {
       it('should return the config in production environment', function () {
         const env = Object.assign({
           NODE_ENV: 'production'
-        }, requiredEnvironmentVariables)
+        }, environmentVariables)
 
         const filename = '/etc/gardener/1/config.yaml'
         const config = gardener.loadConfig(filename, { env })
@@ -109,7 +105,7 @@ describe('config', function () {
           NODE_ENV: 'production',
           PORT: '3456',
           LOG_LEVEL: 'error'
-        }, requiredEnvironmentVariables)
+        }, environmentVariables)
 
         const filename = '/etc/gardener/2/config.yaml'
         const config = gardener.loadConfig(filename, { env })
@@ -122,7 +118,7 @@ describe('config', function () {
       it('should return the config in development environment', function () {
         const env = Object.assign({
           NODE_ENV: 'development'
-        }, requiredEnvironmentVariables)
+        }, environmentVariables)
 
         const filename = '/etc/gardener/3/config.yaml'
         const config = gardener.loadConfig(filename, { env })
@@ -134,11 +130,15 @@ describe('config', function () {
 
       it('should return the config with oidc.ca overridden by environment variables', function () {
         const env = Object.assign({
+          OIDC_CLIENT_ID: 'client_id',
+          OIDC_CLIENT_SECRET: 'client_secret',
           OIDC_CA: 'ca'
-        }, requiredEnvironmentVariables)
+        }, environmentVariables)
 
         const filename = '/etc/gardener/4/config.yaml'
         const config = gardener.loadConfig(filename, { env })
+        expect(config.oidc.client_id).toBe('client_id')
+        expect(config.oidc.client_secret).toBe('client_secret')
         expect(config.oidc.ca).toBe('ca')
       })
     })

@@ -84,8 +84,6 @@ oidc:
   # caSecretKeyRef:
   #   name: oidc-ca-secret-name
   #   key: ca.crt
-  # # redirectUri is the endpoint receiving the OTAC from the OpenID provider after successful login
-  # redirectUri: https://dashboard.ingress.example.org/auth/callback
   # # configuration for kubeconfig download required by kubelogin
   # public:
   #  # clientId is the identifier of the public oidc client use by kubelogin

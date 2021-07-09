@@ -7,7 +7,13 @@
 'use strict'
 
 const releaseName = 'identity'
-const defaults = {}
+const defaults = {
+  dashboardOrigins: [
+    'https://dashboard.garden.example.org',
+    'https://dashboard.ingress.garden.example.org',
+    'http://localhost:8080'
+  ]
+}
 
 module.exports = {
   releaseName,

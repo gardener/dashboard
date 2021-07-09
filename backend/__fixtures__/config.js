@@ -37,7 +37,9 @@ const defaultConfig = {
     ca,
     client_id: 'dashboard',
     client_secret: toHex('dashboard-secret'),
-    redirect_uri: 'http://localhost:8080/auth/callback',
+    redirect_uris: [
+      'http://localhost:8080/auth/callback'
+    ],
     scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl',
     clockTolerance: 42,
     public: {
@@ -123,7 +125,7 @@ configMap.set('/etc/gardener/3/config.yaml', {
 
 configMap.set('/etc/gardener/4/config.yaml', {
   oidc: {
-    ca
+    ...defaultConfig.oidc
   }
 })
 
