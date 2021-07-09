@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         :updateOSMaintenance="updateOSMaintenance"
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
-        :kubernetesVersion="kubernetesVersion"
+        :kubernetes-version="kubernetesVersion"
         @valid="onWorkerValid">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
