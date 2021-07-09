@@ -691,6 +691,7 @@ const getters = {
   sortedDnsProviderList (state, getters) {
     const supportedProviderTypes = ['aws-route53', 'azure-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
     const dnsProviderList = getters['gardenerExtensions/dnsProviderList']
+    // filter and sort
     return compact(map(supportedProviderTypes, poviderType => {
       return find(dnsProviderList, ['type', poviderType])
     }))
