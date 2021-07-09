@@ -120,7 +120,7 @@ function cleanKubeconfig (input) {
   return cleanConfig(parseKubeconfig(input))
 }
 
-async function refreshAuthProviderConfig (input, options = {}) {
+async function refreshAuthProviderConfig (input, options) {
   const kubeconfig = parseKubeconfig(input)
   const {
     'current-context': currentContext,
