@@ -126,7 +126,7 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(cleanKubeconfigSpy).toBeCalledTimes(2)
+      expect(cleanKubeconfigSpy).toBeCalledTimes(1)
 
       expect(res.body).toMatchSnapshot()
     })

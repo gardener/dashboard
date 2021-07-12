@@ -10,7 +10,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, refreshAuthProviderConfig } = require('../lib')
+const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig } = require('../lib')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
 
@@ -31,6 +31,10 @@ describe('kube-config', () => {
 
   beforeEach(() => {
     jest.spyOn(fs, 'readFileSync')
+  })
+
+  afterEach(() => {
+    fs.readFileSync.mockRestore()
   })
 
   describe('#load', () => {
@@ -274,19 +278,27 @@ describe('kube-config', () => {
   })
 
   describe('#getInCluster', () => {
-    it('should fail to load in cluster config', () => {
-      fs.readFileSync
-        .mockReturnValueOnce(token)
-        .mockReturnValue()
+    it('should fail with "kubernetes service endpoint not defined"', () => {
       expect(() => getInCluster()).toThrow(/kubernetes service endpoint not defined$/)
-      expect(() => getInCluster({
-        KUBERNETES_SERVICE_HOST: server.hostname,
-        KUBERNETES_SERVICE_PORT: server.port
-      })).toThrow(/serviceaccount certificate authority not found$/)
+    })
+
+    it('should fail with "serviceaccount token not found"', () => {
+      fs.readFileSync
+        .mockReturnValueOnce(null)
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
       })).toThrow(/serviceaccount token not found$/)
+    })
+
+    it('should fail with "serviceaccount certificate authority not found"', () => {
+      fs.readFileSync
+        .mockReturnValueOnce(token)
+        .mockReturnValueOnce(null)
+      expect(() => getInCluster({
+        KUBERNETES_SERVICE_HOST: server.hostname,
+        KUBERNETES_SERVICE_PORT: server.port
+      })).toThrow(/serviceaccount certificate authority not found$/)
     })
   })
 
@@ -367,11 +379,11 @@ describe('kube-config', () => {
     })
 
     it('should refresh an existing auth-provider token', async () => {
-      const kubeconfigYaml = await refreshAuthProviderConfig(input, credentials)
+      const kubeconfig = parseKubeconfig(input)
+      await kubeconfig.refreshAuthProviderConfig(credentials)
       expect(mockGetToken).toBeCalledTimes(1)
-      const kubeconfig = yaml.safeLoad(kubeconfigYaml)
       expect(kubeconfig.users).toHaveLength(1)
-      const authProvider = kubeconfig.users[0].user['auth-provider']
+      const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.name).toBe('gcp')
       expect(authProvider.config['access-token']).toBe('valid-access-token')
       expect(new Date(authProvider.config.expiry).getTime()).toBeGreaterThan(Date.now())
@@ -379,19 +391,20 @@ describe('kube-config', () => {
 
     it('should create an auth-provider token', async () => {
       delete input.users[0].user['auth-provider'].config
-      const kubeconfigYaml = await refreshAuthProviderConfig(input, credentials)
+      const kubeconfig = parseKubeconfig(input)
+      await kubeconfig.refreshAuthProviderConfig(credentials)
       expect(mockGetToken).toBeCalledTimes(1)
-      const kubeconfig = yaml.safeLoad(kubeconfigYaml)
       expect(kubeconfig.users).toHaveLength(1)
-      const authProvider = kubeconfig.users[0].user['auth-provider']
+      const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
     })
 
     it('should passthrough input without an auth-provider', async () => {
       delete input.users[0].user['auth-provider']
-      const kubeconfigYaml = await refreshAuthProviderConfig(input, credentials)
+      const kubeconfig = parseKubeconfig(input)
+      await kubeconfig.refreshAuthProviderConfig(credentials)
       expect(mockGetToken).toBeCalledTimes(0)
-      expect(kubeconfigYaml).toBe(input)
+      expect(kubeconfig.toJSON()).toMatchObject(input)
     })
   })
 })

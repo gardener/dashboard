@@ -16,7 +16,7 @@ const debug = require('./debug')
 const resources = require('./resources')
 const nonResourceEndpoints = require('./nonResourceEndpoints')
 
-const { fromKubeconfig, refreshAuthProviderConfig } = require('@gardener-dashboard/kube-config')
+const { fromKubeconfig, parseKubeconfig } = require('@gardener-dashboard/kube-config')
 
 const cluster = Symbol('cluster')
 
@@ -69,19 +69,23 @@ class Client {
     const secret = await this.getSecret({ name, namespace })
     const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
     if (!kubeconfigBase64) {
-      throw NotFound('No kubeconfig found in secret')
+      throw NotFound('No "kubeconfig" found in secret')
     }
-    let kubeconfigYaml = decodeBase64(kubeconfigBase64)
+    const kubeconfig = parseKubeconfig(decodeBase64(kubeconfigBase64))
+    const authProviderName = _.get(kubeconfig, 'currentUser.auth-provider.name')
     const serviceaccountJsonBase64 = _.get(secret, 'data["serviceaccount.json"]')
+    if (authProviderName === 'gcp' && !serviceaccountJsonBase64) {
+      throw NotFound('No "serviceaccount.json" found in secret for gcp authentication provider')
+    }
     if (serviceaccountJsonBase64) {
       try {
         const credentials = JSON.parse(decodeBase64(serviceaccountJsonBase64))
-        kubeconfigYaml = await refreshAuthProviderConfig(kubeconfigYaml, credentials)
+        await kubeconfig.refreshAuthProviderConfig(credentials)
       } catch (err) {
         logger.warn(`Failed to refresh auth-provider config of kubeconfig secret "${name}" in namespace "${namespace}"`)
       }
     }
-    return kubeconfigYaml
+    return kubeconfig
   }
 
   async createKubeconfigClient (secretRef) {

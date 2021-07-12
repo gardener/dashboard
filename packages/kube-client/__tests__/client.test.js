@@ -16,6 +16,7 @@ describe('kube-client', () => {
     const bearer = 'bearer'
     const namespace = 'namespace'
     const name = 'name'
+    const server = 'server'
 
     let testClient
     let getSecretStub
@@ -31,19 +32,31 @@ describe('kube-client', () => {
     })
 
     it('should read a kubeconfig from a secret', async () => {
+      const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
       getSecretStub.mockReturnValue({
         data: {
-          kubeconfig: Buffer.from('foo').toString('base64')
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
         }
       })
       const kubeconfig = await testClient.getKubeconfig({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
-      expect(kubeconfig).toBe('foo')
+      expect(kubeconfig.currentUser.token).toBe(bearer)
+      expect(kubeconfig.currentCluster.server).toBe(server)
     })
 
-    it('should not find a kubeconfig in the secret', async () => {
+    it('should not find a "kubeconfig" in the secret', async () => {
       getSecretStub.mockReturnValue({
         data: {}
+      })
+      await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
+    })
+
+    it('should not find a "serviceaccount.json" in the secret', async () => {
+      const testKubeconfig = fixtures.helper.createTestKubeconfig({ 'auth-provider': { name: 'gcp' } })
+      getSecretStub.mockReturnValue({
+        data: {
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
+        }
       })
       await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
     })

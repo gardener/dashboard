@@ -808,17 +808,17 @@ Object {
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": "apiVersion: v1
 kind: Config
-clusters:
-  - name: shoot--foo--barShoot
-    cluster:
-      server: 'https://api.barShoot.foo.shoot.cluster'
-      certificate-authority-data: Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=
+current-context: shoot--foo--barShoot
 contexts:
   - name: shoot--foo--barShoot
     context:
       cluster: shoot--foo--barShoot
       user: shoot--foo--barShoot
-current-context: shoot--foo--barShoot
+clusters:
+  - name: shoot--foo--barShoot
+    cluster:
+      server: 'https://api.barShoot.foo.shoot.cluster'
+      certificate-authority-data: Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=
 users:
   - name: shoot--foo--barShoot
     user:
