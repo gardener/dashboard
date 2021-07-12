@@ -441,6 +441,7 @@ const getters = {
         return map(versions, ({ version, expirationDate, cri, classification }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
           const name = machineImage.name
+          const isExpired = expirationDate && moment().isAfter(expirationDate)
 
           return {
             key: name + '/' + version,
@@ -449,9 +450,9 @@ const getters = {
             cri,
             classification,
             isPreview: classification === 'preview',
-            isSupported: classification === 'supported',
+            isSupported: !isExpired && (!classification || classification === 'supported'),
             isDeprecated: classification === 'deprecated',
-            isExpired: expirationDate && moment().isAfter(expirationDate),
+            isExpired,
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,
@@ -821,12 +822,13 @@ const getters = {
       })
       return map(validVersions, version => {
         const classification = version.classification
+        const isExpired = version.expirationDate && moment().isAfter(version.expirationDate)
         return {
           ...version,
           isPreview: classification === 'preview',
-          isSupported: classification === 'supported',
+          isSupported: !isExpired && (!classification || classification === 'supported'),
           isDeprecated: classification === 'deprecated',
-          isExpired: version.expirationDate && moment().isAfter(version.expirationDate),
+          isExpired,
           expirationDateString: getDateFormatted(version.expirationDate)
         }
       })
