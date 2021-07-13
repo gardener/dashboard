@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
           </p>
           <p>
             You should consider the
-            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank">
+            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" rel="noopener">
               Kubernetes release notes
               <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
             </a>
