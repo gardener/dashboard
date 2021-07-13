@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-list>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
-      <v-btn text color="primary" :href="addCommentLink" target="_blank" rel="noopener" title="Add Comment">
+      <v-btn text color="primary" :href="sanitizeUrl(addCommentLink)" target="_blank" rel="noopener" title="Add Comment">
         Add Comment
         <v-icon color="anchor" class="link-icon pl-2">mdi-open-in-new</v-icon>
       </v-btn>
