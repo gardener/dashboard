@@ -278,7 +278,7 @@ SPDX-License-Identifier: Apache-2.0
                       <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
                         My Account
                       </router-link>
-                      to download the <tt>kubeconfig</tt> for this project.
+                      to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                     </v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>

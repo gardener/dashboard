@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
-                  <v-list-item-subtitle class="line-clamp-2">Personalized command line interface access (requires <tt>kubelogin</tt> kubectl plugin)</v-list-item-subtitle>
+                  <v-list-item-subtitle class="line-clamp-2">Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
@@ -121,19 +121,19 @@ SPDX-License-Identifier: Apache-2.0
                 <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
                   <v-card-text class="pt-0">
                     <div>
-                      The downloaded <tt>kubeconfig</tt> will initiate
+                      The downloaded <span class="font-family-monospace">kubeconfig</span> will initiate
                       <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
                         OIDC
                       </external-link>
-                      authentication via <tt>kubelogin</tt>.
-                      If not already done, please install <tt>kubelogin</tt>
+                      authentication via <span class="font-family-monospace">kubelogin</span>.
+                      If not already done, please install <span class="font-family-monospace">kubelogin</span>
                       according to the
                       <external-link url="https://github.com/int128/kubelogin#setup">
                         setup instructions
                       </external-link>.
-                      For more information please refer to the <tt>kubelogin</tt> documentation.
+                      For more information please refer to the <span class="font-family-monospace">kubelogin</span> documentation.
                       <br>
-                      Below you can configure and preview the <tt>kubeconfig</tt> file before download.
+                      Below you can configure and preview the <span class="font-family-monospace">kubeconfig</span> file before download.
                     </div>
                     <v-tabs slider-color="grey lighten-1" class="mt-2 elevation-1">
                       <v-tab>Configure</v-tab>

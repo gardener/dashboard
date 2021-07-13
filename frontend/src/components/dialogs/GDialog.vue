@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           </slot>
           <template v-if="$slots.affectedObjectName">
             &nbsp;
-            <tt class="font-weight-bold"><slot name="affectedObjectName"></slot></tt>
+            <span class="font-family-monospace font-weight-bold"><slot name="affectedObjectName"></slot></span>
           </template>
         </v-toolbar-title>
       </v-toolbar>

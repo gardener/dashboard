@@ -22,12 +22,12 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:message>
       <div key="confirm-message" style="min-height:100px">
         <div>
-          <span v-if="needsUpdate">To access the garden cluster the <tt>{{serviceAccountName}}</tt> service account requires the <tt>admin</tt> role.</span>
+          <span v-if="needsUpdate">To access the garden cluster the <span class="font-family-monospace">{{serviceAccountName}}</span> service account requires the <span class="font-family-monospace">admin</span> role.</span>
           <span v-else>To access the garden cluster a dedicated service account is required.</span>
         </div>
         <div>
-           <span v-if="needsUpdate">Do you want grant the <tt>admin</tt> role to the service account?</span>
-           <span v-else>Do you want to create the <tt>{{serviceAccountName}}</tt> service account and add it as member with <tt>admin</tt> role to this project?</span>
+           <span v-if="needsUpdate">Do you want grant the <span class="font-family-monospace">admin</span> role to the service account?</span>
+           <span v-else>Do you want to create the <span class="font-family-monospace">{{serviceAccountName}}</span> service account and add it as member with <span class="font-family-monospace">admin</span> role to this project?</span>
           <v-list>
             <v-list-item>
               <v-list-item-content>

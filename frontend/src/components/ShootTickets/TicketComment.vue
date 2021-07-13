@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-list-item>
     <v-list-item-avatar v-if="avatarUrl" class="align-self-start">
       <v-avatar size="40px">
-        <img :src="avatarUrl" :title="login"/>
+        <img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`" />
       </v-avatar>
     </v-list-item-avatar>
     <v-list-item-icon v-else class="align-self-start">

@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
             before upgrading your cluster.
           </p>
           <p>
-            Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
+            Type <strong>{{shootName}}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           </p>
           <i class="warning--text">This action cannot be undone.</i>
         </template>
