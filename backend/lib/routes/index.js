@@ -19,7 +19,7 @@ module.exports = {
   '/gardener-extensions': require('./gardenerExtensions'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/cloudprovider-secrets': require('./cloudProviderSecrets'),
+  '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members')
 }
 

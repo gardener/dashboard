@@ -70,24 +70,24 @@ export function getConfiguration () {
 
 export function getCloudProviderSecrets ({ namespace }) {
   namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/cloudprovider-secrets`)
+  return getResource(`/api/namespaces/${namespace}/cloud-provider-secrets`)
 }
 
 export function updateCloudProviderSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`, data)
+  return updateResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`, data)
 }
 
 export function createCloudProviderSecret ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/cloudprovider-secrets`, data)
+  return createResource(`/api/namespaces/${namespace}/cloud-provider-secrets`, data)
 }
 
 export function deleteCloudProviderSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/cloudprovider-secrets/${name}`)
+  return deleteResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
 }
 
 /* Shoot Clusters */
