@@ -111,18 +111,20 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content class="pt-0">
           <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <dns-provider
-              class="mr-2 mb-2"
-              v-for="({ primary, secretName, type, domains, zones }, index) in shootDnsProviders"
-              :primary="primary"
-              :secretName="secretName"
-              :shootNamespace="shootNamespace"
-              :type="type"
-              :domains="domains"
-              :zones="zones"
-              :key="index">
-            </dns-provider>
-            <span v-if="!shootDnsProviders">No DNS Provider configured</span>
+            <template v-if="shootDnsProviders && shootDnsProviders.length">
+                <dns-provider
+                  class="mr-2"
+                  v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
+                  :primary="primary"
+                  :secretName="secretName"
+                  :shootNamespace="shootNamespace"
+                  :type="type"
+                  :domains="domains"
+                  :zones="zones"
+                  :key="secretName">
+              </dns-provider>
+            </template>
+            <span v-else>No DNS Provider configured</span>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>

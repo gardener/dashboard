@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :shoot-item="shootItem"
     ref="actionDialog"
     caption="Configure DNS"
-    width="1750px"
+    width="1000"
     confirmRequired
     @dialog-opened="onConfigurationDialogOpened"
     >
@@ -33,11 +33,6 @@ export default {
   components: {
     ActionButtonDialog,
     ManageShootDns
-  },
-  props: {
-    shootItem: {
-      type: Object
-    }
   },
   data () {
     return {

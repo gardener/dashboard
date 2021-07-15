@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="workersValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    width="2200px"
+    width="1000"
     confirmRequired
     confirm-message="Please confirm changes to the worker groups as this may affect your workload"
     caption="Configure Workers"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <a :href="url" target="_blank">
-    <span><slot>{{url}}</slot></span> <v-icon  style="font-size: 80%">mdi-open-in-new</v-icon>
+    <slot>{{url}}</slot> <v-icon :size="12">mdi-open-in-new</v-icon>
   </a>
 </template>
 
