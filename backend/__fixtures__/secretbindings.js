@@ -57,16 +57,12 @@ const secretBindingList = [
 ]
 
 function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
-  let labels
+  const labels = {}
   if (cloudProfileName) {
-    labels = {
-      'cloudprofile.garden.sapcloud.io/name': cloudProfileName
-    }
+    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
   }
   if (dnsProviderName) {
-    labels = {
-      'gardener.cloud/dnsProviderName': dnsProviderName
-    }
+    labels ['gardener.cloud/dnsProviderName'] = dnsProviderName
   }
   return {
     kind: 'SecretBinding',
