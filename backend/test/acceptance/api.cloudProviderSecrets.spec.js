@@ -111,7 +111,6 @@ describe('api', function () {
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .post(`/api/namespaces/${namespace}/cloud-provider-secrets`)
