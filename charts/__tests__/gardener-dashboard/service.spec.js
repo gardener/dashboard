@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 //
 // SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 //

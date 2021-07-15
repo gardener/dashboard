@@ -8,13 +8,13 @@
 
 const { promisify } = require('util')
 const assert = require('assert').strict
-const { split, join, noop, trim } = require('lodash')
+const { split, join, noop, trim, some, every, includes, head } = require('lodash')
 const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication } = require('../services')
-const { Forbidden, Unauthorized } = require('http-errors')
+const { Forbidden, Unauthorized, BadRequest } = require('http-errors')
 const logger = require('../logger')
 const { sessionSecret, oidc = {} } = require('../config')
 
@@ -37,7 +37,7 @@ const {
 
 const {
   issuer,
-  redirect_uri: redirectUri,
+  redirect_uris: redirectUris = [],
   scope,
   client_id: clientId,
   client_secret: clientSecret,
@@ -45,6 +45,7 @@ const {
   ca,
   clockTolerance = 15
 } = oidc
+const responseTypes = ['code']
 const httpOptions = {
   followRedirect: false,
   rejectUnauthorized
@@ -53,8 +54,11 @@ if (ca) {
   httpOptions.ca = ca
 }
 
-const secure = /^https:/.test(redirectUri)
-if (!secure && process.env.NODE_ENV === 'production') {
+const hasHttpsProtocol = uri => /^https:/.test(uri)
+const secure = some(redirectUris, hasHttpsProtocol)
+if (secure) {
+  assert.ok(every(redirectUris, hasHttpsProtocol), 'All \'redirect_uris\' must have the same protocol')
+} else if (process.env.NODE_ENV === 'production') {
   logger.warn('The Gardener Dashboard is running in production but you don\'t use Transport Layer Security (TLS) to secure the connection and the data')
 }
 
@@ -81,7 +85,9 @@ function discoverClient (url) {
     overrideHttpOptions.call(issuer)
     const client = new issuer.Client({
       client_id: clientId,
-      client_secret: clientSecret
+      client_secret: clientSecret,
+      redirect_uris: redirectUris,
+      response_types: responseTypes
     })
     overrideHttpOptions.call(client)
     client[custom.clock_tolerance] = clockTolerance
@@ -101,11 +107,34 @@ function getIssuerClient (url = issuer) {
   return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
 }
 
+function getBackendRedirectUri (origin) {
+  return origin
+    ? new URL('/auth/callback', origin).toString()
+    : head(redirectUris)
+}
+
+function getFrontendRedirectUrl (redirectUrl) {
+  return redirectUrl
+    ? new URL(redirectUrl)
+    : new URL('/', head(redirectUris))
+}
+
 async function authorizationUrl (req, res) {
-  const state = encodeState(req.query)
+  const { query } = req
+  const frontendRedirectUrl = getFrontendRedirectUrl(query.redirectUrl)
+  const redirectPath = frontendRedirectUrl.pathname + frontendRedirectUrl.search
+  const redirectOrigin = frontendRedirectUrl.origin
+  const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
+  const state = encodeState({
+    redirectPath,
+    redirectOrigin
+  })
   const client = await exports.getIssuerClient()
+  if (!includes(redirectUris, backendRedirectUri)) {
+    throw new BadRequest('The \'redirectUrl\' parameter must match a redirect URI in the settings')
+  }
   return client.authorizationUrl({
-    redirect_uri: redirectUri,
+    redirect_uri: backendRedirectUri,
     state,
     scope
   })
@@ -151,16 +180,21 @@ async function authorizationCallback (req, res) {
   const client = await exports.getIssuerClient()
   const { code, state } = req.query
   const parameters = { code }
+  const {
+    redirectPath,
+    redirectOrigin
+  } = decodeState(state)
+  const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code'
   }
   const {
     id_token: token,
     expires_in: expiresIn
-  } = await client.callback(redirectUri, parameters, checks)
+  } = await client.callback(backendRedirectUri, parameters, checks)
   req.body = { token, expiresIn }
   await authorizeToken(req, res)
-  return decodeState(state)
+  return { redirectPath }
 }
 
 function isHttpMethodSafe ({ method }) {
@@ -276,6 +310,8 @@ exports = module.exports = {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
+  encodeState,
+  decodeState,
   sign,
   decode,
   verify,
