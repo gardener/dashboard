@@ -5,27 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <aws-dialog v-if="visibleDialog==='aws'" v-model="visibleDialogState" :secret="selectedSecret" vendor="aws" @input="onInput('aws')"></aws-dialog>
-    <azure-dialog v-if="visibleDialog==='azure'" v-model="visibleDialogState" :secret="selectedSecret" vendor="azure" @input="onInput('azure')"></azure-dialog>
-    <gcp-dialog v-if="visibleDialog==='gcp'" v-model="visibleDialogState" :secret="selectedSecret" vendor="gcp" @input="onInput('gcp')"></gcp-dialog>
-    <openstack-dialog v-if="visibleDialog==='openstack'" v-model="visibleDialogState" :secret="selectedSecret" vendor="openstack" @input="onInput('openstack')"></openstack-dialog>
-    <alicloud-dialog v-if="visibleDialog==='alicloud'" v-model="visibleDialogState" :secret="selectedSecret" vendor="alicloud" @input="onInput('alicloud')"></alicloud-dialog>
-    <metal-dialog v-if="visibleDialog==='metal'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
-    <vsphere-dialog v-if="visibleDialog==='vsphere'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
-    <hcloud-dialog v-if="visibleDialog==='hcloud'" v-model="visibleDialogState" :secret="selectedSecret" @input="onInput('hcloud')"></hcloud-dialog>
-
-    <aws-dialog v-if="visibleDialog==='aws-route53'" v-model="visibleDialogState" :secret="selectedSecret" vendor="aws-route53" @input="onInput('aws-route53')"></aws-dialog>
-    <azure-dialog v-if="visibleDialog==='azure-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="azure-dns" @input="onInput('azure-dns')"></azure-dialog>
-    <gcp-dialog v-if="visibleDialog==='google-clouddns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="google-clouddns" @input="onInput('google-clouddns')"></gcp-dialog>
-    <openstack-dialog v-if="visibleDialog==='openstack-designate'" v-model="visibleDialogState" :secret="selectedSecret" vendor="openstack-designate" @input="onInput('openstack-designate')"></openstack-dialog>
-    <alicloud-dialog v-if="visibleDialog==='alicloud-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="alicloud-dns" @input="onInput('alicloud-dns')"></alicloud-dialog>
-    <cloudflare-dialog v-if="visibleDialog==='cloudflare-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="cloudflare-dns" @input="onInput('cloudflare-dns')"></cloudflare-dialog>
-    <infoblox-dialog v-if="visibleDialog==='infoblox-dns'" v-model="visibleDialogState"
-     :secret="selectedSecret" vendor="infoblox-dns" @input="onInput('infoblox-dns')"></infoblox-dialog>
-    <netlify-dialog v-if="visibleDialog==='netlify-dns'" v-model="visibleDialogState" :secret="selectedSecret" vendor="netlify-dns" @input="onInput('netlify-dns')"></netlify-dialog>
-    <delete-dialog v-if="visibleDialog==='delete'" v-model="visibleDialogState" :secret="selectedSecret"></delete-dialog>
-  </div>
+  <component v-if="visibleDialog" :is="componentName" v-bind="{ secret: selectedSecret, vendor: visibleDialog }" v-model="visibleDialogState" @input="onInput(visibleDialog)"></component>
 </template>
 
 <script>
@@ -42,8 +22,11 @@ import NetlifyDialog from '@/components/dialogs/SecretDialogNetlify'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import HcloudDialog from '@/components/dialogs/SecretDialogHCloud'
 
+import upperFirst from 'lodash/upperFirst'
+import split from 'lodash/split'
+import head from 'lodash/head'
+
 export default {
-  name: 'secret-dialog-wrapper',
   components: {
     GcpDialog,
     AzureDialog,
@@ -71,6 +54,18 @@ export default {
     visibleDialog: {
       type: String,
       required: false
+    }
+  },
+  computed: {
+    componentName () {
+      switch (this.visibleDialog) {
+        case 'google-clouddns':
+          return 'GcpDialog'
+        default: {
+          const name = upperFirst(head(split(this.visibleDialog, '-')))
+          return `${name}Dialog`
+        }
+      }
     }
   },
   methods: {
