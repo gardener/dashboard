@@ -6,11 +6,11 @@
 
 'use strict'
 
-const _ = require('lodash')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const yaml = require('js-yaml')
+const Config = require('./Config')
 
 function getInCluster ({
   KUBERNETES_SERVICE_HOST: host,
@@ -72,56 +72,18 @@ function readKubeconfig (filename) {
 }
 
 function parseKubeconfig (input) {
-  if (input) {
-    switch (typeof input) {
-      case 'string':
-        return yaml.safeLoad(input)
-      default:
-        return input
-    }
-  }
-  throw new TypeError('Kubeconfig must not be empty')
+  return Config.parse(input)
 }
 
 function cleanKubeconfig (input) {
-  const cleanCluster = ({ name, cluster }) => {
-    cluster = _.pick(cluster, ['server', 'insecure-skip-tls-verify', 'certificate-authority-data'])
-    return { name, cluster }
-  }
-  const cleanContext = ({ name, context }) => {
-    context = _.pick(context, ['cluster', 'user', 'namespace'])
-    return { name, context }
-  }
-  const cleanAuthInfo = ({ name, user }) => {
-    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password'])
-    return { name, user }
-  }
-  const cleanConfig = ({
-    apiVersion = 'v1',
-    kind = 'Config',
-    clusters,
-    contexts,
-    'current-context': currentContext,
-    users
-  }) => {
-    return {
-      apiVersion,
-      kind,
-      clusters: _.map(clusters, cleanCluster),
-      contexts: _.map(contexts, cleanContext),
-      'current-context': currentContext,
-      users: _.map(users, cleanAuthInfo)
-    }
-  }
-  return cleanConfig(parseKubeconfig(input))
+  const kubeconfig = parseKubeconfig(input)
+  return kubeconfig.clean()
 }
 
 function fromKubeconfig (input) {
   const {
-    clusters,
-    contexts,
-    'current-context': currentContext,
-    users
+    currentCluster: cluster,
+    currentUser: user
   } = parseKubeconfig(input)
 
   // inline certificates and keys
@@ -133,23 +95,6 @@ function fromKubeconfig (input) {
       return Buffer.from(obj[`${name}-data`], 'base64').toString('utf8')
     }
   }
-
-  // get current user and cluster
-  const context = _
-    .chain(contexts)
-    .find(['name', currentContext])
-    .get('context')
-    .value()
-  const cluster = _
-    .chain(clusters)
-    .find(['name', context.cluster])
-    .get('cluster')
-    .value()
-  const user = _
-    .chain(users)
-    .find(['name', context.user])
-    .get('user')
-    .value()
 
   const config = {
     rejectUnauthorized: true
@@ -181,6 +126,25 @@ function fromKubeconfig (input) {
         user: user.username,
         pass: user.password
       }
+    } else if (user['auth-provider']) {
+      const {
+        name,
+        config: authProviderConfig = {}
+      } = user['auth-provider']
+      switch (name) {
+        case 'gcp': {
+          const {
+            'access-token': accessToken,
+            expiry = '1970-01-01T00:00:00.000Z'
+          } = authProviderConfig
+          if (new Date() < new Date(expiry)) {
+            config.auth = {
+              bearer: accessToken
+            }
+          }
+          break
+        }
+      }
     }
   }
 
@@ -188,9 +152,7 @@ function fromKubeconfig (input) {
 }
 
 function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namespace, token, server, caData }) {
-  return yaml.safeDump({
-    apiVersion: 'v1',
-    kind: 'Config',
+  return new Config({
     clusters: [{
       name: cluster,
       cluster: {
@@ -213,7 +175,7 @@ function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namesp
       }
     }],
     'current-context': context
-  })
+  }).toYAML()
 }
 
 function load (env = process.env) {
@@ -243,6 +205,7 @@ exports = module.exports = {
     input = exports.cleanKubeconfig(input)
     return fromKubeconfig(input)
   },
+  parseKubeconfig,
   dumpKubeconfig,
   load
 }

@@ -14,7 +14,6 @@ const { getSeed } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
-const yaml = require('js-yaml')
 const semver = require('semver')
 
 const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain } = utils
@@ -259,7 +258,9 @@ exports.info = async function ({ user, namespace, name }) {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
-            data[key] = yaml.safeDump(kubeconfig.cleanKubeconfig(value))
+            const kubeconfigObject = kubeconfig.cleanKubeconfig(value)
+            data[key] = kubeconfigObject.toYAML()
+            data.serverUrl = kubeconfigObject.currentCluster.server
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }
@@ -269,7 +270,6 @@ exports.info = async function ({ user, namespace, name }) {
       })
       .commit()
 
-    data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
     data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
