@@ -1,0 +1,261 @@
+//
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+import Vue from 'vue'
+
+import has from 'lodash/has'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import head from 'lodash/head'
+import map from 'lodash/map'
+import keyBy from 'lodash/keyBy'
+import omit from 'lodash/omit'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
+import every from 'lodash/every'
+
+// helper
+function getId (object) {
+  return get(object, 'id', null)
+}
+
+function omitId (object) {
+  return omit(object, ['id'])
+}
+
+function idByIndex (index) {
+  if (!Number.isInteger(index) || index < 0) {
+    throw TypeError('Index argument must be a positive integer')
+  }
+  return '' + (index + 1)
+}
+
+function indexById (id) {
+  if (!/^\d+$/.test(id)) {
+    throw TypeError('Id argument must be a string which only contains digits')
+  }
+  return +id - 1
+}
+
+function maxIndexByIds (ids) {
+  return Math.max(-1, ...map(ids, indexById))
+}
+
+function validateDnsProvider ({ type, secretName }) {
+  return !!type && !!secretName
+}
+
+// state
+const state = {
+  dnsDomain: null,
+  dnsProviders: {},
+  dnsProviderIds: [],
+  dnsProviderLastIndex: -1,
+  dnsPrimaryProviderId: null,
+  dnsPrimaryProviderValid: null
+}
+
+// getters
+const getters = {
+  dnsProviderTypes (state, getters, rootState, rootGetters) {
+    return map(rootGetters.sortedDnsProviderList, 'type')
+  },
+  dnsProviderTypesWithPrimarySupport (state, getters, rootState, rootGetters) {
+    return map(filter(rootGetters.sortedDnsProviderList, 'primary'), 'type')
+  },
+  dnsProvidersWithPrimarySupport (state, getters) {
+    const types = getters.dnsProviderTypesWithPrimarySupport
+    return filter(state.dnsProviders, ({ type }) => includes(types, type))
+  },
+  dnsProvidersValid (state) {
+    return every(state.dnsProviders, 'valid')
+  },
+  dnsProviderLastId (state) {
+    return idByIndex(state.dnsProviderLastIndex)
+  },
+  dnsProviderNextId (state) {
+    return idByIndex(state.dnsProviderLastIndex + 1)
+  },
+  dnsPrimaryProvider (state) {
+    return state.dnsProviders[state.dnsPrimaryProviderId]
+  },
+  dnsDefaultPrimaryProviderId (state, getters) {
+    const defaultPrimaryProvider = head(getters.dnsProvidersWithPrimarySupport)
+    return getId(defaultPrimaryProvider)
+  },
+  dns (state) {
+    return {
+      domain: state.dnsDomain,
+      providers: map(state.dnsProviderIds, id => {
+        const {
+          type,
+          secretName,
+          excludeDomains,
+          includeDomains,
+          excludeZones,
+          includeZones
+        } = state.dnsProviders[id]
+        const primary = state.dnsPrimaryProviderId === id
+        const provider = {
+          type,
+          secretName,
+          primary
+        }
+        if (!isEmpty(excludeDomains)) {
+          set(provider, 'domains.exclude', [...excludeDomains])
+        }
+        if (!isEmpty(includeDomains)) {
+          set(provider, 'domains.include', [...includeDomains])
+        }
+        if (!isEmpty(excludeZones)) {
+          set(provider, 'zones.exclude', [...excludeZones])
+        }
+        if (!isEmpty(includeZones)) {
+          set(provider, 'zones.include', [...includeZones])
+        }
+        return provider
+      })
+    }
+  },
+  dnsValid (state, getters) {
+    return state.dnsPrimaryProviderValid && getters.dnsProvidersValid
+  }
+}
+
+// actions
+const actions = {
+  setDnsDomain ({ commit, state, getters }, value) {
+    commit('setDnsDomain', value)
+    if (!value) {
+      commit('setDnsPrimaryProviderId', null)
+    } else if (!state.dnsPrimaryProviderId) {
+      const id = getters.dnsDefaultPrimaryProviderId
+      if (id) {
+        commit('setDnsPrimaryProviderId', id)
+      }
+    }
+  },
+  addDnsProvider ({ commit, getters, rootGetters }) {
+    const type = head(getters.dnsProviderTypes)
+    const dnsSecret = head(rootGetters.dnsSecretsByProviderKind(type))
+    const secretName = get(dnsSecret, 'metadata.name')
+    commit('addDnsProvider', {
+      id: getters.dnsProviderNextId,
+      type,
+      secretName,
+      excludeDomains: [],
+      includeDomains: [],
+      excludeZones: [],
+      includeZones: [],
+      valid: validateDnsProvider({ type, secretName })
+    })
+  },
+  setupDns ({ commit }, { domain, providers = [] }) {
+    let primaryProviderId = null
+    providers = map(providers, (provider, index) => {
+      const id = idByIndex(index)
+      const {
+        type,
+        secretName,
+        primary = false,
+        domains: {
+          exclude: excludeDomains = [],
+          include: includeDomains = []
+        } = {},
+        zones: {
+          exclude: excludeZones = [],
+          include: includeZones = []
+        } = {}
+      } = provider
+      if (primary) {
+        primaryProviderId = id
+      }
+      return {
+        id,
+        type,
+        secretName,
+        excludeDomains: [...excludeDomains],
+        includeDomains: [...includeDomains],
+        excludeZones: [...excludeZones],
+        includeZones: [...includeZones],
+        valid: validateDnsProvider({ type, secretName })
+      }
+    })
+    commit('setupDns', {
+      domain,
+      providers,
+      primaryProviderId
+    })
+  }
+}
+
+// mutations
+const mutations = {
+  setupDns (state, { domain, providers = [], primaryProviderId = null }) {
+    state.dnsDomain = domain
+    state.dnsProviders = keyBy(providers, 'id')
+    state.dnsProviderIds = map(providers, 'id')
+    state.dnsProviderLastIndex = maxIndexByIds(state.dnsProviderIds)
+    state.dnsPrimaryProviderId = primaryProviderId
+    state.dnsPrimaryProviderValid = !state.dnsDomain || !!state.dnsPrimaryProviderId
+  },
+  setDnsDomain (state, value) {
+    state.dnsDomain = value
+  },
+  setDnsPrimaryProviderId (state, value) {
+    state.dnsPrimaryProviderId = value
+  },
+  setDnsPrimaryProvider (state, value) {
+    state.dnsPrimaryProviderId = getId(value)
+  },
+  setDnsPrimaryProviderValid (state, value) {
+    state.dnsPrimaryProviderValid = value
+  },
+  addDnsProvider (state, value) {
+    const id = getId(value)
+    const nextIndex = indexById(id)
+    const index = state.dnsProviderIds.indexOf(id)
+    if (index === -1 && nextIndex > state.dnsProviderLastIndex) {
+      state.dnsProviderLastIndex = nextIndex
+      state.dnsProviderIds.push(id)
+      Vue.set(state.dnsProviders, id, value)
+    }
+  },
+  patchDnsProvider (state, value) {
+    const id = getId(value)
+    const index = state.dnsProviderIds.indexOf(id)
+    if (index !== -1 && has(state.dnsProviders, id)) {
+      const object = omitId(value)
+      for (const [key, value] of Object.entries(object)) {
+        Vue.set(state.dnsProviders[id], key, value)
+      }
+    }
+  },
+  deleteDnsProvider (state, id) {
+    const index = state.dnsProviderIds.indexOf(id)
+    if (index !== -1) {
+      state.dnsProviderIds.splice(index, 1)
+    }
+    Vue.delete(state.dnsProviders, id)
+    if (isEmpty(state.dnsProviderIds)) {
+      state.dnsDomain = null
+      state.dnsPrimaryProviderId = null
+      state.dnsPrimaryProviderValid = true
+    } else if (state.dnsPrimaryProviderId === id) {
+      state.dnsPrimaryProviderId = null
+      state.dnsPrimaryProviderValid = !state.dnsDomain
+    }
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
+}

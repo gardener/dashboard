@@ -20,16 +20,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageShootDns from '@/components/ShootDns/ManageDns'
 import { updateShootDns } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
-import { mapMutations, mapState } from 'vuex'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
   name: 'dns-configuration',
+  mixins: [shootItem],
   components: {
     ActionButtonDialog,
     ManageShootDns
@@ -39,12 +40,13 @@ export default {
       componentKey: uuidv4()
     }
   },
-  mixins: [shootItem],
-  computed: {
-    ...mapState('componentStates', { storedComponentState: 'manageDns' })
-  },
+  ...mapGetters('shootSpec', {
+    dnsConfiguration: 'dns'
+  }),
   methods: {
-    ...mapMutations('componentStates', ['SET_MANAGE_DNS']),
+    ...mapActions('shootSpec', {
+      setupDnsConfiguration: 'setupDns'
+    }),
     async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -54,8 +56,10 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const dnsConfiguration = this.storedComponentState
-        await updateShootDns({ namespace: this.shootNamespace, name: this.shootName, data: dnsConfiguration })
+        const namespace = this.shootNamespace
+        const name = this.shootName
+        const data = this.dnsConfiguration
+        await updateShootDns({ namespace, name, data })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -65,7 +69,7 @@ export default {
       }
     },
     reset () {
-      this.SET_MANAGE_DNS(this.shootSpec.dns)
+      this.setupDnsConfiguration(this.shootSpec.dns)
       this.componentKey = uuidv4() // force re-render
     }
   }

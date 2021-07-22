@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
                 item-color="primary"
                 v-model="type"
                 @blur="$v.type.$touch()"
-                @input="onInputType"
+                @input="$v.type.$touch()"
                 :items="dnsProviderTypes"
                 :error-messages="getErrorMessages('type')"
                 label="Dns Provider Type"
@@ -44,8 +44,9 @@ SPDX-License-Identifier: Apache-2.0
               <select-secret
                 :dns-provider-kind="type"
                 :selected-secret="secret"
-                @update-secret="onUpdateSecret"
-                @valid="onSecretValid"></select-secret>
+                @update-secret="onSecretUpdate"
+                @valid="onSecretValid">
+              </select-secret>
             </div>
             <div class="regularInput">
               <v-combobox
@@ -54,7 +55,6 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 small-chips
                 deletable-chips
-                @input="onInputExcludeDomains"
               >
               </v-combobox>
             </div>
@@ -65,7 +65,6 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 small-chips
                 deletable-chips
-                @input="onInputIncludeDomains"
               >
               </v-combobox>
             </div>
@@ -76,7 +75,6 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 small-chips
                 deletable-chips
-                @input="onInputExcludeZones"
               >
               </v-combobox>
             </div>
@@ -87,7 +85,6 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 small-chips
                 deletable-chips
-                @input="onInputIncludeZones"
               >
               </v-combobox>
             </div>
@@ -99,27 +96,34 @@ SPDX-License-Identifier: Apache-2.0
             outlined
             icon
             color="grey"
-            @click.native.stop="removeDnsProvider"
+            @click.native.stop="onDelete"
             :disabled="primary && !createMode">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-col>
       </template>
       <span class="font-weight-bold">You cannot edit this DNS Provider</span><br />
-      SecretBinding for secret {{provider.secretName}} not found in poject namespace
+      SecretBinding for secret {{secretName}} not found in poject namespace
     </v-tooltip>
   </v-row>
 </template>
 
 <script>
+import { mapState, mapGetters, mapMutations } from 'vuex'
+import { required } from 'vuelidate/lib/validators'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import find from 'lodash/find'
+
 import SelectSecret from '@/components/SelectSecret'
 import VendorIcon from '@/components/VendorIcon'
-import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import { mapGetters } from 'vuex'
-import find from 'lodash/find'
-import head from 'lodash/head'
-import map from 'lodash/map'
+
+const validations = {
+  type: {
+    required
+  }
+}
 
 const validationErrors = {
   type: {
@@ -133,110 +137,149 @@ export default {
     SelectSecret,
     VendorIcon
   },
+  validations,
   props: {
-    provider: {
-      type: Object,
+    createMode: {
+      type: Boolean,
+      default: false
+    },
+    dnsProviderId: {
+      type: String,
       required: true
     }
   },
   data () {
     return {
       validationErrors,
-      secretValid: false,
-      id: undefined,
-      type: undefined,
-      secret: undefined,
-      excludeDomains: undefined,
-      includeDomains: undefined,
-      excludeZones: undefined,
-      includeZones: undefined,
-      primary: false,
-      createMode: false,
-      secretBindingMissing: false
-    }
-  },
-  validations: {
-    type: {
-      required
+      secretValid: null
     }
   },
   computed: {
-    ...mapGetters([
-      'dnsSecretsByProviderKind',
-      'sortedDnsProviderList'
+    ...mapState('shootSpec', {
+      dnsProvider (state) {
+        return state.dnsProviders[this.dnsProviderId]
+      },
+      primary (state) {
+        return state.dnsPrimaryProviderId === this.dnsProviderId
+      }
+    }),
+    ...mapGetters('shootSpec', [
+      'dnsProviderTypes'
     ]),
-    dnsProviderTypes () {
-      return map(this.sortedDnsProviderList, 'type')
+    ...mapGetters([
+      'dnsSecretsByProviderKind'
+    ]),
+    dnsSecrets () {
+      return this.dnsSecretsByProviderKind(this.type)
     },
     typeHint () {
       if (this.primary && !this.createMode) {
         return 'Primary Provider type cannot be changed after cluster creation'
       }
       return undefined
+    },
+    secret () {
+      return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretName])
+    },
+    secretBindingMissing () {
+      return !this.createMode && !this.secret
+    },
+    type: {
+      get () {
+        return get(this.dnsProvider, 'type')
+      },
+      set (value) {
+        const defaultDnsSecret = head(this.dnsSecretsByProviderKind(value))
+        this.setData({
+          type: value,
+          secretName: get(defaultDnsSecret, 'metadata.name', null)
+        })
+      }
+    },
+    secretName: {
+      get () {
+        return get(this.dnsProvider, 'secretName')
+      },
+      set (value) {
+        this.setData({ secretName: value })
+      }
+    },
+    includeDomains: {
+      get () {
+        return get(this.dnsProvider, 'includeDomains', [])
+      },
+      set (value = []) {
+        this.setData({ includeDomains: value })
+      }
+    },
+    excludeDomains: {
+      get () {
+        return get(this.dnsProvider, 'excludeDomains', [])
+      },
+      set (value = []) {
+        this.setData({ excludeDomains: value })
+      }
+    },
+    includeZones: {
+      get () {
+        return get(this.dnsProvider, 'includeZones', [])
+      },
+      set (value = []) {
+        this.setData({ includeZones: value })
+      }
+    },
+    excludeZones: {
+      get () {
+        return get(this.dnsProvider, 'excludeZones', [])
+      },
+      set (value = []) {
+        this.setData({ excludeZones: value })
+      }
+    },
+    valid () {
+      return get(this.dnsProvider, 'valid')
     }
   },
   methods: {
+    ...mapMutations('shootSpec', [
+      'patchDnsProvider',
+      'deleteDnsProvider'
+    ]),
+    setData (data) {
+      this.patchDnsProvider({
+        id: this.dnsProviderId,
+        ...data
+      })
+    },
+    updateValid () {
+      const valid = this.secretValid && !this.$v.$invalid
+      if (this.valid !== valid) {
+        this.setData({ valid })
+      }
+    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    onInputType () {
-      this.$v.type.$touch()
-      this.$emit('type', { id: this.id, type: this.type })
-      const secret = head(this.dnsSecretsByProviderKind(this.type))
-      this.onUpdateSecret(secret)
+    onSecretValid (value) {
+      this.secretValid = !!value
+      this.updateValid()
     },
-    onUpdateSecret (secret) {
-      this.secret = secret
-      this.validateInput()
-      this.$emit('secret', { id: this.id, secret: this.secret })
+    onSecretUpdate (secret) {
+      const secretName = get(secret, 'metadata.name', null)
+      this.setData({ secretName })
     },
-    onInputExcludeDomains () {
-      this.$emit('exclude-domains', { id: this.id, excludeDomains: this.excludeDomains })
-    },
-    onInputIncludeDomains () {
-      this.$emit('include-domains', { id: this.id, includeDomains: this.includeDomains })
-    },
-    onInputExcludeZones () {
-      this.$emit('exclude-zones', { id: this.id, excludeZones: this.excludeZones })
-    },
-    onInputIncludeZones () {
-      this.$emit('include-zones', { id: this.id, includeZones: this.includeZones })
-    },
-    onSecretValid (valid) {
-      if (this.secretValid !== valid) {
-        this.secretValid = valid
-        this.validateInput()
-      }
-    },
-    validateInput () {
-      const valid = this.secretValid && !this.$v.$invalid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', { id: this.id, valid: this.valid })
-      }
-    },
-    removeDnsProvider () {
-      this.$emit('remove-dns-provider')
+    onDelete () {
+      this.deleteDnsProvider(this.dnsProviderId)
     }
   },
   mounted () {
-    if (this.provider) {
-      this.id = this.provider.id
-      this.type = this.provider.type
-      this.secret = find(this.dnsSecretsByProviderKind(this.provider.type), ['metadata.secretRef.name', this.provider.secretName])
-      this.excludeDomains = this.provider.excludeDomains
-      this.includeDomains = this.provider.includeDomains
-      this.excludeZones = this.provider.excludeZones
-      this.includeZones = this.provider.includeZones
-      this.primary = this.provider.primary
-      this.createMode = this.provider.createMode
+    this.$v.$touch()
+  },
+  watch: {
+    '$v.$invalid' () {
+      this.updateValid()
     }
-    if (!this.secret && !this.createMode) {
-      this.secretBindingMissing = true
-    }
-    this.validateInput()
   }
-
 }
 </script>
 

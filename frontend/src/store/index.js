@@ -61,6 +61,7 @@ import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
 import replace from 'lodash/replace'
 import sample from 'lodash/sample'
+import split from 'lodash/split'
 
 import moment from '@/utils/moment'
 import { ioPlugin } from '@/utils/Emitter'
@@ -74,7 +75,7 @@ import draggable from './modules/draggable'
 import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
-import componentStates from './modules/componentStates'
+import shootSpec from './modules/shootSpec'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
@@ -82,7 +83,8 @@ const localStorage = Vue.localStorage
 
 Vue.use(Vuex)
 
-const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+const strict = process.env.NODE_ENV !== 'production'
+const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
@@ -1749,7 +1751,7 @@ const modules = {
   shoots,
   cloudProviderSecrets,
   tickets,
-  componentStates
+  shootSpec
 }
 
 const store = new Vuex.Store({
@@ -1758,7 +1760,7 @@ const store = new Vuex.Store({
   actions,
   mutations,
   modules,
-  strict: debug,
+  strict,
   plugins
 })
 
