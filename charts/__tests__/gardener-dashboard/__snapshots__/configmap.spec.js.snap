@@ -340,3 +340,26 @@ Object {
   },
 }
 `;
+
+exports[`gardener-dashboard configmap vendorHints should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "vendorHints": Array [
+      Object {
+        "hintMessage": "hint message",
+        "hintType": "warning",
+        "vendorNames": Array [
+          "foo",
+          "bar",
+        ],
+      },
+      Object {
+        "hintMessage": "other message",
+        "vendorNames": Array [
+          "fooz",
+        ],
+      },
+    ],
+  },
+}
+`;

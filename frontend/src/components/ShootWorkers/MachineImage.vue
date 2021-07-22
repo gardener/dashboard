@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <hint-colorizer hint-color="warning">
+  <hint-colorizer :hint-color="hintColor">
     <v-select
       color="primary"
       item-color="primary"
@@ -107,8 +107,8 @@ export default {
     },
     hint () {
       const hintText = []
-      if (this.machineImage.needsLicense) {
-        hintText.push('The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.')
+      if (this.machineImage.vendorHint) {
+        hintText.push(this.machineImage.vendorHint.hintMessage)
       }
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
@@ -120,6 +120,17 @@ export default {
         hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
       }
       return join(hintText, ' / ')
+    },
+    hintColor () {
+      if (this.machineImage.expirationDate ||
+         (this.updateOSMaintenance && this.selectedImageIsNotLatest) ||
+         this.machineImage.isPreview) {
+        return 'warning'
+      }
+      if (this.machineImage.vendorHint) {
+        return this.machineImage.vendorHint.hintType
+      }
+      return undefined
     },
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
