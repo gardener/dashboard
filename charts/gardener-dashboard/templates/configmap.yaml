@@ -244,7 +244,7 @@ data:
       {{- if .Values.frontendConfig.sla }}
       sla:
         title: {{ .Values.frontendConfig.sla.title }}
-        description: {{ .Values.frontendConfig.sla.description }}
+        description: {{ toJson .Values.frontendConfig.sla.description }}
       {{- end }}
       {{- if .Values.frontendConfig.accessRestriction }}
       accessRestriction:
