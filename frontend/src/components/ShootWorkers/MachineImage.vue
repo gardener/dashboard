@@ -157,9 +157,6 @@ export default {
       if (machineImage.classification) {
         itemDescription.push(`Classification: ${machineImage.classification}`)
       }
-      if (machineImage.needsLicense) {
-        itemDescription.push('Enterprise support license required')
-      }
       if (machineImage.expirationDate) {
         itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
       }

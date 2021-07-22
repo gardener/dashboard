@@ -21,7 +21,8 @@ describe('Store', () => {
         name: 'suse-chost',
         versions: [
           {
-            version: '15.1.20190927'
+            version: '15.1.20190927',
+            classification: 'preview'
           },
           {
             version: '15.1.20191027',
@@ -78,6 +79,7 @@ describe('Store', () => {
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
     expect(expiredImage.isExpired).toBe(true)
+    expect(expiredImage.isSupported).toBe(false)
 
     const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
     expect(invalidImage).toBeUndefined()
@@ -94,15 +96,23 @@ describe('Store', () => {
     expect(suseImage.isPreview).toBe(false)
     expect(suseImage).toBe(dashboardMachineImages[2]) // check sorting
 
+    const suseImage2 = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20190927' })
+    expect(suseImage2.isSupported).toBe(false)
+    expect(suseImage2.isPreview).toBe(true)
+
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
     expect(fooImage.vendorHint).toBe(undefined)
-    expect(fooImage.isSupported).toBe(false)
+    expect(fooImage.isSupported).toBe(true)
   })
 
   it('should filter kubernetes versions from cloud profile', () => {
     const kubernetesVersions = [
       {
-        version: '1.13.4'
+        version: '1.13.4',
+        classification: 'deprecated'
+      },
+      {
+        version: '1.14.0'
       },
       {
         expirationDate: '2120-04-12T23:59:59Z', // not expired
@@ -136,18 +146,22 @@ describe('Store', () => {
     }
 
     const dashboardVersions = getters.sortedKubernetesVersions({}, storeGetters)('foo')
-    expect(dashboardVersions).toHaveLength(3)
+    expect(dashboardVersions).toHaveLength(4)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
     expect(expiredVersion.isExpired).toBe(true)
+    expect(expiredVersion.isSupported).toBe(false)
 
     const invalidVersion = find(dashboardVersions, { version: '1.06.2' })
     expect(invalidVersion).toBeUndefined()
 
+    const supportedVersion = find(dashboardVersions, { version: '1.14.0' })
+    expect(supportedVersion.isSupported).toBe(true)
+
     const kubernetesVersion = find(dashboardVersions, { version: '1.16.3' })
     expect(kubernetesVersion.expirationDate).toBe('2120-04-12T23:59:59Z')
     expect(kubernetesVersion.expirationDateString).toBeDefined()
-    expect(kubernetesVersion.classification).toBe('supported')
+    expect(kubernetesVersion.isSupported).toBe(true)
     expect(kubernetesVersion).toBe(dashboardVersions[0]) // check sorting
   })
 
