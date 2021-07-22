@@ -197,7 +197,7 @@ export default {
       'cfg'
     ]),
     ...mapGetters('shootSpec', {
-      dnsConfiguration: 'dns',
+      getDnsConfiguration: 'getDns',
       dnsConfigurationValid: 'dnsValid'
     }),
     ...mapGetters([
@@ -298,7 +298,7 @@ export default {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
       }
 
-      const dnsConfiguration = cloneDeep(this.dnsConfiguration)
+      const dnsConfiguration = this.getDnsConfiguration()
       if (dnsConfiguration.domain || !isEmpty(dnsConfiguration.providers)) {
         set(shootResource, 'spec.dns', dnsConfiguration)
       } else {

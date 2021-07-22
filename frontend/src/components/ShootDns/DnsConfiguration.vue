@@ -41,7 +41,7 @@ export default {
     }
   },
   ...mapGetters('shootSpec', {
-    dnsConfiguration: 'dns'
+    getDnsConfiguration: 'getDns'
   }),
   methods: {
     ...mapActions('shootSpec', {
@@ -58,7 +58,7 @@ export default {
       try {
         const namespace = this.shootNamespace
         const name = this.shootName
-        const data = this.dnsConfiguration
+        const data = this.getDnsConfiguration()
         await updateShootDns({ namespace, name, data })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'

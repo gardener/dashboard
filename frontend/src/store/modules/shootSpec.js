@@ -23,10 +23,6 @@ function getId (object) {
   return get(object, 'id', null)
 }
 
-function omitId (object) {
-  return omit(object, ['id'])
-}
-
 function idByIndex (index) {
   if (!Number.isInteger(index) || index < 0) {
     throw TypeError('Index argument must be a positive integer')
@@ -45,7 +41,7 @@ function maxIndexByIds (ids) {
   return Math.max(-1, ...map(ids, indexById))
 }
 
-function validateDnsProvider ({ type, secretName }) {
+function isDnsProviderValid ({ type, secretName }) {
   return !!type && !!secretName
 }
 
@@ -87,38 +83,41 @@ const getters = {
     const defaultPrimaryProvider = head(getters.dnsProvidersWithPrimarySupport)
     return getId(defaultPrimaryProvider)
   },
-  dns (state) {
-    return {
-      domain: state.dnsDomain,
-      providers: map(state.dnsProviderIds, id => {
-        const {
-          type,
-          secretName,
-          excludeDomains,
-          includeDomains,
-          excludeZones,
-          includeZones
-        } = state.dnsProviders[id]
-        const primary = state.dnsPrimaryProviderId === id
-        const provider = {
-          type,
-          secretName,
-          primary
-        }
-        if (!isEmpty(excludeDomains)) {
-          set(provider, 'domains.exclude', [...excludeDomains])
-        }
-        if (!isEmpty(includeDomains)) {
-          set(provider, 'domains.include', [...includeDomains])
-        }
-        if (!isEmpty(excludeZones)) {
-          set(provider, 'zones.exclude', [...excludeZones])
-        }
-        if (!isEmpty(includeZones)) {
-          set(provider, 'zones.include', [...includeZones])
-        }
-        return provider
-      })
+  getDns (state) {
+    const providerById = id => {
+      const {
+        type,
+        secretName,
+        excludeDomains,
+        includeDomains,
+        excludeZones,
+        includeZones
+      } = state.dnsProviders[id]
+      const primary = state.dnsPrimaryProviderId === id
+      const provider = {
+        type,
+        secretName,
+        primary
+      }
+      if (!isEmpty(excludeDomains)) {
+        set(provider, 'domains.exclude', [...excludeDomains])
+      }
+      if (!isEmpty(includeDomains)) {
+        set(provider, 'domains.include', [...includeDomains])
+      }
+      if (!isEmpty(excludeZones)) {
+        set(provider, 'zones.exclude', [...excludeZones])
+      }
+      if (!isEmpty(includeZones)) {
+        set(provider, 'zones.include', [...includeZones])
+      }
+      return provider
+    }
+    return () => {
+      return {
+        domain: state.dnsDomain,
+        providers: map(state.dnsProviderIds, providerById)
+      }
     }
   },
   dnsValid (state, getters) {
@@ -151,7 +150,7 @@ const actions = {
       includeDomains: [],
       excludeZones: [],
       includeZones: [],
-      valid: validateDnsProvider({ type, secretName })
+      valid: isDnsProviderValid({ type, secretName })
     })
   },
   setupDns ({ commit }, { domain, providers = [] }) {
@@ -182,7 +181,7 @@ const actions = {
         includeDomains: [...includeDomains],
         excludeZones: [...excludeZones],
         includeZones: [...includeZones],
-        valid: validateDnsProvider({ type, secretName })
+        valid: isDnsProviderValid({ type, secretName })
       }
     })
     commit('setupDns', {
@@ -229,7 +228,7 @@ const mutations = {
     const id = getId(value)
     const index = state.dnsProviderIds.indexOf(id)
     if (index !== -1 && has(state.dnsProviders, id)) {
-      const object = omitId(value)
+      const object = omit(value, ['id'])
       for (const [key, value] of Object.entries(object)) {
         Vue.set(state.dnsProviders[id], key, value)
       }
