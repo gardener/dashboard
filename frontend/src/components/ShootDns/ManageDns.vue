@@ -13,7 +13,6 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             label="Cluster Domain"
             v-model="domain"
-            clearable
             @blur="$v.primaryProvider.$touch()"
             :disabled="!createMode"
             :persistent-hint="!createMode"
@@ -56,7 +55,6 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <transition-group name="list" class="alternate-row-background">
       <v-row v-for="id in dnsProviderIds" :key="id" class="list-item pt-2">
-        <v-chip label x-small>{{id}}</v-chip>
         <dns-provider-row :create-mode="createMode" :dnsProviderId="id"/>
       </v-row>
       <v-row key="addProvider" class="list-item">
