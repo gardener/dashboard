@@ -346,7 +346,7 @@ Object {
   "frontend": Object {
     "vendorHints": Array [
       Object {
-        "hintMessage": "hint message",
+        "hintMessage": "[foo](https://bar.baz)",
         "hintType": "warning",
         "vendorNames": Array [
           "foo",

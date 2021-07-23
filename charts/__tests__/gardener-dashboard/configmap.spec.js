@@ -315,7 +315,7 @@ describe('gardener-dashboard', function () {
                   'foo',
                   'bar'
                 ],
-                hintMessage: 'hint message',
+                hintMessage: '[foo](https://bar.baz)',
                 hintType: 'warning'
               },
               {

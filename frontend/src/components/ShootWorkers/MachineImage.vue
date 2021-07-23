@@ -36,6 +36,9 @@ SPDX-License-Identifier: Apache-2.0
          {{item.name}} [{{item.version}}]
         </span>
       </template>
+      <template v-slot:message="{ message }">
+        <div v-html="message"></div>
+      </template>
     </v-select>
   </hint-colorizer>
 </template>
@@ -44,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
 import VendorIcon from '@/components/VendorIcon'
 import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, selectedImageIsNotLatest } from '@/utils'
+import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
@@ -108,7 +111,7 @@ export default {
     hint () {
       const hintText = []
       if (this.machineImage.vendorHint) {
-        hintText.push(this.machineImage.vendorHint.hintMessage)
+        hintText.push(transformHtml(this.machineImage.vendorHint.hintMessage))
       }
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
@@ -119,7 +122,7 @@ export default {
       if (this.machineImage.isPreview) {
         hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
       }
-      return join(hintText, ' / ')
+      return join(hintText, '<br />')
     },
     hintColor () {
       if (this.machineImage.expirationDate ||

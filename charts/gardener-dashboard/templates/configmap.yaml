@@ -308,7 +308,7 @@ data:
             {{- range .vendorNames }}
             - {{ . }}
             {{- end }}
-          hintMessage: {{ .hintMessage }}
+          hintMessage: {{ quote .hintMessage }}
           {{- if .hintType }}
           hintType: {{ .hintType }}
           {{- end }}
