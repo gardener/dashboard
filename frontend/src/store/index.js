@@ -75,7 +75,7 @@ import draggable from './modules/draggable'
 import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
-import shootSpec from './modules/shootSpec'
+import shootStaging from './modules/shootStaging'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
@@ -1751,7 +1751,7 @@ const modules = {
   shoots,
   cloudProviderSecrets,
   tickets,
-  shootSpec
+  shootStaging
 }
 
 const store = new Vuex.Store({

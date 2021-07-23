@@ -196,10 +196,10 @@ export default {
       'namespace',
       'cfg'
     ]),
-    ...mapGetters('shootSpec', {
-      getDnsConfiguration: 'getDns',
-      dnsConfigurationValid: 'dnsValid'
-    }),
+    ...mapGetters('shootStaging', [
+      'getDnsConfiguration',
+      'dnsConfigurationValid'
+    ]),
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
@@ -221,9 +221,9 @@ export default {
       'createShoot',
       'setNewShootResource'
     ]),
-    ...mapActions('shootSpec', {
-      setupDnsConfiguration: 'setupDns'
-    }),
+    ...mapActions('shootStaging', [
+      'setDnsConfiguration'
+    ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
     },
@@ -501,7 +501,7 @@ export default {
   },
   created () {
     const shootSpecDns = get(this.newShootResource, 'spec.dns', {})
-    this.setupDnsConfiguration(shootSpecDns)
+    this.setDnsConfiguration(shootSpecDns)
   }
 }
 </script>

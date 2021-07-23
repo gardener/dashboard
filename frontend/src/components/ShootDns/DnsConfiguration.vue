@@ -40,13 +40,15 @@ export default {
       componentKey: uuidv4()
     }
   },
-  ...mapGetters('shootSpec', {
-    getDnsConfiguration: 'getDns'
-  }),
+  computed: {
+    ...mapGetters('shootStaging', [
+      'getDnsConfiguration'
+    ])
+  },
   methods: {
-    ...mapActions('shootSpec', {
-      setupDnsConfiguration: 'setupDns'
-    }),
+    ...mapActions('shootStaging', [
+      'setDnsConfiguration'
+    ]),
     async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -69,7 +71,7 @@ export default {
       }
     },
     reset () {
-      this.setupDnsConfiguration(this.shootSpec.dns)
+      this.setDnsConfiguration(this.shootSpec.dns)
       this.componentKey = uuidv4() // force re-render
     }
   }

@@ -155,7 +155,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('shootSpec', {
+    ...mapState('shootStaging', {
       dnsProvider (state) {
         return state.dnsProviders[this.dnsProviderId]
       },
@@ -163,7 +163,7 @@ export default {
         return state.dnsPrimaryProviderId === this.dnsProviderId
       }
     }),
-    ...mapGetters('shootSpec', [
+    ...mapGetters('shootStaging', [
       'dnsProviderTypes'
     ]),
     ...mapGetters([
@@ -241,7 +241,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('shootSpec', [
+    ...mapMutations('shootStaging', [
       'patchDnsProvider',
       'deleteDnsProvider'
     ]),

@@ -110,13 +110,13 @@ export default {
   },
   validations,
   computed: {
-    ...mapState('shootSpec', [
+    ...mapState('shootStaging', [
       'dnsDomain',
       'dnsProviders',
       'dnsProviderIds',
       'dnsPrimaryProviderId'
     ]),
-    ...mapGetters('shootSpec', [
+    ...mapGetters('shootStaging', [
       'dnsProviderTypes ',
       'dnsProvidersWithPrimarySupport',
       'dnsPrimaryProvider',
@@ -154,11 +154,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions('shootSpec', [
+    ...mapActions('shootStaging', [
       'setDnsDomain',
       'addDnsProvider'
     ]),
-    ...mapMutations('shootSpec', [
+    ...mapMutations('shootStaging', [
       'setDnsPrimaryProvider',
       'setDnsPrimaryProviderValid'
     ]),

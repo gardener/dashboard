@@ -18,27 +18,11 @@ import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import every from 'lodash/every'
 
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 // helper
 function getId (object) {
   return get(object, 'id', null)
-}
-
-function idByIndex (index) {
-  if (!Number.isInteger(index) || index < 0) {
-    throw TypeError('Index argument must be a positive integer')
-  }
-  return '' + (index + 1)
-}
-
-function indexById (id) {
-  if (!/^\d+$/.test(id)) {
-    throw TypeError('Id argument must be a string which only contains digits')
-  }
-  return +id - 1
-}
-
-function maxIndexByIds (ids) {
-  return Math.max(-1, ...map(ids, indexById))
 }
 
 function isDnsProviderValid ({ type, secretName }) {
@@ -50,7 +34,6 @@ const state = {
   dnsDomain: null,
   dnsProviders: {},
   dnsProviderIds: [],
-  dnsProviderLastIndex: -1,
   dnsPrimaryProviderId: null,
   dnsPrimaryProviderValid: null
 }
@@ -70,12 +53,6 @@ const getters = {
   dnsProvidersValid (state) {
     return every(state.dnsProviders, 'valid')
   },
-  dnsProviderLastId (state) {
-    return idByIndex(state.dnsProviderLastIndex)
-  },
-  dnsProviderNextId (state) {
-    return idByIndex(state.dnsProviderLastIndex + 1)
-  },
   dnsPrimaryProvider (state) {
     return state.dnsProviders[state.dnsPrimaryProviderId]
   },
@@ -83,7 +60,7 @@ const getters = {
     const defaultPrimaryProvider = head(getters.dnsProvidersWithPrimarySupport)
     return getId(defaultPrimaryProvider)
   },
-  getDns (state) {
+  getDnsConfiguration (state) {
     const providerById = id => {
       const {
         type,
@@ -120,7 +97,7 @@ const getters = {
       }
     }
   },
-  dnsValid (state, getters) {
+  dnsConfigurationValid (state, getters) {
     return state.dnsPrimaryProviderValid && getters.dnsProvidersValid
   }
 }
@@ -142,8 +119,9 @@ const actions = {
     const type = head(getters.dnsProviderTypes)
     const dnsSecret = head(rootGetters.dnsSecretsByProviderKind(type))
     const secretName = get(dnsSecret, 'metadata.name')
+    const id = uuidv4()
     commit('addDnsProvider', {
-      id: getters.dnsProviderNextId,
+      id,
       type,
       secretName,
       excludeDomains: [],
@@ -153,10 +131,10 @@ const actions = {
       valid: isDnsProviderValid({ type, secretName })
     })
   },
-  setupDns ({ commit }, { domain, providers = [] }) {
+  setDnsConfiguration ({ commit }, { domain, providers = [] }) {
     let primaryProviderId = null
-    providers = map(providers, (provider, index) => {
-      const id = idByIndex(index)
+    providers = map(providers, provider => {
+      const id = uuidv4()
       const {
         type,
         secretName,
@@ -184,7 +162,7 @@ const actions = {
         valid: isDnsProviderValid({ type, secretName })
       }
     })
-    commit('setupDns', {
+    commit('setDns', {
       domain,
       providers,
       primaryProviderId
@@ -194,11 +172,10 @@ const actions = {
 
 // mutations
 const mutations = {
-  setupDns (state, { domain, providers = [], primaryProviderId = null }) {
+  setDns (state, { domain, providers = [], primaryProviderId = null }) {
     state.dnsDomain = domain
     state.dnsProviders = keyBy(providers, 'id')
     state.dnsProviderIds = map(providers, 'id')
-    state.dnsProviderLastIndex = maxIndexByIds(state.dnsProviderIds)
     state.dnsPrimaryProviderId = primaryProviderId
     state.dnsPrimaryProviderValid = !state.dnsDomain || !!state.dnsPrimaryProviderId
   },
@@ -216,10 +193,8 @@ const mutations = {
   },
   addDnsProvider (state, value) {
     const id = getId(value)
-    const nextIndex = indexById(id)
     const index = state.dnsProviderIds.indexOf(id)
-    if (index === -1 && nextIndex > state.dnsProviderLastIndex) {
-      state.dnsProviderLastIndex = nextIndex
+    if (index === -1) {
       state.dnsProviderIds.push(id)
       Vue.set(state.dnsProviders, id, value)
     }
