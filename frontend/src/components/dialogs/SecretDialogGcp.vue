@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="gcp"
-    create-title="Add new Google Secret"
-    replace-title="Replace Google Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template v-slot:help-slot>
-      <div class="help-content">
+      <div class="help-content" v-if="vendor==='gcp'">
         <p>
           A service account is a special account that can be used by services and applications running on your Google
           Compute Engine instance to interact with other Google Cloud Platform APIs. Applications can use service
@@ -57,10 +57,20 @@ SPDX-License-Identifier: Apache-2.0
 
         <p>
           Read the
-          <a href="https://cloud.google.com/compute/docs/access/service-accounts"
-              target="_blank">
-            Service Account Documentation<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to apply for credentials
+          <external-link url="https://cloud.google.com/compute/docs/access/service-accounts">
+            Service Account Documentation</external-link> on how to apply for credentials
           to service accounts.
+        </p>
+      </div>
+      <div v-if="vendor==='google-clouddns'">
+        <p>
+          You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
+        </p>
+        <p>
+          For details on Cloud DNS see <external-link url="https://cloud.google.com/dns/docs/zones"></external-link>, and on Service Accounts see <external-link url="https://cloud.google.com/iam/docs/service-accounts"></external-link>
+        </p>
+        <p>
+          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <external-link url="https://cloud.google.com/dns/docs/access-control"></external-link>. A possible role is roles/dns.admin "DNS Administrator".
         </p>
       </div>
     </template>
@@ -71,6 +81,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import ExternalLink from '@/components/ExternalLink'
 import { required } from 'vuelidate/lib/validators'
 import { serviceAccountKey } from '@/utils/validators'
 import { handleTextFieldDrop, getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -84,7 +95,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    ExternalLink
   },
   props: {
     value: {
@@ -93,6 +105,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -126,6 +141,15 @@ export default {
     },
     isCreateMode () {
       return !this.secret
+    },
+    name () {
+      if (this.vendor === 'gcp') {
+        return 'Google'
+      }
+      if (this.vendor === 'google-clouddns') {
+        return 'Google Cloud DNS'
+      }
+      return undefined
     }
   },
   methods: {

@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-tooltip v-else top color="rgba(0, 0, 0, 1)" content-class="tooltip">
     <template v-slot:activator="{ on }">
       <div class="d-flex align-center" v-on="on">
-        <infra-icon v-model="cloudProviderKind" class="mr-2"></infra-icon>
+        <infra-icon :value="cloudProviderKind" class="mr-2"></infra-icon>
         {{ description }}
       </div>
     </template>
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item>
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex"><infra-icon v-model="cloudProviderKind" class="mr-2"></infra-icon>{{ cloudProviderKind }}</v-list-item-title>
+            <v-list-item-title class="d-flex"><infra-icon :value="cloudProviderKind" class="mr-2"></infra-icon>{{ cloudProviderKind }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item v-if="cloudProfileName">

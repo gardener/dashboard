@@ -30,16 +30,22 @@ exports[`api controllerregistrations should return all gardener extensions 2`] =
 Array [
   Object {
     "name": "foo",
+    "resources": Array [
+      Object {
+        "kind": "OperatingSystemConfig",
+        "type": "gardenlinux",
+      },
+    ],
     "version": "v1.0.0",
   },
   Object {
     "name": "bar",
+    "resources": Array [
+      Object {
+        "kind": "Network",
+        "type": "gardium",
+      },
+    ],
   },
-]
-`;
-
-exports[`api controllerregistrations should return all networking types 1`] = `
-Array [
-  "gardium",
 ]
 `;

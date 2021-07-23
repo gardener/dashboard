@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="gDialog"
     confirm-button-text="Ok"
     cancel-button-text=""
-    maxWidth="600"
+    width="600"
     @dialog-closed="onDialogClosed()"
     >
     <template v-slot:caption>About</template>
@@ -73,7 +73,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchGardenerExtensions',
       'setError'
     ]),
     async fetchVersions () {
@@ -96,11 +95,6 @@ export default {
         })
       }
     },
-    async fetchExtensions () {
-      if (this.isAdmin) {
-        await this.fetchGardenerExtensions()
-      }
-    },
     onDialogClosed () {
       this.$emit('dialog-closed')
     }
@@ -110,7 +104,6 @@ export default {
       if (value) {
         this.$refs.gDialog.showDialog()
         this.fetchVersions()
-        this.fetchExtensions()
       }
     }
   }

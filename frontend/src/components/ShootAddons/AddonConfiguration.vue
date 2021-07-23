@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Add-ons"
-    max-width="900"
+    width="900"
     max-height="60vh"
     >
     <template v-slot:actionComponent>

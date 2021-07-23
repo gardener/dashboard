@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     :button-text="buttonText"
     :small-icon="small"
-    max-width="600"
+    width="600"
   >
     <template v-slot:actionComponent>
       <v-list>

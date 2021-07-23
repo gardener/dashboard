@@ -31,7 +31,7 @@ function getSecret ({ namespace, name, labels, data = {} }) {
   return { metadata, data }
 }
 
-function getInfrastructureSecret ({ cloudProfileName, ...options }) {
+function getCloudProviderSecret ({ cloudProfileName, ...options }) {
   return getSecret({
     labels: {
       'cloudprofile.garden.sapcloud.io/name': cloudProfileName
@@ -62,8 +62,8 @@ function getKubeconfig ({ server, name = 'default' }) {
   })
 }
 
-const infrastructureSecretList = [
-  getInfrastructureSecret({
+const cloudProviderSecretList = [
+  getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret1',
     cloudProfileName: 'infra1-profileName',
@@ -72,7 +72,7 @@ const infrastructureSecretList = [
       secret: 'fooSecret'
     }
   }),
-  getInfrastructureSecret({
+  getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret2',
     cloudProfileName: 'infra3-profileName',
@@ -81,7 +81,7 @@ const infrastructureSecretList = [
       secret: 'fooSecret'
     }
   }),
-  getInfrastructureSecret({
+  getCloudProviderSecret({
     namespace: 'garden-trial',
     name: 'trial-secret',
     cloudProfileName: 'infra1-profileName',
@@ -101,7 +101,7 @@ const secrets = {
     return find(items, ['metadata.name', name])
   },
   list (namespace) {
-    const items = cloneDeep(infrastructureSecretList)
+    const items = cloneDeep(cloudProviderSecretList)
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items

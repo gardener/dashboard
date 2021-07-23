@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="text-subtitle-1">
-          Project Secrets
+          Infrastructure Secrets
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="secretList.length > 3"
+        <v-text-field v-if="infrastructureSecretItems.length > 3"
           class="mr-3"
           prepend-inner-icon="mdi-magnify"
           color="primary"
@@ -22,10 +22,10 @@ SPDX-License-Identifier: Apache-2.0
           flat
           solo
           clearable
-          v-model="secretFilter"
-          @keyup.esc="secretFilter=''"
+          v-model="infraSecretFilter"
+          @keyup.esc="infraSecretFilter=''"
         ></v-text-field>
-        <v-menu v-if="canCreateSecrets" :nudge-bottom="20" :nudge-right="20" left v-model="createSecretMenu" absolute>
+        <v-menu v-if="canCreateSecrets" :nudge-bottom="20" :nudge-right="20" left v-model="createInfraSecretMenu" absolute>
           <template v-slot:activator="{ on: menu }">
             <v-tooltip top>
               <template v-slot:activator="{ on: tooltip }">
@@ -33,11 +33,11 @@ SPDX-License-Identifier: Apache-2.0
                   <v-icon color="toolbar-title">mdi-plus</v-icon>
                 </v-btn>
               </template>
-              Create Secret
+              Create Infrastructure Secret
             </v-tooltip>
           </template>
           <v-list subheader dense>
-            <v-subheader>Create Secret</v-subheader>
+            <v-subheader>Create Infrastructure Secret</v-subheader>
             <v-list-item v-for="infrastructure in sortedCloudProviderKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
               <v-list-item-action>
                  <infra-icon :value="infrastructure" :size="24"></infra-icon>
@@ -51,41 +51,121 @@ SPDX-License-Identifier: Apache-2.0
           </v-list>
         </v-menu>
         <table-column-selection
-          :headers="secretTableHeaders"
-          @set-selected-header="setSelectedHeader"
-          @reset="resetTableSettings"
+          :headers="infraSecretTableHeaders"
+          @set-selected-header="setSelectedInfraHeader"
+          @reset="resetInfraTableSettings"
         ></table-column-selection>
       </v-toolbar>
 
-      <v-card-text v-if="!secretList.length">
-        <div class="text-h6 grey--text text--darken-1 my-4">Add Secrets to your project</div>
+      <v-card-text v-if="!infrastructureSecretItems.length">
+        <div class="text-h6 grey--text text--darken-1 my-4">Add Infrastructure Secrets to your project</div>
         <p class="text-body-1">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
       <v-data-table
         v-else
-        :headers="visibleSecretTableHeaders"
-        :items="secretList"
+        :headers="visibleInfraSecretTableHeaders"
+        :items="infrastructureSecretItems"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
-        :options.sync="secretTableOptions"
+        :options.sync="infraSecretTableOptions"
         must-sort
-        :search="secretFilter"
+        :search="infraSecretFilter"
       >
         <template v-slot:item="{ item }">
-          <secret-row
+          <secret-row-infra
             :item="item"
-            :headers="secretTableHeaders"
+            :headers="infraSecretTableHeaders"
             :key="`${item.cloudProfileName}/${item.name}`"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
-          ></secret-row>
+          ></secret-row-infra>
         </template>
       </v-data-table>
     </v-card>
 
-    <secret-dialog-wrapper :dialog-state="dialogState" :selected-secret="selectedSecret"></secret-dialog-wrapper>
-    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret"></delete-dialog>
+    <v-card class="ma-3 mt-6">
+      <v-toolbar flat color="toolbar-background toolbar-title--text">
+        <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
+        <v-toolbar-title class="text-subtitle-1">
+          DNS Secrets
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field v-if="dnsSecretItems.length > 3"
+          class="mr-3"
+          prepend-inner-icon="mdi-magnify"
+          color="primary"
+          label="Search"
+          hide-details
+          flat
+          solo
+          clearable
+          v-model="dnsSecretFilter"
+          @keyup.esc="dnsSecretFilter=''"
+        ></v-text-field>
+        <v-menu v-if="canCreateSecrets" :nudge-bottom="20" :nudge-right="20" left v-model="createDnsSecretMenu" absolute>
+          <template v-slot:activator="{ on: menu }">
+            <v-tooltip top>
+              <template v-slot:activator="{ on: tooltip }">
+                <v-btn v-on="{ ...menu, ...tooltip}" icon>
+                  <v-icon color="toolbar-title">mdi-plus</v-icon>
+                </v-btn>
+              </template>
+              Create DNS Secret
+            </v-tooltip>
+          </template>
+          <v-list subheader dense>
+            <v-subheader>Create DNS Secret</v-subheader>
+            <v-list-item v-for="dnsProvider in dnsProviderTypes" :key="dnsProvider" @click="openSecretAddDialog(dnsProvider)">
+              <v-list-item-action>
+                 <infra-icon :value="dnsProvider" :size="24"></infra-icon>
+              </v-list-item-action>
+              <v-list-item-content class="primary--text">
+                <v-list-item-title>
+                    {{dnsProvider}}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <table-column-selection
+          :headers="dnsSecretTableHeaders"
+          @set-selected-header="setSelectedDnsHeader"
+          @reset="resetDnsTableSettings"
+        ></table-column-selection>
+      </v-toolbar>
+
+      <v-card-text v-if="!dnsSecretItems.length">
+        <div class="text-h6 grey--text text--darken-1 my-4">Add DNS Secrets to your project</div>
+        <p class="text-body-1">
+          Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
+        </p>
+      </v-card-text>
+      <v-data-table
+        v-else
+        :headers="visibleDnsSecretTableHeaders"
+        :items="dnsSecretItems"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :options.sync="dnsSecretTableOptions"
+        must-sort
+        :search="dnsSecretFilter"
+      >
+        <template v-slot:item="{ item }">
+          <secret-row-dns
+            :item="item"
+            :headers="dnsSecretTableHeaders"
+            :key="`${item.cloudProfileName}/${item.name}`"
+            @delete="onRemoveSecret"
+            @update="onUpdateSecret"
+          ></secret-row-dns>
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <secret-dialog-wrapper
+      :visible-dialog="visibleSecretDialog" :selected-secret="selectedSecret"
+      @dialog-closed="onDialogClosed"
+    ></secret-dialog-wrapper>
   </v-container>
 </template>
 
@@ -93,97 +173,74 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters } from 'vuex'
 import { isOwnSecret, mapTableHeader } from '@/utils'
 import get from 'lodash/get'
-import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
-import SecretRow from '@/components/SecretRow.vue'
+import SecretRowInfra from '@/components/SecretRowInfra.vue'
+import SecretRowDns from '@/components/SecretRowDns.vue'
 import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
-import merge from 'lodash/merge'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
+import find from 'lodash/find'
 import includes from 'lodash/includes'
 
 export default {
   name: 'secrets',
   components: {
-    DeleteDialog,
     SecretDialogWrapper,
     TableColumnSelection,
-    SecretRow,
+    SecretRowInfra,
+    SecretRowDns,
     InfraIcon
   },
   data () {
     return {
       selectedSecret: {},
-      dialogState: {
-        aws: {
-          visible: false,
-          help: false
-        },
-        azure: {
-          visible: false,
-          help: false
-        },
-        gcp: {
-          visible: false,
-          help: false
-        },
-        openstack: {
-          visible: false,
-          help: false
-        },
-        alicloud: {
-          visible: false,
-          help: false
-        },
-        metal: {
-          visible: false,
-          help: false
-        },
-        vsphere: {
-          visible: false,
-          help: false
-        },
-        hcloud: {
-          visible: false,
-          help: false
-        },
-        deleteConfirm: false,
-        speedDial: false
-      },
-      initialDialogState: {},
-      defaultSecretTableOptions: {
+      defaultInfraSecretTableOptions: {
         itemsPerPage: 10,
         sortBy: ['name'],
         sortDesc: [false]
       },
-      secretSelectedColumns: {},
-      secretTableOptions: undefined,
-      secretFilter: '',
-      createSecretMenu: false
+      infraSecretSelectedColumns: {},
+      infraSecretTableOptions: undefined,
+      infraSecretFilter: '',
+      createInfraSecretMenu: false,
+      dnsSecretSelectedColumns: {},
+      dnsSecretTableOptions: undefined,
+      dnsSecretFilter: '',
+      createDnsSecretMenu: false,
+      visibleSecretDialog: undefined
     }
   },
   computed: {
     ...mapGetters([
       'cloudProfilesByCloudProviderKind',
-      'getInfrastructureSecretByName',
+      'getCloudProviderSecretByName',
       'infrastructureSecretList',
+      'dnsSecretList',
       'shootList',
       'canCreateSecrets',
-      'sortedCloudProviderKindList'
+      'sortedCloudProviderKindList',
+      'sortedDnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
       }
     },
-    secretTableHeaders () {
+    infraSecretTableHeaders () {
       const headers = [
         {
           text: 'NAME',
           align: 'start',
           value: 'name',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'Secret',
+          align: 'start',
+          value: 'secret',
           sortable: true,
           defaultSelected: true
         },
@@ -218,53 +275,114 @@ export default {
       return map(headers, header => ({
         ...header,
         class: 'nowrap',
-        selected: get(this.secretSelectedColumns, header.value, header.defaultSelected)
+        selected: get(this.infraSecretSelectedColumns, header.value, header.defaultSelected)
       }))
     },
-    visibleSecretTableHeaders () {
-      return filter(this.secretTableHeaders, ['selected', true])
+    visibleInfraSecretTableHeaders () {
+      return filter(this.infraSecretTableHeaders, ['selected', true])
     },
-    secretList () {
+    infrastructureSecretItems () {
       return map(this.infrastructureSecretList, secret => ({
         name: secret.metadata.name,
         isOwnSecret: isOwnSecret(secret),
-        ownerNamespace: secret.metadata.secretRef.namespace,
+        secretNamespace: secret.metadata.secretRef.namespace,
+        secretName: secret.metadata.secretRef.name,
         infrastructure: `${secret.metadata.cloudProviderKind}--${secret.metadata.cloudProfileName}`,
         infrastructureName: secret.metadata.cloudProviderKind,
         cloudProfileName: secret.metadata.cloudProfileName,
-        details: this.getSecretDetails(secret),
-        relatedShootCount: this.relatedShootCount(secret),
-        relatedShootCountLabel: this.relatedShootCountLabel(secret),
-        isSupportedInfrastructure: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
+        details: this.getSecretDetailsInfra(secret),
+        relatedShootCount: this.relatedShootCountInfra(secret),
+        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
+        isSupportedCloudProvider: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
+        secret
+      }))
+    },
+    dnsProviderTypes () {
+      return map(this.sortedDnsProviderList, 'type')
+    },
+    dnsSecretTableHeaders () {
+      const headers = [
+        {
+          text: 'NAME',
+          align: 'start',
+          value: 'name',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'Secret',
+          align: 'start',
+          value: 'secret',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'DNS Provider',
+          align: 'start',
+          value: 'dnsProvider',
+          sortable: true,
+          defaultSelected: true
+        },
+        {
+          text: 'DETAILS',
+          align: 'start',
+          value: 'details',
+          sortable: false,
+          defaultSelected: true
+        },
+        {
+          text: 'USED BY',
+          align: 'start',
+          value: 'relatedShootCount',
+          defaultSelected: true
+        },
+        {
+          text: 'ACTIONS',
+          align: 'end',
+          value: 'actions',
+          sortable: false,
+          defaultSelected: true
+        }
+      ]
+      return map(headers, header => ({
+        ...header,
+        class: 'nowrap',
+        selected: get(this.infraSecretSelectedColumns, header.value, header.defaultSelected)
+      }))
+    },
+    visibleDnsSecretTableHeaders () {
+      return filter(this.dnsSecretTableHeaders, ['selected', true])
+    },
+    dnsSecretItems () {
+      return map(this.dnsSecretList, secret => ({
+        name: secret.metadata.name,
+        isOwnSecret: isOwnSecret(secret),
+        secretNamespace: secret.metadata.secretRef.namespace,
+        secretName: secret.metadata.secretRef.name,
+        dnsProvider: secret.metadata.dnsProviderName,
+        details: this.getSecretDetailsDns(secret),
+        relatedShootCount: this.relatedShootCountDns(secret),
+        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
+        isSupportedCloudProvider: includes(this.dnsProviderTypes, secret.metadata.dnsProviderName),
         secret
       }))
     }
   },
   methods: {
-    onToogleHelp (infrastructureKind) {
-      const infrastructure = this.dialogState[infrastructureKind]
-      infrastructure.help = !infrastructure.help
-    },
-    onHideHelp (infrastructureKind) {
-      this.dialogState[infrastructureKind].help = false
-    },
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
-      this.dialogState[infrastructureKind].visible = true
+      this.visibleSecretDialog = infrastructureKind
     },
     onUpdateSecret (secret) {
-      const kind = secret.metadata.cloudProviderKind
+      const kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
       this.selectedSecret = secret
-      this.dialogState[kind].visible = true
+      this.visibleSecretDialog = kind
     },
     onRemoveSecret (secret) {
       this.selectedSecret = secret
-      this.dialogState.deleteConfirm = true
+      this.visibleSecretDialog = 'delete'
     },
-    hideDialogs () {
-      merge(this.dialogState, this.initialDialogState)
-    },
-    getSecretDetails (secret) {
+    getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
       switch (secret.metadata.cloudProviderKind) {
         case 'openstack':
@@ -317,6 +435,13 @@ export default {
               value: secretData.accessKeyID
             }
           ]
+        case 'metal':
+          return [
+            {
+              label: 'API URL',
+              value: secretData.metalAPIURL
+            }
+          ]
         case 'hcloud':
           return [
             {
@@ -325,44 +450,126 @@ export default {
             }
           ]
       }
+    },
+    getSecretDetailsDns (secret) {
+      const secretData = secret.data || {}
+      switch (secret.metadata.dnsProviderName) {
+        case 'openstack-designate':
+          return [
+            {
+              label: 'Domain Name',
+              value: secretData.domainName
+            },
+            {
+              label: 'Tenant Name',
+              value: secretData.tenantName
+            }
+          ]
+        case 'aws-route53':
+          return [
+            {
+              label: 'Access Key ID',
+              value: secretData.accessKeyID
+            }
+          ]
+        case 'azure-dns':
+          return [
+            {
+              label: 'Subscription ID',
+              value: secretData.subscriptionID
+            }
+          ]
+        case 'google-clouddns':
+          return [
+            {
+              label: 'Project',
+              value: secretData.project
+            }
+          ]
+        case 'alicloud-dns':
+          return [
+            {
+              label: 'Access Key ID',
+              value: secretData.accessKeyID
+            }
+          ]
+        case 'infoblox-dns':
+          return [
+            {
+              label: 'Infoblox Username',
+              value: secretData.USERNAME
+            }
+          ]
+        case 'cloudflare-dns':
+          return [
+            {
+              label: 'API Key',
+              value: 'hidden'
+            }
+          ]
+        case 'netlify-dns':
+          return [
+            {
+              label: 'API Key',
+              value: 'hidden'
+            }
+          ]
+      }
       return undefined
     },
-    relatedShootCount (secret) {
+    relatedShootCountInfra (secret) {
       const name = secret.metadata.name
       const shootsByInfrastructureSecret = filter(this.shootList, ['spec.secretBindingName', name])
       return shootsByInfrastructureSecret.length
     },
-    relatedShootCountLabel (secret) {
-      const count = this.relatedShootCount(secret)
+    relatedShootCountDns (secret) {
+      const shootsByDnsSecret = filter(this.shootList, shoot => {
+        return find(shoot.spec.dns.providers, { type: secret.metadata.dnsProviderName, secretName: secret.metadata.name })
+      })
+      return shootsByDnsSecret.length
+    },
+    relatedShootCountLabel (count) {
       if (count === 0) {
         return 'currently unused'
       } else {
         return `${count} ${count > 1 ? 'clusters' : 'cluster'}`
       }
     },
-    setSelectedHeader (header) {
-      this.$set(this.secretSelectedColumns, header.value, !header.selected)
+    setSelectedInfraHeader (header) {
+      this.$set(this.infraSecretSelectedColumns, header.value, !header.selected)
       this.saveSelectedColumns()
     },
-    resetTableSettings () {
-      this.secretSelectedColumns = mapTableHeader(this.secretTableHeaders, 'defaultSelected')
-      this.tableOptions = this.defaultSecretTableOptions
+    resetInfraTableSettings () {
+      this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
+      this.tableOptions = this.defaultInfraSecretTableOptions
+      this.saveSelectedColumns()
+    },
+    setSelectedDnsHeader (header) {
+      this.$set(this.dnsSecretSelectedColumns, header.value, !header.selected)
+      this.saveSelectedColumns()
+    },
+    resetDnsTableSettings () {
+      this.dnsSecretSelectedColumns = mapTableHeader(this.dnsSecretTableHeaders, 'defaultSelected')
+      this.tableOptions = this.defaultDnsSecretTableOptions
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
-      this.$localStorage.setObject('secrets/secret-list/selected-columns', mapTableHeader(this.secretTableHeaders, 'selected'))
+      this.$localStorage.setObject('secrets/secret-list/selected-columns', mapTableHeader(this.infraSecretTableHeaders, 'selected'))
     },
     updateTableSettings () {
-      this.secretSelectedColumns = this.$localStorage.getObject('members/secret-list/selected-columns') || {}
+      this.infraSecretSelectedColumns = this.$localStorage.getObject('members/secret-list/selected-columns') || {}
       const tableOptions = this.$localStorage.getObject('members/secret-list/options')
-      this.secretTableOptions = {
-        ...this.defaultSecretTableOptions,
+      this.infraSecretTableOptions = {
+        ...this.defaultInfraSecretTableOptions,
         ...tableOptions
       }
+    },
+    onDialogClosed () {
+      this.visibleSecretDialog = undefined
     }
   },
   watch: {
-    secretTableOptions (value) {
+    infraSecretTableOptions (value) {
       if (!value) {
         return
       }
@@ -377,18 +584,11 @@ export default {
     if (!get(this.$route.params, 'name')) {
       return
     }
-    const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
-    if (!infrastructureSecret || !isOwnSecret(infrastructureSecret)) {
+    const secret = this.getCloudProviderSecretByName(this.$route.params)
+    if (!secret || !isOwnSecret(secret)) {
       return
     }
-    this.onUpdateSecret(infrastructureSecret)
-  },
-  created () {
-    merge(this.initialDialogState, this.dialogState)
-
-    this.$bus.$on('esc-pressed', () => {
-      this.hideDialogs()
-    })
+    this.onUpdateSecret(secret)
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                 <code>admin</code> - Access to all resources of this project, except for member management.
               </li>
               <li>
-                <code>viewer</code> - Read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read infrastructure secrets.
+                <code>viewer</code> - Read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read cloud provider secrets.
               </li>
               <li>
                 <code>UAM</code> - Give the member User Access Management rights. Members with this role can manage members, should be used in combination with admin role to extend rights. In case an external UAM system is connected via a service account, only this account should get the <code>UAM</code> role.

@@ -7,7 +7,7 @@
 'use strict'
 
 const express = require('express')
-const { infrastructureSecrets } = require('../services')
+const { cloudProviderSecrets } = require('../services')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -18,7 +18,7 @@ router.route('/')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      res.send(await infrastructureSecrets.list({ user, namespace }))
+      res.send(await cloudProviderSecrets.list({ user, namespace }))
     } catch (err) {
       next(err)
     }
@@ -28,7 +28,7 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const body = req.body
-      res.send(await infrastructureSecrets.create({ user, namespace, body }))
+      res.send(await cloudProviderSecrets.create({ user, namespace, body }))
     } catch (err) {
       next(err)
     }
@@ -40,7 +40,7 @@ router.route('/:name')
       const user = req.user
       const { namespace, name } = req.params
       const body = req.body
-      res.send(await infrastructureSecrets.patch({ user, namespace, name, body }))
+      res.send(await cloudProviderSecrets.patch({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -49,7 +49,7 @@ router.route('/:name')
     try {
       const user = req.user
       const { namespace, name } = req.params
-      res.send(await infrastructureSecrets.remove({ user, namespace, name }))
+      res.send(await cloudProviderSecrets.remove({ user, namespace, name }))
     } catch (err) {
       next(err)
     }

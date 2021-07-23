@@ -97,7 +97,8 @@ function ensureDataLoaded (store, localStorage) {
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
-        ensureKubeconfigDataLoaded(store)
+        ensureKubeconfigDataLoaded(store),
+        ensureExtensionInformationLoaded(store)
       ])
 
       await setNamespace(store, to.params.namespace || to.query.namespace)
@@ -106,7 +107,7 @@ function ensureDataLoaded (store, localStorage) {
         case 'Secrets':
         case 'Secret': {
           await Promise.all([
-            store.dispatch('fetchInfrastructureSecrets'),
+            store.dispatch('fetchcloudProviderSecrets'),
             store.dispatch('subscribeShoots')
           ])
           break
@@ -114,11 +115,10 @@ function ensureDataLoaded (store, localStorage) {
         case 'NewShoot':
         case 'NewShootEditor': {
           const promises = [
-            store.dispatch('subscribeShoots'),
-            store.dispatch('fetchNetworkingTypes')
+            store.dispatch('subscribeShoots')
           ]
           if (store.getters.canGetSecrets) {
-            promises.push(store.dispatch('fetchInfrastructureSecrets'))
+            promises.push(store.dispatch('fetchcloudProviderSecrets'))
           }
           await Promise.all(promises)
 
@@ -198,5 +198,11 @@ function ensureSeedsLoaded (store) {
 function ensureKubeconfigDataLoaded (store) {
   if (isEmpty(store.state.kubeconfigData)) {
     return store.dispatch('fetchKubeconfigData')
+  }
+}
+
+function ensureExtensionInformationLoaded (store) {
+  if (isEmpty(store.getters.gardenerExtensionsList)) {
+    return store.dispatch('fetchGardenerExtensions')
   }
 }

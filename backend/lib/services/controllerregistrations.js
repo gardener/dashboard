@@ -21,17 +21,8 @@ exports.listExtensions = async function ({ user }) {
   return _.map(controllerregistrations, ({ metadata, spec }) => {
     return {
       name: metadata.name,
-      version: _.get(spec, 'deployment.providerConfig.values.image.tag')
+      version: _.get(spec, 'deployment.providerConfig.values.image.tag'),
+      resources: _.get(spec, 'resources')
     }
   })
-}
-
-exports.listNetworkingTypes = async function () {
-  const controllerregistrations = getControllerRegistrations()
-  return _
-    .chain(controllerregistrations)
-    .flatMap('spec.resources')
-    .filter(['kind', 'Network'])
-    .map('type')
-    .value()
 }

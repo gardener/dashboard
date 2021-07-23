@@ -43,6 +43,14 @@ SPDX-License-Identifier: Apache-2.0
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
+      <v-card flat class="mt-4">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
+          DNS Configuration
+        </v-card-title>
+        <v-card-text>
+          <manage-shoot-dns create-mode></manage-shoot-dns>
+       </v-card-text>
+      </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
         <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
          Access Restrictions
@@ -118,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapMutations, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -136,6 +144,7 @@ import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectIn
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+import ManageShootDns from '@/components/ShootDns/ManageDns'
 
 import asyncRef from '@/mixins/asyncRef'
 
@@ -156,6 +165,7 @@ export default {
     AccessRestrictions,
     NewShootDetails,
     ManageShootAddons,
+    ManageShootDns,
     MaintenanceComponents,
     MaintenanceTime,
     ManageHibernationSchedule,
@@ -186,6 +196,7 @@ export default {
       'namespace',
       'cfg'
     ]),
+    ...mapState('componentStates', { storedComponentStateManageDns: 'manageDns' }),
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
@@ -198,7 +209,8 @@ export default {
         this.detailsValid &&
         this.workersValid &&
         this.maintenanceTimeValid &&
-        this.hibernationScheduleValid
+        this.hibernationScheduleValid &&
+        this.storedComponentStateManageDns.valid
     }
   },
   methods: {
@@ -206,6 +218,7 @@ export default {
       'createShoot',
       'setNewShootResource'
     ]),
+    ...mapMutations('componentStates', ['SET_MANAGE_DNS']),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
     },
@@ -278,6 +291,20 @@ export default {
       }
       if (!isEmpty(firewallNetworks)) {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+      }
+
+      const dns = {}
+      if (this.storedComponentStateManageDns.domain) {
+        dns.domain = this.storedComponentStateManageDns.domain
+      }
+      if (this.storedComponentStateManageDns.providers.length) {
+        dns.providers = this.storedComponentStateManageDns.providers
+      }
+
+      if (!isEmpty(dns)) {
+        set(shootResource, 'spec.dns', dns)
+      } else {
+        unset(shootResource, 'spec.dns', this.storedComponentStateManageDns)
       }
 
       if (this.$refs.accessRestrictions) {
@@ -473,6 +500,17 @@ export default {
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
+  },
+  created () {
+    const shootResource = cloneDeep(this.newShootResource)
+    const domain = get(shootResource, 'spec.dns.domain')
+    const providers = get(shootResource, 'spec.dns.providers')
+
+    const dnsState = {
+      domain,
+      providers
+    }
+    this.SET_MANAGE_DNS(dnsState)
   }
 }
 </script>

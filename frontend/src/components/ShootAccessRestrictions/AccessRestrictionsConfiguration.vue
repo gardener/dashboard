@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :tooltip="tooltip"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    max-width="760"
+    width="760"
     caption="Configure Access Restrictions">
     <template v-slot:actionComponent>
       <access-restrictions

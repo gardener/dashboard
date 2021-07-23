@@ -66,28 +66,28 @@ export function getConfiguration () {
   return getResource('/config.json')
 }
 
-/* Infrastructures Secrets */
+/* CloudProviders Secrets */
 
-export function getInfrastructureSecrets ({ namespace }) {
+export function getCloudProviderSecrets ({ namespace }) {
   namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`)
+  return getResource(`/api/namespaces/${namespace}/cloud-provider-secrets`)
 }
 
-export function updateInfrastructureSecret ({ namespace, name, data }) {
+export function updateCloudProviderSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`, data)
+  return updateResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`, data)
 }
 
-export function createInfrastructureSecret ({ namespace, data }) {
+export function createCloudProviderSecret ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, data)
+  return createResource(`/api/namespaces/${namespace}/cloud-provider-secrets`, data)
 }
 
-export function deleteInfrastructureSecret ({ namespace, name }) {
+export function deleteCloudProviderSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`)
+  return deleteResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
 }
 
 /* Shoot Clusters */
@@ -161,6 +161,12 @@ export function updateShootAddons ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
+}
+
+export function updateShootDns ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`, data)
 }
 
 export async function getShootSchemaDefinition () {
@@ -351,8 +357,4 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 
 export function getGardenerExtensions () {
   return getResource('/api/gardener-extensions')
-}
-
-export function getNetworkingTypes () {
-  return getResource('/api/networking-types')
 }

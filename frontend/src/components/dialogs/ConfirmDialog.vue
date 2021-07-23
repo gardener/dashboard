@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="gDialog"
     :confirm-button-text="confirmButtonText"
     :cancel-button-text="cancelButtonText"
-    :max-width="maxWidth"
+    :width="width"
     :confirm-value="confirmValue"
     >
     <template v-slot:caption>{{captionText}}</template>
@@ -33,7 +33,7 @@ export default {
       cancelButtonText: undefined,
       captionText: undefined,
       messageHtml: undefined,
-      maxWidth: undefined,
+      width: undefined,
       confirmValue: undefined
     }
   },

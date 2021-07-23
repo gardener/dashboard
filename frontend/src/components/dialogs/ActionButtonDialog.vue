@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
       :confirm-disabled="!valid"
       :error-message.sync="errorMessage"
       :detailed-error-message.sync="detailedErrorMessage"
-      :max-width="maxWidth"
+      :width="width"
       :max-height="maxHeight"
       :confirm-value="confirmValue"
       :confirm-message="confirmMessage"
@@ -93,9 +93,8 @@ export default {
       type: Boolean,
       default: true
     },
-    maxWidth: {
-      type: String,
-      default: '1000'
+    width: {
+      type: String
     },
     maxHeight: {
       type: String,
