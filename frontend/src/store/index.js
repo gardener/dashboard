@@ -21,6 +21,7 @@ import {
   isValidTerminationDate,
   selectedImageIsNotLatest,
   availableKubernetesUpdatesCache,
+  defaultCRIForWorker,
   UNKNOWN_EXPIRED_TIMESTAMP
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -46,7 +47,6 @@ import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import pick from 'lodash/pick'
 import pickBy from 'lodash/pickBy'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
@@ -545,8 +545,7 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      const defaultMachineImage = firstItemMatchingVersionClassification(machineImages)
-      return pick(defaultMachineImage, 'name', 'version')
+      return firstItemMatchingVersionClassification(machineImages)
     }
   },
   shootList (state, getters) {
@@ -1052,7 +1051,7 @@ const getters = {
     }
   },
   generateWorker (state, getters) {
-    return (availableZones, cloudProfileName, region) => {
+    return (availableZones, cloudProfileName, region, kubernetesVersion) => {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
       const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
@@ -1074,6 +1073,9 @@ const getters = {
           image: machineImage
         },
         zones,
+        cri: {
+          name: defaultCRIForWorker(kubernetesVersion, map(machineImage.cri, 'name'))
+        },
         isNew: true
       }
       if (volumeType.name) {

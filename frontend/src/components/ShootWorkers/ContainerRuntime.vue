@@ -23,8 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="ociRuntimeItems"
-      @input="onInputOciRuntime"
-      v-model="ociRuntime"
+      v-model="ociRuntimes"
       label="Additional OCI Runtimes"
       multiple
       chips
@@ -36,18 +35,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors } from '@/utils'
-import uniq from 'lodash/uniq'
+import { getValidationErrors, defaultCRIForWorker } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
-
-// The following runtime is a default that is always offered.
-// Selecting a default Container / OCI Runtime will not create a CRI config in the shoot worker
-// Currently, this is hard-coded in Gardener. Once this can be configured or default is removed, we need to adapt
-const DEFAULT_CONTAINER_RUNTIME = 'docker'
+import includes from 'lodash/includes'
 
 const validationErrors = {
   containerRuntime: {
@@ -70,26 +64,52 @@ export default {
     machineImageCri: {
       type: Array,
       default: () => []
+    },
+    kubernetesVersion: {
+      type: String,
+      required: true
     }
   },
   data () {
     return {
       validationErrors,
-      valid: undefined,
-      containerRuntime: undefined,
-      ociRuntime: undefined
+      valid: undefined
     }
   },
   validations,
   computed: {
     containerRuntimeItems () {
-      const containerRuntimes = map(this.machineImageCri, 'name')
-      return uniq([...containerRuntimes, DEFAULT_CONTAINER_RUNTIME])
+      return map(this.machineImageCri, 'name')
     },
     ociRuntimeItems () {
       const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
-      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
-      return map(ociRuntimes, 'type')
+      const ociRuntimess = get(containerRuntime, 'containerRuntimes', [])
+      return map(ociRuntimess, 'type')
+    },
+    containerRuntime: {
+      get () {
+        return get(this.worker, 'cri.name')
+      },
+      set (value) {
+        set(this.worker, 'cri.name', value)
+      }
+    },
+    ociRuntimes: {
+      get () {
+        const ociRuntimes = get(this.worker, 'cri.containerRuntimes')
+        if (!ociRuntimes) {
+          return undefined
+        }
+        return map(ociRuntimes, 'type')
+      },
+      set (value) {
+        if (value && value.length) {
+          const containerRuntimes = map(value, ociRuntimes => ({ type: ociRuntimes }))
+          set(this.worker, 'cri.containerRuntimes', containerRuntimes)
+        } else {
+          unset(this.worker, 'cri.containerRuntimes')
+        }
+      }
     }
   },
   methods: {
@@ -97,22 +117,9 @@ export default {
       return getValidationErrors(this, field)
     },
     onInputContainerRuntime (value) {
-      if (value && value !== DEFAULT_CONTAINER_RUNTIME) {
-        set(this.worker, 'cri.name', value)
-      } else {
-        unset(this.worker, 'cri')
-      }
-      this.ociRuntime = undefined
+      this.ociRuntimes = undefined
       this.$v.containerRuntime.$touch()
       this.validateInput()
-    },
-    onInputOciRuntime (value) {
-      if (value.length) {
-        const containerRuntimes = map(value, ociRuntime => ({ type: ociRuntime }))
-        set(this.worker, 'cri.containerRuntimes', containerRuntimes)
-      } else {
-        unset(this.worker, 'cri.containerRuntimes')
-      }
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -122,13 +129,16 @@ export default {
     }
   },
   mounted () {
-    this.containerRuntime = get(this.worker, 'cri.name', DEFAULT_CONTAINER_RUNTIME)
-    const ociRuntime = get(this.worker, 'cri.containerRuntimes')
-    if (ociRuntime) {
-      this.ociRuntime = map(ociRuntime, 'type')
-    }
     this.$v.$touch()
     this.validateInput()
+  },
+  watch: {
+    containerRuntimeItems (containerRuntimeItems) {
+      if (!includes(containerRuntimeItems, this.containerRuntime)) {
+        this.containerRuntime = defaultCRIForWorker(this.kubernetesVersion, this.containerRuntimeItems)
+        this.onInputContainerRuntime()
+      }
+    }
   }
 }
 </script>
