@@ -11,7 +11,6 @@ const logger = require('./logger')
 const markdown = require('./markdown')
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
-const { CLIEngine } = require('eslint')
 
 function frontendConfig (config) {
   const converter = markdown.createConverter()
