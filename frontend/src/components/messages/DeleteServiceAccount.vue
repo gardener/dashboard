@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    Do you want to delete the service account <i>{{name}}</i>?
+    Do you want to delete the service account <em>{{name}}</em>?
   </div>
 </template>
 

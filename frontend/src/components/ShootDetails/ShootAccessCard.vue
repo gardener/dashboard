@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               Dashboard is not running for hibernated clusters
             </v-tooltip>
-            <a v-else :href="dashboardUrl" target="_blank">{{dashboardUrlText}}</a>
+            <a v-else :href="dashboardUrl" target="_blank" rel="noopener">{{dashboardUrlText}}</a>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>

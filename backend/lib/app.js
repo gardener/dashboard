@@ -66,7 +66,7 @@ app.use(helmet.contentSecurityPolicy({
     fontSrc: ['\'self\'', 'data:'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'none\'']
+    frameAncestors: ['\'self\'']
   }
 }))
 app.use(helmet.referrerPolicy({

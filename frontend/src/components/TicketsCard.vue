@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <ticket :ticket="ticket"></ticket>
       </v-card>
       <div class="d-flex align-center justify-center mt-4">
-        <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">
+        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
           <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-toolbar-title class="text-subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
-        <v-btn text color="primary" :href="createTicketLink" target="_blank" title="Create Ticket">
+        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
           <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
@@ -41,6 +41,7 @@ import uniq from 'lodash/uniq'
 
 import Ticket from '@/components/ShootTickets/Ticket'
 import { shootItem } from '@/mixins/shootItem'
+import sanitizeUrl from '@/mixins/sanitizeUrl'
 import moment from '@/utils/moment'
 
 export default {
@@ -52,7 +53,7 @@ export default {
       type: Array
     }
   },
-  mixins: [shootItem],
+  mixins: [shootItem, sanitizeUrl],
   computed: {
     ...mapState([
       'cfg'

@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Read the
           <a href="https://cloud.google.com/compute/docs/access/service-accounts"
-              target="_blank">
+              target="_blank" rel="noopener">
             Service Account Documentation<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to apply for credentials
           to service accounts.
         </p>

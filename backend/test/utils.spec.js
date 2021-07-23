@@ -87,7 +87,7 @@ describe('utils', function () {
       const emitter = new TestEmitter({ kind, socket, objectKeyPath })
       expect(message).toBe(notImplemented)
       expect(() => emitter.emit()).toThrowError(notImplemented)
-      expect(() => emitter.count()).toThrowError(notImplemented)
+      expect(emitter.count()).toBe(0)
       expect(() => emitter.appendChunkedEvents()).toThrowError(notImplemented)
     })
 

@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
-        Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
+        Type <strong>{{shootName}}</strong> below and confirm to hibernate your cluster.<br /><br />
       </template>
       <template v-else>
         This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />

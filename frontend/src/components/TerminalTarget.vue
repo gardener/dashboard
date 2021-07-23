@@ -50,8 +50,8 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       outlined
     >
-      <strong>Terminal will be running on <tt>{{shootName}}</tt> cluster</strong><br>
-      Make sure that only gardener project members with <tt>admin</tt> role have privileged access to the <tt>{{shootName}}</tt> cluster before creating this terminal session.
+      <strong>Terminal will be running on <span class="font-family-monospace">{{shootName}}</span> cluster</strong><br>
+      Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{shootName}}</span> cluster before creating this terminal session.
     </v-alert>
   </div>
 </template>

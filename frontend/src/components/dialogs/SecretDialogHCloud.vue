@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Please read the
           <a href="https://www.hetzner.com/cloud"
-            target="_blank">
+            target="_blank" rel="noopener">
             Hetzner Cloud Documentation</a>.
         </p>
       </div>

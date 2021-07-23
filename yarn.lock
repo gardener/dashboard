@@ -1230,6 +1230,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@braintree/sanitize-url@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "@braintree/sanitize-url@npm:5.0.2"
+  checksum: 16a022d29d584f96f6982443946668bddd2d900140c0b56316bafb17cc2d50bc4b5423104847bd33564c4ec0104bcda71ceb81258928afe60fb9bb35c23ee590
+  languageName: node
+  linkType: hard
+
 "@cnakazawa/watch@npm:^1.0.3":
   version: 1.0.4
   resolution: "@cnakazawa/watch@npm:1.0.4"
@@ -1340,6 +1347,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
+    "@braintree/sanitize-url": ^5.0.2
     "@fontsource/roboto": 4.2.3
     "@mdi/font": ^5.6.55
     "@vue/cli-plugin-babel": ~4.5.0

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="nowrap">
     <v-avatar :size="size">
-      <img :src="avatarUrl"/>
+      <img :src="avatarUrl" :alt="`avatar of ${accountName}`"/>
     </v-avatar>
     <a v-if="mailTo && isEmail" :href="`mailto:${accountName}`" class="pl-2">{{accountName}}</a>
     <span v-else-if="accountName" class="pl-2">{{accountName}}</span>

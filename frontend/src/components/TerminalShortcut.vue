@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
             </div>
           </template>
           <span v-if="!disabled">
-            Create '<tt>{{shortcut.title}}</tt>' terminal session
+            Create '<span class="font-family-monospace">{{shortcut.title}}</span>' terminal session
           </span>
           <span v-else>
             Cluster is hibernated. Wake up cluster to open terminal
