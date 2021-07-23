@@ -301,3 +301,16 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.frontendConfig.vendorHints }}
+      vendorHints:
+        {{- range .Values.frontendConfig.vendorHints }}
+        - vendorNames:
+            {{- range .vendorNames }}
+            - {{ . }}
+            {{- end }}
+          hintMessage: {{ .hintMessage }}
+          {{- if .hintType }}
+          hintType: {{ .hintType }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
