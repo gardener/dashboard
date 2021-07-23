@@ -89,7 +89,7 @@ describe('Store', () => {
     expect(suseImage.expirationDateString).toBeDefined()
     expect(suseImage.vendorName).toBe('suse-chost')
     expect(suseImage.icon).toBe('suse-chost')
-    expect(suseImage.vendorHint).toBe(storeState.cfg.vendorHints[0])
+    expect(suseImage.vendorHint).toEqual(storeState.cfg.vendorHints[0])
     expect(suseImage.classification).toBe('supported')
     expect(suseImage.isSupported).toBe(true)
     expect(suseImage.isDeprecated).toBe(false)
@@ -101,7 +101,7 @@ describe('Store', () => {
     expect(suseImage2.isPreview).toBe(true)
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
-    expect(fooImage.vendorHint).toBe(undefined)
+    expect(fooImage.vendorHint).toBeUndefined()
     expect(fooImage.isSupported).toBe(true)
   })
 

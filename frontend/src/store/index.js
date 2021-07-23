@@ -179,9 +179,8 @@ const vendorNameFromImageName = imageName => {
   return undefined
 }
 
-const vendorHint = (state, vendorName) => {
-  const hints = get(state.cfg, 'vendorHints')
-  return find(hints, hint => includes(hint.vendorNames, vendorName))
+const findVendorHint = (vendorHints, vendorName) => {
+  return find(vendorHints, hint => includes(hint.vendorNames, vendorName))
 }
 
 const matchesPropertyOrEmpty = (path, srcValue) => {
@@ -465,7 +464,7 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            vendorHint: vendorHint(state, vendorName)
+            vendorHint: findVendorHint(state.cfg.vendorHints, vendorName)
           })
         })
       }
