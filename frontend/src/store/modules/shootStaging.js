@@ -46,9 +46,12 @@ const getters = {
   dnsProviderTypesWithPrimarySupport (state, getters, rootState, rootGetters) {
     return map(filter(rootGetters.sortedDnsProviderList, 'primary'), 'type')
   },
+  dnsProviders (state) {
+    return map(state.dnsProviderIds, id => state.dnsProviders[id])
+  },
   dnsProvidersWithPrimarySupport (state, getters) {
     const types = getters.dnsProviderTypesWithPrimarySupport
-    return filter(state.dnsProviders, ({ type }) => includes(types, type))
+    return filter(getters.dnsProviders, ({ type }) => includes(types, type))
   },
   dnsProvidersValid (state) {
     return every(state.dnsProviders, 'valid')

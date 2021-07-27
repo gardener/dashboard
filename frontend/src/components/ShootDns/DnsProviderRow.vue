@@ -43,9 +43,8 @@ SPDX-License-Identifier: Apache-2.0
             <div class="regularInput">
               <select-secret
                 :dns-provider-kind="type"
-                :selected-secret="secret"
-                @update-secret="onSecretUpdate"
-                @valid="onSecretValid">
+                v-model="secret"
+                :valid.sync="secretValid">
               </select-secret>
             </div>
             <div class="regularInput">
@@ -178,9 +177,6 @@ export default {
       }
       return undefined
     },
-    secret () {
-      return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretName])
-    },
     secretBindingMissing () {
       return !this.createMode && !this.secret
     },
@@ -202,6 +198,14 @@ export default {
       },
       set (value) {
         this.setData({ secretName: value })
+      }
+    },
+    secret: {
+      get () {
+        return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretName])
+      },
+      set (value) {
+        this.secretName = get(value, 'metadata.name', null)
       }
     },
     includeDomains: {
@@ -260,14 +264,6 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    onSecretValid (value) {
-      this.secretValid = !!value
-      this.updateValid()
-    },
-    onSecretUpdate (secret) {
-      const secretName = get(secret, 'metadata.name', null)
-      this.setData({ secretName })
-    },
     onDelete () {
       this.deleteDnsProvider(this.dnsProviderId)
     }
@@ -277,6 +273,9 @@ export default {
   },
   watch: {
     '$v.$invalid' () {
+      this.updateValid()
+    },
+    secretValid () {
       this.updateValid()
     }
   }

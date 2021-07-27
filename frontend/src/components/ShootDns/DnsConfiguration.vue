@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <action-button-dialog
     :shoot-item="shootItem"
+    :valid="dnsConfigurationValid"
     ref="actionDialog"
     caption="Configure DNS"
     width="1000"
@@ -42,7 +43,8 @@ export default {
   },
   computed: {
     ...mapGetters('shootStaging', [
-      'getDnsConfiguration'
+      'getDnsConfiguration',
+      'dnsConfigurationValid'
     ])
   },
   methods: {
