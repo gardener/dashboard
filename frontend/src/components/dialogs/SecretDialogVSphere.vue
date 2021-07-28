@@ -72,16 +72,16 @@ SPDX-License-Identifier: Apache-2.0
           The Gardener needs these credentials to provision and operate the VMware vSphere infrastructure for your Kubernetes cluster.
         </p>
         <p>
-          Ensure that these accounts have privileges to <b>create, modify and delete VMs and Networking resources</b>.
+          Ensure that these accounts have privileges to <strong>create, modify and delete VMs and Networking resources</strong>.
         </p>
         <p>
           Please read the
           <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
-            target="_blank">
+            target="_blank" rel="noopener">
             VMware vSphere Documentation</a>
             and the
           <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
-            target="_blank">
+            target="_blank" rel="noopener">
           VMware NSX-T Data Center Documentation</a>.
         </p>
       </div>

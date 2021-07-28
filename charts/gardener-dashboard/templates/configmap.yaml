@@ -32,7 +32,7 @@ data:
     gitHub:
       apiUrl: {{ .Values.gitHub.apiUrl }}
       {{- if .Values.gitHub.ca }}
-      ca: {{ toJson .Values.gitHub.ca }}
+      ca: {{ quote .Values.gitHub.ca }}
       {{- end }}
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
@@ -66,7 +66,7 @@ data:
       rejectUnauthorized: true
       {{- end }}
       {{- if .Values.oidc.ca }}
-      ca: {{ toJson .Values.oidc.ca }}
+      ca: {{ quote .Values.oidc.ca }}
       {{- end }}
       {{- if .Values.oidc.clockTolerance }}
       clockTolerance: {{ .Values.oidc.clockTolerance }}
@@ -182,7 +182,7 @@ data:
         {{- end }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
         avatarSource: {{ .Values.frontendConfig.ticket.avatarSource | default "github" }}
-        issueDescriptionTemplate: {{ toJson .Values.frontendConfig.ticket.issueDescriptionTemplate }}
+        issueDescriptionTemplate: {{ quote .Values.frontendConfig.ticket.issueDescriptionTemplate }}
       {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
@@ -244,12 +244,12 @@ data:
       {{- if .Values.frontendConfig.sla }}
       sla:
         title: {{ .Values.frontendConfig.sla.title }}
-        description: {{ .Values.frontendConfig.sla.description }}
+        description: {{ quote .Values.frontendConfig.sla.description }}
       {{- end }}
       {{- if .Values.frontendConfig.accessRestriction }}
       accessRestriction:
         {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
-        noItemsText: {{ toJson .Values.frontendConfig.accessRestriction.noItemsText }}
+        noItemsText: {{ quote .Values.frontendConfig.accessRestriction.noItemsText }}
         {{- end }}
         items:
         {{- range .Values.frontendConfig.accessRestriction.items }}
@@ -259,9 +259,9 @@ data:
             title: {{ .display.title }}{{- end }}{{- if .display.description }}
             description: {{ .display.description }}{{- end }}
           input:
-            title: {{ toJson .input.title }}
+            title: {{ quote .input.title }}
             {{- if .input.description }}
-            description: {{ toJson .input.description }}
+            description: {{ quote .input.description }}
             {{- end }}
             {{- if .input.inverted }}
             inverted: {{ .input.inverted }}
@@ -275,9 +275,9 @@ data:
               title: {{ .display.title }}{{- end }}{{- if .display.description }}
               description: {{ .display.description }}{{- end }}
             input:
-              title: {{ toJson .input.title }}
+              title: {{ quote .input.title }}
               {{- if .input.description }}
-              description: {{ toJson .input.description }}
+              description: {{ quote .input.description }}
               {{- end }}
               {{- if .input.inverted }}
               inverted: {{ .input.inverted }}

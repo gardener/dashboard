@@ -285,6 +285,17 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap themes should render the template with sla description markdown hyperlink 1`] = `
+Object {
+  "frontend": Object {
+    "sla": Object {
+      "description": "[foo](https://bar.baz)",
+      "title": "SLA title",
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap tickets should render the template 1`] = `
 Object {
   "frontend": Object {

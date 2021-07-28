@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
           The Gardener needs the credentials to provision and operate the Azure infrastructure for your Kubernetes cluster.
         </p>
         <p>
-          Ensure that the account has the <b>contributor</b> role.
+          Ensure that the account has the <strong>contributor</strong> role.
         </p>
         <p>
           Read the

@@ -349,6 +349,19 @@ function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
   return shortcuts
 }
 
+function decorateClassificationObject (obj) {
+  const classification = obj.classification
+  const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
+  return {
+    ...obj,
+    isPreview: classification === 'preview',
+    isSupported: !isExpired && (!classification || classification === 'supported'),
+    isDeprecated: classification === 'deprecated',
+    isExpired,
+    expirationDateString: getDateFormatted(obj.expirationDate)
+  }
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -461,26 +474,22 @@ const getters = {
           return semver.rcompare(a.version, b.version)
         })
 
-        return map(versions, ({ version, expirationDate, cri, classification }) => {
-          const vendorName = vendorNameFromImageName(machineImage.name)
-          const name = machineImage.name
+        const name = machineImage.name
+        const vendorName = vendorNameFromImageName(machineImage.name)
+        const needsLicense = vendorNeedsLicense(vendorName)
 
-          return {
+        return map(versions, ({ version, expirationDate, cri, classification }) => {
+          return decorateClassificationObject({
             key: name + '/' + version,
             name,
             version,
             cri,
             classification,
-            isPreview: classification === 'preview',
-            isSupported: classification === 'supported',
-            isDeprecated: classification === 'deprecated',
-            isExpired: expirationDate && moment().isAfter(expirationDate),
             expirationDate,
-            expirationDateString: getDateFormatted(expirationDate),
             vendorName,
             icon: vendorName,
-            needsLicense: vendorNeedsLicense(vendorName)
-          }
+            needsLicense
+          })
         })
       }
 
@@ -864,17 +873,7 @@ const getters = {
         }
         return true
       })
-      return map(validVersions, version => {
-        const classification = version.classification
-        return {
-          ...version,
-          isPreview: classification === 'preview',
-          isSupported: classification === 'supported',
-          isDeprecated: classification === 'deprecated',
-          isExpired: version.expirationDate && moment().isAfter(version.expirationDate),
-          expirationDateString: getDateFormatted(version.expirationDate)
-        }
-      })
+      return map(validVersions, decorateClassificationObject)
     }
   },
   sortedKubernetesVersions (state, getters) {

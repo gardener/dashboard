@@ -2301,6 +2301,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["@braintree/sanitize-url", [
+        ["npm:5.0.2", {
+          "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-5.0.2-ef365f598a-16a022d29d.zip/node_modules/@braintree/sanitize-url/",
+          "packageDependencies": [
+            ["@braintree/sanitize-url", "npm:5.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["@cnakazawa/watch", [
         ["npm:1.0.4", {
           "packageLocation": "./.yarn/cache/@cnakazawa-watch-npm-1.0.4-ee43493884-7909f89bbe.zip/node_modules/@cnakazawa/watch/",
@@ -2418,6 +2427,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./frontend/",
           "packageDependencies": [
             ["@gardener-dashboard/frontend", "workspace:frontend"],
+            ["@braintree/sanitize-url", "npm:5.0.2"],
             ["@fontsource/roboto", "npm:4.2.3"],
             ["@mdi/font", "npm:5.6.55"],
             ["@vue/cli-plugin-babel", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.5.12"],

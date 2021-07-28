@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
           The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
         </p>
         <p>
-          Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
+          Ensure that the user has privileges to <strong>create, modify and delete VMs</strong>.
         </p>
       </div>
       <div v-if="vendor==='openstack-designate'">

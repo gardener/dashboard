@@ -469,7 +469,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
       linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')
       const linkText = linkElement.innerHTML
-      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><i class="v-icon mdi mdi-open-in-new text-body-1"></i>`
+      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><em class="v-icon mdi mdi-open-in-new text-body-1"></em>`
     }
   })
 

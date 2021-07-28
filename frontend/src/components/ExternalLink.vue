@@ -5,15 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <a :href="url" target="_blank">
+  <a :href="sanitizeUrl(url)" target="_blank" rel="noopener">
     <slot>{{url}}</slot> <v-icon :size="12">mdi-open-in-new</v-icon>
   </a>
 </template>
 
 <script>
+import sanitizeUrl from '@/mixins/sanitizeUrl'
 
 export default {
   name: 'external-link',
+  mixins: [sanitizeUrl],
   props: {
     url: {
       type: String,
