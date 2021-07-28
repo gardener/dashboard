@@ -11,31 +11,30 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       label="Secret"
-      :items="secretItems"
+      :items="secretList"
       item-value="metadata.name"
       return-object
       v-model="secret"
       :error-messages="getErrorMessages('secret')"
-      @input="onInputSecret"
+      @input="$v.secret.$touch()"
       @blur="$v.secret.$touch()"
       persistent-hint
       :hint="secretHint"
       >
       <template v-slot:item="{ item }">
-        <template v-if="isAddNewSecret(item)">
-          <v-icon>mdi-plus</v-icon>
-          <span class="pl-2">{{get(item, 'title')}}</span>
-        </template>
-        <template v-else>
-          <span>{{get(item, 'metadata.name')}}</span>
-          <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
-        </template>
+        {{get(item, 'metadata.name')}}
+        <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
       </template>
       <template v-slot:selection="{ item }">
-        <span>
-          {{get(item, 'metadata.name')}}
-        </span>
+        {{get(item, 'metadata.name')}}
         <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
+      </template>
+      <template v-slot:append-item>
+        <v-divider class="mb-2"></v-divider>
+        <v-btn text @click="openSecretDialog" class="mx-2 primary--text">
+          <v-icon class="mr-2">mdi-plus</v-icon>
+          Add new Secret
+        </v-btn>
       </template>
     </v-select>
     <secret-dialog-wrapper
@@ -47,7 +46,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import concat from 'lodash/concat'
 import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
 import isEqual from 'lodash/isEqual'
@@ -66,22 +64,36 @@ export default {
     SecretDialogWrapper
   },
   props: {
+    value: {
+      type: Object
+    },
+    valid: {
+      type: Boolean
+    },
     cloudProfileName: {
       type: String
     },
     dnsProviderKind: {
       type: String
-    },
-    selectedSecret: {
-      type: Object
     }
   },
   data () {
     return {
-      valid: undefined,
       secretItemsBeforeAdd: undefined,
-      secret: undefined,
-      visibleSecretDialog: undefined
+      visibleSecretDialog: undefined,
+      validationErrors: {
+        secret: {
+          required: 'Secret is required',
+          requiresCostObjectIfEnabled: () => {
+            const projectName = get(this.secret, 'metadata.projectName')
+            const isSecretInProject = this.projectName === projectName
+
+            return isSecretInProject
+              ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
+              : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
+          }
+        }
+      }
     }
   },
   validations: {
@@ -94,10 +106,18 @@ export default {
     ...mapGetters([
       'infrastructureSecretsByCloudProfileName',
       'costObjectSettings',
-      'projectFromProjectList',
+      'projectName',
       'cloudProfileByName',
       'dnsSecretsByProviderKind'
     ]),
+    secret: {
+      get () {
+        return this.value
+      },
+      set (value) {
+        this.$emit('input', value)
+      }
+    },
     secretList () {
       if (this.cloudProfileName) {
         return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
@@ -122,22 +142,11 @@ export default {
       }
       return cloudProfile.metadata.cloudProviderKind
     },
-    secretItems () {
-      if (!isEmpty(this.infrastructureKind)) {
-        return concat(this.secretList, {
-          value: 'ADD_NEW_SECRET',
-          title: 'Add new Secret'
-        })
-      } else {
-        return this.secretList
-      }
-    },
     secretHint () {
       if (this.selfTerminationDays) {
         return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
-      } else {
-        return undefined
       }
+      return undefined
     },
     costObjectSettingEnabled () { // required internally for requiresCostObjectIfEnabled
       return !isEmpty(this.costObjectSettings)
@@ -145,83 +154,37 @@ export default {
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
     },
-    isOwnSecret () {
-      return (secret) => {
-        return isOwnSecret(secret)
-      }
-    },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.secret)
-    },
-    validationErrors () {
-      return {
-        secret: {
-          required: 'Secret is required',
-          requiresCostObjectIfEnabled: () => {
-            const projectName = get(this.secret, 'metadata.projectName')
-            const project = this.projectFromProjectList
-            const isSecretInProject = project.metadata.name === projectName
-
-            return isSecretInProject ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.` : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
-          }
-        }
-      }
     }
   },
   methods: {
-    get (object, path, defaultValue) {
-      return get(object, path, defaultValue)
-    },
+    get,
+    isOwnSecret,
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    onInputSecret () {
-      if (this.isAddNewSecret(this.secret)) {
-        this.onAddSecret()
-      } else {
-        this.$v.secret.$touch()
-        this.validateInput()
-        this.$emit('update-secret', this.secret)
-      }
-    },
-    isAddNewSecret (item) {
-      return (item && item.value === 'ADD_NEW_SECRET') || item === 'ADD_NEW_SECRET'
-    },
-    onAddSecret () {
-      this.secret = undefined
-      this.$nextTick(() => {
-        // need to set in next ui loop as it would not render correctly otherwise
-        this.secret = head(this.secretList)
-        this.onInputSecret()
-      })
-      this.secretItemsBeforeAdd = cloneDeep(this.secretItems)
+    openSecretDialog () {
       this.visibleSecretDialog = this.infrastructureKind
+      this.secretItemsBeforeAdd = cloneDeep(this.secretList)
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const newSecret = head(differenceWith(this.secretItems, this.secretItemsBeforeAdd, isEqual))
+      const newSecret = head(differenceWith(this.secretList, this.secretItemsBeforeAdd, isEqual))
       if (newSecret) {
         this.secret = newSecret
-        this.onInputSecret()
-      }
-    },
-    validateInput () {
-      if (this.valid !== !this.$v.$invalid) {
-        this.valid = !this.$v.$invalid
-        this.$emit('valid', this.valid)
       }
     }
   },
   mounted () {
-    this.secret = this.selectedSecret
     this.$v.$touch()
-    this.validateInput()
   },
   watch: {
-    selectedSecret: function (selectedSecret) {
-      this.secret = selectedSecret
+    value () {
       this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
-      this.validateInput()
+    },
+    '$v.$invalid' (value) {
+      this.$emit('update:valid', !value)
     }
   }
 }

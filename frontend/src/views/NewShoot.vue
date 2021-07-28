@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapMutations, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -196,7 +196,10 @@ export default {
       'namespace',
       'cfg'
     ]),
-    ...mapState('componentStates', { storedComponentStateManageDns: 'manageDns' }),
+    ...mapGetters('shootStaging', [
+      'getDnsConfiguration',
+      'dnsConfigurationValid'
+    ]),
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
@@ -210,7 +213,7 @@ export default {
         this.workersValid &&
         this.maintenanceTimeValid &&
         this.hibernationScheduleValid &&
-        this.storedComponentStateManageDns.valid
+        this.dnsConfigurationValid
     }
   },
   methods: {
@@ -218,7 +221,9 @@ export default {
       'createShoot',
       'setNewShootResource'
     ]),
-    ...mapMutations('componentStates', ['SET_MANAGE_DNS']),
+    ...mapActions('shootStaging', [
+      'setDnsConfiguration'
+    ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
     },
@@ -293,18 +298,11 @@ export default {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
       }
 
-      const dns = {}
-      if (this.storedComponentStateManageDns.domain) {
-        dns.domain = this.storedComponentStateManageDns.domain
-      }
-      if (this.storedComponentStateManageDns.providers.length) {
-        dns.providers = this.storedComponentStateManageDns.providers
-      }
-
-      if (!isEmpty(dns)) {
-        set(shootResource, 'spec.dns', dns)
+      const dnsConfiguration = this.getDnsConfiguration()
+      if (dnsConfiguration.domain || !isEmpty(dnsConfiguration.providers)) {
+        set(shootResource, 'spec.dns', dnsConfiguration)
       } else {
-        unset(shootResource, 'spec.dns', this.storedComponentStateManageDns)
+        unset(shootResource, 'spec.dns')
       }
 
       if (this.$refs.accessRestrictions) {
@@ -502,15 +500,8 @@ export default {
     this.updateUIComponentsWithShootResource()
   },
   created () {
-    const shootResource = cloneDeep(this.newShootResource)
-    const domain = get(shootResource, 'spec.dns.domain')
-    const providers = get(shootResource, 'spec.dns.providers')
-
-    const dnsState = {
-      domain,
-      providers
-    }
-    this.SET_MANAGE_DNS(dnsState)
+    const shootSpecDns = get(this.newShootResource, 'spec.dns', {})
+    this.setDnsConfiguration(shootSpecDns)
   }
 }
 </script>

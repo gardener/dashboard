@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <component v-if="visibleDialog" :is="componentName" v-bind="{ secret: selectedSecret, vendor: visibleDialog }" v-model="visibleDialogState" @input="onInput(visibleDialog)"></component>
+  <component v-if="visibleDialog" :is="componentName" v-bind="{ secret: selectedSecret, vendor: visibleDialog }" v-model="visibleDialogState"></component>
 </template>
 
 <script>
@@ -68,18 +68,13 @@ export default {
       }
     }
   },
-  methods: {
-    onInput (infrastructureKind) {
-      this.$emit('dialog-closed', infrastructureKind)
-    }
-  },
   watch: {
-    visibleDialog: function (visibleDialog) {
+    visibleDialog (visibleDialog) {
       if (visibleDialog) {
         this.visibleDialogState = true
       }
     },
-    visibleDialogState: function (visibleDialogState) {
+    visibleDialogState (visibleDialogState) {
       if (!visibleDialogState) {
         this.$emit('dialog-closed')
       }
