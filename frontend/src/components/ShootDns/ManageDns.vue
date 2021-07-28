@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             :hint="domainHint"
           ></v-text-field>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="3" v-if="!noCustomDomain">
           <v-select
             color="primary"
             item-color="primary"
@@ -104,6 +104,10 @@ export default {
   },
   props: {
     createMode: {
+      type: Boolean,
+      default: false
+    },
+    noCustomDomain: {
       type: Boolean,
       default: false
     }

@@ -134,7 +134,7 @@ const actions = {
       valid: isDnsProviderValid({ type, secretName })
     })
   },
-  setDnsConfiguration ({ commit }, { domain, providers = [] }) {
+  setDnsConfiguration ({ commit }, { domain, providers = [], noCustomDomain = false }) {
     let primaryProviderId = null
     providers = map(providers, provider => {
       const id = uuidv4()
@@ -168,19 +168,20 @@ const actions = {
     commit('setDns', {
       domain,
       providers,
-      primaryProviderId
+      primaryProviderId,
+      noCustomDomain
     })
   }
 }
 
 // mutations
 const mutations = {
-  setDns (state, { domain, providers = [], primaryProviderId = null }) {
+  setDns (state, { domain, providers = [], primaryProviderId = null, noCustomDomain = false }) {
     state.dnsDomain = domain
     state.dnsProviders = keyBy(providers, 'id')
     state.dnsProviderIds = map(providers, 'id')
     state.dnsPrimaryProviderId = primaryProviderId
-    state.dnsPrimaryProviderValid = !state.dnsDomain || !!state.dnsPrimaryProviderId
+    state.dnsPrimaryProviderValid = !state.dnsDomain || !!state.dnsPrimaryProviderId || noCustomDomain
   },
   setDnsDomain (state, value) {
     state.dnsDomain = value

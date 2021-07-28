@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Shoot Domain</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">{{shootDomain}}</v-list-item-title>
+          <v-list-item-title class="pt-1">{{shootDomain}} <v-chip small color="primary" outlined>{{customDomainChipText}}</v-chip></v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <v-list-item>
@@ -219,6 +219,12 @@ export default {
     },
     canLinkToSecret () {
       return this.shootSecretBindingName && this.shootNamespace
+    },
+    customDomainChipText () {
+      if (this.isCustomShootDomain) {
+        return 'custom'
+      }
+      return 'generated'
     }
   }
 }

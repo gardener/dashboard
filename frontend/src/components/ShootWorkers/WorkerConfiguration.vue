@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     width="1000"
-    confirmRequired
-    confirm-message="Please confirm changes to the worker groups as this may affect your workload"
+    confirm-required
     caption="Configure Workers"
     disable-confirm-input-focus>
     <template v-slot:actionComponent>

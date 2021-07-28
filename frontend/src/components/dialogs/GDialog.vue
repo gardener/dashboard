@@ -67,9 +67,6 @@ export default {
       type: Boolean,
       default: false
     },
-    confirmMessage: {
-      type: String
-    },
     errorMessage: {
       type: String
     },

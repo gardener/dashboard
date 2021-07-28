@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
       :width="width"
       :max-height="maxHeight"
       :confirm-value="confirmValue"
-      :confirm-message="confirmMessage"
       :disable-confirm-input-focus="disableConfirmInputFocus"
       ref="gDialog"
     >
@@ -85,9 +84,6 @@ export default {
     confirmRequired: {
       type: Boolean,
       default: false
-    },
-    confirmMessage: {
-      type: String
     },
     valid: {
       type: Boolean,

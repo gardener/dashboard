@@ -11,11 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     caption="Configure DNS"
     width="1000"
-    confirmRequired
+    confirm-required
     @dialog-opened="onConfigurationDialogOpened"
     >
     <template v-slot:actionComponent>
-      <manage-shoot-dns :key="componentKey"></manage-shoot-dns>
+      <manage-shoot-dns :key="componentKey" :noCustomDomain="!isCustomShootDomain"></manage-shoot-dns>
     </template>
   </action-button-dialog>
 </template>
@@ -73,7 +73,8 @@ export default {
       }
     },
     reset () {
-      this.setDnsConfiguration(this.shootSpec.dns)
+      const noCustomDomain = !this.isCustomShootDomain
+      this.setDnsConfiguration({ ...this.shootSpec.dns, noCustomDomain })
       this.componentKey = uuidv4() // force re-render
     }
   }
