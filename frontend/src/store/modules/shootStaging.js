@@ -29,8 +29,13 @@ function isDnsProviderValid ({ type, secretName }) {
   return !!type && !!secretName
 }
 
+function notYetCreated (object) {
+  return !get(object, 'metadata.creationTimestamp')
+}
+
 // state
 const state = {
+  metadata: {},
   dnsDomain: null,
   dnsProviders: {},
   dnsProviderIds: [],
@@ -40,6 +45,9 @@ const state = {
 
 // getters
 const getters = {
+  clusterIsNew (state) {
+    return notYetCreated(state)
+  },
   dnsProviderTypes (state, getters, rootState, rootGetters) {
     return map(rootGetters.sortedDnsProviderList, 'type')
   },
@@ -134,9 +142,19 @@ const actions = {
       valid: isDnsProviderValid({ type, secretName })
     })
   },
-  setDnsConfiguration ({ commit }, { domain, providers = [], noCustomDomain = false }) {
+  setClusterConfiguration ({ commit }, value) {
+    const {
+      metadata = {},
+      spec: {
+        dns = {}
+      }
+    } = value
+    // metadata
+    commit('setMetadata', metadata)
+    // dns configuration
     let primaryProviderId = null
-    providers = map(providers, provider => {
+    const domain = dns.domain
+    const providers = map(dns.providers, provider => {
       const id = uuidv4()
       const {
         type,
@@ -168,20 +186,22 @@ const actions = {
     commit('setDns', {
       domain,
       providers,
-      primaryProviderId,
-      noCustomDomain
+      primaryProviderId
     })
   }
 }
 
 // mutations
 const mutations = {
-  setDns (state, { domain, providers = [], primaryProviderId = null, noCustomDomain = false }) {
+  setMetadata (state, metadata) {
+    state.metadata = metadata
+  },
+  setDns (state, { domain, providers = [], primaryProviderId = null }) {
     state.dnsDomain = domain
     state.dnsProviders = keyBy(providers, 'id')
     state.dnsProviderIds = map(providers, 'id')
     state.dnsPrimaryProviderId = primaryProviderId
-    state.dnsPrimaryProviderValid = !state.dnsDomain || !!state.dnsPrimaryProviderId || noCustomDomain
+    state.dnsPrimaryProviderValid = true
   },
   setDnsDomain (state, value) {
     state.dnsDomain = value

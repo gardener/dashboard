@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     @dialog-opened="onConfigurationDialogOpened"
     >
     <template v-slot:actionComponent>
-      <manage-shoot-dns :key="componentKey" :noCustomDomain="!isCustomShootDomain"></manage-shoot-dns>
+      <manage-shoot-dns :key="componentKey"/>
     </template>
   </action-button-dialog>
 </template>
@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     ...mapActions('shootStaging', [
-      'setDnsConfiguration'
+      'setClusterConfiguration'
     ]),
     async onConfigurationDialogOpened () {
       this.reset()
@@ -73,8 +73,7 @@ export default {
       }
     },
     reset () {
-      const noCustomDomain = !this.isCustomShootDomain
-      this.setDnsConfiguration({ ...this.shootSpec.dns, noCustomDomain })
+      this.setClusterConfiguration(this.shootItem)
       this.componentKey = uuidv4() // force re-render
     }
   }

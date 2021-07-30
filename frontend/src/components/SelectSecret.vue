@@ -68,7 +68,8 @@ export default {
       type: Object
     },
     valid: {
-      type: Boolean
+      type: Boolean,
+      default: true
     },
     cloudProfileName: {
       type: String
@@ -116,6 +117,16 @@ export default {
       },
       set (value) {
         this.$emit('input', value)
+      }
+    },
+    secretValid: {
+      get () {
+        return this.valid
+      },
+      set (value) {
+        if (this.valid !== value) {
+          this.$emit('update:valid', value)
+        }
       }
     },
     secretList () {
@@ -177,14 +188,15 @@ export default {
     }
   },
   mounted () {
-    this.$v.$touch()
+    this.$v.secret.$touch()
+    this.secretValid = !this.$v.secret.$invalid
   },
   watch: {
     value () {
       this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
     },
-    '$v.$invalid' (value) {
-      this.$emit('update:valid', !value)
+    '$v.secret.$invalid' (value) {
+      this.secretValid = !value
     }
   }
 }

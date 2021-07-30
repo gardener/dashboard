@@ -102,8 +102,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon color="primary">mdi-dns</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>Shoot Domain</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">{{shootDomain}} <v-chip small color="primary" outlined>{{customDomainChipText}}</v-chip></v-list-item-title>
+          <v-list-item-subtitle>
+            Shoot Domain
+            <v-chip label x-small color="primary" outlined class="ml-2">{{customDomainChipText}}</v-chip>
+          </v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{shootDomain}}
+          </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <v-list-item>
