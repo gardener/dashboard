@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container class="pa-0 ma-0">
     <template v-if="dnsProviderIds.length">
-      <v-row>
+      <v-row class="ma-0">
         <v-col cols="3">
           <v-text-field
             color="primary"
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             :hint="domainHint"
           ></v-text-field>
         </v-col>
-        <v-col cols="3" v-if="!noCustomDomain">
+        <v-col cols="3">
           <v-select
             color="primary"
             item-color="primary"
@@ -30,6 +30,7 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages('primaryProvider')"
             label="Primary DNS Provider"
             :disabled="!createMode"
+            v-if="domain && domain.length"
           >
             <template v-slot:item="{ item }">
               <v-list-item-action>
@@ -51,7 +52,9 @@ SPDX-License-Identifier: Apache-2.0
           </v-select>
         </v-col>
       </v-row>
-      <v-divider/>
+      <v-row class="ma-0">
+        <v-divider class="mx-3" />
+      </v-row>
     </template>
     <transition-group name="list" class="alternate-row-background">
       <v-row v-for="id in dnsProviderIds" :key="id" class="list-item pt-2">
@@ -104,10 +107,6 @@ export default {
   },
   props: {
     createMode: {
-      type: Boolean,
-      default: false
-    },
-    noCustomDomain: {
       type: Boolean,
       default: false
     }
@@ -172,6 +171,7 @@ export default {
   },
   mounted () {
     this.$v.$touch()
+    this.setDnsPrimaryProviderValid(!this.$v.primaryProvider.$invalid)
   },
   watch: {
     '$v.primaryProvider.$invalid' (value) {

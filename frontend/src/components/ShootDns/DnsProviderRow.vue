@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row align="center">
+  <v-row align="center" class="ma-0">
     <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
       <template v-slot:activator="{ on }">
         <v-col cols="11" v-on="on">
