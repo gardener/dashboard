@@ -453,6 +453,7 @@ const getters = {
 
         const name = machineImage.name
         const vendorName = vendorNameFromImageName(machineImage.name)
+        const vendorHint = findVendorHint(state.cfg.vendorHints, vendorName)
 
         return map(versions, ({ version, expirationDate, cri, classification }) => {
           return decorateClassificationObject({
@@ -464,7 +465,7 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            vendorHint: findVendorHint(state.cfg.vendorHints, vendorName)
+            vendorHint
           })
         })
       }

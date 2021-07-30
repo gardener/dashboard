@@ -4,48 +4,46 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <hint-colorizer :hint-color="hintColor">
-    <v-select
-      color="primary"
-      item-color="primary"
-      :items="machineImages"
-      item-value="key"
-      return-object
-      :error-messages="getErrorMessages('worker.machine.image')"
-      @input="onInputMachineImage"
-      @blur="$v.worker.machine.image.$touch()"
-      v-model="machineImage"
-      label="Machine Image"
-      :hint="hint"
-      persistent-hint
-    >
-      <template v-slot:item="{ item }">
-        <v-list-item-action>
-          <vendor-icon v-model="item.icon"></vendor-icon>
-        </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
-          <v-list-item-subtitle v-if="itemDescription(item).length">
-            {{itemDescription(item)}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-      </template>
-      <template v-slot:selection="{ item }">
+  <v-select
+    color="primary"
+    item-color="primary"
+    :items="machineImages"
+    item-value="key"
+    return-object
+    :error-messages="getErrorMessages('worker.machine.image')"
+    @input="onInputMachineImage"
+    @blur="$v.worker.machine.image.$touch()"
+    v-model="machineImage"
+    label="Machine Image"
+    :hint="hint"
+    persistent-hint
+  >
+    <template v-slot:item="{ item }">
+      <v-list-item-action>
         <vendor-icon v-model="item.icon"></vendor-icon>
-        <span class="ml-2">
-         {{item.name}} [{{item.version}}]
-        </span>
-      </template>
-      <template v-slot:message="{ message }">
-        <div v-html="message"></div>
-      </template>
-    </v-select>
-  </hint-colorizer>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
+        <v-list-item-subtitle v-if="itemDescription(item).length">
+          {{itemDescription(item)}}
+        </v-list-item-subtitle>
+      </v-list-item-content>
+    </template>
+    <template v-slot:selection="{ item }">
+      <vendor-icon v-model="item.icon"></vendor-icon>
+      <span class="ml-2">
+        {{item.name}} [{{item.version}}]
+      </span>
+    </template>
+    <template v-slot:message="{ message }">
+      <multi-message :message="message" />
+    </template>
+  </v-select>
 </template>
 
 <script>
 import VendorIcon from '@/components/VendorIcon'
-import HintColorizer from '@/components/HintColorizer'
+import MultiMessage from '@/components/MultiMessage'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
 import includes from 'lodash/includes'
@@ -77,7 +75,7 @@ const validations = {
 export default {
   components: {
     VendorIcon,
-    HintColorizer
+    MultiMessage
   },
   props: {
     worker: {
@@ -109,20 +107,36 @@ export default {
       }
     },
     hint () {
-      const hintText = []
+      const hints = []
       if (this.machineImage.vendorHint) {
-        hintText.push(transformHtml(this.machineImage.vendorHint.hintMessage))
+        hints.push({
+          type: 'html',
+          hint: transformHtml(this.machineImage.vendorHint.hintMessage),
+          severity: 'warning'
+        })
       }
       if (this.machineImage.expirationDate) {
-        hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
+        hints.push({
+          type: 'text',
+          hint: `Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`,
+          severity: 'warning'
+        })
       }
       if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hintText.push('If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates')
+        hints.push({
+          type: 'text',
+          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
+          severity: 'info'
+        })
       }
-      if (this.machineImage.isPreview) {
-        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
+        hints.push({
+          type: 'text',
+          hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
+          severity: 'warning'
+        })
       }
-      return join(hintText, '<br />')
+      return JSON.stringify(hints)
     },
     hintColor () {
       if (this.machineImage.expirationDate ||

@@ -346,18 +346,18 @@ Object {
   "frontend": Object {
     "vendorHints": Array [
       Object {
-        "hintMessage": "[foo](https://bar.baz)",
-        "hintType": "warning",
-        "vendorNames": Array [
+        "matchNames": Array [
           "foo",
           "bar",
         ],
+        "message": "[foo](https://bar.baz)",
+        "severity": "warning",
       },
       Object {
-        "hintMessage": "other message",
-        "vendorNames": Array [
+        "matchNames": Array [
           "fooz",
         ],
+        "message": "other message",
       },
     ],
   },

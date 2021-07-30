@@ -304,13 +304,10 @@ data:
       {{- if .Values.frontendConfig.vendorHints }}
       vendorHints:
         {{- range .Values.frontendConfig.vendorHints }}
-        - vendorNames:
-            {{- range .vendorNames }}
-            - {{ . }}
-            {{- end }}
-          hintMessage: {{ quote .hintMessage }}
-          {{- if .hintType }}
-          hintType: {{ .hintType }}
+        - matchNames: {{ toJson .matchNames }}
+          message: {{ quote .message }}
+          {{- if .severity }}
+          severity: {{ .severity }}
           {{- end }}
         {{- end }}
       {{- end }}

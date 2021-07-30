@@ -311,18 +311,18 @@ describe('gardener-dashboard', function () {
           frontendConfig: {
             vendorHints: [
               {
-                vendorNames: [
+                matchNames: [
                   'foo',
                   'bar'
                 ],
-                hintMessage: '[foo](https://bar.baz)',
-                hintType: 'warning'
+                message: '[foo](https://bar.baz)',
+                severity: 'warning'
               },
               {
-                vendorNames: [
+                matchNames: [
                   'fooz'
                 ],
-                hintMessage: 'other message'
+                message: 'other message'
               }
             ]
           }
