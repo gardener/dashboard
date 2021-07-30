@@ -28,12 +28,10 @@ export default {
         const obj = JSON.parse(this.message)
         const hints = Array.isArray(obj) ? obj : [obj]
 
-        return map(hints, ({ type, hint, severity }) => {
-          return {
-            type,
-            hint,
-            className: severity ? `${severity}--text` : undefined
-          }
+        const severities = ['info', 'success', 'warning', 'error']
+        return map(hints, ({ severity, ...rest }) => {
+          const className = severities.includes(severity) ? `${severity}--text` : ''
+          return { ...rest, className }
         })
       } catch (err) {
         return [
