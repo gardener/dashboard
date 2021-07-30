@@ -179,8 +179,8 @@ const vendorNameFromImageName = imageName => {
   return undefined
 }
 
-const vendorNeedsLicense = vendorName => {
-  return vendorName === 'suse-jeos' || vendorName === 'suse-chost'
+const findVendorHint = (vendorHints, vendorName) => {
+  return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
 const matchesPropertyOrEmpty = (path, srcValue) => {
@@ -453,7 +453,7 @@ const getters = {
 
         const name = machineImage.name
         const vendorName = vendorNameFromImageName(machineImage.name)
-        const needsLicense = vendorNeedsLicense(vendorName)
+        const vendorHint = findVendorHint(state.cfg.vendorHints, vendorName)
 
         return map(versions, ({ version, expirationDate, cri, classification }) => {
           return decorateClassificationObject({
@@ -465,7 +465,7 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            needsLicense
+            vendorHint
           })
         })
       }

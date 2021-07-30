@@ -351,3 +351,26 @@ Object {
   },
 }
 `;
+
+exports[`gardener-dashboard configmap vendorHints should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "vendorHints": Array [
+      Object {
+        "matchNames": Array [
+          "foo",
+          "bar",
+        ],
+        "message": "[foo](https://bar.baz)",
+        "severity": "warning",
+      },
+      Object {
+        "matchNames": Array [
+          "fooz",
+        ],
+        "message": "other message",
+      },
+    ],
+  },
+}
+`;

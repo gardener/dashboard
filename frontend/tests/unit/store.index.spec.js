@@ -59,7 +59,22 @@ describe('Store', () => {
       }
     }
 
-    const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
+    const storeState = {
+      cfg: {
+        vendorHints: [
+          {
+            matchNames: [
+              'suse-jeos',
+              'suse-chost'
+            ],
+            message: 'test',
+            type: 'warning'
+          }
+        ]
+      }
+    }
+
+    const dashboardMachineImages = getters.machineImagesByCloudProfileName(storeState, storeGetters)('foo')
     expect(dashboardMachineImages).toHaveLength(5)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
@@ -74,7 +89,7 @@ describe('Store', () => {
     expect(suseImage.expirationDateString).toBeDefined()
     expect(suseImage.vendorName).toBe('suse-chost')
     expect(suseImage.icon).toBe('suse-chost')
-    expect(suseImage.needsLicense).toBe(true)
+    expect(suseImage.vendorHint).toEqual(storeState.cfg.vendorHints[0])
     expect(suseImage.classification).toBe('supported')
     expect(suseImage.isSupported).toBe(true)
     expect(suseImage.isDeprecated).toBe(false)
@@ -86,7 +101,7 @@ describe('Store', () => {
     expect(suseImage2.isPreview).toBe(true)
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
-    expect(fooImage.needsLicense).toBe(false)
+    expect(fooImage.vendorHint).toBeUndefined()
     expect(fooImage.isSupported).toBe(true)
   })
 
