@@ -164,7 +164,6 @@ export default {
   },
   mounted () {
     this.$v.$touch()
-    this.setDnsPrimaryProviderValid(!this.$v.primaryProvider.$invalid)
   },
   watch: {
     '$v.primaryProvider.$invalid' (value) {
