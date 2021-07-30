@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
           DNS Configuration
         </v-card-title>
         <v-card-text>
-          <manage-shoot-dns create-mode></manage-shoot-dns>
+          <manage-shoot-dns/>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
@@ -222,7 +222,7 @@ export default {
       'setNewShootResource'
     ]),
     ...mapActions('shootStaging', [
-      'setDnsConfiguration'
+      'setClusterConfiguration'
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
@@ -500,8 +500,7 @@ export default {
     this.updateUIComponentsWithShootResource()
   },
   created () {
-    const shootSpecDns = get(this.newShootResource, 'spec.dns', {})
-    this.setDnsConfiguration(shootSpecDns)
+    this.setClusterConfiguration(this.newShootResource)
   }
 }
 </script>

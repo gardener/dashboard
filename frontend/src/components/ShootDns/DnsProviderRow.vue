@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
                 :items="dnsProviderTypes"
                 :error-messages="getErrorMessages('type')"
                 label="Dns Provider Type"
-                :disabled="primary && !createMode"
+                :disabled="primary && !clusterIsNew"
                 :hint="typeHint"
                 persistent-hint
               >
@@ -95,8 +95,8 @@ SPDX-License-Identifier: Apache-2.0
             outlined
             icon
             color="grey"
-            @click.native.stop="onDelete"
-            :disabled="primary && !createMode">
+            @click="onDelete"
+            :disabled="primary && !clusterIsNew">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-col>
@@ -138,10 +138,6 @@ export default {
   },
   validations,
   props: {
-    createMode: {
-      type: Boolean,
-      default: false
-    },
     dnsProviderId: {
       type: String,
       required: true
@@ -150,7 +146,7 @@ export default {
   data () {
     return {
       validationErrors,
-      secretValid: null
+      secretValid: true
     }
   },
   computed: {
@@ -163,6 +159,7 @@ export default {
       }
     }),
     ...mapGetters('shootStaging', [
+      'clusterIsNew',
       'dnsProviderTypes'
     ]),
     ...mapGetters([
@@ -172,13 +169,12 @@ export default {
       return this.dnsSecretsByProviderKind(this.type)
     },
     typeHint () {
-      if (this.primary && !this.createMode) {
-        return 'Primary Provider type cannot be changed after cluster creation'
-      }
-      return undefined
+      return this.primary && !this.clusterIsNew
+        ? 'Primary Provider type cannot be changed after cluster creation'
+        : ''
     },
     secretBindingMissing () {
-      return !this.createMode && !this.secret
+      return !this.clusterIsNew && !this.secret
     },
     type: {
       get () {

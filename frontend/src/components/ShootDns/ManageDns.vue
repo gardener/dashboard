@@ -8,18 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="pa-0 ma-0">
     <template v-if="dnsProviderIds.length">
       <v-row class="ma-0">
-        <v-col cols="3">
+        <v-col cols="6">
           <v-text-field
             color="primary"
             label="Cluster Domain"
             v-model="domain"
             @blur="$v.primaryProvider.$touch()"
-            :disabled="!createMode"
-            :persistent-hint="!createMode"
+            :disabled="!clusterIsNew"
+            :persistent-hint="!clusterIsNew"
             :hint="domainHint"
           ></v-text-field>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="3" v-show="primaryProviderVisible">
           <v-select
             color="primary"
             item-color="primary"
@@ -29,8 +29,8 @@ SPDX-License-Identifier: Apache-2.0
             :items="dnsProvidersWithPrimarySupport"
             :error-messages="getErrorMessages('primaryProvider')"
             label="Primary DNS Provider"
-            :disabled="!createMode"
-            v-if="domain && domain.length"
+            clearable
+            :disabled="!clusterIsNew"
           >
             <template v-slot:item="{ item }">
               <v-list-item-action>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <transition-group name="list" class="alternate-row-background">
       <v-row v-for="id in dnsProviderIds" :key="id" class="list-item pt-2">
-        <dns-provider-row :create-mode="createMode" :dnsProviderId="id"/>
+        <dns-provider-row :dnsProviderId="id"/>
       </v-row>
       <v-row key="addProvider" class="list-item">
         <v-col>
@@ -90,12 +90,12 @@ import { requiredIf } from 'vuelidate/lib/validators'
 import DnsProviderRow from '@/components/ShootDns/DnsProviderRow'
 import VendorIcon from '@/components/VendorIcon'
 import { getValidationErrors } from '@/utils'
+import { nilUnless } from '@/utils/validators'
 
 const validations = {
   primaryProvider: {
-    required: requiredIf(function () {
-      return !!this.domain
-    })
+    required: requiredIf('domain'),
+    nil: nilUnless('domain')
   }
 }
 
@@ -105,39 +105,29 @@ export default {
     DnsProviderRow,
     VendorIcon
   },
-  props: {
-    createMode: {
-      type: Boolean,
-      default: false
-    }
-  },
   validations,
   computed: {
     ...mapState('shootStaging', [
       'dnsDomain',
-      'dnsProviders',
-      'dnsProviderIds',
-      'dnsPrimaryProviderId'
+      'dnsProviderIds'
     ]),
     ...mapGetters('shootStaging', [
-      'dnsProviderTypes ',
+      'clusterIsNew',
       'dnsProvidersWithPrimarySupport',
-      'dnsPrimaryProvider',
-      'dnsDefaultPrimaryProviderId',
-      'newDnsProvider'
+      'dnsPrimaryProvider'
     ]),
     validationErrors () {
       return {
         primaryProvider: {
-          required: 'Provider is required if a custom domain is defined'
+          required: 'Provider is required if a custom domain is defined',
+          nil: 'Provider is not allowed if no custom domain is defined'
         }
       }
     },
     domainHint () {
-      if (this.createMode) {
-        return 'External available domain of the cluster'
-      }
-      return 'Domain cannot be changed after cluster creation'
+      return this.clusterIsNew
+        ? 'External available domain of the cluster'
+        : 'Domain cannot be changed after cluster creation'
     },
     domain: {
       get () {
@@ -154,6 +144,9 @@ export default {
       set (value) {
         this.setDnsPrimaryProvider(value)
       }
+    },
+    primaryProviderVisible () {
+      return !!this.primaryProvider || (this.clusterIsNew && !!this.dnsDomain)
     }
   },
   methods: {
