@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             color="grey"
             @click="onDelete"
             :disabled="primary && !clusterIsNew">
-            <v-icon >mdi-close</v-icon>
+            <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-col>
       </template>
