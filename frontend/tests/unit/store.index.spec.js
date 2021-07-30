@@ -63,12 +63,12 @@ describe('Store', () => {
       cfg: {
         vendorHints: [
           {
-            vendorNames: [
+            matchNames: [
               'suse-jeos',
               'suse-chost'
             ],
-            hintMessage: 'test',
-            hintType: 'warning'
+            message: 'test',
+            type: 'warning'
           }
         ]
       }

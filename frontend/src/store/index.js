@@ -180,7 +180,7 @@ const vendorNameFromImageName = imageName => {
 }
 
 const findVendorHint = (vendorHints, vendorName) => {
-  return find(vendorHints, hint => includes(hint.vendorNames, vendorName))
+  return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
 const matchesPropertyOrEmpty = (path, srcValue) => {

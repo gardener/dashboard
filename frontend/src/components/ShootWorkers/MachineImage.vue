@@ -111,8 +111,8 @@ export default {
       if (this.machineImage.vendorHint) {
         hints.push({
           type: 'html',
-          hint: transformHtml(this.machineImage.vendorHint.hintMessage),
-          severity: 'warning'
+          hint: transformHtml(this.machineImage.vendorHint.message),
+          severity: this.machineImage.vendorHint.severity
         })
       }
       if (this.machineImage.expirationDate) {

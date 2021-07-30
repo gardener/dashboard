@@ -56,7 +56,7 @@ function frontendConfig (config) {
   }
 
   for (const vendorHint of vendorHints) {
-    convertAndSanitize(vendorHint, 'hintMessage')
+    convertAndSanitize(vendorHint, 'message')
   }
 
   return (req, res, next) => {
