@@ -83,8 +83,8 @@ export default {
     },
     ociRuntimeItems () {
       const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
-      const ociRuntimess = get(containerRuntime, 'containerRuntimes', [])
-      return map(ociRuntimess, 'type')
+      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
+      return map(ociRuntimes, 'type')
     },
     containerRuntime: {
       get () {
@@ -96,16 +96,15 @@ export default {
     },
     ociRuntimes: {
       get () {
-        const ociRuntimes = get(this.worker, 'cri.containerRuntimes')
-        if (!ociRuntimes) {
-          return undefined
-        }
-        return map(ociRuntimes, 'type')
+        const criContainerRuntimes = get(this.worker, 'cri.containerRuntimes')
+        return criContainerRuntimes 
+          ? map(criContainerRuntimes, 'type')
+          : undefined
       },
       set (value) {
-        if (value && value.length) {
-          const containerRuntimes = map(value, ociRuntimes => ({ type: ociRuntimes }))
-          set(this.worker, 'cri.containerRuntimes', containerRuntimes)
+        if (!isEmpty(value)) {
+          const criContainerRuntimes = map(value, type => ({ type }))
+          set(this.worker, 'cri.containerRuntimes', criContainerRuntimes)
         } else {
           unset(this.worker, 'cri.containerRuntimes')
         }

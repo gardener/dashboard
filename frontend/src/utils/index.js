@@ -504,12 +504,13 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
-export function defaultCRIForWorker (kubernetesVersion, containerRuntimes) {
-  if (semver.lt(kubernetesVersion, '1.22.0')) {
-    return includes(containerRuntimes, 'docker') ? 'docker' : head(containerRuntimes)
-  } else {
-    return includes(containerRuntimes, 'containerd') ? 'containerd' : head(containerRuntimes)
-  }
+export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion, ) {
+  const criName = semver.lt(kubernetesVersion, '1.22.0') 
+    ? 'docker' 
+    : 'containerd'
+  return includes(criNames, criName) 
+    ? criName
+    : head(criNames)
 }
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
   switch (cloudProviderKind) {
