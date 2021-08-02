@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row align="center" class="ma-0">
-    <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
-      <template v-slot:activator="{ on }">
-        <v-col cols="11" v-on="on">
+  <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
+    <template v-slot:activator="{ on }">
+     <v-row align="center" class="ma-0" v-on="on">
+        <v-col cols="11" :class="{'disabled-row' : secretBindingMissing}">
           <div class="d-flex flex-wrap">
             <div class="regularInput">
               <v-select
@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
             </div>
           </div>
         </v-col>
-        <v-col cols="1">
+        <v-col cols="1" :class="{'disabled-row' : secretBindingMissing}">
           <v-btn
             small
             outlined
@@ -100,11 +100,11 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-col>
-      </template>
-      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br />
-      SecretBinding for secret {{secretName}} not found in poject namespace
-    </v-tooltip>
-  </v-row>
+      </v-row>
+    </template>
+    <span class="font-weight-bold">You cannot edit this DNS Provider</span><br />
+    SecretBinding for secret {{secretName}} not found in poject namespace
+  </v-tooltip>
 </template>
 
 <script>
@@ -252,7 +252,7 @@ export default {
       })
     },
     updateValid () {
-      const valid = this.secretValid && !this.$v.$invalid
+      const valid = this.secretBindingMissing || (this.secretValid && !this.$v.$invalid)
       if (this.valid !== valid) {
         this.setData({ valid })
       }

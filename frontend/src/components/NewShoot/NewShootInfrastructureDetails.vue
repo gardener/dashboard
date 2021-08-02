@@ -23,6 +23,7 @@ SPDX-License-Identifier: Apache-2.0
          :cloudProfileName="cloudProfileName"
          :value="secret"
          @input="onUpdateSecret"
+         :valid="secretValid"
          @update:valid="onSecretValid"></select-secret>
       </v-col>
       <v-col cols="3">
