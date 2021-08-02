@@ -301,3 +301,13 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.frontendConfig.vendorHints }}
+      vendorHints:
+        {{- range .Values.frontendConfig.vendorHints }}
+        - matchNames: {{ toJson .matchNames }}
+          message: {{ quote .message }}
+          {{- if .severity }}
+          severity: {{ .severity }}
+          {{- end }}
+        {{- end }}
+      {{- end }}

@@ -320,5 +320,36 @@ describe('gardener-dashboard', function () {
         expect(pick(config, ['frontend.sla'])).toMatchSnapshot()
       })
     })
+
+    describe('vendorHints', function () {
+      it('should render the template', async function () {
+        const values = {
+          frontendConfig: {
+            vendorHints: [
+              {
+                matchNames: [
+                  'foo',
+                  'bar'
+                ],
+                message: '[foo](https://bar.baz)',
+                severity: 'warning'
+              },
+              {
+                matchNames: [
+                  'fooz'
+                ],
+                message: 'other message'
+              }
+            ]
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.vendorHints'])).toMatchSnapshot()
+      })
+    })
   })
 })

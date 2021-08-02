@@ -28,7 +28,8 @@ function frontendConfig (config) {
     addonDefinition = {},
     accessRestriction: {
       items = []
-    } = {}
+    } = {},
+    vendorHints = []
   } = frontendConfig
 
   convertAndSanitize(alert, 'message')
@@ -52,6 +53,10 @@ function frontendConfig (config) {
       convertAndSanitize(display, 'description')
       convertAndSanitize(input, 'description')
     }
+  }
+
+  for (const vendorHint of vendorHints) {
+    convertAndSanitize(vendorHint, 'message')
   }
 
   return (req, res, next) => {
