@@ -5,16 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <aws-dialog v-model="dialogState.aws.visible" :secret="selectedSecret" @input="onInput('aws')"></aws-dialog>
-    <azure-dialog v-model="dialogState.azure.visible" :secret="selectedSecret" @input="onInput('azure')"></azure-dialog>
-    <gcp-dialog v-model="dialogState.gcp.visible" :secret="selectedSecret" @input="onInput('gcp')"></gcp-dialog>
-    <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret" @input="onInput('openstack')"></openstack-dialog>
-    <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret" @input="onInput('alicloud')"></alicloud-dialog>
-    <metal-dialog v-model="dialogState.metal.visible" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
-    <vsphere-dialog v-model="dialogState.vsphere.visible" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
-    <hcloud-dialog v-model="dialogState.hcloud.visible" :secret="selectedSecret" @input="onInput('hcloud')"></hcloud-dialog>
-  </div>
+  <component v-if="visibleDialog" :is="componentName" v-bind="{ secret: selectedSecret, vendor: visibleDialog }" v-model="visibleDialogState"></component>
 </template>
 
 <script>
@@ -25,10 +16,17 @@ import OpenstackDialog from '@/components/dialogs/SecretDialogOpenstack'
 import AlicloudDialog from '@/components/dialogs/SecretDialogAlicloud'
 import MetalDialog from '@/components/dialogs/SecretDialogMetal'
 import VsphereDialog from '@/components/dialogs/SecretDialogVSphere'
+import CloudflareDialog from '@/components/dialogs/SecretDialogCloudflare'
+import InfobloxDialog from '@/components/dialogs/SecretDialogInfoblox'
+import NetlifyDialog from '@/components/dialogs/SecretDialogNetlify'
+import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import HcloudDialog from '@/components/dialogs/SecretDialogHCloud'
 
+import upperFirst from 'lodash/upperFirst'
+import split from 'lodash/split'
+import head from 'lodash/head'
+
 export default {
-  name: 'secret-dialog-wrapper',
   components: {
     GcpDialog,
     AzureDialog,
@@ -37,20 +35,49 @@ export default {
     AlicloudDialog,
     MetalDialog,
     VsphereDialog,
-    HcloudDialog
+    CloudflareDialog,
+    InfobloxDialog,
+    NetlifyDialog,
+    HcloudDialog,
+    DeleteDialog
   },
-  props: {
-    dialogState: {
-      type: Object,
-      required: true
-    },
-    selectedSecret: {
-      type: Object
+  data () {
+    return {
+      visibleDialogState: false
     }
   },
-  methods: {
-    onInput (infrastructureKind) {
-      this.$emit('dialog-closed', infrastructureKind)
+  props: {
+    selectedSecret: {
+      type: Object,
+      required: false
+    },
+    visibleDialog: {
+      type: String,
+      required: false
+    }
+  },
+  computed: {
+    componentName () {
+      switch (this.visibleDialog) {
+        case 'google-clouddns':
+          return 'GcpDialog'
+        default: {
+          const name = upperFirst(head(split(this.visibleDialog, '-')))
+          return `${name}Dialog`
+        }
+      }
+    }
+  },
+  watch: {
+    visibleDialog (visibleDialog) {
+      if (visibleDialog) {
+        this.visibleDialogState = true
+      }
+    },
+    visibleDialogState (visibleDialogState) {
+      if (!visibleDialogState) {
+        this.$emit('dialog-closed')
+      }
     }
   }
 }

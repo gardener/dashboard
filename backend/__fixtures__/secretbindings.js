@@ -43,18 +43,33 @@ const secretBindingList = [
       name: 'trial-secret'
     },
     quotas
+  }),
+  getSecretBinding({
+    namespace: 'garden-foo',
+    name: 'foo-dns1',
+    dnsProviderName: 'foo-dns',
+    secretRef: {
+      namespace: 'garden-foo',
+      name: 'secret3'
+    },
+    quotas
   })
 ]
 
-function getSecretBinding ({ namespace, name, cloudProfileName, secretRef = {}, quotas = [] }) {
+function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
+  const labels = {}
+  if (cloudProfileName) {
+    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
+  }
+  if (dnsProviderName) {
+    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
+  }
   return {
     kind: 'SecretBinding',
     metadata: {
       name,
       namespace,
-      labels: {
-        'cloudprofile.garden.sapcloud.io/name': cloudProfileName
-      }
+      labels
     },
     secretRef,
     quotas

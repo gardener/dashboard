@@ -334,5 +334,53 @@ describe('api', function () {
 
       expect(res.body).toMatchSnapshot()
     })
+
+    it('should replace addons', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`)
+        .set('cookie', await user.cookie)
+        .send([
+          {
+            testAddon: {
+              enabled: true,
+              foo: 'bar'
+            }
+          }
+        ])
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should replace dns', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`)
+        .set('cookie', await user.cookie)
+        .send({
+          domain: 'foo.bar',
+          providers: [
+            {
+              primary: 'true',
+              secretName: 'foo-secret',
+              type: 'foo-provider'
+            }
+          ]
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
   })
 })

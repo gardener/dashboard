@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { withParams, regex, ref } from 'vuelidate/lib/validators/common'
+import { withParams, regex, ref, req } from 'vuelidate/lib/validators/common'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
 
@@ -78,6 +78,12 @@ const includesIfAvailable = (key, reference) => withParams({ type: 'includesIfAv
   }
 )
 
+const nilUnless = key => withParams({ type: 'nilUnless', key },
+  function (value, parentVm) {
+    return !ref(key, this, parentVm) ? !req(value) : true
+  }
+)
+
 export {
   withParams,
   regex,
@@ -94,5 +100,6 @@ export {
   uniqueWorkerName,
   numberOrPercentage,
   requiresCostObjectIfEnabled,
-  isTimezone
+  isTimezone,
+  nilUnless
 }

@@ -17,6 +17,7 @@ import {
   TargetEnum,
   isHtmlColorCode,
   parseSize,
+  isOwnSecret,
   shortRandomString,
   isValidTerminationDate,
   selectedImageIsNotLatest,
@@ -60,6 +61,7 @@ import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
 import replace from 'lodash/replace'
 import sample from 'lodash/sample'
+import split from 'lodash/split'
 
 import moment from '@/utils/moment'
 import { ioPlugin } from '@/utils/Emitter'
@@ -67,13 +69,13 @@ import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
-import networkingTypes from './modules/networkingTypes'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
-import infrastructureSecrets from './modules/infrastructureSecrets'
+import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
+import shootStaging from './modules/shootStaging'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
@@ -81,7 +83,8 @@ const localStorage = Vue.localStorage
 
 Vue.use(Vuex)
 
-const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+const strict = process.env.NODE_ENV !== 'production'
+const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
@@ -175,6 +178,26 @@ const vendorNameFromImageName = imageName => {
     return 'suse-jeos'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
     return 'suse-chost'
+  } else if (lowerCaseName.includes('flatcar')) {
+    return 'flatcar'
+  } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
+    return 'memoryone'
+  } else if (lowerCaseName.includes('aws-route53')) {
+    return 'aws-route53'
+  } else if (lowerCaseName.includes('azure-dns')) {
+    return 'azure-dns'
+  } else if (lowerCaseName.includes('google-clouddns')) {
+    return 'google-clouddns'
+  } else if (lowerCaseName.includes('openstack-designate')) {
+    return 'openstack-designate'
+  } else if (lowerCaseName.includes('alicloud-dns')) {
+    return 'alicloud-dns'
+  } else if (lowerCaseName.includes('cloudflare-dns')) {
+    return 'cloudflare-dns'
+  } else if (lowerCaseName.includes('infoblox-dns')) {
+    return 'infoblox-dns'
+  } else if (lowerCaseName.includes('netlify-dns')) {
+    return 'netlify-dns'
   }
   return undefined
 }
@@ -369,11 +392,11 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  gardenerExtensionsList (state) {
-    return state.gardenerExtensions.all
+  gardenerExtensionsList (state, getters) {
+    return getters['gardenerExtensions/items']
   },
   networkingTypeList (state, getters) {
-    const networkList = state.networkingTypes.all
+    const networkList = getters['gardenerExtensions/networkingTypes']
     return sortBy(networkList)
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
@@ -638,11 +661,30 @@ const getters = {
     return state.members.all
   },
   infrastructureSecretList (state) {
-    return state.infrastructureSecrets.all
+    return filter(state.cloudProviderSecrets.all, secret => {
+      return !!secret.metadata.cloudProviderKind
+    })
   },
-  getInfrastructureSecretByName (state, getters) {
+  infrastructureSecretsByCloudProfileName (state) {
+    return (cloudProfileName) => {
+      return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
+    }
+  },
+  dnsSecretList (state) {
+    return filter(state.cloudProviderSecrets.all, secret => {
+      return !!secret.metadata.dnsProviderName && isOwnSecret(secret) // secret binding not supported
+    })
+  },
+  dnsSecretsByProviderKind (state) {
+    return (dnsProviderName) => {
+      return filter(state.cloudProviderSecrets.all, secret => {
+        return secret.metadata.dnsProviderName === dnsProviderName && isOwnSecret(secret) // secret binding not supported
+      })
+    }
+  },
+  getCloudProviderSecretByName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
+      return getters['cloudProviderSecrets/getCloudProviderSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -656,6 +698,14 @@ const getters = {
   },
   sortedCloudProviderKindList (state, getters) {
     return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+  },
+  sortedDnsProviderList (state, getters) {
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const dnsProviderList = getters['gardenerExtensions/dnsProviderList']
+    // filter and sort
+    return compact(map(supportedProviderTypes, poviderType => {
+      return find(dnsProviderList, ['type', poviderType])
+    }))
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -782,11 +832,6 @@ const getters = {
           text: `${key} [${value}]`
         }
       })
-    }
-  },
-  infrastructureSecretsByCloudProfileName (state) {
-    return (cloudProfileName) => {
-      return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
     }
   },
   shootByNamespaceAndName (state, getters) {
@@ -1237,13 +1282,6 @@ const actions = {
       dispatch('setError', err)
     }
   },
-  async fetchNetworkingTypes ({ dispatch }) {
-    try {
-      await dispatch('networkingTypes/getAll')
-    } catch (err) {
-      dispatch('setError', err)
-    }
-  },
   async fetchSeeds ({ dispatch }) {
     try {
       await dispatch('seeds/getAll')
@@ -1263,8 +1301,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchInfrastructureSecrets ({ dispatch, commit }) {
-    return dispatch('infrastructureSecrets/getAll')
+  fetchcloudProviderSecrets ({ dispatch, commit }) {
+    return dispatch('cloudProviderSecrets/getAll')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -1435,24 +1473,24 @@ const actions = {
         return res
       })
   },
-  createInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/create', data)
+  createCloudProviderSecret ({ dispatch, commit }, data) {
+    return dispatch('cloudProviderSecrets/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret created', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret created', type: 'success' })
         return res
       })
   },
-  updateInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/update', data)
+  updateCloudProviderSecret ({ dispatch, commit }, data) {
+    return dispatch('cloudProviderSecrets/update', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret updated', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret updated', type: 'success' })
         return res
       })
   },
-  deleteInfrastructureSecret ({ dispatch, commit }, data) {
-    return dispatch('infrastructureSecrets/delete', data)
+  deleteCloudProviderSecret ({ dispatch, commit }, data) {
+    return dispatch('cloudProviderSecrets/delete', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure secret deleted', type: 'success' })
+        dispatch('setAlert', { message: 'Cloud Provider secret deleted', type: 'success' })
         return res
       })
   },
@@ -1708,11 +1746,11 @@ const modules = {
   draggable,
   cloudProfiles,
   gardenerExtensions,
-  networkingTypes,
   seeds,
   shoots,
-  infrastructureSecrets,
-  tickets
+  cloudProviderSecrets,
+  tickets,
+  shootStaging
 }
 
 const store = new Vuex.Store({
@@ -1721,7 +1759,7 @@ const store = new Vuex.Store({
   actions,
   mutations,
   modules,
-  strict: debug,
+  strict,
   plugins
 })
 

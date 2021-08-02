@@ -60,4 +60,16 @@ describe('Vuetify', () => {
       expect(wrapper.find(selector).text()).toBe(hint)
     })
   })
+
+  describe('VSelect', () => {
+    const selector = '.v-select__slot div'
+
+    it('v-select__slot class should exist and cotaint a div', () => {
+      const wrapper = mount(VSelect, {
+        localVue,
+        vuetify
+      })
+      expect(wrapper.find(selector).exists()).toBe(true)
+    })
+  })
 })

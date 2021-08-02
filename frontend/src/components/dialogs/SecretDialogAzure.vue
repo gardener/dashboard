@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="azure"
-    create-title="Add new Azure Secret"
-    replace-title="Replace Azure Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template v-slot:help-slot>
-      <div>
+      <div v-if="vendor==='azure'">
         <p>
           Before you can provision and access a Kubernetes cluster on Azure, you need to add account credentials.
           The Gardener needs the credentials to provision and operate the Azure infrastructure for your Kubernetes cluster.
@@ -72,10 +72,12 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Read the
-          <a href="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure"
-          target="_blank" rel="noopener">
-          IAM Console help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to manage your credentials and subscriptions.
+          <external-link url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
+          IAM Console help section</external-link> on how to manage your credentials and subscriptions.
         </p>
+      </div>
+      <div v-if="vendor==='azure-dns'">
+        <p>Follow the steps as described in the Azure documentation to <external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
       </div>
     </template>
 
@@ -85,6 +87,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
+import ExternalLink from '@/components/ExternalLink'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
 
@@ -105,7 +108,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    ExternalLink
   },
   props: {
     value: {
@@ -114,6 +118,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -161,6 +168,15 @@ export default {
     },
     isCreateMode () {
       return !this.secret
+    },
+    name () {
+      if (this.vendor === 'azure') {
+        return 'Azure'
+      }
+      if (this.vendor === 'azure-dns') {
+        return 'Azure DNS'
+      }
+      return undefined
     }
   },
   methods: {

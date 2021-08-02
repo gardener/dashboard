@@ -10,12 +10,22 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="openstack"
-    create-title="Add new OpenStack Secret"
-    replace-title="Replace OpenStack Secret"
+    :vendor="vendor"
+    :create-title="`Add new ${name} Secret`"
+    :replace-title="`Replace ${name} Secret`"
     @input="onInput">
 
     <template v-slot:secret-slot>
+      <div v-if="vendor==='openstack-designate'">
+        <v-text-field
+          color="primary"
+          v-model="authURL"
+          label="Auth URL"
+          :error-messages="getErrorMessages('authURL')"
+          @input="$v.authURL.$touch()"
+          @blur="$v.authURL.$touch()"
+        ></v-text-field>
+      </div>
       <div>
         <v-text-field
           color="primary"
@@ -69,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
 
     <template v-slot:help-slot>
-      <div>
+      <div v-if="vendor==='openstack'">
         <p>
           Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
           The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
@@ -77,13 +87,15 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Ensure that the user has privileges to <strong>create, modify and delete VMs</strong>.
         </p>
-        <p>
-          Read the
-          <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
-            target="_blank" rel="noopener">
-            OpenStack help section<v-icon style="font-size: 80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
-        </p>
       </div>
+      <div v-if="vendor==='openstack-designate'">
+        <p>Make sure that you configure your account for DNS usage.</p>
+        <p>Required Roles: dns_viewer, dns_webmaster</p>
+      </div>
+      <p>
+        Read the
+        <external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</external-link> on how to create and manage roles.
+      </p>
     </template>
 
   </secret-dialog>
@@ -93,9 +105,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required } from 'vuelidate/lib/validators'
+import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
+import ExternalLink from '@/components/ExternalLink'
 
 const validationErrors = {
   domainName: {
@@ -109,13 +122,17 @@ const validationErrors = {
   },
   password: {
     required: 'You can\'t leave this empty.'
+  },
+  authURL: {
+    required: 'Required for Secret Type DNS.'
   }
 }
 
 export default {
   components: {
     SecretDialog,
-    HintColorizer
+    HintColorizer,
+    ExternalLink
   },
   props: {
     value: {
@@ -124,6 +141,9 @@ export default {
     },
     secret: {
       type: Object
+    },
+    vendor: {
+      type: String
     }
   },
   data () {
@@ -133,6 +153,7 @@ export default {
       username: undefined,
       password: undefined,
       hideSecret: true,
+      authURL: undefined,
       validationErrors
     }
   },
@@ -148,12 +169,16 @@ export default {
       return !this.$v.$invalid
     },
     secretData () {
-      return {
+      const data = {
         domainName: this.domainName,
         tenantName: this.tenantName,
         username: this.username,
         password: this.password
       }
+      if (this.authURL && this.authURL.length) {
+        data.OS_AUTH_URL = this.authURL
+      }
+      return data
     },
     validators () {
       const validators = {
@@ -168,12 +193,26 @@ export default {
         },
         password: {
           required
+        },
+        authURL: {
+          required: requiredIf(function () {
+            return this.vendor === 'openstack-designate'
+          })
         }
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
+    },
+    name () {
+      if (this.vendor === 'openstack') {
+        return 'OpenStack'
+      }
+      if (this.vendor === 'openstack-designate') {
+        return 'OpenStack Designate'
+      }
+      return undefined
     }
   },
   methods: {
@@ -187,6 +226,7 @@ export default {
       this.tenantName = ''
       this.username = ''
       this.password = ''
+      this.authURL = ''
 
       if (!this.isCreateMode) {
         if (this.secret.data) {

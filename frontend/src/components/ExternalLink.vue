@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <a :href="sanitizeUrl(url)" target="_blank" rel="noopener">
-    <span :style="{ fontSize: size + 'px' }"><slot></slot></span><v-icon :size="size" >mdi-open-in-new</v-icon>
+    <slot>{{url}}</slot> <v-icon :size="12">mdi-open-in-new</v-icon>
   </a>
 </template>
 
@@ -18,14 +18,8 @@ export default {
   mixins: [sanitizeUrl],
   props: {
     url: {
-      type: String
-    },
-    text: {
-      type: String
-    },
-    size: {
-      type: Number,
-      default: 14
+      type: String,
+      required: true
     }
   }
 }

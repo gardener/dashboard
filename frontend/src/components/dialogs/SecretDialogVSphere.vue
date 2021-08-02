@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="vsphere"
+    vendor="vsphere"
     create-title="Add new VMware vSphere Secret"
     replace-title="Replace VMware vSphere Secret"
     @input="onInput">

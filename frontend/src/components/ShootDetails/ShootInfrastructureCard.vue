@@ -96,6 +96,46 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="primary">mdi-dns</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>
+            Shoot Domain
+            <v-chip label x-small color="primary" outlined class="ml-2">{{customDomainChipText}}</v-chip>
+          </v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{shootDomain}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            <template v-if="shootDnsProviders && shootDnsProviders.length">
+                <dns-provider
+                  class="mr-2"
+                  v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
+                  :primary="primary"
+                  :secretName="secretName"
+                  :shootNamespace="shootNamespace"
+                  :type="type"
+                  :domains="domains"
+                  :zones="zones"
+                  :key="secretName">
+              </dns-provider>
+            </template>
+            <span v-else>No DNS Provider configured</span>
+          </v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action>
+          <dns-configuration :shootItem="shootItem"></dns-configuration>
+        </v-list-item-action>
+      </v-list-item>
       <template v-if="!!shootIngressDomainText">
         <v-divider inset></v-divider>
         <v-list-item>
@@ -142,6 +182,8 @@ import CopyBtn from '@/components/CopyBtn'
 import LbClass from '@/components/ShootDetails/LbClass'
 import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
+import DnsProvider from '@/components/ShootDns/DnsProvider'
+import DnsConfiguration from '@/components/ShootDns/DnsConfiguration'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -150,7 +192,9 @@ export default {
     CopyBtn,
     LbClass,
     ShootSeedName,
-    Vendor
+    Vendor,
+    DnsProvider,
+    DnsConfiguration
   },
   mixins: [shootItem],
   computed: {
@@ -180,6 +224,12 @@ export default {
     },
     canLinkToSecret () {
       return this.shootSecretBindingName && this.shootNamespace
+    },
+    customDomainChipText () {
+      if (this.isCustomShootDomain) {
+        return 'custom'
+      }
+      return 'generated'
     }
   }
 }

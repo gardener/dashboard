@@ -8,7 +8,7 @@ import assign from 'lodash/assign'
 import findIndex from 'lodash/findIndex'
 import find from 'lodash/find'
 import matches from 'lodash/matches'
-import { getInfrastructureSecrets, updateInfrastructureSecret, createInfrastructureSecret, deleteInfrastructureSecret } from '@/utils/api'
+import { getCloudProviderSecrets, updateCloudProviderSecret, createCloudProviderSecret, deleteCloudProviderSecret } from '@/utils/api'
 
 const eqlNameAndNamespace = ({ namespace, name }) => {
   return matches({ metadata: { namespace, name } })
@@ -21,7 +21,7 @@ const state = {
 
 // getters
 const getters = {
-  getInfrastructureSecretByName (state) {
+  getCloudProviderSecretByName (state) {
     return ({ name, namespace }) => find(state.all, eqlNameAndNamespace({ name, namespace }))
   }
 }
@@ -30,7 +30,7 @@ const getters = {
 const actions = {
   getAll: ({ commit, state, rootState }) => {
     const namespace = rootState.namespace
-    return getInfrastructureSecrets({ namespace })
+    return getCloudProviderSecrets({ namespace })
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all
@@ -42,7 +42,7 @@ const actions = {
   },
   update: ({ commit, rootState }, { metadata, data }) => {
     const { namespace = rootState.namespace, name } = metadata
-    return updateInfrastructureSecret({ namespace, name, data: { metadata, data } })
+    return updateCloudProviderSecret({ namespace, name, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
@@ -50,7 +50,7 @@ const actions = {
   },
   create: ({ commit, rootState }, { metadata, data }) => {
     const { namespace = rootState.namespace } = metadata
-    return createInfrastructureSecret({ namespace, data: { metadata, data } })
+    return createCloudProviderSecret({ namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
@@ -58,7 +58,7 @@ const actions = {
   },
   delete ({ dispatch, commit, rootState }, name) {
     const namespace = rootState.namespace
-    return deleteInfrastructureSecret({ namespace, name })
+    return deleteCloudProviderSecret({ namespace, name })
       .then(res => {
         commit('ITEM_DELETED', res.data)
         return res.data
