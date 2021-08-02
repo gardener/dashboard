@@ -1206,6 +1206,13 @@ Object {
   "creationTimestamp": "2020-01-01T00:00:00Z",
   "kubeconfig": "apiVersion: v1
 kind: Config
+current-context: garden-foo-robot
+contexts:
+  - name: garden-foo-robot
+    context:
+      cluster: garden
+      user: robot
+      namespace: garden-foo
 clusters:
   - name: garden
     cluster:
@@ -1215,13 +1222,6 @@ users:
   - name: robot
     user:
       token: robot-token-726f6
-contexts:
-  - name: garden-foo-robot
-    context:
-      cluster: garden
-      user: robot
-      namespace: garden-foo
-current-context: garden-foo-robot
 ",
   "roles": Array [
     "viewer",

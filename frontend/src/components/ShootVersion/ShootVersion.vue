@@ -64,22 +64,22 @@ SPDX-License-Identifier: Apache-2.0
           </p>
           <p>
             You should consider the
-            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank">
+            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" rel="noopener">
               Kubernetes release notes
               <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
             </a>
             before upgrading your cluster.
           </p>
           <p>
-            Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
+            Type <strong>{{shootName}}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           </p>
-          <i class="warning--text">This action cannot be undone.</i>
+          <em class="warning--text">This action cannot be undone.</em>
         </template>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
           <p>
             Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
           </p>
-          <i class="warning--text">This action cannot be undone.</i>
+          <em class="warning--text">This action cannot be undone.</em>
         </template>
       </template>
     </g-dialog>

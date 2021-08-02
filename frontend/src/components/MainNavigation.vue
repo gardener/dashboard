@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
-            <img src="/static/assets/logo.svg" class="logo">
+            <img src="/static/assets/logo.svg" class="logo" alt="gardener logo">
             <h1 class="main-navigation-title--text">Gardener <span class="version">{{version}}</span></h1>
             <h2 class="primary--text">Universal Kubernetes at Scale</h2>
           </a>

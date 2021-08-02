@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :class="{ 'icon-background' : !noBackground }" small :size="size" class="rounded-lg" tile>
-    <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" class="rounded-0">
+  <v-avatar :class="{ 'icon-background' : !noBackground }" small :size="size" :max-height="size" :max-width="size" class="rounded-lg" tile>
+    <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" :alt="`${value} logo`" class="rounded-0">
     <v-icon v-else-if="isMdiIcon" class="primary--text" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="primary--text" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </v-avatar>
@@ -32,6 +32,7 @@ export default {
   computed: {
     iconSrc () {
       switch (this.value) {
+        // infrastructures
         case 'azure':
           return require('@/assets/azure.svg')
         case 'aws':
@@ -44,6 +45,28 @@ export default {
           return require('@/assets/alicloud.svg')
         case 'vsphere':
           return require('@/assets/vsphere.svg')
+        case 'metal':
+          return require('@/assets/metal.svg')
+
+        // dns
+        case 'aws-route53':
+          return require('@/assets/aws-route53.svg')
+        case 'azure-dns':
+          return require('@/assets/azure-dns.svg')
+        case 'google-clouddns':
+          return require('@/assets/google-clouddns.svg')
+        case 'openstack-designate':
+          return require('@/assets/openstack.svg')
+        case 'alicloud-dns':
+          return require('@/assets/alicloud-dns.png')
+        case 'cloudflare-dns':
+          return require('@/assets/cloudflare-dns.svg')
+        case 'infoblox-dns':
+          return require('@/assets/infoblox-dns.svg')
+        case 'netlify-dns':
+          return require('@/assets/netlify-dns.svg')
+
+        // os
         case 'coreos':
           return require('@/assets/coreos.svg')
         case 'suse-jeos':
@@ -52,10 +75,10 @@ export default {
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
-        case 'metal':
-          return require('@/assets/metal.svg')
         case 'gardenlinux':
           return require('@/assets/gardenlinux.svg')
+        case 'flatcar':
+          return require('@/assets/flatcar.svg')
         case 'hcloud':
           return require('@/assets/hcloud.svg')
       }

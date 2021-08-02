@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <tr>
     <td v-if="selectedHeaders.displayName">
       <v-list-item class="pl-0">
-        <v-list-item-avatar><img :src="item.avatarUrl" /></v-list-item-avatar>
+        <v-list-item-avatar><img :src="item.avatarUrl" :alt="`avatar of ${item.username}`"/></v-list-item-avatar>
         <v-list-item-content>
           <v-list-item-title class="d-flex">
             <span class="text-subtitle-1">{{item.displayName}}</span>

@@ -43,6 +43,14 @@ SPDX-License-Identifier: Apache-2.0
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
+      <v-card flat class="mt-4">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
+          DNS Configuration
+        </v-card-title>
+        <v-card-text>
+          <manage-shoot-dns/>
+       </v-card-text>
+      </v-card>
       <v-card flat class="mt-4" v-if="cfg.accessRestriction">
         <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
          Access Restrictions
@@ -136,6 +144,7 @@ import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectIn
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+import ManageShootDns from '@/components/ShootDns/ManageDns'
 
 import asyncRef from '@/mixins/asyncRef'
 
@@ -156,6 +165,7 @@ export default {
     AccessRestrictions,
     NewShootDetails,
     ManageShootAddons,
+    ManageShootDns,
     MaintenanceComponents,
     MaintenanceTime,
     ManageHibernationSchedule,
@@ -186,6 +196,10 @@ export default {
       'namespace',
       'cfg'
     ]),
+    ...mapGetters('shootStaging', [
+      'getDnsConfiguration',
+      'dnsConfigurationValid'
+    ]),
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
@@ -198,13 +212,17 @@ export default {
         this.detailsValid &&
         this.workersValid &&
         this.maintenanceTimeValid &&
-        this.hibernationScheduleValid
+        this.hibernationScheduleValid &&
+        this.dnsConfigurationValid
     }
   },
   methods: {
     ...mapActions([
       'createShoot',
       'setNewShootResource'
+    ]),
+    ...mapActions('shootStaging', [
+      'setClusterConfiguration'
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
@@ -278,6 +296,13 @@ export default {
       }
       if (!isEmpty(firewallNetworks)) {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+      }
+
+      const dnsConfiguration = this.getDnsConfiguration()
+      if (dnsConfiguration.domain || !isEmpty(dnsConfiguration.providers)) {
+        set(shootResource, 'spec.dns', dnsConfiguration)
+      } else {
+        unset(shootResource, 'spec.dns')
       }
 
       if (this.$refs.accessRestrictions) {
@@ -473,6 +498,9 @@ export default {
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
+  },
+  created () {
+    this.setClusterConfiguration(this.newShootResource)
   }
 }
 </script>

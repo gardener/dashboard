@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
+  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw" @keydown.esc="resolveAction(false)">
     <v-card>
       <v-toolbar flat class="toolbar-background toolbar-title--text">
         <v-toolbar-title class="dialog-title align-center justify-start">
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           </slot>
           <template v-if="$slots.affectedObjectName">
             &nbsp;
-            <tt class="font-weight-bold"><slot name="affectedObjectName"></slot></tt>
+            <span class="font-family-monospace font-weight-bold"><slot name="affectedObjectName"></slot></span>
           </template>
         </v-toolbar-title>
       </v-toolbar>
@@ -67,9 +67,6 @@ export default {
       type: Boolean,
       default: false
     },
-    confirmMessage: {
-      type: String
-    },
     errorMessage: {
       type: String
     },
@@ -84,7 +81,7 @@ export default {
       type: String,
       default: 'Cancel'
     },
-    maxWidth: {
+    width: {
       type: String,
       default: '500'
     },

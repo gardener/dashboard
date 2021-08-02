@@ -66,11 +66,11 @@ SPDX-License-Identifier: Apache-2.0
             <template v-slot:activator="{ on: tooltip }">
               <v-badge v-if="isAdmin" color="primary" bottom overlap icon="mdi-account-supervisor">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
-                  <img :src="avatarUrl" />
+                  <img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`"/>
                 </v-avatar>
               </v-badge>
               <v-avatar v-else v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
-                <img :src="avatarUrl" />
+                <img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`"/>
               </v-avatar>
             </template>
             <span v-if="isAdmin">

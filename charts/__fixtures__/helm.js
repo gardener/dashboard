@@ -31,7 +31,7 @@ async function renderChartTemplates (chart, templates, values) {
   try {
     fs.writeFileSync(filename, yaml.safeDump(values, { skipInvalid: true }))
     const cmd = [
-      '/usr/local/bin/helm',
+      'helm',
       'template',
       name,
       '-n',

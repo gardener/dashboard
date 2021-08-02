@@ -9,6 +9,7 @@ import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
+import some from 'lodash/some'
 import { mapGetters } from 'vuex'
 
 import {
@@ -137,6 +138,12 @@ export const shootItem = {
     },
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')
+    },
+    isCustomShootDomain () {
+      return some(this.shootDnsProviders, ['primary', true])
+    },
+    shootDnsProviders () {
+      return get(this.shootSpec, 'dns.providers')
     },
     shootHibernationSchedules () {
       return get(this.shootSpec, 'hibernation.schedules', [])

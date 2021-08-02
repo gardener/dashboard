@@ -10,8 +10,7 @@ const assert = require('assert').strict
 const Client = require('./Client')
 const Store = require('./cache/Store')
 const { Resources } = require('./resources')
-const kubeconfig = require('@gardener-dashboard/kube-config')
-const config = kubeconfig.load(process.env)
+const config = require('@gardener-dashboard/kube-config').load(process.env)
 
 function createClient ({ auth, key, cert, ...options } = {}) {
   assert.ok(auth || (key && cert), 'Client credentials are required')

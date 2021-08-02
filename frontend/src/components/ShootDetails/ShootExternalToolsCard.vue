@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
             <v-list-item-title>
-              <external-link :url="expandUrl(url)" :size="16">
+              <external-link :url="expandUrl(url)">
                 {{expandUrl(url)}}
               </external-link>
             </v-list-item-title>

@@ -18,15 +18,17 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           {{appTitle}} is not running for hibernated clusters
         </v-tooltip>
-        <a v-else :href="url" target="_blank">{{urlText}}</a>
+        <a v-else :href="sanitizeUrl(url)" target="_blank" rel="noopener">{{urlText}}</a>
       </v-list-item-title>
     </v-list-item-content>
   </v-list-item>
 </template>
 
 <script>
+import sanitizeUrl from '@/mixins/sanitizeUrl'
 
 export default {
+  mixins: [sanitizeUrl],
   props: {
     appTitle: {
       type: String,

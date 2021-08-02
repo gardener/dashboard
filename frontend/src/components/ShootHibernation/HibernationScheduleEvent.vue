@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container class="py-0 ma-2">
-    <v-row align="center">
-      <v-row >
-        <v-col class="weekday-select">
+  <v-row align="center">
+    <v-col cols="11">
+      <v-row class="ma-0">
+        <v-col cols="5">
           <v-select
           color="primary"
           item-color="primary"
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           deletable-chips
         ></v-select>
         </v-col>
-        <v-col class="time-select">
+        <v-col cols="2">
           <v-text-field
             color="primary"
             label="Wake up at"
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
             type="time"
           ></v-text-field>
         </v-col>
-        <v-col class="time-select">
+        <v-col cols="2">
           <v-text-field
             color="primary"
             label="Hibernate at"
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
             type="time"
           ></v-text-field>
         </v-col>
-        <v-col class="location-select">
+        <v-col cols="3">
           <v-autocomplete
             color="primary"
             label="Location"
@@ -62,18 +62,18 @@ SPDX-License-Identifier: Apache-2.0
           </v-autocomplete>
         </v-col>
       </v-row>
-      <v-col class="ml-4">
-        <v-btn
-          small
-          outlined
-          icon
-          color="grey"
-          @click.native.stop="removeScheduleEvent">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+    </v-col>
+    <v-col cols="1">
+      <v-btn
+        small
+        outlined
+        icon
+        color="grey"
+        @click.native.stop="removeScheduleEvent">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -278,15 +278,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .weekday-select {
-    width: 300px;
-  }
-  .time-select {
-    max-width: 100px;
-  }
-  .location-select {
-    max-width: 300px;
-  }
-</style>

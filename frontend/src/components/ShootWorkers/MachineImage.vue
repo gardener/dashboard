@@ -4,47 +4,48 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <hint-colorizer hint-color="warning">
-    <v-select
-      color="primary"
-      item-color="primary"
-      :items="machineImages"
-      item-value="key"
-      return-object
-      :error-messages="getErrorMessages('worker.machine.image')"
-      @input="onInputMachineImage"
-      @blur="$v.worker.machine.image.$touch()"
-      v-model="machineImage"
-      label="Machine Image"
-      :hint="hint"
-      persistent-hint
-    >
-      <template v-slot:item="{ item }">
-        <v-list-item-action>
-          <vendor-icon v-model="item.icon"></vendor-icon>
-        </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
-          <v-list-item-subtitle v-if="itemDescription(item).length">
-            {{itemDescription(item)}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-      </template>
-      <template v-slot:selection="{ item }">
-        <vendor-icon v-model="item.icon"></vendor-icon>
-        <span class="ml-2">
-         {{item.name}} [{{item.version}}]
-        </span>
-      </template>
-    </v-select>
-  </hint-colorizer>
+  <v-select
+    color="primary"
+    item-color="primary"
+    :items="machineImages"
+    item-value="key"
+    return-object
+    :error-messages="getErrorMessages('worker.machine.image')"
+    @input="onInputMachineImage"
+    @blur="$v.worker.machine.image.$touch()"
+    v-model="machineImage"
+    label="Machine Image"
+    :hint="hint"
+    persistent-hint
+  >
+    <template v-slot:item="{ item }">
+      <v-list-item-action>
+        <vendor-icon :value="item.icon"></vendor-icon>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
+        <v-list-item-subtitle v-if="itemDescription(item).length">
+          {{itemDescription(item)}}
+        </v-list-item-subtitle>
+      </v-list-item-content>
+    </template>
+    <template v-slot:selection="{ item }">
+      <vendor-icon :value="item.icon"></vendor-icon>
+      <span class="ml-2">
+        {{item.name}} [{{item.version}}]
+      </span>
+    </template>
+    <template v-slot:message="{ message }">
+      <multi-message :message="message" />
+    </template>
+  </v-select>
 </template>
 
 <script>
 import VendorIcon from '@/components/VendorIcon'
-import HintColorizer from '@/components/HintColorizer'
+import MultiMessage from '@/components/MultiMessage'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, selectedImageIsNotLatest } from '@/utils'
+import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
@@ -74,7 +75,7 @@ const validations = {
 export default {
   components: {
     VendorIcon,
-    HintColorizer
+    MultiMessage
   },
   props: {
     worker: {
@@ -106,20 +107,47 @@ export default {
       }
     },
     hint () {
-      const hintText = []
-      if (this.machineImage.needsLicense) {
-        hintText.push('The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.')
+      const hints = []
+      if (this.machineImage.vendorHint) {
+        hints.push({
+          type: 'html',
+          hint: transformHtml(this.machineImage.vendorHint.message),
+          severity: this.machineImage.vendorHint.severity
+        })
       }
       if (this.machineImage.expirationDate) {
-        hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
+        hints.push({
+          type: 'text',
+          hint: `Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`,
+          severity: 'warning'
+        })
       }
       if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hintText.push('If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates')
+        hints.push({
+          type: 'text',
+          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
+          severity: 'info'
+        })
       }
-      if (this.machineImage.isPreview) {
-        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
+        hints.push({
+          type: 'text',
+          hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
+          severity: 'warning'
+        })
       }
-      return join(hintText, ' / ')
+      return JSON.stringify(hints)
+    },
+    hintColor () {
+      if (this.machineImage.expirationDate ||
+         (this.updateOSMaintenance && this.selectedImageIsNotLatest) ||
+         this.machineImage.isPreview) {
+        return 'warning'
+      }
+      if (this.machineImage.vendorHint) {
+        return this.machineImage.vendorHint.hintType
+      }
+      return undefined
     },
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
@@ -146,9 +174,6 @@ export default {
       if (machineImage.classification) {
         itemDescription.push(`Classification: ${machineImage.classification}`)
       }
-      if (machineImage.needsLicense) {
-        itemDescription.push('Enterprise support license required')
-      }
       if (machineImage.expirationDate) {
         itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
       }
@@ -169,3 +194,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  ::v-deep .v-select__slot {
+    div {
+     flex-wrap: nowrap;
+    }
+  }
+
+</style>

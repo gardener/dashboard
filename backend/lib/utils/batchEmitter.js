@@ -48,7 +48,7 @@ class AbstractBatchEmitter {
   }
 
   flush () {
-    if (this.count() !== 0) {
+    if (this.count() > 0) {
       this.emit()
     }
     logger.debug('Emitted %s batch events to socket %s', this.kind, this.socket.id)
@@ -62,7 +62,7 @@ class AbstractBatchEmitter {
   }
 
   count () {
-    throw new Error('You have to implement the method!')
+    return 0
   }
 
   appendChunkedEvents (chunkedEvents) {
