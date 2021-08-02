@@ -7,7 +7,7 @@
 import map from 'lodash/map'
 
 import { getters } from '@/store'
-import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCRIForWorker } from '@/utils'
+import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion } from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -491,18 +491,18 @@ describe('utils', () => {
       })
     })
 
-    describe('defaultCRIForWorker', () => {
+    describe('defaultCriNameByKubernetesVersion', () => {
       it('should return docker for k8s < 1.22.0', () => {
-        expect(defaultCRIForWorker('1.21.3', ['cri1', 'docker', 'containerd', 'cri2'])).toBe('docker')
+        expect(defaultCriNameByKubernetesVersion(['cri1', 'docker', 'containerd', 'cri2'], '1.21.3')).toBe('docker')
       })
 
       it('should return containerd for k8s >= 1.22.0', () => {
-        expect(defaultCRIForWorker('1.22.0', ['cri1', 'docker', 'containerd', 'cri2'])).toBe('containerd')
+        expect(defaultCriNameByKubernetesVersion(['cri1', 'docker', 'containerd', 'cri2'], '1.22.0')).toBe('containerd')
       })
 
       it('should return first cri as fallback', () => {
-        expect(defaultCRIForWorker('1.21.3', ['cri1', 'cri2'])).toBe('cri1')
-        expect(defaultCRIForWorker('1.22.0', ['cri1', 'cri2'])).toBe('cri1')
+        expect(defaultCriNameByKubernetesVersion(['cri1', 'cri2'], '1.21.3')).toBe('cri1')
+        expect(defaultCriNameByKubernetesVersion(['cri1', 'cri2'], '1.22.0')).toBe('cri1')
       })
     })
 

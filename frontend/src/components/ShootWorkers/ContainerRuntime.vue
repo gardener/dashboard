@@ -10,20 +10,20 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       color="primary"
       item-color="primary"
-      :items="containerRuntimeItems"
-      :error-messages="getErrorMessages('containerRuntime')"
-      @input="onInputContainerRuntime"
-      @blur="$v.containerRuntime.$touch()"
-      v-model="containerRuntime"
+      :items="criNames"
+      :error-messages="getErrorMessages('criName')"
+      @input="onInputCriName"
+      @blur="$v.criName.$touch()"
+      v-model="criName"
       label="Container Runtime"
     ></v-select>
     <v-select
-      v-if="ociRuntimeItems.length"
+      v-if="criContainerRuntimeTypes.length"
       class="ml-1"
       color="primary"
       item-color="primary"
-      :items="ociRuntimeItems"
-      v-model="ociRuntimes"
+      :items="criContainerRuntimeTypes"
+      v-model="selectedCriContainerRuntimeTypes"
       label="Additional OCI Runtimes"
       multiple
       chips
@@ -35,22 +35,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, defaultCRIForWorker } from '@/utils'
+import { getValidationErrors, defaultCriNameByKubernetesVersion } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
-  containerRuntime: {
+  criName: {
     required: 'Container Runtime is required'
   }
 }
 
 const validations = {
-  containerRuntime: {
+  criName: {
     required
   }
 }
@@ -78,15 +79,15 @@ export default {
   },
   validations,
   computed: {
-    containerRuntimeItems () {
+    criNames () {
       return map(this.machineImageCri, 'name')
     },
-    ociRuntimeItems () {
+    criContainerRuntimeTypes () {
       const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
       const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
       return map(ociRuntimes, 'type')
     },
-    containerRuntime: {
+    criName: {
       get () {
         return get(this.worker, 'cri.name')
       },
@@ -94,10 +95,10 @@ export default {
         set(this.worker, 'cri.name', value)
       }
     },
-    ociRuntimes: {
+    selectedCriContainerRuntimeTypes: {
       get () {
         const criContainerRuntimes = get(this.worker, 'cri.containerRuntimes')
-        return criContainerRuntimes 
+        return criContainerRuntimes
           ? map(criContainerRuntimes, 'type')
           : undefined
       },
@@ -115,9 +116,9 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    onInputContainerRuntime (value) {
-      this.ociRuntimes = undefined
-      this.$v.containerRuntime.$touch()
+    onInputCriName (value) {
+      this.selectedCriContainerRuntimeTypes = undefined
+      this.$v.criName.$touch()
       this.validateInput()
     },
     validateInput () {
@@ -132,10 +133,10 @@ export default {
     this.validateInput()
   },
   watch: {
-    containerRuntimeItems (containerRuntimeItems) {
-      if (!includes(containerRuntimeItems, this.containerRuntime)) {
-        this.containerRuntime = defaultCRIForWorker(this.kubernetesVersion, this.containerRuntimeItems)
-        this.onInputContainerRuntime()
+    criNames (criNames) {
+      if (!includes(criNames, this.criName)) {
+        this.criName = defaultCriNameByKubernetesVersion(this.criNames, this.kubernetesVersion)
+        this.onInputCriName()
       }
     }
   }

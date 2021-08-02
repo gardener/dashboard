@@ -22,7 +22,7 @@ import {
   isValidTerminationDate,
   selectedImageIsNotLatest,
   availableKubernetesUpdatesCache,
-  defaultCRIForWorker,
+  defaultCriNameByKubernetesVersion,
   UNKNOWN_EXPIRED_TIMESTAMP
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -1119,7 +1119,7 @@ const getters = {
         },
         zones,
         cri: {
-          name: defaultCRIForWorker(kubernetesVersion, map(machineImage.cri, 'name'))
+          name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion)
         },
         isNew: true
       }
