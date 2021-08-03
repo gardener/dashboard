@@ -1546,7 +1546,7 @@ const actions = {
     const themes = get(Vue, 'vuetify.framework.theme.themes')
     if (themes) {
       const applyCustomThemeConfiguration = (name) => {
-        const customTheme = get(state, ['cfg', 'themes', name])
+        const customTheme = cloneDeep(get(state, ['cfg', 'themes', name]))
         if (customTheme) {
           forOwn(customTheme, (value, key) => {
             const color = get(colors, value)
