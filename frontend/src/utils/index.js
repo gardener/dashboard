@@ -504,6 +504,14 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
+export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) {
+  const criName = semver.lt(kubernetesVersion, '1.22.0')
+    ? 'docker'
+    : 'containerd'
+  return includes(criNames, criName)
+    ? criName
+    : head(criNames)
+}
 export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
   switch (cloudProviderKind) {
     case 'azure':
