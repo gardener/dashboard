@@ -135,7 +135,7 @@ export default {
   watch: {
     criNames (criNames) {
       if (!includes(criNames, this.criName)) {
-        this.criName = defaultCriNameByKubernetesVersion(this.criNames, this.kubernetesVersion)
+        this.criName = defaultCriNameByKubernetesVersion(criNames, this.kubernetesVersion)
         this.onInputCriName()
       }
     }
