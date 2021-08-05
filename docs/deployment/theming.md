@@ -5,7 +5,7 @@ Gardener landscape administrators should have the possibility to change the appe
 
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
-Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors cam be specified as HTML color code (e.g. #FF0000 for red) or by referencing a color from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
+Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. #FF0000 for red) or by referencing a color from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
 
 The following colors can be configured:
 
@@ -23,6 +23,21 @@ The following colors can be configured:
 | `error`                 | Snotify error popups, error texts |
 
 If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
+
+### Example
+
+```yaml
+frontend:
+  themes:
+    light:
+      primary: '#0b8062'
+      anchor: '#0b8062'
+      main-background: 'grey.darken3'
+      main-navigation-title: 'shades.white'
+      toolbar-background: '#0b8062'
+      toolbar-title: 'shades.white'
+      action-button: 'grey.darken4'
+```
 
 ## Logos and Icons
 

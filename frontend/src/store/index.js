@@ -57,7 +57,6 @@ import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
-import assign from 'lodash/assign'
 import forOwn from 'lodash/forOwn'
 import replace from 'lodash/replace'
 import sample from 'lodash/sample'
@@ -1547,22 +1546,18 @@ const actions = {
 
     const themes = get(Vue, 'vuetify.framework.theme.themes')
     if (themes) {
-      const applyCustomThemeConfiguration = (name) => {
-        const customTheme = get(state, ['cfg', 'themes', name])
-        if (customTheme) {
-          forOwn(customTheme, (value, key) => {
-            const color = get(colors, value)
-            if (color) {
-              customTheme[key] = color
-            } else if (!isHtmlColorCode(value)) {
-              delete customTheme[key]
-            }
-          })
-          assign(themes[name], customTheme)
-        }
+      for (const name of ['light', 'dark']) {
+        const theme = get(Vue.vuetify.framework.theme.themes, name)
+        const themeConfiguration = get(state.cfg.themes, name)
+        forOwn(themeConfiguration, (value, key) => {
+          const color = get(colors, value)
+          if (color) {
+            theme[key] = color
+          } else if (isHtmlColorCode(value)) {
+            theme[key] = value
+          }
+        })
       }
-      applyCustomThemeConfiguration('light')
-      applyCustomThemeConfiguration('dark')
     }
 
     return state.cfg
