@@ -24,17 +24,19 @@ SPDX-License-Identifier: Apache-2.0
       <div class="grey--text text--darken-1">
         <div class="font-weight-bold">Version Information</div>
         <div v-if="!!dashboardVersion">Dashboard<span class="ml-1 font-weight-bold">{{dashboardVersion}}</span></div>
-        <div v-if="!!gardenerVersion">API<span class="ml-1 font-weight-bold">{{gardenerVersion}}</span></div>
-        <v-divider v-if="extensionsList.length" class="my-3"></v-divider>
-        <div v-if="extensionsList.length" class="font-weight-bold">Extensions ({{extensionsList.length}} deployed)</div>
-        <div
-        v-for="extension in extensionsList"
-        :key="extension.id"
-        class="extension-item">
-          <span>{{extension.name}}</span>
-          <span v-if="!!extension.version"><span class="ml-1 font-weight-bold">{{extension.version}}</span></span>
-          <span v-if="!!extension.kind"> (Kind: {{extension.kind}})</span>
-        </div>
+        <template v-if="isAdmin">
+          <div v-if="!!gardenerVersion">API<span class="ml-1 font-weight-bold">{{gardenerVersion}}</span></div>
+          <v-divider v-if="extensionsList.length" class="my-3"></v-divider>
+          <div v-if="extensionsList.length" class="font-weight-bold">Extensions ({{extensionsList.length}} deployed)</div>
+          <div
+          v-for="extension in extensionsList"
+          :key="extension.id"
+          class="extension-item">
+            <span>{{extension.name}}</span>
+            <span v-if="!!extension.version"><span class="ml-1 font-weight-bold">{{extension.version}}</span></span>
+            <span v-if="!!extension.kind"> (Kind: {{extension.kind}})</span>
+          </div>
+        </template>
       </div>
     </template>
   </g-dialog>

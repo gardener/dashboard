@@ -34,7 +34,7 @@ function getControllerRegistration ({ uid, name, version, resources }) {
 const controllerRegistrationList = [
   getControllerRegistration({
     uid: 1,
-    name: 'foo',
+    name: 'OS Registration',
     version: 'v1.0.0',
     resources: [{
       kind: 'OperatingSystemConfig',
@@ -43,10 +43,30 @@ const controllerRegistrationList = [
   }),
   getControllerRegistration({
     uid: 2,
-    name: 'bar',
+    name: 'Network Registration',
     resources: [{
       kind: 'Network',
       type: 'gardium'
+    }]
+  }),
+  getControllerRegistration({
+    uid: 2,
+    name: 'Network Registration 2',
+    resources: [{
+      kind: 'Network',
+      type: 'foobium'
+    },
+    {
+      kind: 'Foo',
+      type: 'bar'
+    }]
+  }),
+  getControllerRegistration({
+    uid: 2,
+    name: 'DNS Registration',
+    resources: [{
+      kind: 'DNSProvider',
+      type: 'gardenland'
     }]
   })
 ]
