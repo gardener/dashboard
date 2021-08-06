@@ -10,32 +10,24 @@ const { getControllerRegistrations } = require('../cache')
 const authorization = require('./authorization')
 const _ = require('lodash')
 
+const REQUIRED_RESOURCE_KINDS = ['Network', 'DNSProvider']
 exports.listExtensions = async function ({ user }) {
   const controllerregistrations = getControllerRegistrations()
-  // required resoure kinds are essential for the frontend and need to be returned even if the user has not the right to read controllerregistrations
-  const requiredResourceKinds = ['Network', 'DNSProvider']
-  const stripNotRequiredInformation = ({ metadata, spec }) => {
-    const resources = _.filter(spec.resources, resource => resource && _.includes(requiredResourceKinds, resource.kind))
-    return {
-      name: metadata.name,
-      resources
+  const allowed = await authorization.canListControllerRegistrations(user)
+  const extensions = []
+  for (const { metadata, spec = {} } of controllerregistrations) {
+    const name = metadata.name
+    if (allowed) {
+      const version = _.get(spec, 'deployment.providerConfig.values.image.tag')
+      const resources = spec.resources
+      extensions.push({ name, version, resources })
+    } else {
+      // required resoure kinds are essential for the frontend and need to be returned even if the user has not the permission to read controllerregistrations
+      const resources = _.filter(spec.resources, ({ kind }) => REQUIRED_RESOURCE_KINDS.includes(kind))
+      if (!_.isEmpty(resources)) {
+        extensions.push({ name, resources })
+      }
     }
   }
-
-  const allowed = await authorization.canListControllerRegistrations(user)
-  if (!allowed) {
-    return _
-      .chain(controllerregistrations)
-      .map(stripNotRequiredInformation)
-      .filter(({ resources }) => !_.isEmpty(resources))
-      .value()
-  } else {
-    return _.map(controllerregistrations, ({ metadata, spec }) => {
-      return {
-        name: metadata.name,
-        version: _.get(spec, 'deployment.providerConfig.values.image.tag'),
-        resources: _.get(spec, 'resources')
-      }
-    })
-  }
+  return extensions
 }
