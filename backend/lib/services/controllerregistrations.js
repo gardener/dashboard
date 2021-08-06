@@ -6,29 +6,23 @@
 
 'use strict'
 
+const { Forbidden } = require('http-errors')
 const { getControllerRegistrations } = require('../cache')
 const authorization = require('./authorization')
 const _ = require('lodash')
 
-const REQUIRED_RESOURCE_KINDS = ['Network', 'DNSProvider']
 exports.listExtensions = async function ({ user }) {
-  const controllerregistrations = getControllerRegistrations()
   const allowed = await authorization.canListControllerRegistrations(user)
-  const extensions = []
-  for (const { metadata, spec = {} } of controllerregistrations) {
-    const name = metadata.name
-    if (allowed) {
-      const version = _.get(spec, 'deployment.providerConfig.values.image.tag')
-      const resources = spec.resources
-      extensions.push({ name, version, resources })
-    } else {
-      // required resoure kinds are essential for the frontend and need to be returned even if the user has not the permission to read controllerregistrations
-      const resources = _.filter(spec.resources, ({ kind }) => REQUIRED_RESOURCE_KINDS.includes(kind))
-      // only expose the extension if it contains one of the required resources
-      if (!_.isEmpty(resources)) {
-        extensions.push({ name, resources })
-      }
-    }
+  if (!allowed) {
+    throw new Forbidden('You are not allowed to list controllerregistrations')
   }
-  return extensions
+
+  const controllerregistrations = getControllerRegistrations()
+  return _.map(controllerregistrations, ({ metadata, spec }) => {
+    return {
+      name: metadata.name,
+      version: _.get(spec, 'deployment.providerConfig.values.image.tag'),
+      resources: _.get(spec, 'resources')
+    }
+  })
 }
