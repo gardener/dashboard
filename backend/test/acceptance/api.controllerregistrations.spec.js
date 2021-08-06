@@ -26,8 +26,23 @@ describe('api', function () {
   describe('controllerregistrations', function () {
     const user = fixtures.auth.createUser({ id: 'john.doe@example.org' })
 
-    it('should return all gardener extensions', async function () {
+    it('should return all gardener extensions (admin)', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get('/api/gardener-extensions')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return only required registrations and information (admin)', async function () {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
       const res = await agent
         .get('/api/gardener-extensions')
