@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="dnsConfigurationValid"
     ref="actionDialog"
     caption="Configure DNS"
-    width="1000"
+    width="900"
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
     >

@@ -45,6 +45,7 @@ SPDX-License-Identifier: Apache-2.0
       :error-message.sync="updateErrorMessage"
       :detailed-error-message.sync="updateDetailedErrorMessage"
       ref="gDialog"
+      width="450"
       >
       <template v-slot:caption>Update Cluster</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
