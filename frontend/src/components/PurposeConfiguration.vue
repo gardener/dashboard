@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="valid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    width="400"
+    width="450"
     caption="Configure Purpose">
     <template v-slot:actionComponent>
       <purpose
