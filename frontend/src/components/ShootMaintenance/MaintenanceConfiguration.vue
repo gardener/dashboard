@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="maintenanceTimeValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    width="900"
     caption="Configure Maintenance">
     <template v-slot:actionComponent>
       <maintenance-time

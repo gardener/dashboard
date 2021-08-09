@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
     :loading="isMaintenanceToBeScheduled"
     @dialog-opened="startDialogVisible"
     ref="actionDialog"
+    width="900"
     :caption="caption"
     icon="mdi-refresh"
     :button-text="buttonText"
-    max-width="850"
     confirm-button-text="Trigger now">
     <template v-slot:actionComponent>
       <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
