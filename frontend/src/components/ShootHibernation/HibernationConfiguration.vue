@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="hibernationScheduleValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    width="900"
     caption="Configure Hibernation Schedule">
     <template v-slot:actionComponent>
       <manage-hibernation-schedule

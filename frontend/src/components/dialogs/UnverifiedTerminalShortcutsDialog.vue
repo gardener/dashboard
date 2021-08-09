@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-dialog
     confirm-button-text="Confirm"
-    width="750px"
+    width="750"
     max-height="100vh"
     ref="gDialog"
     >
