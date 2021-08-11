@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
+import { requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, defaultCriNameByKubernetesVersion } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
@@ -52,7 +52,7 @@ const validationErrors = {
 
 const validations = {
   criName: {
-    required
+    required: requiredIf('criNameIsRequired')
   }
 }
 
@@ -69,6 +69,10 @@ export default {
     kubernetesVersion: {
       type: String,
       required: true
+    },
+    criNameIsRequired: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -83,7 +87,7 @@ export default {
       return map(this.machineImageCri, 'name')
     },
     criContainerRuntimeTypes () {
-      const containerRuntime = find(this.machineImageCri, ['name', this.containerRuntime])
+      const containerRuntime = find(this.machineImageCri, ['name', this.criName])
       const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
       return map(ociRuntimes, 'type')
     },
@@ -92,7 +96,10 @@ export default {
         return get(this.worker, 'cri.name')
       },
       set (value) {
-        set(this.worker, 'cri.name', value)
+        this.$set(this.worker, 'cri', {
+          ...this.worker.cri,
+          name: value
+        })
       }
     },
     selectedCriContainerRuntimeTypes: {
