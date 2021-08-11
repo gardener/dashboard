@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :kubernetes-version="kubernetesVersion"
+          :cri-name-is-required="isNew"
           @valid="onContainerRuntimeValid">
         </container-runtime>
       </div>
