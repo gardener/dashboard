@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="pa-0 ma-0">
     <template v-if="dnsProviderIds.length">
       <v-row class="ma-0">
-        <v-col cols="6">
+        <v-col cols="7">
           <v-text-field
             color="primary"
             label="Cluster Domain"
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             :hint="domainHint"
           ></v-text-field>
         </v-col>
-        <v-col cols="3" v-show="primaryProviderVisible">
+        <v-col cols="4" v-show="primaryProviderVisible">
           <v-select
             color="primary"
             item-color="primary"

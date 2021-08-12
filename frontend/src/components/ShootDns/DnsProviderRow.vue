@@ -5,13 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip top :disabled="!secretBindingMissing" open-delay="0">
+  <v-tooltip top :disabled="!readonly" open-delay="0">
     <template v-slot:activator="{ on }">
      <v-row align="center" class="ma-0" v-on="on">
-        <v-col cols="11" :class="{'disabled-row' : secretBindingMissing}">
+        <v-col cols="11">
           <div class="d-flex flex-wrap">
-            <div class="regularInput">
+            <div class="regular-input">
               <v-select
+                :disabled="readonly || primaryReadonly"
                 color="primary"
                 item-color="primary"
                 v-model="type"
@@ -20,7 +21,6 @@ SPDX-License-Identifier: Apache-2.0
                 :items="dnsProviderTypes"
                 :error-messages="getErrorMessages('type')"
                 label="Dns Provider Type"
-                :disabled="primary && !clusterIsNew"
                 :hint="typeHint"
                 persistent-hint
               >
@@ -40,15 +40,17 @@ SPDX-License-Identifier: Apache-2.0
                 </template>
               </v-select>
             </div>
-            <div class="regularInput">
+            <div class="regular-input">
               <select-secret
+                :disabled="readonly"
                 :dns-provider-kind="type"
                 v-model="secret"
                 :valid.sync="secretValid">
               </select-secret>
             </div>
-            <div class="regularInput">
+            <div class="regular-input">
               <v-combobox
+                :disabled="readonly"
                 v-model="excludeDomains"
                 label="Exclude Domains"
                 multiple
@@ -57,8 +59,9 @@ SPDX-License-Identifier: Apache-2.0
               >
               </v-combobox>
             </div>
-            <div class="regularInput">
+            <div class="regular-input">
               <v-combobox
+                :disabled="readonly"
                 v-model="includeDomains"
                 label="Include Domains"
                 multiple
@@ -67,8 +70,9 @@ SPDX-License-Identifier: Apache-2.0
               >
               </v-combobox>
             </div>
-            <div class="regularInput">
+            <div class="regular-input">
               <v-combobox
+                :disabled="readonly"
                 v-model="excludeZones"
                 label="Exclude Zones"
                 multiple
@@ -77,8 +81,9 @@ SPDX-License-Identifier: Apache-2.0
               >
               </v-combobox>
             </div>
-            <div class="regularInput">
+            <div class="regular-input">
               <v-combobox
+                :disabled="readonly"
                 v-model="includeZones"
                 label="Include Zones"
                 multiple
@@ -89,14 +94,14 @@ SPDX-License-Identifier: Apache-2.0
             </div>
           </div>
         </v-col>
-        <v-col cols="1" :class="{'disabled-row' : secretBindingMissing}">
+        <v-col cols="1">
           <v-btn
+            :disabled="readonly || primaryReadonly"
             small
             outlined
             icon
             color="grey"
-            @click="onDelete"
-            :disabled="primary && !clusterIsNew">
+            @click="onDelete">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-col>
@@ -160,31 +165,32 @@ export default {
     }),
     ...mapGetters('shootStaging', [
       'clusterIsNew',
-      'dnsProviderTypes'
-    ]),
-    ...mapGetters([
-      'dnsSecretsByProviderKind'
+      'dnsProviderTypes',
+      'getDnsProviderSecrets'
     ]),
     dnsSecrets () {
-      return this.dnsSecretsByProviderKind(this.type)
+      return this.getDnsProviderSecrets(this.type)
     },
     typeHint () {
       return this.primary && !this.clusterIsNew
         ? 'Primary Provider type cannot be changed after cluster creation'
         : ''
     },
-    secretBindingMissing () {
-      return !this.clusterIsNew && !this.secret
+    primaryReadonly () {
+      return !this.clusterIsNew && this.primary
+    },
+    readonly () {
+      return get(this.dnsProvider, 'readonly')
     },
     type: {
       get () {
         return get(this.dnsProvider, 'type')
       },
       set (value) {
-        const defaultDnsSecret = head(this.dnsSecretsByProviderKind(value))
+        const defaultDnsSecret = head(this.getDnsProviderSecrets(value))
         this.setData({
           type: value,
-          secretName: get(defaultDnsSecret, 'metadata.name', null)
+          secretName: get(defaultDnsSecret, 'metadata.secretRef.name', null)
         })
       }
     },
@@ -201,7 +207,7 @@ export default {
         return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretName])
       },
       set (value) {
-        this.secretName = get(value, 'metadata.name', null)
+        this.secretName = get(value, 'metadata.secretRef.name', null)
       }
     },
     includeDomains: {
@@ -252,8 +258,8 @@ export default {
       })
     },
     updateValid () {
-      const valid = this.secretBindingMissing || (this.secretValid && !this.$v.$invalid)
-      if (this.valid !== valid) {
+      const valid = this.secretValid && !this.$v.$invalid
+      if (this.valid !== valid && !this.readonly) {
         this.setData({ valid })
       }
     },
@@ -286,12 +292,8 @@ export default {
     }
   }
 
-  .disabled-row {
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  .regularInput {
+  .regular-input {
+    width: 250px;
     max-width: 300px;
     flex: 1 1 auto;
     padding: 12px;
