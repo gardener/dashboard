@@ -300,7 +300,7 @@ export default {
 <style lang="scss" scoped>
 
   .scroll {
-    overflow-x: scroll;
+    overflow-x: auto;
   }
 
   .wrap-text {

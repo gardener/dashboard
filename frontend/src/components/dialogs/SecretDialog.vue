@@ -341,7 +341,7 @@ export default {
 
   .help {
     max-width: 80%;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
 </style>

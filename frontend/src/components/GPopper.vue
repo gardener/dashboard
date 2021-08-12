@@ -138,7 +138,7 @@ export default {
   .inner-card {
     max-width: 1000px;
     max-height: 85vh;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   ::v-deep .v-toolbar__content {
