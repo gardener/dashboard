@@ -17,6 +17,7 @@ import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import every from 'lodash/every'
+import find from 'lodash/find'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -53,6 +54,15 @@ const getters = {
   },
   dnsProviderTypesWithPrimarySupport (state, getters, rootState, rootGetters) {
     return map(filter(rootGetters.sortedDnsProviderList, 'primary'), 'type')
+  },
+  getDnsProviderSecrets (state, getters, rootState, rootGetters) {
+    return type => rootGetters.dnsSecretsByProviderKind(type)
+  },
+  findDnsProviderSecret (state, getters) {
+    return (type, secretName) => {
+      const secrets = getters.getDnsProviderSecrets(type)
+      return find(secrets, ['metadata.secretRef.name', secretName])
+    }
   },
   dnsProviders (state) {
     return map(state.dnsProviderIds, id => state.dnsProviders[id])
@@ -130,10 +140,10 @@ const actions = {
       }
     }
   },
-  addDnsProvider ({ commit, getters, rootGetters }) {
+  addDnsProvider ({ commit, getters }) {
     const type = head(getters.dnsProviderTypes)
-    const dnsSecret = head(rootGetters.dnsSecretsByProviderKind(type))
-    const secretName = get(dnsSecret, 'metadata.name')
+    const secret = head(getters.getDnsProviderSecrets(type))
+    const secretName = get(secret, 'metadata.name')
     const id = uuidv4()
     commit('addDnsProvider', {
       id,
@@ -143,10 +153,11 @@ const actions = {
       includeDomains: [],
       excludeZones: [],
       includeZones: [],
-      valid: isDnsProviderValid({ type, secretName })
+      valid: isDnsProviderValid({ type, secretName }),
+      readonly: false
     })
   },
-  setClusterConfiguration ({ commit }, value) {
+  setClusterConfiguration ({ commit, getters }, value) {
     const {
       metadata = {},
       spec: {
@@ -176,6 +187,16 @@ const actions = {
       if (primary) {
         primaryProviderId = id
       }
+      let readonly = false
+      if (!getters.clusterIsNew) {
+        const secret = getters.findDnsProviderSecret(type, secretName)
+        // If no secret binding was found for a given secretName and the cluster is not new,
+        // then we assume that the secret exists and was created by hand.
+        // The DNS provider should not be changed in this case.
+        if (!secret) {
+          readonly = true
+        }
+      }
       return {
         id,
         type,
@@ -184,7 +205,8 @@ const actions = {
         includeDomains: [...includeDomains],
         excludeZones: [...excludeZones],
         includeZones: [...includeZones],
-        valid: isDnsProviderValid({ type, secretName })
+        valid: isDnsProviderValid({ type, secretName }),
+        readonly
       }
     })
     commit('setDns', {
