@@ -61,6 +61,7 @@ import forOwn from 'lodash/forOwn'
 import replace from 'lodash/replace'
 import sample from 'lodash/sample'
 import split from 'lodash/split'
+import pick from 'lodash/pick'
 
 import moment from '@/utils/moment'
 import { ioPlugin } from '@/utils/Emitter'
@@ -1114,7 +1115,7 @@ const getters = {
         maxSurge: 1,
         machine: {
           type: machineType.name,
-          image: machineImage
+          image: pick(machineImage, ['name', 'version'])
         },
         zones,
         cri: {
