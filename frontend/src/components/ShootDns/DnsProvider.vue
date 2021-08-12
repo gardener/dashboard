@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         outlined
         class="cursor-pointer my-0 ml-0">
           <vendor-icon :value="type" :size="20"></vendor-icon>
-          {{secretName}}
+          <span class="px-1">{{secretName}}</span>
           <v-icon v-if="primary" small>mdi-star</v-icon>
       </v-chip>
     </template>

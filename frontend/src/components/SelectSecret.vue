@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       label="Secret"
+      :disabled="disabled"
       :items="secretList"
       item-value="metadata.name"
       return-object
@@ -70,6 +71,10 @@ export default {
     valid: {
       type: Boolean,
       default: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     },
     cloudProfileName: {
       type: String
