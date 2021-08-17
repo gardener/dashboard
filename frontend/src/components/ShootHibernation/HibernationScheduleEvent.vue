@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row align="center">
+  <v-row align="center" class="ma-0">
     <v-col cols="11">
       <v-row class="ma-0">
         <v-col cols="5">
