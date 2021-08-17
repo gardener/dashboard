@@ -191,6 +191,6 @@ export default {
   .description-column {
     max-width: 20vw;
     max-height: 60px;
-    overflow: scroll;
+    overflow: auto;
   }
 </style>

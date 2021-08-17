@@ -523,7 +523,7 @@ export default {
 
   .newshoot-cards {
     max-height: calc(100% - 48px);
-    overflow: scroll;
+    overflow: auto;
   }
 
 </style>

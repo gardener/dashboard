@@ -144,7 +144,7 @@ export default {
 
   .message-block {
     max-height: 230px;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   .wrap {
