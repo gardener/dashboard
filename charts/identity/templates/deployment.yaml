@@ -58,7 +58,7 @@ spec:
             - /usr/local/bin/dex
             - serve
             - /etc/dex/config.yaml
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "image" .Values.image }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:
             failureThreshold: 3
