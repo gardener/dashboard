@@ -30,7 +30,7 @@ It is derived from the historical, internal *gardener-ui* repository
 at commit eeb623d60c86e6037c0e1dc2bdd9e54663bf41a8.
 
 ## License
-[Apache License 2.0](LICENSE.md)
+[Apache License 2.0](./LICENSES/Apache-2.0.txt)
 
 Copyright 2020 The Gardener Authors
 
