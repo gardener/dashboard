@@ -247,7 +247,6 @@ export default {
       serviceAccountDescription: undefined,
       userFilter: '',
       serviceAccountFilter: '',
-      fab: false,
       currentServiceAccountName: undefined,
       currentServiceAccountKubeconfig: undefined,
       userAccountTableOptions: undefined,
@@ -654,6 +653,15 @@ export default {
         ...this.defaultServiceAccountTableOptions,
         ...serviceAccountTableOptions
       }
+    },
+    closeDialogs () {
+      this.userAddDialog = false
+      this.userHelpDialog = false
+      this.userUpdateDialog = false
+      this.serviceAccountAddDialog = false
+      this.serviceAccountHelpDialog = false
+      this.serviceAccountUpdateDialog = false
+      this.kubeconfigDialog = false
     }
   },
   watch: {
@@ -679,16 +687,10 @@ export default {
     }
   },
   created () {
-    this.$bus.$on('esc-pressed', () => {
-      this.userAddDialog = false
-      this.userHelpDialog = false
-      this.userUpdateDialog = false
-      this.serviceAccountAddDialog = false
-      this.serviceAccountHelpDialog = false
-      this.serviceAccountUpdateDialog = false
-      this.kubeconfigDialog = false
-      this.fab = false
-    })
+    this.$bus.on('esc-pressed', this.closeDialogs)
+  },
+  beforeDestroy () {
+    this.$bus.off('esc-pressed', this.closeDialogs)
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {

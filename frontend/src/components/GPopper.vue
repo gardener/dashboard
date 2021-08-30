@@ -38,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import Popper from 'vue-popperjs'
-import { closePopover } from '@/utils'
 import 'vue-popperjs/dist/vue-popper.css'
 
 export default {
@@ -86,8 +85,10 @@ export default {
     }
   },
   methods: {
-    closePopover () {
-      closePopover(this.$refs.popper)
+    closePopper () {
+      if (this.$refs.popper) {
+        this.$refs.popper.doClose()
+      }
     },
     customArrowStyles (data) {
       if (data.placement === 'bottom') {
@@ -113,12 +114,13 @@ export default {
   },
   created () {
     /*
-       * listen on the global "esc-key" event to close all tooltips.
-       * shorthand instead of click outside of the tooltip.
-       */
-    this.$bus.$on('esc-pressed', () => {
-      this.closePopover()
-    })
+     * listen on the global "esc-key" event to close all tooltips.
+     * shorthand instead of click outside of the tooltip.
+     */
+    this.$bus.on('esc-pressed', this.closePopper)
+  },
+  beforeDestroy () {
+    this.$bus.off('esc-pressed', this.closePopper)
   }
 }
 </script>
