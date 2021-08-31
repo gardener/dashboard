@@ -15,9 +15,9 @@ const App = Vue.extend({
   created () {
     // provide the keyboard events for dialogs. Dialogs can't catch keyboard events
     // if any input element of the dialog didn't have the focus.
-    window.addEventListener('keyup', ({ keyCode }) => {
-      if (keyCode === 27) {
-        this.$bus.$emit('esc-pressed')
+    window.addEventListener('keyup', ({ key }) => {
+      if (key === 'Escape' || key === 'Esc') {
+        this.$bus.emit('esc-pressed')
       }
     })
 
