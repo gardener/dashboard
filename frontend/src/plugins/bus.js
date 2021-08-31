@@ -5,11 +5,15 @@
 //
 
 import Vue from 'vue'
+import EventEmitter from 'events'
 
 const VueBus = {
   install (Vue) {
-    const bus = new Vue({})
-    Object.defineProperty(Vue.prototype, '$bus', { value: bus })
+    const bus = new EventEmitter()
+    bus.setMaxListeners(200)
+    Object.defineProperty(Vue.prototype, '$bus', {
+      value: bus
+    })
   }
 }
 

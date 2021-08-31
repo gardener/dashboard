@@ -72,15 +72,6 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value
   textarea.addEventListener('drop', drop, false)
 }
 
-/*
- * popperRefs can be an array or a vue popper object
- */
-export function closePopover (refs) {
-  if (refs) {
-    [].concat(refs).forEach(ref => ref.doClose())
-  }
-}
-
 export function getValidationErrors (vm, field) {
   const errors = []
   const validationForField = get(vm.$v, field)
