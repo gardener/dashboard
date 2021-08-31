@@ -5,9 +5,9 @@
 //
 
 // Libraries
-import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import EventEmitter from 'events'
 
 // Components
 import StatusTag from '@/components/StatusTag'
@@ -18,7 +18,7 @@ import { state, actions, getters, mutations } from '@/store'
 
 describe('StatusTag.vue', () => {
   const localVue = createLocalVue()
-  const bus = new Vue({})
+  const bus = new EventEmitter()
 
   localVue.use(Vuetify)
   localVue.use(Vuex)
