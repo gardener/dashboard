@@ -9,14 +9,14 @@ import get from 'lodash/get'
 /* General Purpose */
 async function toPlainResponseObject (response) {
   const { status, statusText } = response
+  const contentType = response.headers.get('Content-Type')
   const headers = {}
   for (const [key, value] of response.headers.entries()) {
     headers[key] = value
   }
-  const contentLength = +get(headers, 'content-length', '0')
   let data
-  if (contentLength > 0) {
-    const [mediaType] = get(headers, 'content-type', '').split(';')
+  if (contentType && typeof contentType === 'string') {
+    const [mediaType] = contentType.split(';')
     switch (mediaType.trim()) {
       case 'application/json':
         data = await response.json()
