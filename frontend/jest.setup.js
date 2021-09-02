@@ -5,8 +5,11 @@
 
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import fetchMock from 'jest-fetch-mock'
 
 Vue.use(Vuetify)
+
+fetchMock.enableMocks()
 
 window.matchMedia = jest.fn().mockImplementation(query => {
   return {

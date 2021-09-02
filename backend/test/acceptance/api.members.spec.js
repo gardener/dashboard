@@ -401,16 +401,18 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
-      await agent
+      const res = await agent
         .post(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
           method: 'rotateSecret'
         })
-        .expect(200)
+        .expect(204)
 
       expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.noContent).toBe(true)
     })
   })
 })

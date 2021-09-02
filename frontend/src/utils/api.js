@@ -7,6 +7,33 @@
 import get from 'lodash/get'
 
 /* General Purpose */
+async function toPlainResponseObject (response) {
+  const { status, statusText } = response
+  const contentType = response.headers.get('Content-Type')
+  const headers = {}
+  for (const [key, value] of response.headers.entries()) {
+    headers[key] = value
+  }
+  let data
+  if (contentType && typeof contentType === 'string') {
+    const [mediaType] = contentType.split(';')
+    switch (mediaType.trim()) {
+      case 'application/json':
+        data = await response.json()
+        break
+      default:
+        data = await response.text()
+        break
+    }
+  }
+  return {
+    status,
+    statusText,
+    headers,
+    data
+  }
+}
+
 async function request (method, url, data) {
   const options = {
     method,
@@ -21,13 +48,8 @@ async function request (method, url, data) {
     options.body = JSON.stringify(data)
   }
   let response = await fetch(url, options)
-  const { status, statusText, headers } = response
-  response = {
-    status,
-    statusText,
-    headers,
-    data: await response.json()
-  }
+  response = await toPlainResponseObject(response)
+  const { status } = response
   if (status >= 200 && status < 300) {
     return response
   }

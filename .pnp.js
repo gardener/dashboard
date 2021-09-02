@@ -2457,6 +2457,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["get-contrast", "npm:2.0.0"],
             ["highlight.js", "npm:10.7.2"],
             ["jest-environment-jsdom-fifteen", "npm:1.0.2"],
+            ["jest-fetch-mock", "npm:3.0.3"],
             ["jest-serializer-vue", "npm:2.0.2"],
             ["js-yaml", "npm:3.14.0"],
             ["jwt-decode", "npm:2.2.0"],
@@ -7825,6 +7826,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ripemd160", "npm:2.0.2"],
             ["safe-buffer", "npm:5.2.1"],
             ["sha.js", "npm:2.4.11"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["cross-fetch", [
+        ["npm:3.1.4", {
+          "packageLocation": "./.yarn/cache/cross-fetch-npm-3.1.4-45e4517cba-47b33bc773.zip/node_modules/cross-fetch/",
+          "packageDependencies": [
+            ["cross-fetch", "npm:3.1.4"],
+            ["node-fetch", "npm:2.6.1"]
           ],
           "linkType": "HARD",
         }]
@@ -13235,6 +13246,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["jest-fetch-mock", [
+        ["npm:3.0.3", {
+          "packageLocation": "./.yarn/cache/jest-fetch-mock-npm-3.0.3-ac072ca8af-5c7dc1ba7a.zip/node_modules/jest-fetch-mock/",
+          "packageDependencies": [
+            ["jest-fetch-mock", "npm:3.0.3"],
+            ["cross-fetch", "npm:3.1.4"],
+            ["promise-polyfill", "npm:8.2.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["jest-get-type", [
         ["npm:24.9.0", {
           "packageLocation": "./.yarn/cache/jest-get-type-npm-24.9.0-18c591f6f2-0e6164dff2.zip/node_modules/jest-get-type/",
@@ -17545,6 +17567,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],
           "packagePeers": [
             "bluebird"
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["promise-polyfill", [
+        ["npm:8.2.0", {
+          "packageLocation": "./.yarn/cache/promise-polyfill-npm-8.2.0-caaa5896b6-37a612596d.zip/node_modules/promise-polyfill/",
+          "packageDependencies": [
+            ["promise-polyfill", "npm:8.2.0"]
           ],
           "linkType": "HARD",
         }]
