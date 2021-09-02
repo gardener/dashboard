@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
-    cloud-provider-kind="hcloud"
+    vendor="hcloud"
     create-title="Add new Hetzner Cloud Secret"
     replace-title="Replace Hetzner Cloud Secret"
     @input="onInput">
