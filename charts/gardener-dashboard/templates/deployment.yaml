@@ -67,7 +67,7 @@ spec:
         - name: gardener-dashboard
           args:
             - /etc/gardener-dashboard/config.yaml
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "image" .Values.image }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
