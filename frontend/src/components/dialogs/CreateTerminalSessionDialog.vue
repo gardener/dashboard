@@ -137,7 +137,7 @@ export default {
       'projectList'
     ]),
     shootItem () {
-      return this.shootByNamespaceAndName({ name: this.name, namespace: this.namespace })
+      return this.shootByNamespaceAndName(pick(this, 'namespace', 'name'))
     },
     valid () {
       switch (this.tab) {
