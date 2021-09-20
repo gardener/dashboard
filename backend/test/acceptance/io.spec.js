@@ -76,13 +76,20 @@ describe('socket.io', function () {
       return Promise.resolve(item)
     }
 
-    async function emitSubscribe (...args) {
+    function subscribeShoot (metadata) {
+      return new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
+    }
+
+    async function subscribeShoots (options = {}) {
       const asyncIterator = pEvent.iterator(socket, 'namespacedEvents', {
         timeout: 1000,
         resolutionEvents: ['shootSubscriptionDone', 'batchNamespacedEventsDone'],
         rejectionEvents: ['error', 'subscription_error']
       })
-      socket.emit(...args)
+      const event = Object.prototype.hasOwnProperty.call(options, 'namespaces')
+        ? 'subscribeShoots'
+        : 'subscribeAllShoots'
+      socket.emit(event, options)
       const shootsByNamespace = {}
       for await (const namespacedEvent of asyncIterator) {
         for (const [key, items] of Object.entries(namespacedEvent.namespaces)) {
@@ -95,6 +102,7 @@ describe('socket.io', function () {
     let listProjectsStub
     let listShootsStub
     let readShootStub
+    let rooms
 
     beforeEach(async function () {
       listProjectsStub = jest.spyOn(projects, 'list').mockResolvedValue(projectList)
@@ -110,34 +118,53 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
+      rooms = agent.io.of('/shoots').sockets.get(socket.id).rooms
     })
 
     it('should subscribe shoots for a namespace', async function () {
-      const shootsByNamespace = await emitSubscribe('subscribeShoots', {
+      const shootsByNamespace = await subscribeShoots({
         namespaces: [{ namespace: 'foo' }]
       })
       expect(isAdminStub).toBeCalledTimes(0)
       expect(listProjectsStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(1)
       expect(shootsByNamespace).toEqual(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
+      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo']))
     })
 
     it('should subscribe shoots for all namespaces', async function () {
       isAdminStub.mockResolvedValueOnce(false)
-      const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
+      const shootsByNamespace = await subscribeShoots({})
       expect(isAdminStub).toBeCalledTimes(1)
       expect(listProjectsStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(2)
       expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
+      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo', 'shoots_bar']))
     })
 
     it('should subscribe shoots for all namespaces as admin', async function () {
       isAdminStub.mockResolvedValueOnce(true)
-      const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
+      const shootsByNamespace = await subscribeShoots({})
       expect(isAdminStub).toBeCalledTimes(1)
       expect(listProjectsStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(1)
       expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
+      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo', 'shoots_bar']))
+    })
+
+    it('should subscribe shoots with issues', async function () {
+      isAdminStub.mockResolvedValueOnce(true)
+      const shootsByNamespace = await subscribeShoots({ filter: 'issues' })
+      expect(isAdminStub).toBeCalledTimes(1)
+      expect(listProjectsStub).toBeCalledTimes(1)
+      expect(listShootsStub).toBeCalledTimes(1)
+      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
+      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo_issues', 'shoots_bar_issues']))
+      await subscribeShoot({
+        namespace: 'foo',
+        name: 'bar'
+      })
+      expect(rooms).toEqual(new Set([socket.id, 'shoot_foo_bar']))
     })
 
     it('should subscribe single shoot', async function () {
@@ -145,17 +172,19 @@ describe('socket.io', function () {
         namespace: 'foo',
         name: 'bar'
       }
-      const event = await new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
+      const event = await subscribeShoot(metadata)
       expect(isAdminStub).toBeCalledTimes(0)
       expect(readShootStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(0)
       expect(event).toEqual(find(shootList, { metadata }))
+      expect(rooms).toEqual(new Set([socket.id, 'shoot_foo_bar']))
     })
   })
 
   describe('tickets', function () {
     const commentList = fixtures.github.comments.list()
     let ticketCache
+    let rooms
 
     async function emitSubscribe (...args) {
       const asyncIterator = pEvent.iterator(socket, 'events', {
@@ -183,6 +212,7 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
+      rooms = agent.io.of('/tickets').sockets.get(socket.id).rooms
     })
 
     it('should subscribe tickets', async function () {
@@ -190,6 +220,7 @@ describe('socket.io', function () {
 
       const actualIssues = await emitSubscribe('subscribeIssues')
       expect(actualIssues).toEqual(issues)
+      expect(rooms).toEqual(new Set([socket.id, 'issues']))
     })
 
     it('should subscribe ticket comments', async function () {
@@ -206,6 +237,7 @@ describe('socket.io', function () {
       const actualComments = await emitSubscribe('subscribeComments', { namespace, name })
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(actualComments).toEqual(expectedComments)
+      expect(rooms).toEqual(new Set([socket.id, 'comments_garden-test/test']))
     })
   })
 })
