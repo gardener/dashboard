@@ -77,7 +77,7 @@ export default {
       'shootByNamespaceAndName'
     ]),
     shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
+      return this.shootByNamespaceAndName(this.$route.params) || {}
     }
   },
   methods: {
