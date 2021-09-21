@@ -165,7 +165,7 @@ export const shootItem = {
       return isTypeDelete(this.shootLastOperation)
     },
     isShootLastOperationTypeControlPlaneMigrating () {
-      return this.shootLastOperation.type === 'Migrate' || this.shootLastOperation.type === 'Restore'
+      return this.shootLastOperation.type === 'Migrate' || (this.shootLastOperation.type === 'Restore' && this.shootLastOperation.type !== 'Succeeded')
     },
     shootLastOperationTypeControlPlaneMigrationMessage () {
       switch (this.shootLastOperation.type) {
