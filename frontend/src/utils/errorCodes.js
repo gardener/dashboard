@@ -96,7 +96,7 @@ const errorCodes = {
     temporaryError: false,
     userError: true
   },
-  ERR_INFRA_REQUEST_THROTTLING: {
+  ERR_INFRA_RATE_LIMITS_EXCEEDED: {
     shortDescription: 'Rate Limit Exceeded',
     description: 'Cloud provider rate limit exceeded. The operation will be retried automatically.',
     temporaryError: true,
