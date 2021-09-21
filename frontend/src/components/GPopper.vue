@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-toolbar ref="toolbar" :height="30" :color="toolbarColor" flat>
           <v-toolbar-title class="text-subtitle-1 toolbar-title--text">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn small icon @click.native.stop="closePopover">
+          <v-btn small icon @click.native.stop="closePopper">
             <v-icon color="toolbar-title" class="text-subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
