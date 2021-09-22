@@ -70,7 +70,7 @@ Object {
               },
             ],
             "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
-            "imagePullPolicy": "Always",
+            "imagePullPolicy": "IfNotPresent",
             "livenessProbe": Object {
               "failureThreshold": 6,
               "initialDelaySeconds": 15,
