@@ -51,31 +51,25 @@ function joinRoom (socket, room) {
   logger.debug('Socket %s subscribed to room "%s"', socket.id, room)
 }
 
-function leaveRooms (socket, predicate = _.identity) {
-  _
-    .chain(socket.rooms)
-    .keys()
-    .filter(predicate)
-    .each(room => {
+function leaveRooms (socket, predicate = () => true) {
+  for (const room of socket.rooms) {
+    if (room !== socket.id && predicate(room)) {
       logger.debug('Socket %s leaving room %s', socket.id, room)
       socket.leave(room)
-    })
-    .commit()
+    }
+  }
 }
 
 function leaveShootsAndShootRoom (socket) {
-  const predicate = room => room !== socket.id
-  leaveRooms(socket, predicate)
+  leaveRooms(socket)
 }
 
 function leaveIssuesRoom (socket) {
-  const predicate = room => room !== socket.id && !_.startsWith(room, 'comments_')
-  leaveRooms(socket, predicate)
+  leaveRooms(socket, room => !/^comments_/.test(room))
 }
 
 function leaveCommentsRooms (socket) {
-  const predicate = room => room !== socket.id && room !== 'issues'
-  leaveRooms(socket, predicate)
+  leaveRooms(socket, room => room !== 'issues')
 }
 
 async function subscribeShoots ({ socket, namespacesAndFilters, projectList }) {

@@ -10,7 +10,7 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/gardener-project/gardener/dashboard
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 # vertical Pod autoscaling disabled by default
 # vpa:
