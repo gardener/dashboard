@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         class="cursor-pointer my-0 ml-0"
         outlined
         color="primary">
-          <vendor-icon :value="machineImage.icon" :size="20"></vendor-icon>
+          <vendor-icon :value="machineImageIcon" :size="20"></vendor-icon>
           {{workerGroup.name}}
       </v-chip>
     </template>
@@ -188,6 +188,9 @@ export default {
       }
 
       return item
+    },
+    machineImageIcon () {
+      return get(this.machineImage, 'icon')
     }
   }
 }

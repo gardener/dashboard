@@ -397,7 +397,7 @@ export default {
       return find(this.machineImages, this.worker.machine.image)
     },
     machineImageCri () {
-      return this.selectedMachineImage.cri
+      return get(this.selectedMachineImage, 'cri')
     }
   },
   methods: {
