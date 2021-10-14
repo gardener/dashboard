@@ -209,6 +209,10 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
   switch (target) {
     case TargetEnum.GARDEN: {
       targetCluster.kubeconfigContextNamespace = namespace
+      targetCluster.apiServer = {
+        server: config.apiServerUrl
+      }
+
       if (isAdmin) {
         targetCluster.namespace = 'garden'
         targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
@@ -244,9 +248,6 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
             ]
           }
         ]
-        targetCluster.apiServer = {
-          server: config.apiServerUrl
-        }
       }
 
       break
