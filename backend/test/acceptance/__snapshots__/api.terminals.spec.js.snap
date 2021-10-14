@@ -408,7 +408,9 @@ Array [
           "temporaryNamespace": true,
         },
         "target": Object {
-          "apiServer": undefined,
+          "apiServer": Object {
+            "server": "https://kubernetes.external.foo.bar",
+          },
           "authorization": Object {
             "projectMemberships": undefined,
             "roleBindings": Array [
