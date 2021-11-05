@@ -94,7 +94,7 @@ function init (options) {
     }
   }, options)
 
-  return Octokit(options)
+  return new Octokit(options)
 }
 
 module.exports = init
