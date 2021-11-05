@@ -49,8 +49,8 @@ describe('utils', () => {
             minute: obj.format('mm')
           }
         }
-        expect(utcToTimezone('1700', 'CET')).toEqual({
-          hour: '19',
+        expect(utcToTimezone('1700', 'HST')).toEqual({
+          hour: '07',
           minute: '00'
         })
         expect(utcToTimezone('0800', 'MST')).toEqual({
@@ -70,10 +70,6 @@ describe('utils', () => {
             minute: obj.format('mm')
           }
         }
-        expect(utcToTimezone(8, 39, 'CET')).toEqual({
-          hour: '10',
-          minute: '39'
-        })
         expect(utcToTimezone(13, 42, 'MST')).toEqual({
           hour: '06',
           minute: '42'
