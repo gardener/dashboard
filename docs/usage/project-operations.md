@@ -16,7 +16,7 @@ This section demonstrates how to use the standard Kubernetes tool for cluster op
 - You’re logged on to the Gardener Dashboard.
 - You’ve created a cluster and its status is operational.
 
-It's recommended that you get acquainted with the resources in the [Gardener API](https://gardener.cloud/api-reference/).
+It's recommended that you get acquainted with the resources in the [Gardener API](https://github.com/gardener/gardener/tree/master/docs/api-reference).
 
 
 ## Downloading `kubeconfig` for remote project operations
@@ -155,7 +155,7 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     flowering   garden-flowering   Ready    [PROJECT-ADMIN]@domain   [PROJECT-ADMIN]@domain system   45m
     ```
 
-    > For more information, see [Project](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.Project) in the API reference.
+    > For more information, see [Project](https://github.com/gardener/gardener/blob/master/docs/api-reference/core.md#project) in the API reference.
 
 2. To query the names of the members of a project, use the following command:
 
@@ -169,11 +169,11 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     [PROJECT-ADMIN]@domain system:serviceaccount:garden-flowering:robot
     ```
 
-    > For more information, see [members](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.ProjectMember) in the API reference.
+    > For more information, see [members](https://github.com/gardener/gardener/blob/master/docs/api-reference/core.md#projectmember) in the API reference.
 
 ## Working with clusters
 
-The Gardener domain object for a managed cluster is called [Shoot](https://gardener.cloud/api-reference/core/#core.gardener.cloud/v1beta1.Shoot).
+The Gardener domain object for a managed cluster is called [Shoot](https://github.com/gardener/gardener/blob/master/docs/api-reference/core.md#shoot).
 
 ### List project clusters
 
@@ -374,4 +374,4 @@ The name of the Secret containing the kubeconfig is in the form `<cluster-name>.
 
 [Working with Service Accounts](./working-with-service-accounts.md)
 
-[Authenticating with an Identity Provider](https://gardener.cloud/documentation/tutorials/oidc-login/).
+[Authenticating with an Identity Provider](https://github.com/gardener/documentation/blob/master/website/documentation/tutorials/oidc-login/_index.md).

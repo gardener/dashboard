@@ -5,7 +5,7 @@
 - You are logged on to the Gardener Dashboard
 - You have [created a project](working-with-projects.md).
 
-The cluster operations that are performed manually in the dashboard or via `kubectl` can be automated using the [Gardener API](https://gardener.cloud/api-reference/). You need a **service account** to be authorized to perform them.
+The cluster operations that are performed manually in the dashboard or via `kubectl` can be automated using the [Gardener API](https://github.com/gardener/gardener/tree/master/docs/api-reference). You need a **service account** to be authorized to perform them.
 
 > The service account of a project has access to all Kubernetes resources in the project.
 
