@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
        <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" tile>
-        Shoots will only start using the new secret after they got reconciled. Therefore, wait until all {{relatedShootCount}} Shoots using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the Shoots will no longer function.
+        Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
       </v-alert>
       <v-divider></v-divider>
       <v-card-actions>
