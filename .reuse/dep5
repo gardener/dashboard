@@ -32,7 +32,7 @@ Files:
   VERSION
   .pnp.js
   yarn.lock
-Copyright: 2017-2020 SAP SE or an SAP affiliate company and Gardener contributors
+Copyright: 2017-2021 SAP SE or an SAP affiliate company and Gardener contributors
 License: Apache-2.0
 
 # --------------------------------------------------
