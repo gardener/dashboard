@@ -314,6 +314,7 @@ export function getControlPlaneZone (workers, infrastructureKind, oldControlPlan
   const workerZones = flatMap(workers, 'zones')
   switch (infrastructureKind) {
     case 'gcp':
+    case 'hcloud':
     case 'openstack':
       if (includes(workerZones, oldControlPlaneZone)) {
         return oldControlPlaneZone
