@@ -47,6 +47,8 @@ export function getRawVal (rootGetters, item, column) {
       const labels = rootGetters.ticketsLabels(metadata)
       return join(map(labels, 'name'), ' ')
     }
+    case 'errorCodes':
+      return join(errorCodesFromArray(get(item, 'status.lastErrors', [])), ' ')
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
@@ -160,6 +162,7 @@ export default {
         getRawVal(rootGetters, item, 'purpose'),
         getRawVal(rootGetters, item, 'k8sVersion'),
         getRawVal(rootGetters, item, 'ticketLabels'),
+        getRawVal(rootGetters, item, 'errorCodes'),
         ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
       ]
 
