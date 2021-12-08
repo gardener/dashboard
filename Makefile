@@ -21,3 +21,7 @@ push:
 
 .PHONY: release
 release: build push
+
+.PHONY: check-docforge
+check-docforge:
+	@./.ci/check-docforge
