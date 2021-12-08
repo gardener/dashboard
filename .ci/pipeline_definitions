@@ -30,7 +30,7 @@ dashboard:
         pull-request: ~
       steps:
         check:
-          image: 'eu.gcr.io/gardener-project/3rd/node:14-alpine3.12'
+          image: 'eu.gcr.io/gardener-project/3rd/node:16-alpine3.13'
     release:
       traits:
         version:
