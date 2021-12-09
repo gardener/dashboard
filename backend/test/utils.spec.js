@@ -61,6 +61,7 @@ describe('utils', function () {
 
   describe('batchEmitter', function () {
     const kind = 'foo'
+    const eventName = 'events'
     const socket = new EventEmitter()
     const objectKeyPath = 'id'
     const notImplemented = 'You have to implement the method!'
@@ -84,7 +85,7 @@ describe('utils', function () {
       socket.once('error', err => {
         message = err.message
       })
-      const emitter = new TestEmitter({ kind, socket, objectKeyPath })
+      const emitter = new TestEmitter({ eventName, kind, socket, objectKeyPath })
       expect(message).toBe(notImplemented)
       expect(() => emitter.emit()).toThrowError(notImplemented)
       expect(emitter.count()).toBe(0)
@@ -93,10 +94,10 @@ describe('utils', function () {
 
     it('should emit events in batches', function () {
       const chunks = []
-      const emitter = new EventsEmitter({ kind, socket, objectKeyPath })
+      const emitter = new EventsEmitter({ kind, socket, objectKeyPath, eventName })
       emitter.MIN_CHUNK_SIZE = 2
       emitter.MAX_CHUNK_SIZE = 3
-      socket.on('events', ({ events }) => {
+      socket.on(eventName, ({ events }) => {
         const chunk = events.map(event => event.objectKey)
         chunks.push(chunk)
       })
@@ -121,10 +122,10 @@ describe('utils', function () {
 
     it('should emit namespaced events in batches', function () {
       const chunks = []
-      const emitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath })
+      const emitter = new NamespacedBatchEmitter({ eventName, kind, socket, objectKeyPath })
       emitter.MIN_CHUNK_SIZE = 2
       emitter.MAX_CHUNK_SIZE = 3
-      socket.on('namespacedEvents', ({ namespaces }) => {
+      socket.on(eventName, ({ namespaces }) => {
         const chunk = {}
         for (const [namespace, events] of Object.entries(namespaces)) {
           chunk[namespace] = events.map(event => event.objectKey)

@@ -57,7 +57,7 @@ function createSocketAgent (cache) {
       await new Promise(resolve => server.close(resolve))
       await new Promise(resolve => io.close(resolve))
     },
-    async connect (pathname = '/', { cookie, user } = {}) {
+    async connect ({ cookie, user } = {}) {
       const { address: hostname, port } = server.address()
       const origin = `http://[${hostname}]:${port}`
       const extraHeaders = {}
@@ -66,7 +66,7 @@ function createSocketAgent (cache) {
       } else if (user) {
         extraHeaders.cookie = await user.cookie
       }
-      const socket = ioClient(origin + pathname, {
+      const socket = ioClient(origin, {
         path: '/api/events',
         extraHeaders,
         reconnectionDelay: 0,

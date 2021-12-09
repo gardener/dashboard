@@ -6,12 +6,15 @@
 //
 
 'use strict'
+
+const assert = require('assert').strict
 const _ = require('lodash')
 const logger = require('../logger')
 
 class AbstractBatchEmitter {
-  constructor ({ kind, socket, objectKeyPath = undefined, eventsKind }) {
-    this.eventsKind = eventsKind
+  constructor ({ eventName, kind, socket, objectKeyPath }) {
+    assert.ok(eventName, 'Property eventName is required for AbstractBatchEmitter')
+    this.eventName = eventName
     this.kind = kind
     this.socket = socket
     this.objectKeyPath = objectKeyPath
@@ -75,12 +78,8 @@ class AbstractBatchEmitter {
 }
 
 class EventsEmitter extends AbstractBatchEmitter {
-  constructor ({ kind, socket, objectKeyPath = undefined }) {
-    super({ kind, socket, objectKeyPath, eventsKind: 'events' })
-  }
-
   emit () {
-    this.socket.emit(this.eventsKind, { kind: this.kind, events: this.events })
+    this.socket.emit(this.eventName, { kind: this.kind, events: this.events })
   }
 
   count () {
@@ -97,17 +96,13 @@ class EventsEmitter extends AbstractBatchEmitter {
 }
 
 class NamespacedBatchEmitter extends AbstractBatchEmitter {
-  constructor ({ kind, socket, objectKeyPath = undefined }) {
-    super({ kind, socket, objectKeyPath, eventsKind: 'namespacedEvents' })
-  }
-
   batchEmitObjects (objects, namespace) {
     this.currentBatchNamespace = namespace
     super.batchEmitObjects(objects)
   }
 
   emit () {
-    this.socket.emit(this.eventsKind, { kind: this.kind, namespaces: this.namespaces })
+    this.socket.emit(this.eventName, { kind: this.kind, namespaces: this.namespaces })
   }
 
   count () {

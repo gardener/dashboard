@@ -63,14 +63,15 @@ describe('watches', function () {
 
   describe('shoots', function () {
     class Room {
-      constructor (namespace, events, kind = 'shoots') {
+      constructor (namespace, events, kind = 'shoots', eventName = 'shoots') {
         this.kind = kind
+        this.eventName = eventName
         this.namespace = namespace
         this.events = events
       }
 
       emit (name, { kind, namespaces }) {
-        assert.strictEqual(name, 'namespacedEvents')
+        assert.strictEqual(name, this.eventName)
         assert.strictEqual(kind, this.kind)
         assert.strictEqual(namespaces[this.namespace].length, 1)
         const { objectKey, ...actualEvent } = namespaces[this.namespace][0]
@@ -119,7 +120,7 @@ describe('watches', function () {
 
     const io = {
       of (namespace) {
-        assert.strictEqual(namespace, '/shoots')
+        assert.strictEqual(namespace, '/')
         return nsp
       }
     }
@@ -273,7 +274,7 @@ describe('watches', function () {
     const issueEvent = {}
     const issuesRoom = {
       emit (name, payload) {
-        assert.strictEqual(name, 'events')
+        assert.strictEqual(name, 'issues')
         assert.deepStrictEqual(payload, {
           kind: 'issues',
           events: [issueEvent]
@@ -291,7 +292,7 @@ describe('watches', function () {
     }
     const commentsRoom = {
       emit (name, payload) {
-        assert.strictEqual(name, 'events')
+        assert.strictEqual(name, 'comments')
         assert.deepStrictEqual(payload, {
           kind: 'comments',
           events: [commentEvent]
@@ -312,7 +313,7 @@ describe('watches', function () {
 
     const io = {
       of (namespace) {
-        assert.strictEqual(namespace, '/tickets')
+        assert.strictEqual(namespace, '/')
         return nsp
       }
     }

@@ -149,12 +149,12 @@ class ShootsSubscription extends AbstractSubscription {
     * we expect many events coming in in a short period of time */
     const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
 
-    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
+    this.socket.on('shoots', ({ kind, namespaces }) => {
       if (kind === 'shoots') {
         throttledNsEventEmitter.emit(kind, namespaces)
       }
     })
-    this.socket.on('batchNamespacedEventsDone', ({ kind, namespaces }) => {
+    this.socket.on('subscription_done', ({ kind, namespaces }) => {
       if (kind === 'shoots') {
         this.store.dispatch('unsetShootsLoading', namespaces)
         throttledNsEventEmitter.flush()
@@ -189,7 +189,7 @@ class ShootSubscription extends AbstractSubscription {
   constructor (connector) {
     super(connector)
 
-    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
+    this.socket.on('shoots', ({ kind, namespaces }) => {
       if (kind === 'shoot') {
         this.emit(kind, namespaces)
       }
@@ -216,17 +216,15 @@ class ShootSubscription extends AbstractSubscription {
   }
 }
 
-class AbstractTicketsSubscription extends AbstractSubscription {
+class IssuesSubscription extends AbstractSubscription {
   constructor (connector) {
     super(connector)
 
-    this.socket.on('events', ({ kind, events }) => {
+    this.socket.on('issues', ({ kind, events }) => {
       this.emit(kind, events)
     })
   }
-}
 
-class IssuesSubscription extends AbstractTicketsSubscription {
   onConnect () {
     super.onConnect()
 
@@ -250,7 +248,15 @@ class IssuesSubscription extends AbstractTicketsSubscription {
   }
 }
 
-class CommentsSubscription extends AbstractTicketsSubscription {
+class CommentsSubscription extends AbstractSubscription {
+  constructor (connector) {
+    super(connector)
+
+    this.socket.on('comments', ({ kind, events }) => {
+      this.emit(kind, events)
+    })
+  }
+
   subscribeComments ({ name, namespace }) {
     this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
@@ -311,31 +317,27 @@ function initializeConnector (connector) {
   socket.on('subscription_error', error => {
     const { kind, code, message } = error
     console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
-    store.dispatch('setSubscriptionError', error)
+    store.dispatch('setError', error)
   })
 }
 
 export const ioPlugin = store => {
-  const shootsConnector = new Connector(io('/shoots', socketConfig), store)
-  const ticketsConnector = new Connector(io('/tickets', socketConfig), store)
-
-  const shootsEmitter = new ShootsSubscription(shootsConnector)
-  const shootEmitter = new ShootSubscription(shootsConnector)
+  const connector = new Connector(io(socketConfig), store)
+  const shootsEmitter = new ShootsSubscription(connector)
+  const shootEmitter = new ShootSubscription(connector)
   // eslint-disable-next-line no-unused-vars
-  const ticketIssuesEmitter = new IssuesSubscription(ticketsConnector)
-  const ticketCommentsEmitter = new CommentsSubscription(ticketsConnector)
+  const ticketIssuesEmitter = new IssuesSubscription(connector)
+  const ticketCommentsEmitter = new CommentsSubscription(connector)
 
-  forEach([shootsConnector, ticketsConnector], initializeConnector)
+  initializeConnector(connector)
 
   const { state, getters } = store
 
   const handleSetUser = user => {
     if (user) {
-      shootsConnector.connect()
-      ticketsConnector.connect()
+      connector.connect()
     } else {
-      shootsConnector.disconnect()
-      ticketsConnector.disconnect()
+      connector.disconnect()
     }
   }
 

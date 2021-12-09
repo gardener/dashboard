@@ -81,9 +81,9 @@ describe('socket.io', function () {
     }
 
     async function subscribeShoots (options = {}) {
-      const asyncIterator = pEvent.iterator(socket, 'namespacedEvents', {
+      const asyncIterator = pEvent.iterator(socket, 'shoots', {
         timeout: 1000,
-        resolutionEvents: ['shootSubscriptionDone', 'batchNamespacedEventsDone'],
+        resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
       const event = Object.prototype.hasOwnProperty.call(options, 'namespaces')
@@ -108,7 +108,7 @@ describe('socket.io', function () {
       listProjectsStub = jest.spyOn(projects, 'list').mockResolvedValue(projectList)
       listShootsStub = jest.spyOn(shoots, 'list').mockImplementation(listShootsImplementation)
       readShootStub = jest.spyOn(shoots, 'read').mockImplementation(readShootImplementation)
-      socket = await agent.connect('/shoots', {
+      socket = await agent.connect({
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
@@ -118,7 +118,7 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/shoots').sockets.get(socket.id).rooms
+      rooms = agent.io.of('/').sockets.get(socket.id).rooms
     })
 
     it('should subscribe shoots for a namespace', async function () {
@@ -187,9 +187,10 @@ describe('socket.io', function () {
     let rooms
 
     async function emitSubscribe (...args) {
-      const asyncIterator = pEvent.iterator(socket, 'events', {
+      const eventName = args[0].substring(9).toLowerCase()
+      const asyncIterator = pEvent.iterator(socket, eventName, {
         timeout: 1000,
-        resolutionEvents: ['batchEventsDone'],
+        resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
       socket.emit(...args)
@@ -202,7 +203,7 @@ describe('socket.io', function () {
 
     beforeEach(async function () {
       ticketCache = cache.getTicketCache()
-      socket = await agent.connect('/tickets', {
+      socket = await agent.connect({
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
@@ -212,7 +213,7 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/tickets').sockets.get(socket.id).rooms
+      rooms = agent.io.of('/').sockets.get(socket.id).rooms
     })
 
     it('should subscribe tickets', async function () {

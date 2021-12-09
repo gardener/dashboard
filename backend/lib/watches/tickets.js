@@ -16,10 +16,10 @@ module.exports = (io, ticketCache, retryOptions = {}) => {
     logger.warn('Missing gitHub property in config for tickets feature')
     return
   }
-  const nsp = io.of('/tickets')
+  const nsp = io.of('/')
   ticketCache.on('issue', event => {
     const room = 'issues'
-    nsp.to(room).emit('events', {
+    nsp.to(room).emit('issues', {
       kind: 'issues',
       events: [event]
     })
@@ -27,7 +27,7 @@ module.exports = (io, ticketCache, retryOptions = {}) => {
   ticketCache.on('comment', event => {
     const { projectName, name } = event.object.metadata
     const room = `comments_${projectName}/${name}`
-    nsp.to(room).emit('events', {
+    nsp.to(room).emit('comments', {
       kind: 'comments',
       events: [event]
     })
