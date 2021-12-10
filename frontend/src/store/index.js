@@ -64,7 +64,7 @@ import split from 'lodash/split'
 import pick from 'lodash/pick'
 
 import moment from '@/utils/moment'
-import { ioPlugin } from '@/utils/Emitter'
+import { createIoPlugin } from '@/utils/Emitter'
 import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -88,7 +88,7 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  ioPlugin,
+  createIoPlugin(Vue.auth),
   createMediaPlugin(window)
 ]
 if (debug) {

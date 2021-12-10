@@ -27,8 +27,11 @@ function socketAuthentication (nsp) {
       logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
       next()
     } catch (err) {
-      const level = /^ERR_JWT/.test(err.code) ? 'info' : 'error'
-      logger[level]('Socket %s authentication failed: "%s"', socket.id, err.message)
+      logger.error('Socket %s authentication failed: %s', socket.id, err)
+      if (isHttpError(err)) {
+        const { statusCode, code } = err
+        err.data = JSON.stringify({ statusCode, code })
+      }
       next(err)
     }
   })
@@ -48,7 +51,7 @@ function getUserFromSocket (socket) {
 
 function joinRoom (socket, room) {
   socket.join(room)
-  logger.debug('Socket %s subscribed to room "%s"', socket.id, room)
+  logger.debug('Socket %s subscribed to room %s', socket.id, room)
 }
 
 function leaveRooms (socket, predicate = () => true) {

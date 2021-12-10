@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication } = require('../services')
-const { Forbidden, Unauthorized, BadRequest } = require('http-errors')
+const createError = require('http-errors')
 const logger = require('../logger')
 const { sessionSecret, oidc = {} } = require('../config')
 
@@ -131,7 +131,7 @@ async function authorizationUrl (req, res) {
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
-    throw new BadRequest('The \'redirectUrl\' parameter must match a redirect URI in the settings')
+    throw createError(400, 'The \'redirectUrl\' parameter must match a redirect URI in the settings')
   }
   return client.authorizationUrl({
     redirect_uri: backendRedirectUri,
@@ -218,27 +218,27 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
-function authenticate (options = {}) {
+function authenticate ({ ws = false, ...options } = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
-      throw new Unauthorized('No authorization token was found')
+      throw createError(401, 'No authentication token was found', { code: 'ERR_JWT_NOT_FOUND' })
     }
     try {
       const audience = [GARDENER_AUDIENCE]
       req.user = await verify(token, { audience })
     } catch (err) {
-      const unauthorizedError = new Unauthorized(err.message)
+      const props = {}
       switch (err.name) {
         case 'TokenExpiredError':
-          unauthorizedError.code = 'ERR_JWT_TOKEN_EXPIRED'
+          props.code = 'ERR_JWT_TOKEN_EXPIRED'
           break
         case 'NotBeforeError':
-          unauthorizedError.code = 'ERR_JWT_NOT_BEFORE'
+          props.code = 'ERR_JWT_NOT_BEFORE'
           break
       }
-      throw unauthorizedError
+      throw createError(401, err.message, props)
     }
   }
   const csrfProtection = (req, res) => {
@@ -248,7 +248,7 @@ function authenticate (options = {}) {
      * is an alternate defense that is particularly well suited for AJAX/XHR endpoints.
      */
     if (!isHttpMethodSafe(req) && !isXmlHttpRequest(req)) {
-      throw new Forbidden('Request has been blocked by CSRF protection')
+      throw createError(403, 'Request has been blocked by CSRF protection', { code: 'ERR_CSRF_PREVENTION' })
     }
   }
   const setUserAuth = async (req, res) => {
@@ -258,10 +258,12 @@ function authenticate (options = {}) {
     }
     const encryptedBearer = cookies[COOKIE_TOKEN]
     if (!encryptedBearer) {
-      throw new Unauthorized('No bearer token found in request')
+      throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
     }
     const bearer = decrypt(encryptedBearer)
-    assert.ok(bearer, 'The decrypted bearer token must not be empty')
+    if (!bearer) {
+      throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
+    }
     const auth = user.auth = { bearer }
 
     Object.defineProperty(user, 'client', {
@@ -283,7 +285,7 @@ function authenticate (options = {}) {
 }
 
 function authenticateSocket (options) {
-  const authenticateAsync = promisify(authenticate(options))
+  const authenticateAsync = promisify(authenticate({ ws: true, ...options }))
   const cookieParserAsync = promisify(cookieParser())
   return async (socket) => {
     const res = {

@@ -13,10 +13,11 @@ import EventEmitter from 'events'
 import ThrottledNamespacedEventEmitter from './ThrottledEmitter'
 
 class Connector {
-  constructor (socket, store) {
+  constructor (socket, store, userManager) {
     this.socket = socket
     this.store = store
     this.handlers = []
+    this.userManager = userManager
   }
 
   addHandler (handler) {
@@ -26,17 +27,17 @@ class Connector {
   onConnect (attempt) {
     if (attempt) {
       // eslint-disable-next-line no-console
-      console.log(`socket connection ${this.socket.id} established after '${attempt}' attempt(s)`)
+      console.log('socket connection %s established after %d attempt(s)', this.socket.id, attempt)
     } else {
       // eslint-disable-next-line no-console
-      console.log(`socket connection ${this.socket.id} established`)
+      console.log('socket connection %s established', this.socket.id)
     }
     this.store.dispatch('unsetWebsocketConnectionError')
     forEach(this.handlers, handler => handler.onConnect())
   }
 
   onDisconnect (reason) {
-    console.error('socket connection lost because', reason)
+    console.error('socket connection lost because %s', reason)
     this.store.dispatch('setWebsocketConnectionError', { reason })
     forEach(this.handlers, handler => handler.onDisconnect())
   }
@@ -47,7 +48,7 @@ class Connector {
 
   disconnect () {
     // eslint-disable-next-line no-console
-    console.log(`Disconnect socket ${this.socket.id}`)
+    console.log('disconnect socket %s', this.socket.id)
     if (this.socket.connected) {
       this.socket.disconnect()
     }
@@ -284,138 +285,150 @@ const socketConfig = {
   autoConnect: false
 }
 
+function reviveConnectionError (err) {
+  if (err.data) {
+    try {
+      Object.assign(err, JSON.parse(err.data))
+    } catch (err) { /* Ignore error */ }
+  }
+  return err
+}
+
 /* Web Socket Connection */
 function initializeConnector (connector) {
-  const { socket, store } = connector
+  const { socket, store, userManager } = connector
   socket.on('connect', attempt => connector.onConnect(attempt))
   socket.on('reconnect', attempt => connector.onConnect(attempt))
   socket.on('disconnect', reason => connector.onDisconnect(reason))
   socket.on('connect_error', err => {
-    console.error(`socket connection error ${err}`)
+    console.error('socket connection error: %s', err)
+    err = reviveConnectionError(err)
+    if (err.statusCode === 401 || err.statusCode === 403) {
+      userManager.signout(err)
+    }
   })
   socket.on('connect_timeout', () => {
-    console.error(`socket ${socket.id} connection timeout`)
+    console.error('socket %s connection timeout', socket.id)
   })
   socket.on('reconnect_attempt', () => {
     // eslint-disable-next-line no-console
-    console.log(`socket ${socket.id} reconnect attempt`)
+    console.log('socket %s reconnect attempt', socket.id)
   })
   socket.on('reconnecting', attempt => {
     store.dispatch('setWebsocketConnectionError', { reconnectAttempt: attempt })
     // eslint-disable-next-line no-console
-    console.log(`socket ${socket.id} reconnecting attempt number '${attempt}'`)
+    console.log('socket %s reconnecting attempt number %d', socket.id, attempt)
   })
   socket.on('reconnect_error', err => {
-    console.error(`socket ${socket.id} reconnect error ${err}`)
+    console.error('socket %s reconnect error: %s', socket.id, err)
   })
   socket.on('reconnect_failed', () => {
-    console.error(`socket ${socket.id} couldn't reconnect`)
+    console.error('socket %s reconnect failed', socket.id)
   })
   socket.on('error', err => {
-    console.error(`socket ${socket.id} error ${err}`)
+    console.error('socket %s error: %s', socket.id, err)
   })
-  socket.on('subscription_error', error => {
-    const { kind, code, message } = error
-    console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
-    store.dispatch('setError', error)
-  })
-}
-
-export const ioPlugin = store => {
-  const connector = new Connector(io(socketConfig), store)
-  const shootsEmitter = new ShootsSubscription(connector)
-  const shootEmitter = new ShootSubscription(connector)
-  // eslint-disable-next-line no-unused-vars
-  const ticketIssuesEmitter = new IssuesSubscription(connector)
-  const ticketCommentsEmitter = new CommentsSubscription(connector)
-
-  initializeConnector(connector)
-
-  const { state, getters } = store
-
-  const handleSetUser = user => {
-    if (user) {
-      connector.connect()
-    } else {
-      connector.disconnect()
-    }
-  }
-
-  const handleSubscribe = ([key, value] = []) => {
-    try {
-      switch (key) {
-        case 'shoot':
-          shootEmitter.subscribeShoot(value)
-          break
-        case 'shoots':
-          shootsEmitter.subscribeShoots(value)
-          break
-        case 'comments':
-          ticketCommentsEmitter.subscribeComments(value)
-          break
-      }
-    } catch (err) { /* ignore error */ }
-  }
-
-  const handleUnsubscribe = key => {
-    try {
-      switch (key) {
-        case 'comments':
-          ticketCommentsEmitter.unsubscribe()
-          break
-      }
-    } catch (err) { /* ignore error */ }
-  }
-
-  store.subscribe(mutation => {
-    const { type, payload } = mutation
-    switch (type) {
-      case 'SET_USER':
-        handleSetUser(payload)
-        break
-      case 'SUBSCRIBE':
-        handleSubscribe(payload)
-        break
-      case 'UNSUBSCRIBE':
-        handleUnsubscribe(payload)
-        break
-    }
-  })
-
-  const filterNamespacedEvents = namespacedEvents => {
-    const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
-    return reduce(getters.currentNamespaces, concatEventsForNamespace, [])
-  }
-
-  /* handle 'shoots' events */
-  shootsEmitter.on('shoots', namespacedEvents => {
-    store.commit('shoots/HANDLE_EVENTS', {
-      rootState: state,
-      rootGetters: getters,
-      events: filterNamespacedEvents(namespacedEvents)
-    })
-  })
-
-  /* handle 'shoot' events */
-  shootEmitter.on('shoot', namespacedEvents => {
-    store.commit('shoots/HANDLE_EVENTS', {
-      rootState: state,
-      rootGetters: getters,
-      events: filterNamespacedEvents(namespacedEvents)
-    })
-  })
-
-  /* handle 'issues' events */
-  ticketIssuesEmitter.on('issues', events => {
-    store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
-  })
-
-  /* handle 'comments' events */
-  ticketCommentsEmitter.on('comments', events => {
-    store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
+  socket.on('subscription_error', err => {
+    const { kind, code, message } = err
+    console.error('socket %s %s subscription error: %s (%s)', socket.id, kind, message, code)
+    store.dispatch('setError', err)
   })
 }
 
-export default {
-  plugin: ioPlugin
+export function createIoPlugin (userManager) {
+  return store => {
+    const socket = io(socketConfig)
+    const connector = new Connector(socket, store, userManager)
+    const shootsEmitter = new ShootsSubscription(connector)
+    const shootEmitter = new ShootSubscription(connector)
+    // eslint-disable-next-line no-unused-vars
+    const ticketIssuesEmitter = new IssuesSubscription(connector)
+    const ticketCommentsEmitter = new CommentsSubscription(connector)
+
+    initializeConnector(connector)
+
+    const { state, getters } = store
+
+    const handleSetUser = user => {
+      if (user) {
+        connector.connect()
+      } else {
+        connector.disconnect()
+      }
+    }
+
+    const handleSubscribe = ([key, value] = []) => {
+      try {
+        switch (key) {
+          case 'shoot':
+            shootEmitter.subscribeShoot(value)
+            break
+          case 'shoots':
+            shootsEmitter.subscribeShoots(value)
+            break
+          case 'comments':
+            ticketCommentsEmitter.subscribeComments(value)
+            break
+        }
+      } catch (err) { /* ignore error */ }
+    }
+
+    const handleUnsubscribe = key => {
+      try {
+        switch (key) {
+          case 'comments':
+            ticketCommentsEmitter.unsubscribe()
+            break
+        }
+      } catch (err) { /* ignore error */ }
+    }
+
+    store.subscribe(mutation => {
+      const { type, payload } = mutation
+      switch (type) {
+        case 'SET_USER':
+          handleSetUser(payload)
+          break
+        case 'SUBSCRIBE':
+          handleSubscribe(payload)
+          break
+        case 'UNSUBSCRIBE':
+          handleUnsubscribe(payload)
+          break
+      }
+    })
+
+    const filterNamespacedEvents = namespacedEvents => {
+      const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
+      return reduce(getters.currentNamespaces, concatEventsForNamespace, [])
+    }
+
+    /* handle 'shoots' events */
+    shootsEmitter.on('shoots', namespacedEvents => {
+      store.commit('shoots/HANDLE_EVENTS', {
+        rootState: state,
+        rootGetters: getters,
+        events: filterNamespacedEvents(namespacedEvents)
+      })
+    })
+
+    /* handle 'shoot' events */
+    shootEmitter.on('shoot', namespacedEvents => {
+      store.commit('shoots/HANDLE_EVENTS', {
+        rootState: state,
+        rootGetters: getters,
+        events: filterNamespacedEvents(namespacedEvents)
+      })
+    })
+
+    /* handle 'issues' events */
+    ticketIssuesEmitter.on('issues', events => {
+      store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
+    })
+
+    /* handle 'comments' events */
+    ticketCommentsEmitter.on('comments', events => {
+      store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
+    })
+  }
 }
