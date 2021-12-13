@@ -54,25 +54,25 @@ function joinRoom (socket, room) {
   logger.debug('Socket %s subscribed to room %s', socket.id, room)
 }
 
-function leaveRooms (socket, predicate = () => true) {
+function leaveRooms (socket, prefix) {
+  logger.debug('Socket %s leaving all %s rooms', socket.id, prefix)
   for (const room of socket.rooms) {
-    if (room !== socket.id && predicate(room)) {
-      logger.debug('Socket %s leaving room %s', socket.id, room)
+    if (room !== socket.id && room.startsWith(prefix)) {
       socket.leave(room)
     }
   }
 }
 
 function leaveShootsAndShootRoom (socket) {
-  leaveRooms(socket)
+  leaveRooms(socket, 'shoot')
 }
 
 function leaveIssuesRoom (socket) {
-  leaveRooms(socket, room => !/^comments_/.test(room))
+  leaveRooms(socket, 'issues')
 }
 
 function leaveCommentsRooms (socket) {
-  leaveRooms(socket, room => room !== 'issues')
+  leaveRooms(socket, 'comments')
 }
 
 async function subscribeShoots (socket, { namespace, namespaces, filter, user }) {
@@ -95,11 +95,11 @@ async function subscribeShoots (socket, { namespace, namespaces, filter, user })
 
   await Promise.all(namespaces.map(async namespace => {
     // join room
-    const shootsWithIssuesOnly = !!filter
     const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
     joinRoom(socket, room)
     try {
       // fetch shoots for namespace
+      const shootsWithIssuesOnly = !!filter
       const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
       batchEmitter.batchEmitObjects(shootList.items, namespace)
     } catch (error) {
@@ -131,8 +131,9 @@ async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
     // join rooms
     for (const namespace of namespaces) {
       const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-      joinRoom(socket, room)
+      socket.join(room)
     }
+    logger.debug('Socket %s subscribed to shoot rooms for all namespaces', socket.id)
 
     // fetch shoots
     const shootList = await shoots.list({ user, shootsWithIssuesOnly })
