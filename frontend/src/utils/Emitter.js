@@ -5,6 +5,7 @@
 //
 
 import io from 'socket.io-client'
+import get from 'lodash/get'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
 import concat from 'lodash/concat'
@@ -281,15 +282,6 @@ const socketConfig = {
   autoConnect: false
 }
 
-function reviveConnectionError (err) {
-  if (err.data) {
-    try {
-      Object.assign(err, JSON.parse(err.data))
-    } catch (err) { /* Ignore error */ }
-  }
-  return err
-}
-
 /* Web Socket Connection */
 function initializeConnector (connector) {
   const { socket, store, userManager } = connector
@@ -298,8 +290,8 @@ function initializeConnector (connector) {
   socket.on('disconnect', reason => connector.onDisconnect(reason))
   socket.on('connect_error', err => {
     console.error('socket connection error: %s', err)
-    err = reviveConnectionError(err)
-    if (err.statusCode === 401 || err.statusCode === 403) {
+    const statusCode = get(err, 'data.statusCode')
+    if ([401, 403].includes(statusCode)) {
       userManager.signout(err)
     }
   })

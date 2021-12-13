@@ -30,8 +30,7 @@ function socketAuthentication (nsp) {
     } catch (err) {
       logger.error('Socket %s authentication failed: %s', socket.id, err)
       if (isHttpError(err)) {
-        const { statusCode, code } = err
-        err.data = JSON.stringify({ statusCode, code })
+        err.data = _.pick(err, ['statusCode', 'code'])
       }
       next(err)
     }
