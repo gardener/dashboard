@@ -1616,23 +1616,12 @@ const actions = {
     commit('SET_LOADING', false)
     return state.loading
   },
-  setShootsLoading ({ commit }) {
-    commit('SET_SHOOTS_LOADING', true)
-    return state.shootsLoading
-  },
-  unsetShootsLoading ({ commit, getters }, namespaces) {
-    const currentNamespace = !some(namespaces, namespace => !getters.isCurrentNamespace(namespace))
-    if (currentNamespace) {
-      commit('SET_SHOOTS_LOADING', false)
-    }
-    return state.shootsLoading
-  },
   setWebsocketConnectionError ({ commit }, { reason, reconnectAttempt }) {
-    commit('SET_WEBSOCKETCONNECTIONERROR', { reason, reconnectAttempt })
+    commit('SET_WEBSOCKET_CONNECTION_ERROR', { reason, reconnectAttempt })
     return state.websocketConnectionError
   },
   unsetWebsocketConnectionError ({ commit }) {
-    commit('SET_WEBSOCKETCONNECTIONERROR', null)
+    commit('SET_WEBSOCKET_CONNECTION_ERROR', null)
     return state.websocketConnectionError
   },
   setError ({ commit }, value) {
@@ -1647,7 +1636,7 @@ const actions = {
     return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
   },
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
-    commit('SPLITPANE_RESIZE', value)
+    commit('SET_SPLITPANE_RESIZE', value)
     return state.splitpaneResize
   },
   setColorScheme ({ commit }, colorScheme) {
@@ -1691,7 +1680,7 @@ const mutations = {
   SET_SHOOTS_LOADING (state, value) {
     state.shootsLoading = value
   },
-  SET_WEBSOCKETCONNECTIONERROR (state, value) {
+  SET_WEBSOCKET_CONNECTION_ERROR (state, value) {
     if (value) {
       state.websocketConnectionError = merge({}, state.websocketConnectionError, value)
     } else {
@@ -1712,7 +1701,7 @@ const mutations = {
       state.focusedElementId = null
     }
   },
-  SPLITPANE_RESIZE (state, value) {
+  SET_SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
   SET_COLOR_SCHEME (state, value) {

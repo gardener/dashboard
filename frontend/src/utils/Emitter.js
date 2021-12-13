@@ -87,11 +87,11 @@ class AbstractSubscription extends EventEmitter {
     this.subscribeOnNextTrigger()
   }
 
-  async subscribe () {
+  subscribe () {
     if (this.subscribeTo) {
       if (!this.subscribedTo || !isEqual(this.subscribedTo, this.subscribeTo)) {
         if (this.connector.connected) {
-          if (await this._subscribe()) {
+          if (this._subscribe()) {
             this.subscribed()
           }
         } else {
@@ -155,29 +155,29 @@ class ShootsSubscription extends AbstractSubscription {
         throttledNsEventEmitter.emit(kind, namespaces)
       }
     })
-    this.socket.on('subscription_done', ({ kind, namespaces }) => {
-      if (kind === 'shoots') {
-        this.store.dispatch('unsetShootsLoading', namespaces)
+    this.socket.on('subscription_done', ({ kind, namespace }) => {
+      if (kind === 'shoots' && namespace === this.store.state.namespace) {
+        this.store.commit('SET_SHOOTS_LOADING', false)
         throttledNsEventEmitter.flush()
       }
     })
   }
 
-  async subscribeShoots ({ namespace, filter }) {
+  subscribeShoots ({ namespace, filter }) {
     // immediately clear, also if not authenticated to avoid outdated content is shown to the user
-    await this.store.dispatch('clearShoots')
+    this.store.commit('shoots/CLEAR_ALL')
     this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
 
-  async _subscribe () {
+  _subscribe () {
     const { namespace, filter } = this.subscribeTo
 
-    await this.store.dispatch('setShootsLoading')
+    this.store.commit('SET_SHOOTS_LOADING', true)
     if (namespace === '_all') {
       this.socket.emit('subscribeAllShoots', { filter })
     } else if (namespace) {
-      this.socket.emit('subscribeShoots', { namespaces: [{ namespace, filter }] })
+      this.socket.emit('subscribeShoots', { namespace, filter })
     } else {
       console.error(new Error('no namespace specified'))
       return false
@@ -202,7 +202,7 @@ class ShootSubscription extends AbstractSubscription {
     this.subscribe()
   }
 
-  async _subscribe () {
+  _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
     this.socket.emit('subscribeShoot', { namespace, name }, object => {
@@ -239,10 +239,8 @@ class IssuesSubscription extends AbstractSubscription {
     this.subscribe()
   }
 
-  async _subscribe () {
-    await Promise.all([
-      this.store.dispatch('clearIssues')
-    ])
+  _subscribe () {
+    this.store.commit('tickets/CLEAR_ISSUES')
 
     this.socket.emit('subscribeIssues')
     return true
@@ -263,10 +261,8 @@ class CommentsSubscription extends AbstractSubscription {
     this.subscribe()
   }
 
-  async _subscribe () {
-    await Promise.all([
-      this.store.dispatch('clearComments')
-    ])
+  _subscribe () {
+    this.store.commit('tickets/CLEAR_COMMENTS')
 
     const { name, namespace } = this.subscribeTo
     this.socket.emit('subscribeComments', { name, namespace })

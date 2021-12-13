@@ -63,9 +63,6 @@ const getters = {
 
 // actions
 const actions = {
-  getCommentsList ({ state }, { name, projectName }) {
-    return state.comments
-  },
   clearIssues ({ commit, state }) {
     commit('CLEAR_ISSUES')
     return state.all

@@ -218,12 +218,12 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
-function authenticate ({ ws = false, ...options } = {}) {
+function authenticate (options = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
-      throw createError(401, 'No authentication token was found', { code: 'ERR_JWT_NOT_FOUND' })
+      throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
     }
     try {
       const audience = [GARDENER_AUDIENCE]
@@ -285,7 +285,7 @@ function authenticate ({ ws = false, ...options } = {}) {
 }
 
 function authenticateSocket (options) {
-  const authenticateAsync = promisify(authenticate({ ws: true, ...options }))
+  const authenticateAsync = promisify(authenticate(options))
   const cookieParserAsync = promisify(cookieParser())
   return async (socket) => {
     const res = {

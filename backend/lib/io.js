@@ -6,11 +6,12 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const _ = require('lodash')
 const createServer = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { isHttpError } = require('http-errors')
+const { isHttpError, Unauthorized } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
 const kubernetesClient = require('@gardener-dashboard/kube-client')
@@ -75,51 +76,50 @@ function leaveCommentsRooms (socket) {
   leaveRooms(socket, room => room !== 'issues')
 }
 
-async function subscribeShoots ({ socket, namespacesAndFilters, projectList }) {
+async function subscribeShoots (socket, { namespace, namespaces, filter, user }) {
   leaveShootsAndShootRoom(socket)
 
-  /* join current rooms */
-  if (!_.isArray(namespacesAndFilters)) {
-    return
+  // subscribe for all namespaces or a single namespace
+  if (Array.isArray(namespaces)) {
+    namespace = '_all'
+  } else if (namespace) {
+    namespaces = [namespace]
+  } else {
+    assert.fail('Either property namespaces or namespace is required')
   }
+
+  /* join current rooms */
   const kind = 'shoots'
   const eventName = 'shoots'
   const objectKeyPath = 'metadata.uid'
-  const user = getUserFromSocket(socket)
   const batchEmitter = new NamespacedBatchEmitter({ eventName, kind, socket, objectKeyPath })
 
-  await _
-    .chain(namespacesAndFilters)
-    .filter(({ namespace }) => !!_.find(projectList, ['metadata.namespace', namespace]))
-    .map(async ({ namespace, filter }) => {
-      // join room
-      const shootsWithIssuesOnly = !!filter
-      const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-      joinRoom(socket, room)
-      try {
-        // fetch shoots for namespace
-        const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
-        batchEmitter.batchEmitObjects(shootList.items, namespace)
-      } catch (error) {
-        logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
-        socket.emit('subscription_error', {
-          kind,
-          code: 500,
-          message: `Failed to fetch clusters for namespace ${namespace}`
-        })
-      }
-    })
-    .thru(promises => Promise.all(promises))
-    .value()
-
+  await Promise.all(namespaces.map(async namespace => {
+    // join room
+    const shootsWithIssuesOnly = !!filter
+    const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
+    joinRoom(socket, room)
+    try {
+      // fetch shoots for namespace
+      const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
+      batchEmitter.batchEmitObjects(shootList.items, namespace)
+    } catch (error) {
+      logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
+      socket.emit('subscription_error', {
+        kind,
+        code: 500,
+        message: `Failed to fetch clusters for namespace ${namespace}`
+      })
+    }
+  }))
   batchEmitter.flush()
   socket.emit('subscription_done', {
     kind,
-    namespaces: _.map(namespacesAndFilters, 'namespace')
+    namespace
   })
 }
 
-async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
+async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
   leaveShootsAndShootRoom(socket)
 
   const kind = 'shoots'
@@ -130,24 +130,18 @@ async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
 
   try {
     // join rooms
-    _.forEach(namespaces, namespace => {
+    for (const namespace of namespaces) {
       const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
       joinRoom(socket, room)
-    })
+    }
 
     // fetch shoots
     const shootList = await shoots.list({ user, shootsWithIssuesOnly })
-    const batchEmitObjects = _
-      .chain(batchEmitter)
-      .bindKey('batchEmitObjects')
-      .ary(2)
-      .value()
-
     _
       .chain(shootList)
       .get('items')
       .groupBy('metadata.namespace')
-      .forEach(batchEmitObjects)
+      .forEach((objects, namespace) => batchEmitter.batchEmitObjects(objects, namespace))
       .commit()
   } catch (error) {
     logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
@@ -160,7 +154,7 @@ async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
   batchEmitter.flush()
   socket.emit('subscription_done', {
     kind,
-    namespaces
+    namespace: '_all'
   })
 }
 
@@ -207,37 +201,42 @@ async function subscribeShoot (socket, { namespace, name }) {
   }
 }
 
-function handleShootEvents (socket) {
+function registerShootHandlers (socket) {
   socket.on('subscribeAllShoots', async ({ filter }) => {
+    const kind = 'shoots'
     try {
       const user = getUserFromSocket(socket)
       const projectList = await projects.list({ user })
       const namespaces = _.map(projectList, 'metadata.namespace')
 
       if (await authorization.isAdmin(user)) {
-        subscribeShootsAdmin({ socket, user, namespaces, filter })
+        subscribeShootsAdmin(socket, { namespaces, filter, user })
       } else {
-        const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
-        subscribeShoots({ socket, namespacesAndFilters, projectList })
+        subscribeShoots(socket, { namespaces, filter, user })
       }
     } catch (err) {
       logger.error('Socket %s: failed to subscribe to all shoots: %s', socket.id, err)
       socket.emit('subscription_error', {
-        kind: 'shoots',
+        kind,
         code: 500,
         message: 'Failed to fetch clusters'
       })
     }
   })
-  socket.on('subscribeShoots', async ({ namespaces }) => {
+  socket.on('subscribeShoots', async ({ namespace, filter }) => {
+    const kind = 'shoots'
     try {
       const user = getUserFromSocket(socket)
       const projectList = await projects.list({ user })
-      subscribeShoots({ namespacesAndFilters: namespaces, socket, projectList })
+      if (!_.find(projectList, ['metadata.namespace', namespace])) {
+        throw new Unauthorized(`Not authorized to subscribe for shoots in namepsace ${namespace}`)
+      }
+
+      subscribeShoots(socket, { namespace, filter, user })
     } catch (err) {
       logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
       socket.emit('subscription_error', {
-        kind: 'shoots',
+        kind,
         code: 500,
         message: 'Failed to fetch clusters'
       })
@@ -253,7 +252,7 @@ function handleShootEvents (socket) {
   })
 }
 
-function handleTicketEvents (socket, cache, ticketCache) {
+function registerTicketHandlers (socket, cache, ticketCache) {
   socket.on('subscribeIssues', async () => {
     leaveIssuesRoom(socket)
 
@@ -313,11 +312,11 @@ function initializeServer (httpServer, cache) {
   })
   // middleware
   socketAuthentication(io)
-  // handle connections
+  // handle connections (see https://socket.io/docs/v3/server-application-structure/#each-file-registers-its-own-event-handlers)
   io.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
-    handleShootEvents(socket)
-    handleTicketEvents(socket, cache, ticketCache)
+    registerShootHandlers(socket)
+    registerTicketHandlers(socket, cache, ticketCache)
     socket.on('disconnect', onDisconnect)
   })
 

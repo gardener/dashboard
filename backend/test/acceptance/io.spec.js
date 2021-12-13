@@ -86,9 +86,9 @@ describe('socket.io', function () {
         resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
-      const event = Object.prototype.hasOwnProperty.call(options, 'namespaces')
-        ? 'subscribeShoots'
-        : 'subscribeAllShoots'
+      const event = !options.namespace
+        ? 'subscribeAllShoots'
+        : 'subscribeShoots'
       socket.emit(event, options)
       const shootsByNamespace = {}
       for await (const namespacedEvent of asyncIterator) {
@@ -118,13 +118,12 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/').sockets.get(socket.id).rooms
+      const nsp = agent.io.sockets
+      rooms = nsp.sockets.get(socket.id).rooms
     })
 
     it('should subscribe shoots for a namespace', async function () {
-      const shootsByNamespace = await subscribeShoots({
-        namespaces: [{ namespace: 'foo' }]
-      })
+      const shootsByNamespace = await subscribeShoots({ namespace: 'foo' })
       expect(isAdminStub).toBeCalledTimes(0)
       expect(listProjectsStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(1)
@@ -213,7 +212,8 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/').sockets.get(socket.id).rooms
+      const nsp = agent.io.sockets
+      rooms = nsp.sockets.get(socket.id).rooms
     })
 
     it('should subscribe tickets', async function () {
