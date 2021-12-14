@@ -79,12 +79,11 @@ async function subscribeShoots (socket, { namespace, namespaces, filter, user })
   leaveShootsAndShootRoom(socket)
 
   // subscribe for all namespaces or a single namespace
-  if (Array.isArray(namespaces)) {
+  assert.ok(Array.isArray(namespaces) || namespace, 'Either namespaces or namespace is required')
+  if (!namespace) {
     namespace = '_all'
-  } else if (namespace) {
-    namespaces = [namespace]
   } else {
-    assert.fail('Either property namespaces or namespace is required')
+    namespaces = [namespace]
   }
 
   /* join current rooms */
