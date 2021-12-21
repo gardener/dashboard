@@ -27,7 +27,12 @@ import {
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { hash } from '@/utils/crypto'
-import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
+import {
+  getSubjectRules,
+  getKubeconfigData,
+  listProjectTerminalShortcuts,
+  getClusterIdentity
+} from '@/utils/api'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
 import mapValues from 'lodash/mapValues'
@@ -145,7 +150,12 @@ const state = {
   },
   darkTheme: false,
   colorScheme: 'auto',
-  subscriptions: {}
+  subscriptions: {},
+  clusterIdentity: null,
+  gardenctlOptions: {
+    legacyCommands: false,
+    shell: null
+  }
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1258,6 +1268,12 @@ const getters = {
       })
       return filter(workerGroups, 'expirationDate')
     }
+  },
+  clusterIdentity (state) {
+    return state.clusterIdentity
+  },
+  gardenctlOptions (state) {
+    return state.gardenctlOptions
   }
 }
 
@@ -1660,6 +1676,41 @@ const actions = {
   setColorScheme ({ commit }, colorScheme) {
     commit('SET_COLOR_SCHEME', colorScheme)
     return state.colorScheme
+  },
+  async initializeClusterIdentity ({ commit, dispatch, state }) {
+    const { clusterIdentity } = state
+
+    if (!isEmpty(clusterIdentity)) {
+      // it is not expected that the cluster identity will ever change, hence we can just return it
+      return clusterIdentity
+    }
+
+    try {
+      const { data: { clusterIdentity } } = await getClusterIdentity()
+      commit('SET_CLUSTER_IDENTITY', clusterIdentity)
+
+      return clusterIdentity
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(`Failed to get cluster-identity ${err.message}`)
+    }
+  },
+  refreshGardenctlOptions ({ commit }) {
+    const backendDefaultOptions = get(state.cfg, 'gardenctl', {})
+    const defaultOptions = {
+      legacyCommands: false,
+      shell: 'bash'
+    }
+
+    const options = localStorage.getObject('global/gardenctl')
+    const gardenctlOptions = {
+      ...defaultOptions,
+      ...backendDefaultOptions,
+      ...options
+    }
+
+    commit('SET_GARDENCTL_OPTIONS', gardenctlOptions)
+    return gardenctlOptions
   }
 }
 
@@ -1735,6 +1786,13 @@ const mutations = {
   },
   UNSUBSCRIBE (state, key) {
     Vue.delete(state.subscriptions, key)
+  },
+  SET_CLUSTER_IDENTITY (state, value) {
+    state.clusterIdentity = value
+  },
+  SET_GARDENCTL_OPTIONS (state, value) {
+    state.gardenctlOptions = value
+    localStorage.setObject('global/gardenctl', value)
   }
 }
 

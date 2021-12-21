@@ -27,109 +27,133 @@ describe('api', function () {
   describe('info', function () {
     const id = 'john.doe@example.org'
     const aud = ['gardener']
-    const service = {
-      name: 'gardener-apiserver',
-      namespace: 'gardener'
-    }
-    const caBundle = fixtures.helper.toBase64('ca')
 
-    it('should reject requests csrf protection error', async function () {
-      const res = await agent
-        .post('/api/info')
-        .unset('x-requested-with')
-        .expect('content-type', /json/)
-        .expect(403)
+    describe('version', function () {
+      const service = {
+        name: 'gardener-apiserver',
+        namespace: 'gardener'
+      }
+      const caBundle = fixtures.helper.toBase64('ca')
 
-      expect(mockRequest).not.toBeCalled()
+      it('should reject requests csrf protection error', async function () {
+        const res = await agent
+          .post('/api/info')
+          .unset('x-requested-with')
+          .expect('content-type', /json/)
+          .expect(403)
 
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        expect(mockRequest).not.toBeCalled()
+
+        expect(res.body).toMatchSnapshot({
+          details: expect.any(Object)
+        })
+      })
+
+      it('should reject requests without authorization header', async function () {
+        const res = await agent
+          .get('/api/info')
+          .expect('content-type', /json/)
+          .expect(401)
+
+        expect(mockRequest).not.toBeCalled()
+
+        expect(res.body).toMatchSnapshot({
+          details: expect.any(Object)
+        })
+      })
+
+      it('should reject requests with invalid signature', async function () {
+        const user = fixtures.user.create({ id, aud }, true)
+
+        const res = await agent
+          .get('/api/info')
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(401)
+
+        expect(mockRequest).not.toBeCalled()
+
+        expect(res.body).toMatchSnapshot({
+          details: expect.any(Object)
+        })
+      })
+
+      it('should reject requests with invalid audience', async function () {
+        const user = fixtures.user.create({ id, aud: ['invalid-audience'] })
+
+        const res = await agent
+          .get('/api/info')
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(401)
+
+        expect(mockRequest).not.toBeCalled()
+
+        expect(res.body).toMatchSnapshot({
+          details: expect.any(Object)
+        })
+      })
+
+      it('should return information with version', async function () {
+        const user = fixtures.user.create({ id, aud })
+        const gardenerVersion = { major: '1', minor: '0' }
+
+        mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
+        mockRequest.mockResolvedValueOnce(gardenerVersion)
+
+        const res = await agent
+          .get('/api/info')
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot({
+          version: expect.any(String)
+        })
+      })
+
+      it('should return information without version', async function () {
+        const user = fixtures.user.create({ id, aud })
+
+        mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
+        mockRequest.mockRejectedValueOnce(createError(404, 'Not found'))
+
+        const res = await agent
+          .get('/api/info')
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body).toMatchSnapshot({
+          version: expect.any(String)
+        })
       })
     })
 
-    it('should reject requests without authorization header', async function () {
-      const res = await agent
-        .get('/api/info')
-        .expect('content-type', /json/)
-        .expect(401)
+    describe('identity', function () {
+      it('should return identity', async function () {
+        const user = fixtures.user.create({ id, aud })
 
-      expect(mockRequest).not.toBeCalled()
+        mockRequest.mockResolvedValueOnce({ data: { 'cluster-identity': 'test-id' } })
 
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
-      })
-    })
+        const res = await agent
+          .get('/api/info/identity')
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
 
-    it('should reject requests with invalid signature', async function () {
-      const user = fixtures.user.create({ id, aud }, true)
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      const res = await agent
-        .get('/api/info')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(401)
-
-      expect(mockRequest).not.toBeCalled()
-
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
-      })
-    })
-
-    it('should reject requests with invalid audience', async function () {
-      const user = fixtures.user.create({ id, aud: ['invalid-audience'] })
-
-      const res = await agent
-        .get('/api/info')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(401)
-
-      expect(mockRequest).not.toBeCalled()
-
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
-      })
-    })
-
-    it('should return information with version', async function () {
-      const user = fixtures.user.create({ id, aud })
-      const gardenerVersion = { major: '1', minor: '0' }
-
-      mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
-      mockRequest.mockResolvedValueOnce(gardenerVersion)
-
-      const res = await agent
-        .get('/api/info')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot({
-        version: expect.any(String)
-      })
-    })
-
-    it('should return information without version', async function () {
-      const user = fixtures.user.create({ id, aud })
-
-      mockRequest.mockResolvedValueOnce({ spec: { service, caBundle } })
-      mockRequest.mockRejectedValueOnce(createError(404, 'Not found'))
-
-      const res = await agent
-        .get('/api/info')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot({
-        version: expect.any(String)
+        expect(res.body).toMatchSnapshot({
+          clusterIdentity: 'test-id'
+        })
       })
     })
   })

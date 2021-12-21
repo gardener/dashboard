@@ -311,3 +311,8 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.frontendConfig.gardenctl }}
+      gardenctl:
+        legacyCommands: {{ .Values.frontendConfig.gardenctl.legacyCommands | default false }}
+        shell: {{ .Values.frontendConfig.gardenctl.shell | default "bash" }}
+      {{- end }}
