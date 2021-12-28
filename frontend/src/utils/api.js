@@ -305,12 +305,7 @@ export function getInfo () {
   return getResource('/api/info')
 }
 
-export function getClusterIdentity () {
-  return getResource('/api/info/identity')
-}
-
 /* Terminals */
-
 export function createTerminal ({ namespace, name, target, body = {} }) {
   body.coordinate = {
     name,

@@ -75,7 +75,7 @@ import GPopper from '@/components/GPopper'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import Vue from 'vue'
@@ -94,12 +94,11 @@ export default {
   },
   computed: {
     ...mapState([
-      'cfg'
+      'cfg',
+      'gardenctlOptions'
     ]),
     ...mapGetters([
-      'projectFromProjectList',
-      'gardenctlOptions',
-      'clusterIdentity'
+      'projectFromProjectList'
     ]),
     projectName () {
       const project = this.projectFromProjectList
@@ -163,8 +162,8 @@ export default {
     },
     targetControlPlaneCommandV2 () {
       const args = []
-      if (this.clusterIdentity) {
-        args.push(`--garden ${this.clusterIdentity}`)
+      if (this.cfg.clusterIdentity) {
+        args.push(`--garden ${this.cfg.clusterIdentity}`)
       }
       if (this.projectName) {
         args.push(`--project ${this.projectName}`)
@@ -193,8 +192,8 @@ export default {
     },
     targetShootCommandV2 () {
       const args = []
-      if (this.clusterIdentity) {
-        args.push(`--garden ${this.clusterIdentity}`)
+      if (this.cfg.clusterIdentity) {
+        args.push(`--garden ${this.cfg.clusterIdentity}`)
       }
       if (this.projectName) {
         args.push(`--project ${this.projectName}`)
@@ -210,10 +209,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
-      'initializeClusterIdentity',
-      'refreshGardenctlOptions'
-    ]),
     visibilityIcon (index) {
       return this.expansionPanel[index] ? 'mdi-eye-off' : 'mdi-eye'
     },
@@ -233,10 +228,6 @@ export default {
           return `eval $(${command})`
       }
     }
-  },
-  async mounted () {
-    await this.initializeClusterIdentity()
-    await this.refreshGardenctlOptions()
   }
 }
 </script>

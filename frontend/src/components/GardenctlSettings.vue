@@ -12,7 +12,6 @@ SPDX-License-Identifier: Apache-2.0
         label="Select Version"
         hint="Choose for which gardenctl version the commands should be displayed"
         persistent-hint
-        @change="onChangeLegacyCommands"
         class="pb-4"
       >
         <v-radio
@@ -35,44 +34,46 @@ SPDX-License-Identifier: Apache-2.0
         hint="Choose for which shell the commands should be displayed"
         persistent-hint
         v-model="shell"
-        @input="onInputShell"
       ></v-select>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
-  data () {
-    return {
-      legacyCommands: false,
-      shell: 'bash'
+  computed: {
+    ...mapState([
+      'gardenctlOptions'
+    ]),
+    legacyCommands: {
+      get () {
+        return this.gardenctlOptions.legacyCommands
+      },
+      set (value) {
+        this.setGardenctlOptions({
+          ...this.gardenctlOptions,
+          legacyCommands: value
+        })
+      }
+    },
+    shell: {
+      get () {
+        return this.gardenctlOptions.shell
+      },
+      set (value) {
+        this.setGardenctlOptions({
+          ...this.gardenctlOptions,
+          shell: value
+        })
+      }
     }
   },
   methods: {
-    ...mapActions([
-      'refreshGardenctlOptions'
-    ]),
-    onInputShell () {
-      this.store()
-    },
-    onChangeLegacyCommands () {
-      this.store()
-    },
-    store () {
-      const gardenctlOptions = {
-        legacyCommands: this.legacyCommands,
-        shell: this.shell
-      }
-      this.$store.commit('SET_GARDENCTL_OPTIONS', gardenctlOptions)
-    }
-  },
-  async mounted () {
-    const { legacyCommands, shell } = await this.refreshGardenctlOptions()
-    this.legacyCommands = legacyCommands
-    this.shell = shell
+    ...mapMutations({
+      setGardenctlOptions: 'SET_GARDENCTL_OPTIONS'
+    })
   }
 }
 </script>

@@ -51,23 +51,3 @@ async function fetchGardenerVersion () {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
   }
 }
-
-router.route('/identity')
-  .get(async (req, res, next) => {
-    try {
-      const clusterIdentity = await fetchIdentity()
-      res.send({ clusterIdentity })
-    } catch (err) {
-      next(err)
-    }
-  })
-
-async function fetchIdentity () {
-  const {
-    data: {
-      'cluster-identity': clusterIdentity
-    }
-  } = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
-
-  return clusterIdentity
-}
