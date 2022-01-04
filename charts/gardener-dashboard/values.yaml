@@ -33,7 +33,7 @@ logLevel: debug
 #   -----END CERTIFICATE-----
 # # or skip tls verify (insecure)
 # apiServerSkipTlsVerify: true
-# # the identifier of the gardener landscape (defaults to the name store in kube-system/cluster-identity configmap)
+# # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
 # clusterIdentity: my-landscape-dev
 containerPort: 8080
 servicePort: 8080
