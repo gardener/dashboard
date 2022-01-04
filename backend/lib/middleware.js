@@ -8,61 +8,8 @@
 
 const _ = require('lodash')
 const logger = require('./logger')
-const markdown = require('./markdown')
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
-
-function frontendConfig (config) {
-  const converter = markdown.createConverter()
-  const convertAndSanitize = (obj, key) => {
-    if (obj[key]) {
-      obj[key] = converter.makeSanitizedHtml(obj[key])
-    }
-  }
-
-  const frontendConfig = _.cloneDeep(config.frontend)
-  const {
-    alert = {},
-    costObject = {},
-    sla = {},
-    addonDefinition = {},
-    accessRestriction: {
-      items = []
-    } = {},
-    vendorHints = []
-  } = frontendConfig
-
-  convertAndSanitize(alert, 'message')
-  convertAndSanitize(costObject, 'description')
-  convertAndSanitize(sla, 'description')
-  convertAndSanitize(addonDefinition, 'description')
-
-  for (const item of items) {
-    const {
-      display = {},
-      input = {},
-      options = []
-    } = item
-    convertAndSanitize(display, 'description')
-    convertAndSanitize(input, 'description')
-    for (const option of options) {
-      const {
-        display = {},
-        input = {}
-      } = option
-      convertAndSanitize(display, 'description')
-      convertAndSanitize(input, 'description')
-    }
-  }
-
-  for (const vendorHint of vendorHints) {
-    convertAndSanitize(vendorHint, 'message')
-  }
-
-  return (req, res, next) => {
-    res.json(frontendConfig)
-  }
-}
 
 function noCache () {
   return (req, res, next) => {
@@ -150,7 +97,6 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 module.exports = {
-  frontendConfig,
   noCache,
   historyFallback,
   notFound,

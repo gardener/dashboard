@@ -24,14 +24,16 @@ describe('config', function () {
   })
 
   it('should return the frontend configuration', async function () {
+    mockRequest.mockResolvedValueOnce({ data: { 'cluster-identity': 'test-id' } })
+
     const res = await agent
       .get('/config.json')
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).not.toBeCalled()
-    expect(Array.isArray(res.body.helpMenuItems)).toBe(true)
-    expect(res.body.helpMenuItems).toHaveLength(3)
-    expect(res.body.landingPageUrl).toBe('https://gardener.cloud/')
+    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest.mock.calls).toMatchSnapshot()
+
+    expect(res.body).toMatchSnapshot()
   })
 })
