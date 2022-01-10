@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-list>
-    <template v-for="({ title, subtitle, value }, index) in commands">
+    <template v-for="({ title, subtitle, value, displayValue }, index) in commands">
       <v-list-item :key="title">
         <v-list-item-icon>
           <v-icon v-if="index === 0" color="primary">mdi-console-line</v-icon>
@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content class="pt-0">
           <code-block
             lang="shell"
-            :content="'$ ' + value.replace(/ --/g, ' \\\n    --').replace(/ &&/g, ' \\\n  &&')"
+            :content="displayValue"
             :show-copy-button="false"
           ></code-block>
         </v-list-item-content>
@@ -105,18 +105,26 @@ export default {
       return get(project, 'metadata.name')
     },
     commands () {
+      const displayValue = command => {
+        return '$ ' + command
+          .replace(/ --/g, ' \\\n    --')
+          .replace(/ &&/g, ' \\\n  &&')
+      }
+
       const gardenctlVersion = this.legacyCommands ? 'Legacy gardenctl' : 'Gardenctl-v2'
       const additionalInfo = this.legacyCommands ? '' : `(${this.shell})`
       return [
         {
           title: 'Target Control Plane',
           subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster ${additionalInfo}`,
-          value: this.targetControlPlaneCommand
+          value: this.targetControlPlaneCommand,
+          displayValue: displayValue(this.targetControlPlaneCommand)
         },
         {
           title: 'Target Cluster',
           subtitle: `${gardenctlVersion} command to target the shoot cluster ${additionalInfo}`,
-          value: this.targetShootCommand
+          value: this.targetShootCommand,
+          displayValue: displayValue(this.targetShootCommand)
         }
       ]
     },
