@@ -33,6 +33,8 @@ logLevel: debug
 #   -----END CERTIFICATE-----
 # # or skip tls verify (insecure)
 # apiServerSkipTlsVerify: true
+# # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
+# clusterIdentity: my-landscape-dev
 containerPort: 8080
 servicePort: 8080
 resources:
@@ -240,6 +242,11 @@ frontendConfig:
   #    action-button: 'grey.lighten4'
   #    error: 'red.darken4'
   #    warning: 'orange.darken4'
+
+  # gardenctl - configure the default settings for the gardenctl commands
+  gardenctl:
+    legacyCommands: false # false to show gardenctl-v2 commands by default, true to show the legacy gardenctl commands. Can be overwritten by the user.
+    shell: bash # default shell. Should be one of bash, fish, powershell, zsh. Can be overwritten by the user.
 
 # # github configuration of the ticket feature
 # gitHub:

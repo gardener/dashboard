@@ -351,5 +351,17 @@ describe('gardener-dashboard', function () {
         expect(pick(config, ['frontend.vendorHints'])).toMatchSnapshot()
       })
     })
+
+    describe('clusterIdentity', function () {
+      it('should render the template', async function () {
+        const clusterIdentity = 'my-lanscape-dev'
+
+        const documents = await renderTemplates(templates, { clusterIdentity })
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        expect(config.clusterIdentity).toBe(clusterIdentity)
+      })
+    })
   })
 })

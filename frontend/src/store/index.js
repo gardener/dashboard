@@ -27,7 +27,11 @@ import {
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { hash } from '@/utils/crypto'
-import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
+import {
+  getSubjectRules,
+  getKubeconfigData,
+  listProjectTerminalShortcuts
+} from '@/utils/api'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
 import mapValues from 'lodash/mapValues'
@@ -145,7 +149,11 @@ const state = {
   },
   darkTheme: false,
   colorScheme: 'auto',
-  subscriptions: {}
+  subscriptions: {},
+  gardenctlOptions: {
+    legacyCommands: false,
+    shell: null
+  }
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1258,6 +1266,13 @@ const getters = {
       })
       return filter(workerGroups, 'expirationDate')
     }
+  },
+  defaultGardenctlOptions (state) {
+    return {
+      legacyCommands: false,
+      shell: 'bash',
+      ...get(state, 'cfg.gardenctl')
+    }
   }
 }
 
@@ -1717,6 +1732,10 @@ const mutations = {
   },
   UNSUBSCRIBE (state, key) {
     Vue.delete(state.subscriptions, key)
+  },
+  SET_GARDENCTL_OPTIONS (state, value) {
+    state.gardenctlOptions = value
+    localStorage.setObject('global/gardenctl', value)
   }
 }
 

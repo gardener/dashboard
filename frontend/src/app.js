@@ -21,8 +21,13 @@ const App = Vue.extend({
       }
     })
 
-    const colorScheme = window.localStorage.getItem('global/color-scheme')
+    const colorScheme = this.$localStorage.getItem('global/color-scheme')
     this.$store.commit('SET_COLOR_SCHEME', colorScheme)
+    const options = {
+      ...this.$store.getters.defaultGardenctlOptions,
+      ...this.$localStorage.getObject('global/gardenctl')
+    }
+    this.$store.commit('SET_GARDENCTL_OPTIONS', options)
   },
   render (createElement) {
     return createElement('router-view')
