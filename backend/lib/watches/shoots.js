@@ -36,24 +36,24 @@ function toNamespacedEvents ({ type, object }) {
 }
 
 module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
-  const nsp = io.of('/shoots')
+  const nsp = io.of('/')
   const handleEvent = event => {
     const { type, object } = event
     const { namespace, name, uid } = object.metadata
 
     const namespacedEvents = toNamespacedEvents(event)
-    nsp.to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
-    nsp.to(`shoot_${namespace}_${name}`).emit('namespacedEvents', { ...namespacedEvents, kind: 'shoot' })
+    nsp.to(`shoots_${namespace}`).emit('shoots', namespacedEvents)
+    nsp.to(`shoot_${namespace}_${name}`).emit('shoots', { ...namespacedEvents, kind: 'shoot' })
 
     if (shootHasIssue(object)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+      nsp.to(`shoots_${namespace}_issues`).emit('shoots', namespacedEvents)
       if (!shootsWithIssues.has(uid)) {
         shootsWithIssues.add(uid)
       } else if (type === 'DELETED') {
         shootsWithIssues.delete(uid)
       }
     } else if (shootsWithIssues.has(uid)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('namespacedEvents', toNamespacedEvents({ type: 'DELETED', object }))
+      nsp.to(`shoots_${namespace}_issues`).emit('shoots', toNamespacedEvents({ type: 'DELETED', object }))
       shootsWithIssues.delete(uid)
     }
 

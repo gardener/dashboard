@@ -81,14 +81,14 @@ describe('socket.io', function () {
     }
 
     async function subscribeShoots (options = {}) {
-      const asyncIterator = pEvent.iterator(socket, 'namespacedEvents', {
+      const asyncIterator = pEvent.iterator(socket, 'shoots', {
         timeout: 1000,
-        resolutionEvents: ['shootSubscriptionDone', 'batchNamespacedEventsDone'],
+        resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
-      const event = Object.prototype.hasOwnProperty.call(options, 'namespaces')
-        ? 'subscribeShoots'
-        : 'subscribeAllShoots'
+      const event = !options.namespace
+        ? 'subscribeAllShoots'
+        : 'subscribeShoots'
       socket.emit(event, options)
       const shootsByNamespace = {}
       for await (const namespacedEvent of asyncIterator) {
@@ -108,7 +108,7 @@ describe('socket.io', function () {
       listProjectsStub = jest.spyOn(projects, 'list').mockResolvedValue(projectList)
       listShootsStub = jest.spyOn(shoots, 'list').mockImplementation(listShootsImplementation)
       readShootStub = jest.spyOn(shoots, 'read').mockImplementation(readShootImplementation)
-      socket = await agent.connect('/shoots', {
+      socket = await agent.connect({
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
@@ -118,13 +118,12 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/shoots').sockets.get(socket.id).rooms
+      const nsp = agent.io.sockets
+      rooms = nsp.sockets.get(socket.id).rooms
     })
 
     it('should subscribe shoots for a namespace', async function () {
-      const shootsByNamespace = await subscribeShoots({
-        namespaces: [{ namespace: 'foo' }]
-      })
+      const shootsByNamespace = await subscribeShoots({ namespace: 'foo' })
       expect(isAdminStub).toBeCalledTimes(0)
       expect(listProjectsStub).toBeCalledTimes(1)
       expect(listShootsStub).toBeCalledTimes(1)
@@ -187,9 +186,10 @@ describe('socket.io', function () {
     let rooms
 
     async function emitSubscribe (...args) {
-      const asyncIterator = pEvent.iterator(socket, 'events', {
+      const eventName = args[0].substring(9).toLowerCase()
+      const asyncIterator = pEvent.iterator(socket, eventName, {
         timeout: 1000,
-        resolutionEvents: ['batchEventsDone'],
+        resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
       socket.emit(...args)
@@ -202,7 +202,7 @@ describe('socket.io', function () {
 
     beforeEach(async function () {
       ticketCache = cache.getTicketCache()
-      socket = await agent.connect('/tickets', {
+      socket = await agent.connect({
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
@@ -212,7 +212,8 @@ describe('socket.io', function () {
           bearer: await user.bearer
         }
       })
-      rooms = agent.io.of('/tickets').sockets.get(socket.id).rooms
+      const nsp = agent.io.sockets
+      rooms = nsp.sockets.get(socket.id).rooms
     })
 
     it('should subscribe tickets', async function () {
