@@ -50,5 +50,5 @@
   "jestrunner.enableYarnPnpSupport": true,
   "jestrunner.jestCommand": "scripts/jest",
   "vetur.useWorkspaceDependencies": true,
-  "vetur.experimental.templateInterpolationService": true
+  "vetur.experimental.templateInterpolationService": false
 }

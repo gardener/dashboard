@@ -47,7 +47,7 @@ RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM eu.gcr.io/gardener-project/3rd/alpine:3.13 as release
+FROM eu.gcr.io/gardener-project/3rd/alpine:3.15 as release
 
 RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
 RUN apk add --no-cache tini libstdc++

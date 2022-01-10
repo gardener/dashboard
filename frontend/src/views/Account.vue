@@ -64,6 +64,35 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item>
           </v-list>
         </v-card>
+        <v-card class="mt-4">
+          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
+            <v-toolbar-title>Dashboard Customization</v-toolbar-title>
+          </v-toolbar>
+          <v-list>
+            <v-list-item>
+              <v-list-item-avatar>
+                <v-icon color="primary">mdi-console-line</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>Gardenctl</v-list-item-title>
+                <v-list-item-subtitle class="line-clamp-2">Personalize the <span class="font-family-monospace">gardenctl</span> command that is shown on the cluster details page</v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action class="mx-0">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" icon @click.native.stop="gardenctlExpansionPanel = !gardenctlExpansionPanel" color="action-button">
+                      <v-icon>{{gardenctlExpansionPanelIcon}}</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>{{gardenctlExpansionPanelTooltip}}</span>
+                </v-tooltip>
+              </v-list-item-action>
+            </v-list-item>
+            <v-expand-transition>
+              <gardenctl-settings v-if="gardenctlExpansionPanel"></gardenctl-settings>
+            </v-expand-transition>
+          </v-list>
+        </v-card>
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
@@ -109,16 +138,16 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel" color="action-button">
-                        <v-icon>{{expansionPanelIcon}}</v-icon>
+                      <v-btn v-on="on" icon @click.native.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel" color="action-button">
+                        <v-icon>{{kubeconfigExpansionPanelIcon}}</v-icon>
                       </v-btn>
                     </template>
-                    <span>{{expansionPanelTooltip}}</span>
+                    <span>{{kubeconfigExpansionPanelTooltip}}</span>
                   </v-tooltip>
                 </v-list-item-action>
               </v-list-item>
               <v-expand-transition>
-                <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
+                <v-card v-if="kubeconfigExpansionPanel" flat class="mx-2 mt-2">
                   <v-card-text class="pt-0">
                     <div>
                       The downloaded <span class="font-family-monospace">kubeconfig</span> will initiate
@@ -199,6 +228,7 @@ import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import ExternalLink from '@/components/ExternalLink'
 import AccountAvatar from '@/components/AccountAvatar'
+import GardenctlSettings from '@/components/GardenctlSettings'
 import { getToken } from '@/utils/api'
 import moment from '@/utils/moment'
 
@@ -207,12 +237,14 @@ export default {
     CopyBtn,
     CodeBlock,
     ExternalLink,
-    AccountAvatar
+    AccountAvatar,
+    GardenctlSettings
   },
   name: 'profile',
   data () {
     return {
-      expansionPanel: false,
+      kubeconfigExpansionPanel: false,
+      gardenctlExpansionPanel: false,
       projectName: undefined,
       skipOpenBrowser: false,
       grantType: 'auto',
@@ -239,11 +271,17 @@ export default {
       'canCreateProject',
       'isKubeconfigEnabled'
     ]),
-    expansionPanelIcon () {
-      return this.expansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
+    kubeconfigExpansionPanelIcon () {
+      return this.expansionPanelIcon(this.kubeconfigExpansionPanel)
     },
-    expansionPanelTooltip () {
-      return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'
+    gardenctlExpansionPanelIcon () {
+      return this.expansionPanelIcon(this.gardenctlExpansionPanel)
+    },
+    kubeconfigExpansionPanelTooltip () {
+      return this.expansionPanelTooltip(this.kubeconfigExpansionPanel)
+    },
+    gardenctlExpansionPanelTooltip () {
+      return this.expansionPanelTooltip(this.gardenctlExpansionPanel)
     },
     icon () {
       return this.isAdmin ? 'mdi-account-supervisor' : 'mdi-account'
@@ -349,6 +387,12 @@ export default {
     },
     async updateKubeconfigYaml (value) {
       this.kubeconfigYaml = await this.$yaml.safeDump(value)
+    },
+    expansionPanelIcon (value) {
+      return value ? 'mdi-chevron-up' : 'mdi-chevron-down'
+    },
+    expansionPanelTooltip (value) {
+      return value ? 'Hide advanced options' : 'Show advanced options'
     }
   },
   async mounted () {

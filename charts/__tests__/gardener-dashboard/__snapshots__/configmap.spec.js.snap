@@ -168,6 +168,10 @@ Object {
       "projectTerminalShortcutsEnabled": false,
       "terminalEnabled": false,
     },
+    "gardenctl": Object {
+      "legacyCommands": false,
+      "shell": "bash",
+    },
     "helpMenuItems": Array [
       Object {
         "icon": "description",

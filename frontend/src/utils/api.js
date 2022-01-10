@@ -306,7 +306,6 @@ export function getInfo () {
 }
 
 /* Terminals */
-
 export function createTerminal ({ namespace, name, target, body = {} }) {
   body.coordinate = {
     name,
