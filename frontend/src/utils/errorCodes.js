@@ -43,13 +43,21 @@ export function objectsFromErrorCodes (errorCodesArray) {
 }
 
 const errorCodes = {
-  ERR_INFRA_UNAUTHORIZED: {
+  ERR_INFRA_UNAUTHENTICATED: {
     shortDescription: 'Invalid Credentials',
-    description: 'Invalid cloud provider credentials.',
+    description: 'Invalid authentication credentials.',
     temporaryError: false,
     userError: true,
     infraAccountError: true
   },
+  ERR_INFRA_UNAUTHORIZED: {
+    shortDescription: 'Not authorized',
+    description: 'Insufficient privileges to complete the request.',
+    temporaryError: false,
+    userError: true,
+    infraAccountError: true
+  },
+  // This error code is deprecated in favor of ERR_INFRA_UNAUTHORIZED and will be removed in a future version.
   ERR_INFRA_INSUFFICIENT_PRIVILEGES: {
     shortDescription: 'Insufficient Privileges',
     description: 'Cloud provider credentials have insufficient privileges.',
