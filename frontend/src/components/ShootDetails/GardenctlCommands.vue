@@ -94,11 +94,11 @@ export default {
   },
   computed: {
     ...mapState([
-      'cfg',
-      'gardenctlOptions'
+      'cfg'
     ]),
     ...mapGetters([
-      'projectFromProjectList'
+      'projectFromProjectList',
+      'gardenctlOptions'
     ]),
     projectName () {
       const project = this.projectFromProjectList
