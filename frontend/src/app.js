@@ -28,6 +28,11 @@ const App = Vue.extend({
     if (options) {
       this.$store.commit('SET_GARDENCTL_OPTIONS', options)
     }
+    window.addEventListener('storage', ({ key, newValue } = {}) => {
+      if (key === 'global/gardenctl') {
+        this.$store.commit('SET_GARDENCTL_OPTIONS', JSON.parse(newValue))
+      }
+    }, false)
   },
   render (createElement) {
     return createElement('router-view')
