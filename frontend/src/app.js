@@ -23,11 +23,16 @@ const App = Vue.extend({
 
     const colorScheme = this.$localStorage.getItem('global/color-scheme')
     this.$store.commit('SET_COLOR_SCHEME', colorScheme)
-    const options = {
-      ...this.$store.getters.defaultGardenctlOptions,
-      ...this.$localStorage.getObject('global/gardenctl')
+
+    const options = this.$localStorage.getObject('global/gardenctl')
+    if (options) {
+      this.$store.commit('SET_GARDENCTL_OPTIONS', options)
     }
-    this.$store.commit('SET_GARDENCTL_OPTIONS', options)
+    window.addEventListener('storage', ({ key, newValue } = {}) => {
+      if (key === 'global/gardenctl') {
+        this.$store.commit('SET_GARDENCTL_OPTIONS', JSON.parse(newValue))
+      }
+    }, false)
   },
   render (createElement) {
     return createElement('router-view')

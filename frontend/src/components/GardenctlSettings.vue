@@ -40,11 +40,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default {
   computed: {
-    ...mapState([
+    ...mapGetters([
       'gardenctlOptions'
     ]),
     legacyCommands: {
@@ -53,7 +53,7 @@ export default {
       },
       set (value) {
         this.setGardenctlOptions({
-          ...this.gardenctlOptions,
+          ...this.$store.state.gardenctlOptions,
           legacyCommands: value
         })
       }
@@ -64,7 +64,7 @@ export default {
       },
       set (value) {
         this.setGardenctlOptions({
-          ...this.gardenctlOptions,
+          ...this.$store.state.gardenctlOptions,
           shell: value
         })
       }

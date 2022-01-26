@@ -150,10 +150,7 @@ const state = {
   darkTheme: false,
   colorScheme: 'auto',
   subscriptions: {},
-  gardenctlOptions: {
-    legacyCommands: false,
-    shell: null
-  }
+  gardenctlOptions: {}
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1272,6 +1269,12 @@ const getters = {
       legacyCommands: false,
       shell: 'bash',
       ...get(state, 'cfg.gardenctl')
+    }
+  },
+  gardenctlOptions (state, getters) {
+    return {
+      ...getters.defaultGardenctlOptions,
+      ...state.gardenctlOptions
     }
   }
 }
