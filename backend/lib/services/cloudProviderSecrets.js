@@ -90,13 +90,14 @@ function toSecretBindingResource ({ metadata }) {
   const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
-  const { name, secretRef } = metadata
+  const { name, secretRef, cloudProfileName, cloudProviderKind, dnsProviderName } = metadata
+  const providerType = cloudProviderKind || dnsProviderName
   const labels = {}
-  if (metadata.cloudProfileName) {
-    labels['cloudprofile.garden.sapcloud.io/name'] = metadata.cloudProfileName
+  if (cloudProfileName) {
+    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
   }
-  if (metadata.dnsProviderName) {
-    labels['gardener.cloud/dnsProviderName'] = metadata.dnsProviderName
+  if (dnsProviderName) {
+    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
   }
 
   metadata = _
@@ -104,7 +105,14 @@ function toSecretBindingResource ({ metadata }) {
     .pick(['namespace'])
     .assign({ name, labels })
     .value()
-  return { apiVersion, kind, metadata, secretRef }
+  const secretBinding = { apiVersion, kind, metadata, secretRef }
+  if (providerType) {
+    secretBinding.provider = {
+      type: providerType
+    }
+  }
+
+  return secretBinding
 }
 
 function resolveQuotas (secretBinding) {
