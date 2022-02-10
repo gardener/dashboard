@@ -75,7 +75,8 @@ describe('api', function () {
     it('should create a cloudProvider infrastructure secret', async function () {
       const metadata = {
         name: 'new-infra1',
-        cloudProfileName
+        cloudProfileName,
+        cloudProviderKind: 'infra1'
       }
       const data = {
         key: 'myKey',
