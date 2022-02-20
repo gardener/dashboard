@@ -80,12 +80,6 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     shoots                                            core.gardener.cloud            true         Shoot
     shootstates                                       core.gardener.cloud            true         ShootState
     terminals                                         dashboard.gardener.cloud       true         Terminal
-    cloudprofiles                     cprofile,cpfl   garden.sapcloud.io             false        CloudProfile
-    projects                                          garden.sapcloud.io             false        Project
-    quotas                            squota          garden.sapcloud.io             true         Quota
-    secretbindings                    sb              garden.sapcloud.io             true         SecretBinding
-    seeds                                             garden.sapcloud.io             false        Seed
-    shoots                                            garden.sapcloud.io             true         Shoot
     clusteropenidconnectpresets       coidcps         settings.gardener.cloud        false        ClusterOpenIDConnectPreset
     openidconnectpresets              oidcps          settings.gardener.cloud        true         OpenIDConnectPreset
     ```
@@ -102,7 +96,6 @@ You can now execute `kubectl` commands on the garden cluster using the technical
     core.gardener.cloud/v1alpha1
     core.gardener.cloud/v1beta1
     dashboard.gardener.cloud/v1alpha1
-    garden.sapcloud.io/v1beta1
     settings.gardener.cloud/v1alpha1
     ```
 
