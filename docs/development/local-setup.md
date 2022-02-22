@@ -45,9 +45,17 @@ frontend:
 
 ## Run locally <small style="color: grey; font-size: 0.7em">(during development)</small>
 
-Concurrently run the backend server (port `3030`) and the frontend server (port `8080`) both with hot reload enabled.
+For the required `node.js` version, refer to `.engines.node` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
+
+Concurrently run the [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) both with hot reload enabled.
 
 ```sh
+cd backend
+yarn serve
+```
+
+```sh
+cd frontend
 yarn serve
 ```
 
