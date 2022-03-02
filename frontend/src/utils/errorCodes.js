@@ -57,14 +57,6 @@ const errorCodes = {
     userError: true,
     infraAccountError: true
   },
-  // This error code is deprecated in favor of ERR_INFRA_UNAUTHORIZED and will be removed in a future version.
-  ERR_INFRA_INSUFFICIENT_PRIVILEGES: {
-    shortDescription: 'Insufficient Privileges',
-    description: 'Cloud provider credentials have insufficient privileges.',
-    temporaryError: false,
-    userError: true,
-    infraAccountError: true
-  },
   ERR_INFRA_QUOTA_EXCEEDED: {
     shortDescription: 'Quota Exceeded',
     description: 'Cloud provider quota exceeded. Please request limit increases.',
