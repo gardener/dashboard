@@ -324,15 +324,32 @@ function setFilteredItems (state, rootState, rootGetters) {
   state.filteredShoots = items
 }
 
-const putItem = (state, newItem) => {
-  const item = findItem(state)(newItem.metadata)
-  if (item !== undefined) {
-    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
+const putItem = (state, item) => {
+  const shoot = findItem(state)(item.metadata)
+  const key = keyForShoot(item.metadata)
+  if (shoot !== undefined) {
+    if (shoot.metadata.resourceVersion !== item.metadata.resourceVersion) {
+      Vue.set(state.shoots, key, assign(shoot, item))
     }
   } else {
+    item.info = undefined // register property to ensure reactivity
+    Vue.set(state.shoots, key, item)
+  }
+}
+
+const putItems = (state, newItems) => {
+  const newShoots = {}
+  forEach(newItems, newItem => {
     newItem.info = undefined // register property to ensure reactivity
-    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
+    const key = keyForShoot(newItem.metadata)
+    newShoots[key] = newItem
+  })
+
+  // Do not use Vue.set but assign all new items at once by ceating a whole new object
+  // This significally improves performance while ensuring reactivity for the new items
+  state.shoots = {
+    ...state.shoots,
+    ...newShoots
   }
 }
 
@@ -366,14 +383,23 @@ const mutations = {
   HANDLE_EVENTS (state, { rootState, rootGetters, events }) {
     const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
     let setFilteredItemsRequired = false
+    const objectsToAdd = []
+    const shouldAddShoot = (shoot) => {
+      // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
+      return rootState.namespace !== '_all' ||
+      !onlyShootsWithIssues ||
+      onlyShootsWithIssues === shootHasIssue(shoot)
+    }
     forEach(events, event => {
       switch (event.type) {
         case 'ADDED':
+          if (shouldAddShoot(event.object)) {
+            objectsToAdd.push(event.object)
+            setFilteredItemsRequired = true
+          }
+          break
         case 'MODIFIED':
-          if (rootState.namespace !== '_all' ||
-            !onlyShootsWithIssues ||
-            onlyShootsWithIssues === shootHasIssue(event.object)) {
-            // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
+          if (shouldAddShoot(event.object)) {
             putItem(state, event.object)
             setFilteredItemsRequired = true
           }
@@ -386,6 +412,9 @@ const mutations = {
           console.error('undhandled event type', event.type)
       }
     })
+    if (objectsToAdd.length > 0) {
+      putItems(state, objectsToAdd)
+    }
     if (setFilteredItemsRequired) {
       setFilteredItems(state, rootState, rootGetters)
     }
