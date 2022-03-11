@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: {{ include "ingressversion" . }}
+{{- else }}
+apiVersion: {{ include "legacyingressversion" . }}
+{{- end }}
 kind: Ingress
 metadata:
   name: identity-ingress
@@ -28,6 +32,14 @@ spec:
       http:
         paths:
           - backend:
+          {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+             service:
+              name: gardener-dashboard-service
+              port:
+                number: {{ $.Values.servicePort }}
+          {{- else }}
               serviceName: identity-service
               servicePort: {{ $.Values.servicePort }}
+          {{- end }}
             path: "{{ $pathname }}"
+            pathType: Prefix
