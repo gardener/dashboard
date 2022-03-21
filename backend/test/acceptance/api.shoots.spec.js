@@ -116,14 +116,15 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
-        .set('cookie', await admin.cookie)
+        .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toBeCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(cleanKubeconfigSpy).toBeCalledTimes(1)

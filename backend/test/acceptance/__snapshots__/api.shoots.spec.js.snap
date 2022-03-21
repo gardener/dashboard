@@ -895,7 +895,7 @@ Array [
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -904,7 +904,7 @@ Array [
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.kubeconfig",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -913,7 +913,7 @@ Array [
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -922,7 +922,7 @@ Array [
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
     Object {
       "apiVersion": "authorization.k8s.io/v1",
@@ -937,12 +937,21 @@ Array [
       },
     },
   ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.monitoring",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+    },
+  ],
 ]
 `;
 
 exports[`api shoots should return shoot info 2`] = `
 Object {
-  "canLinkToSeed": true,
+  "canLinkToSeed": false,
   "cluster_password": "pass-foo-barShoot",
   "cluster_username": "user-foo-barShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
