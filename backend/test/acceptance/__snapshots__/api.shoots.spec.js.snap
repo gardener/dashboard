@@ -974,6 +974,8 @@ users:
       client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
       client-key-data: Y2xpZW50LWtleS1kYXRh
 ",
+  "monitoringPassword": "pass-garden-foo",
+  "monitoringUsername": "user-garden-foo",
   "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
   "serverUrl": "https://api.barShoot.foo.shoot.cluster",
 }
@@ -1033,8 +1035,8 @@ Array [
 
 exports[`api shoots should return shoot seed info 2`] = `
 Object {
-  "monitoringPassword": "pass-foo-barShoot",
-  "monitoringUsername": "user-foo-barShoot",
+  "monitoringPassword": "pass-shoot--foo--barShoot",
+  "monitoringUsername": "user-shoot--foo--barShoot",
 }
 `;
 

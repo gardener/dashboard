@@ -171,14 +171,13 @@ const secrets = {
       }
     })
   },
-  getMonitoringSecret (namespace, name = 'monitoring-ingress-credentials') {
-    const [, projectName, shootName] = split(namespace, '--')
+  getMonitoringSecret (namespace, name) {
     return getSecret({
       name,
       namespace,
       data: {
-        username: `user-${projectName}-${shootName}`,
-        password: `pass-${projectName}-${shootName}`
+        username: `user-${namespace}`,
+        password: `pass-${namespace}`
       }
     })
   },
@@ -253,6 +252,11 @@ const mocks = {
         }
         const item = secrets.get(namespace, name)
         if (item) {
+          return Promise.resolve(item)
+        }
+
+        if (endsWith(name, '.monitoring')) {
+          const item = secrets.getMonitoringSecret(namespace, name)
           return Promise.resolve(item)
         }
       } else if (endsWith(hostname, 'seed.cluster')) {
