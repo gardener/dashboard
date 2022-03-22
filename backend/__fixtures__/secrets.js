@@ -17,7 +17,7 @@ const certificateAuthorityData = toBase64('certificate-authority-data')
 const clientCertificateData = toBase64('client-certificate-data')
 const clientKeyData = toBase64('client-key-data')
 
-function getSecret ({ namespace, name, labels, data = {} }) {
+function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   const metadata = {
     namespace,
     name
@@ -25,6 +25,11 @@ function getSecret ({ namespace, name, labels, data = {} }) {
   if (!isEmpty(labels)) {
     metadata.labels = labels
   }
+
+  if (!isEmpty(creationTimestamp)) {
+    metadata.creationTimestamp = creationTimestamp
+  }
+
   if (!isEmpty(data)) {
     data = mapValues(data, toBase64)
   }
@@ -106,6 +111,11 @@ const secrets = {
       ? filter(items, ['metadata.namespace', namespace])
       : items
   },
+  listMonitoringSecrets (namespace) {
+    const item1 = secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z')
+    const item2 = secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
+    return [item1, item2]
+  },
   getTerminalShortcutsSecret (namespace, options = {}) {
     const {
       valid = false,
@@ -171,13 +181,14 @@ const secrets = {
       }
     })
   },
-  getMonitoringSecret (namespace, name) {
+  getMonitoringSecret (namespace, name, creationTimestamp) {
     return getSecret({
       name,
       namespace,
+      creationTimestamp,
       data: {
-        username: `user-${namespace}`,
-        password: `pass-${namespace}`
+        username: `user-${namespace}-${name}`,
+        password: `pass-${namespace}-${name}`
       }
     })
   },
@@ -196,18 +207,31 @@ const secrets = {
 
 const matchOptions = { decode: decodeURIComponent }
 const matchList = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets', matchOptions)
+const matchListMonitoringSecrets = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets\\?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet', matchOptions)
 const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:name', matchOptions)
 
 const mocks = {
-  list () {
+  list ({ monitoringSecretsWithLabels = true } = {}) {
     return headers => {
-      const matchResult = matchList(headers[':path'])
-      if (matchResult === false) {
-        return Promise.reject(createError(503))
+      let matchResult = matchList(headers[':path'])
+      if (matchResult) {
+        const { params: { namespace } = {} } = matchResult
+        const items = secrets.list(namespace)
+        return Promise.resolve({ items })
       }
-      const { params: { namespace } = {} } = matchResult
-      const items = secrets.list(namespace)
-      return Promise.resolve({ items })
+
+      if (!monitoringSecretsWithLabels) {
+        return Promise.resolve({ items: [] })
+      }
+
+      matchResult = matchListMonitoringSecrets(headers[':path'])
+      if (matchResult) {
+        const { params: { namespace } = {} } = matchResult
+        const items = secrets.listMonitoringSecrets(namespace)
+        return Promise.resolve({ items })
+      }
+
+      return Promise.reject(createError(503))
     }
   },
   create ({ resourceVersion = '42' } = {}) {

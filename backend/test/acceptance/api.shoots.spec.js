@@ -138,7 +138,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
@@ -147,6 +147,29 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(cleanKubeconfigSpy).toBeCalledTimes(1)
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return shoot seed info when need to fallback to old monitoring secret', async function () {
+      const cleanKubeconfigSpy = jest.spyOn(kubeconfig, 'cleanKubeconfig')
+
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list({ monitoringSecretsWithLabels: false }))
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
+        .set('cookie', await admin.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(cleanKubeconfigSpy).toBeCalledTimes(1)
