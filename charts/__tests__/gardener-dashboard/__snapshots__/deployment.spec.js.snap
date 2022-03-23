@@ -140,3 +140,39 @@ Object {
   },
 }
 `;
+
+exports[`gardener-dashboard deployment should render the template with optimized garbage collector 1`] = `
+Array [
+  Object {
+    "name": "SESSION_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "keyValue",
+        "name": "gardener-dashboard-sessionsecret",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_id",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_secret",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "NODE_OPTIONS",
+    "value": "--optimize_for_size --max_old_space_size=460 --gc_interval=100",
+  },
+]
+`;

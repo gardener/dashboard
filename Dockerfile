@@ -55,7 +55,6 @@ RUN apk add --no-cache tini libstdc++
 WORKDIR /usr/src/app
 
 ENV NODE_ENV "production"
-ENV NODE_OPTIONS "--require /usr/src/app/.pnp.js"
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -72,4 +71,4 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "server" ]
+ENTRYPOINT [ "/sbin/tini", "--", "node", "--require", "/usr/src/app/.pnp.js", "server.js"]
