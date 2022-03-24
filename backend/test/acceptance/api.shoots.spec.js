@@ -160,7 +160,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list({ monitoringSecretsWithLabels: false }))
+      mockRequest.mockResolvedValueOnce([])
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
 
       const res = await agent

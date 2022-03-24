@@ -112,9 +112,10 @@ const secrets = {
       : items
   },
   listMonitoringSecrets (namespace) {
-    const item1 = secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z')
-    const item2 = secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
-    return [item1, item2]
+    return [
+      secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z'), 
+      secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
+    ]
   },
   getTerminalShortcutsSecret (namespace, options = {}) {
     const {
@@ -211,17 +212,13 @@ const matchListMonitoringSecrets = pathToRegexp.match('/api/v1/namespaces/:names
 const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:name', matchOptions)
 
 const mocks = {
-  list ({ monitoringSecretsWithLabels = true } = {}) {
+  list () {
     return headers => {
       let matchResult = matchList(headers[':path'])
       if (matchResult) {
         const { params: { namespace } = {} } = matchResult
         const items = secrets.list(namespace)
         return Promise.resolve({ items })
-      }
-
-      if (!monitoringSecretsWithLabels) {
-        return Promise.resolve({ items: [] })
       }
 
       matchResult = matchListMonitoringSecrets(headers[':path'])
