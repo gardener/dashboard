@@ -26,7 +26,7 @@ function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
     metadata.labels = labels
   }
 
-  if (!isEmpty(creationTimestamp)) {
+  if (creationTimestamp) {
     metadata.creationTimestamp = creationTimestamp
   }
 
