@@ -26,7 +26,7 @@ function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
     metadata.labels = labels
   }
 
-  if (!isEmpty(creationTimestamp)) {
+  if (creationTimestamp) {
     metadata.creationTimestamp = creationTimestamp
   }
 
@@ -113,7 +113,7 @@ const secrets = {
   },
   listMonitoringSecrets (namespace) {
     return [
-      secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z'), 
+      secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z'),
       secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
     ]
   },
