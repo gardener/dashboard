@@ -152,11 +152,17 @@ function fromKubeconfig (input) {
 }
 
 function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namespace, token, server, caData }) {
+  const certificateAuthorityData = caData
+    ? {
+        'certificate-authority-data': caData
+      }
+    : {}
+
   return new Config({
     clusters: [{
       name: cluster,
       cluster: {
-        'certificate-authority-data': caData,
+        ...certificateAuthorityData,
         server
       }
     }],

@@ -93,6 +93,20 @@ describe('kube-config', () => {
       })
     })
 
+    it('should dump KUBECONFIG without providing a ca', () => {
+      try {
+        const kubeconfig = dumpKubeconfig({
+          user,
+          namespace,
+          token,
+          server: server.origin
+        })
+        expect(kubeconfig).toBeDefined()
+      } catch (err) {
+        throw new Error('No exception expected')
+      }
+    })
+
     it('should return the config from the users homedir', () => {
       const defaultKubeconfigPath = path.join(os.homedir(), '.kube', 'config')
       const kubeconfig = yaml.safeDump({
