@@ -15,6 +15,10 @@ import sample from 'lodash/sample'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import range from 'lodash/range'
+import pick from 'lodash/pick'
+import values from 'lodash/values'
+import get from 'lodash/get'
+import set from 'lodash/set'
 
 const defaultWorkerCIDR = '10.250.0.0/16'
 
@@ -203,9 +207,6 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 }
 
 export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infrastructureKind, workerCIDR) {
-  if (!workerCIDR) {
-    workerCIDR = defaultWorkerCIDR
-  }
   switch (infrastructureKind) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
@@ -233,8 +234,11 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
   }
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind)
+export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones, workerCIDR) {
+  if (!workerCIDR) {
+    workerCIDR = defaultWorkerCIDR
+  }
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -247,9 +251,6 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
 }
 
 export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, infrastructureKind, maxNumberOfZones) {
-  if (!workerCIDR) {
-    workerCIDR = defaultWorkerCIDR
-  }
   if (!existingZonesNetworkConfiguration) {
     return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
   }
@@ -266,14 +267,9 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR) {
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
   const newUniqueZones = uniq(flatMap(newWorkers, 'zones'))
   if (!newUniqueZones || !infrastructureKind || !maxNumberOfZones) {
-    return undefined
-  }
-
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones)
-  if (!defaultZonesNetworkConfiguration) {
     return undefined
   }
 
@@ -303,7 +299,24 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     return uniq([...oldZonesNetworkConfiguration, ...newZonesNetworkConfiguration])
   }
 
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, newShootWorkerCIDR)
+  if (!defaultZonesNetworkConfiguration) {
+    return undefined
+  }
+
   if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {
+    return defaultZonesNetworkConfiguration
+  }
+
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => {
+    return values(pick(zone, 'workers', 'public', 'internal'))
+  })
+
+  const shootCIDR = new Netmask(newShootWorkerCIDR)
+  const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => {
+    return !shootCIDR.contains(cidr)
+  })
+  if (zoneConfigurationContainsInvalidCIDR) {
     return defaultZonesNetworkConfiguration
   }
 
@@ -334,4 +347,19 @@ export function getWorkerProviderConfig (infrastructureKind) {
       }
     }
   }
+}
+
+export function alignAndReturnNodeCIDR (shootResource) {
+  const networks = get(shootResource, 'spec.provider.infrastructureConfig.networks')
+  const networkCIDR = get(networks, 'vpc.cidr', get(networks, 'vnet.cidr', get(networks, 'workers')))
+  const nodeCIDR = get(shootResource, 'spec.networking.nodes')
+  if (networkCIDR && networkCIDR !== nodeCIDR) {
+    // networkCIDR is the leading CIDR as it is more likely to be modified by the user
+    // nodeCIDR needs to be a subset or equal to networkCIDR. Usually they should be equal
+    // some cloud provider extensions do not have a dedicated network configuration, in this case
+    // networkCIDR is undefined and network CIDR is configured exclusively using 'spec.networking.node'
+    set(shootResource, 'spec.networking.nodes', networkCIDR)
+  }
+
+  return networkCIDR || nodeCIDR
 }

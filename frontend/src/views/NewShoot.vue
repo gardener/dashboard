@@ -150,7 +150,7 @@ import asyncRef from '@/mixins/asyncRef'
 
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone, alignAndReturnNodeCIDR } from '@/utils/createShoot'
 
 import EventEmitter from 'events'
 
@@ -318,8 +318,9 @@ export default {
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', undefined)
-      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length)
+      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
+      const nodeCIDR = alignAndReturnNodeCIDR(shootResource)
+      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
       if (zonesNetworkConfiguration) {
         set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
       }

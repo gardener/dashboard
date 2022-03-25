@@ -154,6 +154,8 @@ describe('utils', () => {
         }
       ]
 
+      const nodeCIDR = '10.250.0.0/16'
+
       const customZonesNetworkConfiguration = [
         {
           name: 'fooZone',
@@ -190,10 +192,34 @@ describe('utils', () => {
       })
 
       it('should keep network config if zones are the same', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3, undefined, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
+      })
+
+      it('should update network config if one of the zone CIDRs is not in the provided nodeCIDR range', () => {
+        const newNodeCIDR = '10.180.0.0/20'
+
+        const newCustomZonesNetworkConfiguration = [
+          {
+            name: 'fooZone',
+            workers: '10.180.0.0/23',
+            public: '10.180.2.0/24',
+            internal: '10.180.3.0/24'
+          },
+          {
+            name: 'barZone',
+            workers: '10.180.4.0/23',
+            public: '10.180.6.0/24',
+            internal: '10.180.7.0/24'
+          }
+        ]
+
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3, undefined, newNodeCIDR)
+        expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
+        expect(zonesNetworkConfiguration).toHaveLength(2)
+        expect(zonesNetworkConfiguration).toEqual(newCustomZonesNetworkConfiguration)
       })
 
       it('should reset network config if zones are not the same', () => {
@@ -210,7 +236,7 @@ describe('utils', () => {
             ]
           }
         ]
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, undefined, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).not.toEqual(customZonesNetworkConfiguration)
@@ -225,7 +251,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, '10.250.0.0/16')
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -263,7 +289,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, '10.250.0.0/16')
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(3)
         expect(zonesNetworkConfiguration).toEqual(newZonesNetworkConfiguration)
@@ -285,7 +311,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, '10.250.0.0/16')
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
     })
