@@ -132,7 +132,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should return shoot seed info', async function () {
+    it('should return shoot seed info when no fallback is needed', async function () {
       const cleanKubeconfigSpy = jest.spyOn(kubeconfig, 'cleanKubeconfig')
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())

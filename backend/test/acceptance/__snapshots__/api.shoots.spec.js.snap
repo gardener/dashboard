@@ -981,7 +981,7 @@ users:
 }
 `;
 
-exports[`api shoots should return shoot seed info 1`] = `
+exports[`api shoots should return shoot seed info when no fallback is needed 1`] = `
 Array [
   Array [
     Object {
@@ -1033,7 +1033,7 @@ Array [
 ]
 `;
 
-exports[`api shoots should return shoot seed info 2`] = `
+exports[`api shoots should return shoot seed info when no fallback is needed 2`] = `
 Object {
   "monitoringPassword": "pass-shoot--foo--barShoot-bar.monitoring",
   "monitoringUsername": "user-shoot--foo--barShoot-bar.monitoring",
