@@ -10,7 +10,7 @@ const yaml = require('js-yaml')
 const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsWith, endsWith, isEmpty } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
-const { toBase64 } = require('./helper')
+const { toBase64, createUrl, parseLabelSelector } = require('./helper')
 const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
@@ -208,23 +208,24 @@ const secrets = {
 
 const matchOptions = { decode: decodeURIComponent }
 const matchList = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets', matchOptions)
-const matchListMonitoringSecrets = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets\\?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet', matchOptions)
 const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:name', matchOptions)
 
 const mocks = {
-  list () {
+  list ({ forceEmpty = false } = {}) {
     return headers => {
-      let matchResult = matchList(headers[':path'])
-      if (matchResult) {
-        const { params: { namespace } = {} } = matchResult
-        const items = secrets.list(namespace)
-        return Promise.resolve({ items })
+      console.log('forceEmpty', forceEmpty)
+      if (forceEmpty) {
+        return Promise.resolve({ items: [] })
       }
 
-      matchResult = matchListMonitoringSecrets(headers[':path'])
+      const url = createUrl(headers)
+      const labelSelector = parseLabelSelector(url)
+      const matchResult = matchList(url.pathname)
       if (matchResult) {
         const { params: { namespace } = {} } = matchResult
-        const items = secrets.listMonitoringSecrets(namespace)
+        const items = labelSelector.name === 'observability-ingress' && labelSelector['managed-by'] === 'secrets-manager'
+          ? secrets.listMonitoringSecrets(namespace)
+          : secrets.list(namespace)
         return Promise.resolve({ items })
       }
 
