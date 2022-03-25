@@ -105,6 +105,7 @@ function parseSelector (name) {
     return _
       .chain(selector)
       .split(',')
+      .condense()
       .map(value => value.split('='))
       .fromPairs()
       .value()
