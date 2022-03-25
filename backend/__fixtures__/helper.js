@@ -102,10 +102,14 @@ function parseSelector (name) {
         selector = obj.get(name)
       }
     }
+
+    if (!selector) {
+      return {}
+    }
+
     return _
       .chain(selector)
       .split(',')
-      .condense()
       .map(value => value.split('='))
       .fromPairs()
       .value()
