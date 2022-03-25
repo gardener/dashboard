@@ -65,8 +65,13 @@ spec:
       {{- end }}
       containers:
         - name: gardener-dashboard
-          args:
-            - /etc/gardener-dashboard/config.yaml
+          {{- if .Values.nodeOptions }}
+          args: 
+          {{- range .Values.nodeOptions }}
+          - {{ . }}
+          {{- end }}
+          - server.js
+          {{- end }}
           image: "{{ include "image" .Values.image }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -131,13 +136,11 @@ spec:
                 name: gardener-dashboard-github
                 key: webhookSecret
           {{- end }}
+          - name: GARDENER_CONFIG
+            value: /etc/gardener-dashboard/config.yaml
           {{- if .Values.kubeconfig }}
           - name: KUBECONFIG
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
-          {{- end }}
-          {{- if .Values.nodeOptions }}
-          - name: NODE_OPTIONS
-            value: {{ .Values.nodeOptions }}
           {{- end }}
           resources:
 {{ toYaml .Values.resources | trim | indent 12 }}

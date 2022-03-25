@@ -42,9 +42,9 @@ describe('gardener-dashboard', function () {
       })
     })
 
-    it('should render the template with optimized garbage collector', async function () {
+    it('should render the template with node options', async function () {
       const values = {
-        nodeOptions: '--optimize_for_size --max_old_space_size=460 --gc_interval=100'
+        nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -52,7 +52,20 @@ describe('gardener-dashboard', function () {
       const containers = deployment.spec.template.spec.containers
       expect(containers).toHaveLength(1)
       const [container] = containers
-      expect(container.env).toMatchSnapshot()
+      expect(container.args).toMatchSnapshot()
+    })
+
+    it('should render the template with an empty list node options', async function () {
+      const values = {
+        nodeOptions: []
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const containers = deployment.spec.template.spec.containers
+      expect(containers).toHaveLength(1)
+      const [container] = containers
+      expect(container.args).toBeUndefined()
     })
   })
 })
