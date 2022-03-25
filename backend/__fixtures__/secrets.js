@@ -213,7 +213,6 @@ const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:nam
 const mocks = {
   list ({ forceEmpty = false } = {}) {
     return headers => {
-      console.log('forceEmpty', forceEmpty)
       if (forceEmpty) {
         return Promise.resolve({ items: [] })
       }
