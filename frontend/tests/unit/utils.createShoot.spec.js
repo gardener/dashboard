@@ -186,7 +186,7 @@ describe('utils', () => {
       })
 
       it('should return initial network config', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'aws', 3)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'aws', 3, undefined, nodeCIDR)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
       })

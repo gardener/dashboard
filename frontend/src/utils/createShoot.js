@@ -20,13 +20,11 @@ import values from 'lodash/values'
 import get from 'lodash/get'
 import set from 'lodash/set'
 
-const defaultWorkerCIDR = '10.250.0.0/16'
-
-export function getSpecTemplate (infrastructureKind) {
+export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
     case 'metal':
       return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
-        provider: getProviderTemplate(infrastructureKind),
+        provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
         networking: {
           type: 'calico',
           pods: '10.244.128.0/18',
@@ -56,7 +54,7 @@ export function getSpecTemplate (infrastructureKind) {
       }
     default:
       return {
-        provider: getProviderTemplate(infrastructureKind),
+        provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
         networking: {
           nodes: defaultWorkerCIDR
         }
@@ -64,7 +62,7 @@ export function getSpecTemplate (infrastructureKind) {
   }
 }
 
-function getProviderTemplate (infrastructureKind) {
+function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
     case 'aws':
       return {
@@ -235,9 +233,6 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
 }
 
 export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones, workerCIDR) {
-  if (!workerCIDR) {
-    workerCIDR = defaultWorkerCIDR
-  }
   const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
   if (!zoneConfigurations) {
     return undefined
