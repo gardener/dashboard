@@ -331,34 +331,36 @@ async function getSecret (client, { namespace, name }) {
   }
 }
 
-async function getSecretByLabelSelector (client, namespace, labelSelector) {
-  try {
-    const query = {
-      labelSelector: labelSelector.join(',')
+async function getMonitoringSecret (client, namespace, shootName) {
+  let name
+  if (!shootName) {
+    try {
+      // read operator secret from seed
+      const labelSelector = 'name=observability-ingress,managed-by=secrets-manager,manager-identity=gardenlet'
+      const secretList = await client.core.secrets.list(namespace, { labelSelector })
+      const secret = _
+        .chain(secretList.items)
+        .orderBy(['metadata.creationTimestamp'], ['desc'])
+        .head()
+        .value()
+      if (secret) {
+        return secret
+      }
+      // fallback to old secret name
+      name = 'monitoring-ingress-credentials'
+    } catch (err) {
+      logger.error('failed to fetch %s secret: %s', name, err)
+      throw err
     }
-    const secretList = await client.core.secrets.list(namespace, query)
-    return _.head(_.orderBy(secretList.items, ['metadata.creationTimestamp'], ['desc']))
-  } catch (err) {
-    logger.error('failed to fetch %s secret: %s', name, err)
-    throw err
+  } else {
+    // read user secret from garden cluster
+    name = `${shootName}.monitoring`
   }
+  return getSecret(client, { namespace, name })
 }
 
 async function assignMonitoringSecret (client, data, namespace, shootName) {
-  let secret
-  if (shootName) {
-    // read user secret from garden cluster
-    const name = `${shootName}.monitoring`
-    secret = await getSecret(client, { namespace, name })
-  } else {
-    // read operator secret from seed
-    secret = await getSecretByLabelSelector(client, namespace, ['name=observability-ingress', 'managed-by=secrets-manager', 'manager-identity=gardenlet'])
-    if (!secret) {
-      // fallback to old secret name
-      const name = 'monitoring-ingress-credentials'
-      secret = await getSecret(client, { namespace, name })
-    }
-  }
+  const secret = await getMonitoringSecret(client, namespace, shootName) 
 
   if (secret) {
     _
