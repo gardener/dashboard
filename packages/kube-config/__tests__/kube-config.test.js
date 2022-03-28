@@ -72,7 +72,7 @@ describe('kube-config', () => {
 
     it('should return the config from KUBECONFIG environment variable', () => {
       const kubeconfig = dumpKubeconfig({
-        user,
+        userName: user,
         namespace,
         token,
         server: server.origin,
@@ -96,7 +96,7 @@ describe('kube-config', () => {
     it('should dump KUBECONFIG without providing a ca', () => {
       try {
         const kubeconfig = dumpKubeconfig({
-          user,
+          userName: user,
           namespace,
           token,
           server: server.origin

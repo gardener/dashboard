@@ -224,9 +224,9 @@ class MemberManager {
     const contextName = `${clusterName}-${projectName}-${name}`
 
     return dumpKubeconfig({
-      user: name,
-      context: contextName,
-      cluster: clusterName,
+      userName: name,
+      contextName,
+      clusterName,
       namespace,
       token,
       server,
