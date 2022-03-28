@@ -94,17 +94,15 @@ describe('kube-config', () => {
     })
 
     it('should dump KUBECONFIG without providing a ca', () => {
-      try {
-        const kubeconfig = dumpKubeconfig({
+        const kubeconfig = yaml.safeLoad(dumpKubeconfig({
           user,
           namespace,
           token,
           server: server.origin
-        })
-        expect(kubeconfig).toBeDefined()
-      } catch (err) {
-        throw new Error('No exception expected')
-      }
+        }))
+        expect(kubeconfig.clusters).toHaveLength(1)
+        const cluster = kubeconfig.clusters[0]
+        expect(cluster).not.toHaveProperty('certificate-authority-data')
     })
 
     it('should return the config from the users homedir', () => {
