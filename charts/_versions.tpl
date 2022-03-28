@@ -14,7 +14,3 @@ apps/v1
 {{- define "ingressversion" -}}
 networking.k8s.io/v1
 {{- end -}}
-
-{{- define "legacyingressversion" -}}
-extensions/v1beta1
-{{- end -}}
