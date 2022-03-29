@@ -360,7 +360,7 @@ async function getMonitoringSecret (client, namespace, shootName) {
 }
 
 async function assignMonitoringSecret (client, data, namespace, shootName) {
-  const secret = await getMonitoringSecret(client, namespace, shootName) 
+  const secret = await getMonitoringSecret(client, namespace, shootName)
 
   if (secret) {
     _
