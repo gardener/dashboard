@@ -151,30 +151,32 @@ function fromKubeconfig (input) {
   return config
 }
 
-function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namespace, token, server, caData }) {
+function dumpKubeconfig ({ userName, contextName = 'default', clusterName = 'garden', namespace, token, server, caData }) {
+  const cluster = { server }
+  if (caData) {
+    cluster['certificate-authority-data'] = caData
+  }
+
   return new Config({
     clusters: [{
-      name: cluster,
-      cluster: {
-        'certificate-authority-data': caData,
-        server
-      }
+      name: clusterName,
+      cluster
     }],
     users: [{
-      name: user,
+      name: userName,
       user: {
         token
       }
     }],
     contexts: [{
-      name: context,
+      name: contextName,
       context: {
-        cluster,
-        user,
+        cluster: clusterName,
+        user: userName,
         namespace
       }
     }],
-    'current-context': context
+    'current-context': contextName
   }).toYAML()
 }
 
