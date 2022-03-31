@@ -723,7 +723,7 @@ class Bootstrapper extends Queue {
       id: taskId, // with the id we make sure that the task for one shoot is not added multiple times (e.g. on another ADDED event when the shoot watch is re-established)
       description
     })
-    
+
     this.push(handler)
   }
 
