@@ -217,10 +217,15 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
           paths: [
             {
               backend: {
-                serviceName,
-                servicePort: 443
+                service: {
+                  name: serviceName,
+                  port: {
+                    number: 443
+                  }
+                }
               },
-              path: '/'
+              path: '/',
+              pathType: 'ImplementationSpecific'
             }
           ]
         }
@@ -238,7 +243,7 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
 
   const body = toIngressResource({ name, annotations, spec, ownerReferences })
 
-  return replaceResource(client.extensions.ingresses, { namespace, name, body })
+  return replaceResource(client['networking.k8s.io'].ingresses, { namespace, name, body })
 }
 
 function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, ip, port, ownerReferences }) {
@@ -718,6 +723,7 @@ class Bootstrapper extends Queue {
       id: taskId, // with the id we make sure that the task for one shoot is not added multiple times (e.g. on another ADDED event when the shoot watch is re-established)
       description
     })
+    
     this.push(handler)
   }
 

@@ -571,7 +571,7 @@ describe('services', function () {
             }
           }
         },
-        extensions: {
+        networking: {
           ingresses: {
             async mergePatch (namespace, name, body) {
               await nextTick()
@@ -597,7 +597,7 @@ describe('services', function () {
             }
           }
         },
-        extensions: {
+        networking: {
           ingresses: {
             async mergePatch (namespace, name, body) {
               await nextTick()
@@ -623,7 +623,7 @@ describe('services', function () {
             }
           }
         },
-        extensions: {
+        networking: {
           ingresses: {
             async mergePatch (namespace, name, body) {
               await nextTick()
