@@ -1,20 +1,37 @@
-### Install Dependencies
+# Local development
 
-Install all dependencies via yarn
-
+<p float="left">
+<img width="90" src="https://raw.githubusercontent.com/gardener/dashboard/master/logo/logo_gardener_dashboard.png">
 <img width="200" src="https://raw.githubusercontent.com/yarnpkg/assets/master/yarn-kitten-full.png">
+</p>
 
+## Purpose
+Develop new feature and fix bug on the Gardener Dashboard.
+
+## Requirements
+- Yarn. For the required version, refer to `.engines.yarn` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
+- Node.js. For the required version, refer to `.engines.node` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
+
+## Steps
+
+### 1. Clone repository
+Clone the [gardener/dashboard](https://github.com/gardener/dashboard.git) repository
+```sh
+git clone git@github.com:gardener/dashboard.git
+```
+
+### 2. Install dependencies
+
+Run `yarn` at the repository root to install all dependencies.
+```sh
+cd dashboard
+```
 ```sh
 yarn
 ```
 
-### Configuration
-
-#### KUBECONFIG
-If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in `${HOME}/.kube/config` or by the `KUBECONFIG` environment variable.
-
-#### GARDENER_CONFIG
-The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable `GARDENER_CONFIG` at the server process. If nothing is specified the default location is `${HOME}/.gardener/config.yaml`.
+### 3. Configuration
+Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 
 A local configuration example for [minikube](https://github.com/kubernetes/minikube) and [dex](https://github.com/coreos/dex) could look like follows:
 
@@ -43,14 +60,14 @@ frontend:
     production: ~
 ```
 
-## Run locally <small style="color: grey; font-size: 0.7em">(during development)</small>
+### 5. Run it locally
+The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden Cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
 
-For the required `node.js` version, refer to `.engines.node` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
-
-Concurrently run the [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) both with hot reload enabled.
+Concurrently run the `backend` server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) with hot reload enabled.
 
 ```sh
 cd backend
+export KUBECONFIG=/path/to/garden/cluster/kubeconfig.yaml
 yarn serve
 ```
 
@@ -59,7 +76,7 @@ cd frontend
 yarn serve
 ```
 
-All request to `/api`, `/auth` and `/config.json` will be proxied by default to the backend server.
+You can now access the UI on http://localhost:8080/
 
 ## Build
 
