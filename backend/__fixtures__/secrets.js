@@ -198,7 +198,6 @@ const secrets = {
       name,
       namespace,
       data: {
-        'ca.crt': 'ca.crt',
         namespace,
         token: name
       }

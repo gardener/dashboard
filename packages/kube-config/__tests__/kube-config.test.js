@@ -72,7 +72,7 @@ describe('kube-config', () => {
 
     it('should return the config from KUBECONFIG environment variable', () => {
       const kubeconfig = dumpKubeconfig({
-        user,
+        userName: user,
         namespace,
         token,
         server: server.origin,
@@ -91,6 +91,18 @@ describe('kube-config', () => {
         rejectUnauthorized: true,
         auth: { bearer: token }
       })
+    })
+
+    it('should dump KUBECONFIG without providing a ca', () => {
+      const kubeconfig = yaml.safeLoad(dumpKubeconfig({
+        userName: user,
+        namespace,
+        token,
+        server: server.origin
+      }))
+      expect(kubeconfig.clusters).toHaveLength(1)
+      const cluster = kubeconfig.clusters[0]
+      expect(cluster).not.toHaveProperty('certificate-authority-data')
     })
 
     it('should return the config from the users homedir', () => {
