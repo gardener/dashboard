@@ -8,11 +8,11 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="visible">
     <g-popper
       @input="onPopperInput"
-      :title="tag.name"
+      :title="condition.name"
       :toolbar-color="color"
       :popper-key="popperKeyWithType"
       :placement="popperPlacement"
-      :disabled="!tag.message">
+      :disabled="!condition.message">
       <template v-slot:popperRef>
         <div>
           <v-tooltip top max-width="400px" :disabled="tooltipDisabled">
@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-chip
                 v-on="on"
                 class="status-tag"
-                :class="{ 'cursor-pointer': tag.message }"
+                :class="{ 'cursor-pointer': condition.message }"
                 outlined
                 :text-color="color"
                 small
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
         :status-title="chipStatus"
         :last-message="nonErrorMessage"
         :error-descriptions="errorDescriptions"
-        :last-transition-time="tag.lastTransitionTime"
+        :last-transition-time="condition.lastTransitionTime"
         :secret-binding-name="secretBindingName"
         :namespace="namespace"
       />
@@ -57,17 +57,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapState, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import split from 'lodash/split'
-import dropRight from 'lodash/dropRight'
-import last from 'lodash/last'
-import first from 'lodash/first'
-import snakeCase from 'lodash/snakeCase'
-import includes from 'lodash/includes'
-import upperFirst from 'lodash/upperFirst'
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
 
@@ -106,15 +97,11 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'cfg',
-      'conditionCache'
-    ]),
     ...mapGetters([
       'isAdmin'
     ]),
     chipText () {
-      return this.tag.shortName || ''
+      return this.condition.shortName || ''
     },
     chipStatus () {
       if (this.isError) {
@@ -131,39 +118,39 @@ export default {
     },
     chipTooltip () {
       return {
-        title: this.tag.name,
+        title: this.condition.name,
         status: this.chipStatus,
-        description: this.tag.description,
-        userErrorCodeObjects: filter(objectsFromErrorCodes(this.tag.codes), { userError: true })
+        description: this.condition.description,
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true })
       }
     },
     isError () {
-      if (this.tag.status === 'False' || !isEmpty(this.tag.codes)) {
+      if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
         return true
       }
       return false
     },
     isUnknown () {
-      if (this.tag.status === 'Unknown') {
+      if (this.condition.status === 'Unknown') {
         return true
       }
       return false
     },
     isProgressing () {
-      if (this.tag.status === 'Progressing') {
+      if (this.condition.status === 'Progressing') {
         return true
       }
       return false
     },
     isUserError () {
-      return isUserError(this.tag.codes)
+      return isUserError(this.condition.codes)
     },
     errorDescriptions () {
       if (this.isError) {
         return [
           {
-            description: this.tag.message,
-            errorCodeObjects: objectsFromErrorCodes(this.tag.codes)
+            description: this.condition.message,
+            errorCodeObjects: objectsFromErrorCodes(this.condition.codes)
           }
         ]
       }
@@ -171,19 +158,12 @@ export default {
     },
     nonErrorMessage () {
       if (!this.isError) {
-        return this.tag.message
+        return this.condition.message
       }
       return undefined
     },
     popperKeyWithType () {
       return `statusTag_${this.popperKey}`
-    },
-    tag () {
-      const { lastTransitionTime, message, status, type, codes } = this.condition
-      const id = type
-      const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
-
-      return { id, name, shortName, description, message, lastTransitionTime, status, codes }
     },
     color () {
       if (this.isError) {
@@ -199,10 +179,7 @@ export default {
     },
     visible () {
       if (!this.isAdmin) {
-        const { type } = this.condition
-
-        const conditionMetadata = this.conditionMetadataFromType(type)
-        return !get(conditionMetadata, 'showAdminOnly', false)
+        return !get(this.condition, 'showAdminOnly', false)
       }
       return true
     },
@@ -211,35 +188,6 @@ export default {
     }
   },
   methods: {
-    ...mapMutations([
-      'setCondition'
-    ]),
-    conditionMetadataFromType (type) {
-      const condition = this.conditionCache[type]
-      if (condition) {
-        return condition
-      }
-
-      const dropSuffixes = [
-        'Available',
-        'Healthy',
-        'Ready',
-        'Availability'
-      ]
-      let conditionComponents = snakeCase(type)
-      conditionComponents = split(conditionComponents, '_')
-      conditionComponents = map(conditionComponents, upperFirst)
-      if (includes(dropSuffixes, last(conditionComponents))) {
-        conditionComponents = dropRight(conditionComponents)
-      }
-
-      const displayName = join(conditionComponents, ' ')
-      const shortName = join(map(conditionComponents, first), '')
-      const conditionMetaData = { displayName, shortName }
-      this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
-
-      return conditionMetaData
-    },
     onPopperInput (value) {
       this.popperVisible = value
     }
