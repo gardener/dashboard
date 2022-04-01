@@ -225,7 +225,7 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
                 }
               },
               path: '/',
-              pathType: 'ImplementationSpecific'
+              pathType: 'Prefix'
             }
           ]
         }
