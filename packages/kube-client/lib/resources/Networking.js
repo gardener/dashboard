@@ -8,10 +8,10 @@
 
 const { mix } = require('mixwith')
 
-const { Extensions } = require('../groups')
+const { Networking } = require('../groups')
 const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
 
-class Ingress extends mix(Extensions).with(NamespaceScoped, Readable, Observable, Writable) {
+class Ingress extends mix(Networking).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
     return {
       plural: 'ingresses',
