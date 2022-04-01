@@ -2,7 +2,7 @@
 
 exports[`gardener-dashboard ingress should render the template with tls and a secret 1`] = `
 Object {
-  "apiVersion": "extensions/v1beta1",
+  "apiVersion": "networking.k8s.io/v1",
   "kind": "Ingress",
   "metadata": Object {
     "annotations": Object {
@@ -27,8 +27,12 @@ Object {
           "paths": Array [
             Object {
               "backend": Object {
-                "serviceName": "gardener-dashboard-service",
-                "servicePort": 8080,
+                "service": Object {
+                  "name": "gardener-dashboard-service",
+                  "port": Object {
+                    "number": 8080,
+                  },
+                },
               },
               "path": "/",
               "pathType": "Prefix",
@@ -42,8 +46,12 @@ Object {
           "paths": Array [
             Object {
               "backend": Object {
-                "serviceName": "gardener-dashboard-service",
-                "servicePort": 8080,
+                "service": Object {
+                  "name": "gardener-dashboard-service",
+                  "port": Object {
+                    "number": 8080,
+                  },
+                },
               },
               "path": "/",
               "pathType": "Prefix",
