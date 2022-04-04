@@ -10,14 +10,14 @@ const yaml = require('js-yaml')
 const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsWith, endsWith, isEmpty } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
-const { toBase64 } = require('./helper')
+const { toBase64, createUrl, parseLabelSelector } = require('./helper')
 const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
 const clientCertificateData = toBase64('client-certificate-data')
 const clientKeyData = toBase64('client-key-data')
 
-function getSecret ({ namespace, name, labels, data = {} }) {
+function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   const metadata = {
     namespace,
     name
@@ -25,6 +25,11 @@ function getSecret ({ namespace, name, labels, data = {} }) {
   if (!isEmpty(labels)) {
     metadata.labels = labels
   }
+
+  if (creationTimestamp) {
+    metadata.creationTimestamp = creationTimestamp
+  }
+
   if (!isEmpty(data)) {
     data = mapValues(data, toBase64)
   }
@@ -106,6 +111,12 @@ const secrets = {
       ? filter(items, ['metadata.namespace', namespace])
       : items
   },
+  listMonitoringSecrets (namespace) {
+    return [
+      secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z'),
+      secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
+    ]
+  },
   getTerminalShortcutsSecret (namespace, options = {}) {
     const {
       valid = false,
@@ -171,14 +182,14 @@ const secrets = {
       }
     })
   },
-  getMonitoringSecret (namespace, name = 'monitoring-ingress-credentials') {
-    const [, projectName, shootName] = split(namespace, '--')
+  getMonitoringSecret (namespace, name, creationTimestamp) {
     return getSecret({
       name,
       namespace,
+      creationTimestamp,
       data: {
-        username: `user-${projectName}-${shootName}`,
-        password: `pass-${projectName}-${shootName}`
+        username: `user-${namespace}-${name}`,
+        password: `pass-${namespace}-${name}`
       }
     })
   },
@@ -199,15 +210,24 @@ const matchList = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets', ma
 const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/secrets/:name', matchOptions)
 
 const mocks = {
-  list () {
+  list ({ forceEmpty = false } = {}) {
     return headers => {
-      const matchResult = matchList(headers[':path'])
-      if (matchResult === false) {
-        return Promise.reject(createError(503))
+      if (forceEmpty) {
+        return Promise.resolve({ items: [] })
       }
-      const { params: { namespace } = {} } = matchResult
-      const items = secrets.list(namespace)
-      return Promise.resolve({ items })
+
+      const url = createUrl(headers)
+      const labelSelector = parseLabelSelector(url)
+      const matchResult = matchList(url.pathname)
+      if (matchResult) {
+        const { params: { namespace } = {} } = matchResult
+        const items = labelSelector.name === 'observability-ingress' && labelSelector['managed-by'] === 'secrets-manager'
+          ? secrets.listMonitoringSecrets(namespace)
+          : secrets.list(namespace)
+        return Promise.resolve({ items })
+      }
+
+      return Promise.reject(createError(503))
     }
   },
   create ({ resourceVersion = '42' } = {}) {
@@ -252,6 +272,11 @@ const mocks = {
         }
         const item = secrets.get(namespace, name)
         if (item) {
+          return Promise.resolve(item)
+        }
+
+        if (endsWith(name, '.monitoring')) {
+          const item = secrets.getMonitoringSecret(namespace, name)
           return Promise.resolve(item)
         }
       } else if (endsWith(hostname, 'seed.cluster')) {

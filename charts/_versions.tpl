@@ -12,5 +12,5 @@ apps/v1
 {{- end -}}
 
 {{- define "ingressversion" -}}
-extensions/v1beta1
+networking.k8s.io/v1
 {{- end -}}
