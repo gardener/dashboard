@@ -895,7 +895,7 @@ Array [
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -904,7 +904,7 @@ Array [
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.kubeconfig",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -913,7 +913,7 @@ Array [
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
   Array [
@@ -922,7 +922,7 @@ Array [
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
     Object {
       "apiVersion": "authorization.k8s.io/v1",
@@ -937,12 +937,21 @@ Array [
       },
     },
   ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.monitoring",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+    },
+  ],
 ]
 `;
 
 exports[`api shoots should return shoot info 2`] = `
 Object {
-  "canLinkToSeed": true,
+  "canLinkToSeed": false,
   "cluster_password": "pass-foo-barShoot",
   "cluster_username": "user-foo-barShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
@@ -965,12 +974,14 @@ users:
       client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
       client-key-data: Y2xpZW50LWtleS1kYXRh
 ",
+  "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
+  "monitoringUsername": "user-garden-foo-barShoot.monitoring",
   "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
   "serverUrl": "https://api.barShoot.foo.shoot.cluster",
 }
 `;
 
-exports[`api shoots should return shoot seed info 1`] = `
+exports[`api shoots should return shoot seed info when no fallback is needed 1`] = `
 Array [
   Array [
     Object {
@@ -1015,6 +1026,73 @@ Array [
     Object {
       ":authority": "api.foo-east.infra1.seed.cluster",
       ":method": "get",
+      ":path": "/api/v1/namespaces/shoot--foo--barShoot/secrets?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet",
+      ":scheme": "https",
+    },
+  ],
+]
+`;
+
+exports[`api shoots should return shoot seed info when no fallback is needed 2`] = `
+Object {
+  "monitoringPassword": "pass-shoot--foo--barShoot-bar.monitoring",
+  "monitoringUsername": "user-shoot--foo--barShoot-bar.monitoring",
+}
+`;
+
+exports[`api shoots should return shoot seed info when need to fallback to old monitoring secret 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "api.foo-east.infra1.seed.cluster",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/shoot--foo--barShoot/secrets?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet",
+      ":scheme": "https",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "api.foo-east.infra1.seed.cluster",
+      ":method": "get",
       ":path": "/api/v1/namespaces/shoot--foo--barShoot/secrets/monitoring-ingress-credentials",
       ":scheme": "https",
     },
@@ -1022,10 +1100,10 @@ Array [
 ]
 `;
 
-exports[`api shoots should return shoot seed info 2`] = `
+exports[`api shoots should return shoot seed info when need to fallback to old monitoring secret 2`] = `
 Object {
-  "monitoringPassword": "pass-foo-barShoot",
-  "monitoringUsername": "user-foo-barShoot",
+  "monitoringPassword": "pass-shoot--foo--barShoot-monitoring-ingress-credentials",
+  "monitoringUsername": "user-shoot--foo--barShoot-monitoring-ingress-credentials",
 }
 `;
 

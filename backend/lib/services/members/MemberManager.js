@@ -218,15 +218,15 @@ class MemberManager {
     const secret = await this.client.core.secrets.get(namespace, secretName)
     const token = decodeBase64(secret.data.token)
     const server = config.apiServerUrl
-    const caData = secret.data['ca.crt']
+    const caData = config.apiServerCaData
     const projectName = this.projectName
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
 
     return dumpKubeconfig({
-      user: name,
-      context: contextName,
-      cluster: clusterName,
+      userName: name,
+      contextName,
+      clusterName,
       namespace,
       token,
       server,

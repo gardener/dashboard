@@ -33,9 +33,9 @@ class Core extends V1(CoreGroup(HttpClient)) {
   }
 }
 
-class Extensions extends V1Beta1(NamedGroup(HttpClient)) {
+class Networking extends V1(NamedGroup(HttpClient)) {
   static get group () {
-    return 'extensions'
+    return 'networking.k8s.io'
   }
 }
 
@@ -56,7 +56,7 @@ module.exports = {
   Authentication,
   Authorization,
   Core,
-  Extensions,
+  Networking,
   GardenerCore,
   GardenerDashboard
 }

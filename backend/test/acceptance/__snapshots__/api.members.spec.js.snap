@@ -1216,8 +1216,9 @@ contexts:
 clusters:
   - name: garden
     cluster:
-      certificate-authority-data: Y2EuY3J0
       server: 'https://kubernetes.external.foo.bar'
+      certificate-authority-data: >-
+        LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
 users:
   - name: robot
     user:
