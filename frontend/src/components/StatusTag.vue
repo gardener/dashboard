@@ -21,11 +21,11 @@ SPDX-License-Identifier: Apache-2.0
                 v-on="on"
                 class="status-tag"
                 :class="{ 'cursor-pointer': condition.message }"
-                outlined
-                :text-color="color"
+                :outlined="!isError"
+                :text-color="textColor"
                 small
                 :color="color">
-                <v-icon v-if="isUserError" small left>mdi-account-alert</v-icon>
+                <v-icon v-if="chipIcon" small left class="mr-0">{{chipIcon}}</v-icon>
                 {{chipText}}
               </v-chip>
             </template>
@@ -124,6 +124,22 @@ export default {
         userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true })
       }
     },
+    chipIcon () {
+      if (this.isUserError) {
+        return 'mdi-account-alert-outline'
+      }
+      if (this.isError) {
+        return 'mdi-alert-circle-outline'
+      }
+      if (this.isUnknown) {
+        return 'mdi-help-circle-outline'
+      }
+      if (this.isProgressing) {
+        return 'mdi-progress-alert'
+      }
+
+      return 'mdi-check-circle-outline'
+    },
     isError () {
       if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
         return true
@@ -176,6 +192,12 @@ export default {
         return 'info'
       }
       return 'primary'
+    },
+    textColor () {
+      if (this.isError) {
+        return 'white'
+      }
+      return this.color
     },
     visible () {
       if (!this.isAdmin) {
