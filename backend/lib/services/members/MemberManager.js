@@ -209,13 +209,19 @@ class MemberManager {
 
   async getKubeconfig (item) {
     const { namespace, name } = Member.parseUsername(item.id)
-    const secretName = _
+    const secretNames = _
       .chain(item)
       .get('extensions.secrets')
-      .head()
-      .get('name')
+      .map('name')
       .value()
-    const secret = await this.client.core.secrets.get(namespace, secretName)
+    const secrets = await this.client.core.secrets.list(namespace)
+    const secret = _
+      .chain(secrets)
+      .get('items')
+      .filter(({metadata}) => _.includes(secretNames, metadata.name))
+      .orderBy(['metadata.creationTimestamp'], ['desc'])
+      .head()
+      .value()
     const token = decodeBase64(secret.data.token)
     const server = config.apiServerUrl
     const caData = config.apiServerCaData
