@@ -138,7 +138,7 @@ export default {
         return 'mdi-progress-alert'
       }
 
-      return 'mdi-check-circle-outline'
+      return ''
     },
     isError () {
       if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
