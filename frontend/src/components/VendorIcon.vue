@@ -52,6 +52,7 @@ export default {
         case 'aws-route53':
           return require('@/assets/aws-route53.svg')
         case 'azure-dns':
+        case 'azure-private-dns':
           return require('@/assets/azure-dns.svg')
         case 'google-clouddns':
           return require('@/assets/google-clouddns.svg')
