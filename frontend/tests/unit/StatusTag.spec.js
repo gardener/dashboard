@@ -6,7 +6,6 @@
 
 // Libraries
 import Vuetify from 'vuetify'
-import EventEmitter from 'events'
 
 // Components
 import StatusTag from '@/components/StatusTag'
@@ -27,9 +26,9 @@ describe('condition.vue', () => {
         condition
       },
       computed: {
-        isAdmin() {
+        isAdmin () {
           return isAdmin
-        } 
+        }
       }
     })
     return wrapper
@@ -99,5 +98,4 @@ describe('condition.vue', () => {
     expect(vmAdmin.chipStatus).toBe('Progressing')
     expect(vmAdmin.chipIcon).toBe('mdi-progress-alert')
   })
-
 })
