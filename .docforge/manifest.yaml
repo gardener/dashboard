@@ -1,49 +1,38 @@
-{{- $vers := Split .versions "," -}}
-{{ $defaultBranch := (index $vers 0) }}
 structure:
 - name: _index.md
-  source: https://github.com/gardener/dashboard/blob/{{$defaultBranch}}/README.md
+  source: /README.md
 - name: architecture
   properties:
     frontmatter:
       title: Architecture
       weight: 1
-  nodes:
-  - nodesSelector:
-      path: https://github.com/gardener/dashboard/tree/{{$defaultBranch}}/docs/architecture
+  nodesSelector:
+    path: /docs/architecture
 - name: concepts
   properties:
     frontmatter:
       title: Concepts
       weight: 2
-  nodes:
-  - nodesSelector:
-      path: https://github.com/gardener/dashboard/tree/{{$defaultBranch}}/docs/concepts
+  nodesSelector:
+    path: /docs/concepts
 - name: deployment
   properties:
     frontmatter:
       title: Deployment
       weight: 3
-  nodes:
-  - nodesSelector:
-      path: https://github.com/gardener/dashboard/tree/{{$defaultBranch}}/docs/deployment
+  nodesSelector:
+    path: /docs/deployment
 - name: development
   properties:
     frontmatter:
       title: Development
       weight: 4
-  nodes:
-  - nodesSelector:
-      path: https://github.com/gardener/dashboard/tree/{{$defaultBranch}}/docs/development
+  nodesSelector:
+    path: /docs/development
 - name: usage
   properties:
     frontmatter:
       title: Usage
       weight: 5
-  nodes:
-  - nodesSelector:
-      path: https://github.com/gardener/dashboard/tree/{{$defaultBranch}}/docs/usage
-links:
-  downloads:
-    scope:
-      "gardener/dashboard/(blob|raw)/(.*)/docs": ~
+  nodesSelector:
+    path: /docs/usage

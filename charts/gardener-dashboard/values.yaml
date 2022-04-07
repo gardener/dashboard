@@ -45,6 +45,11 @@ resources:
     cpu: 100m
     memory: 120Mi
 
+# If dashboard is running in an environment with less than 1.5GB of available memory 
+# you should cap the maximum available "old space". In a Docker-512MB-Container, 
+# the value should not be greater than 90% of the available memory.
+# nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
+
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"

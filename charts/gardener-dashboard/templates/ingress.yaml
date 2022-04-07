@@ -31,8 +31,10 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: gardener-dashboard-service
-          servicePort: {{ $.Values.servicePort }}
+          service:
+              name: gardener-dashboard-service
+              port:
+                number: {{ $.Values.servicePort }}
         path: /
         pathType: Prefix
   {{- end }}

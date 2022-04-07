@@ -37,9 +37,6 @@ Object {
       "spec": Object {
         "containers": Array [
           Object {
-            "args": Array [
-              "/etc/gardener-dashboard/config.yaml",
-            ],
             "env": Array [
               Object {
                 "name": "SESSION_SECRET",
@@ -67,6 +64,10 @@ Object {
                     "name": "gardener-dashboard-oidc",
                   },
                 },
+              },
+              Object {
+                "name": "GARDENER_CONFIG",
+                "value": "/etc/gardener-dashboard/config.yaml",
               },
             ],
             "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
@@ -139,4 +140,14 @@ Object {
     },
   },
 }
+`;
+
+exports[`gardener-dashboard deployment should render the template with node options 1`] = `
+Array [
+  "--max-old-space-size=460",
+  "--expose-gc",
+  "--trace-gc",
+  "--gc-interval=100",
+  "server.js",
+]
 `;
