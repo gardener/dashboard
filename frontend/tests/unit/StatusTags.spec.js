@@ -7,7 +7,6 @@
 // Libraries
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import EventEmitter from 'events'
 
 import map from 'lodash/map'
 
@@ -20,14 +19,9 @@ import { state, actions, getters, mutations } from '@/store'
 
 describe('condition.vue', () => {
   const localVue = createLocalVue()
-  const bus = new EventEmitter()
 
   localVue.use(Vuetify)
   localVue.use(Vuex)
-  Object.defineProperties(localVue, {
-    $bus: { value: bus }
-  })
-
   let vuetify
   let store
 

@@ -134,7 +134,7 @@ export default {
       if (this.isUnknown) {
         return 'mdi-help-circle-outline'
       }
-      if (this.isProgressing) {
+      if (this.isProgressing && this.isAdmin) {
         return 'mdi-progress-alert'
       }
 
