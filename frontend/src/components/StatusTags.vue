@@ -5,16 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-center">
-    <status-tag
-      v-for="condition in filteredConditions"
-      :condition="condition"
-      :popper-key="condition.type"
-      :key="condition.type"
-      :popper-placement="popperPlacement"
-      :secret-binding-name="shootSecretBindingName"
-      :namespace="shootNamespace">
-    </status-tag>
+  <div>
+    <div class="d-flex flex-nowrap justify-start">
+      <status-tag
+        v-for="condition in filteredConditions"
+        :condition="condition"
+        :popper-key="condition.type"
+        :key="condition.type"
+        :popper-placement="popperPlacement"
+        :secret-binding-name="shootSecretBindingName"
+        :namespace="shootNamespace">
+      </status-tag>
+    </div>
+    <template v-if="showStatusText">
+      <div v-for="({ description }) in errorCodeObjects" :key="description">
+        <div class="font-weight-bold error--text wrap">{{description}}</div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -22,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 import StatusTag from '@/components/StatusTag'
 import filter from 'lodash/filter'
 import { shootItem } from '@/mixins/shootItem'
+import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
   components: {
@@ -30,13 +38,29 @@ export default {
   props: {
     popperPlacement: {
       type: String
+    },
+    showStatusText: {
+      type: Boolean,
+      default: false
     }
   },
   mixins: [shootItem],
   computed: {
     filteredConditions () {
       return filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
+    },
+    errorCodeObjects () {
+      const allErrorCodes = errorCodesFromArray(this.filteredConditions)
+      return objectsFromErrorCodes(allErrorCodes)
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .wrap {
+    white-space: normal;
+  }
+
+</style>

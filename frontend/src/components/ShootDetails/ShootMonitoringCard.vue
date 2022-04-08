@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Readiness</v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <status-tags v-else :shoot-item="shootItem" popper-placement="bottom"></status-tags>
+            <status-tags v-else :shoot-item="shootItem" popper-placement="bottom" show-status-text></status-tags>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
