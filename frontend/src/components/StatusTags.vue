@@ -18,8 +18,8 @@ SPDX-License-Identifier: Apache-2.0
       </status-tag>
     </div>
     <template v-if="showStatusText">
-      <div v-for="({ description }) in errorCodeObjects" :key="description">
-        <div class="font-weight-bold error--text wrap">{{description}}</div>
+      <div v-for="({ description }) in errorCodeObjects" :key="description" class="mt-1">
+        <div class="font-weight-bold error--text wrap" v-html="description" />
       </div>
     </template>
   </div>

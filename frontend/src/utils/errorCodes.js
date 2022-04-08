@@ -12,6 +12,7 @@ import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import map from 'lodash/map'
 import some from 'lodash/some'
+import { transformHtml } from '.'
 
 export function errorCodesFromArray (array) {
   return uniq(compact(flatMap(array, 'codes')))
@@ -101,7 +102,7 @@ const errorCodes = {
   },
   ERR_USER_WEBHOOK: {
     shortDescription: 'Misconfigured Webhook',
-    description: 'A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not beeing performed which will eventually turn the cluster into an error state.',
+    description: transformHtml('A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not beeing performed which will eventually turn the cluster into an error state. Find best practises <a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#best-practices-and-warnings">here</a>.'),
     temporaryError: false,
     userError: true
   }
