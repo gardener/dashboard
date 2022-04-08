@@ -6,32 +6,23 @@
 
 'use strict'
 
-import isEmpty from 'lodash/isEmpty'
 import get from 'lodash/get'
 import compact from 'lodash/compact'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import map from 'lodash/map'
-import find from 'lodash/find'
+import some from 'lodash/some'
 
 export function errorCodesFromArray (array) {
   return uniq(compact(flatMap(array, 'codes')))
 }
 
 export function isUserError (errorCodesArray) {
-  if (isEmpty(errorCodesArray)) {
-    return false
-  }
-
-  return !!find(objectsFromErrorCodes(errorCodesArray), 'userError')
+  return some(objectsFromErrorCodes(errorCodesArray), 'userError')
 }
 
 export function isTemporaryError (errorCodesArray) {
-  if (isEmpty(errorCodesArray)) {
-    return false
-  }
-
-  return !!find(objectsFromErrorCodes(errorCodesArray), 'temporaryError')
+  return some(objectsFromErrorCodes(errorCodesArray), 'temporaryError')
 }
 
 export function objectsFromErrorCodes (errorCodesArray) {
@@ -107,5 +98,11 @@ const errorCodes = {
     description: 'Error occurred due to dependent objects on the infrastructure level. The operation will be retried automatically.',
     temporaryError: true,
     userError: false
+  },
+  ERR_USER_WEBHOOK: {
+    shortDescription: 'Misconfigured Webhook',
+    description: 'A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not beeing performed which will eventually turn the cluster into an error state.',
+    temporaryError: false,
+    userError: true
   }
 }

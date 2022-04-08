@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
               :shoot-item="shootItem"
               :popper-key="`${shootNamespace}/${shootName}_lastOp`"
               popper-placement="bottom"
-              showStatusText
+              show-status-text
               >
             </shoot-status>
           </v-list-item-title>

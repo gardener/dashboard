@@ -20,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import StatusTag from '@/components/StatusTag'
-import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -36,10 +35,7 @@ export default {
   mixins: [shootItem],
   computed: {
     filteredConditions () {
-      if (isEmpty(this.shootConditions)) {
-        return []
-      }
-      return filter(this.shootConditions, condition => !!condition.lastTransitionTime)
+      return filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
     }
   }
 }
