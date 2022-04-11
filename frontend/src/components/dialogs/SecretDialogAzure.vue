@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
           IAM Console help section</external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
-      <div v-if="vendor==='azure-dns'">
+      <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
         <p>Follow the steps as described in the Azure documentation to <external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
       </div>
     </template>
@@ -175,6 +175,9 @@ export default {
       }
       if (this.vendor === 'azure-dns') {
         return 'Azure DNS'
+      }
+      if (this.vendor === 'azure-private-dns') {
+        return 'Azure Private DNS'
       }
       return undefined
     }
