@@ -73,7 +73,9 @@ SPDX-License-Identifier: Apache-2.0
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
               >
-                <h4 v-if="userError">User Action required</h4>
+                <h3 v-if="userError">Your Action is required</h3>
+                <h4 class="wrap font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
+                Please read the error message carefully and take action.</h4>
                 <span class="wrap">
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
