@@ -10,6 +10,7 @@ import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import some from 'lodash/some'
+import filter from 'lodash/filter'
 import { mapGetters } from 'vuex'
 
 import {
@@ -188,23 +189,13 @@ export const shootItem = {
     shootConstraints () {
       return get(this.shootItem, 'status.constraints', [])
     },
-    maintenanceReadiness () {
-      if (!this.isMaintenancePreconditionSatisfied) {
-        return {
-          ...this.maintenancePreconditionSatisfiedConstraint,
-          codes: [
-            'ERR_USER_WEBHOOK'
-          ]
-        }
-      }
-    },
     shootReadiness () {
-      if (!this.maintenanceReadiness) {
-        return this.shootConditions
-      }
+      const shootConstraintsWithErrorCode = filter(this.shootConstraints, constraint => {
+        return constraint.codes && constraint.codes.length
+      })
       return [
         ...this.shootConditions,
-        this.maintenanceReadiness
+        ...shootConstraintsWithErrorCode
       ]
     },
     shootObservedGeneration () {
