@@ -5,6 +5,11 @@ SPDX-License-Identifier: Apache-2.0
  -->
 <template>
   <v-container fluid class="px-6">
+    <v-alert type="error" v-if="!isAdmin && shootHasUserError">
+      This cluster requires attention by the <span class="font-weight-bold">user who created and / or manages</span> it.
+      Please read the error message carefully and take action.
+      The error is flagged as <span class="font-weight-bold">user error</span> which indicates that <span class="font-weight-bold">no operator action is required</span>.
+    </v-alert>
     <v-row class="d-flex">
       <v-col cols="12" md="6">
         <shoot-details-card :shoot-item="shootItem"></shoot-details-card>
@@ -64,7 +69,8 @@ export default {
     ...mapGetters([
       'ticketsByNamespaceAndName',
       'canGetSecrets',
-      'shootCustomFieldList'
+      'shootCustomFieldList',
+      'isAdmin'
     ]),
     info () {
       return get(this, 'shootItem.info', {})

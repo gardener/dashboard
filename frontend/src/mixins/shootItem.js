@@ -20,6 +20,7 @@ import {
   isTypeDelete,
   isTruthyValue
 } from '@/utils'
+import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export const shootItem = {
   props: {
@@ -206,6 +207,10 @@ export const shootItem = {
         ...this.shootConditions,
         this.maintenanceReadiness
       ]
+    },
+    shootHasUserError () {
+      const allLastErrorCodes = errorCodesFromArray([...this.shootLastErrors, ...this.shootReadiness])
+      return isUserError(allLastErrorCodes)
     },
     shootObservedGeneration () {
       return get(this.shootItem, 'status.observedGeneration')

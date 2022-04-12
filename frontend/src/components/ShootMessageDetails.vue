@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
               >
-                <h4 v-if="userError">Action required</h4>
+                <h4 v-if="userError">User Action required</h4>
                 <span class="wrap">
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
@@ -83,8 +83,7 @@ SPDX-License-Identifier: Apache-2.0
                         <span>{{secretBindingName}}</span>
                       </router-link>
                       <span v-else>{{secretBindingName}}</span>
-                    </code>:</span>
-                  {{description}}
+                    </code>: </span><span v-html="description" />
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
