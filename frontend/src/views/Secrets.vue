@@ -473,6 +473,7 @@ export default {
             }
           ]
         case 'azure-dns':
+        case 'azure-private-dns':
           return [
             {
               label: 'Subscription ID',

@@ -196,6 +196,8 @@ const vendorNameFromImageName = imageName => {
     return 'aws-route53'
   } else if (lowerCaseName.includes('azure-dns')) {
     return 'azure-dns'
+  } else if (lowerCaseName.includes('azure-private-dns')) {
+    return 'azure-private-dns'
   } else if (lowerCaseName.includes('google-clouddns')) {
     return 'google-clouddns'
   } else if (lowerCaseName.includes('openstack-designate')) {
@@ -709,7 +711,7 @@ const getters = {
     return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
   },
   sortedDnsProviderList (state, getters) {
-    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
     const dnsProviderList = getters['gardenerExtensions/dnsProviderList']
     // filter and sort
     return compact(map(supportedProviderTypes, poviderType => {
