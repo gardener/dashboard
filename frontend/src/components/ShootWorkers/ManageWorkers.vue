@@ -55,6 +55,15 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
       </v-col>
     </v-row>
+    <v-row key="networkWarning" class="list-item" ref="networkWarningRef">
+      <v-alert type="warning" tile prominent v-if="hasAdditionalZonesNetworkConfiguration" class="d-flex flex-grow-1">
+        Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:
+        <pre>
+<code>{{additionalZonesNetworkConfiguration}}</code>
+        </pre>
+        <span class="font-weight-bold">This change cannot be undone.</span>
+      </v-alert>
+    </v-row>
   </transition-group>
 </template>
 
@@ -71,6 +80,7 @@ import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
+import get from 'lodash/get'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -158,10 +168,23 @@ export default {
     },
     cloudProviderKind () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      return cloudProfile.metadata.cloudProviderKind
+      return get(cloudProfile, 'metadata.cloudProviderKind')
     },
     currentZonesNetworkConfiguration () {
       return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR)
+    },
+    additionalZonesNetworkConfiguration () {
+      return difference(this.currentZonesNetworkConfiguration, this.zonesNetworkConfiguration)
+    },
+    hasAdditionalZonesNetworkConfiguration () {
+      return !this.isNewCluster && this.additionalZonesNetworkConfiguration.length
+    }
+  },
+  watch: {
+    hasAdditionalZonesNetworkConfiguration (value) {
+      if (value) {
+        this.$nextTick(() => this.$refs.networkWarningRef.scrollIntoView())
+      }
     }
   },
   methods: {
