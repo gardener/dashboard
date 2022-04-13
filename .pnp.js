@@ -2518,7 +2518,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["jsonwebtoken", "npm:8.5.1"],
             ["lodash", "npm:4.17.21"],
             ["mixwith", "npm:0.1.1"],
-            ["node-forge", "npm:0.10.0"],
+            ["node-forge", "npm:1.3.1"],
             ["uuid", "npm:8.3.0"]
           ],
           "linkType": "SOFT",
@@ -15588,6 +15588,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/node-forge-npm-0.10.0-605ba7b28b-c7a729933a.zip/node_modules/node-forge/",
           "packageDependencies": [
             ["node-forge", "npm:0.10.0"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:1.3.1", {
+          "packageLocation": "./.yarn/cache/node-forge-npm-1.3.1-f31fd566cc-cbb7d3386b.zip/node_modules/node-forge/",
+          "packageDependencies": [
+            ["node-forge", "npm:1.3.1"]
           ],
           "linkType": "HARD",
         }]
