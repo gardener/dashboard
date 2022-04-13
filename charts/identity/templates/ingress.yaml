@@ -29,7 +29,7 @@ spec:
         paths:
           - backend:
               service:
-               name: gardener-dashboard-service
+               name: identity-service
                port:
                  number: {{ $.Values.servicePort }}
             path: "{{ $pathname }}"
