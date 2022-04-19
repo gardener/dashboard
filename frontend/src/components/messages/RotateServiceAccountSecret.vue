@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    Do you want to rotate the secret of service account <em>{{name}}</em>?<br /> Attention: The current kubeconfig credentials will be revoked
+    Do you want to rotate all secrets of the service account <em>{{name}}</em>?<br /> Attention: The current kubeconfig credentials will be revoked
   </div>
 </template>
 

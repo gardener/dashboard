@@ -107,7 +107,7 @@ class MemberManager {
       throw new UnprocessableEntity('Member is not a ServiceAccount')
     }
 
-    await this.deleteServiceAccountSecret(item)
+    await this.deleteServiceAccountSecrets(item)
   }
 
   setItemRoles (item, roles) {
@@ -187,24 +187,21 @@ class MemberManager {
     this.subjectList.delete(item.id)
   }
 
-  async deleteServiceAccountSecret (item) {
+  async deleteServiceAccountSecrets (item) {
     const { namespace } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
       throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-    const name = _
+    const names = _
       .chain(item)
       .get('extensions.secrets', [])
-      .tap(secrets => {
-        if (secrets.length > 1) {
-          throw new UnprocessableEntity(`ServiceAccount ${namespace} has more than one secret`)
-        }
-      })
-      .head()
-      .get('name')
+      .map('name')
       .value()
-    await this.client.core.secrets.delete(namespace, name)
+
+    _.forEach(names, async name => {
+      await this.client.core.secrets.delete(namespace, name)
+    })
   }
 
   async getKubeconfig (item) {
@@ -218,7 +215,7 @@ class MemberManager {
     const secret = _
       .chain(secrets)
       .get('items')
-      .filter(({metadata}) => _.includes(secretNames, metadata.name))
+      .filter(({ metadata }) => _.includes(secretNames, metadata.name))
       .orderBy(['metadata.creationTimestamp'], ['desc'])
       .head()
       .value()
