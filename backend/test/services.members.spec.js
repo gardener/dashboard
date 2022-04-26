@@ -428,24 +428,26 @@ describe('services', function () {
         })
       })
 
-      describe('#deleteServiceAccountSecret', function () {
+      describe('#deleteServiceAccountSecrets', function () {
         it('should delete a serviceaccount secret', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
-          await memberManager.deleteServiceAccountSecret(item)
+          await memberManager.deleteServiceAccountSecrets(item)
           expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
         })
 
         it('should not delete a serviceaccount secret from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+          await expect(memberManager.deleteServiceAccountSecrets(item)).rejects.toThrow(UnprocessableEntity)
         })
 
-        it('should not delete a service account secret if there is one more secret attached', async function () {
+        it('should delete all service account secrets if there is more than one secret attached', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-multiple'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+          await memberManager.deleteServiceAccountSecrets(item)
+          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
+          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-2')
         })
       })
     })

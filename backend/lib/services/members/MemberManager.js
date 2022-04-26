@@ -193,32 +193,36 @@ class MemberManager {
       throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
     }
 
-    const names = _
+    const results = await _
       .chain(item)
-      .get('extensions.secrets', [])
-      .map('name')
+      .get('extensions.secrets')
+      .map(({ name }) => this.client.core.secrets.delete(namespace, name))
+      .thru(promises => Promise.allSettled(promises))
       .value()
 
-    _.forEach(names, async name => {
-      await this.client.core.secrets.delete(namespace, name)
-    })
+    this.handleRejectedPromises(results)
   }
 
   async getKubeconfig (item) {
     const { namespace, name } = Member.parseUsername(item.id)
-    const secretNames = _
+
+    const results = await _
       .chain(item)
       .get('extensions.secrets')
-      .map('name')
+      .map(({ name }) => this.client.core.secrets.get(namespace, name))
+      .thru(promises => Promise.allSettled(promises))
       .value()
-    const secrets = await this.client.core.secrets.list(namespace)
+
+    this.handleRejectedPromises(results)
+
     const secret = _
-      .chain(secrets)
-      .get('items')
-      .filter(({ metadata }) => _.includes(secretNames, metadata.name))
+      .chain(results)
+      .filter(['status', 'fulfilled'])
+      .map('value')
       .orderBy(['metadata.creationTimestamp'], ['desc'])
       .head()
       .value()
+
     const token = decodeBase64(secret.data.token)
     const server = config.apiServerUrl
     const caData = config.apiServerCaData
@@ -235,6 +239,19 @@ class MemberManager {
       server,
       caData
     })
+  }
+
+  handleRejectedPromises (results) {
+    const errors = _
+      .chain(results)
+      .filter(['status', 'rejected'])
+      .map('reason')
+      .filter(err => !isHttpError(err) || err.statusCode !== 404)
+      .value()
+
+    if (errors.length) {
+      throw new Error(errors)
+    }
   }
 
   static async create ({ client, id }, namespace) {
