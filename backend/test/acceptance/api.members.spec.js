@@ -7,7 +7,6 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const createError = require('http-errors')
 
 describe('api', function () {
   let agent
@@ -60,12 +59,11 @@ describe('api', function () {
       })
     })
 
-    it('should return a service account with newest secret', async function () {
-      const name = `system:serviceaccount:${namespace}:robot-two-secrets`
+    it('should return a service account', async function () {
+      const name = `system:serviceaccount:${namespace}:robot`
 
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
 
       const res = await agent
@@ -74,27 +72,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should return a service account where a secret is missing', async function () {
-      const name = `system:serviceaccount:${namespace}:robot-missing-secret`
-
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockRejectedValueOnce(createError(404))
-
-      const res = await agent
-        .get(`/api/namespaces/${namespace}/members/${name}`)
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -416,12 +394,11 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should rotate a service account with two secrets', async function () {
-      const name = 'system:serviceaccount:garden-foo:robot-two-secrets'
+    it('should rotate a service account secret', async function () {
+      const name = 'system:serviceaccount:garden-foo:robot'
 
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
       const res = await agent
@@ -432,29 +409,7 @@ describe('api', function () {
         })
         .expect(204)
 
-      expect(mockRequest).toBeCalledTimes(4)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.noContent).toBe(true)
-    })
-
-    it('should rotate a service account with a missing secret', async function () {
-      const name = 'system:serviceaccount:garden-foo:robot-missing-secret'
-
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockRejectedValueOnce(createError(404))
-
-      const res = await agent
-        .post(`/api/namespaces/${namespace}/members/${name}`)
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'rotateSecret'
-        })
-        .expect(204)
-
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.noContent).toBe(true)

@@ -109,17 +109,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
   Object {
     "roles": Array [
@@ -242,17 +232,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
   Object {
     "roles": Array [
@@ -392,17 +372,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
   Object {
     "createdBy": "bar@example.org",
@@ -524,20 +494,10 @@ Array [
   },
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [
       "myrole",
     ],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -616,17 +576,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
   Object {
     "createdBy": "bar@example.org",
@@ -724,17 +674,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -826,17 +766,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -939,17 +869,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -1009,17 +929,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -1145,17 +1055,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -1264,22 +1164,12 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
-  },
 ]
 `;
 
-exports[`api members should return a service account where a secret is missing 1`] = `
+exports[`api members should return a service account 1`] = `
 Array [
   Array [
     Object {
@@ -1303,16 +1193,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-missing-secret-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/missing-secret",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-token-726f6",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
     },
@@ -1320,17 +1201,17 @@ Array [
 ]
 `;
 
-exports[`api members should return a service account where a secret is missing 2`] = `
+exports[`api members should return a service account 2`] = `
 Object {
   "creationTimestamp": "2020-01-01T00:00:00Z",
   "kubeconfig": "apiVersion: v1
 kind: Config
-current-context: garden-foo-robot-missing-secret
+current-context: garden-foo-robot
 contexts:
-  - name: garden-foo-robot-missing-secret
+  - name: garden-foo-robot
     context:
       cluster: garden
-      user: robot-missing-secret
+      user: robot
       namespace: garden-foo
 clusters:
   - name: garden
@@ -1339,81 +1220,14 @@ clusters:
       certificate-authority-data: >-
         LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
 users:
-  - name: robot-missing-secret
+  - name: robot
     user:
-      token: robot-missing-secret-token-726f6
+      token: robot-token-726f6
 ",
-  "roles": Array [],
-  "username": "system:serviceaccount:garden-foo:robot-missing-secret",
-}
-`;
-
-exports[`api members should return a service account with newest secret 1`] = `
-Array [
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
+  "roles": Array [
+    "viewer",
   ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-two-secrets-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/newest-secret",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-]
-`;
-
-exports[`api members should return a service account with newest secret 2`] = `
-Object {
-  "creationTimestamp": "2020-01-01T00:00:00Z",
-  "kubeconfig": "apiVersion: v1
-kind: Config
-current-context: garden-foo-robot-two-secrets
-contexts:
-  - name: garden-foo-robot-two-secrets
-    context:
-      cluster: garden
-      user: robot-two-secrets
-      namespace: garden-foo
-clusters:
-  - name: garden
-    cluster:
-      server: 'https://kubernetes.external.foo.bar'
-      certificate-authority-data: >-
-        LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
-users:
-  - name: robot-two-secrets
-    user:
-      token: newest-secret
-",
-  "roles": Array [],
-  "username": "system:serviceaccount:garden-foo:robot-two-secrets",
+  "username": "system:serviceaccount:garden-foo:robot",
 }
 `;
 
@@ -1472,22 +1286,12 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
-  },
 ]
 `;
 
-exports[`api members should rotate a service account with a missing secret 1`] = `
+exports[`api members should rotate a service account secret 1`] = `
 Array [
   Array [
     Object {
@@ -1511,57 +1315,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-missing-secret-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/missing-secret",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-]
-`;
-
-exports[`api members should rotate a service account with two secrets 1`] = `
-Array [
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-two-secrets-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/newest-secret",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-token-726f6",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
     },
@@ -1668,17 +1422,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;
@@ -1803,17 +1547,7 @@ Array [
   Object {
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-two-secrets",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
-  },
-  Object {
-    "creationTimestamp": "2020-01-01T00:00:00Z",
-    "roles": Array [],
-    "username": "system:serviceaccount:garden-foo:robot-missing-secret",
   },
 ]
 `;

@@ -200,7 +200,7 @@ class MemberManager {
       .thru(promises => Promise.allSettled(promises))
       .value()
 
-    this.handleRejectedPromises(results)
+    this.constructor.getFulfilledValues(results)
   }
 
   async getKubeconfig (item) {
@@ -213,12 +213,10 @@ class MemberManager {
       .thru(promises => Promise.allSettled(promises))
       .value()
 
-    this.handleRejectedPromises(results)
+    const values = this.constructor.getFulfilledValues(results)
 
     const secret = _
-      .chain(results)
-      .filter(['status', 'fulfilled'])
-      .map('value')
+      .chain(values)
       .orderBy(['metadata.creationTimestamp'], ['desc'])
       .head()
       .value()
@@ -241,7 +239,7 @@ class MemberManager {
     })
   }
 
-  handleRejectedPromises (results) {
+  static getFulfilledValues (results) {
     const errors = _
       .chain(results)
       .filter(['status', 'rejected'])
@@ -249,9 +247,18 @@ class MemberManager {
       .filter(err => !isHttpError(err) || err.statusCode !== 404)
       .value()
 
-    if (errors.length) {
-      throw new Error(errors)
+    if (errors.length === 1) {
+      throw errors[0]
+    } else if (errors.length > 1) {
+      const message = errors.map(err => err.message).join('\n')
+      throw new AggregateError(errors, message)
     }
+
+    return _
+      .chain(results)
+      .filter(['status', 'fulfilled'])
+      .map('value')
+      .value()
   }
 
   static async create ({ client, id }, namespace) {

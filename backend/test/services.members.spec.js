@@ -150,6 +150,9 @@ describe('services', function () {
           },
           {
             name: 'secret-2'
+          },
+          {
+            name: 'missing-secret'
           }
         ]
       },
@@ -161,6 +164,29 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
+        }
+      }
+    ]
+
+    const secrets = [
+      {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'secret-1',
+          creationTimestamp: '2019-03-13T13:11:36Z'
+        },
+        data: {
+          token: Buffer.from('secret-1').toString('base64')
+        }
+      },
+      {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'secret-2',
+          creationTimestamp: '2021-03-13T13:11:36Z'
+        },
+        data: {
+          token: Buffer.from('secret-2').toString('base64')
         }
       }
     ]
@@ -181,6 +207,16 @@ describe('services', function () {
     }
 
     beforeEach(function () {
+      const mockFindOrReject = (objects) => {
+        return jest.fn().mockImplementation((namespace, name) => {
+          const item = _.find(objects, { metadata: { namespace, name } })
+          if (!item) {
+            return Promise.reject(createError(404))
+          }
+          return Promise.resolve(item)
+        })
+      }
+
       client['core.gardener.cloud'].projects = {
         mergePatch: jest.fn().mockResolvedValue()
       }
@@ -188,17 +224,12 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: jest.fn().mockImplementation((namespace, name) => {
-          const item = _.find(serviceAccounts, { metadata: { name, namespace } })
-          if (!item) {
-            return Promise.reject(createError(404))
-          }
-          return Promise.resolve(item)
-        }),
+        delete: mockFindOrReject(serviceAccounts),
         mergePatch: jest.fn().mockResolvedValue()
       }
       client.core.secrets = {
-        delete: jest.fn().mockResolvedValue()
+        delete: mockFindOrReject(secrets),
+        get: mockFindOrReject(secrets)
       }
     })
 
@@ -442,12 +473,26 @@ describe('services', function () {
           await expect(memberManager.deleteServiceAccountSecrets(item)).rejects.toThrow(UnprocessableEntity)
         })
 
-        it('should delete all service account secrets if there is more than one secret attached', async function () {
+        it('should delete all service account secrets if there is more than one secret attached and one is missing', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-multiple'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccountSecrets(item)
-          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
-          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-2')
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
+        })
+      })
+
+      describe('#getKubeconfig', function () {
+        it('should return kubeconfig with token of newest secret', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-multiple'
+          const item = memberManager.subjectList.get(id)
+          const kubeConfig = await memberManager.getKubeconfig(item)
+
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
+          expect(kubeConfig).toContain('secret-2')
         })
       })
     })

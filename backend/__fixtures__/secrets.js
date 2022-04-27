@@ -193,11 +193,10 @@ const secrets = {
       }
     })
   },
-  getServiceAccountSecret (namespace, name, creationTimestamp = '2019-03-13T13:11:36Z') {
+  getServiceAccountSecret (namespace, name) {
     return getSecret({
       name,
       namespace,
-      creationTimestamp,
       data: {
         namespace,
         token: name
@@ -259,10 +258,6 @@ const mocks = {
         }
         if (endsWith(name, '.kubeconfig')) {
           const item = secrets.getShootSecret(namespace, name)
-          return Promise.resolve(item)
-        }
-        if (name === 'newest-secret') {
-          const item = secrets.getServiceAccountSecret(namespace, name, '2022-03-13T13:11:36Z')
           return Promise.resolve(item)
         }
         if (/-token-[a-f0-9]{5}$/.test(name)) {

@@ -14,10 +14,8 @@ const { getTokenPayload } = require('./auth')
 
 const serviceAccountList = [
   getServiceAccount({ namespace: 'garden-foo', name: 'robot', createdBy: 'foo@example.org' }),
-  getServiceAccount({ namespace: 'garden-foo', name: 'robot-two-secrets', createdBy: 'foo@example.org' }),
   getServiceAccount({ namespace: 'garden-foo', name: 'robot-nomember' }),
   getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' }),
-  getServiceAccount({ namespace: 'garden-foo', name: 'robot-missing-secret', createdBy: 'foo@example.org' }),
   getServiceAccount({ namespace: 'term-host-1', name: 'term-attach-1' }),
   getServiceAccount({ namespace: 'term-host-2', name: 'term-attach-2' }),
   getServiceAccount({ namespace: 'term-host-3', name: 'term-attach-3' })
@@ -29,7 +27,7 @@ function getServiceAccount ({
   createdBy = 'admin@example.org',
   creationTimestamp = '2020-01-01T00:00:00Z'
 }) {
-  const serviceAccount = {
+  return {
     metadata: {
       name,
       namespace,
@@ -42,14 +40,6 @@ function getServiceAccount ({
       name: [name, 'token', toHex(name).substring(0, 5)].join('-')
     }]
   }
-  if (name.includes('missing-secret')) {
-    serviceAccount.secrets.push({ name: 'missing-secret' })
-  }
-  if (name.includes('two-secrets')) {
-    serviceAccount.secrets.push({ name: 'newest-secret' })
-  }
-
-  return serviceAccount
 }
 
 const serviceaccounts = {
