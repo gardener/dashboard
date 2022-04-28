@@ -7,6 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
+const { parseKubeconfig } = require('@gardener-dashboard/kube-config')
 const { UnprocessableEntity, NotFound } = require('http-errors')
 const createError = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
@@ -206,17 +207,17 @@ describe('services', function () {
       core: {}
     }
 
-    beforeEach(function () {
-      const mockFindOrReject = (objects) => {
-        return jest.fn().mockImplementation((namespace, name) => {
-          const item = _.find(objects, { metadata: { namespace, name } })
-          if (!item) {
-            return Promise.reject(createError(404))
-          }
-          return Promise.resolve(item)
-        })
+    const findObjectFn = (objects) => {
+      return (namespace, name) => {
+        const item = _.find(objects, { metadata: { namespace, name } })
+        if (!item) {
+          return Promise.reject(createError(404))
+        }
+        return Promise.resolve(item)
       }
+    }
 
+    beforeEach(function () {
       client['core.gardener.cloud'].projects = {
         mergePatch: jest.fn().mockResolvedValue()
       }
@@ -224,12 +225,12 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: mockFindOrReject(serviceAccounts),
+        delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockResolvedValue()
       }
       client.core.secrets = {
-        delete: mockFindOrReject(secrets),
-        get: mockFindOrReject(secrets)
+        delete: jest.fn().mockImplementation(findObjectFn(secrets)),
+        get: jest.fn().mockImplementation(findObjectFn(secrets))
       }
     })
 
@@ -487,12 +488,12 @@ describe('services', function () {
         it('should return kubeconfig with token of newest secret', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-multiple'
           const item = memberManager.subjectList.get(id)
-          const kubeConfig = await memberManager.getKubeconfig(item)
+          const kubeConfig = parseKubeconfig(await memberManager.getKubeconfig(item))
 
           expect(client.core.secrets.get).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
           expect(client.core.secrets.get).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
           expect(client.core.secrets.get).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
-          expect(kubeConfig).toContain('secret-2')
+          expect(kubeConfig.users[0].user.token).toContain('secret-2')
         })
       })
     })
