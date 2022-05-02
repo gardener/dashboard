@@ -159,11 +159,25 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Available Load Balancer Classes</v-list-item-subtitle>
             <v-list-item-title class="d-flex align-center pt-1">
-              <lb-class v-for="{ name, floatingSubnetID } in shootLoadbalancerClasses"
-                :name="name"
-                :floatingSubnetID="floatingSubnetID"
+              <v-tooltip
+                v-for="{ name } in shootLoadbalancerClasses"
                 :key="name"
-              ></lb-class>
+                :disabled="name !== defaultLoadbalancerClass"
+                top
+              >
+                <template v-slot:activator="{ on }">
+                  <v-chip
+                    v-on="on"
+                    small
+                    class="mr-2"
+                    outlined
+                    color="primary">
+                    {{name}}
+                    <v-icon v-if="name === defaultLoadbalancerClass" small>mdi-star</v-icon>
+                  </v-chip>
+                </template>
+                <span>Default Load Balancer Class</span>
+              </v-tooltip>
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -179,9 +193,9 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import map from 'lodash/map'
+import head from 'lodash/head'
 
 import CopyBtn from '@/components/CopyBtn'
-import LbClass from '@/components/ShootDetails/LbClass'
 import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
 import DnsProvider from '@/components/ShootDns/DnsProvider'
@@ -192,7 +206,6 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   components: {
     CopyBtn,
-    LbClass,
     ShootSeedName,
     Vendor,
     DnsProvider,
@@ -237,6 +250,21 @@ export default {
 
       const shootFloatingPool = find(availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
       return get(shootFloatingPool, 'loadBalancerClasses')
+    },
+    defaultLoadbalancerClass () {
+      const shootLBClasses = this.shootLoadbalancerClasses
+
+      let defaultLoadbalancerClass = find(shootLBClasses, { purpose: 'default' })
+      if (defaultLoadbalancerClass) {
+        return defaultLoadbalancerClass.name
+      }
+
+      defaultLoadbalancerClass = find(shootLBClasses, { name: 'default' })
+      if (defaultLoadbalancerClass) {
+        return defaultLoadbalancerClass.name
+      }
+
+      return get(head(shootLBClasses), 'name')
     },
     canLinkToSecret () {
       return this.shootSecretBindingName && this.shootNamespace
