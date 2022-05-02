@@ -174,9 +174,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
+import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
+import map from 'lodash/map'
 
 import CopyBtn from '@/components/CopyBtn'
 import LbClass from '@/components/ShootDetails/LbClass'
@@ -200,7 +202,8 @@ export default {
   computed: {
     ...mapGetters([
       'namespaces',
-      'cloudProfileByName'
+      'cloudProfileByName',
+      'floatingPoolsByCloudProfileNameAndRegionAndDomain'
     ]),
     showSeedInfo () {
       return !!this.shootSeedName && this.hasAccessToGardenNamespace
@@ -216,10 +219,17 @@ export default {
       return `*.ingress.${this.shootDomain}`
     },
     shootLoadbalancerClasses () {
-      const cloudProfile = this.cloudProfileByName(this.shootCloudProfileName)
-      const profileFloatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+      const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
+      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
+
       const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
-      const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
+      const floatingPoolWildcardName = bestMatchForString(floatingPoolWildCardObjects, shootFloatingPoolName)
+
+      if (!floatingPoolWildcardName) {
+        return
+      }
+
+      const shootFloatingPool = find(availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
       return get(shootFloatingPool, 'loadBalancerClasses')
     },
     canLinkToSecret () {
