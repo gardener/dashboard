@@ -219,6 +219,12 @@ export default {
       return `*.ingress.${this.shootDomain}`
     },
     shootLoadbalancerClasses () {
+      const shootLBClasses = get(this.shootItem, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      if (shootLBClasses) {
+        // If the user defines the LB classes in the shoot mainfest, they completely replace the ones defined in the cloudprofile
+        return shootLBClasses
+      }
+
       const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
 
