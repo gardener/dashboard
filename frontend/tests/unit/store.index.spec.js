@@ -372,8 +372,8 @@ describe('Store', () => {
           }
         }
       },
-      floatingPoolNamesByCloudProfileNameAndRegionAndDomain (...args) {
-        return getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, this)(...args)
+      floatingPoolsByCloudProfileNameAndRegionAndDomain (...args) {
+        return getters.floatingPoolsByCloudProfileNameAndRegionAndDomain({}, this)(...args)
       }
     }
 

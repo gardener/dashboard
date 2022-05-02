@@ -776,7 +776,9 @@ const getters = {
     }
   },
   floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
-    return uniq(map(getters.floatingPoolsByCloudProfileNameAndRegionAndDomain, 'name'))
+    return ({ cloudProfileName, region, secretDomain }) => {
+      return uniq(map(getters.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }), 'name'))
+    }
   },
   loadBalancerProviderNamesByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
