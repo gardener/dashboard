@@ -58,9 +58,9 @@ export default {
       const conditions = map(shootConditions, condition => {
         const { lastTransitionTime, message, status, type, codes } = condition
         const id = type
-        const { displayName: name, shortName, description } = this.conditionMetadataFromType(condition.type)
+        const { displayName: name, shortName, description, showAdminOnly } = this.conditionMetadataFromType(condition.type)
 
-        return { id, name, shortName, description, message, lastTransitionTime, status, codes }
+        return { id, name, shortName, description, message, lastTransitionTime, status, codes, showAdminOnly }
       })
 
       return sortBy(conditions, 'shortName')
