@@ -84,7 +84,7 @@ import UnverifiedTerminalShortcutsDialog from '@/components/dialogs/UnverifiedTe
 import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalServiceAccountDialog'
 import { mapGetters } from 'vuex'
 import { getMembers, terminalConfig } from '@/utils/api'
-import { TargetEnum } from '@/utils'
+import { TargetEnum, isShootStatusHibernated } from '@/utils'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
@@ -138,6 +138,9 @@ export default {
     ]),
     shootItem () {
       return this.shootByNamespaceAndName(pick(this, 'namespace', 'name'))
+    },
+    isShootStatusHibernated () {
+      return isShootStatusHibernated(get(this.shootItem, 'status'))
     },
     valid () {
       switch (this.tab) {
