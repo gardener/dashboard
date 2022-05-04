@@ -58,10 +58,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapGetters } from 'vuex'
-
-import get from 'lodash/get'
-
-import { isShootStatusHibernated } from '@/utils'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   props: {
@@ -72,6 +69,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootItem],
   computed: {
     ...mapGetters([
       'hasControlPlaneTerminalAccess',
@@ -79,12 +77,6 @@ export default {
       'hasGardenTerminalAccess',
       'isAdmin'
     ]),
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem, 'status'))
-    },
     selectedTarget: {
       get () {
         return this.value
