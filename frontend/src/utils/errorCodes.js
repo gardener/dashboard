@@ -100,7 +100,7 @@ const errorCodes = {
     temporaryError: true,
     userError: false
   },
-  ERR_USER_WEBHOOK: {
+  ERR_PROBLEMATIC_WEBHOOK: {
     shortDescription: 'Misconfigured Webhook',
     description: transformHtml('A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not beeing performed which will eventually turn the cluster into an error state. Find best practises <a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#best-practices-and-warnings">here</a>.'),
     temporaryError: false,
