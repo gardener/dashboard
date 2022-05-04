@@ -57,9 +57,9 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row key="networkWarning" class="list-item" ref="networkWarningRef">
       <v-alert type="warning" tile prominent v-if="hasAdditionalZonesNetworkConfiguration" class="d-flex flex-grow-1">
-        Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:
-        <pre>
-<code>{{additionalZonesNetworkConfiguration}}</code>
+        <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
+        <pre class="zoneNetworks mt-3">
+<code class="pa-0">{{additionalZonesNetworkConfiguration}}</code>
         </pre>
         <span class="font-weight-bold">This change cannot be undone.</span>
       </v-alert>
@@ -291,3 +291,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .zoneNetworks {
+    line-height: 100% !important;
+  }
+</style>
