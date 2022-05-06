@@ -252,6 +252,8 @@ frontendConfig:
   gardenctl:
     legacyCommands: true # false to show gardenctl-v2 commands by default, true to show the legacy gardenctl commands. Can be overwritten by the user.
     shell: bash # default shell. Should be one of bash, fish, powershell, zsh. Can be overwritten by the user.
+  
+  defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
 
 # # github configuration of the ticket feature
 # gitHub:

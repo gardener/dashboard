@@ -15,14 +15,14 @@ import sample from 'lodash/sample'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import range from 'lodash/range'
+import pick from 'lodash/pick'
+import values from 'lodash/values'
 
-const defaultWorkerCIDR = '10.250.0.0/16'
-
-export function getSpecTemplate (infrastructureKind) {
+export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
     case 'metal':
       return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
-        provider: getProviderTemplate(infrastructureKind),
+        provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
         networking: {
           type: 'calico',
           pods: '10.244.128.0/18',
@@ -52,7 +52,7 @@ export function getSpecTemplate (infrastructureKind) {
       }
     default:
       return {
-        provider: getProviderTemplate(infrastructureKind),
+        provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
         networking: {
           nodes: defaultWorkerCIDR
         }
@@ -60,7 +60,7 @@ export function getSpecTemplate (infrastructureKind) {
   }
 }
 
-function getProviderTemplate (infrastructureKind) {
+function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
     case 'aws':
       return {
@@ -203,9 +203,6 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 }
 
 export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infrastructureKind, workerCIDR) {
-  if (!workerCIDR) {
-    workerCIDR = defaultWorkerCIDR
-  }
   switch (infrastructureKind) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
@@ -233,8 +230,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
   }
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind)
+export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones, workerCIDR) {
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -247,9 +244,6 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
 }
 
 export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, infrastructureKind, maxNumberOfZones) {
-  if (!workerCIDR) {
-    workerCIDR = defaultWorkerCIDR
-  }
   if (!existingZonesNetworkConfiguration) {
     return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
   }
@@ -266,14 +260,9 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR) {
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
   const newUniqueZones = uniq(flatMap(newWorkers, 'zones'))
   if (!newUniqueZones || !infrastructureKind || !maxNumberOfZones) {
-    return undefined
-  }
-
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones)
-  if (!defaultZonesNetworkConfiguration) {
     return undefined
   }
 
@@ -303,7 +292,24 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     return uniq([...oldZonesNetworkConfiguration, ...newZonesNetworkConfiguration])
   }
 
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, newShootWorkerCIDR)
+  if (!defaultZonesNetworkConfiguration) {
+    return undefined
+  }
+
   if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {
+    return defaultZonesNetworkConfiguration
+  }
+
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => {
+    return values(pick(zone, 'workers', 'public', 'internal'))
+  })
+
+  const shootCIDR = new Netmask(newShootWorkerCIDR)
+  const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => {
+    return !shootCIDR.contains(cidr)
+  })
+  if (zoneConfigurationContainsInvalidCIDR) {
     return defaultZonesNetworkConfiguration
   }
 
