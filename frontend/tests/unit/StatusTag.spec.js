@@ -6,123 +6,96 @@
 
 // Libraries
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-import EventEmitter from 'events'
 
 // Components
 import StatusTag from '@/components/StatusTag'
 
 // Utilities
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import { state, actions, getters, mutations } from '@/store'
 
-describe('StatusTag.vue', () => {
+describe('condition.vue', () => {
   const localVue = createLocalVue()
-  const bus = new EventEmitter()
-
   localVue.use(Vuetify)
-  localVue.use(Vuex)
-  Object.defineProperties(localVue, {
-    $bus: { value: bus }
-  })
-
   let vuetify
-  let store
 
-  const cfg = {
-    knownConditions: {
-      ControlPlaneHealthy: {
-        displayName: 'Control Plane Overwritten',
-        shortName: 'CPO',
-        description: 'Overwritten Description'
-      },
-      ConditionFromConfigAvailability: {
-        displayName: 'Config Condition',
-        shortName: 'CC',
-        description: 'Config Condition Description'
-      }
-    }
-  }
-
-  const shallowMountStatusTag = conditionType => {
+  const shallowMountStatusTag = (condition, isAdmin = false) => {
     const wrapper = shallowMount(StatusTag, {
       localVue,
       vuetify,
-      store,
       propsData: {
-        condition: {
-          type: conditionType
-        },
-        popperKey: 'foo'
+        condition
+      },
+      computed: {
+        isAdmin () {
+          return isAdmin
+        }
       }
     })
-    store.dispatch('setConfiguration', cfg)
     return wrapper
   }
 
   beforeEach(() => {
     vuetify = new Vuetify()
-    store = new Vuex.Store({
-      state,
-      actions,
-      getters,
-      mutations
-    })
   })
 
-  it('should generate condition object for simple condition type', () => {
-    const wrapper = shallowMountStatusTag('SampleConditionAvailability')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('SC')
-    expect(statusTag.name).toBe('Sample Condition')
-    expect(statusTag.description).toBeUndefined()
+  it('should render healthy condition object', () => {
+    const condition = {
+      shortName: 'foo',
+      name: 'foo-bar',
+      status: 'True'
+    }
+    const wrapper = shallowMountStatusTag(condition)
+    const vm = wrapper.vm
+    expect(vm.chipText).toBe('foo')
+    expect(vm.chipStatus).toBe('Healthy')
+    expect(vm.chipTooltip.title).toBe('foo-bar')
+    expect(vm.chipIcon).toBe('')
+    expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
+    expect(vm.color).toBe('primary')
+    expect(vm.visible).toBe(true)
   })
 
-  it('should generate condition object for long condition type', () => {
-    const wrapper = shallowMountStatusTag('ExtraLongSampleTESTConditionAvailable')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('ELSTC')
-    expect(statusTag.name).toBe('Extra Long Sample Test Condition')
-    expect(statusTag.description).toBeUndefined()
+  it('should render condition with user error', () => {
+    const condition = {
+      shortName: 'foo',
+      name: 'foo-bar',
+      status: 'True',
+      codes: [
+        'ERR_CONFIGURATION_PROBLEM'
+      ]
+    }
+    const wrapper = shallowMountStatusTag(condition)
+    const vm = wrapper.vm
+    expect(vm.chipText).toBe('foo')
+    expect(vm.chipStatus).toBe('Error')
+    expect(vm.isError).toBe(true)
+    expect(vm.isUserError).toBe(true)
+    expect(vm.chipIcon).toBe('mdi-account-alert-outline')
+    expect(vm.color).toBe('error')
+    expect(vm.visible).toBe(true)
   })
 
-  it('should generate condition object for single condition type', () => {
-    const wrapper = shallowMountStatusTag('Singlecondition')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('S')
-    expect(statusTag.name).toBe('Singlecondition')
-    expect(statusTag.description).toBeUndefined()
-  })
+  it('should render accoring to admin status', () => {
+    const condition = {
+      shortName: 'foo',
+      name: 'foo-bar',
+      status: 'Progressing',
+      showAdminOnly: true
+    }
+    let wrapper = shallowMountStatusTag(condition)
+    const vm = wrapper.vm
+    expect(vm.visible).toBe(false)
+    expect(vm.isProgressing).toBe(true)
+    expect(vm.color).toBe('primary')
+    expect(vm.chipStatus).toBe('Progressing')
+    expect(vm.chipIcon).toBe('')
 
-  it('should cache generated condition object for unknown condition type', () => {
-    expect(store.state.conditionCache.UnknownCondition).toBeUndefined()
-    const wrapper = shallowMountStatusTag('UnknownCondition')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('UC')
-    expect(store.state.conditionCache.UnknownCondition.shortName).toBe('UC')
-  })
-
-  it('should return condition object for known condition types', () => {
-    const wrapper = shallowMountStatusTag('APIServerAvailable')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('API')
-    expect(statusTag.name).toBe('API Server')
-    expect(statusTag.description).not.toHaveLength(0)
-  })
-
-  it('should return condition object for condition types loaded from config', () => {
-    const wrapper = shallowMountStatusTag('ConditionFromConfigAvailability')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('CC')
-    expect(statusTag.name).toBe('Config Condition')
-    expect(statusTag.description).toBe('Config Condition Description')
-  })
-
-  it('should return overwritten known condition with values from config', () => {
-    const wrapper = shallowMountStatusTag('ControlPlaneHealthy')
-    const statusTag = wrapper.vm.tag
-    expect(statusTag.shortName).toBe('CPO')
-    expect(statusTag.name).toBe('Control Plane Overwritten')
-    expect(statusTag.description).toBe('Overwritten Description')
+    wrapper = shallowMountStatusTag(condition, true)
+    const vmAdmin = wrapper.vm
+    expect(vmAdmin.visible).toBe(true)
+    expect(vmAdmin.isProgressing).toBe(true)
+    expect(vmAdmin.color).toBe('info')
+    expect(vmAdmin.chipStatus).toBe('Progressing')
+    expect(vmAdmin.chipIcon).toBe('mdi-progress-alert')
   })
 })
