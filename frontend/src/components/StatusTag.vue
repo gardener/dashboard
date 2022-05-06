@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                 :text-color="textColor"
                 small
                 :color="color">
-                <v-icon v-if="chipIcon" small left class="mr-0">{{chipIcon}}</v-icon>
+                <v-icon v-if="chipIcon" x-small left class="chip-icon">{{chipIcon}}</v-icon>
                 {{chipText}}
               </v-chip>
             </template>
@@ -229,12 +229,17 @@ export default {
 
   .status-tag ::v-deep .v-chip__content {
     margin: -4px;
+
+    .chip-icon {
+      margin-left: -4px;
+      margin-right: 1px;
+    }
   }
 
   ::v-deep .v-card  {
-  .v-card__text {
-    padding: 0px;
-    text-align: left;
+    .v-card__text {
+      padding: 0px;
+      text-align: left;
+    }
   }
-}
 </style>

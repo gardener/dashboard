@@ -58,7 +58,7 @@ export default {
       const conditions = map(shootConditions, condition => {
         const { lastTransitionTime, message, status, type, codes } = condition
         const id = type
-        const { displayName: name, shortName, description, showAdminOnly } = this.conditionMetadataFromType(condition.type)
+        const { displayName: name, shortName, description, showAdminOnly } = this.getCondition(condition.type)
 
         return { id, name, shortName, description, message, lastTransitionTime, status, codes, showAdminOnly }
       })
@@ -70,7 +70,7 @@ export default {
     ...mapMutations([
       'setCondition'
     ]),
-    conditionMetadataFromType (type) {
+    getCondition (type) {
       const condition = this.conditionCache[type]
       if (condition) {
         return condition
