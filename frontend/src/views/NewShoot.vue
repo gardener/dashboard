@@ -319,7 +319,7 @@ export default {
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
       const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
-      const nodeCIDR = get(shootResource, 'spec.networking.nodes') || this.cfg.defaultNodesCIDR
+      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.cfg.defaultNodesCIDR)
       const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
       if (zonesNetworkConfiguration) {
         set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
