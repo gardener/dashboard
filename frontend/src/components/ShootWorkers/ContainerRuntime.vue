@@ -34,8 +34,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, defaultCriNameByKubernetesVersion } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -44,15 +44,9 @@ import unset from 'lodash/unset'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 
-const validationErrors = {
-  criName: {
-    required: 'Container Runtime is required'
-  }
-}
-
 const validations = {
   criName: {
-    required: requiredIf('criNameIsRequired')
+    required
   }
 }
 
@@ -69,20 +63,23 @@ export default {
     kubernetesVersion: {
       type: String,
       required: true
-    },
-    criNameIsRequired: {
-      type: Boolean,
-      default: false
     }
   },
   data () {
     return {
-      validationErrors,
       valid: undefined
     }
   },
   validations,
   computed: {
+    validationErrors () {
+      const originalCriName = this.originalCri.name
+      return {
+        criName: {
+          required: `The selected machine image does not support previously selected Container Rumtime '${originalCriName}'`
+        }
+      }
+    },
     criNames () {
       return map(this.machineImageCri, 'name')
     },
@@ -138,12 +135,20 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
+    this.originalCri = get(this.worker, 'cri', {})
   },
   watch: {
     criNames (criNames) {
       if (!includes(criNames, this.criName)) {
-        this.criName = defaultCriNameByKubernetesVersion(criNames, this.kubernetesVersion)
-        this.onInputCriName()
+        if (includes(criNames, this.originalCri.name)) {
+          // Restore original container runtime settings if possible
+          set(this.worker, 'cri', this.originalCri)
+        } else {
+          // To not implicitly change to other container runtime
+          set(this.worker, 'cri', undefined)
+        }
+        this.$v.$touch()
+        this.validateInput()
       }
     }
   }
