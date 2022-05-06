@@ -7,6 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
+const { parseKubeconfig } = require('@gardener-dashboard/kube-config')
 const { UnprocessableEntity, NotFound } = require('http-errors')
 const createError = require('http-errors')
 const MemberManager = require('../lib/services/members/MemberManager')
@@ -150,6 +151,9 @@ describe('services', function () {
           },
           {
             name: 'secret-2'
+          },
+          {
+            name: 'missing-secret'
           }
         ]
       },
@@ -161,6 +165,29 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
+        }
+      }
+    ]
+
+    const secrets = [
+      {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'secret-1',
+          creationTimestamp: '2019-03-13T13:11:36Z'
+        },
+        data: {
+          token: Buffer.from('secret-1').toString('base64')
+        }
+      },
+      {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'secret-2',
+          creationTimestamp: '2021-03-13T13:11:36Z'
+        },
+        data: {
+          token: Buffer.from('secret-2').toString('base64')
         }
       }
     ]
@@ -180,6 +207,16 @@ describe('services', function () {
       core: {}
     }
 
+    const findObjectFn = (objects) => {
+      return (namespace, name) => {
+        const item = _.find(objects, { metadata: { namespace, name } })
+        if (!item) {
+          return Promise.reject(createError(404))
+        }
+        return Promise.resolve(item)
+      }
+    }
+
     beforeEach(function () {
       client['core.gardener.cloud'].projects = {
         mergePatch: jest.fn().mockResolvedValue()
@@ -188,17 +225,12 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
-        delete: jest.fn().mockImplementation((namespace, name) => {
-          const item = _.find(serviceAccounts, { metadata: { name, namespace } })
-          if (!item) {
-            return Promise.reject(createError(404))
-          }
-          return Promise.resolve(item)
-        }),
+        delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockResolvedValue()
       }
       client.core.secrets = {
-        delete: jest.fn().mockResolvedValue()
+        delete: jest.fn().mockImplementation(findObjectFn(secrets)),
+        get: jest.fn().mockImplementation(findObjectFn(secrets))
       }
     })
 
@@ -428,24 +460,40 @@ describe('services', function () {
         })
       })
 
-      describe('#deleteServiceAccountSecret', function () {
+      describe('#deleteServiceAccountSecrets', function () {
         it('should delete a serviceaccount secret', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
-          await memberManager.deleteServiceAccountSecret(item)
+          await memberManager.deleteServiceAccountSecrets(item)
           expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
         })
 
         it('should not delete a serviceaccount secret from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+          await expect(memberManager.deleteServiceAccountSecrets(item)).rejects.toThrow(UnprocessableEntity)
         })
 
-        it('should not delete a service account secret if there is one more secret attached', async function () {
+        it('should delete all service account secrets if there is more than one secret attached and one is missing', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-multiple'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccountSecret(item)).rejects.toThrow(UnprocessableEntity)
+          await memberManager.deleteServiceAccountSecrets(item)
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
+          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
+        })
+      })
+
+      describe('#getKubeconfig', function () {
+        it('should return kubeconfig with token of newest secret', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-multiple'
+          const item = memberManager.subjectList.get(id)
+          const kubeConfig = parseKubeconfig(await memberManager.getKubeconfig(item))
+
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
+          expect(client.core.secrets.get).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
+          expect(kubeConfig.users[0].user.token).toContain('secret-2')
         })
       })
     })
