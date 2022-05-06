@@ -17,8 +17,6 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import pick from 'lodash/pick'
 import values from 'lodash/values'
-import get from 'lodash/get'
-import set from 'lodash/set'
 
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
@@ -342,19 +340,4 @@ export function getWorkerProviderConfig (infrastructureKind) {
       }
     }
   }
-}
-
-export function alignAndReturnNodeCIDR (shootResource) {
-  const networks = get(shootResource, 'spec.provider.infrastructureConfig.networks')
-  const networkCIDR = get(networks, 'vpc.cidr', get(networks, 'vnet.cidr', get(networks, 'workers')))
-  const nodeCIDR = get(shootResource, 'spec.networking.nodes')
-  if (networkCIDR && networkCIDR !== nodeCIDR) {
-    // networkCIDR is the leading CIDR as it is more likely to be modified by the user
-    // nodeCIDR needs to be a subset or equal to networkCIDR. Usually they should be equal
-    // some cloud provider extensions do not have a dedicated network configuration, in this case
-    // networkCIDR is undefined and network CIDR is configured exclusively using 'spec.networking.node'
-    set(shootResource, 'spec.networking.nodes', networkCIDR)
-  }
-
-  return networkCIDR || nodeCIDR
 }
