@@ -74,9 +74,9 @@ SPDX-License-Identifier: Apache-2.0
                 :prominent="!!userError"
               >
                 <h3 v-if="userError">Your Action is required</h3>
-                <h4 class="wrap font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
+                <h4 class="wrap-text font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
                 Please read the error message carefully and take action.</h4>
-                <span class="wrap">
+                <span class="wrap-text">
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
@@ -150,10 +150,6 @@ export default {
   .message-block {
     max-height: 230px;
     overflow-y: auto;
-  }
-
-  .wrap {
-    white-space: pre-wrap;
   }
 
 </style>

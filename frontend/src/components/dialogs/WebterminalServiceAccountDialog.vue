@@ -157,9 +157,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .wrap-text {
-    white-space: normal;
-  }
-</style>

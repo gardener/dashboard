@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <template v-if="showStatusText">
       <div v-for="({ description, hint }) in errorCodeObjects" :key="description" class="mt-1">
-        <div class="font-weight-bold error--text wrap" v-html="description" />
+        <div class="font-weight-bold error--text wrap-text" v-html="description" />
         <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
       </div>
     </template>
@@ -59,11 +59,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .wrap {
-    white-space: normal;
-  }
-
-</style>

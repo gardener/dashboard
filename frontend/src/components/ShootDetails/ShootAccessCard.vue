@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
-          <v-list-item-subtitle class="text-caption wrap-text py-2">
+          <v-list-item-subtitle class="text-caption wrap-code py-2">
             Access Dashboard using the kubectl command-line tool by running the following command:
             <code>kubectl proxy</code>.
             Kubectl will make Dashboard available at:
@@ -303,7 +303,7 @@ export default {
     overflow-x: auto;
   }
 
-  .wrap-text {
+  .wrap-code {
     line-height: inherit;
     overflow: auto !important;
     white-space: normal !important;

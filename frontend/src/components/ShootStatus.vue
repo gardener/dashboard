@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <template v-if="showStatusText">
         <div v-for="({ description, hint }) in tooltip.errorCodeObjects" :key="description">
-          <div class="font-weight-bold error--text wrap">{{description}}</div>
+          <div class="font-weight-bold error--text wrap-text">{{description}}</div>
           <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
         </div>
       </template>
@@ -233,10 +233,6 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
-  }
-
-  .wrap {
-    white-space: normal;
   }
 
   ::v-deep .v-card  {
