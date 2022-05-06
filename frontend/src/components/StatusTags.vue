@@ -18,8 +18,9 @@ SPDX-License-Identifier: Apache-2.0
       </status-tag>
     </div>
     <template v-if="showStatusText">
-      <div v-for="({ description }) in errorCodeObjects" :key="description" class="mt-1">
+      <div v-for="({ description, hint }) in errorCodeObjects" :key="description" class="mt-1">
         <div class="font-weight-bold error--text wrap" v-html="description" />
+        <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
       </div>
     </template>
   </div>
@@ -27,13 +28,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import StatusTag from '@/components/StatusTag'
+import ExternalLink from '@/components/ExternalLink'
 import filter from 'lodash/filter'
 import { shootItem } from '@/mixins/shootItem'
 import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
   components: {
-    StatusTag
+    StatusTag,
+    ExternalLink
   },
   props: {
     popperPlacement: {

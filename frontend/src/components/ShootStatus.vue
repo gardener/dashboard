@@ -43,8 +43,9 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
       <template v-if="showStatusText">
-        <div v-for="({ description }) in tooltip.errorCodeObjects" :key="description">
+        <div v-for="({ description, hint }) in tooltip.errorCodeObjects" :key="description">
           <div class="font-weight-bold error--text wrap">{{description}}</div>
+          <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
         </div>
       </template>
     </template>
@@ -66,6 +67,7 @@ import map from 'lodash/map'
 import GPopper from '@/components/GPopper'
 import RetryOperation from '@/components/RetryOperation'
 import ShootMessageDetails from '@/components/ShootMessageDetails'
+import ExternalLink from '@/components/ExternalLink'
 
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 import { shootItem } from '@/mixins/shootItem'
@@ -74,7 +76,8 @@ export default {
   components: {
     GPopper,
     RetryOperation,
-    ShootMessageDetails
+    ShootMessageDetails,
+    ExternalLink
   },
   props: {
     popperKey: {

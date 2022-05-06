@@ -68,8 +68,8 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({description, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
-                color="error"
+                v-for="({description, hint, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
+                type="error"
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
               >
@@ -85,7 +85,9 @@ SPDX-License-Identifier: Apache-2.0
                         <span>{{secretBindingName}}</span>
                       </router-link>
                       <span v-else>{{secretBindingName}}</span>
-                    </code>: </span><span v-html="description" />
+                    </code>:</span>
+                    <span>{{description}}</span>
+                    <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
@@ -101,11 +103,13 @@ SPDX-License-Identifier: Apache-2.0
 import AnsiText from '@/components/AnsiText'
 import TimeString from '@/components/TimeString'
 import isEmpty from 'lodash/isEmpty'
+import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
   components: {
     AnsiText,
-    TimeString
+    TimeString,
+    ExternalLink
   },
   props: {
     statusTitle: {
