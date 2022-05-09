@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <div class="d-flex justify-center pr-4">
+        <div class="d-flex pr-4">
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>

@@ -377,7 +377,7 @@ export default {
           text: 'READINESS',
           value: 'readiness',
           sortable: true,
-          align: 'center',
+          align: 'start',
           defaultSelected: true,
           hidden: false
         },
