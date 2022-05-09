@@ -267,7 +267,7 @@ export default {
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.cfg.defaultNodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -318,8 +318,9 @@ export default {
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', undefined)
-      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length)
+      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
+      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.cfg.defaultNodesCIDR)
+      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
       if (zonesNetworkConfiguration) {
         set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
       }
