@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-subtitle>Description</v-list-item-subtitle>
-                    <v-list-item-title class="wrap-title-text">
+                    <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
                         color="action-button"
@@ -127,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-subtitle>Purpose</v-list-item-subtitle>
-                    <v-list-item-title class="wrap-title-text">
+                    <v-list-item-title class="wrap-text">
                       <editable-text
                         :read-only="!canPatchProject"
                         color="action-button"
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-list-item-avatar>
                     <v-list-item-content>
                       <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-                      <v-list-item-title class="markdown wrap-title-text" v-html="slaDescriptionHtml"></v-list-item-title>
+                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionHtml"></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </template>
@@ -273,7 +273,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-title>Command Line Interface Access</v-list-item-title>
-                    <v-list-item-subtitle class="wrap-title-text">
+                    <v-list-item-subtitle class="wrap-text">
                       Go to
                       <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
                         My Account
@@ -557,7 +557,7 @@ export default {
       margin: 0px;
     }
   }
-  .wrap-title-text {
+  .wrap-text {
     line-height: inherit;
     overflow: auto !important;
     white-space: normal !important;

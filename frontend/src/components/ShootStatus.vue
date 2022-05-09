@@ -43,9 +43,9 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
       <template v-if="showStatusText">
-        <div v-for="({ description, hint }) in tooltip.errorCodeObjects" :key="description">
+        <div v-for="({ description, link }) in tooltip.errorCodeObjects" :key="description">
           <div class="font-weight-bold error--text wrap-text">{{description}}</div>
-          <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
+          <div class="font-weight-bold" v-if="link"><external-link :url="link.url">{{link.text}}</external-link></div>
         </div>
       </template>
     </template>
