@@ -17,15 +17,35 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <manage-workers
         @valid="onWorkersValid"
+        @additionalZonesNetworkConfiguration="onAdditionalZonesNetworkConfiguration"
         ref="manageWorkers"
         v-on="$manageWorkers.hooks"
       ></manage-workers>
+    </template>
+    <template v-slot:errorMessage>
+      <v-alert
+        type="warning"
+        prominent
+        v-if="hasAdditionalZonesNetworkConfiguration"
+        dismissible
+        @input="dismissAdditionalNetworksWarning">
+        <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
+        <div class="code-background">
+          <code-block
+            lang="code"
+            :content="additionalZonesNetworkConfigurationYaml"
+            :show-copy-button="false"
+            ></code-block>
+        </div>
+        <span class="font-weight-bold">This change cannot be undone.</span>
+      </v-alert>
     </template>
   </action-button-dialog>
 </template>
 
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
+import CodeBlock from '@/components/CodeBlock'
 import { patchShootProvider } from '@/utils/api'
 import shootItem from '@/mixins/shootItem'
 import asyncRef from '@/mixins/asyncRef'
@@ -39,18 +59,26 @@ export default {
   name: 'worker-configuration',
   components: {
     ActionButtonDialog,
-    ManageWorkers
+    ManageWorkers,
+    CodeBlock
   },
   data () {
     return {
       workersValid: false,
-      workers: undefined
+      workers: undefined,
+      additionalZonesNetworkConfiguration: [],
+      additionalZonesNetworkConfigurationYaml: undefined
     }
   },
   mixins: [
     shootItem,
     asyncRef('manageWorkers')
   ],
+  computed: {
+    hasAdditionalZonesNetworkConfiguration () {
+      return this.additionalZonesNetworkConfiguration.length
+    }
+  },
   methods: {
     async onConfigurationDialogOpened () {
       await this.reset()
@@ -95,7 +123,30 @@ export default {
     },
     onWorkersValid (value) {
       this.workersValid = value
+    },
+    onAdditionalZonesNetworkConfiguration (value) {
+      this.additionalZonesNetworkConfiguration = value
+    },
+    dismissAdditionalNetworksWarning () {
+      this.additionalZonesNetworkConfiguration = []
+    }
+  },
+  watch: {
+    async hasAdditionalZonesNetworkConfiguration (value) {
+      if (value) {
+        this.additionalZonesNetworkConfigurationYaml = await this.$yaml.safeDump(this.additionalZonesNetworkConfiguration)
+      } else {
+        this.additionalZonesNetworkConfigurationYaml = undefined
+      }
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .code-background {
+    background-color: rgba(0, 0, 0, .5);
+  }
+
+</style>
