@@ -7,7 +7,7 @@
 'use strict'
 
 const { clone, split, first, get, set } = require('lodash')
-const { pki } = require('node-forge')
+const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const xRequestStart = Symbol('x-request-start')
@@ -81,9 +81,16 @@ function getUser ({ headers, key, cert }) {
 
   if (key && cert) {
     try {
-      const { subject } = pki.certificateFromPem(cert)
-      user.type = 'cn'
-      user.id = subject.getField('CN').value
+      const rCRLF = /\r?\n/
+      const x509 = new crypto.X509Certificate(cert)
+      for (const field of split(x509.subject, rCRLF)) {
+        const [, commonName] = /^(?:CN|commonName)=(.*)$/.exec(field) || []
+        if (commonName) {
+          user.type = 'cn'
+          user.id = commonName
+          break
+        }
+      }
     } catch (err) { /* ignore error */ }
   }
   return user.id ? user : undefined

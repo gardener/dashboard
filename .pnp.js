@@ -2518,7 +2518,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["jsonwebtoken", "npm:8.5.1"],
             ["lodash", "npm:4.17.21"],
             ["mixwith", "npm:0.1.1"],
-            ["node-forge", "npm:0.10.0"],
             ["uuid", "npm:8.3.0"]
           ],
           "linkType": "SOFT",
@@ -2535,7 +2534,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-jest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:24.3.5"],
             ["eslint-plugin-node", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:11.1.0"],
             ["eslint-plugin-promise", "npm:4.3.1"],
-            ["gtoken", "npm:5.3.0"],
+            ["gtoken", "npm:5.3.2"],
             ["jest", "npm:26.6.3"],
             ["js-yaml", "npm:3.14.0"],
             ["lodash", "npm:4.17.21"]
@@ -11275,11 +11274,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["google-p12-pem", [
-        ["npm:3.1.0", {
-          "packageLocation": "./.yarn/cache/google-p12-pem-npm-3.1.0-6755c5f8c2-b1dfd8b698.zip/node_modules/google-p12-pem/",
+        ["npm:3.1.4", {
+          "packageLocation": "./.yarn/cache/google-p12-pem-npm-3.1.4-9c29549f04-952c9a0557.zip/node_modules/google-p12-pem/",
           "packageDependencies": [
-            ["google-p12-pem", "npm:3.1.0"],
-            ["node-forge", "npm:0.10.0"]
+            ["google-p12-pem", "npm:3.1.4"],
+            ["node-forge", "npm:1.3.1"]
           ],
           "linkType": "HARD",
         }]
@@ -11325,12 +11324,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["gtoken", [
-        ["npm:5.3.0", {
-          "packageLocation": "./.yarn/cache/gtoken-npm-5.3.0-6c9aaeb61d-14644b721c.zip/node_modules/gtoken/",
+        ["npm:5.3.2", {
+          "packageLocation": "./.yarn/cache/gtoken-npm-5.3.2-bd1d540115-8d5abe2a19.zip/node_modules/gtoken/",
           "packageDependencies": [
-            ["gtoken", "npm:5.3.0"],
+            ["gtoken", "npm:5.3.2"],
             ["gaxios", "npm:4.3.0"],
-            ["google-p12-pem", "npm:3.1.0"],
+            ["google-p12-pem", "npm:3.1.4"],
             ["jws", "npm:4.0.0"]
           ],
           "linkType": "HARD",
@@ -15588,6 +15587,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/node-forge-npm-0.10.0-605ba7b28b-c7a729933a.zip/node_modules/node-forge/",
           "packageDependencies": [
             ["node-forge", "npm:0.10.0"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:1.3.1", {
+          "packageLocation": "./.yarn/cache/node-forge-npm-1.3.1-f31fd566cc-cbb7d3386b.zip/node_modules/node-forge/",
+          "packageDependencies": [
+            ["node-forge", "npm:1.3.1"]
           ],
           "linkType": "HARD",
         }]
