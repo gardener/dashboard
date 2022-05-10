@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <manage-workers
         @valid="onWorkersValid"
-        @additionalZonesNetworkConfiguration="onAdditionalZonesNetworkConfiguration"
+        @additionalZonesNetworkConfiguration="setNetworkConfiguration"
         ref="manageWorkers"
         v-on="$manageWorkers.hooks"
       ></manage-workers>
@@ -28,14 +28,14 @@ SPDX-License-Identifier: Apache-2.0
         outlined
         tile
         prominent
-        v-if="hasAdditionalZonesNetworkConfiguration"
+        v-if="networkConfiguration.length"
         dismissible
-        @input="dismissAdditionalNetworksWarning"
+        @input="setNetworksConfiguration(null)"
         class="mx-1">
         <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
         <code-block
           lang="code"
-          :content="additionalZonesNetworkConfigurationYaml"
+          :content="networkConfigurationYaml"
           :show-copy-button="false"
           ></code-block>
         <span class="font-weight-bold">This change cannot be undone.</span>
@@ -67,19 +67,14 @@ export default {
     return {
       workersValid: false,
       workers: undefined,
-      additionalZonesNetworkConfiguration: [],
-      additionalZonesNetworkConfigurationYaml: undefined
+      networkConfiguration: [],
+      networkConfigurationYaml: undefined
     }
   },
   mixins: [
     shootItem,
     asyncRef('manageWorkers')
   ],
-  computed: {
-    hasAdditionalZonesNetworkConfiguration () {
-      return this.additionalZonesNetworkConfiguration.length
-    }
-  },
   methods: {
     async onConfigurationDialogOpened () {
       await this.reset()
@@ -125,20 +120,13 @@ export default {
     onWorkersValid (value) {
       this.workersValid = value
     },
-    onAdditionalZonesNetworkConfiguration (value) {
-      this.additionalZonesNetworkConfiguration = value
-    },
-    dismissAdditionalNetworksWarning () {
-      this.additionalZonesNetworkConfiguration = []
-    }
-  },
-  watch: {
-    async hasAdditionalZonesNetworkConfiguration (value) {
+    async setNetworkConfiguration (value) {
       if (value) {
-        this.additionalZonesNetworkConfigurationYaml = await this.$yaml.safeDump(this.additionalZonesNetworkConfiguration)
+        this.networkConfiguration = value
+        this.networkConfigurationYaml = await this.$yaml.safeDump(value)
       } else {
-        this.additionalZonesNetworkConfigurationYaml = undefined
-      }
+        this.networkConfiguration = []
+        this.networkConfigurationYaml
     }
   }
 }
