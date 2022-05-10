@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       color="primary"
       item-color="primary"
-      :items="criNames"
+      :items="criItems"
       :error-messages="getErrorMessages('criName')"
       @input="onInputCriName"
       @blur="$v.criName.$touch()"
@@ -34,7 +34,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
@@ -44,9 +43,9 @@ import unset from 'lodash/unset'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 
-const validations = {
+const validationErrors = {
   criName: {
-    required
+    validCriName: 'The selected machine image does not support the selected Container Rumtime'
   }
 }
 
@@ -67,21 +66,30 @@ export default {
   },
   data () {
     return {
-      valid: undefined
+      valid: undefined,
+      validationErrors
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
-    validationErrors () {
-      const originalCriName = this.originalCri.name
-      return {
-        criName: {
-          required: `The selected machine image does not support previously selected Container Rumtime '${originalCriName}'`
+    criItems () {
+      const criItems = map(this.machineImageCri, cri => {
+        return {
+          value: cri.name,
+          text: cri.name,
+          valid: true
         }
+      })
+      if (!includes(criItems, this.criName)) {
+        criItems.push({
+          value: this.criName,
+          text: this.criName,
+          valid: false
+        })
       }
-    },
-    criNames () {
-      return map(this.machineImageCri, 'name')
+      return criItems
     },
     criContainerRuntimeTypes () {
       const containerRuntime = find(this.machineImageCri, ['name', this.criName])
@@ -114,6 +122,16 @@ export default {
           unset(this.worker, 'cri.containerRuntimes')
         }
       }
+    },
+    validators () {
+      return {
+        criName: {
+          validCriName: value => {
+            const criItem = find(this.criItems, { value })
+            return get(criItem, 'valid', false)
+          }
+        }
+      }
     }
   },
   methods: {
@@ -138,18 +156,9 @@ export default {
     this.originalCri = get(this.worker, 'cri', {})
   },
   watch: {
-    criNames (criNames) {
-      if (!includes(criNames, this.criName)) {
-        if (includes(criNames, this.originalCri.name)) {
-          // Restore original container runtime settings if possible
-          set(this.worker, 'cri', this.originalCri)
-        } else {
-          // To not implicitly change to other container runtime
-          set(this.worker, 'cri', undefined)
-        }
-        this.$v.$touch()
-        this.validateInput()
-      }
+    criItems (criItems) {
+      this.$v.$touch()
+      this.validateInput()
     }
   }
 }
