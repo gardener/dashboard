@@ -45,6 +45,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:caption>{{caption}}</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
       <template v-slot:message><slot name="actionComponent"></slot></template>
+      <template v-slot:errorMessage><slot name="errorMessage"></slot></template>
     </g-dialog>
   </div>
   <div v-else style="width: 36px"></div>
