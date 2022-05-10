@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         prominent
         v-if="networkConfiguration.length"
         dismissible
-        @input="setNetworksConfiguration(null)"
+        @input="setNetworkConfiguration(undefined)"
         class="mx-1">
         <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
         <code-block
@@ -126,7 +126,8 @@ export default {
         this.networkConfigurationYaml = await this.$yaml.safeDump(value)
       } else {
         this.networkConfiguration = []
-        this.networkConfigurationYaml
+        this.networkConfigurationYaml = undefined
+      }
     }
   }
 }
