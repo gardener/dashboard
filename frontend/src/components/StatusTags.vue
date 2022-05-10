@@ -5,16 +5,24 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-center">
-    <status-tag
-      v-for="condition in conditions"
-      :condition="condition"
-      :popper-key="condition.id"
-      :key="condition.id"
-      :popper-placement="popperPlacement"
-      :secret-binding-name="shootSecretBindingName"
-      :namespace="shootNamespace">
+  <div>
+    <div class="d-flex flex-nowrap justify-start">
+      <status-tag
+        v-for="condition in conditions"
+        :condition="condition"
+        :popper-key="condition.id"
+        :key="condition.id"
+        :popper-placement="popperPlacement"
+        :secret-binding-name="shootSecretBindingName"
+        :namespace="shootNamespace">
     </status-tag>
+    </div>
+    <template v-if="showStatusText">
+      <div v-for="({ description, link }) in errorCodeObjects" :key="description" class="mt-1">
+        <div class="font-weight-bold error--text wrap-text">{{description}}</div>
+        <div v-if="link"><external-link :url="link.url" class="font-weight-bold error--text">{{link.text}}</external-link></div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -30,18 +38,24 @@ import snakeCase from 'lodash/snakeCase'
 import includes from 'lodash/includes'
 import upperFirst from 'lodash/upperFirst'
 import StatusTag from '@/components/StatusTag'
-import isEmpty from 'lodash/isEmpty'
+import ExternalLink from '@/components/ExternalLink'
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import { shootItem } from '@/mixins/shootItem'
+import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
   components: {
-    StatusTag
+    StatusTag,
+    ExternalLink
   },
   props: {
     popperPlacement: {
       type: String
+    },
+    showStatusText: {
+      type: Boolean,
+      default: false
     }
   },
   mixins: [shootItem],
@@ -50,11 +64,7 @@ export default {
       'conditionCache'
     ]),
     conditions () {
-      if (isEmpty(this.shootConditions)) {
-        return []
-      }
-
-      const shootConditions = filter(this.shootConditions, condition => !!condition.lastTransitionTime)
+      const shootConditions = filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
       const conditions = map(shootConditions, condition => {
         const { lastTransitionTime, message, status, type, codes } = condition
         const id = type
@@ -64,6 +74,10 @@ export default {
       })
 
       return sortBy(conditions, 'shortName')
+    },
+    errorCodeObjects () {
+      const allErrorCodes = errorCodesFromArray(this.conditions)
+      return objectsFromErrorCodes(allErrorCodes)
     }
   },
   methods: {

@@ -43,8 +43,6 @@ import TicketsCard from '@/components/TicketsCard'
 
 import { shootItem } from '@/mixins/shootItem'
 
-import 'codemirror/mode/yaml/yaml.js'
-
 const ShootAccessCard = () => import('@/components/ShootDetails/ShootAccessCard')
 
 export default {

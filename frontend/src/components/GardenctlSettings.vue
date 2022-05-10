@@ -25,16 +25,6 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
         ></v-radio>
       </v-radio-group>
-      <v-select
-        v-show="!legacyCommands"
-        color="primary"
-        item-color="primary"
-        label="Shell"
-        :items="['bash', 'fish', 'powershell', 'zsh']"
-        hint="Choose for which shell the commands should be displayed"
-        persistent-hint
-        v-model="shell"
-      ></v-select>
     </v-card-text>
   </v-card>
 </template>
@@ -55,17 +45,6 @@ export default {
         this.setGardenctlOptions({
           ...this.$store.state.gardenctlOptions,
           legacyCommands: value
-        })
-      }
-    },
-    shell: {
-      get () {
-        return this.gardenctlOptions.shell
-      },
-      set (value) {
-        this.setGardenctlOptions({
-          ...this.$store.state.gardenctlOptions,
-          shell: value
         })
       }
     }

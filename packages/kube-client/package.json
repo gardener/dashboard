@@ -32,7 +32,6 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "4.17.21",
     "mixwith": "^0.1.1",
-    "node-forge": "^0.10.0",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
@@ -97,7 +96,7 @@
     ]
   },
   "engines": {
-    "node": "^16.1.0",
+    "node": "^16.15.0",
     "yarn": "^2.4.1"
   }
 }
