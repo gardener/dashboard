@@ -33,7 +33,7 @@
     "node-gyp": "latest"
   },
   "engines": {
-    "node": "^16.1.0",
+    "node": "^16.15.0",
     "yarn": "^2.4.1"
   }
 }
