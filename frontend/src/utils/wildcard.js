@@ -9,27 +9,29 @@
 import startsWith from 'lodash/startsWith'
 import endsWith from 'lodash/endsWith'
 import map from 'lodash/map'
-import trim from 'lodash/trim'
 import filter from 'lodash/filter'
 import head from 'lodash/head'
+import includes from 'lodash/includes'
 
 export function wildcardObjectsFromStrings (wildcardStrings) {
   return map(wildcardStrings, item => {
     let startsWithWildcard = false
     let endsWithWildcard = false
     let customWildcard = false
-    const value = trim(item, '*')
-    let pattern = value
+    let value = item
 
     if (item === '*') {
       customWildcard = true
-      pattern = '.*'
-    } else if (startsWith(item, '*')) {
-      startsWithWildcard = true
-      pattern = '.*' + pattern
-    } else if (endsWith(item, '*')) {
-      endsWithWildcard = true
-      pattern = pattern + '.*'
+      value = ''
+    } else {
+      if (startsWith(item, '*')) {
+        startsWithWildcard = true
+        value = value.substring(1, value.length)
+      }
+      if (endsWith(item, '*')) {
+        endsWithWildcard = true
+        value = value.substring(0, value.length - 1)
+      }
     }
 
     return {
@@ -39,14 +41,32 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
       endsWithWildcard,
       customWildcard,
       isWildcard: startsWithWildcard || endsWithWildcard || customWildcard,
-      regex: new RegExp('^' + pattern + '$')
+      test: function (value) {
+        if (!this.isWildcard) {
+          return value === this.originalValue
+        }
+        if (this.customWildcard) {
+          return true
+        }
+        if (this.startsWithWildcard && this.endsWithWildcard) {
+          return includes(value.substring(1, value.length - 1), this.value)
+        }
+        if (this.startsWithWildcard) {
+          return endsWith(value.substring(1, value.length), this.value)
+        }
+        if (this.endsWithWildcard) {
+          return startsWith(value.substring(0, value.length - 1), this.value)
+        }
+
+        return false
+      }
     }
   })
 }
 
 export function bestMatchForString (wildCardObjects, wildCardString) {
   const matches = filter(wildCardObjects, (item) => {
-    return item.regex.test(wildCardString)
+    return item.test(wildCardString)
   })
   matches.sort(function (a, b) {
     return b.value.length - a.value.length
