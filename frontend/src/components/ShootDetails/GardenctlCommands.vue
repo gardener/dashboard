@@ -77,7 +77,6 @@ import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
-import includes from 'lodash/includes'
 import Vue from 'vue'
 
 export default {
@@ -112,17 +111,16 @@ export default {
       }
 
       const gardenctlVersion = this.legacyCommands ? 'Legacy gardenctl' : 'Gardenctl-v2'
-      const additionalInfo = this.legacyCommands ? '' : `(${this.shell})`
       return [
         {
           title: 'Target Control Plane',
-          subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster ${additionalInfo}`,
+          subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster`,
           value: this.targetControlPlaneCommand,
           displayValue: displayValue(this.targetControlPlaneCommand)
         },
         {
           title: 'Target Cluster',
-          subtitle: `${gardenctlVersion} command to target the shoot cluster ${additionalInfo}`,
+          subtitle: `${gardenctlVersion} command to target the shoot cluster`,
           value: this.targetShootCommand,
           displayValue: displayValue(this.targetShootCommand)
         }
@@ -130,15 +128,6 @@ export default {
     },
     legacyCommands () {
       return get(this.gardenctlOptions, 'legacyCommands', false)
-    },
-    shell () {
-      const shell = get(this.gardenctlOptions, 'shell')
-
-      if (!includes(['bash', 'fish', 'powershell', 'zsh'], shell)) {
-        return 'bash'
-      }
-
-      return shell
     },
     targetControlPlaneCommand () {
       if (this.legacyCommands) {
@@ -182,7 +171,7 @@ export default {
 
       args.push('--control-plane')
 
-      return `gardenctl target ${args.join(' ')} && ${this.kubectlEnvCommandV2}`
+      return `gardenctl target ${args.join(' ')}`
     },
     targetShootCommandV1 () {
       const args = []
@@ -210,10 +199,7 @@ export default {
         args.push(`--shoot ${this.shootName}`)
       }
 
-      return `gardenctl target ${args.join(' ')} && ${this.kubectlEnvCommandV2}`
-    },
-    kubectlEnvCommandV2 () {
-      return this.invokeCommandString(`gardenctl kubectl-env ${this.shell}`)
+      return `gardenctl target ${args.join(' ')}`
     }
   },
   methods: {
@@ -225,16 +211,6 @@ export default {
     },
     toggle (index) {
       Vue.set(this.expansionPanel, index, !this.expansionPanel[index])
-    },
-    invokeCommandString (command) {
-      switch (this.shell) {
-        case 'powershell':
-          return `& ${command} | Invoke-Expression`
-        case 'fish':
-          return `eval (${command})`
-        default:
-          return `eval $(${command})`
-      }
     }
   }
 }
