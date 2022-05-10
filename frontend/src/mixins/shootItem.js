@@ -10,6 +10,7 @@ import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import some from 'lodash/some'
+import filter from 'lodash/filter'
 import { mapGetters } from 'vuex'
 
 import {
@@ -185,6 +186,18 @@ export const shootItem = {
     shootConditions () {
       return get(this.shootItem, 'status.conditions', [])
     },
+    shootConstraints () {
+      return get(this.shootItem, 'status.constraints', [])
+    },
+    shootReadiness () {
+      const shootConstraintsWithErrorCode = filter(this.shootConstraints, constraint => {
+        return constraint.codes && constraint.codes.length
+      })
+      return [
+        ...this.shootConditions,
+        ...shootConstraintsWithErrorCode
+      ]
+    },
     shootObservedGeneration () {
       return get(this.shootItem, 'status.observedGeneration')
     },
@@ -204,8 +217,7 @@ export const shootItem = {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
     },
     hibernationPossibleConstraint () {
-      const constraints = get(this.shootItem, 'status.constraints')
-      return find(constraints, ['type', 'HibernationPossible'])
+      return find(this.shootConstraints, ['type', 'HibernationPossible'])
     },
     isHibernationPossible () {
       const status = get(this.hibernationPossibleConstraint, 'status', 'True')
@@ -215,7 +227,7 @@ export const shootItem = {
       return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
     },
     maintenancePreconditionSatisfiedConstraint () {
-      const constraints = get(this.shootItem, 'status.constraints')
+      const constraints = this.shootConstraints
       return find(constraints, ['type', 'MaintenancePreconditionsSatisfied'])
     },
     isMaintenancePreconditionSatisfied () {

@@ -459,6 +459,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
     if (transformToExternalLinks) {
       linkElement.classList.add('text-decoration-none')
       linkElement.setAttribute('target', '_blank')
+      linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML
       linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><em class="v-icon mdi mdi-open-in-new text-body-1"></em>`
     }

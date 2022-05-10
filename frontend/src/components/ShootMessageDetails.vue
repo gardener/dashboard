@@ -68,13 +68,15 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({description, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
-                color="error"
+                v-for="({description, link, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
+                type="error"
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
               >
-                <h4 v-if="userError">Action required</h4>
-                <span class="wrap">
+                <h3 v-if="userError">Your Action is required</h3>
+                <h4 class="wrap-text font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
+                Please read the error message carefully and take action.</h4>
+                <span class="wrap-text">
                   <span v-if="infraAccountError">There is a problem with your secret
                     <code>
                       <router-link v-if="canLinkToSecret"
@@ -84,7 +86,8 @@ SPDX-License-Identifier: Apache-2.0
                       </router-link>
                       <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
-                  {{description}}
+                    <span>{{description}}</span>
+                    <div v-if="link"><external-link :url="link.url" class="inherit-color font-weight-bold">{{link.text}}</external-link></div>
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
@@ -100,11 +103,13 @@ SPDX-License-Identifier: Apache-2.0
 import AnsiText from '@/components/AnsiText'
 import TimeString from '@/components/TimeString'
 import isEmpty from 'lodash/isEmpty'
+import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
   components: {
     AnsiText,
-    TimeString
+    TimeString,
+    ExternalLink
   },
   props: {
     statusTitle: {
@@ -145,10 +150,6 @@ export default {
   .message-block {
     max-height: 230px;
     overflow-y: auto;
-  }
-
-  .wrap {
-    white-space: pre-wrap;
   }
 
 </style>
