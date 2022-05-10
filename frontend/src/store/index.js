@@ -149,12 +149,12 @@ const state = {
     MaintenancePreconditionsSatisfied: {
       displayName: 'Maintenance Preconditions Satisfied',
       shortName: 'M',
-      description: 'Indicates whether Gardener is able to perform required actions during maintenance. If you not resolve this issue your cluster will eventually turn into an error state.'
+      description: 'Indicates whether Gardener is able to perform required actions during maintenance. If you do not resolve this issue your cluster will eventually turn into an error state.'
     },
     HibernationPossible: {
       displayName: 'Hibernation Preconditions Satisfied',
       shortName: 'H',
-      description: 'Indicates whether Gardener is able to hibernate this cluster. If you not resolve this issue your hibernation schedule may not have any effect.'
+      description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
   darkTheme: false,
