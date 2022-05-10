@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="showStatusText">
       <div v-for="({ description, link }) in errorCodeObjects" :key="description" class="mt-1">
         <div class="font-weight-bold error--text wrap-text">{{description}}</div>
-        <div class="font-weight-bold" v-if="link"><external-link :url="link.url">{{link.text}}</external-link></div>
+        <div v-if="link"><external-link :url="link.url" class="font-weight-bold error--text">{{link.text}}</external-link></div>
       </div>
     </template>
   </div>

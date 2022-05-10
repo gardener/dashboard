@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({description, hint, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
+                v-for="({description, link, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
                 type="error"
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
                       <span v-else>{{secretBindingName}}</span>
                     </code>:</span>
                     <span>{{description}}</span>
-                    <div v-if="hint"><external-link :url="hint.url">{{hint.text}}</external-link></div>
+                    <div v-if="link"><external-link :url="link.url" class="inherit-color font-weight-bold">{{link.text}}</external-link></div>
                 </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
