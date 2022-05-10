@@ -25,18 +25,19 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:errorMessage>
       <v-alert
         type="warning"
+        outlined
+        tile
         prominent
         v-if="hasAdditionalZonesNetworkConfiguration"
         dismissible
-        @input="dismissAdditionalNetworksWarning">
+        @input="dismissAdditionalNetworksWarning"
+        class="mx-1">
         <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
-        <div class="code-background">
-          <code-block
-            lang="code"
-            :content="additionalZonesNetworkConfigurationYaml"
-            :show-copy-button="false"
-            ></code-block>
-        </div>
+        <code-block
+          lang="code"
+          :content="additionalZonesNetworkConfigurationYaml"
+          :show-copy-button="false"
+          ></code-block>
         <span class="font-weight-bold">This change cannot be undone.</span>
       </v-alert>
     </template>
@@ -142,11 +143,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .code-background {
-    background-color: rgba(0, 0, 0, .5);
-  }
-
-</style>
