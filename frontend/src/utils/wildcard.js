@@ -48,14 +48,20 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
         if (this.customWildcard) {
           return true
         }
+        const index = value.indexOf(this.value)
+        const lengthDifference = value.length - this.value.length
+
         if (this.startsWithWildcard && this.endsWithWildcard) {
-          return includes(value.substring(1, value.length - 1), this.value)
+          // included but does not start or end with
+          return index > 0 && index < lengthDifference
         }
         if (this.startsWithWildcard) {
-          return endsWith(value.substring(1, value.length), this.value)
+          // ends with and not equal
+          return index === lengthDifference && lengthDifference > 0
         }
         if (this.endsWithWildcard) {
-          return startsWith(value.substring(0, value.length - 1), this.value)
+          // starts with and not equal
+          return index === 0 && lengthDifference > 0
         }
 
         return false
