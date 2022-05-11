@@ -216,11 +216,11 @@ export default {
       return [{
         key: 'maintenanceConstraintWarning',
         icon: 'mdi-alert-circle-outline',
-        color: 'warning',
+        color: 'error',
         component: {
           name: 'constraint-message',
           props: {
-            constraintCaption: 'Maintenance precondition check failed. It may not be safe to start maintenance for your cluster due to the following reason',
+            constraintCaption: 'Maintenance precondition check failed. Gardener may be unable to perform required actions during maintenance',
             constraintMessage: this.maintenancePreconditionSatisfiedMessage
           }
         }

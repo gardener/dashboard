@@ -90,9 +90,6 @@ export default {
     padding: 0;
     margin-bottom: 12px;
   }
-  .wrap-text {
-    white-space: normal;
-  }
 
   .comment-header {
     border-top-left-radius: 2px;

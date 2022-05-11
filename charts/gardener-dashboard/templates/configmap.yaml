@@ -317,5 +317,7 @@ data:
       {{- if .Values.frontendConfig.gardenctl }}
       gardenctl:
         legacyCommands: {{ .Values.frontendConfig.gardenctl.legacyCommands | default false }}
-        shell: {{ .Values.frontendConfig.gardenctl.shell | default "bash" }}
+      {{- end }}
+      {{- if .Values.frontendConfig.defaultNodesCIDR }}
+      defaultNodesCIDR: {{ .Values.frontendConfig.defaultNodesCIDR }}
       {{- end }}

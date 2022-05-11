@@ -17,15 +17,36 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <manage-workers
         @valid="onWorkersValid"
+        @additionalZonesNetworkConfiguration="setNetworkConfiguration"
         ref="manageWorkers"
         v-on="$manageWorkers.hooks"
       ></manage-workers>
+    </template>
+    <template v-slot:errorMessage>
+      <v-alert
+        type="warning"
+        outlined
+        tile
+        prominent
+        v-if="networkConfiguration.length"
+        dismissible
+        @input="setNetworkConfiguration(undefined)"
+        class="mx-1">
+        <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
+        <code-block
+          lang="code"
+          :content="networkConfigurationYaml"
+          :show-copy-button="false"
+          ></code-block>
+        <span class="font-weight-bold">This change cannot be undone.</span>
+      </v-alert>
     </template>
   </action-button-dialog>
 </template>
 
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
+import CodeBlock from '@/components/CodeBlock'
 import { patchShootProvider } from '@/utils/api'
 import shootItem from '@/mixins/shootItem'
 import asyncRef from '@/mixins/asyncRef'
@@ -39,12 +60,15 @@ export default {
   name: 'worker-configuration',
   components: {
     ActionButtonDialog,
-    ManageWorkers
+    ManageWorkers,
+    CodeBlock
   },
   data () {
     return {
       workersValid: false,
-      workers: undefined
+      workers: undefined,
+      networkConfiguration: [],
+      networkConfigurationYaml: undefined
     }
   },
   mixins: [
@@ -95,6 +119,15 @@ export default {
     },
     onWorkersValid (value) {
       this.workersValid = value
+    },
+    async setNetworkConfiguration (value) {
+      if (value) {
+        this.networkConfiguration = value
+        this.networkConfigurationYaml = await this.$yaml.safeDump(value)
+      } else {
+        this.networkConfiguration = []
+        this.networkConfigurationYaml = undefined
+      }
     }
   }
 }
