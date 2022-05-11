@@ -204,7 +204,8 @@ export default {
       'newShootResource',
       'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'zonesByCloudProfileNameAndRegion',
+      'nodesCIDR'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -267,7 +268,7 @@ export default {
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.cfg.defaultNodesCIDR))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.nodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -319,7 +320,7 @@ export default {
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
       const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
-      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.cfg.defaultNodesCIDR)
+      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.nodesCIDR)
       const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
       if (zonesNetworkConfiguration) {
         set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
@@ -424,7 +425,8 @@ export default {
       const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
-      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion })
+      const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.nodesCIDR)
+      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)

@@ -1292,7 +1292,10 @@ const getters = {
       ...getters.defaultGardenctlOptions,
       ...state.gardenctlOptions
     }
-  }
+  },
+  nodesCIDR (state) {
+    return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
+  },
 }
 
 // actions
