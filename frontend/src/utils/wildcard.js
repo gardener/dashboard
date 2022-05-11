@@ -41,7 +41,7 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
       endsWithWildcard,
       customWildcard,
       isWildcard: startsWithWildcard || endsWithWildcard || customWildcard,
-      test: function (value) {
+      test (value) {
         if (!this.isWildcard) {
           return value === this.originalValue
         }
