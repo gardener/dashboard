@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       color="primary"
       item-color="primary"
-      :items="criNames"
+      :items="criItems"
       :error-messages="getErrorMessages('criName')"
       @input="onInputCriName"
       @blur="$v.criName.$touch()"
@@ -34,8 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { requiredIf } from 'vuelidate/lib/validators'
-import { getValidationErrors, defaultCriNameByKubernetesVersion } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -46,13 +45,7 @@ import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   criName: {
-    required: 'Container Runtime is required'
-  }
-}
-
-const validations = {
-  criName: {
-    required: requiredIf('criNameIsRequired')
+    validCriName: 'The selected machine image does not support the selected container runtime'
   }
 }
 
@@ -69,22 +62,36 @@ export default {
     kubernetesVersion: {
       type: String,
       required: true
-    },
-    criNameIsRequired: {
-      type: Boolean,
-      default: false
     }
   },
   data () {
     return {
-      validationErrors,
-      valid: undefined
+      valid: undefined,
+      validationErrors
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
-    criNames () {
+    validCriNames () {
       return map(this.machineImageCri, 'name')
+    },
+    criItems () {
+      const criItems = map(this.validCriNames, name => {
+        return {
+          value: name,
+          text: name
+        }
+      })
+      if (!includes(criItems, this.criName)) {
+        criItems.push({
+          value: this.criName,
+          text: this.criName,
+          disabled: true
+        })
+      }
+      return criItems
     },
     criContainerRuntimeTypes () {
       const containerRuntime = find(this.machineImageCri, ['name', this.criName])
@@ -117,6 +124,15 @@ export default {
           unset(this.worker, 'cri.containerRuntimes')
         }
       }
+    },
+    validators () {
+      return {
+        criName: {
+          validCriName: value => {
+            return includes(this.validCriNames, value)
+          }
+        }
+      }
     }
   },
   methods: {
@@ -140,11 +156,9 @@ export default {
     this.validateInput()
   },
   watch: {
-    criNames (criNames) {
-      if (!includes(criNames, this.criName)) {
-        this.criName = defaultCriNameByKubernetesVersion(criNames, this.kubernetesVersion)
-        this.onInputCriName()
-      }
+    criItems (criItems) {
+      this.$v.$touch()
+      this.validateInput()
     }
   }
 }
