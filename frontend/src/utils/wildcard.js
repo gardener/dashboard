@@ -11,7 +11,6 @@ import endsWith from 'lodash/endsWith'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import head from 'lodash/head'
-import includes from 'lodash/includes'
 
 export function wildcardObjectsFromStrings (wildcardStrings) {
   return map(wildcardStrings, item => {
