@@ -45,7 +45,7 @@ import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   criName: {
-    validCriName: 'The selected machine image does not support the selected Container Rumtime'
+    validCriName: 'The selected machine image does not support the selected container runtime'
   }
 }
 
