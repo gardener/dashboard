@@ -54,14 +54,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import startsWith from 'lodash/startsWith'
-import endsWith from 'lodash/endsWith'
-import map from 'lodash/map'
+
 import trim from 'lodash/trim'
-import filter from 'lodash/filter'
-import head from 'lodash/head'
 import { getValidationErrors } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
+import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 
 const validations = {
   wildcardVariablePart: {
@@ -115,33 +112,7 @@ export default {
       return undefined
     },
     wildcardSelectItemObjects () {
-      return map(this.wildcardSelectItems, item => {
-        let startsWithWildcard = false
-        let endsWithWildcard = false
-        let customWildcard = false
-        const value = trim(item, '*')
-        let pattern = value
-
-        if (item === '*') {
-          customWildcard = true
-          pattern = '.*'
-        } else if (startsWith(item, '*')) {
-          startsWithWildcard = true
-          pattern = '.*' + pattern
-        } else if (endsWith(item, '*')) {
-          endsWithWildcard = true
-          pattern = pattern + '.*'
-        }
-
-        return {
-          value,
-          startsWithWildcard,
-          endsWithWildcard,
-          customWildcard,
-          isWildcard: startsWithWildcard || endsWithWildcard || customWildcard,
-          regex: new RegExp('^' + pattern + '$')
-        }
-      })
+      return wildcardObjectsFromStrings(this.wildcardSelectItems)
     },
     wildcardTextFieldLabel () {
       if (this.wildcardSelectedValue.startsWithWildcard) {
@@ -193,29 +164,7 @@ export default {
       this.$emit('input', this.internalValue)
     },
     setInternalValue (newValue) {
-      const matches = filter(this.wildcardSelectItemObjects, (item) => {
-        return item.regex.test(newValue)
-      })
-      matches.sort(function (a, b) {
-        return b.value.length - a.value.length
-      })
-      matches.sort(function (a, b) {
-        if (a.isWildcard && !b.isWildcard) {
-          return 1
-        }
-        if (b.isWildcard && !a.isWildcard) {
-          return -1
-        }
-        if (a.customWildcard && !b.customWildcard) {
-          return 1
-        }
-        if (b.customWildcard && !a.customWildcard) {
-          return -1
-        }
-        return 0
-      })
-
-      const bestMatch = head(matches)
+      const bestMatch = bestMatchForString(this.wildcardSelectItemObjects, newValue)
       if (!bestMatch) {
         return
       }

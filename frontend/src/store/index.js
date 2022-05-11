@@ -766,7 +766,7 @@ const getters = {
       return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
-  floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
+  floatingPoolsByCloudProfileNameAndRegionAndDomain (state, getters) {
     return ({ cloudProfileName, region, secretDomain }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
@@ -782,7 +782,12 @@ const getters = {
         availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
       }
 
-      return uniq(map(availableFloatingPools, 'name'))
+      return availableFloatingPools
+    }
+  },
+  floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
+    return ({ cloudProfileName, region, secretDomain }) => {
+      return uniq(map(getters.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }), 'name'))
     }
   },
   loadBalancerProviderNamesByCloudProfileNameAndRegion (state, getters) {
