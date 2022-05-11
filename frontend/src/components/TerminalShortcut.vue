@@ -168,10 +168,6 @@ export default {
 
 <style lang="scss" scoped>
 
-  .wrap-text {
-    white-space: normal;
-  }
-
   ::v-deep .popper {
     text-align: initial;
   }

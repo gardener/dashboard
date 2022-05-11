@@ -145,6 +145,16 @@ const state = {
       displayName: 'System Components',
       shortName: 'SC',
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
+    },
+    MaintenancePreconditionsSatisfied: {
+      displayName: 'Maintenance Preconditions Satisfied',
+      shortName: 'M',
+      description: 'Indicates whether Gardener is able to perform required actions during maintenance. If you do not resolve this issue your cluster will eventually turn into an error state.'
+    },
+    HibernationPossible: {
+      displayName: 'Hibernation Preconditions Satisfied',
+      shortName: 'H',
+      description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
   darkTheme: false,
@@ -756,7 +766,7 @@ const getters = {
       return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
-  floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
+  floatingPoolsByCloudProfileNameAndRegionAndDomain (state, getters) {
     return ({ cloudProfileName, region, secretDomain }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
@@ -772,7 +782,12 @@ const getters = {
         availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
       }
 
-      return uniq(map(availableFloatingPools, 'name'))
+      return availableFloatingPools
+    }
+  },
+  floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
+    return ({ cloudProfileName, region, secretDomain }) => {
+      return uniq(map(getters.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }), 'name'))
     }
   },
   loadBalancerProviderNamesByCloudProfileNameAndRegion (state, getters) {
@@ -1269,7 +1284,6 @@ const getters = {
   defaultGardenctlOptions (state) {
     return {
       legacyCommands: false,
-      shell: 'bash',
       ...get(state, 'cfg.gardenctl')
     }
   },

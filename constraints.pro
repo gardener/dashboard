@@ -19,7 +19,7 @@ gen_enforced_dependency(WorkspaceCwd, DependencyIdent, DependencyRange2, Depende
 gen_enforced_field(WorkspaceCwd, 'license', 'Apache-2.0').
 
 % This rule will enforce that all packages must have certain engines fields
-gen_enforced_field(WorkspaceCwd, 'engines.node', '^16.1.0').
+gen_enforced_field(WorkspaceCwd, 'engines.node', '^16.15.0').
 gen_enforced_field(WorkspaceCwd, 'engines.yarn', '^2.4.1').
 
 % Required to make the package work with the GitHub Package Registry

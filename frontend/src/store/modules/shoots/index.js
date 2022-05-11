@@ -150,7 +150,7 @@ const actions = {
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
+    set(shootResource, 'spec', getSpecTemplate(infrastructureKind, rootState.cfg.defaultNodesCIDR))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
@@ -223,7 +223,7 @@ const actions = {
 
     const allZones = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const zones = allZones.length ? [sample(allZones)] : undefined
-    const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length)
+    const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, rootState.cfg.defaultNodesCIDR)
     if (zonesNetworkConfiguration) {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }

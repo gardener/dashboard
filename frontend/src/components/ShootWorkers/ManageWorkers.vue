@@ -71,6 +71,7 @@ import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
+import get from 'lodash/get'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -158,10 +159,16 @@ export default {
     },
     cloudProviderKind () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      return cloudProfile.metadata.cloudProviderKind
+      return get(cloudProfile, 'metadata.cloudProviderKind')
     },
     currentZonesNetworkConfiguration () {
       return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR)
+    }
+  },
+  watch: {
+    currentZonesNetworkConfiguration (value) {
+      const additionalZonesNetworkConfiguration = difference(this.currentZonesNetworkConfiguration, this.zonesNetworkConfiguration)
+      this.$emit('additionalZonesNetworkConfiguration', additionalZonesNetworkConfiguration)
     }
   },
   methods: {
