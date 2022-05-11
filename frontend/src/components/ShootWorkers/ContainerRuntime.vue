@@ -74,11 +74,14 @@ export default {
     return this.validators
   },
   computed: {
+    validCriNames () {
+      return map(this.machineImageCri, 'name')
+    },
     criItems () {
-      const criItems = map(this.machineImageCri, cri => {
+      const criItems = map(this.validCriNames, name => {
         return {
-          value: cri.name,
-          text: cri.name
+          value: name,
+          text: name
         }
       })
       if (!includes(criItems, this.criName)) {
@@ -126,8 +129,7 @@ export default {
       return {
         criName: {
           validCriName: value => {
-            const criItem = find(this.criItems, { value })
-            return !get(criItem, 'disabled', false)
+            return includes(this.validCriNames, value)
           }
         }
       }
