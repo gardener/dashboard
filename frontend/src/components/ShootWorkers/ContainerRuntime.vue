@@ -78,15 +78,14 @@ export default {
       const criItems = map(this.machineImageCri, cri => {
         return {
           value: cri.name,
-          text: cri.name,
-          valid: true
+          text: cri.name
         }
       })
       if (!includes(criItems, this.criName)) {
         criItems.push({
           value: this.criName,
           text: this.criName,
-          valid: false
+          disabled: true
         })
       }
       return criItems
@@ -128,7 +127,7 @@ export default {
         criName: {
           validCriName: value => {
             const criItem = find(this.criItems, { value })
-            return get(criItem, 'valid', false)
+            return !get(criItem, 'disabled', false)
           }
         }
       }
@@ -153,7 +152,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-    this.originalCri = get(this.worker, 'cri', {})
   },
   watch: {
     criItems (criItems) {
