@@ -266,7 +266,8 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     return undefined
   }
 
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR || newShootWorkerCIDR)
+  const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, workerCIDR)
   if (!defaultZonesNetworkConfiguration) {
     return undefined
   }

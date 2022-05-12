@@ -180,8 +180,13 @@ describe('utils', () => {
         }
       ]
 
-      it('should return undefined for infrastructures that do not require network config for zones', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'azure', 3)
+      it('should return undefined for infrastructures that do not require network config for zones (new cluster)', () => {
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'azure', 3, undefined, nodeCIDR)
+        expect(zonesNetworkConfiguration).toBeUndefined()
+      })
+
+      it('should return undefined for infrastructures that do not require network config for zones (existing cluster)', () => {
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'azure', 3, nodeCIDR, undefined)
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
 
@@ -251,7 +256,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, nodeCIDR, undefined)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -289,7 +294,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR, undefined)
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(3)
         expect(zonesNetworkConfiguration).toEqual(newZonesNetworkConfiguration)
@@ -311,7 +316,7 @@ describe('utils', () => {
           }
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR, undefined)
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
     })
