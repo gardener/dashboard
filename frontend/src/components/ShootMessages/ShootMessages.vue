@@ -301,7 +301,7 @@ export default {
     }
 
     .v-list-item__content {
-      padding: 0px;
+      padding: 5px;
     }
 
     .v-list-item {

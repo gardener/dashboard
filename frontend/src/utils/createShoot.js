@@ -266,6 +266,12 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     return undefined
   }
 
+  const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, workerCIDR)
+  if (!defaultZonesNetworkConfiguration) {
+    return undefined
+  }
+
   const existingZonesNetworkConfiguration = compact(map(newUniqueZones, zone => {
     return find(oldZonesNetworkConfiguration, { name: zone })
   }))
@@ -290,11 +296,6 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
 
     // order is important => keep oldZonesNetworkConfiguration order
     return uniq([...oldZonesNetworkConfiguration, ...newZonesNetworkConfiguration])
-  }
-
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones, newShootWorkerCIDR)
-  if (!defaultZonesNetworkConfiguration) {
-    return undefined
   }
 
   if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {

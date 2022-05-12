@@ -162,7 +162,7 @@ export default {
       return get(cloudProfile, 'metadata.cloudProviderKind')
     },
     currentZonesNetworkConfiguration () {
-      return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR)
+      return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR, this.newShootWorkerCIDR)
     }
   },
   watch: {
@@ -237,7 +237,7 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, kubernetesVersion }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, newShootWorkerCIDR, kubernetesVersion }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
@@ -246,6 +246,7 @@ export default {
       this.zonedCluster = zonedCluster
       this.isNewCluster = !existingWorkerCIDR
       this.existingWorkerCIDR = existingWorkerCIDR
+      this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
     }
   },
