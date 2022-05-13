@@ -35,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { getValidationErrors } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -45,6 +46,7 @@ import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   criName: {
+    required: 'An explicit container runtime configuration is required',
     validCriName: 'The selected machine image does not support the selected container runtime'
   }
 }
@@ -84,7 +86,7 @@ export default {
           text: name
         }
       })
-      if (!includes(criItems, this.criName)) {
+      if (this.criName && !includes(criItems, this.criName)) {
         criItems.push({
           value: this.criName,
           text: this.criName,
@@ -128,6 +130,7 @@ export default {
     validators () {
       return {
         criName: {
+          required,
           validCriName: value => {
             return includes(this.validCriNames, value)
           }
