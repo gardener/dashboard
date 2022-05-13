@@ -217,7 +217,7 @@ export default {
       let data = cloneDeep(this.shootItem)
       if (data) {
         data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
-        if (!this.showManagedFields) {
+        if (!this.showManagedFields && get(data, 'metadata.managedFields', false)) {
           delete data.metadata.managedFields
         }
         return data
