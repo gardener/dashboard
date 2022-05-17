@@ -1,4 +1,7 @@
 {
+  "npm.packageManager": "yarn",
+  "npm.runSilent": true,
+  "editor.tabSize": 2,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
@@ -34,8 +37,8 @@
   "files.exclude": {
     ".pnp.*": true,
     ".yarn": true,
+    ".vscode": false,
     "yarn.lock": true,
-    ".vscode": true,
     ".pre-commit-config.yaml": true,
     ".secrets.baseline": true,
     ".docforge": true,
@@ -49,6 +52,13 @@
   },
   "jestrunner.enableYarnPnpSupport": true,
   "jestrunner.jestCommand": "scripts/jest",
+  "jestrunner.yarnPnpCommand": "yarn-2.4.1.cjs",
+  "jestrunner.changeDirectoryToWorkspaceRoot": true,
+  "jestrunner.debugOptions": {
+    "args": ["--no-cache"],
+    "sourcemaps": "inline",
+    "disableOptimisticBPs": true
+  },
   "vetur.useWorkspaceDependencies": true,
   "vetur.experimental.templateInterpolationService": false
 }
