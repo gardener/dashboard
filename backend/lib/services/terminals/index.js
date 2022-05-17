@@ -261,7 +261,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       targetCluster.apiServer.serviceRef = {}
       targetCluster.apiServer.caData = caData
 
-      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluster is the seed
         targetCluster.apiServer.serviceRef.name = 'kube-apiserver'
       } else {
         targetCluster.apiServer.serviceRef.name = 'kubernetes'
@@ -403,7 +403,7 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
     return getGardenTerminalHostCluster(client, { body })
   }
 
-  if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+  if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluster is the seed
     return getSeedHostCluster(client, { namespace, name, target, body, shootResource })
   }
 
