@@ -51,7 +51,7 @@
     "**/dist": true
   },
   "jestrunner.enableYarnPnpSupport": true,
-  "jestrunner.jestCommand": "scripts/jest",
+  "jestrunner.jestCommand": "node scripts/jest.cjs",
   "jestrunner.yarnPnpCommand": "../../scripts/yarn.cjs",
   "jestrunner.changeDirectoryToWorkspaceRoot": true,
   "vetur.useWorkspaceDependencies": true,

@@ -5,21 +5,25 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const fs = require('fs')
 const path = require('path')
 const { getWorkspaces } = require('./helper.cjs')
+const { spawn } = require('child_process')
 
 const workspaces = getWorkspaces()
 
 const repodir = path.dirname(__dirname)
-const testfile = path.resolve(process.argv[3])
+const args =  process.argv.slice(2)
+const testfile = path.resolve(args[0])
 const testfileLocation = testfile.substring(repodir.length+1)
 const workspace = workspaces.find(({ location }) => testfileLocation.startsWith(location))
 if (workspace) {
   process.argv.push('--config', path.join(repodir, workspace.location, 'package.json'))
 }
 
-const yarndir = path.join(repodir, '.yarn', 'releases')
-const yarnfile = fs.readdirSync(yarndir).find(filename => /^yarn-.+\.c?js$/.test(filename))
- 
-require(path.join(yarndir, yarnfile))
+const cmd = spawn('yarn',  ['workspace', workspace.name, 'run', 'test', ...args], { 
+  stdio: 'inherit' 
+})
+cmd.on('error', err => {
+  console.error('Error: %s', err.message)
+})
+cmd.on('exit', code => process.exit(code))
