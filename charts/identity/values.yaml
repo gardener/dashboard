@@ -9,7 +9,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/dexidp/dex
-  tag: v2.30.0
+  tag: v2.31.1
   pullPolicy: IfNotPresent
 
 containerPort: 5556
