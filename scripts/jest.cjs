@@ -5,25 +5,22 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const path = require('path')
-const { getWorkspaces } = require('./helper.cjs')
+const assert = require('assert').strict
 const { spawn } = require('child_process')
+const { findYarnWorkspace, findJestConfig } = require('./helper.cjs')
 
-const workspaces = getWorkspaces()
-
-const repodir = path.dirname(__dirname)
 const args =  process.argv.slice(2)
-const testfile = path.resolve(args[0])
-const testfileLocation = testfile.substring(repodir.length+1)
-const workspace = workspaces.find(({ location }) => testfileLocation.startsWith(location))
-if (workspace) {
-  process.argv.push('--config', path.join(repodir, workspace.location, 'package.json'))
-}
+const workspace = findYarnWorkspace(args[0])
+assert(workspace, 'yarn workspace not found')
+
+const jestConfig = findJestConfig(workspace)
+assert(jestConfig, 'jest configuration not found')
+process.argv.push('--config', jestConfig)
 
 const cmd = spawn('yarn',  ['workspace', workspace.name, 'run', 'test', ...args], { 
   stdio: 'inherit' 
 })
 cmd.on('error', err => {
-  console.error('Error: %s', err.message)
+  console.error(err.message)
 })
 cmd.on('exit', code => process.exit(code))

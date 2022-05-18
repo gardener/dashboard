@@ -5,21 +5,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const fs = require('fs')
-const path = require('path')
-const { getWorkspaces } = require('./helper.cjs')
+const assert = require('assert').strict
+const { findYarnWorkspace, findJestConfig, findYarnCommand } = require('./helper.cjs')
 
-const workspaces = getWorkspaces()
+const workspace = findYarnWorkspace(process.argv[3])
+assert(workspace, 'yarn workspace not found')
 
-const repodir = path.dirname(__dirname)
-const testfile = path.resolve(process.argv[3])
-const testfileLocation = testfile.substring(repodir.length+1)
-const workspace = workspaces.find(({ location }) => testfileLocation.startsWith(location))
-if (workspace) {
-  process.argv.push('--config', path.join(repodir, workspace.location, 'package.json'))
-}
+const jestConfig = findJestConfig(workspace)
+assert(jestConfig, 'jest configuration not found')
+process.argv.push('--config', jestConfig)
 
-const yarndir = path.join(repodir, '.yarn', 'releases')
-const yarnfile = fs.readdirSync(yarndir).find(filename => /^yarn-.+\.c?js$/.test(filename))
- 
-require(path.join(yarndir, yarnfile))
+const yarnCommand = findYarnCommand()
+assert(yarnCommand, 'yarn command not found')
+
+require(yarnCommand)

@@ -11,12 +11,14 @@ const path = require('path')
 const os = require('os')
 const crypto = require('crypto')
 const { execSync  } = require('child_process')
-const { workspaces } = require('../package.json')
+const packageJson = require('../package.json')
 
-const hash = crypto.createHash('md5').update(JSON.stringify(workspaces)).digest('hex')
-const filename = path.join(os.tmpdir(), 'gardener-dashboard', `workspaces.${hash}.json`)
+const repodir = path.dirname(__dirname)
 
 function getWorkspaces () {
+  const hash = crypto.createHash('md5').update(JSON.stringify(packageJson.workspaces)).digest('hex')
+  const filename = path.join(os.tmpdir(), 'gardener-dashboard', `workspaces.${hash}.json`)
+
   try {
     return JSON.parse(fs.readFileSync(filename,'utf8'))
   } catch (err) {
@@ -37,6 +39,38 @@ function getWorkspaces () {
   return workspaces
 }
 
+function findYarnWorkspace (filename) {
+  const testfile = path.resolve(filename)
+  const testfileLocation = testfile.substring(repodir.length+1)
+  const workspaces = getWorkspaces()
+  return workspaces.find(({ location }) => testfileLocation.startsWith(location))
+}
+
+function findJestConfig (workspace) {
+  const workspacedir = path.join(repodir, workspace.location)
+  const configfile = fs.readdirSync(workspacedir).find(name => {
+    if (name === 'jest.config.js' || name == 'jest.config.json') {
+      return true
+    }
+    if (name === 'package.json') {
+      const jest = require(path.join(workspacedir, 'package.json'))
+      return !!jest
+    }
+    return false
+  })
+  return path.join(workspacedir, configfile)
+}
+
+function findYarnCommand () {
+  const yarndir = path.join(repodir, '.yarn', 'releases')
+  const filename = fs.readdirSync(yarndir).find(filename => /^yarn-.+\.c?js$/.test(filename))
+  if (filename) {
+    return path.join(yarndir, filename)
+  }
+}
+
 module.exports = {
-  getWorkspaces
+  findYarnWorkspace,
+  findYarnCommand,
+  findJestConfig,
 }
