@@ -26,6 +26,9 @@ yarn-error.log*
 # binaries
 scripts/bin
 
+# GitGuardian
+.cache_ggshield
+
 # other files to ignore
 .DS_Store
 node_modules/
