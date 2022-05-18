@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
                 <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" :color="color">mdi-account-alert</v-icon>
                 <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
+                <v-icon v-else-if="isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
                 <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
                 <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
                 <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
@@ -23,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon v-else-if="isShootStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
               <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
               <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+              <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
               <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
               <v-icon v-else-if="isUserError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
               <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
@@ -141,6 +143,10 @@ export default {
         statusTitle.push('Reconciliation Deactivated')
       } else {
         statusTitle.push(`${this.operationType} ${this.operationState}`)
+      }
+
+      if (this.isShootMarkedForDeletion) {
+        statusTitle.push('Cluster marked for deletion')
       }
 
       return join(statusTitle, ', ')
