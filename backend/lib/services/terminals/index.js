@@ -299,7 +299,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       const {
         namespace: secretRefNamespace,
         name: secretRefName
-      } = _.pick(secretRef, ['namespace', 'name'])
+      } = secretRef || {}
       const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
       const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
       const kubeconfigObject = kubeconfig.cleanKubeconfig(rawConfig)
