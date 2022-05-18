@@ -16,8 +16,9 @@ const packageJson = require('../package.json')
 const repodir = path.dirname(__dirname)
 
 function getWorkspaces () {
+  const today = new Date().toISOString().substring(0, 10) 
   const hash = crypto.createHash('md5').update(JSON.stringify(packageJson.workspaces)).digest('hex')
-  const filename = path.join(os.tmpdir(), 'gardener-dashboard', `workspaces.${hash}.json`)
+  const filename = path.join(os.tmpdir(), `gardener-dashboard-${today}`, `workspaces.${hash}.json`)
 
   try {
     return JSON.parse(fs.readFileSync(filename,'utf8'))
