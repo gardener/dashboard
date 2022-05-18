@@ -10,6 +10,7 @@ const _ = require('lodash')
 const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
+const kubeconfig = require('@gardener-dashboard/kube-config')
 
 const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
 const { isHttpError } = require('@gardener-dashboard/request')
@@ -203,15 +204,16 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       roleBindings: undefined,
       projectMemberships: undefined
     },
-    apiServer: undefined
+    apiServer: {
+      caData: undefined
+    }
   }
 
   switch (target) {
     case TargetEnum.GARDEN: {
       targetCluster.kubeconfigContextNamespace = namespace
-      targetCluster.apiServer = {
-        server: config.apiServerUrl
-      }
+      targetCluster.apiServer.server = config.apiServerUrl
+      targetCluster.apiServer.caData = config.apiServerCaData
 
       if (isAdmin) {
         targetCluster.namespace = 'garden'
@@ -253,8 +255,13 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       break
     }
     case TargetEnum.SHOOT: {
-      targetCluster.apiServer = { serviceRef: {} }
-      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+      const caCluster = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
+      const caData = caCluster.data['ca.crt']
+
+      targetCluster.apiServer.serviceRef = {}
+      targetCluster.apiServer.caData = caData
+
+      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluster is the seed
         targetCluster.apiServer.serviceRef.name = 'kube-apiserver'
       } else {
         targetCluster.apiServer.serviceRef.name = 'kubernetes'
@@ -288,12 +295,19 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       const seedShootNamespace = getSeedShootNamespace(shootResource)
       const seedName = getSeedNameFromShoot(shootResource)
       const seed = getSeed(seedName)
+      const secretRef = _.get(seed, 'spec.secretRef')
+      const {
+        namespace: secretRefNamespace,
+        name: secretRefName
+      } = secretRef || {}
+      const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
+      const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
+      const kubeconfigObject = kubeconfig.cleanKubeconfig(rawConfig)
 
+      targetCluster.apiServer.caData = kubeconfigObject.currentCluster['certificate-authority-data']
       targetCluster.kubeconfigContextNamespace = seedShootNamespace
       targetCluster.namespace = seedShootNamespace
-      targetCluster.credentials = {
-        secretRef: _.get(seed, 'spec.secretRef')
-      }
+      targetCluster.credentials = { secretRef }
       targetCluster.authorization.roleBindings = [
         {
           roleRef: {
@@ -393,7 +407,7 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
     return getGardenTerminalHostCluster(client, { body })
   }
 
-  if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+  if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluster is the seed
     return getSeedHostCluster(client, { namespace, name, target, body, shootResource })
   }
 

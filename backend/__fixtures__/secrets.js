@@ -14,6 +14,7 @@ const { toBase64, createUrl, parseLabelSelector } = require('./helper')
 const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
+const caCrt = toBase64('ca.crt')
 const clientCertificateData = toBase64('client-certificate-data')
 const clientKeyData = toBase64('client-key-data')
 
@@ -167,6 +168,18 @@ const secrets = {
       }
     })
   },
+  getCaClusterSecret (namespace, name) {
+    return getSecret({
+      name,
+      namespace,
+      labels: {
+        'gardener.cloud/role': 'ca-cluster'
+      },
+      data: {
+        'ca.crt': caCrt
+      }
+    })
+  },
   getSeedSecret (namespace, name) {
     const seedName = name.substring(11)
     const seed = seeds.get(seedName)
@@ -258,6 +271,10 @@ const mocks = {
         }
         if (endsWith(name, '.kubeconfig')) {
           const item = secrets.getShootSecret(namespace, name)
+          return Promise.resolve(item)
+        }
+        if (endsWith(name, '.ca-cluster')) {
+          const item = secrets.getCaClusterSecret(namespace, name)
           return Promise.resolve(item)
         }
         if (/-token-[a-f0-9]{5}$/.test(name)) {
