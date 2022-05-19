@@ -45,6 +45,7 @@
     "cookie-parser": "^1.4.4",
     "delay": "^4.3.0",
     "express": "^4.17.1",
+    "express-static-gzip": "^2.1.7",
     "fnv-plus": "^1.2.12",
     "helmet": "^3.21.2",
     "http-errors": "^1.8.0",

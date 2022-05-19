@@ -7,6 +7,7 @@
 'use strict'
 
 const express = require('express')
+const expressStaticGzip = require('express-static-gzip')
 const _ = require('lodash')
 const config = require('./config')
 const { resolve, join } = require('path')
@@ -73,7 +74,10 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin'
 }))
 
-app.use(express.static(PUBLIC_DIRNAME))
+app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+  enableBrotli: true,
+  orderPreference: ['br']
+}))
 app.use(['/css', '/fonts', '/img', '/js'], notFound)
 
 app.use(helmet.frameguard({

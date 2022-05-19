@@ -4,7 +4,9 @@
 
 const path = require('path')
 const fs = require('fs')
+const zlib = require('zlib')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
+const CompressionPlugin = require('compression-webpack-plugin')
 
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
@@ -61,6 +63,31 @@ module.exports = {
           cwd: process.cwd()
         }
       ])
+
+    const compressionPluginOptions = {
+      test: /\.(js|js\.map|css|html|svg|png|woff|woff2|eot|ttf)$/,
+      threshold: 8192,
+      minRatio: 0.8
+    }
+    config
+      .plugin('gzip-compress')
+      .use(CompressionPlugin, [{
+        filename: '[path][base].gz',
+        algorithm: 'gzip',
+        ...compressionPluginOptions
+      }])
+    config
+      .plugin('brotli-compress')
+      .use(CompressionPlugin, [{
+        filename: '[path][base].br',
+        algorithm: 'brotliCompress',
+        compressionOptions: {
+          params: {
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+          }
+        },
+        ...compressionPluginOptions
+      }])
   },
   devServer: {
     proxy: {
