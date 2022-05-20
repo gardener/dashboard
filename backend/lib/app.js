@@ -52,7 +52,7 @@ app.use(helmet.dnsPrefetchControl())
 app.use(helmet.permittedCrossDomainPolicies())
 app.use(helmet.noSniff())
 app.use(helmet.hsts())
-app.use(noCache())
+app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
@@ -76,9 +76,13 @@ app.use(helmet.referrerPolicy({
 
 app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   enableBrotli: true,
-  orderPreference: ['br']
+  orderPreference: ['br'],
+  serveStatic: {
+    immutable: true,
+    maxAge: '1 Week'
+  }
 }))
-app.use(['/css', '/fonts', '/img', '/js'], notFound)
+app.use(['/js', '/css', '/fonts', '/img', '/static'], notFound)
 
 app.use(helmet.frameguard({
   action: 'deny'

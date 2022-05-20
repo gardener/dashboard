@@ -11,9 +11,19 @@ const logger = require('./logger')
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
-function noCache () {
+function noCache (staticPaths = []) {
+  const isStatic = path => {
+    for (const staticPath of staticPaths) {
+      if (path.startsWith(staticPath)) {
+        return true
+      }
+    }
+    return false
+  }
   return (req, res, next) => {
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+    if (!isStatic(req.path)) {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    }
     next()
   }
 }
