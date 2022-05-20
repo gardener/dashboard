@@ -65,7 +65,7 @@ module.exports = {
       ])
 
     const compressionPluginOptions = {
-      test: /\.(js|js\.map|css|html|svg|png|woff|woff2|eot|ttf)$/,
+      test: /\.(js|css|html|svg|eot|ttf)$/,
       threshold: 8192,
       minRatio: 0.8
     }
