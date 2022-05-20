@@ -8,6 +8,8 @@
 
 const express = require('express')
 const expressStaticGzip = require('express-static-gzip')
+const zlib = require('zlib')
+const compression = require('compression')
 const _ = require('lodash')
 const config = require('./config')
 const { resolve, join } = require('path')
@@ -54,8 +56,12 @@ app.use(helmet.noSniff())
 app.use(helmet.hsts())
 app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
-app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
+app.use(['/api', '/config.json'], compression({
+  threshold: 8192,
+  level: zlib.constants.Z_DEFAULT_COMPRESSION
+}))
+app.use('/api', api.router)
 app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())

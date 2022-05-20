@@ -2372,6 +2372,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["base64url", "npm:3.0.1"],
             ["better-queue", "npm:3.8.10"],
             ["body-parser", "npm:1.19.0"],
+            ["compression", "npm:1.7.4"],
             ["cookie-parser", "npm:1.4.5"],
             ["delay", "npm:4.4.0"],
             ["dockerfile-ast", "npm:0.0.19"],
