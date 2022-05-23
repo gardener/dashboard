@@ -7,6 +7,9 @@
 'use strict'
 
 const express = require('express')
+const expressStaticGzip = require('express-static-gzip')
+const zlib = require('zlib')
+const compression = require('compression')
 const _ = require('lodash')
 const config = require('./config')
 const { resolve, join } = require('path')
@@ -51,10 +54,14 @@ app.use(helmet.dnsPrefetchControl())
 app.use(helmet.permittedCrossDomainPolicies())
 app.use(helmet.noSniff())
 app.use(helmet.hsts())
-app.use(noCache())
+app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
-app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
+app.use(['/api', '/config.json'], compression({
+  threshold: 8192,
+  level: zlib.constants.Z_DEFAULT_COMPRESSION
+}))
+app.use('/api', api.router)
 app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())
@@ -73,8 +80,15 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin'
 }))
 
-app.use(express.static(PUBLIC_DIRNAME))
-app.use(['/css', '/fonts', '/img', '/js'], notFound)
+app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+  enableBrotli: true,
+  orderPreference: ['br'],
+  serveStatic: {
+    immutable: true,
+    maxAge: '1 Week'
+  }
+}))
+app.use(['/js', '/css', '/fonts', '/img', '/static'], notFound)
 
 app.use(helmet.frameguard({
   action: 'deny'
