@@ -18,12 +18,17 @@ describe('kube-client', () => {
     const name = 'name'
     const server = 'server'
 
+    const certificateAuthorityData = Buffer.from('certificate-authority-data').toString('base64')
+    const clientCertificateData = Buffer.from('client-certificate-data').toString('base64')
+
     let testClient
     let getSecretStub
+    let getShootAdminKubeconfigStub
 
     beforeEach(() => {
       testClient = createClient({ auth: { bearer } })
       getSecretStub = jest.spyOn(testClient.core.secrets, 'get')
+      getShootAdminKubeconfigStub = jest.spyOn(testClient['core.gardener.cloud'].shoots, 'adminKubeconfig')
     })
 
     it('should create a client', () => {
@@ -41,6 +46,27 @@ describe('kube-client', () => {
       const kubeconfig = await testClient.getKubeconfig({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
       expect(kubeconfig.currentUser.token).toBe(bearer)
+    })
+
+    it('should get shoot adminkubeconfig', async () => {
+      const user = {
+        'client-certificate-data': certificateAuthorityData,
+        'client-key-data': clientCertificateData
+      }
+      const testKubeconfig = fixtures.helper.createTestKubeconfig(user, { server })
+      getShootAdminKubeconfigStub.mockReturnValue({
+        status: {
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
+        }
+      })
+      const kubeconfig = await testClient.getShootAdminKubeconfig({ namespace, name })
+      expect(getShootAdminKubeconfigStub).toHaveBeenCalledWith(namespace, name, {
+        apiVersion: 'authentication.gardener.cloud/v1alpha1',
+        kind: 'AdminKubeconfigRequest',
+        spec: { expirationSeconds: 600 }
+      })
+      expect(kubeconfig.currentUser['client-certificate-data']).toBe(certificateAuthorityData)
+      expect(kubeconfig.currentUser['client-key-data']).toBe(clientCertificateData)
       expect(kubeconfig.currentCluster.server).toBe(server)
     })
 
@@ -79,7 +105,7 @@ describe('kube-client', () => {
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
-      expect(extend).toHaveBeenCalledTimes(24)
+      expect(extend).toHaveBeenCalledTimes(25)
       expect(extend).toHaveBeenCalledWith(expect.objectContaining({
         servername,
         headers

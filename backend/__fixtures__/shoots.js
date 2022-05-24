@@ -13,6 +13,7 @@ const { applyPatch } = require('fast-json-patch')
 
 const { getTokenPayload } = require('./auth')
 const projects = require('./projects')
+const { createTestKubeconfig, formatTime, toBase64 } = require('./helper')
 
 const shootList = [
   getShoot({
@@ -121,6 +122,7 @@ const shoots = {
 const matchOptions = { decode: decodeURIComponent }
 const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots', matchOptions)
 const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name', matchOptions)
+const matchAdminKubeconfig = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name/adminkubeconfig', matchOptions)
 
 const mocks = {
   list () {
@@ -158,6 +160,29 @@ const mocks = {
       set(item, 'metadata.uid', uid)
       set(item, 'metadata.annotations["gardener.cloud/created-by"]', payload.id)
       set(item, 'status.technicalID', `shoot--${project.metadata.name}--${name}`)
+      return Promise.resolve(item)
+    }
+  },
+  adminKubeconfig ({
+    user = {
+      'client-certificate-data': toBase64('certificate-authority-data'),
+      'client-key-data': toBase64('client-key-data')
+    }, cluster = { server: 'https://shootApiServerHostname:6443' }
+  } = {}) {
+    return (headers, json) => {
+      const matchResult = matchAdminKubeconfig(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
+      const item = cloneDeep(json)
+      const expirationSeconds = get(item, 'spec.expirationSeconds', 600)
+      set(item, 'metadata.namespace', namespace)
+      set(item, 'metadata.name', name)
+      set(item, 'status.kubeconfig', createTestKubeconfig(user, cluster))
+      set(item, 'status.expirationTimestamp', formatTime(
+        new Date().setSeconds(new Date().getSeconds() + expirationSeconds))
+      )
       return Promise.resolve(item)
     }
   },
