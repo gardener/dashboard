@@ -10,12 +10,12 @@ const yaml = import(/* webpackPrefetch: true */ 'js-yaml')
 const VueYaml = {
   install (Vue) {
     const value = {
-      safeDump (obj) {
+      dump (obj) {
         return yaml.then(({ dump }) => dump(obj, {
           skipInvalid: true
         }))
       },
-      safeLoad (data) {
+      load (data) {
         return yaml.then(({ load }) => load(data))
       }
     }
