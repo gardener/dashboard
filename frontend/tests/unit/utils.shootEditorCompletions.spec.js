@@ -62,25 +62,6 @@ describe('utils', () => {
     let shootEditorCompletions
 
     beforeAll(() => {
-      // cannot stub via sandbo as Jest does not implement the function and
-      // non existant functions cannot be stubbed using a sinon sandbox
-      document.body.createTextRange = function () {
-        return {
-          setEnd: function () {},
-          setStart: function () {},
-          getBoundingClientRect: function () {
-            return { right: 0 }
-          },
-          getClientRects: function () {
-            return {
-              length: 0,
-              left: 0,
-              right: 0
-            }
-          }
-        }
-      }
-
       const element = document.createElement('div')
       const options = {
         indentUnit: 3,
@@ -100,10 +81,6 @@ describe('utils', () => {
       }
 
       shootEditorCompletions = new ShootEditorCompletions(shootCompletions, editor.options.indentUnit)
-    })
-
-    afterAll(() => {
-      document.body.createTextRange = undefined
     })
 
     describe('#yamlHint', () => {
