@@ -32,7 +32,7 @@
     "eslint-plugin-n": "^15.2.0",
     "eslint-plugin-promise": "^6.0.0",
     "jest": "^27.5.1",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.1.0",
     "lodash": "4.17.21"
   },
   "eslintConfig": {

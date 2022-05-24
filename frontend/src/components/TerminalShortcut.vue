@@ -152,7 +152,7 @@ export default {
       return targetText(shortcut.target)
     },
     async updateShortcutYaml (value) {
-      this.shortcutYaml = await this.$yaml.safeDump(value)
+      this.shortcutYaml = await this.$yaml.dump(value)
     }
   },
   created () {

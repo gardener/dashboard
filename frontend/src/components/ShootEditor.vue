@@ -433,7 +433,7 @@ export default {
     },
     async update (value = this.value) {
       if (value) {
-        this.setContent(await this.$yaml.safeDump(value))
+        this.setContent(await this.$yaml.dump(value))
       }
     },
     onCopy () {

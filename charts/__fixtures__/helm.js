@@ -29,7 +29,7 @@ async function renderChartTemplates (chart, templates, values) {
   assert.ok(fs.statSync(dirname).isDirectory(), `Invalid helm values directory "${dirname}"`)
   const filename = path.join(dirname, `values-${randomNumber()}.yaml`)
   try {
-    fs.writeFileSync(filename, yaml.safeDump(values, { skipInvalid: true }))
+    fs.writeFileSync(filename, yaml.dump(values, { skipInvalid: true }))
     const cmd = [
       'helm',
       'template',
@@ -43,7 +43,7 @@ async function renderChartTemplates (chart, templates, values) {
     ]
     const cwd = path.resolve(__dirname, '..', chart)
     const { stdout } = await exec(cmd.join(' '), { cwd })
-    return yaml.safeLoadAll(stdout)
+    return yaml.loadAll(stdout)
   } finally {
     fs.unlinkSync(filename)
   }

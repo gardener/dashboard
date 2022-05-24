@@ -32,7 +32,7 @@ describe('gardener-dashboard', function () {
       const [configMap] = documents
       expect(omit(configMap, ['data'])).toMatchSnapshot()
       expect(Object.keys(configMap.data)).toEqual(['config.yaml'])
-      const config = yaml.safeLoad(configMap.data['config.yaml'])
+      const config = yaml.load(configMap.data['config.yaml'])
       expect(config).toMatchSnapshot()
     })
 
@@ -50,7 +50,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(omit(config, ['frontend', 'terminal'])).toMatchSnapshot()
       })
     })
@@ -78,7 +78,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.accessRestriction'])).toMatchSnapshot()
       })
 
@@ -133,7 +133,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.accessRestriction'])).toMatchSnapshot()
       })
     })
@@ -170,7 +170,7 @@ describe('gardener-dashboard', function () {
         const [configMap, githubSecret] = documents
         expect(configMap.metadata.name).toBe(name)
         expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
         expect(githubSecret).toMatchSnapshot()
       })
@@ -188,7 +188,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['unreachableSeeds'])).toMatchSnapshot()
       })
     })
@@ -206,7 +206,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.alert'])).toMatchSnapshot()
       })
 
@@ -224,7 +224,7 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         expect(configMap.metadata.name).toBe(name)
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.alert'])).toMatchSnapshot()
       })
     })
@@ -258,7 +258,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.terminal.shortcuts'])).toMatchSnapshot()
       })
     })
@@ -282,7 +282,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.themes'])).toMatchSnapshot()
       })
 
@@ -300,7 +300,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.themes'])).toMatchSnapshot()
       })
 
@@ -316,7 +316,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.sla'])).toMatchSnapshot()
       })
     })
@@ -347,7 +347,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.vendorHints'])).toMatchSnapshot()
       })
     })
@@ -359,7 +359,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, { clusterIdentity })
         expect(documents).toHaveLength(1)
         const [configMap] = documents
-        const config = yaml.safeLoad(configMap.data['config.yaml'])
+        const config = yaml.load(configMap.data['config.yaml'])
         expect(config.clusterIdentity).toBe(clusterIdentity)
       })
     })

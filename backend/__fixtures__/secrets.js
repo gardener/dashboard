@@ -59,7 +59,7 @@ function getKubeconfig ({ server, name = 'default' }) {
     cluster: name,
     user: name
   }
-  return yaml.safeDump({
+  return yaml.dump({
     kind: 'Config',
     clusters: [{ cluster, name }],
     contexts: [{ context, name }],
@@ -147,7 +147,7 @@ const secrets = {
         name: 'terminal.shortcuts',
         namespace,
         data: {
-          shortcuts: yaml.safeDump(shortcuts)
+          shortcuts: yaml.dump(shortcuts)
         }
       })
     }

@@ -317,7 +317,7 @@ describe('services', function () {
 
       it('should pick only valid fields from shortcut resource', function () {
         let actualShortcuts = fromShortcutSecretResource({
-          data: encodeBase64(yaml.safeDump({}))
+          data: encodeBase64(yaml.dump({}))
         })
         expect(actualShortcuts).toEqual([])
 
@@ -337,7 +337,7 @@ describe('services', function () {
 
         actualShortcuts = fromShortcutSecretResource({
           data: {
-            shortcuts: encodeBase64(yaml.safeDump([
+            shortcuts: encodeBase64(yaml.dump([
               {
                 foo: 'bar'
               }
@@ -348,7 +348,7 @@ describe('services', function () {
 
         actualShortcuts = fromShortcutSecretResource({
           data: {
-            shortcuts: encodeBase64(yaml.safeDump([
+            shortcuts: encodeBase64(yaml.dump([
               {}, // invalid object
               {
                 description: 'invalid due to missing required keys'
