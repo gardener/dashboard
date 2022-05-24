@@ -261,8 +261,8 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       targetCluster.kubeconfigContextNamespace = 'default'
       targetCluster.namespace = undefined // this will create a temporary namespace
       targetCluster.credentials = {
-        secretRef: {
-          name: `${name}.kubeconfig`,
+        shootRef: {
+          name,
           namespace
         }
       }
@@ -329,7 +329,9 @@ async function getGardenTerminalHostCluster (client, { body }) {
     await getGardenHostClusterKubeApiServer(client)
   ])
   hostCluster.namespace = undefined // this will create a temporary namespace
-  hostCluster.secretRef = secretRef
+  hostCluster.credentials = {
+    secretRef
+  }
   hostCluster.kubeApiServer = kubeApiServer
   return hostCluster
 }
@@ -350,7 +352,9 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
   const seed = getSeed(seedName)
 
   hostCluster.namespace = seedShootNamespace
-  hostCluster.secretRef = _.get(seed, 'spec.secretRef')
+  hostCluster.credentials = {
+    secretRef: _.get(seed, 'spec.secretRef')
+  }
   hostCluster.kubeApiServer = await getKubeApiServerHostForSeedOrShootedSeed(client, seed)
   return hostCluster
 }
@@ -365,9 +369,11 @@ async function getShootHostCluster (client, { namespace, name, target, body, sho
   hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
 
   hostCluster.namespace = undefined // this will create a temporary namespace
-  hostCluster.secretRef = {
-    namespace,
-    name: `${name}.kubeconfig`
+  hostCluster.credentials = {
+    shootRef: {
+      namespace,
+      name: name
+    }
   }
   hostCluster.kubeApiServer = await getKubeApiServerHostForShoot(shootResource)
   return hostCluster
@@ -413,7 +419,12 @@ async function createTerminal ({ user, namespace, target, hostCluster, targetClu
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ ...hostCluster.config, namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, podLabels })
+  const terminalHost = createHost({
+    ...hostCluster.config,
+    namespace: hostCluster.namespace,
+    credentials: hostCluster.credentials,
+    podLabels
+  })
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
@@ -454,7 +465,7 @@ function getPodLabels (target) {
   return labels
 }
 
-function createHost ({ secretRef, namespace, container, podLabels, node, hostPID = false, hostNetwork = false }) {
+function createHost ({ credentials, namespace, container, podLabels, node, hostPID = false, hostNetwork = false }) {
   const temporaryNamespace = _.isEmpty(namespace)
   const {
     image,
@@ -463,9 +474,7 @@ function createHost ({ secretRef, namespace, container, podLabels, node, hostPID
     privileged = false
   } = container
   const host = {
-    credentials: {
-      secretRef
-    },
+    credentials,
     namespace,
     temporaryNamespace,
     pod: {
@@ -545,10 +554,13 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Hosting cluster or target cluster is hibernated')
   }
 
-  try {
-    await client.getKubeconfig(hostCluster.secretRef)
-  } catch (err) {
-    throw new Error('Host kubeconfig does not exist (yet)')
+  const secretRef = hostCluster.credentials.secretRef
+  if (secretRef) {
+    try {
+      await client.getKubeconfig(secretRef)
+    } catch (err) {
+      throw new Error('Host kubeconfig does not exist (yet)')
+    }
   }
 
   if (!terminal) {
@@ -572,7 +584,11 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   }
 }
 
-async function createHostClient (client, secretRef) {
+async function createHostClient (client, { shootRef, secretRef }) {
+  if (shootRef) {
+    return client.createShootAdminKubeconfigClient(shootRef)
+  }
+
   try {
     return await client.createKubeconfigClient(secretRef)
   } catch (err) {
@@ -590,7 +606,7 @@ async function fetchTerminalSession ({ user, body: { name, namespace } }) {
 
   const terminal = await readTerminalUntilReady({ user, name, namespace })
   const host = terminal.spec.host
-  const hostClient = await createHostClient(client, host.credentials.secretRef)
+  const hostClient = await createHostClient(client, host.credentials)
   const token = await readServiceAccountToken(hostClient, {
     namespace: host.namespace,
     serviceAccountName: terminal.status.attachServiceAccountName
@@ -705,11 +721,11 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
   }
 
   if (target === TargetEnum.SHOOT) {
-    const secretRef = {
+    const shootRef = {
       namespace,
-      name: `${name}.kubeconfig`
+      name
     }
-    const hostClient = await client.createKubeconfigClient(secretRef)
+    const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
 
     const nodeList = await hostClient.core.nodes.list()
     config.nodes = _
