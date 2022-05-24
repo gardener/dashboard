@@ -98,7 +98,7 @@ describe('services', function () {
           kind: 'Shoot',
           metadata: { namespace, name },
           spec: {
-            seedName: seedName
+            seedName
           },
           status: {
             technicalID: `shoot--${project}--${name}`
