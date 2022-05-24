@@ -62,6 +62,10 @@ class SecretBinding extends mix(GardenerCore).with(NamespaceScoped, Readable, Ob
 }
 
 class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable, Writable) {
+  adminKubeconfig (namespace, name, body, options) {
+    return this.create([namespace, name, 'adminkubeconfig'], body, options)
+  }
+
   static get names () {
     return {
       plural: 'shoots',
