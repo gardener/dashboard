@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
                         color="primary"
                         :append-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
                         :type="showToken ? 'text' : 'password'"
-                        outline
+                        outlined
                         label="Token"
                         @click:append="showToken = !showToken"
                         required>
