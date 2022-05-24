@@ -236,7 +236,7 @@ describe('Acceptance Tests', function () {
         try {
           await client.request('status/418')
         } catch (err) {
-          /* eslint-disable  jest/no-conditional-expect, jest/no-try-expect */
+          /* eslint-disable  jest/no-conditional-expect */
           expect(isHttpError(err, 418)).toBe(true)
           expect(err).toMatchObject({
             statusCode,
