@@ -29,7 +29,7 @@ const {
 
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 const key = `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxLZ88tEBAu9ij
