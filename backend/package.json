@@ -69,14 +69,14 @@
   "devDependencies": {
     "abort-controller": "^3.0.0",
     "dockerfile-ast": "^0.0.19",
-    "eslint": "^7.23.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^24.3.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
+    "eslint": "^8.15.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.2.2",
+    "eslint-plugin-n": "^15.2.0",
+    "eslint-plugin-promise": "^6.0.0",
     "fast-json-patch": "^3.0.0-1",
-    "jest": "^26.6.3",
+    "jest": "^27.5.1",
     "nodemon": "^2.0.2",
     "p-event": "^4.1.0",
     "path-to-regexp": "^6.2.0",
@@ -86,10 +86,7 @@
   },
   "eslintConfig": {
     "env": {
-      "browser": true,
       "commonjs": true,
-      "es2021": true,
-      "node": true,
       "jest/globals": true
     },
     "plugins": [
@@ -102,9 +99,6 @@
     "globals": {
       "createAgent": true,
       "fixtures": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 12
     },
     "rules": {
       "no-console": "error",

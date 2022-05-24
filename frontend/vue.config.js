@@ -21,9 +21,7 @@ const KiB = 1024
 const MiB = 1024 * KiB
 
 module.exports = {
-  transpileDependencies: [
-    'vuetify'
-  ],
+  transpileDependencies: true,
   pages: {
     index: {
       entry: process.env.NODE_ENV === 'development'
@@ -52,42 +50,49 @@ module.exports = {
       .maxAssetSize(1 * MiB)
       .maxEntrypointSize(2 * MiB)
 
-    config
-      .plugin('circular-dependency')
-      .use(CircularDependencyPlugin, [
-        {
-          exclude: /\.yarn/,
-          include: /src/,
-          failOnError: true,
-          allowAsyncCycles: false,
-          cwd: process.cwd()
-        }
-      ])
+    config.resolve.set('fallback', {
+      assert: false,
+      events: require.resolve('eventemitter3')
+    })
 
-    const compressionPluginOptions = {
-      test: /\.(js|css|html|svg|eot|ttf)$/,
-      threshold: 8192,
-      minRatio: 0.8
-    }
-    config
-      .plugin('gzip-compress')
-      .use(CompressionPlugin, [{
-        filename: '[path][base].gz',
-        algorithm: 'gzip',
-        ...compressionPluginOptions
-      }])
-    config
-      .plugin('brotli-compress')
-      .use(CompressionPlugin, [{
-        filename: '[path][base].br',
-        algorithm: 'brotliCompress',
-        compressionOptions: {
-          params: {
-            [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+    if (process.env.NODE_ENV === 'production') {
+      config
+        .plugin('circular-dependency')
+        .use(CircularDependencyPlugin, [
+          {
+            exclude: /\.yarn/,
+            include: /src/,
+            failOnError: true,
+            allowAsyncCycles: false,
+            cwd: process.cwd()
           }
-        },
-        ...compressionPluginOptions
-      }])
+        ])
+
+      const compressionPluginOptions = {
+        test: /\.(js|css|html|svg|eot|ttf)$/,
+        threshold: 8192,
+        minRatio: 0.8
+      }
+      config
+        .plugin('gzip-compress')
+        .use(CompressionPlugin, [{
+          filename: '[path][base].gz',
+          algorithm: 'gzip',
+          ...compressionPluginOptions
+        }])
+      config
+        .plugin('brotli-compress')
+        .use(CompressionPlugin, [{
+          filename: '[path][base].br',
+          algorithm: 'brotliCompress',
+          compressionOptions: {
+            params: {
+              [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+            }
+          },
+          ...compressionPluginOptions
+        }])
+    }
   },
   devServer: {
     proxy: {
