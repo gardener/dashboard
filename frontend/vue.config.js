@@ -5,7 +5,6 @@
 const path = require('path')
 const fs = require('fs')
 const zlib = require('zlib')
-const { DefinePlugin } = require('webpack')
 
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
