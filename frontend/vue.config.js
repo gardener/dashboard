@@ -5,6 +5,8 @@
 const path = require('path')
 const fs = require('fs')
 const zlib = require('zlib')
+const { DefinePlugin } = require('webpack')
+
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
 
@@ -54,6 +56,15 @@ module.exports = {
       assert: false,
       events: require.resolve('eventemitter3')
     })
+
+    config.plugin('define')
+      .tap(args => {
+        Object.assign(args[0], {
+          'process.platform': JSON.stringify('linux'),
+          'process.version': JSON.stringify(process.version)
+        })
+        return args
+      })
 
     if (process.env.NODE_ENV === 'production') {
       config
