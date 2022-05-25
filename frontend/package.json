@@ -48,7 +48,7 @@
     "netmask": "^1.0.6",
     "ora": "^3.4.0",
     "p-timeout": "^3.2.0",
-    "regenerator-runtime": "^0.13.7",
+    "regenerator-runtime": "^0.13.9",
     "semver": "^7.2.1",
     "socket.io-client": "^4.1.2",
     "splitpanes": "^2.4.1",

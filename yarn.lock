@@ -1521,7 +1521,7 @@ __metadata:
     netmask: ^1.0.6
     ora: ^3.4.0
     p-timeout: ^3.2.0
-    regenerator-runtime: ^0.13.7
+    regenerator-runtime: ^0.13.9
     sass: ^1.51.0
     sass-loader: ^12.6.0
     semver: ^7.2.1
@@ -11668,7 +11668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.13.4, regenerator-runtime@npm:^0.13.7":
+"regenerator-runtime@npm:^0.13.4, regenerator-runtime@npm:^0.13.9":
   version: 0.13.9
   resolution: "regenerator-runtime@npm:0.13.9"
   checksum: 65ed455fe5afd799e2897baf691ca21c2772e1a969d19bb0c4695757c2d96249eb74ee3553ea34a91062b2a676beedf630b4c1551cc6299afb937be1426ec55e
