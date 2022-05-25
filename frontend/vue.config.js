@@ -61,7 +61,7 @@ module.exports = {
       .use(ProvidePlugin, [
         {
           Buffer: ['buffer', 'Buffer'],
-          process: path.resolve(path.join(__dirname, 'process.js'))
+          process: path.resolve(path.join(__dirname, 'src', 'process.js'))
         }
       ])
 
