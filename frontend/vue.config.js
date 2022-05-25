@@ -8,6 +8,8 @@ const zlib = require('zlib')
 
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const { ProvidePlugin } = require('webpack')
 
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
@@ -39,10 +41,6 @@ module.exports = {
     }
   },
   chainWebpack (config) {
-    if (process.env.NODE_ENV === 'development') {
-      config.plugins.delete('VuetifyLoaderPlugin')
-    }
-
     config.externals({
       websocket: /^ws$/i
     })
@@ -51,21 +49,27 @@ module.exports = {
       .maxAssetSize(1 * MiB)
       .maxEntrypointSize(2 * MiB)
 
-    config.resolve.set('fallback', {
-      assert: false,
-      events: require.resolve('eventemitter3')
-    })
-
-    config.plugin('define')
-      .tap(args => {
-        Object.assign(args[0], {
-          'process.platform': JSON.stringify('linux'),
-          'process.version': JSON.stringify(process.version)
-        })
-        return args
+    config.resolve
+      .set('fallback', {
+        assert: false,
+        events: require.resolve('eventemitter3'),
+        buffer: require.resolve('buffer/')
       })
 
+    config
+      .plugin('provide')
+      .use(ProvidePlugin, [
+        {
+          Buffer: ['buffer', 'Buffer'],
+          process: path.resolve(path.join(__dirname, 'process.js'))
+        }
+      ])
+
     if (process.env.NODE_ENV === 'production') {
+      config
+        .plugin('vuetify-loader')
+        .use(VuetifyLoaderPlugin)
+
       config
         .plugin('circular-dependency')
         .use(CircularDependencyPlugin, [

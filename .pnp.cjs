@@ -2725,6 +2725,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vue/vue2-jest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:27.0.0"],\
             ["ansi-html", "npm:0.0.7"],\
             ["babel-jest", "virtual:8ced82824b3c6d1287273ca6740e37a0be3a82fa1688f6f98a7232a4a2a8d7212d41bbb283817ed96542530a6e7e382811c2eee872d28f2b280125bce4e53808#npm:27.5.1"],\
+            ["buffer", "npm:6.0.3"],\
             ["circular-dependency-plugin", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
             ["clipboard", "npm:2.0.11"],\
             ["codemirror", "npm:5.65.4"],\
@@ -6323,6 +6324,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/buffer-npm-5.7.1-513ef8259e-e2cf8429e1.zip/node_modules/buffer/",\
           "packageDependencies": [\
             ["buffer", "npm:5.7.1"],\
+            ["base64-js", "npm:1.5.1"],\
+            ["ieee754", "npm:1.2.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:6.0.3", {\
+          "packageLocation": "./.yarn/cache/buffer-npm-6.0.3-cd90dfedfe-5ad23293d9.zip/node_modules/buffer/",\
+          "packageDependencies": [\
+            ["buffer", "npm:6.0.3"],\
             ["base64-js", "npm:1.5.1"],\
             ["ieee754", "npm:1.2.1"]\
           ],\
