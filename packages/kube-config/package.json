@@ -68,8 +68,8 @@
       }
     }
   },
+  "packageManager": "yarn@3.2.1",
   "engines": {
-    "node": "^16.15.0",
-    "yarn": "^2.4.1"
+    "node": "^16.15.0"
   }
 }
