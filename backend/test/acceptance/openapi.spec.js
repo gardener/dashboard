@@ -7,7 +7,7 @@
 'use strict'
 
 const { pick } = require('lodash')
-const SwaggerParser = require('swagger-parser')
+const SwaggerParser = require('@apidevtools/swagger-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('openapi', function () {
