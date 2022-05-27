@@ -494,11 +494,12 @@ export default {
     })
 
     this.spinner = ora({
+      discardStdin: false,
       stream: {
-        write: chunk => this.term.write(chunk.toString()),
-        isTTY: () => true,
+        write: chunk => this.term.write(chunk),
+        isTTY: true,
         clearLine: () => this.term.write('\x1bc'), // TODO reset line only
-        cursorTo: to => {}
+        cursorTo: () => {}
       },
       spinner: 'dots'
     })

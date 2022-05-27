@@ -52,6 +52,7 @@ module.exports = {
     config.resolve
       .set('fallback', {
         assert: false,
+        readline: false,
         events: require.resolve('eventemitter3'),
         buffer: require.resolve('buffer/')
       })
