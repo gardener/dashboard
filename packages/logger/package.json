@@ -24,7 +24,7 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "chalk": "^3.0.0"
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "eslint": "^8.16.0",
