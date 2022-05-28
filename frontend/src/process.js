@@ -3,8 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-const noop = () => {}
-
 module.exports = {
   title: 'browser',
   platform: 'browser',
@@ -29,16 +27,5 @@ module.exports = {
   }),
   nextTick (callback, ...args) {
     setImmediate(callback, ...args)
-  },
-  stdout: {
-    isTTY: true,
-    write: noop,
-    on: noop,
-    once: noop,
-    emit: noop,
-    clearLine: noop
-  },
-  stdin: {
-    isTTY: true
   }
 }

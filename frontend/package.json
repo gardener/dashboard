@@ -47,7 +47,6 @@
     "lodash": "4.17.21",
     "md5": "^2.3.0",
     "netmask": "^2.0.2",
-    "ora": "^5.4.1",
     "p-timeout": "^4.1.0",
     "regenerator-runtime": "^0.13.9",
     "semver": "^7.3.7",

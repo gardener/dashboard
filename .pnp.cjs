@@ -2810,7 +2810,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lodash", "npm:4.17.21"],\
             ["md5", "npm:2.3.0"],\
             ["netmask", "npm:2.0.2"],\
-            ["ora", "npm:5.4.1"],\
             ["p-timeout", "npm:4.1.0"],\
             ["regenerator-runtime", "npm:0.13.9"],\
             ["sass", "npm:1.52.1"],\
