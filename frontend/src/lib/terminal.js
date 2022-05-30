@@ -414,6 +414,7 @@ export class Spinner {
   start () {
     const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     let i = 0
+    this.#clearScreen()
     this.#hideCursor()
     this.#intervalId = setInterval(() => {
       i = ++i % frames.length
@@ -438,5 +439,9 @@ export class Spinner {
 
   #hideCursor () {
     this.#term.write(ESC + '?25l')
+  }
+
+  #clearScreen () {
+    this.#term.write(ESC + 'c')
   }
 }
