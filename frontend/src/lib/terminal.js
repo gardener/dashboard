@@ -391,7 +391,8 @@ function getDetailedConnectionStateText (terminalContainerStatus) {
   return `${text}: ${reason}`
 }
 
-const ESC = '\u001B['
+// Control Sequence Introducer https://xtermjs.org/docs/api/vtfeatures/#csi
+const CSI = '\u001B['
 
 export class Spinner {
   #term
@@ -414,7 +415,8 @@ export class Spinner {
   start () {
     const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     let i = 0
-    this.#clearScreen()
+    this.#term.focus()
+    this.#clearTerminal()
     this.#hideCursor()
     this.#intervalId = setInterval(() => {
       i = ++i % frames.length
@@ -430,18 +432,25 @@ export class Spinner {
   }
 
   #eraseLine () {
-    this.#term.write(ESC + '2K' + ESC + '1A' + ESC + 'G')
+    this.#term.write([
+      CSI + '2K', // Erase complete line
+      CSI + 'H' // Set cursor to home position
+    ].join(''))
   }
 
   #showCursor () {
-    this.#term.write(ESC + '?25h')
+    this.#term.write(CSI + '?25h')
   }
 
   #hideCursor () {
-    this.#term.write(ESC + '?25l')
+    this.#term.write(CSI + '?25l')
   }
 
-  #clearScreen () {
-    this.#term.write(ESC + 'c')
+  #clearTerminal () {
+    this.#term.write([
+      CSI + '2J', // Erase complete viewport
+      CSI + '3J', // Erase scrollback
+      CSI + 'H' // Set cursor to home position
+    ].join(''))
   }
 }
