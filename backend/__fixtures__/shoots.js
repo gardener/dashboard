@@ -163,7 +163,7 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
-  adminKubeconfig ({
+  createAdminKubeconfigRequest ({
     user = {
       'client-certificate-data': toBase64('certificate-authority-data'),
       'client-key-data': toBase64('client-key-data')

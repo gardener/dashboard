@@ -466,7 +466,7 @@ describe('api', function () {
 
       it('should read the terminal config', async function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.adminKubeconfig())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.createAdminKubeconfigRequest())
         mockRequest.mockImplementationOnce(fixtures.nodes.mocks.list())
 
         const res = await agent

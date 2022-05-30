@@ -23,12 +23,12 @@ describe('kube-client', () => {
 
     let testClient
     let getSecretStub
-    let getShootAdminKubeconfigStub
+    let createShootAdminKubeconfigStub
 
     beforeEach(() => {
       testClient = createClient({ auth: { bearer } })
       getSecretStub = jest.spyOn(testClient.core.secrets, 'get')
-      getShootAdminKubeconfigStub = jest.spyOn(testClient['core.gardener.cloud'].shoots, 'adminKubeconfig')
+      createShootAdminKubeconfigStub = jest.spyOn(testClient['core.gardener.cloud'].shoots, 'createAdminKubeconfigRequest')
     })
 
     it('should create a client', () => {
@@ -54,13 +54,13 @@ describe('kube-client', () => {
         'client-key-data': clientCertificateData
       }
       const testKubeconfig = fixtures.helper.createTestKubeconfig(user, { server })
-      getShootAdminKubeconfigStub.mockReturnValue({
+      createShootAdminKubeconfigStub.mockReturnValue({
         status: {
           kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
         }
       })
-      const kubeconfig = await testClient.getShootAdminKubeconfig({ namespace, name })
-      expect(getShootAdminKubeconfigStub).toHaveBeenCalledWith(namespace, name, {
+      const kubeconfig = await testClient.createShootAdminKubeconfig({ namespace, name })
+      expect(createShootAdminKubeconfigStub).toHaveBeenCalledWith(namespace, name, {
         apiVersion: 'authentication.gardener.cloud/v1alpha1',
         kind: 'AdminKubeconfigRequest',
         spec: { expirationSeconds: 600 }

@@ -88,7 +88,7 @@ class Client {
     return kubeconfig
   }
 
-  async getShootAdminKubeconfig ({ name, namespace }) {
+  async createShootAdminKubeconfig ({ name, namespace }) {
     const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
     const body = {
       kind,
@@ -98,8 +98,8 @@ class Client {
       }
     }
 
-    const request = await this['core.gardener.cloud'].shoots.adminKubeconfig(namespace, name, body)
-    const kubeconfigBase64 = _.get(request, 'status.kubeconfig')
+    const adminKubeconfigRequest = await this['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
+    const kubeconfigBase64 = _.get(adminKubeconfigRequest, 'status.kubeconfig')
     if (!kubeconfigBase64) {
       throw NotFound('No "kubeconfig" found in shoots/adminkubeconfig')
     }
@@ -112,7 +112,7 @@ class Client {
   }
 
   async createShootAdminKubeconfigClient (shootRef) {
-    const kubeconfig = await this.getShootAdminKubeconfig(shootRef)
+    const kubeconfig = await this.createShootAdminKubeconfig(shootRef)
     return new this.constructor(fromKubeconfig(kubeconfig))
   }
 
