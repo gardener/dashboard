@@ -44,7 +44,7 @@
     "jwt-decode": "^2.2.0",
     "lodash": "4.17.21",
     "md5": "^2.3.0",
-    "netmask": "^1.0.6",
+    "netmask": "^2.0.1",
     "ora": "^3.4.0",
     "p-timeout": "^3.2.0",
     "regenerator-runtime": "^0.13.7",
