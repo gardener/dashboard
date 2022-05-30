@@ -9,7 +9,7 @@ const zlib = require('zlib')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
-const { ProvidePlugin } = require('webpack')
+const { ProvidePlugin, NormalModuleReplacementPlugin } = require('webpack')
 
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
@@ -52,8 +52,10 @@ module.exports = {
     config.resolve
       .set('fallback', {
         assert: false,
+        readline: false,
         events: require.resolve('eventemitter3'),
-        buffer: require.resolve('buffer/')
+        buffer: require.resolve('buffer/'),
+        process: path.resolve(path.join(__dirname, 'src', 'process.js'))
       })
 
     config
@@ -61,7 +63,16 @@ module.exports = {
       .use(ProvidePlugin, [
         {
           Buffer: ['buffer', 'Buffer'],
-          process: path.resolve(path.join(__dirname, 'src', 'process.js'))
+          process: ['process']
+        }
+      ])
+
+    config
+      .plugin('normal-module-replacement')
+      .use(NormalModuleReplacementPlugin, [
+        /^node:/,
+        resource => {
+          resource.request = resource.request.replace(/^node:/, '')
         }
       ])
 

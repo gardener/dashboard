@@ -24,5 +24,8 @@ module.exports = {
       obj[prop] = value
       return true
     }
-  })
+  }),
+  nextTick (callback, ...args) {
+    setImmediate(callback, ...args)
+  }
 }

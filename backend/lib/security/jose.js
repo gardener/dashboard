@@ -9,7 +9,8 @@
 const { isPlainObject } = require('lodash')
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
-const { JWK, JWE } = require('jose')
+const crypto = require('crypto')
+const jose = require('jose')
 const uuid = require('uuid')
 const base64url = require('base64url')
 
@@ -17,9 +18,8 @@ const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
 
 function importSymmetricKey (sessionSecret) {
-  const use = 'enc'
   const decodedSessionSecret = decodeSecret(sessionSecret)
-  return JWK.asKey(decodedSessionSecret, { use })
+  return crypto.createSecretKey(decodedSessionSecret)
 }
 
 function decodeSecret (input) {
@@ -48,6 +48,8 @@ function decodeState (state) {
 
 module.exports = sessionSecret => {
   const symetricKey = importSymmetricKey(sessionSecret)
+  const encoder = new TextEncoder()
+  const decoder = new TextDecoder()
   return {
     encodeState,
     decodeState,
@@ -69,10 +71,18 @@ module.exports = sessionSecret => {
       return jwt.decode(token) || {}
     },
     encrypt (text) {
-      return JWE.encrypt(text, symetricKey)
+      const encodedText = encoder.encode(text)
+      const protectedHeader = {
+        enc: 'A128CBC-HS256',
+        alg: 'PBES2-HS256+A128KW'
+      }
+      return new jose.CompactEncrypt(encodedText)
+        .setProtectedHeader(protectedHeader)
+        .encrypt(symetricKey)
     },
-    decrypt (data) {
-      return JWE.decrypt(data, symetricKey).toString('ascii')
+    async decrypt (data) {
+      const { plaintext } = await jose.compactDecrypt(data, symetricKey)
+      return decoder.decode(plaintext)
     }
   }
 }

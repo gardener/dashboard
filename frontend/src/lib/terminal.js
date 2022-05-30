@@ -390,3 +390,53 @@ function getDetailedConnectionStateText (terminalContainerStatus) {
 
   return `${text}: ${reason}`
 }
+
+const ESC = '\u001B['
+
+export class Spinner {
+  #term
+  #intervalId
+  #text
+
+  constructor (term) {
+    this.#term = term
+    this.#intervalId = null
+  }
+
+  get text () {
+    return this.#text
+  }
+
+  set text (value) {
+    this.#text = value
+  }
+
+  start () {
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    let i = 0
+    this.#hideCursor()
+    this.#intervalId = setInterval(() => {
+      i = ++i % frames.length
+      this.#eraseLine()
+      this.#term.write(frames[i] + ' ' + this.#text)
+    }, 125)
+  }
+
+  stop () {
+    clearInterval(this.#intervalId)
+    this.#eraseLine()
+    this.#showCursor()
+  }
+
+  #eraseLine () {
+    this.#term.write(ESC + '2K' + ESC + '1A' + ESC + 'G')
+  }
+
+  #showCursor () {
+    this.#term.write(ESC + '?25h')
+  }
+
+  #hideCursor () {
+    this.#term.write(ESC + '?25l')
+  }
+}

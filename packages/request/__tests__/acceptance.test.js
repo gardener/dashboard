@@ -162,7 +162,7 @@ function createSecureServer ({ cert, key }) {
         stream.end(body)
       }
     })
-    server.listen(0, '127.0.0.1', () => {
+    server.listen(0, hostname, () => {
       const port = server.options.port = server.address().port
       server.origin = `${protocol}//${hostname}:${port}`
       resolve(server)

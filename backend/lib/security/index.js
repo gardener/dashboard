@@ -166,7 +166,7 @@ async function authorizeToken (req, res) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = encrypt(bearer)
+  const encryptedBearer = await encrypt(bearer)
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
@@ -260,7 +260,7 @@ function authenticate (options = {}) {
     if (!encryptedBearer) {
       throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
     }
-    const bearer = decrypt(encryptedBearer)
+    const bearer = await decrypt(encryptedBearer)
     if (!bearer) {
       throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
     }

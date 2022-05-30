@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import get from 'lodash/get'
-import template from 'url-template'
+import { parseTemplate } from 'url-template'
 import ExternalLink from '@/components/ExternalLink'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState } from 'vuex'
@@ -53,7 +53,7 @@ export default {
   methods: {
     expandUrl (url) {
       try {
-        return template.parse(url).expand(this.shootMetadata)
+        return parseTemplate(url).expand(this.shootMetadata)
       } catch (err) {
         console.error(`Failed to parse URL template "${url}"`)
         return url

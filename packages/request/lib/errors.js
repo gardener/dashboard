@@ -31,7 +31,7 @@ function isAbortError (err = {}) {
   return err.code === 'ABORT_ERR'
 }
 
-function createHttpError ({ statusCode, statusMessage = http.STATUS_CODES[statusCode], response, headers, body }) {
+function createHttpError ({ statusCode = 500, statusMessage = http.STATUS_CODES[statusCode], response, headers, body }) {
   const properties = { statusMessage }
   if (headers) {
     properties.headers = { ...headers }
