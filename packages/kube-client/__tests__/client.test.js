@@ -105,7 +105,7 @@ describe('kube-client', () => {
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
-      expect(extend).toHaveBeenCalledTimes(25)
+      expect(extend).toHaveBeenCalledTimes(24)
       expect(extend).toHaveBeenCalledWith(expect.objectContaining({
         servername,
         headers
