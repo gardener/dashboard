@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div v-if="definitions" class="alternate-row-background">
-    <v-row v-for="(definition) in definitions" :key="definition.key">
+    <v-row v-for="(definition) in definitions" :key="definition.key" class="my-0">
       <v-list color="transparent">
         <v-list-item v-if="definition">
           <v-list-item-action class="action-select">

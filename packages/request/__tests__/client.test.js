@@ -23,7 +23,7 @@ const {
   HTTP2_HEADER_STATUS
 } = http2.constants
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 describe('Client', () => {
   const prefixUrl = 'https://127.0.0.1:31415/test'

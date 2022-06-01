@@ -11,6 +11,19 @@ Vue.use(Vuetify)
 
 fetchMock.enableMocks()
 
+document.createRange = jest.fn().mockImplementation(() => {
+  const range = new Range()
+  range.getBoundingClientRect = jest.fn()
+  range.getClientRects = () => {
+    return {
+      item: () => null,
+      length: 0,
+      [Symbol.iterator]: jest.fn()
+    }
+  }
+  return range
+})
+
 window.matchMedia = jest.fn().mockImplementation(query => {
   return {
     matches: false,

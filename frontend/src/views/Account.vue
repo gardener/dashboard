@@ -386,7 +386,7 @@ export default {
       download(kubeconfig, filename, 'text/yaml')
     },
     async updateKubeconfigYaml (value) {
-      this.kubeconfigYaml = await this.$yaml.safeDump(value)
+      this.kubeconfigYaml = await this.$yaml.dump(value)
     },
     expansionPanelIcon (value) {
       return value ? 'mdi-chevron-up' : 'mdi-chevron-down'

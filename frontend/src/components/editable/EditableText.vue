@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
               <span>Save</span>
             </v-tooltip>
           </template>
-          <template v-slot:message="{ key, message }">
+          <template v-slot:message="{ message }">
             <error-message :message="message" @close="clearMessages"/>
           </template>
         </v-text-field>

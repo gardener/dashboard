@@ -8,7 +8,7 @@
 
 const { BackoffManager } = require('../lib/cache')
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 describe('kube-client', () => {
   describe('cache', () => {

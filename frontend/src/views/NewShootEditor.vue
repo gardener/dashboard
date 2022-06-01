@@ -81,7 +81,7 @@ export default {
     },
     async getShootResource () {
       const content = await this.$shootEditor.dispatch('getContent')
-      return this.$yaml.safeLoad(content)
+      return this.$yaml.load(content)
     },
     async createClicked () {
       try {

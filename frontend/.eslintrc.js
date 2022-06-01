@@ -12,18 +12,20 @@ module.exports = {
   },
   extends: [
     'plugin:vue/essential',
+    'plugin:vuetify/base',
     '@vue/standard'
   ],
   parserOptions: {
-    parser: 'babel-eslint'
+    parser: '@babel/eslint-parser'
   },
   plugins: [
-    'vuetify',
     'jest'
   ],
   rules: {
     'no-console': [development ? 'off' : 'error', { allow: ['error'] }],
     'no-debugger': development ? 'off' : 'error',
+    'vue/multi-word-component-names': 'off',
+    'vue/no-mutating-props': 'off',
     'vuetify/no-deprecated-classes': 'error',
     'vuetify/grid-unknown-attributes': 'error',
     'vuetify/no-legacy-grid': 'error'

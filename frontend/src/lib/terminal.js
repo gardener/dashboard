@@ -390,3 +390,64 @@ function getDetailedConnectionStateText (terminalContainerStatus) {
 
   return `${text}: ${reason}`
 }
+
+// Escape Sequence
+const ESC = '\u001B'
+// Control Sequence Introducer https://xtermjs.org/docs/api/vtfeatures/#csi
+const CSI = ESC + '['
+
+export class Spinner {
+  #term
+  #intervalId
+  #text
+
+  constructor (term) {
+    this.#term = term
+    this.#intervalId = null
+  }
+
+  get text () {
+    return this.#text
+  }
+
+  set text (value) {
+    this.#text = value
+  }
+
+  start () {
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    let i = 0
+    this.#clearTerminal()
+    this.#hideCursor()
+    this.#intervalId = setInterval(() => {
+      i = ++i % frames.length
+      this.#eraseLine()
+      this.#term.write(frames[i] + ' ' + this.#text)
+    }, 125)
+  }
+
+  stop () {
+    clearInterval(this.#intervalId)
+    this.#eraseLine()
+    this.#showCursor()
+  }
+
+  #eraseLine () {
+    this.#term.write([
+      CSI + '2K', // Erase complete line
+      CSI + 'H' // Set cursor to home position
+    ].join(''))
+  }
+
+  #showCursor () {
+    this.#term.write(CSI + '?25h')
+  }
+
+  #hideCursor () {
+    this.#term.write(CSI + '?25l')
+  }
+
+  #clearTerminal () {
+    this.#term.write(ESC + 'c')
+  }
+}

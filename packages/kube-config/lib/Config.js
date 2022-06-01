@@ -18,7 +18,7 @@ class Config {
       throw new TypeError('Kubeconfig must not be empty')
     }
     if (typeof input === 'string') {
-      input = yaml.safeLoad(input)
+      input = yaml.load(input)
     }
     input = _
       .chain(input)
@@ -60,7 +60,7 @@ class Config {
   }
 
   toYAML () {
-    return yaml.safeDump(this.toJSON())
+    return yaml.dump(this.toJSON())
   }
 
   clean () {

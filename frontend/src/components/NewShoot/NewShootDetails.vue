@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container class="pa-0 ma-0">
+  <v-container class="px-0 mx-0">
     <v-row >
       <v-col cols="3">
         <v-text-field

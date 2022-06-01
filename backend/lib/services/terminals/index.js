@@ -746,7 +746,7 @@ function pickShortcutValues (data) {
 
 function fromShortcutSecretResource (secret) {
   const shortcutsBase64 = _.get(secret, 'data.shortcuts')
-  const shortcuts = yaml.safeLoad(decodeBase64(shortcutsBase64))
+  const shortcuts = yaml.load(decodeBase64(shortcutsBase64))
   return _
     .chain(shortcuts)
     .map(pickShortcutValues)

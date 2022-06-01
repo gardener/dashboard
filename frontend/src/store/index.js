@@ -329,7 +329,7 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
     return undefined // skip
   }
 
-  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition: optionDefinition, option: options[optionDefinition.key] })))
+  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition, option: options[optionDefinition.key] })))
 
   return {
     key,
