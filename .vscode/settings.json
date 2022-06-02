@@ -54,6 +54,5 @@
   "jestrunner.jestCommand": "node scripts/jest.cjs",
   "jestrunner.yarnPnpCommand": "../../scripts/yarn.cjs",
   "jestrunner.changeDirectoryToWorkspaceRoot": true,
-  "vetur.useWorkspaceDependencies": true,
   "vetur.experimental.templateInterpolationService": false
 }

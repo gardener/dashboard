@@ -27,7 +27,7 @@ const jwtid = 'jti'
 async function getCookieValue (token) {
   const bearer = await token
   const [header, payload, signature] = split(bearer, '.')
-  const encrypted = encrypt(bearer)
+  const encrypted = await encrypt(bearer)
   const cookies = {
     [COOKIE_HEADER_PAYLOAD]: join([header, payload], '.'),
     [COOKIE_SIGNATURE]: signature,

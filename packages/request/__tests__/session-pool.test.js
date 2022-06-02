@@ -14,7 +14,7 @@ const SessionId = require('../lib/SessionId')
 const SessionPool = require('../lib/SessionPool')
 const { StreamError } = require('../lib/errors')
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 const { getOwnSymbolProperty } = fixtures.helper
 const {

@@ -120,6 +120,6 @@ module.exports = {
     return config
   },
   readConfig (path) {
-    return yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+    return yaml.load(fs.readFileSync(path, 'utf8'))
   }
 }

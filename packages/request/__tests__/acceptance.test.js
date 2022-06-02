@@ -29,7 +29,7 @@ const {
 
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 const key = `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxLZ88tEBAu9ij
@@ -162,7 +162,7 @@ function createSecureServer ({ cert, key }) {
         stream.end(body)
       }
     })
-    server.listen(0, '127.0.0.1', () => {
+    server.listen(0, hostname, () => {
       const port = server.options.port = server.address().port
       server.origin = `${protocol}//${hostname}:${port}`
       resolve(server)
@@ -236,7 +236,7 @@ describe('Acceptance Tests', function () {
         try {
           await client.request('status/418')
         } catch (err) {
-          /* eslint-disable  jest/no-conditional-expect, jest/no-try-expect */
+          /* eslint-disable  jest/no-conditional-expect */
           expect(isHttpError(err, 418)).toBe(true)
           expect(err).toMatchObject({
             statusCode,

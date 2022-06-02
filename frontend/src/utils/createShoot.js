@@ -196,7 +196,7 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   }
   const newCidrBlock = new Netmask(`${cidrToSplit.base}/${newBitmask}`)
   const cidrArray = []
-  for (var i = 0; i < numberOfNetworks; i++) {
+  for (let i = 0; i < numberOfNetworks; i++) {
     cidrArray.push(newCidrBlock.next(i).toString())
   }
   return cidrArray

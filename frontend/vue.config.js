@@ -5,8 +5,11 @@
 const path = require('path')
 const fs = require('fs')
 const zlib = require('zlib')
+
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const { ProvidePlugin, NormalModuleReplacementPlugin } = require('webpack')
 
 if (!Reflect.has(process.env, 'VUE_APP_VERSION')) {
   try {
@@ -21,9 +24,7 @@ const KiB = 1024
 const MiB = 1024 * KiB
 
 module.exports = {
-  transpileDependencies: [
-    'vuetify'
-  ],
+  transpileDependencies: true,
   pages: {
     index: {
       entry: process.env.NODE_ENV === 'development'
@@ -40,10 +41,6 @@ module.exports = {
     }
   },
   chainWebpack (config) {
-    if (process.env.NODE_ENV === 'development') {
-      config.plugins.delete('VuetifyLoaderPlugin')
-    }
-
     config.externals({
       websocket: /^ws$/i
     })
@@ -52,42 +49,75 @@ module.exports = {
       .maxAssetSize(1 * MiB)
       .maxEntrypointSize(2 * MiB)
 
+    config.resolve
+      .set('fallback', {
+        assert: false,
+        readline: false,
+        events: require.resolve('eventemitter3'),
+        buffer: require.resolve('buffer/'),
+        process: path.resolve(path.join(__dirname, 'src', 'process.js'))
+      })
+
     config
-      .plugin('circular-dependency')
-      .use(CircularDependencyPlugin, [
+      .plugin('provide')
+      .use(ProvidePlugin, [
         {
-          exclude: /\.yarn/,
-          include: /src/,
-          failOnError: true,
-          allowAsyncCycles: false,
-          cwd: process.cwd()
+          Buffer: ['buffer', 'Buffer'],
+          process: ['process']
         }
       ])
 
-    const compressionPluginOptions = {
-      test: /\.(js|css|html|svg|eot|ttf)$/,
-      threshold: 8192,
-      minRatio: 0.8
-    }
     config
-      .plugin('gzip-compress')
-      .use(CompressionPlugin, [{
-        filename: '[path][base].gz',
-        algorithm: 'gzip',
-        ...compressionPluginOptions
-      }])
-    config
-      .plugin('brotli-compress')
-      .use(CompressionPlugin, [{
-        filename: '[path][base].br',
-        algorithm: 'brotliCompress',
-        compressionOptions: {
-          params: {
-            [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+      .plugin('normal-module-replacement')
+      .use(NormalModuleReplacementPlugin, [
+        /^node:/,
+        resource => {
+          resource.request = resource.request.replace(/^node:/, '')
+        }
+      ])
+
+    if (process.env.NODE_ENV === 'production') {
+      config
+        .plugin('vuetify-loader')
+        .use(VuetifyLoaderPlugin)
+
+      config
+        .plugin('circular-dependency')
+        .use(CircularDependencyPlugin, [
+          {
+            exclude: /\.yarn/,
+            include: /src/,
+            failOnError: true,
+            allowAsyncCycles: false,
+            cwd: process.cwd()
           }
-        },
-        ...compressionPluginOptions
-      }])
+        ])
+
+      const compressionPluginOptions = {
+        test: /\.(js|css|html|svg|eot|ttf)$/,
+        threshold: 8192,
+        minRatio: 0.8
+      }
+      config
+        .plugin('gzip-compress')
+        .use(CompressionPlugin, [{
+          filename: '[path][base].gz',
+          algorithm: 'gzip',
+          ...compressionPluginOptions
+        }])
+      config
+        .plugin('brotli-compress')
+        .use(CompressionPlugin, [{
+          filename: '[path][base].br',
+          algorithm: 'brotliCompress',
+          compressionOptions: {
+            params: {
+              [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+            }
+          },
+          ...compressionPluginOptions
+        }])
+    }
   },
   devServer: {
     proxy: {

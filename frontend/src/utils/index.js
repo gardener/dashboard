@@ -390,8 +390,8 @@ export function encodeBase64Url (input) {
 export function shortRandomString (length) {
   const start = 'abcdefghijklmnopqrstuvwxyz'
   const possible = start + '0123456789'
-  var text = start.charAt(Math.floor(Math.random() * start.length))
-  for (var i = 0; i < (length - 1); i++) {
+  let text = start.charAt(Math.floor(Math.random() * start.length))
+  for (let i = 0; i < (length - 1); i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
@@ -530,6 +530,10 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'uam',
     displayName: 'UAM'
+  },
+  {
+    name: 'serviceaccountmanager',
+    displayName: 'Service Account Manager'
   },
   {
     name: 'owner',

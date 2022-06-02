@@ -25,22 +25,19 @@
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:*",
-    "eslint": "^7.23.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^24.3.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
-    "jest": "^26.6.3",
-    "js-yaml": "^3.13.1",
+    "eslint": "^8.16.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.4.5",
+    "eslint-plugin-n": "^15.2.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^27.5.1",
+    "js-yaml": "^4.1.0",
     "lodash": "4.17.21"
   },
   "eslintConfig": {
     "env": {
-      "browser": true,
       "commonjs": true,
-      "es2021": true,
-      "node": true,
       "jest/globals": true
     },
     "plugins": [
@@ -54,9 +51,6 @@
       "fixtures": true,
       "helmTemplate": true
     },
-    "parserOptions": {
-      "ecmaVersion": 12
-    },
     "rules": {
       "no-console": "error"
     }
@@ -68,8 +62,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
+  "packageManager": "yarn@3.2.1",
   "engines": {
-    "node": "^16.15.0",
-    "yarn": "^2.4.1"
+    "node": "^16.15.0"
   }
 }

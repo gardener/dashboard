@@ -55,7 +55,7 @@ function readKubeconfig (filename) {
     filename = filename.shift()
   }
   const dirname = path.dirname(filename)
-  const config = yaml.safeLoad(fs.readFileSync(filename))
+  const config = yaml.load(fs.readFileSync(filename))
   const resolvePath = (object, key) => {
     if (object[key]) {
       object[key] = path.resolve(dirname, object[key])

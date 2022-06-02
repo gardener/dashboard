@@ -123,7 +123,7 @@ export default {
     async setNetworkConfiguration (value) {
       if (value) {
         this.networkConfiguration = value
-        this.networkConfigurationYaml = await this.$yaml.safeDump(value)
+        this.networkConfigurationYaml = await this.$yaml.dump(value)
       } else {
         this.networkConfiguration = []
         this.networkConfigurationYaml = undefined

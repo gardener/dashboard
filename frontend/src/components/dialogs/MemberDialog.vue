@@ -13,8 +13,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
-          <v-row >
-            <v-col cols="8">
+          <v-row>
+            <v-col cols="7">
               <v-text-field
                 :disabled="isUpdateDialog"
                 color="primary"
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
                 tabindex="1"
               ></v-text-field>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="5">
               <v-select
                 color="primary"
                 item-color="primary"

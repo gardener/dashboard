@@ -94,7 +94,7 @@ describe('kube-config', () => {
     })
 
     it('should dump KUBECONFIG without providing a ca', () => {
-      const kubeconfig = yaml.safeLoad(dumpKubeconfig({
+      const kubeconfig = yaml.load(dumpKubeconfig({
         userName: user,
         namespace,
         token,
@@ -107,7 +107,7 @@ describe('kube-config', () => {
 
     it('should return the config from the users homedir', () => {
       const defaultKubeconfigPath = path.join(os.homedir(), '.kube', 'config')
-      const kubeconfig = yaml.safeDump({
+      const kubeconfig = yaml.dump({
         apiVersion: 'v1',
         kind: 'Config',
         clusters: [{
@@ -193,7 +193,7 @@ describe('kube-config', () => {
           'certificate-authority': '/path/to/ca.crt'
         }
       })
-      kubeconfig = yaml.safeDump(kubeconfig)
+      kubeconfig = yaml.dump(kubeconfig)
       fs.readFileSync.mockImplementation(path => {
         switch (path) {
           case '/path/to/ca.crt':

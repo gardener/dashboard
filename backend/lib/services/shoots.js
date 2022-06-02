@@ -177,7 +177,7 @@ const patchAnnotations = async function ({ user, namespace, name, annotations })
   const client = user.client
   const body = {
     metadata: {
-      annotations: annotations
+      annotations
     }
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)

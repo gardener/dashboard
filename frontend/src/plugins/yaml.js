@@ -5,23 +5,22 @@
 //
 
 import Vue from 'vue'
+const yaml = import(/* webpackPrefetch: true */ 'js-yaml')
 
 const VueYaml = {
   install (Vue) {
-    const yaml = {
-      async safeDump (value) {
-        const { default: yaml } = await import('js-yaml/dist/js-yaml.min.js')
-        return yaml.safeDump(value, {
+    const value = {
+      dump (obj) {
+        return yaml.then(({ dump }) => dump(obj, {
           skipInvalid: true
-        })
+        }))
       },
-      async safeLoad (value) {
-        const { default: yaml } = await import('js-yaml/dist/js-yaml.min.js')
-        return yaml.safeLoad(value)
+      load (data) {
+        return yaml.then(({ load }) => load(data))
       }
     }
-    Object.defineProperty(Vue, 'yaml', { value: yaml })
-    Object.defineProperty(Vue.prototype, '$yaml', { value: yaml })
+    Object.defineProperty(Vue, 'yaml', { value })
+    Object.defineProperty(Vue.prototype, '$yaml', { value })
   }
 }
 

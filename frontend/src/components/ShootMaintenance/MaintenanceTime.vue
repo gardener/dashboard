@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row>
+  <v-row class="my-0">
     <v-col class="regularInput">
       <v-text-field
         color="primary"

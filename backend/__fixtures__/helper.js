@@ -56,11 +56,11 @@ function fromBase64 (value) {
 }
 
 function toYaml (value) {
-  return yaml.safeDump(value)
+  return yaml.dump(value)
 }
 
 function fromYaml (value) {
-  return yaml.safeLoad(value)
+  return yaml.load(value)
 }
 
 function formatTime (time) {

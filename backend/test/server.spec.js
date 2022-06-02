@@ -42,7 +42,7 @@ function createApplication (port) {
   return app
 }
 
-jest.useFakeTimers()
+jest.useFakeTimers('legacy')
 
 describe('server', () => {
   const port = 1234

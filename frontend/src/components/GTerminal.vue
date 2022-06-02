@@ -198,7 +198,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import ora from 'ora'
 import get from 'lodash/get'
 import assign from 'lodash/assign'
 import find from 'lodash/find'
@@ -209,7 +208,7 @@ import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
 
-import { TerminalSession } from '@/lib/terminal'
+import { TerminalSession, Spinner } from '@/lib/terminal'
 import { FocusAddon } from '@/lib/xterm-addon-focus'
 import GPopper from '@/components/GPopper'
 
@@ -493,16 +492,7 @@ export default {
       fitAddon.fit()
     })
 
-    this.spinner = ora({
-      stream: {
-        write: chunk => this.term.write(chunk.toString()),
-        isTTY: () => true,
-        clearLine: () => this.term.write('\x1bc'), // TODO reset line only
-        cursorTo: to => {}
-      },
-      spinner: 'dots'
-    })
-
+    this.spinner = new Spinner(term)
     this.connect()
   },
   beforeDestroy () {

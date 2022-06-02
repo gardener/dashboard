@@ -71,5 +71,5 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "--require=/usr/src/app/.pnp.js"]
+ENTRYPOINT [ "/sbin/tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
 CMD ["server.js"]

@@ -108,6 +108,7 @@ export default {
 
 <style lang="scss" scoped>
   @import '~vuetify/src/styles/styles.sass';
+  @import '@/sass/variables.scss';
 
   $grey-lighten-4: map-get($grey, 'lighten-4');
 
