@@ -84,6 +84,15 @@ SPDX-License-Identifier: Apache-2.0
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
+      <template v-if="cell.header.value === 'issueSince'">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix></time-string>
+            </div>
+          </template>
+          {{ shootIssueSince }}
+        </v-tooltip>      </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
@@ -164,7 +173,8 @@ import AutoHide from '@/components/AutoHide'
 
 import {
   isTypeDelete,
-  getTimestampFormatted
+  getTimestampFormatted,
+  getIssueSince
 } from '@/utils'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -241,6 +251,12 @@ export default {
     },
     shootTicketsLabels () {
       return this.ticketsLabels(this.shootMetadata)
+    },
+    shootIssueSinceTimestamp () {
+      return getIssueSince(this.shootItem.status)
+    },
+    shootIssueSince () {
+      return getTimestampFormatted(this.shootIssueSinceTimestamp)
     },
     cells () {
       return map(this.visibleHeaders, header => {

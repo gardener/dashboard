@@ -411,6 +411,14 @@ export default {
           hidden: false
         },
         {
+          text: 'ISSUE SINCE',
+          value: 'issueSince',
+          sortable: true,
+          align: 'start',
+          defaultSelected: true,
+          hidden: this.projectScope || !this.isAdmin
+        },
+        {
           text: 'ACCESS RESTRICTIONS',
           value: 'accessRestrictions',
           sortable: false,

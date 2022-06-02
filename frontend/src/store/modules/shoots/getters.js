@@ -20,7 +20,8 @@ import pick from 'lodash/pick'
 import {
   getCreatedBy,
   isShootStatusHibernated,
-  isReconciliationDeactivated
+  isReconciliationDeactivated,
+  getIssueSince
 } from '@/utils'
 import { findItem, parseSearch } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
@@ -51,6 +52,8 @@ export function getRawVal (rootGetters, item, column) {
     }
     case 'errorCodes':
       return join(errorCodesFromArray(get(item, 'status.lastErrors', [])), ' ')
+    case 'issueSince':
+      return getIssueSince(item.status) || 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
