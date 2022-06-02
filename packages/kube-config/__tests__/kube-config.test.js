@@ -435,6 +435,7 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider'].config
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
+      expect(mockGetToken).toBeCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
