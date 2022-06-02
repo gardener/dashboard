@@ -16,6 +16,23 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-switch
+          v-model="freezeSorting"
+          class="mr-3"
+          color="primary lighten-3"
+          hide-details>
+          <template v-slot:label>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <span v-on="on" class="text-subtitle-1 toolbar-title--text">Freeze Cluster List</span>
+              </template>
+              <span class="font-weight-bold">Freeze sorting of the Cluster List</span><br />
+              Items in the list will still be updated.<br />
+              New items will not be added to the list.<br />
+              Removed items will be shown as stale (greyed out).
+            </v-tooltip>
+          </template>
+        </v-switch>
         <v-tooltip top v-if="shootSearch || items.length > 3">
           <template v-slot:activator="{ on }">
             <v-text-field
@@ -90,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -158,6 +175,9 @@ export default {
       setSelectedShootInternal: 'setSelectedShoot',
       setShootListFilter: 'setShootListFilter',
       subscribeShoots: 'subscribeShoots'
+    }),
+    ...mapMutations({
+      setFreezeSorting: 'shoots/SET_FREEZE_SORTING'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -266,7 +286,8 @@ export default {
     ...mapState([
       'shootsLoading',
       'cfg',
-      'namespace'
+      'namespace',
+      'shoots/freezeSorting'
     ]),
     defaultTableOptions () {
       return {
@@ -283,6 +304,14 @@ export default {
         if (!value) {
           this.hideDialog()
         }
+      }
+    },
+    freezeSorting: {
+      get () {
+        return this['shoots/freezeSorting']
+      },
+      set (value) {
+        this.setFreezeSorting(value)
       }
     },
     currentName () {

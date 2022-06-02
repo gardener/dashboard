@@ -47,7 +47,8 @@ const state = {
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
-  initialNewShootResource: undefined
+  initialNewShootResource: undefined,
+  freezeSorting: false
 }
 
 // actions
@@ -409,6 +410,9 @@ const mutations = {
   RESET_NEW_SHOOT_RESOURCE (state, shootResource) {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
+  },
+  SET_FREEZE_SORTING (state, value) {
+    state.freezeSorting = value
   }
 }
 

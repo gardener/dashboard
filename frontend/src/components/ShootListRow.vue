@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr>
+  <tr :class="{ stale: isStale }">
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
@@ -253,6 +253,9 @@ export default {
           value // currently only applicable for header.customField === true
         }
       })
+    },
+    isStale () {
+      return this.shootItem.stale
     }
   },
   methods: {
@@ -266,5 +269,9 @@ export default {
 <style lang="scss" scoped>
   .labels {
     line-height: 10px;
+  }
+  .stale {
+    pointer-events: none;
+    opacity: 0.3;
   }
 </style>

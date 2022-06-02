@@ -13,7 +13,9 @@ import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import padStart from 'lodash/padStart'
+import find from 'lodash/find'
 import semver from 'semver'
+import pick from 'lodash/pick'
 
 import {
   getCreatedBy,
@@ -174,7 +176,22 @@ export default {
     }
   },
   sortItems (state, getters, rootState, rootGetters) {
+    let sortedItems
     return (items, sortByArr, sortDescArr) => {
+      if (state.freezeSorting) {
+        return map(sortedItems, sortedItem => {
+          const item = find(items, item => {
+            return item.metadata.uid === sortedItem.metadata.uid
+          })
+          if (item) {
+            return item
+          }
+          return {
+            ...sortedItem,
+            stale: true
+          }
+        })
+      }
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
@@ -228,6 +245,10 @@ export default {
           items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
+      sortedItems = map(items, item => {
+        return pick(item, ['metadata', 'spec', 'status'])
+      })
+
       return items
     }
   }
