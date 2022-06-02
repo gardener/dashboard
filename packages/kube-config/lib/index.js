@@ -11,37 +11,10 @@ const os = require('os')
 const path = require('path')
 const yaml = require('js-yaml')
 const Config = require('./Config')
+const ClientConfig = require('./ClientConfig')
 
-function getInCluster ({
-  KUBERNETES_SERVICE_HOST: host,
-  KUBERNETES_SERVICE_PORT: port
-} = {}) {
-  if (!host || !port) {
-    throw new TypeError('Failed to load in-cluster configuration, kubernetes service endpoint not defined')
-  }
-  const baseDir = '/var/run/secrets/kubernetes.io/serviceaccount/'
-  const tokenPath = path.join(baseDir, 'token')
-  const token = fs.readFileSync(tokenPath, 'utf8')
-  if (!token) {
-    throw new TypeError('Failed to load in-cluster configuration, serviceaccount token not found')
-  }
-
-  const caPath = path.join(baseDir, 'ca.crt')
-  const ca = fs.readFileSync(caPath, 'utf8')
-  if (!ca) {
-    throw new TypeError('Failed to load in-cluster configuration, serviceaccount certificate authority not found')
-  }
-
-  const config = {
-    url: `https://${host}:${port}`,
-    ca,
-    rejectUnauthorized: true,
-    auth: {
-      bearer: token
-    }
-  }
-  return config
-}
+const KUBERNETES_SERVICEACCOUNT_TOKEN_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+const KUBERNETES_SERVICEACCOUNT_CA_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
 
 function readKubeconfig (filename) {
   if (!filename) {
@@ -55,159 +28,95 @@ function readKubeconfig (filename) {
     filename = filename.shift()
   }
   const dirname = path.dirname(filename)
-  const config = yaml.load(fs.readFileSync(filename))
+  const kubeconfig = yaml.load(fs.readFileSync(filename))
   const resolvePath = (object, key) => {
     if (object[key]) {
       object[key] = path.resolve(dirname, object[key])
     }
   }
-  for (const { cluster } of config.clusters) {
+  for (const { cluster } of kubeconfig.clusters) {
     resolvePath(cluster, 'certificate-authority')
   }
-  for (const { user } of config.users) {
+  for (const { user } of kubeconfig.users) {
     resolvePath(user, 'client-key')
     resolvePath(user, 'client-certificate')
   }
-  return config
+  return new Config(kubeconfig)
 }
 
-function parseKubeconfig (input) {
-  return Config.parse(input)
+function inClusterConfig ({
+  KUBERNETES_SERVICE_HOST: host,
+  KUBERNETES_SERVICE_PORT: port
+}) {
+  if (!host || !port) {
+    throw new TypeError('Failed to load in-cluster configuration, kubernetes service endpoint not defined')
+  }
+
+  return Config.build({
+    server: `https://${host}:${port}`,
+    'certificate-authority': KUBERNETES_SERVICEACCOUNT_CA_FILE
+  }, {
+    tokenFile: KUBERNETES_SERVICEACCOUNT_TOKEN_FILE
+  })
 }
 
-function cleanKubeconfig (input) {
-  const kubeconfig = parseKubeconfig(input)
-  return kubeconfig.clean()
-}
-
-function fromKubeconfig (input) {
-  const {
-    currentCluster: cluster,
-    currentUser: user
-  } = parseKubeconfig(input)
-
-  // inline certificates and keys
-  const readCertificate = (obj, name) => {
-    if (obj[name]) {
-      return fs.readFileSync(obj[name])
-    }
-    if (obj[`${name}-data`]) {
-      return Buffer.from(obj[`${name}-data`], 'base64').toString('utf8')
-    }
-  }
-
-  const config = {
-    rejectUnauthorized: true
-  }
-
-  if (cluster) {
-    config.url = cluster.server
-    const ca = readCertificate(cluster, 'certificate-authority')
-    if (ca) {
-      config.ca = ca
-    }
-    if ('insecure-skip-tls-verify' in cluster) {
-      config.rejectUnauthorized = !cluster['insecure-skip-tls-verify']
-    }
-  }
-
-  if (user) {
-    const cert = readCertificate(user, 'client-certificate')
-    const key = readCertificate(user, 'client-key')
-    if (cert && key) {
-      config.cert = cert
-      config.key = key
-    } else if (user.token) {
-      config.auth = {
-        bearer: user.token
-      }
-    } else if (user.username && user.password) {
-      config.auth = {
-        user: user.username,
-        pass: user.password
-      }
-    } else if (user['auth-provider']) {
-      const {
-        name,
-        config: authProviderConfig = {}
-      } = user['auth-provider']
-      switch (name) {
-        case 'gcp': {
-          const {
-            'access-token': accessToken,
-            expiry = '1970-01-01T00:00:00.000Z'
-          } = authProviderConfig
-          if (new Date() < new Date(expiry)) {
-            config.auth = {
-              bearer: accessToken
-            }
-          }
-          break
-        }
-      }
-    }
-  }
-
-  return config
-}
-
-function dumpKubeconfig ({ userName, contextName = 'default', clusterName = 'garden', namespace, token, server, caData }) {
-  const cluster = { server }
-  if (caData) {
-    cluster['certificate-authority-data'] = caData
-  }
-
-  return new Config({
-    clusters: [{
-      name: clusterName,
-      cluster
-    }],
-    users: [{
-      name: userName,
-      user: {
-        token
-      }
-    }],
-    contexts: [{
-      name: contextName,
-      context: {
-        cluster: clusterName,
-        user: userName,
-        namespace
-      }
-    }],
-    'current-context': contextName
-  }).toYAML()
-}
-
-function load (env = process.env) {
-  if (/^test/.test(env.NODE_ENV)) {
-    return {
-      url: 'https://kubernetes:6443',
-      auth: {
-        bearer: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
-      }
-    }
-  }
-  if (env.KUBECONFIG) {
-    return fromKubeconfig(readKubeconfig(env.KUBECONFIG))
-  }
-  try {
-    return getInCluster(env)
-  } catch (err) {
-    return fromKubeconfig(readKubeconfig())
-  }
+function testConfig () {
+  return Config.build({
+    server: 'https://kubernetes:6443'
+  }, {
+    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
+  })
 }
 
 exports = module.exports = {
-  getInCluster,
-  cleanKubeconfig,
-  fromKubeconfig (input) {
-    // required for testing
-    input = exports.cleanKubeconfig(input)
-    return fromKubeconfig(input)
+  constants: {
+    KUBERNETES_SERVICEACCOUNT_CA_FILE,
+    KUBERNETES_SERVICEACCOUNT_TOKEN_FILE
   },
-  parseKubeconfig,
-  dumpKubeconfig,
-  load
+  parseKubeconfig (input) {
+    return Config.parse(input)
+  },
+  cleanKubeconfig (input) {
+    return exports.parseKubeconfig(input).clean()
+  },
+  fromKubeconfig (input) {
+    return new ClientConfig(exports.cleanKubeconfig(input))
+  },
+  dumpKubeconfig ({ userName, contextName = 'default', clusterName = 'garden', namespace, token, server, caData }) {
+    return Config.build(
+      { server, 'certificate-authority-data': caData },
+      { token },
+      { userName, contextName, clusterName, namespace }
+    ).toYAML()
+  },
+  load (env = process.env) {
+    let config
+    if (/^test/.test(env.NODE_ENV)) {
+      config = testConfig()
+    } else if (env.KUBECONFIG) {
+      config = readKubeconfig(env.KUBECONFIG)
+    } else {
+      try {
+        config = inClusterConfig(env)
+      } catch (err) {
+        config = readKubeconfig()
+      }
+    }
+    return new ClientConfig(config)
+  },
+  getInCluster (env = process.env) {
+    try {
+      return new ClientConfig(inClusterConfig(env))
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        switch (err.path) {
+          case KUBERNETES_SERVICEACCOUNT_TOKEN_FILE:
+            throw new TypeError('Failed to load in-cluster configuration, serviceaccount token not found')
+          case KUBERNETES_SERVICEACCOUNT_CA_FILE:
+            throw new TypeError('Failed to load in-cluster configuration, serviceaccount certificate authority not found')
+        }
+      }
+      throw err
+    }
+  }
 }

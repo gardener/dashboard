@@ -10,7 +10,8 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig } = require('../lib')
+const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
+const Config = require('../lib/Config')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
 
@@ -42,6 +43,7 @@ describe('kube-config', () => {
       const config = load()
       expect(config).toEqual({
         url: server.origin,
+        rejectUnauthorized: true,
         auth: {
           bearer: token
         }
@@ -231,6 +233,20 @@ describe('kube-config', () => {
       })
     })
 
+    it('should return a config with keyData and certData', () => {
+      const base64Encode = data => Buffer.from(data, 'utf8').toString('base64')
+      kubeconfig.users[0].user = {
+        'client-key-data': base64Encode('key'),
+        'client-certificate-data': base64Encode('cert')
+      }
+      const config = fromKubeconfig(kubeconfig)
+      expect(config).toEqual({
+        rejectUnauthorized: true,
+        key: 'key',
+        cert: 'cert'
+      })
+    })
+
     it('should fail to parse the kubeconfig', () => {
       expect(() => fromKubeconfig()).toThrow(TypeError)
     })
@@ -290,13 +306,19 @@ describe('kube-config', () => {
   })
 
   describe('#getInCluster', () => {
+    const noEntityError = path => {
+      Object.assign(new Error(`ENOENT: no such file or directory, open '${path}'`), {
+        code: 'ENOENT',
+        path
+      })
+    }
     it('should fail with "kubernetes service endpoint not defined"', () => {
       expect(() => getInCluster()).toThrow(/kubernetes service endpoint not defined$/)
     })
 
     it('should fail with "serviceaccount token not found"', () => {
       fs.readFileSync
-        .mockReturnValueOnce(null)
+        .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_TOKEN_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
@@ -306,7 +328,7 @@ describe('kube-config', () => {
     it('should fail with "serviceaccount certificate authority not found"', () => {
       fs.readFileSync
         .mockReturnValueOnce(token)
-        .mockReturnValueOnce(null)
+        .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_CA_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
@@ -358,6 +380,14 @@ describe('kube-config', () => {
     })
   })
 
+  describe('#parseKubeconfig', () => {
+    it('should return the input object instance', () => {
+      const input = Config.build({}, undefined)
+      const kubeconfig = parseKubeconfig(input)
+      expect(kubeconfig).toBe(input)
+    })
+  })
+
   describe('#refreshAuthProviderConfig', () => {
     const defaultInput = {
       contexts: [{
@@ -405,7 +435,6 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider'].config
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
