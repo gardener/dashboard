@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </worker-input-generic>
     </v-row>
-    <v-row key="addWorker" class="list-item">
+    <v-row key="addWorker" class="list-item pt-2">
       <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"

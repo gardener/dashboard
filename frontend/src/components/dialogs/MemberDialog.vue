@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
         <span class="text-h5 ml-5 toolbar-title--text">{{title}}</span>
       </v-card-title>
       <v-card-text>
-        <v-container  class="pa-0 ma-0">
-          <v-row>
+        <v-container class="px-0">
+          <v-row >
             <v-col cols="7">
               <v-text-field
                 :disabled="isUpdateDialog"

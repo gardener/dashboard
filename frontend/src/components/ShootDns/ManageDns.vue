@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container class="px-0 mx-0">
+  <v-container class="pa-0">
     <template v-if="dnsProviderIds.length">
       <v-row class="ma-0">
         <v-col cols="7">
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-row v-for="id in dnsProviderIds" :key="id" class="list-item pt-2">
         <dns-provider-row :dnsProviderId="id"/>
       </v-row>
-      <v-row key="addProvider" class="list-item">
+      <v-row key="addProvider" class="list-item pt-2">
         <v-col>
           <v-btn
             small
