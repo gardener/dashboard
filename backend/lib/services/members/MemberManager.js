@@ -175,6 +175,8 @@ class MemberManager {
   }
 
   async getKubeconfig (item) {
+    const defaultTokenExpiration = _.get(config, 'frontend.serviceAccountDefaultTokenExpiration', 7776000) // default is 90 days
+
     const { namespace, name } = Member.parseUsername(item.id)
 
     const { apiVersion, kind } = Resources.TokenRequest
@@ -183,7 +185,7 @@ class MemberManager {
       apiVersion,
       spec: {
         audiences: _.get(config, 'tokenRequestAudiences'),
-        expirationSeconds: _.get(config, 'frontend.serviceAccountDefaultTokenExpiration')
+        expirationSeconds: defaultTokenExpiration
       }
     }
 

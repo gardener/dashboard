@@ -257,8 +257,10 @@ frontendConfig:
 
   defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
 
-  # # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts. The token issuer may return a token with a different validity duration
-  # serviceAccountDefaultTokenExpiration: 86400
+  # # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
+  # # If no value is provided, the default value corresponds to 90 days
+  # # The token issuer may return a token with a different validity duration
+  # serviceAccountDefaultTokenExpiration: 7776000 # seconds
 
 # # github configuration of the ticket feature
 # gitHub:
