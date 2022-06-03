@@ -138,6 +138,22 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('token request', function () {
+      it('should render the template', async function () {
+        const values = {
+          frontendConfig: {
+            serviceAccountDefaultTokenExpiration: 42
+          },
+          tokenRequestAudiences: ['foo', 'bar']
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.serviceAccountDefaultTokenExpiration', 'tokenRequestAudiences'])).toMatchSnapshot()
+      })
+    })
+
     describe('tickets', function () {
       beforeEach(() => {
         templates.push('secret-github')
