@@ -43,7 +43,14 @@ function getResourceGroupMetadata (resources, resourceGroup) {
     .value()
 }
 
-exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {})
+exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
+  TokenRequest: {
+    name: 'token',
+    kind: 'TokenRequest',
+    apiVersion: 'authentication.k8s.io/v1',
+    subresource: true
+  }
+})
 
 exports.assign = (object, options) => {
   return Object.assign(object, load(options))
