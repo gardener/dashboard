@@ -545,7 +545,7 @@ export default {
       })
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
-        captionText: 'Confirm Member Deletion',
+        captionText: 'Confirm Service Account Deletion',
         messageHtml: message.innerHTML,
         confirmValue: name
       })
