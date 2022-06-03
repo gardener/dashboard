@@ -547,7 +547,8 @@ export default {
         confirmButtonText: 'Delete',
         captionText: 'Confirm Service Account Deletion',
         messageHtml: message.innerHTML,
-        confirmValue: name
+        confirmValue: name,
+        width: '550'
       })
     },
     onEditUser ({ username, roles }) {
