@@ -1566,15 +1566,6 @@ const actions = {
       await dispatch('setError', { message: `Delete member failed. ${err.message}` })
     }
   },
-  async rotateServiceAccountSecret ({ dispatch, commit }, payload) {
-    try {
-      const result = await dispatch('members/rotateServiceAccountSecret', payload)
-      await dispatch('setAlert', { message: 'Service Account Secret Rotation started', type: 'success' })
-      return result
-    } catch (err) {
-      await dispatch('setError', { message: `Failed to Rotate Service Account Secret ${err.message}` })
-    }
-  },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
 

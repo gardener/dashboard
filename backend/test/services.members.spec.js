@@ -463,30 +463,6 @@ describe('services', function () {
         })
       })
 
-      describe('#deleteServiceAccountSecrets', function () {
-        it('should delete a serviceaccount secret', async function () {
-          const id = 'system:serviceaccount:garden-foo:robot-sa'
-          const item = memberManager.subjectList.get(id)
-          await memberManager.deleteServiceAccountSecrets(item)
-          expect(client.core.secrets.delete).toBeCalledWith('garden-foo', 'secret-1')
-        })
-
-        it('should not delete a serviceaccount secret from a different namespace', async function () {
-          const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
-          const item = memberManager.subjectList.get(id)
-          await expect(memberManager.deleteServiceAccountSecrets(item)).rejects.toThrow(UnprocessableEntity)
-        })
-
-        it('should delete all service account secrets if there is more than one secret attached and one is missing', async function () {
-          const id = 'system:serviceaccount:garden-foo:robot-multiple'
-          const item = memberManager.subjectList.get(id)
-          await memberManager.deleteServiceAccountSecrets(item)
-          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
-          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
-          expect(client.core.secrets.delete).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
-        })
-      })
-
       describe('#getKubeconfig', function () {
         it('should return kubeconfig with token of newest secret', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-user'

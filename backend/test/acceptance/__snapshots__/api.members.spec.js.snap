@@ -1302,38 +1302,6 @@ Array [
 ]
 `;
 
-exports[`api members should rotate a service account secret 1`] = `
-Array [
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-]
-`;
-
 exports[`api members should update roles of a project member 1`] = `
 Array [
   Array [

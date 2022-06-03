@@ -97,19 +97,6 @@ class MemberManager {
     return this.subjectList.members
   }
 
-  async rotateServiceAccountSecret (id) {
-    const item = this.subjectList.get(id)
-    if (!item) {
-      return
-    }
-
-    if (item.kind !== 'ServiceAccount') {
-      throw new UnprocessableEntity('Member is not a ServiceAccount')
-    }
-
-    await this.deleteServiceAccountSecrets(item)
-  }
-
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
@@ -185,22 +172,6 @@ class MemberManager {
       }
     }
     this.subjectList.delete(item.id)
-  }
-
-  async deleteServiceAccountSecrets (item) {
-    const { namespace } = Member.parseUsername(item.id)
-    if (namespace !== this.namespace) {
-      throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
-    }
-
-    const results = await _
-      .chain(item)
-      .get('extensions.secrets')
-      .map(({ name }) => this.client.core.secrets.delete(namespace, name))
-      .thru(promises => Promise.allSettled(promises))
-      .value()
-
-    this.constructor.getFulfilledValues(results)
   }
 
   async getKubeconfig (item) {

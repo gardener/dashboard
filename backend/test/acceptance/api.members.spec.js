@@ -393,26 +393,5 @@ describe('api', function () {
 
       expect(res.body).toMatchSnapshot()
     })
-
-    it('should rotate a service account secret', async function () {
-      const name = 'system:serviceaccount:garden-foo:robot'
-
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-
-      const res = await agent
-        .post(`/api/namespaces/${namespace}/members/${name}`)
-        .set('cookie', await user.cookie)
-        .send({
-          method: 'rotateSecret'
-        })
-        .expect(204)
-
-      expect(mockRequest).toBeCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.noContent).toBe(true)
-    })
   })
 })
