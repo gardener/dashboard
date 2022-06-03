@@ -225,6 +225,9 @@ describe('services', function () {
         create: jest.fn().mockImplementation((namespace, body) => {
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
+        createTokenRequest: jest.fn().mockImplementation((namespace, name, body) => {
+          return Promise.resolve(_.set(body, 'status.token', 'secret'))
+        }),
         delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockResolvedValue()
       }
@@ -486,14 +489,22 @@ describe('services', function () {
 
       describe('#getKubeconfig', function () {
         it('should return kubeconfig with token of newest secret', async function () {
-          const id = 'system:serviceaccount:garden-foo:robot-multiple'
+          const id = 'system:serviceaccount:garden-foo:robot-user'
           const item = memberManager.subjectList.get(id)
           const kubeConfig = parseKubeconfig(await memberManager.getKubeconfig(item))
 
-          expect(client.core.secrets.get).toHaveBeenNthCalledWith(1, 'garden-foo', 'secret-1')
-          expect(client.core.secrets.get).toHaveBeenNthCalledWith(2, 'garden-foo', 'secret-2')
-          expect(client.core.secrets.get).toHaveBeenNthCalledWith(3, 'garden-foo', 'missing-secret')
-          expect(kubeConfig.users[0].user.token).toContain('secret-2')
+          expect(client.core.serviceaccounts.createTokenRequest).toHaveBeenNthCalledWith(1, 'garden-foo', 'robot-user', {
+            apiVersion: 'authentication.k8s.io/v1',
+            kind: 'TokenRequest',
+            spec: {
+              audiences: ['aud1', 'aud2'],
+              expirationSeconds: 42
+            },
+            status: {
+              token: 'secret'
+            }
+          })
+          expect(kubeConfig.users[0].user.token).toContain('secret')
         })
       })
     })

@@ -64,7 +64,7 @@ describe('api', function () {
 
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.createTokenRequest())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/members/${name}`)
