@@ -25,9 +25,10 @@ The cluster operations that are performed manually in the dashboard or via `kube
 
    | Role | Granted Permissions |
    |:---|:---|
-   | *Admin* | Fully manage resources inside the project. |
+   | *Admin* | Fully manage resources inside the project, except for member management. Also the delete/modify permissions for `ServiceAccount`s are now deprecated for this role and will be removed in a future version of Gardener, use the <code>Service Account Manager</code> role instead. |
    | *Viewer* | Read all resources inside the project except secrets. |
    | *UAM* | Manage human users or groups in the project member list. Service accounts can only be managed admins. |
+   | *Service Account Manager* | This allows to fully manage service accounts inside the project namespace and request tokens for them. Please refer to [this document](https://github.com/gardener/gardener/blob/master/docs/usage/project_namespace_access.md). For security reasons this role should not be assigned to service accounts, especially it should be prevented that a service account can refresh tokens for itself. |
 
 4. Choose *CREATE*.
 

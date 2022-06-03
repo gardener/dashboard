@@ -601,10 +601,13 @@ export default {
           if (includes(roles, 'admin')) {
             return 3
           }
-          if (includes(roles, 'viewer')) {
+          if (includes(roles, 'serviceaccountmanager')) {
             return 4
           }
-          return 5
+          if (includes(roles, 'viewer')) {
+            return 5
+          }
+          return 6
         default:
           return get(item, sortBy)
       }

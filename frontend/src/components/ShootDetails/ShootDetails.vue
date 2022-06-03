@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 <template>
-  <v-container fluid class="px-6">
+  <v-container fluid class="pa-6">
     <v-row class="d-flex">
       <v-col cols="12" md="6">
         <shoot-details-card :shoot-item="shootItem"></shoot-details-card>

@@ -532,6 +532,10 @@ export const MEMBER_ROLE_DESCRIPTORS = [
     displayName: 'UAM'
   },
   {
+    name: 'serviceaccountmanager',
+    displayName: 'Service Account Manager'
+  },
+  {
     name: 'owner',
     displayName: 'Owner',
     notEditable: true,
