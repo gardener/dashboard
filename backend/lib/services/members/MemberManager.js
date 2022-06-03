@@ -9,10 +9,10 @@
 const _ = require('lodash')
 const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 const config = require('../../config')
 const { findProjectByNamespace } = require('../../cache')
-const { decodeBase64 } = require('../../utils')
 const Member = require('./Member')
 const SubjectListItem = require('./SubjectListItem')
 const SubjectList = require('./SubjectList')
@@ -206,22 +206,19 @@ class MemberManager {
   async getKubeconfig (item) {
     const { namespace, name } = Member.parseUsername(item.id)
 
-    const results = await _
-      .chain(item)
-      .get('extensions.secrets')
-      .map(({ name }) => this.client.core.secrets.get(namespace, name))
-      .thru(promises => Promise.allSettled(promises))
-      .value()
+    const { apiVersion, kind } = Resources.TokenRequest
+    const body = {
+      kind,
+      apiVersion,
+      spec: {
+        audiences: _.get(config, 'tokenRequestAudiences'),
+        expirationSeconds: _.get(config, 'frontend.serviceAccountDefaultTokenExpiration')
+      }
+    }
 
-    const values = this.constructor.getFulfilledValues(results)
+    const tokenRequest = await this.client.core.serviceaccounts.createTokenRequest(namespace, name, body)
 
-    const secret = _
-      .chain(values)
-      .orderBy(['metadata.creationTimestamp'], ['desc'])
-      .head()
-      .value()
-
-    const token = decodeBase64(secret.data.token)
+    const token = tokenRequest.status.token
     const server = config.apiServerUrl
     const caData = config.apiServerCaData
     const projectName = this.projectName
