@@ -143,6 +143,9 @@ export default {
   getShootListFilters (state) {
     return state.shootListFilters
   },
+  getFreezeSorting (state) {
+    return state.freezeSorting
+  },
   onlyShootsWithIssues (state, getters) {
     return get(getters.getShootListFilters, 'onlyShootsWithIssues', true)
   },
@@ -180,8 +183,10 @@ export default {
   },
   sortItems (state, getters, rootState, rootGetters) {
     let sortedItems
+    let _sortByArr
+    let _sortDescArr
     return (items, sortByArr, sortDescArr) => {
-      if (state.freezeSorting) {
+      if (state.freezeSorting && _sortByArr === sortByArr && _sortDescArr === sortDescArr) {
         return map(sortedItems, sortedItem => {
           const item = find(items, item => {
             return item.metadata.uid === sortedItem.metadata.uid
@@ -251,6 +256,8 @@ export default {
       sortedItems = map(items, item => {
         return pick(item, ['metadata', 'spec', 'status'])
       })
+      _sortByArr = sortByArr
+      _sortDescArr = sortDescArr
 
       return items
     }

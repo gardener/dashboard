@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-spacer></v-spacer>
         <v-switch
           v-model="freezeSorting"
+          v-if="!projectScope && isAdmin"
           class="mr-3"
           color="primary lighten-3"
           hide-details>
@@ -281,7 +282,8 @@ export default {
       ticketsLabels: 'ticketsLabels',
       latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
       sortItems: 'shoots/sortItems',
-      searchItems: 'shoots/searchItems'
+      searchItems: 'shoots/searchItems',
+      getFreezeSorting: 'shoots/getFreezeSorting'
     }),
     ...mapState([
       'shootsLoading',
@@ -308,7 +310,7 @@ export default {
     },
     freezeSorting: {
       get () {
-        return this['shoots/freezeSorting']
+        return this.getFreezeSorting
       },
       set (value) {
         this.setFreezeSorting(value)
@@ -603,6 +605,7 @@ export default {
   beforeRouteUpdate (to, from, next) {
     this.shootSearch = null
     this.updateTableSettings()
+    this.freezeSorting = false
     next()
   },
   beforeRouteLeave (to, from, next) {
