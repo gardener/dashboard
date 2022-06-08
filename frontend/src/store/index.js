@@ -1028,6 +1028,15 @@ const getters = {
   canDeleteSecrets (state) {
     return canI(state.subjectRules, 'delete', '', 'secrets')
   },
+  canCreateTokenRequest (state) {
+    return canI(state.subjectRules, 'create', '', 'serviceaccounts/token')
+  },
+  canCreateServiceAccounts (state) {
+    return canI(state.subjectRules, 'create', '', 'serviceaccounts')
+  },
+  canDeleteServiceAccounts (state) {
+    return canI(state.subjectRules, 'delete', '', 'serviceaccounts')
+  },
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
   },

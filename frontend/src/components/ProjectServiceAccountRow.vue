@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td width="250px" v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end mr-n2">
-        <div v-if="!foreign && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" color="action-button" icon @click.native.stop="onDownload" :disabled="orphaned">
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
             <span>Download Kubeconfig</span>
           </v-tooltip>
         </div>
-        <div v-if="!foreign && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" color="action-button" icon @click="onKubeconfig" :disabled="orphaned">
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
             <span>Edit Service Account</span>
           </v-tooltip>
         </div>
-        <div v-if="canManageServiceAccountMembers" class="ml-1">
+        <div v-if="canManageServiceAccountMembers && canDeleteServiceAccounts" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" icon color="action-button" @click.native.stop="onDelete">
@@ -137,7 +137,8 @@ export default {
     ]),
     ...mapGetters([
       'canManageServiceAccountMembers',
-      'canGetSecrets'
+      'canDeleteServiceAccounts',
+      'canCreateTokenRequest'
     ]),
     orphaned () {
       return this.item.orphaned

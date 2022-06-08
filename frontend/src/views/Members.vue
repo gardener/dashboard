@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-tooltip top v-if="canManageServiceAccountMembers" >
+        <v-tooltip top v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="openServiceAccountAddDialog">
               <v-icon color="toolbar-title">mdi-plus</v-icon>
@@ -273,6 +273,7 @@ export default {
       'projectFromProjectList',
       'canManageMembers',
       'canManageServiceAccountMembers',
+      'canCreateServiceAccounts',
       'username',
       'isAdmin',
       'projectList'
