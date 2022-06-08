@@ -39,10 +39,10 @@ function assignSeedsToCloudProfileIteratee (seeds) {
     const seedNamesForCloudProfile = _
       .chain(seeds)
       .filter(filterProviderType)
-      .filter(({ metadata}) => {
-        if (!matchLabels) {        
+      .filter(({ metadata }) => {
+        if (!matchLabels) {
           return true
-        }        
+        }
         return _.isEqual(metadata.labels, matchLabels)
       })
       .map('metadata.name')
