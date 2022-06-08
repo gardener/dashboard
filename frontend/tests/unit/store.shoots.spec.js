@@ -23,7 +23,8 @@ describe('store.shoots.getters', () => {
     shootCustomFieldList: undefined,
     latestUpdatedTicketByNameAndNamespace: undefined
   }
-  const sortItems = getters.sortItems(undefined, undefined, undefined, rootGetters)
+  const state = {}
+  const sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
 
   beforeEach(() => {
     shootItems = [
