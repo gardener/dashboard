@@ -9,10 +9,10 @@
 const _ = require('lodash')
 const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
 const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 const config = require('../../config')
 const { findProjectByNamespace } = require('../../cache')
-const { decodeBase64 } = require('../../utils')
 const Member = require('./Member')
 const SubjectListItem = require('./SubjectListItem')
 const SubjectList = require('./SubjectList')
@@ -97,19 +97,6 @@ class MemberManager {
     return this.subjectList.members
   }
 
-  async rotateServiceAccountSecret (id) {
-    const item = this.subjectList.get(id)
-    if (!item) {
-      return
-    }
-
-    if (item.kind !== 'ServiceAccount') {
-      throw new UnprocessableEntity('Member is not a ServiceAccount')
-    }
-
-    await this.deleteServiceAccountSecrets(item)
-  }
-
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
@@ -187,41 +174,24 @@ class MemberManager {
     this.subjectList.delete(item.id)
   }
 
-  async deleteServiceAccountSecrets (item) {
-    const { namespace } = Member.parseUsername(item.id)
-    if (namespace !== this.namespace) {
-      throw new UnprocessableEntity('It is not possible to modify a ServiceAccount from another namespace')
-    }
-
-    const results = await _
-      .chain(item)
-      .get('extensions.secrets')
-      .map(({ name }) => this.client.core.secrets.delete(namespace, name))
-      .thru(promises => Promise.allSettled(promises))
-      .value()
-
-    this.constructor.getFulfilledValues(results)
-  }
-
   async getKubeconfig (item) {
+    const defaultTokenExpiration = _.get(config, 'frontend.serviceAccountDefaultTokenExpiration', 7776000) // default is 90 days
+
     const { namespace, name } = Member.parseUsername(item.id)
 
-    const results = await _
-      .chain(item)
-      .get('extensions.secrets')
-      .map(({ name }) => this.client.core.secrets.get(namespace, name))
-      .thru(promises => Promise.allSettled(promises))
-      .value()
+    const { apiVersion, kind } = Resources.TokenRequest
+    const body = {
+      kind,
+      apiVersion,
+      spec: {
+        audiences: _.get(config, 'tokenRequestAudiences'),
+        expirationSeconds: defaultTokenExpiration
+      }
+    }
 
-    const values = this.constructor.getFulfilledValues(results)
+    const tokenRequest = await this.client.core.serviceaccounts.createTokenRequest(namespace, name, body)
 
-    const secret = _
-      .chain(values)
-      .orderBy(['metadata.creationTimestamp'], ['desc'])
-      .head()
-      .value()
-
-    const token = decodeBase64(secret.data.token)
+    const token = tokenRequest.status.token
     const server = config.apiServerUrl
     const caData = config.apiServerCaData
     const projectName = this.projectName

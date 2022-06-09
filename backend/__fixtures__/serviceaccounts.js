@@ -61,6 +61,7 @@ const serviceaccounts = {
 const matchOptions = { decode: decodeURIComponent }
 const matchList = pathToRegexp.match('/api/v1/namespaces/:namespace/serviceaccounts', matchOptions)
 const matchItem = pathToRegexp.match('/api/v1/namespaces/:namespace/serviceaccounts/:name', matchOptions)
+const matchToken = pathToRegexp.match('/api/v1/namespaces/:namespace/serviceaccounts/:name/token', matchOptions)
 
 const mocks = {
   list () {
@@ -88,6 +89,17 @@ const mocks = {
       set(item, 'metadata.uid', uid)
       set(item, 'metadata.creationTimestamp', creationTimestamp)
       set(item, 'metadata.annotations["gardener.cloud/created-by"]', payload.id)
+      return Promise.resolve(item)
+    }
+  },
+  createTokenRequest ({ token = 'secret' } = {}) {
+    return (headers, json) => {
+      const matchResult = matchToken(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const item = cloneDeep(json)
+      set(item, 'status.token', token)
       return Promise.resolve(item)
     }
   },

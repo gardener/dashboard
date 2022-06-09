@@ -40,5 +40,6 @@ Object {
   ],
   "landingPageUrl": "https://gardener.cloud/",
   "primaryLoginType": "oidc",
+  "serviceAccountDefaultTokenExpiration": 42,
 }
 `;

@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td width="250px" v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end mr-n2">
-        <div v-if="!foreign && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" color="action-button" icon @click.native.stop="onDownload" :disabled="orphaned">
@@ -68,37 +68,27 @@ SPDX-License-Identifier: Apache-2.0
             <span>Download Kubeconfig</span>
           </v-tooltip>
         </div>
-        <div v-if="!foreign && canGetSecrets" class="ml-1">
+        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="action-button"  icon @click="onKubeconfig" :disabled="orphaned">
+              <v-btn v-on="on" color="action-button" icon @click="onKubeconfig" :disabled="orphaned">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
             </template>
             <span>Show Kubeconfig</span>
           </v-tooltip>
         </div>
-        <div v-if="!foreign && canDeleteSecrets" class="ml-1">
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="action-button"  icon @click="onRotateSecret" :disabled="orphaned">
-                <v-icon>mdi-refresh</v-icon>
-              </v-btn>
-            </template>
-            <span>Rotate Service Account Secret</span>
-          </v-tooltip>
-        </div>
         <div v-if="canManageServiceAccountMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="action-button"  icon @click.native.stop="onEdit">
+              <v-btn v-on="on" color="action-button" icon @click.native.stop="onEdit">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </template>
             <span>Edit Service Account</span>
           </v-tooltip>
         </div>
-        <div v-if="canManageServiceAccountMembers" class="ml-1">
+        <div v-if="canManageServiceAccountMembers && canDeleteServiceAccounts" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" icon color="action-button" @click.native.stop="onDelete">
@@ -147,8 +137,8 @@ export default {
     ]),
     ...mapGetters([
       'canManageServiceAccountMembers',
-      'canGetSecrets',
-      'canDeleteSecrets'
+      'canDeleteServiceAccounts',
+      'canCreateTokenRequest'
     ]),
     orphaned () {
       return this.item.orphaned
@@ -173,9 +163,6 @@ export default {
     },
     onKubeconfig () {
       this.$emit('kubeconfig', this.item)
-    },
-    onRotateSecret () {
-      this.$emit('rotate-secret', this.item)
     },
     onEdit () {
       this.$emit('edit', this.item)

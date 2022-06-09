@@ -66,7 +66,7 @@ function setPatchType (options, type = PatchType.MERGE) {
 }
 
 function encodeName (name) {
-  return Array.isArray(name) ? path.join(name.map(encodeURIComponent)) : encodeURIComponent(name)
+  return Array.isArray(name) ? path.join(...name.map(encodeURIComponent)) : encodeURIComponent(name)
 }
 
 function encodeNamespace (namespace) {
