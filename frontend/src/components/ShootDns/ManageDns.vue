@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container class="pa-0">
+  <v-container class="pa-0 ma-0">
     <template v-if="dnsProviderIds.length">
       <v-row class="ma-0">
         <v-col cols="7">
