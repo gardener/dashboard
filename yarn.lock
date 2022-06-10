@@ -1618,6 +1618,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-config@workspace:packages/kube-config"
   dependencies:
+    "@gardener-dashboard/logger": "workspace:*"
+    chokidar: ^3.5.3
     eslint: ^8.16.0
     eslint-config-standard: ^17.0.0
     eslint-plugin-import: ^2.26.0

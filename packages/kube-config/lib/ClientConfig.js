@@ -7,6 +7,8 @@
 'use strict'
 
 const fs = require('fs')
+const { globalLogger: logger } = require('@gardener-dashboard/logger')
+const Watcher = require('./watcher')
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -20,10 +22,10 @@ function getCluster ({ currentCluster }, files) {
     } = currentCluster
     cluster.server = server
     if (caData) {
-      cluster.ca = base64Decode(caData)
+      cluster.certificateAuthority = base64Decode(caData)
     } else if (caFile) {
-      files.set('ca', caFile)
-      cluster.ca = fs.readFileSync(caFile, 'utf8')
+      files.set(caFile, 'certificateAuthority')
+      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8')
     }
     if (typeof insecureSkipTlsVerify === 'boolean') {
       cluster.insecureSkipTlsVerify = insecureSkipTlsVerify
@@ -49,21 +51,21 @@ function getUser ({ currentUser }, files) {
       'auth-provider': authProvider
     } = currentUser
     if (certData && keyData) {
-      user.cert = base64Decode(certData)
-      user.key = base64Decode(keyData)
+      user.clientCert = base64Decode(certData)
+      user.clientKey = base64Decode(keyData)
     } else if (certFile && keyFile) {
-      files.set('cert', certFile)
-      user.cert = fs.readFileSync(certFile)
-      files.set('key', keyFile)
-      user.key = fs.readFileSync(keyFile)
+      files.set(certFile, 'clientCert')
+      user.clientCert = fs.readFileSync(certFile, 'utf8')
+      files.set(keyFile, 'clientKey')
+      user.clientKey = fs.readFileSync(keyFile, 'utf8')
     } else if (token) {
-      user.bearer = token
+      user.token = token
     } else if (tokenFile) {
-      files.set('token', tokenFile)
-      user.bearer = fs.readFileSync(tokenFile, 'utf8')
+      files.set(tokenFile, 'token')
+      user.token = fs.readFileSync(tokenFile, 'utf8')
     } else if (username && password) {
-      user.user = username
-      user.pass = password
+      user.username = username
+      user.password = password
     } else if (authProvider) {
       const {
         name,
@@ -76,7 +78,7 @@ function getUser ({ currentUser }, files) {
             expiry = '1970-01-01T00:00:00.000Z'
           } = authProviderConfig
           if (new Date() < new Date(expiry)) {
-            user.bearer = accessToken
+            user.token = accessToken
           }
           break
         }
@@ -87,75 +89,129 @@ function getUser ({ currentUser }, files) {
   }
 }
 
-class ClientConfig {
-  #files
-  #user
-  #cluster
-
-  constructor (config) {
-    const files = new Map()
-    const user = getUser(config, files)
-    const cluster = getCluster(config, files)
-
-    this.#files = files
-    this.#user = user
-    this.#cluster = cluster
-
-    // cluster properties
-    Reflect.defineProperty(this, 'url', {
+function createAuth (user) {
+  const auth = Object.create(Object.prototype, {
+    bearer: {
       enumerable: true,
       get () {
-        return cluster.server
+        return user.token
       }
-    })
-    Reflect.defineProperty(this, 'ca', {
+    },
+    user: {
       enumerable: true,
       get () {
-        return cluster.ca
+        return user.username
       }
-    })
-    Reflect.defineProperty(this, 'rejectUnauthorized', {
+    },
+    pass: {
       enumerable: true,
       get () {
-        return !cluster.insecureSkipTlsVerify
+        return user.password
       }
-    })
-
-    // user properties
-    Reflect.defineProperty(this, 'key', {
-      enumerable: true,
-      get () {
-        return user.key
-      }
-    })
-    Reflect.defineProperty(this, 'cert', {
-      enumerable: true,
-      get () {
-        return user.cert
-      }
-    })
-    const auth = {}
-    for (const key of ['bearer', 'user', 'pass']) {
-      Reflect.defineProperty(auth, key, {
-        enumerable: true,
-        get () {
-          return user[key]
-        }
-      })
     }
-    Reflect.defineProperty(this, 'auth', {
-      enumerable: true,
-      get () {
-        if (user.bearer || (user.user && user.pass)) {
-          return auth
-        }
-      }
-    })
+  })
+
+  return Object.freeze(auth)
+}
+
+async function watchFiles (watcher, handler) {
+  try {
+    for await (const args of watcher) {
+      handler(...args)
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      logger.info('[kube-config] watch files aborted')
+    } else {
+      logger.error('[kube-config] watch files ended with error: %s', err.message)
+    }
   }
 }
 
 function base64Decode (value) {
   return Buffer.from(value, 'base64').toString('utf8')
+}
+
+class ClientConfig {
+  constructor (config, { reactive = false } = {}) {
+    const files = new Map()
+    const user = getUser(config, files)
+    const cluster = getCluster(config, files)
+    const auth = createAuth(user)
+    Object.defineProperties(this, {
+      url: {
+        enumerable: true,
+        get () {
+          return cluster.server
+        }
+      },
+      ca: {
+        enumerable: true,
+        get () {
+          return cluster.certificateAuthority
+        }
+      },
+      rejectUnauthorized: {
+        enumerable: true,
+        get () {
+          return !cluster.insecureSkipTlsVerify
+        }
+      },
+      key: {
+        enumerable: true,
+        get () {
+          return user.clientKey
+        }
+      },
+      cert: {
+        enumerable: true,
+        get () {
+          return user.clientCert
+        }
+      },
+      auth: {
+        enumerable: true,
+        get () {
+          if (auth.bearer || (auth.user && auth.pass)) {
+            return auth
+          }
+        }
+      },
+      extend: {
+        value: options => {
+          return Object.assign(Object.create(this), options)
+        }
+      }
+    })
+
+    if (reactive === true) {
+      let watcher
+      Object.defineProperty(this, 'watcher', {
+        get () {
+          if (!watcher) {
+            watcher = new Watcher(Array.from(files.keys()))
+            watchFiles(watcher, (path, value) => {
+              const key = files.get(path)
+              const obj = key === 'certificateAuthority' ? cluster : user
+              if (obj[key] !== value) {
+                obj[key] = value
+                watcher.emit('change', path)
+              }
+            })
+          }
+          return watcher
+        }
+      })
+    }
+  }
+
+  static create (config) {
+    return new ClientConfig(config)
+  }
+
+  static createReactive (config) {
+    return new ClientConfig(config, { reactive: true })
+  }
 }
 
 module.exports = ClientConfig

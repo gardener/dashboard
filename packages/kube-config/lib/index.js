@@ -12,9 +12,10 @@ const path = require('path')
 const yaml = require('js-yaml')
 const Config = require('./Config')
 const ClientConfig = require('./ClientConfig')
-
-const KUBERNETES_SERVICEACCOUNT_TOKEN_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/token'
-const KUBERNETES_SERVICEACCOUNT_CA_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+const {
+  KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
+  KUBERNETES_SERVICEACCOUNT_CA_FILE
+} = require('./constants')
 
 function readKubeconfig (filename) {
   if (!filename) {
@@ -40,6 +41,7 @@ function readKubeconfig (filename) {
   for (const { user } of kubeconfig.users) {
     resolvePath(user, 'client-key')
     resolvePath(user, 'client-certificate')
+    resolvePath(user, 'tokenFile')
   }
   return new Config(kubeconfig)
 }
@@ -91,8 +93,10 @@ exports = module.exports = {
   },
   load (env = process.env) {
     let config
+    let reactive = true
     if (/^test/.test(env.NODE_ENV)) {
       config = testConfig()
+      reactive = false
     } else if (env.KUBECONFIG) {
       config = readKubeconfig(env.KUBECONFIG)
     } else {
@@ -102,11 +106,11 @@ exports = module.exports = {
         config = readKubeconfig()
       }
     }
-    return new ClientConfig(config)
+    return new ClientConfig(config, { reactive })
   },
   getInCluster (env = process.env) {
     try {
-      return new ClientConfig(inClusterConfig(env))
+      return new ClientConfig(inClusterConfig(env), { reactive: true })
     } catch (err) {
       if (err.code === 'ENOENT') {
         switch (err.path) {

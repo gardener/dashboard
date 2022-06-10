@@ -24,6 +24,8 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
+    "@gardener-dashboard/logger": "workspace:*",
+    "chokidar": "^3.5.3",
     "gtoken": "^6.0.0",
     "js-yaml": "^4.1.0",
     "lodash": "4.17.21"
