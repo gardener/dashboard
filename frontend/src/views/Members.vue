@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-tooltip top v-if="canManageServiceAccountMembers" >
+        <v-tooltip top v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="openServiceAccountAddDialog">
               <v-icon color="toolbar-title">mdi-plus</v-icon>
@@ -151,7 +151,6 @@ SPDX-License-Identifier: Apache-2.0
             :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
-            @rotate-secret="onRotateServiceAccountSecret"
             @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
@@ -204,7 +203,6 @@ import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
 import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
-import RotateServiceAccountSecret from '@/components/messages/RotateServiceAccountSecret'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 
 import {
@@ -275,6 +273,7 @@ export default {
       'projectFromProjectList',
       'canManageMembers',
       'canManageServiceAccountMembers',
+      'canCreateServiceAccounts',
       'username',
       'isAdmin',
       'projectList'
@@ -424,7 +423,6 @@ export default {
     ...mapActions([
       'addMember',
       'deleteMember',
-      'rotateServiceAccountSecret',
       'setError'
     ]),
     openUserAddDialog () {
@@ -527,12 +525,6 @@ export default {
         return this.deleteMember(username)
       }
     },
-    async onRotateServiceAccountSecret ({ username }) {
-      const rotationConfirmed = await this.confirmRotateServiceAccountSecret(username)
-      if (rotationConfirmed) {
-        return this.rotateServiceAccountSecret(username)
-      }
-    },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
       const { projectName } = this.projectDetails
       const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
@@ -554,21 +546,10 @@ export default {
       })
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
-        captionText: 'Confirm Member Deletion',
+        captionText: 'Confirm Service Account Deletion',
         messageHtml: message.innerHTML,
-        confirmValue: name
-      })
-    },
-    confirmRotateServiceAccountSecret (name) {
-      name = displayName(name)
-      const message = this.$renderComponent(RotateServiceAccountSecret, {
-        name
-      })
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Rotate',
-        captionText: 'Confirm Service Account Secret Rotation',
-        messageHtml: message.innerHTML,
-        confirmValue: name
+        confirmValue: name,
+        width: '550'
       })
     },
     onEditUser ({ username, roles }) {

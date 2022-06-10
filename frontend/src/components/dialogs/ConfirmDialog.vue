@@ -38,12 +38,12 @@ export default {
     }
   },
   methods: {
-    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, maxWidth, confirmValue } = {}) {
+    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, width, confirmValue } = {}) {
       this.confirmButtonText = confirmButtonText || 'Confirm'
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
-      this.maxWidth = maxWidth || '400'
+      this.width = width || '500'
       this.confirmValue = confirmValue
 
       return this.$refs.gDialog.confirmWithDialog()

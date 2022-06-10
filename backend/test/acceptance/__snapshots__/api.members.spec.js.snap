@@ -1192,10 +1192,21 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-token-726f6",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot/token",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    Object {
+      "apiVersion": "authentication.k8s.io/v1",
+      "kind": "TokenRequest",
+      "spec": Object {
+        "audiences": Array [
+          "aud1",
+          "aud2",
+        ],
+        "expirationSeconds": 42,
+      },
     },
   ],
 ]
@@ -1222,7 +1233,7 @@ clusters:
 users:
   - name: robot
     user:
-      token: robot-token-726f6
+      token: secret
 ",
   "roles": Array [
     "viewer",
@@ -1288,38 +1299,6 @@ Array [
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
-]
-`;
-
-exports[`api members should rotate a service account secret 1`] = `
-Array [
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "delete",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/robot-token-726f6",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-    },
-  ],
 ]
 `;
 

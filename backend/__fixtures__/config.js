@@ -21,6 +21,7 @@ const defaultConfig = {
   logFormat: 'text',
   apiServerUrl: 'https://kubernetes.external.foo.bar',
   apiServerCaData: toBase64(ca),
+  tokenRequestAudiences: ['aud1', 'aud2'],
   gitHub: {
     apiUrl: 'https://api.github.com',
     org: 'gardener',
@@ -102,7 +103,8 @@ const defaultConfig = {
         icon: 'mdi-bug',
         url: 'https://github.com/gardener/dashboard/issues/'
       }
-    ]
+    ],
+    serviceAccountDefaultTokenExpiration: 42
   }
 }
 
