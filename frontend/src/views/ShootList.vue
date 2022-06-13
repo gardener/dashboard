@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon color="toolbar-title">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
-          <shoot-access-card ref="clusterAccess" :shoot-item="safeSelectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
+          <shoot-access-card ref="clusterAccess" :shoot-item="shootItem" :hide-terminal-shortcuts="true"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>
@@ -277,7 +277,8 @@ export default {
     currentName () {
       return get(this.selectedItem, 'metadata.name')
     },
-    safeSelectedItem () {
+    shootItem () {
+      // property `shoot-item` of the mixin is required
       return this.selectedItem || {}
     },
     currentStandardSelectedColumns () {
