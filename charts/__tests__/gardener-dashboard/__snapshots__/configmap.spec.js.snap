@@ -346,6 +346,18 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap token request should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "serviceAccountDefaultTokenExpiration": 42,
+  },
+  "tokenRequestAudiences": Array [
+    "foo",
+    "bar",
+  ],
+}
+`;
+
 exports[`gardener-dashboard configmap unreachable seeds should render the template 1`] = `
 Object {
   "unreachableSeeds": Object {

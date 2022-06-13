@@ -82,6 +82,10 @@ class Service extends mix(Core).with(NamespaceScoped, Readable, Observable, Writ
 }
 
 class ServiceAccount extends mix(Core).with(NamespaceScoped, Readable, Observable, Writable) {
+  createTokenRequest (namespace, name, body, options) {
+    return this.create([namespace, name, 'token'], body, options)
+  }
+
   static get names () {
     return {
       plural: 'serviceaccounts',

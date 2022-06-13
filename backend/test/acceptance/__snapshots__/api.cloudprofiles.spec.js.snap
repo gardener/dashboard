@@ -69,6 +69,7 @@ Array [
       "seedNames": Array [
         "infra3-seed",
         "infra3-seed-with-selector",
+        "infra3-seed-without-selector",
       ],
       "seedSelector": Object {
         "providerTypes": Array [
@@ -127,6 +128,7 @@ Array [
       "seedNames": Array [
         "infra3-seed",
         "infra3-seed-with-selector",
+        "infra3-seed-without-selector",
       ],
       "seedSelector": Object {},
       "type": "infra3",
