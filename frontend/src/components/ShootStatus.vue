@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex">
+  <div class="d-flex align-center">
     <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
       <template v-slot:popperRef>
         <div class="shoot-status-div d-flex flex-row">
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </g-popper>
     <retry-operation :shoot-item="shootItem"></retry-operation>
-    <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
+    <span v-if="showStatusText" class="ml-2">{{statusTitle}}</span>
   </div>
 </template>
 
