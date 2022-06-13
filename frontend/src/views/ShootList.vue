@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon color="toolbar-title">mdi-close</v-icon>
             </v-btn>
           </v-card-title>
-          <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
+          <shoot-access-card ref="clusterAccess" :shoot-item="shootItem" :hide-terminal-shortcuts="true"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>
@@ -123,7 +123,6 @@ export default {
       dialog: null,
       options: undefined,
       cachedItems: null,
-      clearSelectedShootTimerID: undefined,
       selectedColumns: undefined
     }
   },
@@ -154,11 +153,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions({
-      setSelectedShootInternal: 'setSelectedShoot',
-      setShootListFilter: 'setShootListFilter',
-      subscribeShoots: 'subscribeShoots'
-    }),
+    ...mapActions([
+      'setSelectedShoot',
+      'setShootListFilter',
+      'subscribeShoots'
+    ]),
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -172,8 +171,7 @@ export default {
     },
     hideDialog () {
       this.dialog = null
-      // Delay resetting shoot so that the dialog does not lose context during closing animation
-      this.clearSelectedShootWithDelay()
+      this.setSelectedShoot(null)
     },
     setSelectedHeader (header) {
       this.$set(this.selectedColumns, header.value, !header.selected)
@@ -230,15 +228,6 @@ export default {
       const filters = this.getShootListFilters
       return get(filters, key, false)
     },
-    setSelectedShoot (selectedShoot) {
-      clearTimeout(this.clearSelectedShootTimerID)
-      return this.setSelectedShootInternal(selectedShoot)
-    },
-    clearSelectedShootWithDelay () {
-      this.clearSelectedShootTimerID = setTimeout(() => {
-        this.setSelectedShootInternal(null)
-      }, 500)
-    },
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
     }, 500)
@@ -287,6 +276,10 @@ export default {
     },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
+    },
+    shootItem () {
+      // property `shoot-item` of the mixin is required
+      return this.selectedItem || {}
     },
     currentStandardSelectedColumns () {
       return mapTableHeader(this.standardHeaders, 'selected')
