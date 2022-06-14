@@ -5,61 +5,65 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
-    <template v-slot:popperRef>
-      <div class="shoot-status-div d-flex flex-row">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
-                <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
-                <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" :color="color">mdi-account-alert</v-icon>
-                <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
-                <v-icon v-else-if="isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
-                <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
-                <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
-                <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
-                <template v-else>{{shootLastOperation.progress}}</template>
-              </v-progress-circular>
-              <v-icon v-else-if="isShootStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
-              <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
-              <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
-              <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
-              <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
-              <v-icon v-else-if="isUserError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
-              <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
-              <v-progress-circular v-else-if="isPending" class="vertical-align-middle cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-              <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
-            </div>
-          </template>
+  <div>
+    <div class="d-flex align-center">
+      <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
+        <template v-slot:popperRef>
           <div>
-            <span class="font-weight-bold">{{tooltip.title}}</span>
-            <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
-            <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects" :key="shortDescription">
-              <v-icon v-if="userError" class="mr-1" color="white" small>{{ userError ? 'mdi-account-alert' : 'mdi-alert' }}</v-icon>
-              <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
-            </div>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
+                    <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
+                    <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" :color="color">mdi-account-alert</v-icon>
+                    <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
+                    <v-icon v-else-if="isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
+                    <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
+                    <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
+                    <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
+                    <template v-else>{{shootLastOperation.progress}}</template>
+                  </v-progress-circular>
+                  <v-icon v-else-if="isShootStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
+                  <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
+                  <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+                  <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
+                  <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
+                  <v-icon v-else-if="isUserError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
+                  <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
+                  <v-progress-circular v-else-if="isPending" class="vertical-align-middle cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+                  <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+                </div>
+              </template>
+              <div>
+                <span class="font-weight-bold">{{tooltip.title}}</span>
+                <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
+                <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects" :key="shortDescription">
+                  <v-icon v-if="userError" class="mr-1" color="white" small>{{ userError ? 'mdi-account-alert' : 'mdi-alert' }}</v-icon>
+                  <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
+                </div>
+              </div>
+            </v-tooltip>
           </div>
-        </v-tooltip>
-        <retry-operation :shoot-item="shootItem"></retry-operation>
-        <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
+        </template>
+        <shoot-message-details
+          :status-title="statusTitle"
+          :last-message="lastMessage"
+          :error-descriptions="errorDescriptions"
+          :last-update-time="shootLastOperation.lastUpdateTime"
+          :secret-binding-name="shootSecretBindingName"
+          :namespace="shootNamespace"
+        />
+      </g-popper>
+      <retry-operation :shoot-item="shootItem"></retry-operation>
+      <span v-if="showStatusText" class="ml-2">{{statusTitle}}</span>
+    </div>
+    <template v-if="showStatusText">
+      <div v-for="({ description, link }) in tooltip.errorCodeObjects" :key="description">
+        <div class="font-weight-bold error--text wrap-text">{{description}}</div>
+        <div v-if="link"><external-link :url="link.url" class="font-weight-bold error--text">{{link.text}}</external-link></div>
       </div>
-      <template v-if="showStatusText">
-        <div v-for="({ description, link }) in tooltip.errorCodeObjects" :key="description">
-          <div class="font-weight-bold error--text wrap-text">{{description}}</div>
-          <div v-if="link"><external-link :url="link.url" class="font-weight-bold error--text">{{link.text}}</external-link></div>
-        </div>
-      </template>
     </template>
-    <shoot-message-details
-      :status-title="statusTitle"
-      :last-message="lastMessage"
-      :error-descriptions="errorDescriptions"
-      :last-update-time="shootLastOperation.lastUpdateTime"
-      :secret-binding-name="shootSecretBindingName"
-      :namespace="shootNamespace"
-    />
-  </g-popper>
+  </div>
 </template>
 
 <script>
@@ -196,14 +200,6 @@ export default {
   /* overwrite message class from g-popper child component */
   ::v-deep .message {
     max-height: 800px;
-  }
-
-  .shoot-status-div {
-    display: inline-block;
-    width: 30px;
-    text-align: center;
-    height: auto;
-    max-height:  30px;
   }
 
   .vertical-align-middle {
