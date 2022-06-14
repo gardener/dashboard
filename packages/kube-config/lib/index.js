@@ -91,7 +91,7 @@ exports = module.exports = {
       { userName, contextName, clusterName, namespace }
     ).toYAML()
   },
-  load (env = process.env) {
+  load (env = process.env, options) {
     let config
     let reactive = true
     if (/^test/.test(env.NODE_ENV)) {
@@ -106,11 +106,11 @@ exports = module.exports = {
         config = readKubeconfig()
       }
     }
-    return new ClientConfig(config, { reactive })
+    return new ClientConfig(config, { ...options, reactive })
   },
   getInCluster (env = process.env) {
     try {
-      return new ClientConfig(inClusterConfig(env), { reactive: true })
+      return new ClientConfig(inClusterConfig(env))
     } catch (err) {
       if (err.code === 'ENOENT') {
         switch (err.path) {

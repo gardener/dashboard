@@ -2873,6 +2873,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
             ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+            ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["chokidar", "npm:3.5.3"],\
             ["eslint", "npm:8.16.0"],\
             ["eslint-config-standard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:17.0.0"],\

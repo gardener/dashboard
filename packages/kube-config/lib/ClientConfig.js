@@ -7,8 +7,7 @@
 'use strict'
 
 const fs = require('fs')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const Watcher = require('./watcher')
+const Watcher = require('./Watcher')
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -32,7 +31,7 @@ function getCluster ({ currentCluster }, files) {
     }
   }
 
-  return cluster
+  return Object.seal(cluster)
 }
 
 function getUser ({ currentUser }, files) {
@@ -84,9 +83,9 @@ function getUser ({ currentUser }, files) {
         }
       }
     }
-
-    return user
   }
+
+  return Object.seal(user)
 }
 
 function createAuth (user) {
@@ -114,31 +113,17 @@ function createAuth (user) {
   return Object.freeze(auth)
 }
 
-async function watchFiles (watcher, handler) {
-  try {
-    for await (const args of watcher) {
-      handler(...args)
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      logger.info('[kube-config] watch files aborted')
-    } else {
-      logger.error('[kube-config] watch files ended with error: %s', err.message)
-    }
-  }
-}
-
 function base64Decode (value) {
   return Buffer.from(value, 'base64').toString('utf8')
 }
 
 class ClientConfig {
-  constructor (config, { reactive = false } = {}) {
+  constructor (config, { reactive = false, ...options } = {}) {
     const files = new Map()
     const user = getUser(config, files)
     const cluster = getCluster(config, files)
     const auth = createAuth(user)
-    Object.defineProperties(this, {
+    const properties = {
       url: {
         enumerable: true,
         get () {
@@ -172,45 +157,57 @@ class ClientConfig {
       auth: {
         enumerable: true,
         get () {
-          if (auth.bearer || (auth.user && auth.pass)) {
+          if (user.token || (user.username && user.password)) {
             return auth
           }
         }
-      },
-      extend: {
-        value: options => {
-          return Object.assign(Object.create(this), options)
+      }
+    }
+    if (reactive && files.size) {
+      const watcher = new Watcher(Array.from(files.keys()), options)
+      watcher.run((path, value) => {
+        const key = files.get(path)
+        const obj = key === 'certificateAuthority' ? cluster : user
+        obj[key] = value
+        watcher.emit(`update:${key}`)
+      })
+      properties.watcher = { value: watcher }
+    }
+    Object.defineProperties(this, properties)
+    Object.freeze(this)
+  }
+
+  extend ({ key, cert, auth, ...options } = {}) {
+    let properties
+    if (auth) {
+      properties = {
+        auth: {
+          enumerable: true,
+          value: Object.freeze(Object.assign({}, auth))
+        },
+        key: {
+          value: undefined
+        },
+        cert: {
+          value: undefined
         }
       }
-    })
-
-    if (reactive === true) {
-      let watcher
-      Object.defineProperty(this, 'watcher', {
-        get () {
-          if (!watcher) {
-            watcher = new Watcher(Array.from(files.keys()))
-            watchFiles(watcher, (path, value) => {
-              const key = files.get(path)
-              const obj = key === 'certificateAuthority' ? cluster : user
-              if (obj[key] !== value) {
-                obj[key] = value
-                watcher.emit('change', path)
-              }
-            })
-          }
-          return watcher
+    } else if (key && cert) {
+      properties = {
+        auth: {
+          value: undefined
+        },
+        key: {
+          enumerable: true,
+          value: key
+        },
+        cert: {
+          enumerable: true,
+          value: cert
         }
-      })
+      }
     }
-  }
-
-  static create (config) {
-    return new ClientConfig(config)
-  }
-
-  static createReactive (config) {
-    return new ClientConfig(config, { reactive: true })
+    return Object.assign(Object.create(this, properties), options)
   }
 }
 

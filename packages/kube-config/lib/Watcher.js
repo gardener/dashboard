@@ -6,7 +6,7 @@
 
 'use strict'
 
-const fs = require('fs')
+const fsPromises = require('fs/promises')
 const { Readable } = require('stream')
 const chokidar = require('chokidar')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
@@ -16,8 +16,9 @@ class Watcher extends Readable {
   #timeout
   #watching
   #fsWatcher
+  #readFile
 
-  constructor (paths, { readyTimeout = 15000, ...options } = {}) {
+  constructor (paths, { readyTimeout = 15000, readFile = fsPromises.readFile, ...options } = {}) {
     super({
       ...options,
       objectMode: true
@@ -26,6 +27,7 @@ class Watcher extends Readable {
     this.#timeout = readyTimeout
     this.#watching = false
     this.#fsWatcher = null
+    this.#readFile = readFile
   }
 
   _construct (callback) {
@@ -54,14 +56,13 @@ class Watcher extends Readable {
     if (!this.#watching) {
       this.#watching = true
       this.#fsWatcher
-        .on('change', path => {
-          fs.readFile(path, 'utf8', (err, value) => {
-            if (err) {
-              this.destroy(err)
-            } else {
-              this.push([path, value])
-            }
-          })
+        .on('change', async path => {
+          try {
+            const value = await this.#readFile(path, 'utf8')
+            this.push([path, value])
+          } catch (err) {
+            this.destroy(err)
+          }
         })
     }
   }
@@ -70,6 +71,20 @@ class Watcher extends Readable {
     this.#fsWatcher.close()
       .then(() => callback(error))
       .catch(closeError => callback(closeError || error))
+  }
+
+  async run (fn) {
+    try {
+      for await (const args of this) {
+        fn(...args)
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        logger.info('[kube-config] watch files aborted')
+      } else {
+        logger.error('[kube-config] watch files ended with error: %s', err.message)
+      }
+    }
   }
 }
 

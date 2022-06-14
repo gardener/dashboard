@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@gardener-dashboard/logger": "workspace:*",
+    "@gardener-dashboard/test-utils": "workspace:*",
     "chokidar": "^3.5.3",
     "gtoken": "^6.0.0",
     "js-yaml": "^4.1.0",
@@ -60,6 +61,9 @@
     "restoreMocks": true,
     "verbose": true,
     "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
