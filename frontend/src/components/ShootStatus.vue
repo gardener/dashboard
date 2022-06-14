@@ -5,11 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span>
+  <div>
     <div class="d-flex align-center">
       <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
         <template v-slot:popperRef>
-          <span>
+          <div>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
               </div>
             </v-tooltip>
-          </span>
+          </div>
         </template>
         <shoot-message-details
           :status-title="statusTitle"
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="link"><external-link :url="link.url" class="font-weight-bold error--text">{{link.text}}</external-link></div>
       </div>
     </template>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -212,7 +212,7 @@ export default {
 
   }
 
-  .pr on {
+  .progress-icon {
     font-size: 15px;
   }
 
