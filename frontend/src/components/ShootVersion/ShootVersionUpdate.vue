@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:item="{ item }">
           <v-tooltip top :disabled="!item.notNextMinor">
             <template v-slot:activator="{ on }">
-              <v-list-item-content v-on="on">
+              <v-list-item-content v-on="on" :class="item.colorClass">
                 <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
                 <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
                 <v-list-item-subtitle v-if="versionItemDescription(item).length">
@@ -73,11 +73,19 @@ export default {
     items () {
       const selectionItemsForType = (versions, type) => {
         return map(versions, version => {
+          let colorClass = ''
+          if (version.isSupported) {
+            colorClass = 'success--text'
+          }
+          if (version.isDeprecated) {
+            colorClass = 'warning--text'
+          }
           return {
             ...version,
             type,
             text: `${this.currentK8sVersion.version} → ${version.version}`,
-            notNextMinor: this.itemIsNotNextMinor(version.version, type)
+            notNextMinor: this.itemIsNotNextMinor(version.version, type),
+            colorClass
           }
         })
       }
@@ -93,14 +101,21 @@ export default {
             return -1
           } else if (b.header) {
             return 1
-          } else {
-            if (semver.eq(a.version, b.version)) {
-              return 0
-            } else if (semver.gt(a.version, b.version)) {
-              return 1
-            } else {
+          }
+          if (semver.diff(a.version, b.version) === 'patch') {
+            if (a.isSupported && !b.isSupported) {
               return -1
             }
+            if (!a.isSupported && b.isSupported) {
+              return 1
+            }
+          }
+          if (semver.eq(a.version, b.version)) {
+            return 0
+          } else if (semver.gt(a.version, b.version)) {
+            return 1
+          } else {
+            return -1
           }
         } else {
           const sortValForType = function (type) {
