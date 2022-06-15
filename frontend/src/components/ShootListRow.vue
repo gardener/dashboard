@@ -62,12 +62,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </template>
       <template v-if="cell.header.value === 'purpose'">
-        <div class="d-flex justify-center pr-4">
+        <div class="d-flex justify-center">
           <purpose-tag :purpose="shootPurpose"></purpose-tag>
         </div>
       </template>
       <template v-if="cell.header.value === 'lastOperation'">
-        <div class="d-flex align-center justify-center pr-4">
+        <div class="d-flex align-center justify-center">
           <shoot-status
           :popper-key="`${shootNamespace}/${shootName}`"
           :shoot-item="shootItem">
@@ -75,12 +75,12 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.value === 'k8sVersion'">
-        <div class="d-flex justify-center pr-4">
+        <div class="d-flex justify-center">
           <shoot-version :shoot-item="shootItem" chip></shoot-version>
         </div>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <div class="d-flex pr-4">
+        <div class="d-flex">
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
