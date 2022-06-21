@@ -52,7 +52,9 @@
       "standard",
       "plugin:jest/recommended"
     ],
-    "globals": {},
+    "globals": {
+      "fixtures": true
+    },
     "rules": {
       "no-console": "error"
     }
@@ -72,7 +74,10 @@
         "lines": 100,
         "statements": 100
       }
-    }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "packageManager": "yarn@3.2.1",
   "engines": {
