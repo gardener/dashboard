@@ -25,16 +25,8 @@ class Watcher extends Readable {
     })
     this.#paths = paths
     this.#timeout = readyTimeout
-    this.#watching = false
-    this.#fsWatcher = null
     this.#readFile = readFile
-  }
-
-  _construct (callback) {
-    const timeoutID = setTimeout(() => {
-      callback(new Error(`FSWatcher timed out after ${this.#timeout} milliseconds`))
-    }, this.#timeout)
-
+    this.#watching = false
     this.#fsWatcher = chokidar.watch(this.#paths, {
       persistent: true,
       awaitWriteFinish: true,
@@ -42,6 +34,13 @@ class Watcher extends Readable {
       followSymlinks: false,
       disableGlobbing: true
     })
+  }
+
+  _construct (callback) {
+    const timeoutID = setTimeout(() => {
+      callback(new Error(`FSWatcher timed out after ${this.#timeout} milliseconds`))
+    }, this.#timeout)
+    this.#fsWatcher
       .once('ready', () => {
         this.emit('ready')
         clearTimeout(timeoutID)
@@ -53,24 +52,22 @@ class Watcher extends Readable {
   }
 
   _read () {
-    if (!this.#watching) {
+    if (this.#watching !== true) {
       this.#watching = true
-      this.#fsWatcher
-        .on('change', async path => {
-          try {
-            const value = await this.#readFile(path, 'utf8')
-            this.push([path, value])
-          } catch (err) {
-            this.destroy(err)
-          }
-        })
+      this.#fsWatcher.on('change', async path => {
+        try {
+          const value = await this.#readFile(path, 'utf8')
+          this.push([path, value])
+        } catch (err) {
+          this.destroy(err)
+        }
+      })
     }
   }
 
   _destroy (error, callback) {
-    this.#fsWatcher.close()
-      .then(() => callback(error))
-      .catch(closeError => callback(closeError || error))
+    const done = closeError => callback(closeError || error)
+    this.#fsWatcher.close().then(done, done)
   }
 
   async run (fn) {
@@ -79,9 +76,7 @@ class Watcher extends Readable {
         fn(...args)
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        logger.info('[kube-config] watch files aborted')
-      } else {
+      if (err.name !== 'AbortError') {
         logger.error('[kube-config] watch files ended with error: %s', err.message)
       }
     }

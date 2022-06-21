@@ -10,22 +10,12 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
-const Config = require('../lib/Config')
+const EventEmitter = require('events')
+const chokidar = require('chokidar')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
-
-jest.mock('chokidar', () => {
-  return {
-    watch: jest.fn().mockImplementation(() => {
-      const EventEmitter = require('events')
-      const watcher = new EventEmitter()
-      process.nextTick(() => watcher.emit('ready'))
-      watcher.close = jest.fn().mockImplementation(() => Promise.resolve())
-      return watcher
-    })
-  }
-})
+const Config = require('../lib/Config')
+const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
@@ -43,10 +33,17 @@ describe('kube-config', () => {
   const accessToken = 'access-token'
 
   beforeEach(() => {
+    jest.spyOn(chokidar, 'watch').mockImplementationOnce(() => {
+      const emitter = new EventEmitter()
+      emitter.close = jest.fn().mockImplementation(() => Promise.resolve())
+      process.nextTick(() => emitter.emit('ready'))
+      return emitter
+    })
     jest.spyOn(fs, 'readFileSync')
   })
 
   afterEach(() => {
+    chokidar.watch.mockRestore()
     fs.readFileSync.mockRestore()
   })
 

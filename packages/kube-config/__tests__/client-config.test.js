@@ -9,10 +9,9 @@
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-
 const Config = require('../lib/Config')
 const ClientConfig = require('../lib/ClientConfig')
-const { helper } = require('../__fixtures__')
+const { encodeBase64, onceEvent } = fixtures.helper
 
 describe('client-config', () => {
   let context
@@ -26,7 +25,7 @@ describe('client-config', () => {
     const reactive = !!signal
     clientConfig = new ClientConfig(config, { reactive, signal })
     return reactive
-      ? new Promise(resolve => clientConfig.watcher.once('ready', resolve))
+      ? onceEvent(clientConfig.watcher, 'ready')
       : Promise.resolve()
   }
 
@@ -184,8 +183,8 @@ describe('client-config', () => {
     })
 
     it('should override user clientKey and clientCert', async () => {
-      user['client-key-data'] = helper.encodeBase64('key')
-      user['client-certificate-data'] = helper.encodeBase64('cert')
+      user['client-key-data'] = encodeBase64('key')
+      user['client-certificate-data'] = encodeBase64('cert')
       initClientConfig()
       expect(clientConfig.key).toBe('key')
       expect(clientConfig.cert).toBe('cert')
