@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           {{appTitle}} is not running for hibernated clusters
         </v-tooltip>
-        <a v-else :href="sanitizeUrl(url)" target="_blank" rel="noopener">{{urlText}}</a>
+        <external-link v-else :url="url"></external-link>
       </v-list-item-title>
     </v-list-item-content>
   </v-list-item>
@@ -26,8 +26,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import sanitizeUrl from '@/mixins/sanitizeUrl'
+import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
+  components: {
+    ExternalLink
+  },
   mixins: [sanitizeUrl],
   props: {
     appTitle: {
