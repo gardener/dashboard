@@ -7,6 +7,7 @@
 'use strict'
 
 const { join } = require('path')
+const { isIP } = require('net')
 const http = require('http')
 const http2 = require('http2')
 const zlib = require('zlib')
@@ -81,7 +82,13 @@ class Client {
   }
 
   get #defaultOptions () {
-    return pick(this.#options, ['ca', 'rejectUnauthorized', 'key', 'cert', 'id'])
+    const { hostname } = new URL(this.baseUrl)
+    // use empty string '' to disable sending the SNI extension
+    const servername = isIP(hostname) !== 0 ? '' : hostname
+    return {
+      servername,
+      ...pick(this.#options, ['ca', 'rejectUnauthorized', 'key', 'cert', 'servername', 'id'])
+    }
   }
 
   executeHooks (name, ...args) {
