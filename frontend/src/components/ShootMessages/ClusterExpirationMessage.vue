@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span v-if="isValidTerminationDate">This cluster will self terminate <time-string :date-time="shootExpirationTimestamp" mode="future" class="font-weight-bold"></time-string></span>
+    <span v-if="isValidTerminationDate">This cluster will self terminate <time-string :date-time="shootExpirationTimestamp" mode="future" no-tooltip class="font-weight-bold"></time-string></span>
     <span v-else>This cluster is about to self terminate</span>
   </div>
 </template>

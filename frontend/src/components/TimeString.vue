@@ -5,11 +5,21 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span>{{timeString}}</span>
+  <v-tooltip top :disabled="noTooltip">
+    <template v-slot:activator="{ on }">
+      <span v-on="on" :class="contentClass">{{relDateTimeString}}</span>
+    </template>
+    {{dateTimeString}}
+  </v-tooltip>
 </template>
 
 <script>
-import { getTimeStringFrom, getTimeStringTo } from '@/utils'
+import {
+  getTimeStringFrom,
+  getTimeStringTo,
+  getTimestampFormatted,
+  getDateFormatted
+} from '@/utils'
 import Vue from 'vue'
 
 class Clock {
@@ -47,6 +57,18 @@ export default {
     withoutPrefixOrSuffix: {
       type: Boolean,
       default: false
+    },
+    noTooltip: {
+      type: Boolean,
+      default: false
+    },
+    dateTooltip: {
+      type: Boolean,
+      default: false
+    },
+    contentClass: {
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -57,18 +79,24 @@ export default {
     }
   },
   computed: {
-    timeString () {
-      let timeString = ''
+    relDateTimeString () {
+      let relDateTimeString = ''
       if (this.dateTime && this.currentClockTimer) {
         if (this.negativeRefDate) {
-          timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.withoutPrefixOrSuffix)
+          relDateTimeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.withoutPrefixOrSuffix)
         } else {
-          timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime), this.withoutPrefixOrSuffix)
+          relDateTimeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime), this.withoutPrefixOrSuffix)
         }
       }
 
-      this.$emit('update:current-string', timeString)
-      return timeString
+      this.$emit('update:current-string', relDateTimeString)
+      return relDateTimeString
+    },
+    dateTimeString () {
+      if (this.dateTooltip) {
+        return getDateFormatted(this.dateTime)
+      }
+      return getTimestampFormatted(this.dateTime)
     }
   },
   methods: {

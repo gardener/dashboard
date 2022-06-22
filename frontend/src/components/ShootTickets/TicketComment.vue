@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-list-item-icon>
     <v-list-item-content class="comment">
       <v-list-item-title class="comment-header toolbar-background toolbar-title--text">
-        <span class="font-weight-bold">{{login}}</span> commented <a :href="sanitizeUrl(htmlUrl)" target="_blank" rel="noopener"><time-string :date-time="createdAt" mode="past" class="toolbar-title--text"></time-string></a>
+        <a :href="sanitizeUrl(htmlUrl)" target="_blank" rel="noopener" class="toolbar-title--text"><span class="font-weight-bold toolbar-title--text">{{login}}</span> commented <time-string :date-time="createdAt" mode="past" content-class="toolbar-title--text"></time-string></a>
       </v-list-item-title>
       <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
     </v-list-item-content>
