@@ -18,7 +18,8 @@ import {
   getTimeStringFrom,
   getTimeStringTo,
   getTimestampFormatted,
-  getDateFormatted
+  getDateFormatted,
+  isValidTerminationDate
 } from '@/utils'
 import Vue from 'vue'
 
@@ -69,6 +70,10 @@ export default {
     contentClass: {
       type: String,
       default: ''
+    },
+    expiredText: {
+      type: String,
+      default: 'soon'
     }
   },
   data () {
@@ -80,6 +85,9 @@ export default {
   },
   computed: {
     relDateTimeString () {
+      if (this.mode === 'future' && !isValidTerminationDate(this.dateTime)) {
+        return this.expiredText
+      }
       let relDateTimeString = ''
       if (this.dateTime && this.currentClockTimer) {
         if (this.negativeRefDate) {
