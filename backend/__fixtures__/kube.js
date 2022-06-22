@@ -7,7 +7,7 @@
 'use strict'
 
 const { hash } = require('./helper')
-const { url, auth } = require('@gardener-dashboard/kube-config').load()
+const { url, auth } = require('@gardener-dashboard/kube-config').load({ NODE_ENV: 'test' })
 
 const server = new URL(url)
 const scheme = server.protocol.replace(/:$/, '')

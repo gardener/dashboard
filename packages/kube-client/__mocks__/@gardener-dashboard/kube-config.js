@@ -8,7 +8,7 @@
 
 const { load, ...kubeconfig } = jest.requireActual('@gardener-dashboard/kube-config')
 
-const mockLoadResult = load()
+const mockLoadResult = load({ NODE_ENV: 'test' })
 
 module.exports = {
   ...kubeconfig,
