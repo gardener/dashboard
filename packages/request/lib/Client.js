@@ -11,7 +11,7 @@ const http = require('http')
 const http2 = require('http2')
 const zlib = require('zlib')
 const typeis = require('type-is')
-const { pick } = require('lodash')
+const { pick, omit } = require('lodash')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { createHttpError } = require('./errors')
 const { globalAgent } = require('./Agent')
@@ -21,6 +21,7 @@ const {
   HTTP2_HEADER_STATUS,
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
+  HTTP2_HEADER_AUTHORIZATION,
   HTTP2_HEADER_SCHEME,
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
@@ -33,30 +34,59 @@ const {
 const EOL = '\n'
 
 class Client {
-  constructor ({ prefixUrl, agent = globalAgent, ...options } = {}) {
-    if (!prefixUrl) {
-      throw TypeError('prefixUrl is required')
+  #options
+  #agent
+
+  constructor (options = {}) {
+    if (!options.url && !options.prefixUrl) {
+      throw TypeError('url or prefixUrl is required')
     }
-    this.agent = agent
-    this.defaults = {
-      options: {
-        prefixUrl,
-        ...options
-      }
-    }
+    this.#agent = options.agent || globalAgent
+    this.#options = options
   }
 
-  get responseTimeout () {
-    return this.defaults.options.responseTimeout || 15 * 1000
+  get defaults () {
+    return { options: omit(this.#options, ['agent']) }
   }
 
   get baseUrl () {
-    return new URL(this.defaults.options.prefixUrl)
+    const url = this.#options.url || this.#options.prefixUrl
+    return this.#options.relativeUrl
+      ? new URL(this.#options.relativeUrl, url)
+      : new URL(url)
+  }
+
+  get responseTimeout () {
+    return this.#options.responseTimeout || 15 * 1000
+  }
+
+  get responseType () {
+    return this.#options.responseType
+  }
+
+  set responseType (value) {
+    this.#options.responseType = value
+  }
+
+  get #defaultHeaders () {
+    const headers = { ...this.#options.headers }
+    const { bearer, user, pass } = this.#options.auth || {}
+    if (bearer) {
+      headers[HTTP2_HEADER_AUTHORIZATION] = `Bearer ${bearer}`
+    } else if (user && pass) {
+      const credentials = Buffer.from(user + ':' + pass, 'utf8').toString('base64')
+      headers[HTTP2_HEADER_AUTHORIZATION] = `Basic ${credentials}`
+    }
+    return headers
+  }
+
+  get #defaultOptions () {
+    return pick(this.#options, ['ca', 'rejectUnauthorized', 'key', 'cert', 'id'])
   }
 
   executeHooks (name, ...args) {
+    const hooks = this.#options.hooks || {}
     try {
-      const hooks = this.defaults.options.hooks || {}
       if (Array.isArray(hooks[name])) {
         for (const hook of hooks[name]) {
           hook(...args)
@@ -91,7 +121,7 @@ class Client {
         [HTTP2_HEADER_PATH]: url.pathname + url.search,
         [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
       },
-      normalizeHeaders(this.defaults.options.headers),
+      normalizeHeaders(this.#defaultHeaders),
       normalizeHeaders(headers)
     )
   }
@@ -113,9 +143,8 @@ class Client {
     }
     this.executeHooks('beforeRequest', requestOptions)
 
-    const defaultOptions = pick(this.defaults.options, ['ca', 'rejectUnauthorized', 'key', 'cert', 'id'])
-    const stream = await this.agent.request(headers, {
-      ...defaultOptions,
+    const stream = await this.#agent.request(headers, {
+      ...this.#defaultOptions,
       ...options,
       signal
     })
@@ -124,7 +153,7 @@ class Client {
     }
     stream.end()
 
-    const { responseType } = this.defaults.options
+    const responseType = this.responseType
     const { createDecompressor, concat, transformFactory } = this.constructor
 
     headers = await stream.getHeaders()

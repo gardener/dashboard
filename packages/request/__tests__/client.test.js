@@ -13,6 +13,7 @@ const { Client, extend } = require('../lib')
 const {
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
+  HTTP2_HEADER_AUTHORIZATION,
   HTTP2_HEADER_SCHEME,
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
@@ -85,11 +86,44 @@ describe('Client', () => {
   describe('#constructor', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
+      expect(client.baseUrl.href).toBe(prefixUrl)
       expect(client.responseTimeout).toBe(15000)
     })
 
     it('should throw a type error', () => {
       expect(() => new Client()).toThrowError(TypeError)
+    })
+
+    it('should create an instance with url and relativeUrl', () => {
+      const url = new URL(prefixUrl)
+      client = new Client({
+        url: url.origin,
+        relativeUrl: url.pathname
+      })
+      expect(client.baseUrl.href).toBe(prefixUrl)
+    })
+
+    it('should create an instance with bearer authorization', () => {
+      client = new Client({
+        prefixUrl,
+        auth: {
+          bearer: 'token'
+        }
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Bearer token')
+    })
+
+    it('should create an instance with basic authorization', () => {
+      client = new Client({
+        prefixUrl,
+        auth: {
+          user: 'a',
+          pass: 'b'
+        }
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Basic YTpi')
     })
   })
 
@@ -192,13 +226,13 @@ describe('Client', () => {
     })
 
     it('should return a response with responseType "text"', async () => {
-      client.defaults.options.responseType = 'text'
+      client.responseType = 'text'
       const response = await client.fetch()
       expect(response.type).toBe('text')
     })
 
     it('should return a response and destroy the stream', async () => {
-      client.defaults.options.responseType = 'text'
+      client.responseType = 'text'
       const response = await client.fetch()
       const error = new Error('error')
       response.destroy(error)
