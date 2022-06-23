@@ -101,27 +101,30 @@ describe('kube-client', () => {
   })
 
   describe('#createDashboardClient', () => {
-    const server = new URL(mockLoadResult.url)
-    const servername = server.hostname
-    const headers = {
-      authorization: `Bearer ${mockLoadResult.auth.bearer}`
-    }
-
+    const { url, auth } = mockLoadResult
+    const server = new URL(url)
     let testClient
 
     beforeEach(() => {
       jest.clearAllMocks()
-      testClient = createDashboardClient()
+      testClient = createDashboardClient({})
     })
 
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
       expect(extend).toHaveBeenCalledTimes(24)
-      expect(extend).toHaveBeenCalledWith(expect.objectContaining({
-        servername,
-        headers
-      }))
+      for (let i = 0; i < extend.mock.calls.length; i++) {
+        const call = extend.mock.calls[i]
+        expect(call).toHaveLength(1)
+        const clientConfig = call[0]
+        expect(clientConfig.constructor.name).toBe('ClientConfig')
+        expect(clientConfig.url).toBe(url)
+        expect(clientConfig.auth).toBe(auth)
+        // all endpoints except healthz have json responseType
+        const responseType = i !== 22 ? 'json' : undefined
+        expect(clientConfig.responseType).toBe(responseType)
+      }
     })
   })
 })
