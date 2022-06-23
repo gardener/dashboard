@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { createDashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
 const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
@@ -23,6 +23,7 @@ class LifecycleHooks {
 
   cleanup () {
     this.ac.abort()
+    abortWatcher()
     return new Promise(resolve => {
       if (this.io) {
         this.io.close(resolve)
