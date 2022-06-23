@@ -6,6 +6,7 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const fs = require('fs')
 const Watcher = require('./Watcher')
 
@@ -177,7 +178,8 @@ class ClientConfig {
     Object.freeze(this)
   }
 
-  extend ({ key, cert, auth, ...options } = {}) {
+  extend ({ key, cert, auth, url, ca, rejectUnauthorized, ...options } = {}) {
+    assert.ok(!url && !ca && rejectUnauthorized === undefined, 'Cluster properties must not be overwritten')
     let properties
     if (auth) {
       properties = {
