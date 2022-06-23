@@ -34,14 +34,14 @@ const V1 = superclass => class extends superclass {
 }
 
 const CoreGroup = superclass => class extends superclass {
-  static [http.prefixUrl] (url) {
-    return new URL(join('api', this.version), url).toString()
+  static get [http.relativeUrl] () {
+    return join('api', this.version)
   }
 }
 
 const NamedGroup = superclass => class extends superclass {
-  static [http.prefixUrl] (url) {
-    return new URL(join('apis', this.group, this.version), url).toString()
+  static get [http.relativeUrl] () {
+    return join('apis', this.group, this.version)
   }
 }
 

@@ -8,7 +8,7 @@
 
 module.exports = {
   http: {
-    prefixUrl: Symbol('http.prefixUrl'),
+    relativeUrl: Symbol('http.relativeUrl'),
     client: Symbol('http.client'),
     agent: Symbol('http.agent'),
     request: Symbol('http.request')

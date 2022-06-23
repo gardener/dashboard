@@ -7,6 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
+const { http } = require('../symbols')
 
 const resourceGroups = _
   .chain(require('../groups'))
@@ -19,8 +20,12 @@ function loadGroup ({ name }) {
   return _.mapKeys(resources, 'names.plural')
 }
 
-function load (options) {
-  const createInstance = Ctor => new Ctor({ ...options, responseType: 'json' })
+function load (clientConfig, options) {
+  const createInstance = Ctor => new Ctor(clientConfig.extend({
+    ...options,
+    responseType: 'json',
+    relativeUrl: Ctor[http.relativeUrl]
+  }))
   const createInstances = resourceGroup => _.mapValues(resourceGroup, createInstance)
   return _.mapValues(resourceGroups, createInstances)
 }
@@ -57,6 +62,6 @@ exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   }
 })
 
-exports.assign = (object, options) => {
-  return Object.assign(object, load(options))
+exports.assign = (object, ...args) => {
+  return Object.assign(object, load(...args))
 }

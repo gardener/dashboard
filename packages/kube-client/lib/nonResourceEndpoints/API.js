@@ -10,10 +10,6 @@ const HttpClient = require('../HttpClient')
 const { http } = require('../symbols')
 
 class API extends HttpClient {
-  constructor (options) {
-    super({ ...options, responseType: 'json' })
-  }
-
   get () {
     return this[http.request]('api', { method: 'get' })
   }

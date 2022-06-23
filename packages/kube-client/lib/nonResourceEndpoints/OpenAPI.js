@@ -10,10 +10,6 @@ const HttpClient = require('../HttpClient')
 const { http } = require('../symbols')
 
 class OpenAPI extends HttpClient {
-  constructor (options) {
-    super({ ...options, responseType: 'json' })
-  }
-
   get () {
     return this[http.request]('openapi/v2', { method: 'get' })
   }

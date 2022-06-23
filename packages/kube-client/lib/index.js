@@ -10,33 +10,21 @@ const assert = require('assert').strict
 const Client = require('./Client')
 const Store = require('./cache/Store')
 const { Resources } = require('./resources')
-const config = require('@gardener-dashboard/kube-config').load(process.env)
+const clientConfig = require('@gardener-dashboard/kube-config').load(process.env)
 
-function createClient ({ auth, key, cert, ...options } = {}) {
-  assert.ok(auth || (key && cert), 'Client credentials are required')
-  if (key && cert) {
-    options.key = key
-    options.cert = cert
-  } else if (auth) {
-    options.auth = auth
-  }
-  // if no url is given use server from kubeconfig
-  if (!options.url) {
-    options.url = config.url
-    options.ca = config.ca
-    options.rejectUnauthorized = config.rejectUnauthorized
-  }
-  return new Client(options)
+function createClient (options) {
+  assert.ok(options.auth && options.auth.bearer, 'Client credentials are required')
+  return new Client(clientConfig, options)
 }
 
-function createDashboardClient ({ ...options } = {}) {
-  return createClient(Object.assign(options, config))
+function createDashboardClient (options) {
+  return new Client(clientConfig, options)
 }
 
 exports = module.exports = createClient
 
 // create a client instance for the gardener cluster with dashboard privileges
-const dashboardClient = new Client(config)
+const dashboardClient = new Client(clientConfig)
 
 Object.assign(exports, {
   createClient,
