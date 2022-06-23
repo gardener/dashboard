@@ -133,7 +133,7 @@ class Client {
     )
   }
 
-  async fetch (path, { method, searchParams, headers, body, signal, ...options } = {}) {
+  async fetch (path, { method, searchParams, headers, body, responseType = this.responseType, signal, ...options } = {}) {
     headers = this.getRequestHeaders(path, {
       method,
       searchParams,
@@ -160,7 +160,6 @@ class Client {
     }
     stream.end()
 
-    const responseType = this.responseType
     const { createDecompressor, concat, transformFactory } = this.constructor
 
     headers = await stream.getHeaders()
