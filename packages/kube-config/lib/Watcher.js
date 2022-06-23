@@ -57,6 +57,7 @@ class Watcher extends Readable {
       this.#fsWatcher.on('change', async path => {
         try {
           const value = await this.#readFile(path, 'utf8')
+          logger.debug('[kube-config] file watcher received change event for %s', path)
           this.push([path, value])
         } catch (err) {
           this.destroy(err)
