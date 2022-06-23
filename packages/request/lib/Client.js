@@ -39,8 +39,8 @@ class Client {
   #agent
 
   constructor (options = {}) {
-    if (!options.url && !options.prefixUrl) {
-      throw TypeError('url or prefixUrl is required')
+    if (!options.url) {
+      throw TypeError('url is required')
     }
     this.#agent = options.agent || globalAgent
     this.#options = options
@@ -51,9 +51,9 @@ class Client {
   }
 
   get baseUrl () {
-    const url = this.#options.url || this.#options.prefixUrl
-    return this.#options.relativeUrl
-      ? new URL(this.#options.relativeUrl, url)
+    const { url, relativeUrl } = this.#options
+    return relativeUrl
+      ? new URL(relativeUrl, url)
       : new URL(url)
   }
 

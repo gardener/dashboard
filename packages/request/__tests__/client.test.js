@@ -27,7 +27,7 @@ const {
 jest.useFakeTimers('legacy')
 
 describe('Client', () => {
-  const prefixUrl = 'https://127.0.0.1:31415/test'
+  const url = new URL('https://127.0.0.1:31415/test')
   const xRequestId = '4711'
   const statusCode = 200
   const contentType = 'application/json'
@@ -75,7 +75,7 @@ describe('Client', () => {
       request: jest.fn().mockResolvedValue(stream)
     }
     client = new Client({
-      prefixUrl,
+      url,
       agent,
       headers: {
         'X-Request-Id': xRequestId
@@ -86,7 +86,7 @@ describe('Client', () => {
   describe('#constructor', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
-      expect(client.baseUrl.href).toBe(prefixUrl)
+      expect(client.baseUrl.href).toBe(url.href)
       expect(client.responseTimeout).toBe(15000)
     })
 
@@ -95,17 +95,16 @@ describe('Client', () => {
     })
 
     it('should create an instance with url and relativeUrl', () => {
-      const url = new URL(prefixUrl)
       client = new Client({
         url: url.origin,
         relativeUrl: url.pathname
       })
-      expect(client.baseUrl.href).toBe(prefixUrl)
+      expect(client.baseUrl.href).toBe(url.href)
     })
 
     it('should create an instance with bearer authorization', () => {
       client = new Client({
-        prefixUrl,
+        url,
         auth: {
           bearer: 'token'
         }
@@ -116,7 +115,7 @@ describe('Client', () => {
 
     it('should create an instance with basic authorization', () => {
       client = new Client({
-        prefixUrl,
+        url,
         auth: {
           user: 'a',
           pass: 'b'
@@ -136,7 +135,7 @@ describe('Client', () => {
         throw new Error(message)
       })
       const client = new Client({
-        prefixUrl,
+        url,
         hooks: {
           beforeRequest: [beforeRequestSpy],
           afterResponse: [afterResponseSpy]
@@ -275,7 +274,7 @@ describe('Client', () => {
   describe('#defaults', () => {
     it('should return the default options', () => {
       const foo = 'bar'
-      const options = { prefixUrl, foo }
+      const options = { url, foo }
       const client = new Client(options)
       expect(client.defaults.options).toEqual(options)
     })
@@ -283,7 +282,7 @@ describe('Client', () => {
 
   describe('#extend', () => {
     it('should create a http client', () => {
-      const client = extend({ prefixUrl })
+      const client = extend({ url })
       expect(client).toBeInstanceOf(Client)
     })
   })
