@@ -92,7 +92,8 @@ export default {
         ...this.noHibernationScheduleMessage,
         ...this.clusterExpirationMessage,
         ...this.hibernationConstraintMessage,
-        ...this.maintenanceConstraintMessage
+        ...this.maintenanceConstraintMessage,
+        ...this.caCertificateValiditiesConstraintMessage
       ]
     },
     k8sMessage () {
@@ -222,6 +223,26 @@ export default {
           props: {
             constraintCaption: 'Maintenance precondition check failed. Gardener may be unable to perform required actions during maintenance',
             constraintMessage: this.maintenancePreconditionSatisfiedMessage
+          }
+        }
+      }]
+    },
+    caCertificateValiditiesConstraintMessage () {
+      if (!this.filterMatches('cacertificatevalidities-constraint')) {
+        return []
+      }
+      if (this.isCACertificateValiditiesAcceptable) {
+        return []
+      }
+      return [{
+        key: 'caCertificateValiditiesConstraintWarning',
+        icon: 'mdi-clock-alert-outline',
+        color: 'warning',
+        component: {
+          name: 'constraint-message',
+          props: {
+            constraintCaption: 'Certificate Authorities will expire in less than one year',
+            constraintMessage: this.caCertificateValiditiesAcceptableMessage
           }
         }
       }]
