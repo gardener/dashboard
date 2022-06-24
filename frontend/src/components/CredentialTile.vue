@@ -21,10 +21,10 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="!!lastCompletionTime">Last completed: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
       </v-list-item-subtitle>
     </v-list-item-content>
-    <v-list-item-action class="mx-0" v-if="canPatchShoots">
+    <v-list-item-action class="mx-0">
       <rotate-credentials :shoot-item="shootItem" :operation="initOperation" :phase="phase" :mode="completionOperation ? 'init' : 'rotate'"></rotate-credentials>
     </v-list-item-action>
-    <v-list-item-action v-if="completionOperation && canPatchShoots" class="mx-0">
+    <v-list-item-action v-if="completionOperation" class="mx-0">
       <rotate-credentials :shoot-item="shootItem" :operation="completionOperation" :phase="phase" mode="complete"></rotate-credentials>
     </v-list-item-action>
   </v-list-item>
@@ -33,17 +33,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import RotateCredentials from '@/components/RotateCredentials'
 import TimeString from '@/components/TimeString'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {
     RotateCredentials,
     TimeString
-  },
-  computed: {
-    ...mapGetters([
-      'canPatchShoots'
-    ])
   },
   props: {
     icon: {

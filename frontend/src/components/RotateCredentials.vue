@@ -12,7 +12,8 @@ SPDX-License-Identifier: Apache-2.0
     @dialog-opened="startDialogOpened"
     ref="actionDialog"
     :caption="componentTexts.caption"
-    :icon="icon"
+    :tooltip="tooltip"
+    :icon ="icon"
     width="600"
     :button-text="componentTexts.buttonText"
     :confirm-required="true"
@@ -31,6 +32,7 @@ SPDX-License-Identifier: Apache-2.0
               </li>
             </ul>
           </v-alert>
+          <v-checkbox v-model="maintenance" label="Perform this operation in the maintenance time window">></v-checkbox>
           <span class="pt-4">Type <span class="font-weight-bold">{{shootName}}</span> below top confirm the operation.</span>
         </v-col>
       </v-row>
@@ -69,7 +71,8 @@ export default {
   },
   data () {
     return {
-      actionTriggered: false
+      actionTriggered: false,
+      maintenance: false
     }
   },
   mixins: [shootItem],
@@ -101,7 +104,13 @@ export default {
       }
       return false
     },
+    isScheduledForMaintenance () {
+      return this.shootAnnotations['maintenance.gardener.cloud/operation'] === this.operation
+    },
     icon () {
+      if (this.isScheduledForMaintenance) {
+        return 'mdi-clock-outline'
+      }
       switch (this.mode) {
         case 'init':
           return 'mdi-rotate-right'
@@ -109,6 +118,12 @@ export default {
       return 'mdi-refresh'
     },
     confirmButtonText () {
+      if (this.isScheduledForMaintenance && !this.maintenance) {
+        return 'Unschedule Rotation'
+      }
+      if (this.maintenance) {
+        return 'Schedule Roatation'
+      }
       switch (this.mode) {
         case 'init':
           return 'Initiate Roatation'
@@ -116,6 +131,12 @@ export default {
           return 'Complete Rotation'
       }
       return 'Rotate'
+    },
+    tooltip () {
+      if (this.isScheduledForMaintenance) {
+        return 'This operation is scheduled to be performed during the next maintenance time window'
+      }
+      return undefined
     },
     componentTexts () {
       const componentTexts = {
@@ -308,7 +329,15 @@ export default {
     async start () {
       this.actionTriggered = true
 
-      const data = { 'gardener.cloud/operation': this.operation }
+      let data
+      if (this.maintenance) {
+        data = { 'maintenance.gardener.cloud/operation': this.operation }
+      } else if (this.isScheduledForMaintenance) {
+        // remove annotation if this operation was scheduled for maintenance
+        data = { 'maintenance.gardener.cloud/operation': null }
+      } else {
+        data = { 'gardener.cloud/operation': this.operation }
+      }
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
@@ -340,6 +369,9 @@ export default {
       }
       this.$snotify.success(this.componentTexts.successMessage, config)
     }
+  },
+  mounted () {
+    this.maintenance = this.isScheduledForMaintenance
   }
 }
 </script>
