@@ -11,6 +11,8 @@ import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import some from 'lodash/some'
 import filter from 'lodash/filter'
+import without from 'lodash/without'
+import compact from 'lodash/compact'
 import { mapGetters } from 'vuex'
 
 import {
@@ -98,7 +100,7 @@ export const shootItem = {
       return get(this.shootSpec, 'hibernation.enabled', false)
     },
     isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem, 'status'))
+      return isShootStatusHibernated(this.shootStatus)
     },
     isShootStatusHibernationProgressing () {
       return this.isShootSettingHibernated !== this.isShootStatusHibernated
@@ -211,7 +213,7 @@ export const shootItem = {
       return this.isSeedUnreachableByName(this.shootSeedName)
     },
     shootStatusSeedName () {
-      return get(this.shootItem, 'status.seed')
+      return get(this.shootStatus, 'seed')
     },
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
@@ -236,6 +238,49 @@ export const shootItem = {
     },
     maintenancePreconditionSatisfiedMessage () {
       return get(this.maintenancePreconditionSatisfiedConstraint, 'message', 'It may not be safe to trigger maintenance for this cluster')
+    },
+    shootStatus () {
+      return get(this.shootItem, 'status', {})
+    },
+    shootStatusCredentialRotation () {
+      return get(this.shootStatus, 'credentials.rotation', {})
+    },
+    shootStatusCredentialRotationKubeconfig () {
+      return get(this.shootStatusCredentialRotation, 'kubeconfig', {})
+    },
+    shootStatusCredentialRotationCA () {
+      return get(this.shootStatusCredentialRotation, 'certificateAuthorities', {})
+    },
+    shootStatusCredentialRotationObservability () {
+      return get(this.shootStatusCredentialRotation, 'observability', {})
+    },
+    shootStatusCredentialRotationSshKeypair () {
+      return get(this.shootStatusCredentialRotation, 'sshKeypair', {})
+    },
+    shootStatusCredentialRotationEtcdEncryptionKey () {
+      return get(this.shootStatusCredentialRotation, 'etcdEncryptionKey', {})
+    },
+    shootStatusCredentialRotationServiceAccountKey () {
+      return get(this.shootStatusCredentialRotation, 'serviceAccountKey', {})
+    },
+    shootStatusCredentialRotationAggregatedPhase () {
+      const phases = compact([this.shootStatusCredentialRotationCA.phase,
+        this.shootStatusCredentialRotationEtcdEncryptionKey.phase,
+        this.shootStatusCredentialRotationServiceAccountKey.phase])
+
+      if (!phases.length) {
+        return undefined
+      }
+
+      if (without(phases, 'Prepared').length === 0) {
+        return 'Prepared'
+      }
+
+      if (without(phases, 'Completed').length === 0) {
+        return 'Completed'
+      }
+
+      return 'invalid'
     }
   },
   methods: {

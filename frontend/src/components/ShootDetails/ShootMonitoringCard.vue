@@ -83,11 +83,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .retryOperation {
-    ::v-deep .v-btn {
-      margin: 0 4px 0 0;
-    }
-  }
-</style>
