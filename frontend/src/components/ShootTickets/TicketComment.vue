@@ -29,7 +29,6 @@ import { gravatarUrlIdenticon, transformHtml } from '@/utils'
 import TimeString from '@/components/TimeString'
 import ExternalLink from '@/components/ExternalLink.vue'
 import { mapState } from 'vuex'
-import sanitizeUrl from '@/mixins/sanitizeUrl'
 
 const AvatarEnum = {
   GITHUB: 'github', // default
@@ -42,7 +41,6 @@ export default {
     TimeString,
     ExternalLink
   },
-  mixins: [sanitizeUrl],
   props: {
     comment: {
       type: Object,

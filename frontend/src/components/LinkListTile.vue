@@ -25,14 +25,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import sanitizeUrl from '@/mixins/sanitizeUrl'
 import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
   components: {
     ExternalLink
   },
-  mixins: [sanitizeUrl],
   props: {
     appTitle: {
       type: String,
