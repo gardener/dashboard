@@ -15,17 +15,17 @@ const { DockerfileParser } = require('dockerfile-ast')
 
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
+  12: {
+    endOfLife: new Date('2022-04-01T23:59:59Z')
+  },
+  14: {
+    endOfLife: new Date('2023-04-01T23:59:59Z')
+  },
+  15: {
+    endOfLife: new Date('2021-06-01T23:59:59Z')
+  },
   16: {
-    endOfLife: new Date('2023-09-11T23:59:59Z')
-  },
-  18: {
-    endOfLife: new Date('2025-04-30T23:59:59Z')
-  },
-  19: {
-    endOfLife: new Date('2023-06-01T23:59:59Z')
-  },
-  20: {
-    endOfLife: new Date('2026-04-30T23:59:59Z')
+    endOfLife: new Date('2024-04-30T23:59:59Z')
   }
 }
 
