@@ -47,6 +47,7 @@ import { SnotifyPosition } from 'vue-snotify'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
+import includes from 'lodash/includes'
 
 export default {
   components: {
@@ -99,6 +100,9 @@ export default {
       if (this.mode === 'complete' && this.phase !== 'Prepared') {
         return true
       }
+      if (this.isHibernationPreventingMaintenance) {
+        return true
+      }
       if (this.mode === 'init' && this.phase && this.phase !== 'Completed') {
         return true
       }
@@ -106,6 +110,16 @@ export default {
     },
     isScheduledForMaintenance () {
       return this.shootAnnotations['maintenance.gardener.cloud/operation'] === this.operation
+    },
+    isHibernationPreventingMaintenance () {
+      return this.isShootStatusHibernated &&
+        includes(['rotate-credentials-start',
+          'rotate-etcd-encryption-key-start',
+          'rotate-credentials-complete',
+          'rotate-etcd-encryption-key-complete',
+          'rotate-serviceaccount-key-start',
+          'rotate-serviceaccount-key-complete'],
+        this.operation)
     },
     icon () {
       if (this.isScheduledForMaintenance) {
@@ -135,6 +149,9 @@ export default {
     tooltip () {
       if (this.isScheduledForMaintenance) {
         return 'This operation is scheduled to be performed during the next maintenance time window'
+      }
+      if (this.isHibernationPreventingMaintenance && this.isShootStatusHibernated) {
+        return 'Cluster is hibernated. Wake up cluster to perform this operation.'
       }
       return undefined
     },
