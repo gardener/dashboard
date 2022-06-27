@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
                           </v-tooltip>
                         </span>
                         <span v-else>
-                          This project is considered <span class="font-weight-bold">stale</span> since <time-string :date-time="staleSinceTimestamp" without-Pprefix-or-suffix content-class="font-weight-bold"></time-string>
+                          This project is considered <span class="font-weight-bold">stale</span> since <time-string :date-time="staleSinceTimestamp" without-prefix-or-suffix content-class="font-weight-bold"></time-string>
                         </span>
                       </v-list-item-title>
                     </v-list-item-content>
