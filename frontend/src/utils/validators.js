@@ -84,7 +84,7 @@ const nilUnless = key => withParams({ type: 'nilUnless', key },
   }
 )
 
-const nilIf = key => withParams({ type: 'nilUnless', key },
+const nilIf = key => withParams({ type: 'nilIf', key },
   function (value, parentVm) {
     return ref(key, this, parentVm) ? !req(value) : true
   }
