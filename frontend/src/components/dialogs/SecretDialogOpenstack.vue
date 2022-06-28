@@ -138,38 +138,44 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { required, requiredIf, requiredUnless, and } from 'vuelidate/lib/validators'
+import { nilIf } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
+const requiredMessage = 'You can\'t leave this empty.'
+const requiredUserPassMessage = 'You can\'t leave this empty unless application credentials are used.'
+const requiredAppCredMessage = 'Required for application credentials.'
+const authOrAppCredentialsMessage = 'Application credentials are used only if no authentication credentials are given.'
+
 const validationErrors = {
   domainName: {
-    required: 'You can\'t leave this empty.'
+    required: requiredMessage
   },
   tenantName: {
-    required: 'You can\'t leave this empty.'
+    required: requiredMessage
   },
   username: {
-    required: 'You can\'t leave this empty unless application credentials are used.'
+    required: requiredUserPassMessage
   },
   password: {
-    required: 'You can\'t leave this empty unless application credentials are used.'
+    required: requiredUserPassMessage
   },
   authURL: {
     required: 'Required for Secret Type DNS.'
   },
   applicationCredentialID: {
-    required: 'Required for application credentials.',
-    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
   },
   applicationCredentialName: {
-    required: 'Required for application credentials.',
-    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
   },
   applicationCredentialSecret: {
-    required: 'Required for application credentials.',
-    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
   }
 }
 
@@ -251,14 +257,10 @@ export default {
           required
         },
         username: {
-          required: requiredIf(function () {
-            return this.password
-          })
+          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
         },
         password: {
-          required: requiredIf(function () {
-            return this.username
-          })
+          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
         },
         authURL: {
           required: requiredIf(function () {
@@ -266,28 +268,16 @@ export default {
           })
         },
         applicationCredentialID: {
-          authOrAppCredentials: function () {
-            return !this.applicationCredentialID || !(this.username || this.password)
-          },
-          required: requiredIf(function () {
-            return this.applicationCredentialName || this.applicationCredentialSecret
-          })
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
         },
         applicationCredentialName: {
-          authOrAppCredentials: function () {
-            return !this.applicationCredentialName || !(this.username || this.password)
-          },
-          required: requiredIf(function () {
-            return this.applicationCredentialID || this.applicationCredentialSecret
-          })
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
         },
         applicationCredentialSecret: {
-          authOrAppCredentials: function () {
-            return !this.applicationCredentialSecret || !(this.username || this.password)
-          },
-          required: requiredIf(function () {
-            return this.applicationCredentialID || this.applicationCredentialName
-          })
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
         }
       }
       return validators
