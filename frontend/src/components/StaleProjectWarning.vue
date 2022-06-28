@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-else>mdi-clock-alert-outline</v-icon>
     </template>
      <span v-if="staleAutoDeleteTimestamp">
-      This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp" mode="future"></time-string></span>
+      This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <time-string :date-time="staleAutoDeleteTimestamp" mode="future" no-tooltip content-class="font-weight-bold"></time-string>
     </span>
     <span v-else>
-      This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
+      This project is considered <span class="font-weight-bold">stale</span> since <time-string :date-time="staleSinceTimestamp" without-prefix-or-suffix no-tooltip content-class="font-weight-bold"></time-string>
     </span>
   </v-tooltip>
 </template>

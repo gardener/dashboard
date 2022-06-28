@@ -15,9 +15,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-container>
       <span class="font-weight-bold">{{login}}</span> created this
-      <a :href="sanitizeUrl(ticketHtmlUrl)" target="_blank" rel="noopener">ticket</a>
-      <a :href="sanitizeUrl(ticketHtmlUrl)" target="_blank" rel="noopener" class="link-icon"><v-icon color="anchor" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :date-time="ticket.metadata.created_at" mode="past"></time-string>
+      <external-link :url="ticketHtmlUrl">ticket</external-link>
+      <time-string :date-time="ticket.metadata.created_at" mode="past" content-class="ml-1"></time-string>
     </v-container>
     <v-list>
       <ticket-comment :comment="ticket"></ticket-comment>
@@ -40,13 +39,15 @@ import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
 import TicketLabel from '@/components/ShootTickets/TicketLabel'
 import TicketComment from '@/components/ShootTickets/TicketComment'
+import ExternalLink from '@/components/ExternalLink.vue'
 import sanitizeUrl from '@/mixins/sanitizeUrl'
 
 export default {
   components: {
     TimeString,
     TicketLabel,
-    TicketComment
+    TicketComment,
+    ExternalLink
   },
   mixins: [sanitizeUrl],
   props: {
