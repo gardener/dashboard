@@ -212,7 +212,6 @@ import {
   parseServiceAccountUsername,
   isForeignServiceAccount,
   isServiceAccountUsername,
-  getTimestampFormatted,
   getProjectDetails,
   sortedRoleDisplayNames,
   mapTableHeader
@@ -355,7 +354,6 @@ export default {
           ...serviceAccount,
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
-          created: getTimestampFormatted(serviceAccount.creationTimestamp),
           roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
           isCurrentUser: this.isCurrentUser(username)
         }

@@ -34,14 +34,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.creationTimestamp">
       <div>
-        <v-tooltip top v-if="item.creationTimestamp">
-          <template v-slot:activator="{ on }">
-            <span v-on="on">
-              <time-string :date-time="item.creationTimestamp" mode="past"></time-string>
-            </span>
-          </template>
-          {{item.created}}
-        </v-tooltip>
+        <time-string v-if="item.creationTimestamp" :date-time="item.creationTimestamp" mode="past"></time-string>
         <span v-else class="font-weight-light text--disabled">unknown</span>
       </div>
     </td>

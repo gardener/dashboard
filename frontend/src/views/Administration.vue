@@ -61,11 +61,11 @@ SPDX-License-Identifier: Apache-2.0
                             <template v-slot:activator="{ on }">
                               <span class="font-weight-bold" v-on="on">{{staleAutoDeleteDate}}</span>
                             </template>
-                            <time-string :date-time="staleAutoDeleteTimestamp" mode="future"></time-string>
+                            <time-string :date-time="staleAutoDeleteTimestamp" mode="future" no-tooltip></time-string>
                           </v-tooltip>
                         </span>
                         <span v-else>
-                          This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
+                          This project is considered <span class="font-weight-bold">stale</span> since <time-string :date-time="staleSinceTimestamp" without-prefix-or-suffix content-class="font-weight-bold"></time-string>
                         </span>
                       </v-list-item-title>
                     </v-list-item-content>
