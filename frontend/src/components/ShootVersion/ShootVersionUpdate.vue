@@ -23,10 +23,9 @@ SPDX-License-Identifier: Apache-2.0
         <template v-slot:item="{ item }">
           <v-tooltip top :disabled="!item.notNextMinor">
             <template v-slot:activator="{ on }">
-              <v-list-item-content v-on="on" :class="item.colorClass">
-                <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
-                <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
-                <v-list-item-subtitle v-if="versionItemDescription(item).length">
+              <v-list-item-content v-on="on">
+                <v-list-item-title :class="{'text--disabled': item.notNextMinor}">{{item.text}}</v-list-item-title>
+                <v-list-item-subtitle v-if="versionItemDescription(item).length" :class="item.subtitleClass">
                   {{versionItemDescription(item)}}
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -73,19 +72,23 @@ export default {
     items () {
       const selectionItemsForType = (versions, type) => {
         return map(versions, version => {
-          let colorClass = ''
+          const notNextMinor = this.itemIsNotNextMinor(version.version, type)
+          let subtitleClass = ''
           if (version.isSupported) {
-            colorClass = 'success--text'
+            subtitleClass = 'success--text'
           }
           if (version.isDeprecated) {
-            colorClass = 'warning--text'
+            subtitleClass = 'warning--text'
+          }
+          if (notNextMinor) {
+            subtitleClass = 'text--disabled'
           }
           return {
             ...version,
             type,
             text: `${this.currentK8sVersion.version} → ${version.version}`,
-            notNextMinor: this.itemIsNotNextMinor(version.version, type),
-            colorClass
+            notNextMinor,
+            subtitleClass
           }
         })
       }
