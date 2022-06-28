@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
               </span>
             </v-list-item-subtitle>
             <v-list-item-title>
-              <span v-for="({ value }, index) in item.details" :key="value">
+              <span v-for="({ value, label }, index) in item.details" :key="label">
                 <span v-if="value">{{value}}</span>
                 <span v-else class="font-weight-light text--disabled">unknown</span>
                 <span v-if="index !== item.details.length - 1"> / </span>
