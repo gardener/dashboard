@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
-      <v-row v-if="!parseError" key="addSchedule" class="list-item">
+      <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
         <v-col>
           <v-btn
             small

@@ -104,6 +104,18 @@ Array [
     "data": Object {
       "region": "foo-europe",
       "type": "infra3",
+      "unprotected": true,
+      "visible": true,
+    },
+    "metadata": Object {
+      "name": "infra3-seed-without-selector",
+      "unreachable": false,
+    },
+  },
+  Object {
+    "data": Object {
+      "region": "foo-europe",
+      "type": "infra3",
       "unprotected": false,
       "visible": true,
     },
