@@ -99,12 +99,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content class="pt-0">
           <v-list-item-subtitle>Created at</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <span v-on="on">{{shootCreatedAt}}</span>
-              </template>
-              <time-string :date-time="shootMetadata.creationTimestamp" mode="past"></time-string>
-            </v-tooltip>
+            <time-string :date-time="shootMetadata.creationTimestamp" mode="past"></time-string>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>

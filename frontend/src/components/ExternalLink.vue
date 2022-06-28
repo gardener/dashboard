@@ -5,8 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <a :href="sanitizeUrl(url)" target="_blank" rel="noopener">
-    <slot>{{url}}</slot> <v-icon :size="12">mdi-open-in-new</v-icon>
+  <a :href="sanitizeUrl(url)" target="_blank" rel="noopener" class="text-decoration-none text-no-wrap">
+    <span class="text-decoration-underline">
+      <slot>{{url}}</slot>
+    </span>
+    <v-icon :size="12" class="inherit-color ml-1">mdi-open-in-new</v-icon>
   </a>
 </template>
 
@@ -24,12 +27,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  a {
-    text-decoration: none;
-  }
-  a > span {
-    text-decoration-line: underline;
-  }
-</style>

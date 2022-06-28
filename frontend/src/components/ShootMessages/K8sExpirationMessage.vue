@@ -7,12 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <span v-if="isValidTerminationDate">Kubernetes version of this cluster expires
-      <v-tooltip right>
-        <template v-slot:activator="{ on }">
-          <time-string v-on="on" :date-time="expirationDate" mode="future" class="font-weight-bold"></time-string>
-        </template>
-        {{getDateFormatted(expirationDate)}}
-      </v-tooltip>. </span>
+       <time-string :date-time="expirationDate" mode="future" date-tooltip content-class="font-weight-bold"></time-string>
+       <span>. </span>
+    </span>
     <span v-else>Kubernetes version of this cluster is expired.</span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
     <template v-else-if="severity === 'warning'">
@@ -25,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import { getDateFormatted } from '@/utils'
 import TimeString from '@/components/TimeString'
 
 export default {
@@ -44,11 +40,6 @@ export default {
     severity: {
       type: String,
       required: true
-    }
-  },
-  methods: {
-    getDateFormatted (date) {
-      return getDateFormatted(date)
     }
   }
 }
