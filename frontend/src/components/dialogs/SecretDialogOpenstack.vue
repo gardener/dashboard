@@ -76,6 +76,39 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
         </hint-colorizer>
       </div>
+      <div>
+        <v-text-field
+        color="primary"
+        v-model="applicationCredentialID"
+        label="Application credential ID"
+        :error-messages="getErrorMessages('applicationCredentialID')"
+        @input="$v.applicationCredentialID.$touch()"
+        @blur="$v.applicationCredentialID.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+        color="primary"
+        v-model="applicationCredentialName"
+        label="Application credential name"
+        :error-messages="getErrorMessages('applicationCredentialName')"
+        @input="$v.applicationCredentialName.$touch()"
+        @blur="$v.applicationCredentialName.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="primary"
+          v-model="applicationCredentialSecret"
+          label="Application credential password"
+          :error-messages="getErrorMessages('applicationCredentialSecret')"
+          :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="hideApplicationCredentialSecret ? 'password' : 'text'"
+          @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
+          @input="$v.applicationCredentialSecret.$touch()"
+          @blur="$v.applicationCredentialSecret.$touch()"
+        ></v-text-field>
+      </div>
     </template>
 
     <template v-slot:help-slot>
@@ -118,13 +151,25 @@ const validationErrors = {
     required: 'You can\'t leave this empty.'
   },
   username: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty unless application credentials are used.'
   },
   password: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty unless application credentials are used.'
   },
   authURL: {
     required: 'Required for Secret Type DNS.'
+  },
+  applicationCredentialID: {
+    required: 'Required for application credentials.',
+    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
+  },
+  applicationCredentialName: {
+    required: 'Required for application credentials.',
+    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
+  },
+  applicationCredentialSecret: {
+    required: 'Required for application credentials.',
+    authOrAppCredentials: 'Application credentials are used only if no authentication credentials are given.'
   }
 }
 
@@ -154,6 +199,10 @@ export default {
       password: undefined,
       hideSecret: true,
       authURL: undefined,
+      applicationCredentialID: undefined,
+      applicationCredentialName: undefined,
+      applicationCredentialSecret: undefined,
+      hideApplicationCredentialSecret: true,
       validationErrors
     }
   },
@@ -171,12 +220,25 @@ export default {
     secretData () {
       const data = {
         domainName: this.domainName,
-        tenantName: this.tenantName,
-        username: this.username,
-        password: this.password
+        tenantName: this.tenantName
+      }
+      if (this.username && this.username.length) {
+        data.username = this.username
+      }
+      if (this.password && this.password.length) {
+        data.password = this.password
       }
       if (this.authURL && this.authURL.length) {
         data.OS_AUTH_URL = this.authURL
+      }
+      if (this.applicationCredentialID && this.applicationCredentialID.length) {
+        data.applicationCredentialID = this.applicationCredentialID
+      }
+      if (this.applicationCredentialName && this.applicationCredentialName.length) {
+        data.applicationCredentialName = this.applicationCredentialName
+      }
+      if (this.applicationCredentialSecret && this.applicationCredentialSecret.length) {
+        data.applicationCredentialSecret = this.applicationCredentialSecret
       }
       return data
     },
@@ -189,14 +251,42 @@ export default {
           required
         },
         username: {
-          required
+          required: requiredIf(function () {
+            return this.password
+          })
         },
         password: {
-          required
+          required: requiredIf(function () {
+            return this.username
+          })
         },
         authURL: {
           required: requiredIf(function () {
             return this.vendor === 'openstack-designate'
+          })
+        },
+        applicationCredentialID: {
+          authOrAppCredentials: function () {
+            return !this.applicationCredentialID || !(this.username || this.password)
+          },
+          required: requiredIf(function () {
+            return this.applicationCredentialName || this.applicationCredentialSecret
+          })
+        },
+        applicationCredentialName: {
+          authOrAppCredentials: function () {
+            return !this.applicationCredentialName || !(this.username || this.password)
+          },
+          required: requiredIf(function () {
+            return this.applicationCredentialID || this.applicationCredentialSecret
+          })
+        },
+        applicationCredentialSecret: {
+          authOrAppCredentials: function () {
+            return !this.applicationCredentialSecret || !(this.username || this.password)
+          },
+          required: requiredIf(function () {
+            return this.applicationCredentialID || this.applicationCredentialName
           })
         }
       }
@@ -227,6 +317,9 @@ export default {
       this.username = ''
       this.password = ''
       this.authURL = ''
+      this.applicationCredentialID = ''
+      this.applicationCredentialName = ''
+      this.applicationCredentialSecret = ''
 
       if (!this.isCreateMode) {
         if (this.secret.data) {
