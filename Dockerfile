@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #### Builder ####
-FROM node:16-alpine3.15 as builder
+FROM node:18-alpine3.16 as builder
 
 WORKDIR /usr/src/app
 
@@ -47,7 +47,7 @@ RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM alpine:3.15 as release
+FROM alpine:3.16 as release
 
 RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
 RUN apk add --no-cache tini libstdc++
