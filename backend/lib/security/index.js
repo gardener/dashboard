@@ -150,13 +150,8 @@ async function authorizeToken (req, res) {
   return decode(token)
 }
 
-async function setCookies (res, tokenSet) {
-  const {
-    id_token: idToken,
-    expires_in: expiresIn
-  } = tokenSet
+async function createToken (idToken, expiresIn) {
   const { username: id, groups } = await authentication.isAuthenticated({ token: idToken })
-
   const { name, email } = decode(idToken)
   const user = {
     id,
@@ -165,7 +160,16 @@ async function setCookies (res, tokenSet) {
     email
   }
   const audience = [GARDENER_AUDIENCE]
-  const token = await sign(user, { expiresIn, audience })
+  return sign(user, { expiresIn, audience })
+}
+
+async function setCookies (res, tokenSet) {
+  const {
+    id_token: idToken,
+    refresh_token: refreshToken,
+    expires_in: expiresIn
+  } = tokenSet
+  const token = await createToken(idToken, expiresIn)
   const [header, payload, signature] = split(token, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
@@ -178,8 +182,12 @@ async function setCookies (res, tokenSet) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = await encrypt(idToken)
-  res.cookie(COOKIE_TOKEN, encryptedBearer, {
+  const tokens = [idToken]
+  if (refreshToken) {
+    tokens.push(refreshToken)
+  }
+  const encryptedValue = await encrypt(tokens.join(','))
+  res.cookie(COOKIE_TOKEN, encryptedValue, {
     secure,
     httpOnly: true,
     expires: undefined,
@@ -255,15 +263,27 @@ function csrfProtection (req) {
   }
 }
 
-async function setUserAuth (user, encryptedBearer) {
-  if (!encryptedBearer) {
+async function getTokenSet (encryptedValue) {
+  if (!encryptedValue) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
-  const bearer = await decrypt(encryptedBearer)
-  if (!bearer) {
+  const value = await decrypt(encryptedValue)
+  if (!value) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
-  user.auth = { bearer }
+  const [idToken, refreshToken] = value.split(',')
+  const { exp } = decode(idToken)
+  return {
+    token_type: 'Bearer',
+    id_token: idToken,
+    refresh_token: refreshToken,
+    expires_in: exp - Math.floor(Date.now() / 1000)
+  }
+}
+
+async function setUserAuth (user, encryptedBearer) {
+  const tokenSet = await getTokenSet(encryptedBearer)
+  user.auth = { bearer: tokenSet.id_token }
   return user
 }
 
