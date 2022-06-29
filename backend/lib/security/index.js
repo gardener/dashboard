@@ -281,12 +281,6 @@ async function getTokenSet (encryptedValue) {
   }
 }
 
-async function setUserAuth (user, encryptedBearer) {
-  const tokenSet = await getTokenSet(encryptedBearer)
-  user.auth = { bearer: tokenSet.id_token }
-  return user
-}
-
 function authenticate (options = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   return async (req, res, next) => {
@@ -296,12 +290,19 @@ function authenticate (options = {}) {
       if (!token) {
         throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
       }
+      const tokenSet = await getTokenSet(req.cookies[COOKIE_TOKEN])
       const user = await verifyToken(token)
-      await setUserAuth(user, req.cookies[COOKIE_TOKEN])
-      const auth = user.auth
-      Object.defineProperty(user, 'client', {
-        value: options.createClient({ auth }),
-        configurable: true
+      const auth = Object.freeze({
+        bearer: tokenSet.id_token
+      })
+      Object.defineProperties(user, {
+        auth: {
+          value: auth,
+          enumerable: true
+        },
+        client: {
+          value: options.createClient({ auth })
+        }
       })
       req.user = user
       next()
