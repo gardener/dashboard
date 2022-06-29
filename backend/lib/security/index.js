@@ -220,14 +220,10 @@ function getToken ({ cookies = {}, headers = {} }) {
 
 function authenticate (options = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
-  const verifyToken = async (req, res) => {
-    const token = getToken(req)
-    if (!token) {
-      throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
-    }
+  const verifyToken = async token => {
     try {
       const audience = [GARDENER_AUDIENCE]
-      req.user = await verify(token, { audience })
+      return await verify(token, { audience })
     } catch (err) {
       const props = {}
       switch (err.name) {
@@ -241,7 +237,7 @@ function authenticate (options = {}) {
       throw createError(401, err.message, props)
     }
   }
-  const csrfProtection = (req, res) => {
+  const csrfProtection = req => {
     /**
      * According to the OWASP Document "Cross-Site Request Forgery Prevention"
      * the ["Use of Custom Request Headers"](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#use-of-custom-request-headers)
@@ -251,12 +247,7 @@ function authenticate (options = {}) {
       throw createError(403, 'Request has been blocked by CSRF protection', { code: 'ERR_CSRF_PREVENTION' })
     }
   }
-  const setUserAuth = async (req, res) => {
-    const { cookies = {}, user = {} } = req
-    if (user.auth && user.client) {
-      return
-    }
-    const encryptedBearer = cookies[COOKIE_TOKEN]
+  const setUserAuth = async (user, encryptedBearer) => {
     if (!encryptedBearer) {
       throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
     }
@@ -264,18 +255,24 @@ function authenticate (options = {}) {
     if (!bearer) {
       throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
     }
-    const auth = user.auth = { bearer }
-
-    Object.defineProperty(user, 'client', {
-      value: options.createClient({ auth }),
-      configurable: true
-    })
+    user.auth = { bearer }
+    return user
   }
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
-      await verifyToken(req, res)
-      await setUserAuth(req, res)
+      const token = getToken(req)
+      if (!token) {
+        throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
+      }
+      const user = await verifyToken(token)
+      await setUserAuth(user, req.cookies[COOKIE_TOKEN])
+      const auth = user.auth
+      Object.defineProperty(user, 'client', {
+        value: options.createClient({ auth }),
+        configurable: true
+      })
+      req.user = user
       next()
     } catch (err) {
       clearCookies(res)
