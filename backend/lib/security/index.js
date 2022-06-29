@@ -281,17 +281,29 @@ async function getTokenSet (encryptedValue) {
   }
 }
 
+async function refreshTokenSet (tokenSet) {
+  const client = await exports.getIssuerClient()
+  return client.refresh(tokenSet.refresh_token)
+}
+
 function authenticate (options = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
-      const token = getToken(req)
+      let user
+      let token = getToken(req)
       if (!token) {
         throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
       }
-      const tokenSet = await getTokenSet(req.cookies[COOKIE_TOKEN])
-      const user = await verifyToken(token)
+      let tokenSet = await getTokenSet(req.cookies[COOKIE_TOKEN])
+      if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
+        tokenSet = await refreshTokenSet(tokenSet)
+        token = await setCookies(res, tokenSet)
+        user = decode(token)
+      } else {
+        user = await verifyToken(token)
+      }
       const auth = Object.freeze({
         bearer: tokenSet.id_token
       })
