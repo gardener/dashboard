@@ -12,45 +12,29 @@ SPDX-License-Identifier: Apache-2.0
           <div>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
-                    <v-badge
-                      left
-                      overlap
-                      bordered
-                      offset-x="1"
-                      color="error"
-                      icon="mdi-account-alert"
-                      :value="isUserError"
-                    >
+                <div v-on="on" class="d-flex align-center">
+                  <div class="icon-slot cursor-pointer">
+                    <v-icon v-if="isUserError" class="vertical-align-middle status-icon" color="error">mdi-account-alert</v-icon>
+                  </div>
+                  <div class="icon-slot cursor-pointer">
+                    <v-progress-circular v-if="showProgress" class="vertical-align-middle" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
                       <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
-                      <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" :color="color">mdi-account-alert</v-icon>
                       <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
                       <v-icon v-else-if="isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
                       <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
                       <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
                       <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
                       <template v-else>{{shootLastOperation.progress}}</template>
-                    </v-badge>
-                  </v-progress-circular>
-                  <v-badge
-                    v-else
-                    left
-                    overlap
-                    bordered
-                    color="error"
-                    icon="mdi-account-alert"
-                    :value="isUserError"
-                  >
-                    <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
-                    <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
-                    <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+                    </v-progress-circular>
+                    <v-icon v-else-if="isShootStatusHibernated" class="vertical-align-middle status-icon" :color="color">mdi-sleep</v-icon>
+                    <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle status-icon" :color="color">mdi-block-helper</v-icon>
+                    <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle status-icon" :color="color">mdi-delete</v-icon>
                     <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
-                    <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
-                    <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
-                    <v-progress-circular v-else-if="isPending" class="vertical-align-middle cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-                    <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
-                  </v-badge>
+                    <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle status-icon" :color="color">mdi-plus</v-icon>
+                    <v-icon v-else-if="isError" class="vertical-align-middle status-icon" :color="color">mdi-alert-outline</v-icon>
+                    <v-progress-circular v-else-if="isPending" class="vertical-align-middle" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+                    <v-icon v-else class="vertical-align-middle status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+                  </div>
                 </div>
               </template>
               <div>
@@ -73,7 +57,9 @@ SPDX-License-Identifier: Apache-2.0
           :namespace="shootNamespace"
         />
       </g-popper>
-      <retry-operation :shoot-item="shootItem"></retry-operation>
+      <div class="icon-slot">
+        <retry-operation :shoot-item="shootItem"></retry-operation>
+      </div>
       <span v-if="showStatusText" class="ml-2">{{statusTitle}}</span>
     </div>
     <template v-if="showStatusText">
@@ -254,6 +240,12 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
+  }
+
+  .icon-slot {
+    width: 30px;
+    height: auto;
+    text-align: center;
   }
 
   ::v-deep .v-card  {
