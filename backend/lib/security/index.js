@@ -221,11 +221,7 @@ function isXmlHttpRequest ({ headers = {} }) {
   return headers['x-requested-with'] === 'XMLHttpRequest'
 }
 
-function getToken ({ cookies = {}, headers = {} }) {
-  const { authorization = '' } = headers
-  if (authorization.startsWith('Bearer ')) {
-    return authorization.substring(7)
-  }
+function getToken (cookies) {
   const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
   const signature = cookies[COOKIE_SIGNATURE]
   if (header && payload && signature) {
@@ -263,7 +259,8 @@ function csrfProtection (req) {
   }
 }
 
-async function getTokenSet (encryptedValue) {
+async function getTokenSet (cookies) {
+  const encryptedValue = cookies[COOKIE_TOKEN]
   if (!encryptedValue) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
@@ -292,11 +289,11 @@ function authenticate (options = {}) {
     try {
       csrfProtection(req, res)
       let user
-      let token = getToken(req)
+      let token = getToken(req.cookies)
       if (!token) {
         throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
       }
-      let tokenSet = await getTokenSet(req.cookies[COOKIE_TOKEN])
+      let tokenSet = await getTokenSet(req.cookies)
       if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
         tokenSet = await refreshTokenSet(tokenSet)
         token = await setCookies(res, tokenSet)
