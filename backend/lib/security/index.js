@@ -218,46 +218,49 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
+async function verifyToken (token) {
+  try {
+    const audience = [GARDENER_AUDIENCE]
+    return await verify(token, { audience })
+  } catch (err) {
+    const props = {}
+    switch (err.name) {
+      case 'TokenExpiredError':
+        props.code = 'ERR_JWT_TOKEN_EXPIRED'
+        break
+      case 'NotBeforeError':
+        props.code = 'ERR_JWT_NOT_BEFORE'
+        break
+    }
+    throw createError(401, err.message, props)
+  }
+}
+
+function csrfProtection (req) {
+  /**
+   * According to the OWASP Document "Cross-Site Request Forgery Prevention"
+   * the ["Use of Custom Request Headers"](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#use-of-custom-request-headers)
+   * is an alternate defense that is particularly well suited for AJAX/XHR endpoints.
+   */
+  if (!isHttpMethodSafe(req) && !isXmlHttpRequest(req)) {
+    throw createError(403, 'Request has been blocked by CSRF protection', { code: 'ERR_CSRF_PREVENTION' })
+  }
+}
+
+async function setUserAuth (user, encryptedBearer) {
+  if (!encryptedBearer) {
+    throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
+  }
+  const bearer = await decrypt(encryptedBearer)
+  if (!bearer) {
+    throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
+  }
+  user.auth = { bearer }
+  return user
+}
+
 function authenticate (options = {}) {
   assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
-  const verifyToken = async token => {
-    try {
-      const audience = [GARDENER_AUDIENCE]
-      return await verify(token, { audience })
-    } catch (err) {
-      const props = {}
-      switch (err.name) {
-        case 'TokenExpiredError':
-          props.code = 'ERR_JWT_TOKEN_EXPIRED'
-          break
-        case 'NotBeforeError':
-          props.code = 'ERR_JWT_NOT_BEFORE'
-          break
-      }
-      throw createError(401, err.message, props)
-    }
-  }
-  const csrfProtection = req => {
-    /**
-     * According to the OWASP Document "Cross-Site Request Forgery Prevention"
-     * the ["Use of Custom Request Headers"](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#use-of-custom-request-headers)
-     * is an alternate defense that is particularly well suited for AJAX/XHR endpoints.
-     */
-    if (!isHttpMethodSafe(req) && !isXmlHttpRequest(req)) {
-      throw createError(403, 'Request has been blocked by CSRF protection', { code: 'ERR_CSRF_PREVENTION' })
-    }
-  }
-  const setUserAuth = async (user, encryptedBearer) => {
-    if (!encryptedBearer) {
-      throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
-    }
-    const bearer = await decrypt(encryptedBearer)
-    if (!bearer) {
-      throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
-    }
-    user.auth = { bearer }
-    return user
-  }
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
