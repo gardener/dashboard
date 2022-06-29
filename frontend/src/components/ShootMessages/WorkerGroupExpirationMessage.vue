@@ -8,12 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span>
     <span v-if="isValidTerminationDate">expires
-      <v-tooltip right>
-        <template v-slot:activator="{ on }">
-          <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate" mode="future"></time-string></span>
-        </template>
-        {{getDateFormatted(expirationDate)}}
-      </v-tooltip>
+      <time-string :date-time="expirationDate" mode="future" date-tooltip content-class="font-weight-bold"></time-string>
       <span>. </span>
     </span>
     <span v-else>is expired. </span>

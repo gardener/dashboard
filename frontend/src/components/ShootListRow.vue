@@ -52,14 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         <account-avatar :account-name="shootCreatedBy"></account-avatar>
       </template>
       <template v-if="cell.header.value === 'createdAt'">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
-            </div>
-          </template>
-          {{ shootCreatedAt }}
-        </v-tooltip>
+        <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
       </template>
       <template v-if="cell.header.value === 'purpose'">
         <div class="d-flex justify-center">
@@ -88,16 +81,9 @@ SPDX-License-Identifier: Apache-2.0
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-                <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
-              </router-link>
-            </div>
-          </template>
-          {{ shootLastUpdatedTicket }}
-        </v-tooltip>
+        <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+          <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
+        </router-link>
       </template>
       <template v-if="cell.header.value === 'ticketLabels'">
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
@@ -163,8 +149,7 @@ import ShootListRowActions from '@/components/ShootListRowActions'
 import AutoHide from '@/components/AutoHide'
 
 import {
-  isTypeDelete,
-  getTimestampFormatted
+  isTypeDelete
 } from '@/utils'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -235,9 +220,6 @@ export default {
     },
     shootLastUpdatedTicketTimestamp () {
       return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)
-    },
-    shootLastUpdatedTicket () {
-      return getTimestampFormatted(this.shootLastUpdatedTicketTimestamp)
     },
     shootTicketsLabels () {
       return this.ticketsLabels(this.shootMetadata)

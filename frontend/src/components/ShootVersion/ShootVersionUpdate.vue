@@ -24,9 +24,8 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top :disabled="!item.notNextMinor">
             <template v-slot:activator="{ on }">
               <v-list-item-content v-on="on">
-                <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
-                <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
-                <v-list-item-subtitle v-if="versionItemDescription(item).length">
+                <v-list-item-title :class="{'text--disabled': item.notNextMinor}">{{item.text}}</v-list-item-title>
+                <v-list-item-subtitle v-if="versionItemDescription(item).length" :class="item.subtitleClass">
                   {{versionItemDescription(item)}}
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -73,11 +72,23 @@ export default {
     items () {
       const selectionItemsForType = (versions, type) => {
         return map(versions, version => {
+          const notNextMinor = this.itemIsNotNextMinor(version.version, type)
+          let subtitleClass = ''
+          if (version.isSupported) {
+            subtitleClass = 'success--text'
+          }
+          if (version.isDeprecated) {
+            subtitleClass = 'warning--text'
+          }
+          if (notNextMinor) {
+            subtitleClass = 'text--disabled'
+          }
           return {
             ...version,
             type,
             text: `${this.currentK8sVersion.version} → ${version.version}`,
-            notNextMinor: this.itemIsNotNextMinor(version.version, type)
+            notNextMinor,
+            subtitleClass
           }
         })
       }
@@ -93,14 +104,21 @@ export default {
             return -1
           } else if (b.header) {
             return 1
-          } else {
-            if (semver.eq(a.version, b.version)) {
-              return 0
-            } else if (semver.gt(a.version, b.version)) {
-              return 1
-            } else {
+          }
+          if (semver.diff(a.version, b.version) === 'patch') {
+            if (a.isSupported && !b.isSupported) {
               return -1
             }
+            if (!a.isSupported && b.isSupported) {
+              return 1
+            }
+          }
+          if (semver.eq(a.version, b.version)) {
+            return 0
+          } else if (semver.gt(a.version, b.version)) {
+            return 1
+          } else {
+            return -1
           }
         } else {
           const sortValForType = function (type) {

@@ -76,6 +76,39 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
         </hint-colorizer>
       </div>
+      <div>
+        <v-text-field
+        color="primary"
+        v-model="applicationCredentialID"
+        label="Application credential ID"
+        :error-messages="getErrorMessages('applicationCredentialID')"
+        @input="$v.applicationCredentialID.$touch()"
+        @blur="$v.applicationCredentialID.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+        color="primary"
+        v-model="applicationCredentialName"
+        label="Application credential name"
+        :error-messages="getErrorMessages('applicationCredentialName')"
+        @input="$v.applicationCredentialName.$touch()"
+        @blur="$v.applicationCredentialName.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="primary"
+          v-model="applicationCredentialSecret"
+          label="Application credential password"
+          :error-messages="getErrorMessages('applicationCredentialSecret')"
+          :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="hideApplicationCredentialSecret ? 'password' : 'text'"
+          @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
+          @input="$v.applicationCredentialSecret.$touch()"
+          @blur="$v.applicationCredentialSecret.$touch()"
+        ></v-text-field>
+      </div>
     </template>
 
     <template v-slot:help-slot>
@@ -105,26 +138,44 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { required, requiredIf, requiredUnless, and } from 'vuelidate/lib/validators'
+import { nilIf } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
+const requiredMessage = 'You can\'t leave this empty.'
+const requiredUserPassMessage = 'You can\'t leave this empty unless application credentials are used.'
+const requiredAppCredMessage = 'Required for application credentials.'
+const authOrAppCredentialsMessage = 'Application credentials are used only if no authentication credentials are given.'
+
 const validationErrors = {
   domainName: {
-    required: 'You can\'t leave this empty.'
+    required: requiredMessage
   },
   tenantName: {
-    required: 'You can\'t leave this empty.'
+    required: requiredMessage
   },
   username: {
-    required: 'You can\'t leave this empty.'
+    required: requiredUserPassMessage
   },
   password: {
-    required: 'You can\'t leave this empty.'
+    required: requiredUserPassMessage
   },
   authURL: {
     required: 'Required for Secret Type DNS.'
+  },
+  applicationCredentialID: {
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
+  },
+  applicationCredentialName: {
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
+  },
+  applicationCredentialSecret: {
+    required: requiredAppCredMessage,
+    authOrAppCredentials: authOrAppCredentialsMessage
   }
 }
 
@@ -154,6 +205,10 @@ export default {
       password: undefined,
       hideSecret: true,
       authURL: undefined,
+      applicationCredentialID: undefined,
+      applicationCredentialName: undefined,
+      applicationCredentialSecret: undefined,
+      hideApplicationCredentialSecret: true,
       validationErrors
     }
   },
@@ -171,12 +226,25 @@ export default {
     secretData () {
       const data = {
         domainName: this.domainName,
-        tenantName: this.tenantName,
-        username: this.username,
-        password: this.password
+        tenantName: this.tenantName
+      }
+      if (this.username && this.username.length) {
+        data.username = this.username
+      }
+      if (this.password && this.password.length) {
+        data.password = this.password
       }
       if (this.authURL && this.authURL.length) {
         data.OS_AUTH_URL = this.authURL
+      }
+      if (this.applicationCredentialID && this.applicationCredentialID.length) {
+        data.applicationCredentialID = this.applicationCredentialID
+      }
+      if (this.applicationCredentialName && this.applicationCredentialName.length) {
+        data.applicationCredentialName = this.applicationCredentialName
+      }
+      if (this.applicationCredentialSecret && this.applicationCredentialSecret.length) {
+        data.applicationCredentialSecret = this.applicationCredentialSecret
       }
       return data
     },
@@ -189,15 +257,27 @@ export default {
           required
         },
         username: {
-          required
+          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
         },
         password: {
-          required
+          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
         },
         authURL: {
           required: requiredIf(function () {
             return this.vendor === 'openstack-designate'
           })
+        },
+        applicationCredentialID: {
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
+        },
+        applicationCredentialName: {
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
+        },
+        applicationCredentialSecret: {
+          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
+          required: and(requiredUnless('username'), requiredUnless('password'))
         }
       }
       return validators
@@ -227,6 +307,9 @@ export default {
       this.username = ''
       this.password = ''
       this.authURL = ''
+      this.applicationCredentialID = ''
+      this.applicationCredentialName = ''
+      this.applicationCredentialSecret = ''
 
       if (!this.isCreateMode) {
         if (this.secret.data) {
