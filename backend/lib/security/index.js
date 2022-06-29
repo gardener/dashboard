@@ -8,7 +8,7 @@
 
 const { promisify } = require('util')
 const assert = require('assert').strict
-const { split, join, noop, trim, some, every, includes, head } = require('lodash')
+const { split, join, noop, some, every, includes, head, chain } = require('lodash')
 const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
@@ -141,12 +141,23 @@ async function authorizationUrl (req, res) {
 }
 
 async function authorizeToken (req, res) {
-  const { token, expiresIn } = req.body
-  const bearer = trim(token)
+  /* eslint-disable camelcase */
+  const id_token = chain(req.body)
+    .get('token')
+    .trim()
+    .value()
+  const token = await setCookies(res, { id_token })
+  return decode(token)
+}
 
-  const { username: id, groups } = await authentication.isAuthenticated({ token: bearer })
+async function setCookies (res, tokenSet) {
+  const {
+    id_token: idToken,
+    expires_in: expiresIn
+  } = tokenSet
+  const { username: id, groups } = await authentication.isAuthenticated({ token: idToken })
 
-  const { name, email } = decode(bearer)
+  const { name, email } = decode(idToken)
   const user = {
     id,
     groups,
@@ -154,7 +165,8 @@ async function authorizeToken (req, res) {
     email
   }
   const audience = [GARDENER_AUDIENCE]
-  const [header, payload, signature] = split(await sign(user, { expiresIn, audience }), '.')
+  const token = await sign(user, { expiresIn, audience })
+  const [header, payload, signature] = split(token, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
@@ -166,14 +178,14 @@ async function authorizeToken (req, res) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = await encrypt(bearer)
+  const encryptedBearer = await encrypt(idToken)
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
   })
-  return user
+  return token
 }
 
 async function authorizationCallback (req, res) {
@@ -188,12 +200,8 @@ async function authorizationCallback (req, res) {
   const checks = {
     response_type: 'code'
   }
-  const {
-    id_token: token,
-    expires_in: expiresIn
-  } = await client.callback(backendRedirectUri, parameters, checks)
-  req.body = { token, expiresIn }
-  await authorizeToken(req, res)
+  const tokenSet = await client.callback(backendRedirectUri, parameters, checks)
+  await setCookies(res, tokenSet)
   return { redirectPath }
 }
 
