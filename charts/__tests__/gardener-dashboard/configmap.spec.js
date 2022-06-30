@@ -279,6 +279,38 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('terminal config', function () {
+      it('should render the template', async function () {
+        const values = {
+          terminal: {
+            bootstrap: {
+              disabled: false
+            },
+            container: {
+              image: 'chart-test:0.1.0'
+            },
+            garden: {
+              operatorCredentials: {
+                serviceAccountRef: {
+                  name: 'robot',
+                  namespace: 'garden'
+                }
+              }
+            },
+            gardenTerminalHost: {
+              seedRef: 'my-seed'
+            },
+            serviceAccountTokenExpiration: 42
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['terminal'])).toMatchSnapshot()
+      })
+    })
+
     describe('themes', function () {
       it('should render the template', async function () {
         const values = {
