@@ -191,6 +191,7 @@ Object {
     ],
     "landingPageUrl": "https://gardener.cloud/",
     "seedCandidateDeterminationStrategy": "SameRegion",
+    "serviceAccountDefaultTokenExpiration": 7776000,
   },
   "logFormat": "text",
   "logLevel": "debug",
