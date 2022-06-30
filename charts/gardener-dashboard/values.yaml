@@ -297,6 +297,10 @@ readinessProbe:
 #   containerImageDescriptions:
 #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
+#   # serviceAccountTokenExpiration - is the default requested duration of validity of the token request for the "attach" service account (residing in the terminal host cluster)
+#   # If no value is provided, the default value corresponds to 12 hours
+#   # The token issuer may return a token with a different validity duration
+#   serviceAccountTokenExpiration: 43200 # seconds
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
 #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
 #     secretRef:
