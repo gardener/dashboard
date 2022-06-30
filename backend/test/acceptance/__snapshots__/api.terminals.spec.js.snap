@@ -562,17 +562,16 @@ Array [
   Array [
     Object {
       ":authority": "api.host.garden.shoot.cluster",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/term-host-1/serviceaccounts?watch=true&fieldSelector=metadata.name%3Dterm-attach-1",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/term-host-1/serviceaccounts/term-attach-1/token",
       ":scheme": "https",
     },
-  ],
-  Array [
     Object {
-      ":authority": "api.host.garden.shoot.cluster",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/term-host-1/secrets/term-attach-1-token-74657",
-      ":scheme": "https",
+      "apiVersion": "authentication.k8s.io/v1",
+      "kind": "TokenRequest",
+      "spec": Object {
+        "expirationSeconds": 86400,
+      },
     },
   ],
 ]
@@ -585,7 +584,7 @@ Object {
       "container": "terminal",
       "name": "term-1",
     },
-    "token": "term-attach-1-token-74657",
+    "token": "secret",
   },
   "metadata": Object {
     "identifier": "1",
