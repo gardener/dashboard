@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="icon-slot cursor-pointer">
                     <v-icon v-if="isUserError" class="vertical-align-middle status-icon" color="error">mdi-account-alert</v-icon>
                   </div>
-                  <div class="icon-slot cursor-pointer">
+                  <div class="icon-slot cursor-pointer mx-1">
                     <v-progress-circular v-if="showProgress" class="vertical-align-middle" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
                       <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
                       <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
