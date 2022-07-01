@@ -9,7 +9,7 @@
 const { promisify } = require('util')
 const assert = require('assert').strict
 const { split, join, noop, some, every, includes, head, chain } = require('lodash')
-const { Issuer, custom } = require('openid-client')
+const { Issuer, custom, generators } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
@@ -32,6 +32,7 @@ const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
   COOKIE_SIGNATURE,
+  COOKIE_CODE_VERIFIER,
   GARDENER_AUDIENCE
 } = require('./constants')
 
@@ -41,6 +42,7 @@ const {
   scope,
   client_id: clientId,
   client_secret: clientSecret,
+  usePKCI = !clientSecret,
   rejectUnauthorized = true,
   ca,
   clockTolerance = 15
@@ -119,6 +121,20 @@ function getFrontendRedirectUrl (redirectUrl) {
     : new URL('/', head(redirectUris))
 }
 
+function getCodeChallengeMethod (client) {
+  const supportedMethods = client.issuer.code_challenge_methods_supported
+  if (Array.isArray(supportedMethods)) {
+    if (supportedMethods.includes('S256')) {
+      return 'S256'
+    }
+    if (supportedMethods.includes('plain')) {
+      return 'plain'
+    }
+    throw createError(500, 'neither code_challenge_method supported by the client is supported by the issuer')
+  }
+  return 'S256'
+}
+
 async function authorizationUrl (req, res) {
   const { query } = req
   const frontendRedirectUrl = getFrontendRedirectUrl(query.redirectUrl)
@@ -133,11 +149,32 @@ async function authorizationUrl (req, res) {
   if (!includes(redirectUris, backendRedirectUri)) {
     throw createError(400, 'The \'redirectUrl\' parameter must match a redirect URI in the settings')
   }
-  return client.authorizationUrl({
+  const params = {
     redirect_uri: backendRedirectUri,
     state,
     scope
-  })
+  }
+  if (usePKCI) {
+    const codeChallengeMethod = getCodeChallengeMethod(client)
+    const codeVerifier = generators.codeVerifier()
+    res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
+      secure,
+      httpOnly: true,
+      maxAge: 300000, // cookie will be removed after 5 minutes
+      sameSite: 'Lax',
+      path: '/auth/callback'
+    })
+    switch (codeChallengeMethod) {
+      case 'S256':
+        params.code_challenge = generators.codeChallenge(codeVerifier)
+        params.code_challenge_method = 'S256'
+        break
+      case 'plain':
+        params.code_challenge = codeVerifier
+        break
+    }
+  }
+  return client.authorizationUrl(params)
 }
 
 async function authorizeToken (req, res) {
@@ -207,6 +244,10 @@ async function authorizationCallback (req, res) {
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code'
+  }
+  if (COOKIE_CODE_VERIFIER in req.cookies) {
+    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
+    res.clearCookie(COOKIE_CODE_VERIFIER)
   }
   const tokenSet = await client.callback(backendRedirectUri, parameters, checks)
   await setCookies(res, tokenSet)
