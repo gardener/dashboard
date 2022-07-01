@@ -570,7 +570,7 @@ Array [
       "apiVersion": "authentication.k8s.io/v1",
       "kind": "TokenRequest",
       "spec": Object {
-        "expirationSeconds": 86400,
+        "expirationSeconds": 43200,
       },
     },
   ],
