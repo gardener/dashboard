@@ -10,5 +10,6 @@ module.exports = {
   COOKIE_HEADER_PAYLOAD: 'gHdrPyl',
   COOKIE_SIGNATURE: 'gSgn',
   COOKIE_TOKEN: 'gTkn',
+  COOKIE_CODE_VERIFIER: 'gCdVrfr',
   GARDENER_AUDIENCE: 'gardener'
 }
