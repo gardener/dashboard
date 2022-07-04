@@ -14,13 +14,12 @@ const security = require('./security')
 const { isHttpError, Unauthorized } = require('http-errors')
 const { STATUS_CODES } = require('http')
 
-const kubernetesClient = require('@gardener-dashboard/kube-client')
-
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
-const { projects, shoots, tickets, authorization } = require('./services')
+const { tickets } = require('./services')
+const { isAdmin, canGetShoot, listNamespaces, listShoots, readShoot } = require('./services/io')
 
 function socketAuthentication (nsp) {
-  const authenticate = security.authenticateSocket(kubernetesClient)
+  const authenticate = security.authenticateSocket()
   nsp.use(async (socket, next) => {
     logger.debug('Socket %s authenticating', socket.id)
     try {
@@ -99,7 +98,7 @@ async function subscribeShoots (socket, { namespace, namespaces, filter, user })
     try {
       // fetch shoots for namespace
       const shootsWithIssuesOnly = !!filter
-      const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
+      const shootList = await listShoots(user, { namespace, shootsWithIssuesOnly })
       batchEmitter.batchEmitObjects(shootList.items, namespace)
     } catch (error) {
       logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
@@ -135,7 +134,7 @@ async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
     logger.debug('Socket %s subscribed to shoot rooms for all namespaces', socket.id)
 
     // fetch shoots
-    const shootList = await shoots.list({ user, shootsWithIssuesOnly })
+    const shootList = await listShoots(user, { shootsWithIssuesOnly })
     _
       .chain(shootList)
       .get('items')
@@ -164,7 +163,7 @@ async function subscribeShoot (socket, { namespace, name }) {
   const room = `shoot_${namespace}_${name}`
 
   try {
-    const object = await shoots.read({ user, namespace, name })
+    const object = await readShoot(user, namespace, name)
     joinRoom(socket, room)
     return object
   } catch (err) {
@@ -179,7 +178,7 @@ async function subscribeShoot (socket, { namespace, name }) {
       reason = STATUS_CODES[code]
       if (code === 404) {
         try {
-          const allowed = await authorization.canGetShoot(user, namespace, name)
+          const allowed = await canGetShoot(user, namespace, name)
           if (allowed) {
             status = 'Success'
             joinRoom(socket, room)
@@ -200,15 +199,14 @@ async function subscribeShoot (socket, { namespace, name }) {
   }
 }
 
-function registerShootHandlers (socket) {
+function registerShootHandlers (socket, cache) {
   socket.on('subscribeAllShoots', async ({ filter }) => {
     const kind = 'shoots'
     try {
       const user = getUserFromSocket(socket)
-      const projectList = await projects.list({ user })
-      const namespaces = _.map(projectList, 'metadata.namespace')
+      const namespaces = await listNamespaces(user)
 
-      if (await authorization.isAdmin(user)) {
+      if (await isAdmin(user)) {
         subscribeShootsAdmin(socket, { namespaces, filter, user })
       } else {
         subscribeShoots(socket, { namespaces, filter, user })
@@ -226,8 +224,8 @@ function registerShootHandlers (socket) {
     const kind = 'shoots'
     try {
       const user = getUserFromSocket(socket)
-      const projectList = await projects.list({ user })
-      if (!_.find(projectList, ['metadata.namespace', namespace])) {
+      const namespaces = await listNamespaces(user)
+      if (!_.includes(namespaces, namespace)) {
         throw new Unauthorized(`Not authorized to subscribe for shoots in namepsace ${namespace}`)
       }
 
@@ -314,7 +312,7 @@ function initializeServer (httpServer, cache) {
   // handle connections (see https://socket.io/docs/v3/server-application-structure/#each-file-registers-its-own-event-handlers)
   io.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
-    registerShootHandlers(socket)
+    registerShootHandlers(socket, cache)
     registerTicketHandlers(socket, cache, ticketCache)
     socket.on('disconnect', onDisconnect)
   })
