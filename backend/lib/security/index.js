@@ -367,7 +367,8 @@ function authenticate (options = {}) {
   }
 }
 
-function authenticateSocket (options) {
+function authenticateSocket () {
+  const options = { createClient: () => false }
   const authenticateAsync = promisify(authenticate(options))
   const cookieParserAsync = promisify(cookieParser())
   return async (socket) => {
