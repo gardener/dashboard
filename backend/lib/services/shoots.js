@@ -82,6 +82,17 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
+exports.replaceEnableStaticTokenKubeconfig = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const enableStaticTokenKubeconfig = body.enableStaticTokenKubeconfig
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/kubernetes/enableStaticTokenKubeconfig',
+    value: enableStaticTokenKubeconfig
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
+}
+
 exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
   const client = user.client
   const enabled = !!body.enabled

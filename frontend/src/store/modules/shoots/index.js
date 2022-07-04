@@ -220,6 +220,7 @@ const actions = {
 
     const kubernetesVersion = rootGetters.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
+    set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', true)
 
     const allZones = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const zones = allZones.length ? [sample(allZones)] : undefined

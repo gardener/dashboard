@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible" inset></v-divider>
 
     <terminal-shortcuts-tile
       v-if="isTerminalShortcutsTileVisible"
@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
       class="mt-3"
     ></terminal-shortcuts-tile>
 
-    <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider v-if="isTerminalShortcutsTileVisible" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="mdi-developer-board" app-title="Dashboard" :url="dashboardUrl" :url-text="dashboardUrlText" :is-shoot-status-hibernated="isShootStatusHibernated"></link-list-tile>
 
@@ -88,20 +88,22 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider v-if="isDashboardTileVisible" inset></v-divider>
 
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
 
-    <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider v-if="isCredentialsTileVisible" inset></v-divider>
 
-    <v-list-item v-if="isKubeconfigTileVisible">
+    <v-list-item>
       <v-list-item-icon>
         <v-icon color="primary">mdi-file</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>
+        <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Gardener provided static admin kubeconfig is disabled for this cluster</v-list-item-subtitle>
+        <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Gardener provided static admin kubeconfig currently not available</v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
@@ -111,10 +113,10 @@ SPDX-License-Identifier: Apache-2.0
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <copy-btn :clipboard-text="kubeconfig"></copy-btn>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig" color="action-button">
@@ -124,6 +126,9 @@ SPDX-License-Identifier: Apache-2.0
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <admin-kubeconfig-configuration :shootItem="shootItem"></admin-kubeconfig-configuration>
+      </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
       <v-card v-if="expansionPanelKubeconfig" flat>
@@ -131,7 +136,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
     </v-expand-transition>
 
-    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+    <v-divider v-if="isGardenctlTileVisible" inset></v-divider>
 
     <gardenctl-commands v-if="isGardenctlTileVisible" :shoot-item="shootItem"></gardenctl-commands>
   </v-list>
@@ -145,6 +150,7 @@ import TerminalListTile from '@/components/TerminalListTile'
 import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
+import AdminKubeconfigConfiguration from '@/components/AdminKubeconfigConfiguration'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import download from 'downloadjs'
@@ -159,7 +165,8 @@ export default {
     TerminalListTile,
     LinkListTile,
     GardenctlCommands,
-    TerminalShortcutsTile
+    TerminalShortcutsTile,
+    AdminKubeconfigConfiguration
   },
   props: {
     hideTerminalShortcuts: {
@@ -242,7 +249,7 @@ export default {
       return this.hasControlPlaneTerminalAccess ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
     },
     isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
+      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isTerminalTileVisible
     },
     isDashboardTileVisible () {
       return !!this.dashboardUrl
@@ -250,7 +257,7 @@ export default {
     isCredentialsTileVisible () {
       return !!this.username && !!this.password
     },
-    isKubeconfigTileVisible () {
+    isKubeconfigAvailable () {
       return !!this.kubeconfig
     },
     isGardenctlTileVisible () {

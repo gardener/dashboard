@@ -57,6 +57,11 @@ SPDX-License-Identifier: Apache-2.0
         ></purpose>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12">
+        <admin-kubeconfig v-model="enableStaticTokenKubeconfig"></admin-kubeconfig>
+      </v-col>
+    </v-row>
     <v-row  v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{slaTitle}}</label>
@@ -80,6 +85,7 @@ import asyncRef from '@/mixins/asyncRef'
 
 import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+import AdminKubeconfig from '@/components/AdminKubeconfig'
 
 const Purpose = () => import('@/components/Purpose')
 
@@ -101,7 +107,8 @@ export default {
   name: 'new-shoot-details',
   components: {
     HintColorizer,
-    Purpose
+    Purpose,
+    AdminKubeconfig
   },
   mixins: [
     asyncRef('purpose')
@@ -122,7 +129,8 @@ export default {
       purposeValid: false,
       cloudProfileName: undefined,
       secret: undefined,
-      updateK8sMaintenance: undefined
+      updateK8sMaintenance: undefined,
+      enableStaticTokenKubeconfig: undefined
     }
   },
   validations () {
@@ -236,15 +244,17 @@ export default {
       return {
         name: this.name,
         kubernetesVersion: this.kubernetesVersion,
-        purpose: this.purpose
+        purpose: this.purpose,
+        enableStaticTokenKubeconfig: this.enableStaticTokenKubeconfig
       }
     },
-    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
+    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance, enableStaticTokenKubeconfig }) {
       this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.updateK8sMaintenance = updateK8sMaintenance
+      this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
 
       await this.$purpose.dispatch('setPurpose', purpose)
 
