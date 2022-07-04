@@ -202,8 +202,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.watch())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-        mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.watch())
-        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.createTokenRequest())
 
         const res = await agent
           .post('/api/terminals')
@@ -218,7 +217,7 @@ describe('api', function () {
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest).toBeCalledTimes(4)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
