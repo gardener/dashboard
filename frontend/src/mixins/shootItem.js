@@ -12,7 +12,6 @@ import find from 'lodash/find'
 import some from 'lodash/some'
 import filter from 'lodash/filter'
 import without from 'lodash/without'
-import compact from 'lodash/compact'
 import { mapGetters } from 'vuex'
 
 import {
@@ -256,29 +255,9 @@ export const shootItem = {
     shootStatusCredentialRotation () {
       return get(this.shootStatus, 'credentials.rotation', {})
     },
-    shootStatusCredentialRotationKubeconfig () {
-      return get(this.shootStatusCredentialRotation, 'kubeconfig', {})
-    },
-    shootStatusCredentialRotationCA () {
-      return get(this.shootStatusCredentialRotation, 'certificateAuthorities', {})
-    },
-    shootStatusCredentialRotationObservability () {
-      return get(this.shootStatusCredentialRotation, 'observability', {})
-    },
-    shootStatusCredentialRotationSshKeypair () {
-      return get(this.shootStatusCredentialRotation, 'sshKeypair', {})
-    },
-    shootStatusCredentialRotationEtcdEncryptionKey () {
-      return get(this.shootStatusCredentialRotation, 'etcdEncryptionKey', {})
-    },
-    shootStatusCredentialRotationServiceAccountKey () {
-      return get(this.shootStatusCredentialRotation, 'serviceAccountKey', {})
-    },
     shootStatusCredentialRotationAggregatedPhase () {
-      const phases = compact([this.shootStatusCredentialRotationCA.phase,
-        this.shootStatusCredentialRotationEtcdEncryptionKey.phase,
-        this.shootStatusCredentialRotationServiceAccountKey.phase])
-
+      const phases = flatMap(this.shootStatusCredentialRotation, 'phase')
+      
       if (!phases.length) {
         return undefined
       }
@@ -291,7 +270,7 @@ export const shootItem = {
         return 'Completed'
       }
 
-      return 'invalid'
+      return 'ambiguous'
     }
   },
   methods: {

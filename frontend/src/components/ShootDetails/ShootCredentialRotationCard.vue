@@ -14,30 +14,21 @@ SPDX-License-Identifier: Apache-2.0
         icon="mdi-key"
         title="Rotate All Credentials"
         :shoot-item="shootItem"
-        :phase="shootStatusCredentialRotationAggregatedPhase"
-        initOperation="rotate-credentials-start"
-        completionOperation="rotate-credentials-complete"
         ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
         icon="mdi-file"
         title="Rotate Kubeconfig"
-        :lastInitiationTime="shootStatusCredentialRotationKubeconfig.lastInitiationTime"
-        :lastCompletionTime="shootStatusCredentialRotationKubeconfig.lastCompletionTime"
         :shoot-item="shootItem"
-        initOperation="rotate-kubeconfig-credentials"
+        type="kubeconfig"
         ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
         :color="caColor"
         icon="mdi-file-certificate"
         title="Certificate Authorities"
-        :lastInitiationTime="shootStatusCredentialRotationCA.lastInitiationTime"
-        :lastCompletionTime="shootStatusCredentialRotationCA.lastCompletionTime"
-        :phase="shootStatusCredentialRotationCA.phase"
         :shoot-item="shootItem"
-        initOperation="rotate-ca-start"
-        completionOperation="rotate-ca-complete"
+        type="certificateAuthorities"
         >
           <template v-slot:subtitle v-if="!isCACertificateValiditiesAcceptable">
             <v-list-item-subtitle class="d-flex align-center pt-1">
@@ -51,42 +42,30 @@ SPDX-License-Identifier: Apache-2.0
           <credential-tile
             icon="mdi-developer-board"
             title="Observability Passwords"
-            :lastInitiationTime="shootStatusCredentialRotationObservability.lastInitiationTime"
-            :lastCompletionTime="shootStatusCredentialRotationObservability.lastCompletionTime"
             :shoot-item="shootItem"
-            initOperation="rotate-observability-credentials"
+            type="observability"
           ></credential-tile>
         </template>
         <v-divider inset></v-divider>
         <credential-tile
           icon="mdi-ssh"
           title="SSH Key Pair for Worker Nodes"
-          :lastInitiationTime="shootStatusCredentialRotationSshKeypair.lastInitiationTime"
-          :lastCompletionTime="shootStatusCredentialRotationSshKeypair.lastCompletionTime"
           :shoot-item="shootItem"
-          initOperation="rotate-ssh-keypair"
+          type="sshKeypair"
           ></credential-tile>
         <v-divider inset></v-divider>
         <credential-tile
           icon="mdi-database"
           title="ETCD Encryption Key"
-          :lastInitiationTime="shootStatusCredentialRotationEtcdEncryptionKey.lastInitiationTime"
-          :lastCompletionTime="shootStatusCredentialRotationEtcdEncryptionKey.lastCompletionTime"
-          :phase="shootStatusCredentialRotationEtcdEncryptionKey.phase"
           :shoot-item="shootItem"
-          initOperation="rotate-etcd-encryption-key-start"
-          completionOperation="rotate-etcd-encryption-key-complete"
+          type="etcdEncryptionKey"
           ></credential-tile>
         <v-divider inset></v-divider>
         <credential-tile
           icon="mdi-monitor-multiple"
           title="ServiceAccount Token Signing Key"
-          :lastInitiationTime="shootStatusCredentialRotationServiceAccountKey.lastInitiationTime"
-          :lastCompletionTime="shootStatusCredentialRotationServiceAccountKey.lastCompletionTime"
-          :phase="shootStatusCredentialRotationServiceAccountKey.phase"
           :shoot-item="shootItem"
-          initOperation="rotate-serviceaccount-key-start"
-          completionOperation="rotate-serviceaccount-key-complete"
+          type="serviceAccountKey"
           ></credential-tile>
     </v-list>
   </v-card>

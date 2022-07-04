@@ -48,6 +48,9 @@ import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
+import get from 'lodash/get'
+import flatMap from 'lodash/flatMap'
+import without from 'lodash/without'
 
 export default {
   components: {
@@ -57,17 +60,9 @@ export default {
     text: {
       type: Boolean
     },
-    operation: {
-      type: String,
-      required: true
-    },
-    phase: {
+    type: {
       type: String,
       required: false
-    },
-    mode: {
-      type: String,
-      default: 'rotate'
     }
   },
   data () {
@@ -81,6 +76,66 @@ export default {
     ...mapGetters([
       'isAdmin'
     ]),
+    mode () {
+      if (!this.completionOperation) {
+        return 'rotate'
+      }
+      if (this.operation === this.completionOperation) {
+        return 'complete'
+      }
+      return 'init'
+    },
+    operation () {
+      if (this.phase === 'Prepared' || this.phase === 'Completing') {
+        return this.completionOperation
+      }
+      return this.initOperation
+    },
+    initOperation () {
+      switch (this.type) {
+        case 'kubeconfig':
+          return 'rotate-kubeconfig-credentials'
+        case 'certificateAuthorities':
+          return 'rotate-ca-start'
+        case 'observability':
+          return 'rotate-observability-credentials'
+        case 'sshKeypair':
+          return 'rotate-ssh-keypair'
+        case 'etcdEncryptionKey':
+          return 'rotate-serviceaccount-key-start'
+        case 'serviceAccountKey':
+          return 'rotate-etcd-encryption-key-start'
+        default:
+          return 'rotate-credentials-start'
+      }
+    },
+    completionOperation () {
+      switch (this.type) {
+        case 'kubeconfig':
+          return undefined
+        case 'certificateAuthorities':
+          return 'rotate-ca-complete'
+        case 'observability':
+          return undefined
+        case 'sshKeypair':
+          return undefined
+        case 'etcdEncryptionKey':
+          return 'rotate-serviceaccount-key-complete'
+        case 'serviceAccountKey':
+          return 'rotate-etcd-encryption-key-complete'
+        default:
+          return 'rotate-credentials-complete'
+      }
+    },
+    rotationStatus () {
+      return get(this.shootStatusCredentialRotation, this.type, {})
+    },
+    phase () {
+      if (this.type) {
+        return this.rotationStatus.phase
+      }
+      return this.shootStatusCredentialRotationAggregatedPhase
+    },
     isActionToBeScheduled () {
       return this.shootGardenOperation === this.operation
     },

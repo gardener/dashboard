@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-list-item-content>
       <v-list-item-title>
         {{title}}
+        <v-chip v-if="phase" :color="phaseColor" x-small class="rounded">{{phase}}</v-chip>
       </v-list-item-title>
       <slot name="subtitle">
         <v-list-item-subtitle>
@@ -24,10 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       </slot>
     </v-list-item-content>
     <v-list-item-action class="mx-0">
-      <rotate-credentials :shoot-item="shootItem" :operation="initOperation" :phase="phase" :mode="completionOperation ? 'init' : 'rotate'"></rotate-credentials>
-    </v-list-item-action>
-    <v-list-item-action v-if="completionOperation" class="mx-0">
-      <rotate-credentials :shoot-item="shootItem" :operation="completionOperation" :phase="phase" mode="complete"></rotate-credentials>
+      <rotate-credentials :shoot-item="shootItem" :type="type"></rotate-credentials>
     </v-list-item-action>
   </v-list-item>
 </template>
@@ -35,6 +33,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import RotateCredentials from '@/components/RotateCredentials'
 import TimeString from '@/components/TimeString'
+import { shootItem } from '@/mixins/shootItem'
+import get from 'lodash/get'
+import flatMap from 'lodash/flatMap'
+import head from 'lodash/head'
 
 export default {
   components: {
@@ -50,33 +52,49 @@ export default {
       type: String,
       required: true
     },
-    lastInitiationTime: {
-      type: String,
-      required: false
-    },
-    lastCompletionTime: {
-      type: String,
-      required: false
-    },
-    shootItem: {
-      type: Object,
-      required: true
-    },
-    initOperation: {
-      type: String,
-      required: true
-    },
-    completionOperation: {
-      type: String,
-      required: false
-    },
-    phase: {
+    type: {
       type: String,
       required: false
     },
     color: {
       type: String,
       default: 'primary'
+    }
+  },
+  mixins: [shootItem],
+  computed: {
+    rotationStatus () {
+      return get(this.shootStatusCredentialRotation, this.type, {})
+    },
+    lastInitiationTime () {
+      if (this.type) {
+        return this.rotationStatus.lastInitiationTime
+      }
+      return head(flatMap(this.shootStatusCredentialRotation, 'lastInitiationTime').sort())
+    },
+    lastCompletionTime () {
+      if (this.type) {
+        return this.rotationStatus.lastCompletionTime
+      }
+      return head(flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime').sort())
+    },
+    phase () {
+      if (this.type) {
+        return this.rotationStatus.phase
+      }
+      return this.shootStatusCredentialRotationAggregatedPhase
+    },
+    phaseColor () {
+      switch (this.phase) {
+        case 'Preparing':
+        case 'Completing':
+          return 'info'
+        case 'Prepared':
+        case 'Completed':
+          return 'success'
+        default:
+          return 'grey'
+      }
     }
   }
 }
