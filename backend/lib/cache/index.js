@@ -36,6 +36,10 @@ class Cache extends Map {
     return this.get('projects').list()
   }
 
+  getShoots () {
+    return this.get('shoots').list()
+  }
+
   getControllerRegistrations () {
     return this.get('controllerregistrations').list()
   }
@@ -81,6 +85,12 @@ module.exports = {
   },
   getProjects () {
     return cache.getProjects()
+  },
+  getShoots () {
+    return cache.getShoots()
+  },
+  getShoot (namespace, name) {
+    return cache.get('shoots').find({ metadata: { namespace, name } })
   },
   getControllerRegistrations () {
     return cache.getControllerRegistrations()
