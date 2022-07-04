@@ -43,6 +43,7 @@ const {
   client_id: clientId,
   client_secret: clientSecret,
   usePKCI = !clientSecret,
+  refreshTokenLifetime = 86400,
   rejectUnauthorized = true,
   ca,
   clockTolerance = 15
@@ -85,12 +86,18 @@ function discoverClient (url) {
   return pRetry(async () => {
     const issuer = await discoverIssuer(url)
     overrideHttpOptions.call(issuer)
-    const client = new issuer.Client({
+    const options = {
       client_id: clientId,
       client_secret: clientSecret,
       redirect_uris: redirectUris,
       response_types: responseTypes
-    })
+    }
+    if (clientSecret) {
+      options.client_secret = clientSecret
+    } else {
+      options.token_endpoint_auth_method = 'none'
+    }
+    const client = new issuer.Client(options)
     overrideHttpOptions.call(client)
     client[custom.clock_tolerance] = clockTolerance
     return client
@@ -203,9 +210,9 @@ async function createToken (idToken, expiresIn) {
 async function setCookies (res, tokenSet) {
   const {
     id_token: idToken,
-    refresh_token: refreshToken,
-    expires_in: expiresIn
+    refresh_token: refreshToken
   } = tokenSet
+  const expiresIn = refreshToken ? refreshTokenLifetime : tokenSet.expires_in
   const token = await createToken(idToken, expiresIn)
   const [header, payload, signature] = split(token, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
@@ -268,7 +275,7 @@ function getToken (cookies) {
   if (header && payload && signature) {
     return join([header, payload, signature], '.')
   }
-  return null
+  throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
 }
 
 async function verifyToken (token) {
@@ -331,9 +338,6 @@ function authenticate (options = {}) {
       csrfProtection(req, res)
       let user
       let token = getToken(req.cookies)
-      if (!token) {
-        throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
-      }
       let tokenSet = await getTokenSet(req.cookies)
       if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
         tokenSet = await refreshTokenSet(tokenSet)
