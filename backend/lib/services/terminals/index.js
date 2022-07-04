@@ -11,6 +11,7 @@ const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
 const kubeconfig = require('@gardener-dashboard/kube-config')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
 const { isHttpError } = require('@gardener-dashboard/request')
@@ -111,29 +112,18 @@ function findImageDescription (containerImage, containerImageDescriptions) {
 exports.findImageDescription = findImageDescription
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
-  const asyncIterable = await client.core.serviceaccounts.watch(namespace, serviceAccountName)
-  const serviceAccount = await asyncIterable.until(isServiceAccountReady, { timeout: 10 * 1000 })
-  const secretName = getFirstServiceAccountSecret(serviceAccount)
-  if (secretName) {
-    const secret = await client.core.secrets.get(namespace, secretName)
-    return decodeBase64(secret.data.token)
+  const { apiVersion, kind } = Resources.TokenRequest
+  const body = {
+    kind,
+    apiVersion,
+    spec: {
+      expirationSeconds: _.get(config, 'terminal.serviceAccountTokenExpiration', 43200) // default is 12h
+    }
   }
-}
 
-function getFirstServiceAccountSecret (serviceAccount) {
-  return _
-    .chain(serviceAccount)
-    .get('secrets')
-    .first()
-    .get('name')
-    .value()
-}
+  const tokenRequest = await client.core.serviceaccounts.createTokenRequest(namespace, serviceAccountName, body)
 
-function isServiceAccountReady ({ type, object: serviceAccount }) {
-  if (type === 'DELETE') {
-    throw new InternalServerError('ServiceAccount resource has been deleted')
-  }
-  return !_.isEmpty(getFirstServiceAccountSecret(serviceAccount))
+  return tokenRequest.status.token
 }
 
 async function listTerminals ({ user, namespace, identifier }) {
