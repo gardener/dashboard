@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on" class="d-flex align-center">
-                  <div class="icon-slot cursor-pointer">
+                  <div class="cursor-pointer" :class="{'showStatusText' : showStatusText}">
                     <v-icon v-if="isUserError" class="vertical-align-middle status-icon" color="error">mdi-account-alert</v-icon>
                   </div>
                   <div class="icon-slot cursor-pointer mx-1">
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           :namespace="shootNamespace"
         />
       </g-popper>
-      <div class="icon-slot">
+      <div :class="{'showStatusText' : showStatusText}">
         <retry-operation :shoot-item="shootItem"></retry-operation>
       </div>
       <span v-if="showStatusText" class="ml-2">{{statusTitle}}</span>
