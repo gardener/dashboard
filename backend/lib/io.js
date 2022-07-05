@@ -11,7 +11,8 @@ const _ = require('lodash')
 const createServer = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { isHttpError, Unauthorized } = require('http-errors')
+const createError = require('http-errors')
+const { isHttpError } = createError
 const { STATUS_CODES } = require('http')
 
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
@@ -231,7 +232,7 @@ function registerShootHandlers (socket, cache) {
       const user = getUserFromSocket(socket)
       const namespaces = await listNamespaces(user)
       if (!_.includes(namespaces, namespace)) {
-        throw new Unauthorized(`Not authorized to subscribe for shoots in namepsace ${namespace}`)
+        throw createError(403, `Not authorized to subscribe for shoots in namespace ${namespace}`)
       }
 
       subscribeShoots(socket, { namespace, filter, user })
