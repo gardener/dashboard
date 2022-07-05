@@ -11,19 +11,19 @@ const cache = require('../cache')
 const createError = require('http-errors')
 const { dashboardClient, Resources } = require('@gardener-dashboard/kube-client')
 
-async function hasAuthorization ({ id: user, groups }, { resourceAttributes }) {
+async function hasAuthorization (user, { resourceAttributes }) {
   const { apiVersion, kind } = Resources.SubjectAccessReview
   const body = {
     kind,
     apiVersion,
     spec: {
-      user,
-      groups,
+      user: user.id,
+      groups: user.groups,
       resourceAttributes
     }
   }
-  const { status = {} } = await dashboardClient['authorization.k8s.io'].subjectaccessreviews.create(body)
-  return status.allowed
+  const { status: { allowed = false } = {} } = await dashboardClient['authorization.k8s.io'].subjectaccessreviews.create(body)
+  return allowed
 }
 
 const authorization = {
@@ -57,21 +57,25 @@ const authorization = {
 }
 
 const shoots = {
-  async list ({ user, namespace, shootsWithIssuesOnly } = {}) {
+  async list ({ user, namespace, shootsWithIssuesOnly }) {
     const allowed = await authorization.canListShoots(user, namespace)
     if (!allowed) {
       const message = namespace
-        ? `Not authorized to list shoots in namepsace ${namespace}`
+        ? `Not authorized to list shoots in namespace ${namespace}`
         : 'Not authorized to list shoots of all namespaces'
       throw createError(403, message)
     }
     const items = cache.getShoots().filter(({ metadata }) => {
-      if (metadata.namespace !== namespace) {
+      if (namespace && metadata.namespace !== namespace) {
         return false
       }
       if (shootsWithIssuesOnly === true) {
-        const { labels = {} } = metadata
-        if (!labels['shoot.gardener.cloud/status'] || labels['shoot.gardener.cloud/status'] === 'healthy') {
+        const status = _
+          .chain(metadata)
+          .get('labels["shoot.gardener.cloud/status"]', 'initial')
+          .lowerCase()
+          .value()
+        if (status === 'healthy') {
           return false
         }
       }
@@ -84,14 +88,14 @@ const shoots = {
       items
     }
   },
-  async read ({ user, namepsace, name }) {
-    const allowed = await authorization.canGetShoot(user, namepsace, name)
+  async read ({ user, namespace, name }) {
+    const allowed = await authorization.canGetShoot(user, namespace, name)
     if (!allowed) {
-      throw createError(403, `Not authorized to get shoot ${name} in namepsace ${namepsace}`)
+      throw createError(403, `Not authorized to get shoot ${name} in namespace ${namespace}`)
     }
-    const shoot = cache.getShoot(namepsace, name)
+    const shoot = cache.getShoot(namespace, name)
     if (!shoot) {
-      throw createError(404, `Shoot "${name}" not found in namespace "${namepsace}"`)
+      throw createError(404, `Shoot ${name} not found in namespace ${namespace}`)
     }
     return shoot
   }
