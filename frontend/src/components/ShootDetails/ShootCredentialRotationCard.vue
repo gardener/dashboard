@@ -11,24 +11,22 @@ SPDX-License-Identifier: Apache-2.0
     </v-toolbar>
     <v-list>
       <credential-tile
-        icon="mdi-key"
         title="Rotate All Credentials"
         :shoot-item="shootItem"
         ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
-        icon="mdi-file"
+        <!-- TODO check for static kubeconfig enabled when PR merged -->
         title="Rotate Kubeconfig"
         :shoot-item="shootItem"
         type="kubeconfig"
+        dense
         ></credential-tile>
-      <v-divider inset></v-divider>
       <credential-tile
-        :color="caColor"
-        icon="mdi-file-certificate"
         title="Certificate Authorities"
         :shoot-item="shootItem"
         type="certificateAuthorities"
+        dense
         >
           <template v-slot:subtitle v-if="!isCACertificateValiditiesAcceptable">
             <v-list-item-subtitle class="d-flex align-center pt-1">
@@ -38,34 +36,31 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </credential-tile>
         <template v-if="shootPurpose!=='testing'">
-          <v-divider inset></v-divider>
-          <credential-tile
+              <credential-tile
             icon="mdi-developer-board"
             title="Observability Passwords"
             :shoot-item="shootItem"
             type="observability"
+            dense
           ></credential-tile>
         </template>
-        <v-divider inset></v-divider>
-        <credential-tile
-          icon="mdi-ssh"
+          <credential-tile
           title="SSH Key Pair for Worker Nodes"
           :shoot-item="shootItem"
           type="sshKeypair"
+          dense
           ></credential-tile>
-        <v-divider inset></v-divider>
-        <credential-tile
-          icon="mdi-database"
+          <credential-tile
           title="ETCD Encryption Key"
           :shoot-item="shootItem"
           type="etcdEncryptionKey"
+          dense
           ></credential-tile>
-        <v-divider inset></v-divider>
-        <credential-tile
-          icon="mdi-monitor-multiple"
+          <credential-tile
           title="ServiceAccount Token Signing Key"
           :shoot-item="shootItem"
           type="serviceAccountKey"
+          dense
           ></credential-tile>
     </v-list>
   </v-card>

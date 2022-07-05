@@ -271,7 +271,7 @@ export const shootItem = {
         return 'Completed'
       }
 
-      return 'ambiguous'
+      return 'Ambiguous'
     }
   },
   methods: {

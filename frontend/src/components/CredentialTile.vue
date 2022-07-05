@@ -5,16 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list-item>
+  <v-list-item :dense="dense">
     <v-list-item-icon>
-      <v-badge icon="mdi-key-change" :color="color" overlap offset-y="6">
-        <v-icon :color="color">{{icon}}</v-icon>
-      </v-badge>
+      <v-icon v-if="!dense" :color="color">mdi-key-change</v-icon>
     </v-list-item-icon>
-    <v-list-item-content>
+    <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
         {{title}}
-        <v-chip v-if="phase" :color="phaseColor" x-small class="rounded ml-1">{{phase}}</v-chip>
+        <v-chip v-if="phase" :color="phaseColor" label x-small class="ml-2" outlined>{{phase}}</v-chip>
       </v-list-item-title>
       <slot name="subtitle">
         <v-list-item-subtitle>
@@ -24,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-subtitle>
       </slot>
     </v-list-item-content>
-    <v-list-item-action class="mx-0">
+    <v-list-item-action :class="{'py-0 my-0' : dense}">
       <rotate-credentials :shoot-item="shootItem" :type="type"></rotate-credentials>
     </v-list-item-action>
   </v-list-item>
@@ -44,16 +42,16 @@ export default {
     TimeString
   },
   props: {
-    icon: {
-      type: String,
-      required: true
-    },
     title: {
       type: String,
       required: true
     },
     type: {
       type: String,
+      required: false
+    },
+    dense: {
+      type: Boolean,
       required: false
     },
     color: {
@@ -91,9 +89,9 @@ export default {
           return 'info'
         case 'Prepared':
         case 'Completed':
-          return 'success'
+          return 'primary'
         default:
-          return 'grey'
+          return 'warning'
       }
     }
   }
