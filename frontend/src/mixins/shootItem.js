@@ -12,6 +12,7 @@ import find from 'lodash/find'
 import some from 'lodash/some'
 import filter from 'lodash/filter'
 import without from 'lodash/without'
+import compact from 'lodash/compact'
 import { mapGetters } from 'vuex'
 
 import {
@@ -256,8 +257,8 @@ export const shootItem = {
       return get(this.shootStatus, 'credentials.rotation', {})
     },
     shootStatusCredentialRotationAggregatedPhase () {
-      const phases = flatMap(this.shootStatusCredentialRotation, 'phase')
-      
+      const phases = compact(flatMap(this.shootStatusCredentialRotation, 'phase'))
+
       if (!phases.length) {
         return undefined
       }

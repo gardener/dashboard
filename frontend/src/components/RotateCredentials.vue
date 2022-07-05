@@ -32,8 +32,14 @@ SPDX-License-Identifier: Apache-2.0
               </li>
             </ul>
           </v-alert>
-          <v-checkbox v-model="maintenance" label="Perform this operation in the maintenance time window">></v-checkbox>
-          <span class="pt-4">Type <span class="font-weight-bold">{{shootName}}</span> below top confirm the operation.</span>
+          <v-checkbox
+            v-model="maintenance"
+            label="Perform this operation in the maintenance time window"
+            :disabled="isMaintenanceDisabled"
+            :hint="maintenanceHint"
+            persistent-hint>
+          </v-checkbox>
+          <div class="mt-3">Type <span class="font-weight-bold">{{shootName}}</span> below to confirm the operation.</div>
         </v-col>
       </v-row>
     </template>
@@ -49,8 +55,6 @@ import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
-import flatMap from 'lodash/flatMap'
-import without from 'lodash/without'
 
 export default {
   components: {
@@ -166,6 +170,15 @@ export default {
     isScheduledForMaintenance () {
       return this.shootAnnotations['maintenance.gardener.cloud/operation'] === this.operation
     },
+    isMaintenanceDisabled () {
+      return !this.isScheduledForMaintenance && !!this.shootAnnotations['maintenance.gardener.cloud/operation']
+    },
+    maintenanceHint () {
+      if (this.isMaintenanceDisabled) {
+        return 'Another operation has already been scheduled. Only one oepration at a time can be scheduled.'
+      }
+      return ''
+    },
     isHibernationPreventingMaintenance () {
       return this.isShootStatusHibernated &&
         includes(['rotate-credentials-start',
@@ -213,7 +226,7 @@ export default {
     componentTexts () {
       const componentTexts = {
         'rotate-kubeconfig-credentials': {
-          caption: this.isActionToBeScheduled ? 'Requesting to schedule kubeconfig credentials rotation' : 'Start Kubeconfig Rotation',
+          caption: this.isLoading ? 'Scheduling kubeconfig credentials rotation' : 'Start Kubeconfig Rotation',
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
           successMessage: `Rotation of kubeconfig credentials started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of kubeconfig credentials?',
@@ -225,8 +238,8 @@ export default {
           }
         },
         'rotate-ca-start': {
-          caption: this.isActionToBeScheduled
-            ? 'Requesting to initiate certificate authorities rotation'
+          caption: this.isLoading
+            ? 'Initiating certificate authorities rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate Certificate Authorities Rotation',
@@ -257,7 +270,7 @@ export default {
           }
         },
         'rotate-observability-credentials': {
-          caption: this.isActionToBeScheduled ? 'Requesting to schedule observability passwords rotation' : 'Start Observability Passwords Rotation',
+          caption: this.isLoading ? 'Scheduling observability passwords rotation' : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
           successMessage: `Rotation of observability passwords started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of observability passwords?',
@@ -271,7 +284,7 @@ export default {
           }
         },
         'rotate-ssh-keypair': {
-          caption: this.isActionToBeScheduled ? 'Requesting to schedule ssh key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
+          caption: this.isLoading ? 'Scheduling ssh key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of ssh key pair',
           successMessage: `Rotation of ssh key pair started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of ssh key pair for worker nodes?',
@@ -283,8 +296,8 @@ export default {
           }
         },
         'rotate-etcd-encryption-key-start': {
-          caption: this.isActionToBeScheduled
-            ? 'Requesting to initiate etcd encryption key rotation'
+          caption: this.isLoading
+            ? 'Initiating etcd encryption key rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate ETCD Encryption Key Rotation',
@@ -315,8 +328,8 @@ export default {
           }
         },
         'rotate-serviceaccount-key-start': {
-          caption: this.isActionToBeScheduled
-            ? 'Requesting to initiate ServiceAccount token signing key rotation'
+          caption: this.isLoading
+            ? 'Initiating ServiceAccount token signing key rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate ServiceAccount Token Signing Key Rotation',
@@ -348,8 +361,8 @@ export default {
         }
       }
       componentTexts['rotate-credentials-start'] = {
-        caption: this.isActionToBeScheduled
-          ? 'Requesting to initiate credential rotation'
+        caption: this.isLoading
+          ? 'Initiating credential rotation'
           : this.isDisabled
             ? 'All credentials rotations need to have reached phase "Completed" in order to perform tis action. Please complete all credential rotations that have already been initiated.'
             : 'Initiate Rotation of all Credentials',

@@ -12,9 +12,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-badge>
     </v-list-item-icon>
     <v-list-item-content>
-      <v-list-item-title>
+      <v-list-item-title class="d-flex align-center">
         {{title}}
-        <v-chip v-if="phase" :color="phaseColor" x-small class="rounded">{{phase}}</v-chip>
+        <v-chip v-if="phase" :color="phaseColor" x-small class="rounded ml-1">{{phase}}</v-chip>
       </v-list-item-title>
       <slot name="subtitle">
         <v-list-item-subtitle>
