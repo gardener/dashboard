@@ -113,7 +113,8 @@ describe('kube-client', () => {
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
-      expect(extend).toHaveBeenCalledTimes(24)
+      const expectedNumberOfCalls = 25
+      expect(extend).toHaveBeenCalledTimes(expectedNumberOfCalls)
       for (let i = 0; i < extend.mock.calls.length; i++) {
         const call = extend.mock.calls[i]
         expect(call).toHaveLength(1)
@@ -122,7 +123,7 @@ describe('kube-client', () => {
         expect(clientConfig.url).toBe(url)
         expect(clientConfig.auth).toBe(auth)
         // all endpoints except healthz have json responseType
-        const responseType = i !== 22 ? 'json' : undefined
+        const responseType = i !== (expectedNumberOfCalls - 2) ? 'json' : undefined
         expect(clientConfig.responseType).toBe(responseType)
       }
     })
