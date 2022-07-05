@@ -26,126 +26,126 @@ async function hasAuthorization ({ id: user, groups }, { resourceAttributes }) {
   return status.allowed
 }
 
-function canListShoots (user, namespace) {
-  const resourceAttributes = {
-    verb: 'list',
-    group: 'core.gardener.cloud',
-    resource: 'shoots',
-    namespace
-  }
-  return hasAuthorization(user, { resourceAttributes })
-}
-
-function canGetShoot (user, namespace, name) {
-  const resourceAttributes = {
-    verb: 'get',
-    group: 'core.gardener.cloud',
-    resource: 'shoots',
-    namespace,
-    name
-  }
-  return hasAuthorization(user, { resourceAttributes })
-}
-
-function isAdmin (user) {
-  const resourceAttributes = {
-    verb: 'get',
-    group: '',
-    resource: 'secrets'
-  }
-  return hasAuthorization(user, { resourceAttributes })
-}
-
-async function listShoots (user, { namespace, shootsWithIssuesOnly } = {}) {
-  const allowed = await canListShoots(user, namespace)
-  if (!allowed) {
-    const message = namespace
-      ? `Not authorized to list shoots in namepsace ${namespace}`
-      : 'Not authorized to list shoots of all namespaces'
-    throw createError(403, message)
-  }
-  const items = cache.getShoots().filter(({ metadata }) => {
-    if (metadata.namespace !== namespace) {
-      return false
+const authorization = {
+  canListShoots (user, namespace) {
+    const resourceAttributes = {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace
     }
-    if (shootsWithIssuesOnly === true) {
-      const { labels = {} } = metadata
-      if (!labels['shoot.gardener.cloud/status'] || labels['shoot.gardener.cloud/status'] === 'healthy') {
+    return hasAuthorization(user, { resourceAttributes })
+  },
+  canGetShoot (user, namespace, name) {
+    const resourceAttributes = {
+      verb: 'get',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace,
+      name
+    }
+    return hasAuthorization(user, { resourceAttributes })
+  },
+  isAdmin (user) {
+    const resourceAttributes = {
+      verb: 'get',
+      group: '',
+      resource: 'secrets'
+    }
+    return hasAuthorization(user, { resourceAttributes })
+  }
+}
+
+const shoots = {
+  async list ({ user, namespace, shootsWithIssuesOnly } = {}) {
+    const allowed = await authorization.canListShoots(user, namespace)
+    if (!allowed) {
+      const message = namespace
+        ? `Not authorized to list shoots in namepsace ${namespace}`
+        : 'Not authorized to list shoots of all namespaces'
+      throw createError(403, message)
+    }
+    const items = cache.getShoots().filter(({ metadata }) => {
+      if (metadata.namespace !== namespace) {
         return false
       }
-    }
-    return true
-  })
-  return {
-    apiVersion: 'v1',
-    kind: 'List',
-    metadata: {},
-    items
-  }
-}
-
-async function readShoot (user, namepsace, name) {
-  const allowed = await canGetShoot(user, namepsace, name)
-  if (!allowed) {
-    throw createError(403, `Not authorized to get shoot ${name} in namepsace ${namepsace}`)
-  }
-  const shoot = cache.getShoot(namepsace, name)
-  if (!shoot) {
-    throw createError(404, `Shoot "${name}" not found in namespace "${namepsace}"`)
-  }
-  return shoot
-}
-
-async function listNamespaces (user) {
-  const admin = await isAdmin(user)
-  const isMemberOf = project => {
-    return _
-      .chain(project)
-      .get('spec.members')
-      .find(({ kind, namespace, name }) => {
-        switch (kind) {
-          case 'Group':
-            if (_.includes(user.groups, name)) {
-              return true
-            }
-            break
-          case 'User':
-            if (user.id === name) {
-              return true
-            }
-            break
-          case 'ServiceAccount':
-            if (user.id === `system:serviceaccount:${namespace}:${name}`) {
-              return true
-            }
-            break
+      if (shootsWithIssuesOnly === true) {
+        const { labels = {} } = metadata
+        if (!labels['shoot.gardener.cloud/status'] || labels['shoot.gardener.cloud/status'] === 'healthy') {
+          return false
         }
-        return false
-      })
-      .value()
-  }
-  const isReady = project => {
-    return _.get(project, 'status.phase') === 'Ready'
-  }
-  return _
-    .chain(cache.getProjects())
-    .filter(project => {
-      if (!admin && !isMemberOf(project)) {
-        return false
-      }
-      if (!isReady(project)) {
-        return false
       }
       return true
     })
-    .map('spec.namespace')
-    .value()
+    return {
+      apiVersion: 'v1',
+      kind: 'List',
+      metadata: {},
+      items
+    }
+  },
+  async read ({ user, namepsace, name }) {
+    const allowed = await authorization.canGetShoot(user, namepsace, name)
+    if (!allowed) {
+      throw createError(403, `Not authorized to get shoot ${name} in namepsace ${namepsace}`)
+    }
+    const shoot = cache.getShoot(namepsace, name)
+    if (!shoot) {
+      throw createError(404, `Shoot "${name}" not found in namespace "${namepsace}"`)
+    }
+    return shoot
+  }
+}
+
+const projects = {
+  async list ({ user }) {
+    const admin = await authorization.isAdmin(user)
+    const isMemberOf = project => {
+      return _
+        .chain(project)
+        .get('spec.members')
+        .find(({ kind, namespace, name }) => {
+          switch (kind) {
+            case 'Group':
+              if (_.includes(user.groups, name)) {
+                return true
+              }
+              break
+            case 'User':
+              if (user.id === name) {
+                return true
+              }
+              break
+            case 'ServiceAccount':
+              if (user.id === `system:serviceaccount:${namespace}:${name}`) {
+                return true
+              }
+              break
+          }
+          return false
+        })
+        .value()
+    }
+    const isReady = project => {
+      return _.get(project, 'status.phase') === 'Ready'
+    }
+    return _
+      .chain(cache.getProjects())
+      .filter(project => {
+        if (!admin && !isMemberOf(project)) {
+          return false
+        }
+        if (!isReady(project)) {
+          return false
+        }
+        return true
+      })
+      .value()
+  }
 }
 
 module.exports = {
-  isAdmin,
-  canGetShoot,
-  listNamespaces,
-  listShoots,
-  readShoot
+  authorization,
+  shoots,
+  projects
 }
