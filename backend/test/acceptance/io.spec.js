@@ -9,19 +9,45 @@
 const assert = require('assert').strict
 const pEvent = require('p-event')
 const { filter, map, pick, groupBy, find, includes } = require('lodash')
-const kubeClient = require('@gardener-dashboard/kube-client')
 const cache = require('../../lib/cache')
-const { projects, shoots, authorization, tickets } = require('../../lib/services')
+const { tickets } = require('../../lib/services')
+const { projects, shoots, authorization } = require('../../lib/services/io')
+const { mockAuthenticate } = require('../../lib/security')
+
+jest.mock('../../lib/security', () => {
+  const originalSecurity = jest.requireActual('../../lib/security')
+  const mockAuthenticate = jest.fn()
+  return {
+    ...originalSecurity,
+    mockAuthenticate,
+    authenticateSocket: jest.fn().mockImplementation(options => {
+      mockAuthenticate.mockImplementation(originalSecurity.authenticateSocket(options))
+      return mockAuthenticate
+    })
+  }
+})
 
 describe('socket.io', function () {
   const id = 'foo@example.org'
-  const user = fixtures.auth.createUser({ id })
+  const groups = ['viewer']
+  const user = fixtures.auth.createUser({ id, groups })
+
+  async function assertUser () {
+    assert.strictEqual(mockAuthenticate.mock.calls.length, 1)
+    assert.strictEqual(mockAuthenticate.mock.calls[0].length, 1)
+    const socket = mockAuthenticate.mock.calls[0][0]
+    assert.ok(socket)
+    assert.ok(socket.client)
+    assert.ok(socket.client.user)
+    assert.strictEqual(socket.client.user.id, id)
+    assert.deepStrictEqual(socket.client.user.groups, groups)
+    assert.deepStrictEqual(socket.client.user.auth, {
+      bearer: await user.bearer
+    })
+  }
 
   let agent
   let socket
-
-  const client = {}
-  let createClientStub
   let isAdminStub
 
   beforeAll(function () {
@@ -41,19 +67,19 @@ describe('socket.io', function () {
   })
 
   beforeEach(async function () {
-    createClientStub = jest.spyOn(kubeClient, 'createClient').mockReturnValue(client)
     isAdminStub = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
   })
 
   afterEach(function () {
+    mockAuthenticate.mockClear()
     if (socket && socket.connected) {
       socket.destroy()
     }
   })
 
   const projectList = [
-    { metadata: { namespace: 'foo', name: 'foo' } },
-    { metadata: { namespace: 'bar', name: 'bar' } }
+    { metadata: { name: 'foo' }, spec: { namespace: 'foo' } },
+    { metadata: { name: 'bar' }, spec: { namespace: 'bar' } }
   ]
 
   describe('shoots', function () {
@@ -112,12 +138,7 @@ describe('socket.io', function () {
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
-      assert.strictEqual(createClientStub.mock.calls.length, 1)
-      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
-        auth: {
-          bearer: await user.bearer
-        }
-      })
+      await assertUser()
       const nsp = agent.io.sockets
       rooms = nsp.sockets.get(socket.id).rooms
     })
@@ -206,12 +227,7 @@ describe('socket.io', function () {
         cookie: await user.cookie
       })
       assert.strictEqual(socket.connected, true)
-      assert.strictEqual(createClientStub.mock.calls.length, 1)
-      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
-        auth: {
-          bearer: await user.bearer
-        }
-      })
+      await assertUser()
       const nsp = agent.io.sockets
       rooms = nsp.sockets.get(socket.id).rooms
     })
