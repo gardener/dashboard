@@ -16,7 +16,12 @@ const { STATUS_CODES } = require('http')
 
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { tickets } = require('./services')
-const { isAdmin, canGetShoot, listNamespaces, listShoots, readShoot } = require('./services/io')
+const { authorization, shoots, projects } = require('./services/io')
+
+async function listNamespaces (user) {
+  const projectList = await projects.list({ user })
+  return _.map(projectList, 'spec.namespace')
+}
 
 function socketAuthentication (nsp) {
   const authenticate = security.authenticateSocket()
@@ -98,7 +103,7 @@ async function subscribeShoots (socket, { namespace, namespaces, filter, user })
     try {
       // fetch shoots for namespace
       const shootsWithIssuesOnly = !!filter
-      const shootList = await listShoots(user, { namespace, shootsWithIssuesOnly })
+      const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
       batchEmitter.batchEmitObjects(shootList.items, namespace)
     } catch (error) {
       logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
@@ -134,7 +139,7 @@ async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
     logger.debug('Socket %s subscribed to shoot rooms for all namespaces', socket.id)
 
     // fetch shoots
-    const shootList = await listShoots(user, { shootsWithIssuesOnly })
+    const shootList = await shoots.list({ user, shootsWithIssuesOnly })
     _
       .chain(shootList)
       .get('items')
@@ -163,7 +168,7 @@ async function subscribeShoot (socket, { namespace, name }) {
   const room = `shoot_${namespace}_${name}`
 
   try {
-    const object = await readShoot(user, namespace, name)
+    const object = await shoots.read({ user, namespace, name })
     joinRoom(socket, room)
     return object
   } catch (err) {
@@ -178,7 +183,7 @@ async function subscribeShoot (socket, { namespace, name }) {
       reason = STATUS_CODES[code]
       if (code === 404) {
         try {
-          const allowed = await canGetShoot(user, namespace, name)
+          const allowed = await authorization.canGetShoot(user, namespace, name)
           if (allowed) {
             status = 'Success'
             joinRoom(socket, room)
@@ -206,7 +211,7 @@ function registerShootHandlers (socket, cache) {
       const user = getUserFromSocket(socket)
       const namespaces = await listNamespaces(user)
 
-      if (await isAdmin(user)) {
+      if (await authorization.isAdmin(user)) {
         subscribeShootsAdmin(socket, { namespaces, filter, user })
       } else {
         subscribeShoots(socket, { namespaces, filter, user })
