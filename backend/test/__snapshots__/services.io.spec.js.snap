@@ -1,0 +1,389 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`services io projects should return the two projects for user foo@example.org 1`] = `
+Array [
+  Object {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SubjectAccessReview",
+    "spec": Object {
+      "groups": Array [],
+      "resourceAttributes": Object {
+        "group": "",
+        "resource": "secrets",
+        "verb": "get",
+      },
+      "user": "foo@example.org",
+    },
+  },
+]
+`;
+
+exports[`services io shoots listing shoots in all namespaces should succeed 1`] = `
+Array [
+  Object {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SubjectAccessReview",
+    "spec": Object {
+      "groups": Array [
+        "viewer",
+      ],
+      "resourceAttributes": Object {
+        "group": "core.gardener.cloud",
+        "namespace": undefined,
+        "resource": "shoots",
+        "verb": "list",
+      },
+      "user": "foo@example.org",
+    },
+  },
+]
+`;
+
+exports[`services io shoots listing shoots in all namespaces should succeed 2`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "healthy",
+      },
+      "name": "fooShoot",
+      "namespace": "garden-foo",
+      "uid": 1,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--fooShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "bar@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "healthy",
+      },
+      "name": "barShoot",
+      "namespace": "garden-foo",
+      "uid": 2,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "barPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--barShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "unhealthy",
+      },
+      "name": "dummyShoot",
+      "namespace": "garden-foo",
+      "uid": 3,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "barSecretName",
+      "seedName": "infra4-seed-without-secretRef",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--dummyShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "admin@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "healthy",
+      },
+      "name": "infra1-seed",
+      "namespace": "garden",
+      "uid": 4,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "foo-purpose",
+      "region": "foo-west",
+      "secretBindingName": "soil-infra1",
+      "seedName": "soil-infra1",
+    },
+    "status": Object {
+      "technicalID": "shoot--garden--infra1-seed",
+    },
+  },
+]
+`;
+
+exports[`services io shoots listing shoots in namespace "garden-foo" should succeed 1`] = `
+Array [
+  Object {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SubjectAccessReview",
+    "spec": Object {
+      "groups": Array [
+        "viewer",
+      ],
+      "resourceAttributes": Object {
+        "group": "core.gardener.cloud",
+        "namespace": "garden-foo",
+        "resource": "shoots",
+        "verb": "list",
+      },
+      "user": "foo@example.org",
+    },
+  },
+]
+`;
+
+exports[`services io shoots listing shoots in namespace "garden-foo" should succeed 2`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "healthy",
+      },
+      "name": "fooShoot",
+      "namespace": "garden-foo",
+      "uid": 1,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--fooShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "bar@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "healthy",
+      },
+      "name": "barShoot",
+      "namespace": "garden-foo",
+      "uid": 2,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "barPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--barShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "unhealthy",
+      },
+      "name": "dummyShoot",
+      "namespace": "garden-foo",
+      "uid": 3,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "barSecretName",
+      "seedName": "infra4-seed-without-secretRef",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--dummyShoot",
+    },
+  },
+]
+`;
+
+exports[`services io shoots listing unhealthy shoots in all namespaces should succeed 1`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "labels": Object {
+        "shoot.gardener.cloud/status": "unhealthy",
+      },
+      "name": "dummyShoot",
+      "namespace": "garden-foo",
+      "uid": 3,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "barSecretName",
+      "seedName": "infra4-seed-without-secretRef",
+    },
+    "status": Object {
+      "technicalID": "shoot--foo--dummyShoot",
+    },
+  },
+]
+`;
+
+exports[`services io shoots reading a shoot in namespace "garden-foo" should succeed 1`] = `
+Array [
+  Object {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SubjectAccessReview",
+    "spec": Object {
+      "groups": Array [
+        "viewer",
+      ],
+      "resourceAttributes": Object {
+        "group": "core.gardener.cloud",
+        "name": "fooShoot",
+        "namespace": "garden-foo",
+        "resource": "shoots",
+        "verb": "get",
+      },
+      "user": "foo@example.org",
+    },
+  },
+]
+`;
+
+exports[`services io shoots reading a shoot in namespace "garden-foo" should succeed 2`] = `
+Object {
+  "metadata": Object {
+    "annotations": Object {
+      "gardener.cloud/created-by": "foo@example.org",
+    },
+    "labels": Object {
+      "shoot.gardener.cloud/status": "healthy",
+    },
+    "name": "fooShoot",
+    "namespace": "garden-foo",
+    "uid": 1,
+  },
+  "spec": Object {
+    "cloudProfileName": "infra1-profileName",
+    "hibernation": Object {
+      "enabled": false,
+    },
+    "kubernetes": Object {
+      "version": "1.16.0",
+    },
+    "provider": Object {
+      "type": "fooInfra",
+    },
+    "purpose": "fooPurpose",
+    "region": "foo-west",
+    "secretBindingName": "foo-infra1",
+    "seedName": "infra1-seed",
+  },
+  "status": Object {
+    "technicalID": "shoot--foo--fooShoot",
+  },
+}
+`;
