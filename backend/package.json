@@ -67,6 +67,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@gardener-dashboard/test-utils": "workspace:*",
     "abort-controller": "^3.0.0",
     "dockerfile-ast": "^0.4.2",
     "eslint": "^8.16.0",

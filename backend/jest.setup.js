@@ -12,7 +12,9 @@ const { Test } = require('supertest')
 const pEvent = require('p-event')
 const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
-const fixtures = require('./__fixtures__')
+const { matchers, ...fixtures } = require('./__fixtures__')
+
+expect.extend(matchers)
 
 function createHttpAgent () {
   const app = require('./lib/app')
