@@ -290,6 +290,7 @@ export function getCreatedBy (metadata) {
 export function getProjectDetails (project) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
+  const projectStatus = project.status || {}
   const projectName = projectMetadata.name || ''
   const owner = projectData.owner || ''
   const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
@@ -298,8 +299,10 @@ export function getProjectDetails (project) {
   const description = projectData.description || ''
   const createdBy = projectData.createdBy || ''
   const purpose = projectData.purpose || ''
-  const staleSinceTimestamp = projectData.staleSinceTimestamp
-  const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
+  const staleSinceTimestamp = projectStatus.staleSinceTimestamp
+  const staleAutoDeleteTimestamp = projectStatus.staleAutoDeleteTimestamp
+  const phase = projectStatus.phase
+  const isNotReady = phase !== 'Ready'
 
   return {
     projectName,
@@ -311,7 +314,9 @@ export function getProjectDetails (project) {
     description,
     purpose,
     staleSinceTimestamp,
-    staleAutoDeleteTimestamp
+    staleAutoDeleteTimestamp,
+    phase,
+    isNotReady
   }
 }
 

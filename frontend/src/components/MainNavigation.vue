@@ -47,9 +47,10 @@ SPDX-License-Identifier: Apache-2.0
               @keyup.enter="navigateToHighlightedProject"
             >
               <v-icon class="pr-6">mdi-grid-large</v-icon>
-              <span class="ml-2" :class="{ placeholder: !project }" >{{projectName}}</span>
-              <template v-if="project">
-                <stale-project-warning :project="project" small></stale-project-warning>
+              <span class="ml-2" :class="{ placeholder: !selectedProject }" >{{selectedProjectName}}</span>
+              <template v-if="selectedProject">
+                <stale-project-warning :project="selectedProject" small></stale-project-warning>
+                <not-ready-project-warning :project="selectedProject" small></not-ready-project-warning>
               </template>
               <v-spacer></v-spacer>
               <v-icon right>{{projectMenuIcon}}</v-icon>
@@ -91,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0
                 :data-g-project-name="project.metadata.name"
               >
                 <v-list-item-avatar>
-                  <v-icon v-if="project.metadata.name === projectName" color="primary">mdi-check</v-icon>
+                  <v-icon v-if="project.metadata.name === selectedProjectName" color="primary">mdi-check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
@@ -99,6 +100,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-content>
                 <v-list-item-action>
                   <stale-project-warning :project="project" small></stale-project-warning>
+                  <not-ready-project-warning :project="project" small></not-ready-project-warning>
                 </v-list-item-action>
               </v-list-item>
             </v-list>
@@ -170,13 +172,15 @@ import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/components/dialogs/ProjectDialog'
 import StaleProjectWarning from '@/components/StaleProjectWarning'
+import NotReadyProjectWarning from '@/components/NotReadyProjectWarning'
 
 const initialVisibleProjects = 10
 
 export default {
   components: {
     ProjectCreateDialog,
-    StaleProjectWarning
+    StaleProjectWarning,
+    NotReadyProjectWarning
   },
   data () {
     return {
@@ -184,7 +188,7 @@ export default {
       projectDialog: false,
       projectFilter: '',
       projectMenu: false,
-      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } },
+      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' }, status: { phase: 'Ready' } },
       highlightedProjectName: undefined,
       numberOfVisibleProjects: initialVisibleProjects
     }
@@ -207,7 +211,7 @@ export default {
         this.setSidebar(val)
       }
     },
-    project: {
+    selectedProject: {
       get () {
         if (this.namespace === this.allProjectsItem.metadata.namespace) {
           return this.allProjectsItem
@@ -225,14 +229,14 @@ export default {
       return !this.projectList.length
     },
     routes () {
-      const hasProjectScope = get(this.project, 'metadata.namespace') !== this.allProjectsItem.metadata.namespace
+      const hasProjectScope = get(this.selectedProject, 'metadata.namespace') !== this.allProjectsItem.metadata.namespace
       return routes(this.$router, hasProjectScope)
     },
     projectMenuIcon () {
       return this.projectMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
     },
-    projectName () {
-      const project = this.project
+    selectedProjectName () {
+      const project = this.selectedProject
       return project ? project.metadata.name : ''
     },
     sortedAndFilteredProjectList () {
@@ -312,8 +316,8 @@ export default {
     navigateToProject (project) {
       this.projectMenu = false
 
-      if (project !== this.project) {
-        this.project = project
+      if (project !== this.selectedProject) {
+        this.selectedProject = project
       }
     },
     openProjectDialog () {

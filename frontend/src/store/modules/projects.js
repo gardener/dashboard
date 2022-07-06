@@ -47,9 +47,9 @@ const actions = {
   },
   async delete ({ commit, state }, { metadata }) {
     const namespace = metadata.namespace
-    await deleteProject({ namespace })
-    commit('ITEM_DELETED', metadata)
-    return state.all
+    const res = await deleteProject({ namespace })
+    // commit('ITEM_DELETED', metadata)
+    return res.data
   }
 }
 
