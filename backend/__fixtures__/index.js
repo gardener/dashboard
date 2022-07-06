@@ -6,6 +6,7 @@
 
 'use strict'
 
+const { matchers } = require('@gardener-dashboard/test-utils')
 const config = require('./config')
 const auth = require('./auth')
 const kube = require('./kube')
@@ -33,6 +34,7 @@ function resetAll () {
 }
 
 const fixtures = {
+  matchers,
   config,
   auth,
   user,
