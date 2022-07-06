@@ -100,8 +100,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>
-        <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Gardener provided static admin kubeconfig is disabled for this cluster</v-list-item-subtitle>
-        <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Gardener provided static admin kubeconfig currently not available</v-list-item-subtitle>
+        <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Static token kubeconfig is disabled for this cluster</v-list-item-subtitle>
+        <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Static token kubeconfig currently not available</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <v-tooltip top>
