@@ -2696,6 +2696,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
             ["@gardener-dashboard/logger", "workspace:packages/logger"],\
             ["@gardener-dashboard/request", "workspace:packages/request"],\
+            ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["@godaddy/terminus", "npm:4.10.2"],\
             ["@octokit/rest", "npm:18.12.0"],\
             ["abort-controller", "npm:3.0.0"],\
