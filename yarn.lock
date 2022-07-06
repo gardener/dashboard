@@ -1451,6 +1451,7 @@ __metadata:
     "@gardener-dashboard/kube-config": "workspace:*"
     "@gardener-dashboard/logger": "workspace:*"
     "@gardener-dashboard/request": "workspace:*"
+    "@gardener-dashboard/test-utils": "workspace:*"
     "@godaddy/terminus": ^4.10.2
     "@octokit/rest": ^18.12.0
     abort-controller: ^3.0.0
