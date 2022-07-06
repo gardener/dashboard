@@ -63,6 +63,9 @@ function errorToLocals (err, req) {
   if (code >= 500) {
     logger.error(err.message, err.stack)
   }
+  if (code === 401) {
+    logger.info('Authentication Failed: %s', err.message)
+  }
   return { code, reason, message, status, details }
 }
 
