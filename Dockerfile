@@ -3,7 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #### Builder ####
-FROM node:18-alpine3.16 as builder
+FROM node:18 as builder
+
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static.asc /tini.asc
+RUN gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+ && gpg --batch --verify /tini.asc /tini
+RUN chmod +x /tini
 
 WORKDIR /usr/src/app
 
@@ -47,10 +54,7 @@ RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM alpine:3.16 as release
-
-RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
-RUN apk add --no-cache tini libstdc++
+FROM gcr.io/distroless/nodejs:18 as release
 
 WORKDIR /usr/src/app
 
@@ -59,17 +63,14 @@ ENV NODE_ENV "production"
 ARG PORT=8080
 ENV PORT $PORT
 
-# copy node binary
-COPY --from=builder /usr/local/bin/node /usr/local/bin/
+COPY --from=builder /tini /tini
+COPY --chown=nonroot --from=builder /usr/src/build .
 
-# copy production directory
-COPY --chown=node:node --from=builder /usr/src/build .
-
-USER node
+USER nonroot
 
 EXPOSE $PORT
 
-VOLUME ["/home/node"]
+VOLUME ["/home/nonroot"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
+ENTRYPOINT ["/tini", "--", "/nodejs/bin/node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
 CMD ["server.js"]
