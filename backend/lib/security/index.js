@@ -9,7 +9,7 @@
 const { promisify } = require('util')
 const assert = require('assert').strict
 const { split, join, noop, some, every, includes, head, chain } = require('lodash')
-const { Issuer, custom, generators } = require('openid-client')
+const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
@@ -88,7 +88,6 @@ function discoverClient (url) {
     overrideHttpOptions.call(issuer)
     const options = {
       client_id: clientId,
-      client_secret: clientSecret,
       redirect_uris: redirectUris,
       response_types: responseTypes
     }
@@ -184,36 +183,65 @@ async function authorizationUrl (req, res) {
   return client.authorizationUrl(params)
 }
 
+function now () {
+  return Math.floor(Date.now() / 1000)
+}
+
 async function authorizeToken (req, res) {
-  /* eslint-disable camelcase */
-  const id_token = chain(req.body)
+  const idToken = chain(req.body)
     .get('token')
     .trim()
     .value()
-  const token = await setCookies(res, { id_token })
+  const tokenSet = createTokenSet({ id_token: idToken })
+  const token = await setCookies(res, tokenSet)
   return decode(token)
 }
 
-async function createToken (idToken, expiresIn) {
-  const { username: id, groups } = await authentication.isAuthenticated({ token: idToken })
-  const { name, email } = decode(idToken)
-  const user = {
-    id,
-    groups,
-    name,
-    email
+function createTokenSet (values) {
+  const tokenSet = new TokenSet(values)
+  if (!tokenSet.expires_at) {
+    const tokenLifetime = 86400 // default token lifetime is 24 hours
+    let expiresAt = now() + tokenLifetime
+    try {
+      const { iat, exp } = tokenSet.claims()
+      if (exp) {
+        expiresAt = Number(exp)
+      } else if (iat) {
+        expiresAt = Number(iat) + tokenLifetime
+      }
+    } finally {
+      tokenSet.expires_at = expiresAt
+    }
   }
-  const audience = [GARDENER_AUDIENCE]
-  return sign(user, { expiresIn, audience })
+  return tokenSet
+}
+
+async function createToken (tokenSet) {
+  const { username: id, groups } = await authentication.isAuthenticated({ token: tokenSet.id_token })
+  const payload = {
+    id,
+    groups
+  }
+  try {
+    const claims = tokenSet.claims()
+    payload.email = claims.email
+    if (claims.name) {
+      payload.name = claims.name
+    }
+  } catch (err) { /* ignore error */ }
+  const options = {
+    audience: [GARDENER_AUDIENCE]
+  }
+  if (tokenSet.refresh_token) {
+    options.expiresIn = Math.max(tokenSet.expires_in, refreshTokenLifetime)
+  } else {
+    payload.exp = tokenSet.expires_at
+  }
+  return sign(payload, options)
 }
 
 async function setCookies (res, tokenSet) {
-  const {
-    id_token: idToken,
-    refresh_token: refreshToken
-  } = tokenSet
-  const expiresIn = refreshToken ? refreshTokenLifetime : tokenSet.expires_in
-  const token = await createToken(idToken, expiresIn)
+  const token = await createToken(tokenSet)
   const [header, payload, signature] = split(token, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
@@ -226,12 +254,12 @@ async function setCookies (res, tokenSet) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const tokens = [idToken]
-  if (refreshToken) {
-    tokens.push(refreshToken)
+  const values = [tokenSet.id_token, tokenSet.expires_at]
+  if (tokenSet.refresh_token) {
+    values.push(tokenSet.refresh_token)
   }
-  const encryptedValue = await encrypt(tokens.join(','))
-  res.cookie(COOKIE_TOKEN, encryptedValue, {
+  const encryptedValues = await encrypt(values.join(','))
+  res.cookie(COOKIE_TOKEN, encryptedValues, {
     secure,
     httpOnly: true,
     expires: undefined,
@@ -241,7 +269,6 @@ async function setCookies (res, tokenSet) {
 }
 
 async function authorizationCallback (req, res) {
-  const client = await exports.getIssuerClient()
   const { code, state } = req.query
   const parameters = { code }
   const {
@@ -256,7 +283,7 @@ async function authorizationCallback (req, res) {
     checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
     res.clearCookie(COOKIE_CODE_VERIFIER)
   }
-  const tokenSet = await client.callback(backendRedirectUri, parameters, checks)
+  const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)
   await setCookies(res, tokenSet)
   return { redirectPath }
 }
@@ -307,38 +334,55 @@ function csrfProtection (req) {
   }
 }
 
-async function getTokenSet (cookies) {
-  const encryptedValue = cookies[COOKIE_TOKEN]
-  if (!encryptedValue) {
+async function decryptTokenSet (cookies) {
+  const encryptedValues = cookies[COOKIE_TOKEN]
+  if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
-  const value = await decrypt(encryptedValue)
-  if (!value) {
+  const values = await decrypt(encryptedValues)
+  if (!values) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
-  const [idToken, refreshToken] = value.split(',')
-  const { exp } = decode(idToken)
-  return {
-    token_type: 'Bearer',
+  const [idToken, expiresAt, refreshToken] = values.split(',')
+  return createTokenSet({
     id_token: idToken,
     refresh_token: refreshToken,
-    expires_in: exp - Math.floor(Date.now() / 1000)
+    expires_at: expiresAt ? Number(expiresAt) : undefined
+  })
+}
+
+async function authorizationCodeExchange (redirectUri, parameters, checks) {
+  try {
+    const client = await exports.getIssuerClient()
+    return await client.callback(redirectUri, parameters, checks)
+  } catch (err) {
+    if (err instanceof RPError || err instanceof OPError) {
+      throw createError(401, err)
+    }
+    throw err
   }
 }
 
 async function refreshTokenSet (tokenSet) {
-  const client = await exports.getIssuerClient()
-  return client.refresh(tokenSet.refresh_token)
+  try {
+    const client = await exports.getIssuerClient()
+    return await client.refresh(tokenSet.refresh_token)
+  } catch (err) {
+    if (err instanceof RPError || err instanceof OPError) {
+      throw createError(401, err)
+    }
+    throw err
+  }
 }
 
 function authenticate (options = {}) {
-  assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
+  assert.ok(options.createClient === false || typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
       let user
       let token = getToken(req.cookies)
-      let tokenSet = await getTokenSet(req.cookies)
+      let tokenSet = await decryptTokenSet(req.cookies)
       if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
         tokenSet = await refreshTokenSet(tokenSet)
         token = await setCookies(res, tokenSet)
@@ -349,15 +393,15 @@ function authenticate (options = {}) {
       const auth = Object.freeze({
         bearer: tokenSet.id_token
       })
-      Object.defineProperties(user, {
-        auth: {
-          value: auth,
-          enumerable: true
-        },
-        client: {
-          value: options.createClient({ auth })
-        }
+      Object.defineProperty(user, 'auth', {
+        value: auth,
+        enumerable: true
       })
+      if (typeof options.createClient === 'function') {
+        Object.defineProperty(user, 'client', {
+          value: options.createClient({ auth })
+        })
+      }
       req.user = user
       next()
     } catch (err) {
@@ -368,8 +412,7 @@ function authenticate (options = {}) {
 }
 
 function authenticateSocket () {
-  const options = { createClient: () => false }
-  const authenticateAsync = promisify(authenticate(options))
+  const authenticateAsync = promisify(authenticate({ createClient: false }))
   const cookieParserAsync = promisify(cookieParser())
   return async (socket) => {
     const res = {
