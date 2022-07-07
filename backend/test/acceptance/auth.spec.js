@@ -8,6 +8,7 @@
 
 const { pick, head } = require('lodash')
 const assert = require('assert').strict
+const { TokenSet } = require('openid-client')
 const setCookieParser = require('set-cookie-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
 
@@ -58,12 +59,10 @@ class Client {
   async callback (redirectUri, { code }, { response_type: responseType }) {
     assert.strictEqual(code, OTAC)
     assert.strictEqual(responseType, 'code')
-    const bearer = await this.user.bearer
-    const expiresIn = Math.floor(Date.now() / 1000) + 86400
-    return {
-      id_token: bearer,
-      expires_in: expiresIn
-    }
+    const idToken = await this.user.bearer
+    const tokenSet = new TokenSet({ id_token: idToken })
+    tokenSet.expires_at = tokenSet.claims().exp
+    return tokenSet
   }
 }
 
@@ -201,6 +200,8 @@ describe('auth', function () {
 
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
+    const { exp: expiresAt } = security.decode(bearer)
+    const now = Math.floor(Date.now() / 1000)
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
@@ -239,18 +240,24 @@ describe('auth', function () {
     })
     const [header, payload] = cookieHeaderPayload.value.split('.')
     const signature = cookieSignature.value
-    const encryptedBearer = cookieToken.value
     const token = [header, payload, signature].join('.')
-    const tokenPayload = security.decode(token)
-    expect(tokenPayload.jti).toMatch(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     expect(cookieHeaderPayload.sameSite).toBe('Lax')
     expect(cookieHeaderPayload.httpOnly).toBeUndefined()
     expect(cookieSignature.sameSite).toBe('Lax')
     expect(cookieSignature.httpOnly).toBe(true)
     expect(cookieToken.sameSite).toBe('Lax')
     expect(cookieToken.httpOnly).toBe(true)
-    expect(await security.verify(token)).toEqual(tokenPayload)
-    expect(await security.decrypt(encryptedBearer)).toBe(bearer)
+    expect(await security.verify(token)).toEqual(expect.objectContaining({
+      id,
+      iat: expect.toBeWithinRange(now, now + 3),
+      aud: ['gardener'],
+      exp: expiresAt,
+      jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
+    }))
+    expect((await security.decrypt(cookieToken.value)).split(',')).toEqual([
+      bearer,
+      expiresAt.toString()
+    ])
     expect(res.body.id).toBe(id)
   })
 
