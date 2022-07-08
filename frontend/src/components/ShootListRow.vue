@@ -52,22 +52,15 @@ SPDX-License-Identifier: Apache-2.0
         <account-avatar :account-name="shootCreatedBy"></account-avatar>
       </template>
       <template v-if="cell.header.value === 'createdAt'">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
-            </div>
-          </template>
-          {{ shootCreatedAt }}
-        </v-tooltip>
+        <time-string :date-time="shootCreationTimestamp" mode="past"></time-string>
       </template>
       <template v-if="cell.header.value === 'purpose'">
-        <div class="d-flex justify-center pr-4">
+        <div class="d-flex justify-center">
           <purpose-tag :purpose="shootPurpose"></purpose-tag>
         </div>
       </template>
       <template v-if="cell.header.value === 'lastOperation'">
-        <div class="d-flex align-center justify-center pr-4">
+        <div class="d-flex align-center justify-center">
           <shoot-status
           :popper-key="`${shootNamespace}/${shootName}`"
           :shoot-item="shootItem">
@@ -75,12 +68,12 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.value === 'k8sVersion'">
-        <div class="d-flex justify-center pr-4">
+        <div class="d-flex justify-center">
           <shoot-version :shoot-item="shootItem" chip></shoot-version>
         </div>
       </template>
       <template v-if="cell.header.value === 'readiness'">
-        <div class="d-flex pr-4">
+        <div class="d-flex">
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
@@ -97,16 +90,9 @@ SPDX-License-Identifier: Apache-2.0
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-                <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
-              </router-link>
-            </div>
-          </template>
-          {{ shootLastUpdatedTicket }}
-        </v-tooltip>
+        <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+          <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
+        </router-link>
       </template>
       <template v-if="cell.header.value === 'ticketLabels'">
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
@@ -245,9 +231,6 @@ export default {
     },
     shootLastUpdatedTicketTimestamp () {
       return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)
-    },
-    shootLastUpdatedTicket () {
-      return getTimestampFormatted(this.shootLastUpdatedTicketTimestamp)
     },
     shootTicketsLabels () {
       return this.ticketsLabels(this.shootMetadata)

@@ -206,10 +206,17 @@ ClusterScoped.Creatable = superclass => class extends superclass {
 
 NamespaceScoped.Creatable = superclass => class extends superclass {
   create (namespace, body, options) {
+    let name
+    if (Array.isArray(namespace)) {
+      name = namespace[1]
+      assertName(name)
+      name = [name, namespace[2]]
+      namespace = namespace[0]
+    }
     assertNamespace(namespace)
     assertBodyObject(body)
     assertOptions(options)
-    const url = namespaceScopedUrl(this.constructor.names, namespace)
+    const url = namespaceScopedUrl(this.constructor.names, namespace, name)
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'post', searchParams, json: body })
   }

@@ -33,6 +33,9 @@ logLevel: debug
 #   -----END CERTIFICATE-----
 # # or skip tls verify (insecure)
 # apiServerSkipTlsVerify: true
+# # Optional list of the intended audiences of the service account token (garden cluster)
+# tokenRequestAudiences:
+# - foo
 # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
 # clusterIdentity: my-landscape-dev
 containerPort: 8080
@@ -254,6 +257,11 @@ frontendConfig:
 
   defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
 
+  # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
+  # If no value is provided, the default value corresponds to 90 days
+  # The token issuer may return a token with a different validity duration
+  serviceAccountDefaultTokenExpiration: 7776000 # seconds
+
 # # github configuration of the ticket feature
 # gitHub:
 #   apiUrl: https://api.foo-github.com
@@ -289,6 +297,10 @@ readinessProbe:
 #   containerImageDescriptions:
 #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
+#   # serviceAccountTokenExpiration - is the default requested duration of validity of the token request for the "attach" service account (residing in the terminal host cluster)
+#   # If no value is provided, the default value corresponds to 12 hours
+#   # The token issuer may return a token with a different validity duration
+#   serviceAccountTokenExpiration: 43200 # seconds
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
 #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
 #     secretRef:

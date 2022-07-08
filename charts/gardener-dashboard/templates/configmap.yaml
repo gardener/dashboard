@@ -26,6 +26,12 @@ data:
     {{- else if eq (default false .Values.apiServerSkipTlsVerify) true }}
     apiServerSkipTlsVerify: true
     {{- end }}
+    {{- if .Values.tokenRequestAudiences }}
+    tokenRequestAudiences:
+      {{- range .Values.tokenRequestAudiences }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
     {{- if .Values.clusterIdentity }}
     clusterIdentity: {{ .Values.clusterIdentity }}
     {{- end }}
@@ -96,6 +102,9 @@ data:
       - image: {{ .image }}
         description: {{ .description }}
       {{- end }}
+      {{- end }}
+      {{- if .Values.terminal.serviceAccountTokenExpiration }}
+      serviceAccountTokenExpiration: {{ .Values.terminal.serviceAccountTokenExpiration }}
       {{- end }}
       gardenTerminalHost:
         {{- if .Values.terminal.gardenTerminalHost.secretRef }}
@@ -320,4 +329,7 @@ data:
       {{- end }}
       {{- if .Values.frontendConfig.defaultNodesCIDR }}
       defaultNodesCIDR: {{ .Values.frontendConfig.defaultNodesCIDR }}
+      {{- end }}
+      {{- if .Values.frontendConfig.serviceAccountDefaultTokenExpiration }}
+      serviceAccountDefaultTokenExpiration: {{ .Values.frontendConfig.serviceAccountDefaultTokenExpiration }}
       {{- end }}

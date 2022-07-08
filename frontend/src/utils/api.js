@@ -269,14 +269,6 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
-export function rotateServiceAccountSecret ({ namespace, name }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return callResourceMethod(`/api/namespaces/${namespace}/members/${name}`, {
-    method: 'rotateSecret'
-  })
-}
-
 /* User */
 export function createTokenReview (data) {
   return createResource('/auth', data)

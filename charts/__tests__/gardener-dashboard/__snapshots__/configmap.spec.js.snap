@@ -191,6 +191,7 @@ Object {
     ],
     "landingPageUrl": "https://gardener.cloud/",
     "seedCandidateDeterminationStrategy": "SameRegion",
+    "serviceAccountDefaultTokenExpiration": 7776000,
   },
   "logFormat": "text",
   "logLevel": "debug",
@@ -228,6 +229,34 @@ Li4u
     "gardenTerminalHost": Object {
       "seedRef": "soil-gcp",
     },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap terminal config should render the template 1`] = `
+Object {
+  "terminal": Object {
+    "bootstrap": Object {
+      "disabled": false,
+      "gardenTerminalHostDisabled": true,
+      "seedDisabled": true,
+      "shootDisabled": true,
+    },
+    "container": Object {
+      "image": "chart-test:0.1.0",
+    },
+    "garden": Object {
+      "operatorCredentials": Object {
+        "serviceAccountRef": Object {
+          "name": "robot",
+          "namespace": "garden",
+        },
+      },
+    },
+    "gardenTerminalHost": Object {
+      "seedRef": "my-seed",
+    },
+    "serviceAccountTokenExpiration": 42,
   },
 }
 `;
@@ -343,6 +372,18 @@ Object {
     "namespace": "garden",
   },
   "type": "Opaque",
+}
+`;
+
+exports[`gardener-dashboard configmap token request should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "serviceAccountDefaultTokenExpiration": 42,
+  },
+  "tokenRequestAudiences": Array [
+    "foo",
+    "bar",
+  ],
 }
 `;
 
