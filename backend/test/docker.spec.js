@@ -12,10 +12,6 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend, globalAgent } = jest.requireActual('@gardener-dashboard/request')
-const client = extend({
-  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/main/'
-})
 
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
@@ -40,12 +36,6 @@ async function getDashboardDockerfile () {
 }
 
 describe('dockerfile', function () {
-  const timeout = 15 * 1000
-
-  afterAll(() => {
-    globalAgent.destroy()
-  })
-
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
@@ -62,5 +52,5 @@ describe('dockerfile', function () {
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
     expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
     expect(buildStages.release.getImage()).toBe('scratch')
-  }, timeout)
+  })
 })
