@@ -25,11 +25,11 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:label>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <span v-on="on" class="text-subtitle-1 toolbar-title--text">Freeze Cluster List</span>
+                <span v-on="on" class="text-subtitle-1 toolbar-title--text">Focus</span>
               </template>
               <span class="font-weight-bold">Freeze sorting of the Cluster List</span><br />
               Items in the list will still be updated.<br />
-              New items will not be added to the list.<br />
+              New items will be added to the end of the list.<br />
               Removed items will be shown as stale (greyed out).
             </v-tooltip>
           </template>
@@ -81,6 +81,15 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         :custom-sort="sortItems"
       >
+        <template v-slot:top>
+          <v-alert tile dense type="info" v-if="freezeSorting">
+            The cluster list is currently
+            <span class="font-weight-bold">freezed</span>.
+            Items in the list will still be updated.
+            New items will be added to the end of the list.
+            Removed items will be shown as stale (greyed out).
+          </v-alert>
+        </template>
         <template v-slot:item="{ item }">
           <shoot-list-row
             :shoot-item="item"

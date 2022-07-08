@@ -13,9 +13,10 @@ import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import padStart from 'lodash/padStart'
-import find from 'lodash/find'
+import differenceBy from 'lodash/differenceBy'
 import semver from 'semver'
-import pick from 'lodash/pick'
+import clone from 'lodash/clone'
+import find from 'lodash/find'
 
 import {
   getCreatedBy,
@@ -186,20 +187,39 @@ export default {
     let _sortByArr
     let _sortDescArr
     return (items, sortByArr, sortDescArr) => {
+      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting
       if (state.freezeSorting && _sortByArr === sortByArr && _sortDescArr === sortDescArr) {
-        return map(sortedItems, sortedItem => {
+        // New Items are items added to the list after the freeze
+        let newItems = differenceBy(items, sortedItems, 'metadata.uid')
+        newItems = map(newItems, newItem => {
+          return {
+            ...newItem,
+            addedAfterFreeze: true // Flag them so that the UI can render them accordingly
+          }
+        })
+
+        const existingItems = map(sortedItems, sortedItem => {
           const item = find(items, item => {
             return item.metadata.uid === sortedItem.metadata.uid
           })
           if (item) {
             return item
           }
+          // Keep Items that no longer in the list as stale items, to keep the list static
           return {
             ...sortedItem,
-            stale: true
+            stale: true // Flag them so that the UI can render them accordingly
           }
         })
+
+        // Add new items to the end of the list to keep the list static
+        return [
+          ...existingItems,
+          ...newItems
+        ]
       }
+
+      // Regular sorting logic
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
@@ -253,9 +273,7 @@ export default {
           items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-      sortedItems = map(items, item => {
-        return pick(item, ['metadata', 'spec', 'status'])
-      })
+      sortedItems = clone(items)
       _sortByArr = sortByArr
       _sortDescArr = sortDescArr
 

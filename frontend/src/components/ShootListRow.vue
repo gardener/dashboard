@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr :class="{ stale: isStale }">
+  <tr :class="{ 'stale': isStale, 'newItem' : isAddedAfterFreeze  }">
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
@@ -255,6 +255,9 @@ export default {
     },
     isStale () {
       return this.shootItem.stale
+    },
+    isAddedAfterFreeze () {
+      return this.shootItem.addedAfterFreeze
     }
   },
   methods: {
@@ -272,5 +275,9 @@ export default {
   .stale {
     pointer-events: none;
     opacity: 0.3;
+  }
+
+  .newItem {
+    background-color: var(--v-primary-lighten4);
   }
 </style>
