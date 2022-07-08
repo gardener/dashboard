@@ -5,6 +5,13 @@
 #### Builder ####
 FROM node:18-alpine3.16 as builder
 
+# get the latest security upgrades and install tini
+RUN apk -U upgrade && apk add --no-cache tini 
+
+# create node user and group
+RUN echo 'node:x:1000:1000:node,,,:/home/node:/sbin/nologin' > /tmp/passwd \
+ && echo 'node:x:1000:node' > /tmp/group
+
 WORKDIR /usr/src/app
 
 COPY . .
@@ -47,10 +54,7 @@ RUN cp -r frontend/dist /usr/src/build/public \
     && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
 
 #### Release ####
-FROM alpine:3.16 as release
-
-RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
-RUN apk add --no-cache tini libstdc++
+FROM scratch as release
 
 WORKDIR /usr/src/app
 
@@ -59,8 +63,16 @@ ENV NODE_ENV "production"
 ARG PORT=8080
 ENV PORT $PORT
 
-# copy node binary
+# copy users and groups
+COPY --from=builder /tmp/passwd /tmp/group /etc/
+
+# copy binaries
 COPY --from=builder /usr/local/bin/node /usr/local/bin/
+COPY --from=builder /sbin/tini /sbin/ 
+
+# copy libraries
+COPY --from=builder /lib/ld-musl-x86_64.so* /lib/libcrypto.so* /lib/libssl.so* /lib/libz.so* /lib/
+COPY --from=builder /usr/lib/libstdc++.so* /usr/lib/libgcc_s.so* /usr/lib/engines-1.1 /usr/lib/
 
 # copy production directory
 COPY --chown=node:node --from=builder /usr/src/build .
