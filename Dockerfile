@@ -67,12 +67,10 @@ ENV PORT $PORT
 COPY --from=builder /tmp/passwd /tmp/group /etc/
 
 # copy binaries
-COPY --from=builder /usr/local/bin/node /usr/local/bin/
-COPY --from=builder /sbin/tini /sbin/ 
+COPY --from=builder /usr/local/bin/node  /sbin/tini /bin/
 
 # copy libraries
-COPY --from=builder /lib/ld-musl-x86_64.so* /lib/libcrypto.so* /lib/libssl.so* /lib/libz.so* /lib/
-COPY --from=builder /usr/lib/libstdc++.so* /usr/lib/libgcc_s.so* /usr/lib/engines-1.1 /usr/lib/
+COPY --from=builder /lib/ld-musl-x86_64.so* /usr/lib/libstdc++.so* /usr/lib/libgcc_s.so* /lib/
 
 # copy production directory
 COPY --chown=node:node --from=builder /usr/src/build .
@@ -83,5 +81,5 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
 CMD ["server.js"]
