@@ -33,11 +33,6 @@ const activeNodeReleases = {
   }
 }
 
-async function getNodeDockerfile (nodeVersion, alpineVersion) {
-  const body = await client.request(`${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
-  return DockerfileParser.parse(body)
-}
-
 async function getDashboardDockerfile () {
   const filename = path.join(__dirname, '..', '..', 'Dockerfile')
   const data = await readFile(filename, 'utf8')
@@ -66,12 +61,6 @@ describe('dockerfile', function () {
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
     expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
-    const dashboardReleaseBaseImage = buildStages.release.getImage()
-    const [, alpineVersion] = /alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
-    const nodeDockerfile = await getNodeDockerfile(nodeRelease, alpineVersion)
-    expect(nodeDockerfile.getFROMs()).toHaveLength(1)
-    const nodeBaseImage = _.first(nodeDockerfile.getFROMs()).getImage()
-    // Alpine base images of "dashboard-release" image and "node" image do not match!
-    expect(dashboardReleaseBaseImage.endsWith(nodeBaseImage)).toBe(true)
+    expect(buildStages.release.getImage()).toBe('scratch')
   }, timeout)
 })
