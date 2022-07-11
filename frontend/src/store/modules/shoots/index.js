@@ -20,6 +20,7 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import clone from 'lodash/clone'
 import getters from './getters'
 import { keyForShoot, findItem } from './helper'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -44,6 +45,7 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 const state = {
   shoots: {},
   filteredShoots: [],
+  freezedShoots: [],
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
@@ -412,6 +414,9 @@ const mutations = {
     state.initialNewShootResource = cloneDeep(shootResource)
   },
   SET_FREEZE_SORTING (state, value) {
+    if (value) {
+      state.freezedShoots = clone(state.filteredShoots)
+    }
     state.freezeSorting = value
   }
 }

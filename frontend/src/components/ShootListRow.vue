@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr :class="{ 'stale': isStale, 'newItem' : isAddedAfterFreeze  }">
+  <tr :class="{ 'stale': isStale }">
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
@@ -85,7 +85,8 @@ SPDX-License-Identifier: Apache-2.0
             </div>
           </template>
           {{ shootIssueSince }}
-        </v-tooltip>      </template>
+        </v-tooltip>
+      </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
@@ -255,9 +256,6 @@ export default {
     },
     isStale () {
       return this.shootItem.stale
-    },
-    isAddedAfterFreeze () {
-      return this.shootItem.addedAfterFreeze
     }
   },
   methods: {
@@ -275,9 +273,5 @@ export default {
   .stale {
     pointer-events: none;
     opacity: 0.3;
-  }
-
-  .newItem {
-    background-color: var(--v-primary-lighten4);
   }
 </style>

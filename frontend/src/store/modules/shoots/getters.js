@@ -13,10 +13,12 @@ import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import padStart from 'lodash/padStart'
-import differenceBy from 'lodash/differenceBy'
 import semver from 'semver'
 import clone from 'lodash/clone'
 import find from 'lodash/find'
+import some from 'lodash/some'
+import compact from 'lodash/compact'
+import differenceBy from 'lodash/differenceBy'
 
 import {
   getCreatedBy,
@@ -131,6 +133,10 @@ export function getSortVal (rootGetters, item, sortBy) {
 
 export default {
   filteredItems (state) {
+    if (state.freezeSorting) {
+      // When state is freezed, do not include new items
+      return state.freezedShoots
+    }
     return state.filteredShoots
   },
   itemByNameAndNamespace (state) {
@@ -183,40 +189,34 @@ export default {
     }
   },
   sortItems (state, getters, rootState, rootGetters) {
-    let sortedItems
-    let _sortByArr
-    let _sortDescArr
+    let sortedItemsAtFreeze
+    let sortByArrAtFreeze
+    let sortDescArrAtFreeze
     return (items, sortByArr, sortDescArr) => {
-      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting
-      if (state.freezeSorting && _sortByArr === sortByArr && _sortDescArr === sortDescArr) {
-        // New Items are items added to the list after the freeze
-        let newItems = differenceBy(items, sortedItems, 'metadata.uid')
-        newItems = map(newItems, newItem => {
-          return {
-            ...newItem,
-            addedAfterFreeze: true // Flag them so that the UI can render them accordingly
-          }
-        })
+      const searchStringChanged = state.freezeSorting && differenceBy(items, sortedItemsAtFreeze, 'metadata.uid').length > 0
 
-        const existingItems = map(sortedItems, sortedItem => {
-          const item = find(items, item => {
+      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
+      if (state.freezeSorting && sortByArrAtFreeze === sortByArr && sortDescArrAtFreeze === sortDescArr && !searchStringChanged) {
+        // If freezed, the list is static items are not added and removed and the order is defined by the cached array
+        return compact(map(sortedItemsAtFreeze, sortedItem => {
+          const storeItem = find(state.filteredShoots, item => {
             return item.metadata.uid === sortedItem.metadata.uid
           })
-          if (item) {
-            return item
+          if (storeItem) { // check that item is still in store (not removed from socket.io room)
+            const tableContainsItem = some(items, item => { // check that item shall still be visible in table
+              return item.metadata.uid === sortedItem.metadata.uid
+            })
+            if (!tableContainsItem) {
+              return undefined // item not in table (filtered via table search)
+            }
+            return storeItem
           }
-          // Keep Items that no longer in the list as stale items, to keep the list static
+          // Keep Items that are no longer in the store as stale items, to keep the list static
           return {
             ...sortedItem,
             stale: true // Flag them so that the UI can render them accordingly
           }
-        })
-
-        // Add new items to the end of the list to keep the list static
-        return [
-          ...existingItems,
-          ...newItems
-        ]
+        }))
       }
 
       // Regular sorting logic
@@ -273,11 +273,17 @@ export default {
           items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-      sortedItems = clone(items)
-      _sortByArr = sortByArr
-      _sortDescArr = sortDescArr
+      sortedItemsAtFreeze = clone(items)
+      sortByArrAtFreeze = sortByArr
+      sortDescArrAtFreeze = sortDescArr
 
       return items
     }
+  },
+  numberOfNewItemsSinceFreeze (state) {
+    if (!state.freezeSorting) {
+      return 0
+    }
+    return differenceBy(state.filteredShoots, state.freezedShoots, 'metadata.uid').length
   }
 }

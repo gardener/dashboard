@@ -16,24 +16,41 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-switch
-          v-model="freezeSorting"
-          v-if="!projectScope && isAdmin"
-          class="mr-3"
-          color="primary lighten-3"
-          hide-details>
-          <template v-slot:label>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <span v-on="on" class="text-subtitle-1 toolbar-title--text">Focus</span>
-              </template>
-              <span class="font-weight-bold">Freeze sorting of the Cluster List</span><br />
-              Items in the list will still be updated.<br />
-              New items will be added to the end of the list.<br />
-              Removed items will be shown as stale (greyed out).
-            </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-badge
+                class="mr-5"
+                bordered
+                color="primary lighten-3"
+                :content="numberOfNewItemsSinceFreeze"
+                :value="numberOfNewItemsSinceFreeze > 0"
+                overlap
+              >
+                <v-switch
+                  v-model="freezeSorting"
+                  v-if="!projectScope && isAdmin"
+                  class="mr-3"
+                  color="primary lighten-3"
+                  hide-details>
+                  <template v-slot:label>
+                    <span class="text-subtitle-1 toolbar-title--text">Focus</span>
+                  </template>
+                </v-switch>
+              </v-badge>
+            </div>
           </template>
-        </v-switch>
+          <span class="font-weight-bold">Focus Mode</span><br />
+          Cluster List sorting is freezed.<br />
+          Items in the list will still be updated.<br />
+          New items will not be added to the list.<br />
+          Removed items will be shown as stale (greyed out).
+          <template v-if="numberOfNewItemsSinceFreeze > 0">
+            <v-divider color="white"></v-divider>
+            <span class="font-weight-bold">{{numberOfNewItemsSinceFreeze}}</span> new clusters were added to the list since you enabled focus mode.<br />
+            New clusters will not be added to the list until you disable focus mode.
+          </template>
+        </v-tooltip>
         <v-tooltip top v-if="shootSearch || items.length > 3">
           <template v-slot:activator="{ on }">
             <v-text-field
@@ -81,15 +98,6 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         :custom-sort="sortItems"
       >
-        <template v-slot:top>
-          <v-alert tile dense type="info" v-if="freezeSorting">
-            The cluster list is currently
-            <span class="font-weight-bold">freezed</span>.
-            Items in the list will still be updated.
-            New items will be added to the end of the list.
-            Removed items will be shown as stale (greyed out).
-          </v-alert>
-        </template>
         <template v-slot:item="{ item }">
           <shoot-list-row
             :shoot-item="item"
@@ -281,7 +289,8 @@ export default {
       latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
       sortItems: 'shoots/sortItems',
       searchItems: 'shoots/searchItems',
-      getFreezeSorting: 'shoots/getFreezeSorting'
+      getFreezeSorting: 'shoots/getFreezeSorting',
+      numberOfNewItemsSinceFreeze: 'shoots/numberOfNewItemsSinceFreeze'
     }),
     ...mapState([
       'shootsLoading',
