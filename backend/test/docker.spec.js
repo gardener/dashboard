@@ -12,10 +12,6 @@ const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 const { DockerfileParser } = require('dockerfile-ast')
-const { extend, globalAgent } = jest.requireActual('@gardener-dashboard/request')
-const client = extend({
-  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/main/'
-})
 
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
@@ -33,11 +29,6 @@ const activeNodeReleases = {
   }
 }
 
-async function getNodeDockerfile (nodeVersion, alpineVersion) {
-  const body = await client.request(`${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
-  return DockerfileParser.parse(body)
-}
-
 async function getDashboardDockerfile () {
   const filename = path.join(__dirname, '..', '..', 'Dockerfile')
   const data = await readFile(filename, 'utf8')
@@ -45,12 +36,6 @@ async function getDashboardDockerfile () {
 }
 
 describe('dockerfile', function () {
-  const timeout = 15 * 1000
-
-  afterAll(() => {
-    globalAgent.destroy()
-  })
-
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
@@ -66,12 +51,6 @@ describe('dockerfile', function () {
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
     expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
-    const dashboardReleaseBaseImage = buildStages.release.getImage()
-    const [, alpineVersion] = /alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
-    const nodeDockerfile = await getNodeDockerfile(nodeRelease, alpineVersion)
-    expect(nodeDockerfile.getFROMs()).toHaveLength(1)
-    const nodeBaseImage = _.first(nodeDockerfile.getFROMs()).getImage()
-    // Alpine base images of "dashboard-release" image and "node" image do not match!
-    expect(dashboardReleaseBaseImage.endsWith(nodeBaseImage)).toBe(true)
-  }, timeout)
+    expect(buildStages.release.getImage()).toBe('scratch')
+  })
 })
