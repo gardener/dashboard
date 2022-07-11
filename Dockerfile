@@ -5,14 +5,7 @@
 #### Builder ####
 FROM node:18-alpine3.16 as builder
 
-# get the latest security upgrades and install tini
-RUN apk -U upgrade && apk add --no-cache tini 
-
-# create node user and group
-RUN echo 'node:x:1000:1000:node,,,:/home/node:/sbin/nologin' > /tmp/passwd \
- && echo 'node:x:1000:node' > /tmp/group
-
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
@@ -49,31 +42,44 @@ RUN yarn workspace @gardener-dashboard/backend     prod-install --pack /usr/src/
 # run frontend build
 RUN yarn workspace @gardener-dashboard/frontend    run build
 
-# copy files to production directory
-RUN cp -r frontend/dist /usr/src/build/public \
-    && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
+WORKDIR /volume
+
+RUN apk add --no-cache tini \
+    # tini and node binaries
+    && mkdir -p ./sbin ./usr/local/bin \
+    && cp /sbin/tini ./sbin/ \
+    && cp /usr/local/bin/node ./usr/local/bin/ \
+    # root ca certificates
+    && mkdir -p ./etc/ssl \
+    && cp -r /etc/ssl/certs ./etc/ssl \
+    # node user
+    && echo 'node:x:1000:1000:node,,,:/home/node:/sbin/nologin' > ./etc/passwd \
+    && echo 'node:x:1000:node' > ./etc/group \
+    && mkdir -p ./home/node \
+    && chown 1000:1000 ./home/node \
+    # libc, libgcc and libstdc++ libraries
+    && mkdir -p ./lib ./usr/lib \
+    && cp -d /lib/ld-musl-x86_64.so.* ./lib \
+    && cp -d /lib/libc.musl-x86_64.so.* ./lib \
+    && cp -d /usr/lib/libgcc_s.so.* ./usr/lib \
+    && cp -d /usr/lib/libstdc++.so.* ./usr/lib \
+    # application
+    && mv /usr/src/build ./app \
+    && find ./app/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} + \
+    && mv /app/frontend/dist ./app/public \
+    && chown -R 1000:1000 ./app
 
 #### Release ####
 FROM scratch as release
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 ENV NODE_ENV "production"
 
 ARG PORT=8080
 ENV PORT $PORT
 
-# copy users and groups
-COPY --from=builder /tmp/passwd /tmp/group /etc/
-
-# copy binaries
-COPY --from=builder /usr/local/bin/node  /sbin/tini /bin/
-
-# copy libraries
-COPY --from=builder /lib/ld-musl-x86_64.so* /usr/lib/libstdc++.so* /usr/lib/libgcc_s.so* /lib/
-
-# copy production directory
-COPY --chown=node:node --from=builder /usr/src/build .
+COPY --from=builder /volume /
 
 USER node
 
@@ -81,5 +87,5 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--experimental-loader=/app/.pnp.loader.mjs"]
 CMD ["server.js"]
