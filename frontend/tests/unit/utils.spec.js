@@ -7,7 +7,7 @@
 import map from 'lodash/map'
 
 import { getters } from '@/store'
-import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion } from '@/utils'
+import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion, getIssueSince } from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -519,6 +519,96 @@ describe('utils', () => {
 
       it('should return false on non-html color code', () => {
         expect(isHtmlColorCode('foo')).toBe(false)
+      })
+    })
+
+    describe('getIssueSince', () => {
+      const sampleStatuses = {
+        statusLastOperation: {
+          lastOperation: {
+            state: 'False',
+            lastUpdateTime: '2000-00-00T00:00:01Z'
+          }
+        },
+        statusLastOperationTrue: {
+          lastOperation: {
+            state: 'True',
+            lastUpdateTime: '2000-00-00T00:00:01Z'
+          }
+        },
+        statusCondition: {
+          conditions: [
+            {
+              status: 'True',
+              lastTransitionTime: '2000-00-00T00:00:02Z'
+            },
+            {
+              status: 'False',
+              lastTransitionTime: '2000-00-00T00:00:03Z'
+            },
+            {
+              status: 'False',
+              lastTransitionTime: '2000-00-00T00:00:04Z'
+            }
+          ]
+        },
+        statusConstraints: {
+          constraints: [
+            {
+              status: 'True',
+              lastTransitionTime: '2000-00-00T00:00:05Z'
+            },
+            {
+              status: 'False',
+              lastTransitionTime: '2000-00-00T00:00:06Z'
+            },
+            {
+              status: 'False',
+              lastTransitionTime: '2000-00-00T00:00:07Z'
+            }
+          ]
+        },
+        statusLastErrors: {
+          lastErrors: [
+            {
+              lastUpdateTime: '2000-00-00T00:00:08Z'
+            }
+          ]
+        }
+      }
+      sampleStatuses.statusAll = {
+        ...sampleStatuses.statusLastOperation,
+        ...sampleStatuses.statusCondition,
+        ...sampleStatuses.statusConstraints,
+        ...sampleStatuses.statusLastErrors
+      }
+
+      it('should not fail when zero', () => {
+        expect(getIssueSince(undefined)).toBe(undefined)
+      })
+
+      it('should return undefined for lastOperation == true', () => {
+        expect(getIssueSince({...sampleStatuses.statusLastOperationTrue})).toBe(undefined)
+      })
+
+      it('should return issue since for lastOperation', () => {
+        expect(getIssueSince({...sampleStatuses.statusLastOperation})).toBe('2000-00-00T00:00:01Z')
+      })
+
+      it('should return issue since for condition', () => {
+        expect(getIssueSince({...sampleStatuses.statusCondition})).toBe('2000-00-00T00:00:03Z')
+      })
+
+      it('should return issue since for constraint', () => {
+        expect(getIssueSince({...sampleStatuses.statusConstraints})).toBe('2000-00-00T00:00:06Z')
+      })
+
+      it('should return issue since for lastError', () => {
+        expect(getIssueSince({...sampleStatuses.statusLastErrors})).toBe('2000-00-00T00:00:08Z')
+      })
+
+      it('should return issue since for allIssues', () => {
+        expect(getIssueSince({...sampleStatuses.statusAll})).toBe('2000-00-00T00:00:01Z')
       })
     })
   })

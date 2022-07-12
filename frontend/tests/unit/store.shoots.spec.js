@@ -23,10 +23,13 @@ describe('store.shoots.getters', () => {
     shootCustomFieldList: undefined,
     latestUpdatedTicketByNameAndNamespace: undefined
   }
-  const state = {}
-  const sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
+  let state
+  let sortItems
 
   beforeEach(() => {
+    state = {}
+    sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
+
     shootItems = [
       {
         metadata: {
@@ -211,6 +214,51 @@ describe('store.shoots.getters', () => {
     expect(sortedShoots[0].metadata.name).toBe('shoot3')
     expect(sortedShoots[1].metadata.name).toBe('shoot1')
     expect(sortedShoots[2].metadata.name).toBe('shoot2')
+  })
+
+  it('should keep sorting static when shoot list is freezed', () => {
+    const sortBy = ['name']
+    const sortDesc = [false]
+    let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots[0].metadata.name).toBe('shoot1')
+
+    state.freezeSorting = true
+    sortedShoots[0].metadata.name = 'shoot4'
+    sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots[0].metadata.name).toBe('shoot4')
+  })
+
+  it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
+    const sortBy = ['name']
+    const sortDesc = [false]
+    let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots[0].stale).toBe(undefined)
+
+    state.freezeSorting = true
+    shootItems.splice(0,1)
+    expect(shootItems.length).toBe(2)
+    
+    sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots.length).toBe(3)
+    expect(sortedShoots[0].stale).toBe(true)
+  })
+
+  it('should not add new shoots to list when shoot list is freezed', () => {
+    const sortBy = ['issueSince']
+    const sortDesc = [false]
+    let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots.length).toBe(3)
+
+    state.freezeSorting = true
+    const newShoot = {
+      ...shootItems[0]
+    }
+    shootItems.push(newShoot)
+    newShoot.name = "shoot4"
+    expect(shootItems.length).toBe(4)
+
+    sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+    expect(sortedShoots.length).toBe(3)
   })
 })
 

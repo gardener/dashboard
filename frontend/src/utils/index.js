@@ -294,7 +294,7 @@ export function getIssueSince (shootStatus) {
   if (lastOperation.state === 'False') {
     issueTimestamps.push(lastOperation.lastUpdateTime)
   }
-  forEach([...get(shootStatus, 'conditions'), ...get(shootStatus, 'constraints')], readiness => {
+  forEach([...get(shootStatus, 'conditions', []), ...get(shootStatus, 'constraints', [])], readiness => {
     if (readiness.status !== 'True') {
       issueTimestamps.push(readiness.lastTransitionTime)
     }
