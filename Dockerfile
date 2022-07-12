@@ -5,7 +5,7 @@
 #### Builder ####
 FROM node:18-alpine3.16 as builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
@@ -42,28 +42,44 @@ RUN yarn workspace @gardener-dashboard/backend     prod-install --pack /usr/src/
 # run frontend build
 RUN yarn workspace @gardener-dashboard/frontend    run build
 
-# copy files to production directory
-RUN cp -r frontend/dist /usr/src/build/public \
-    && find /usr/src/build/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} +
+WORKDIR /volume
+
+RUN apk add --no-cache tini \
+    # tini and node binaries
+    && mkdir -p ./sbin ./usr/local/bin \
+    && cp /sbin/tini ./sbin/ \
+    && cp /usr/local/bin/node ./usr/local/bin/ \
+    # root ca certificates
+    && mkdir -p ./etc/ssl \
+    && cp -r /etc/ssl/certs ./etc/ssl \
+    # node user
+    && echo 'node:x:1000:1000:node,,,:/home/node:/sbin/nologin' > ./etc/passwd \
+    && echo 'node:x:1000:node' > ./etc/group \
+    && mkdir -p ./home/node \
+    && chown 1000:1000 ./home/node \
+    # libc, libgcc and libstdc++ libraries
+    && mkdir -p ./lib ./usr/lib \
+    && cp -d /lib/ld-musl-x86_64.so.* ./lib \
+    && cp -d /lib/libc.musl-x86_64.so.* ./lib \
+    && cp -d /usr/lib/libgcc_s.so.* ./usr/lib \
+    && cp -d /usr/lib/libstdc++.so.* ./usr/lib \
+    # application
+    && mv /usr/src/build ./app \
+    && find ./app/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} + \
+    && mv /app/frontend/dist ./app/public \
+    && chown -R 1000:1000 ./app
 
 #### Release ####
-FROM alpine:3.16 as release
+FROM scratch as release
 
-RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
-RUN apk add --no-cache tini libstdc++
-
-WORKDIR /usr/src/app
+WORKDIR /app
 
 ENV NODE_ENV "production"
 
 ARG PORT=8080
 ENV PORT $PORT
 
-# copy node binary
-COPY --from=builder /usr/local/bin/node /usr/local/bin/
-
-# copy production directory
-COPY --chown=node:node --from=builder /usr/src/build .
+COPY --from=builder /volume /
 
 USER node
 
@@ -71,5 +87,5 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "--require=/usr/src/app/.pnp.cjs", "--experimental-loader=/usr/src/app/.pnp.loader.mjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--experimental-loader=/app/.pnp.loader.mjs"]
 CMD ["server.js"]
