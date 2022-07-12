@@ -69,23 +69,11 @@ describe('kube-config', () => {
       ac.abort()
     })
 
-    it('should return the test config', () => {
-      const config = load()
-      expect(config).toEqual({
-        url: server.origin,
-        rejectUnauthorized: true,
-        auth: {
-          bearer: token
-        }
-      })
-    })
-
     it('should return the in cluster config', async () => {
       fs.readFileSync
         .mockReturnValueOnce(token)
         .mockReturnValueOnce(ca)
       const config = await loadConfig({
-        NODE_ENV: 'development',
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
       })
@@ -112,7 +100,6 @@ describe('kube-config', () => {
       })
       fs.readFileSync.mockReturnValue(kubeconfig)
       const config = await loadConfig({
-        NODE_ENV: 'development',
         KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config'
       })
       expect(fs.readFileSync).toHaveBeenCalledTimes(1)
@@ -331,7 +318,7 @@ describe('kube-config', () => {
       })
     }
     it('should fail with "kubernetes service endpoint not defined"', () => {
-      expect(() => getInCluster()).toThrow(/kubernetes service endpoint not defined$/)
+      expect(() => getInCluster({})).toThrow(/kubernetes service endpoint not defined$/)
     })
 
     it('should fail with "serviceaccount token not found"', () => {

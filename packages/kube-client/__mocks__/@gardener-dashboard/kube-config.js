@@ -6,12 +6,16 @@
 
 'use strict'
 
-const { load, ...kubeconfig } = jest.requireActual('@gardener-dashboard/kube-config')
+const { Config, ClientConfig, ...originalKubeconfig } = jest.requireActual('@gardener-dashboard/kube-config')
 
-const mockLoadResult = load({ NODE_ENV: 'test' })
+const mockLoadResult = new ClientConfig(Config.build({
+  server: 'https://kubernetes:6443'
+}, {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
+}))
 
 module.exports = {
-  ...kubeconfig,
+  ...originalKubeconfig,
   load: jest.fn().mockReturnValue(mockLoadResult),
   mockLoadResult
 }

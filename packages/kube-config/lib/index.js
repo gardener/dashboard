@@ -62,15 +62,9 @@ function inClusterConfig ({
   })
 }
 
-function testConfig () {
-  return Config.build({
-    server: 'https://kubernetes:6443'
-  }, {
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
-  })
-}
-
 exports = module.exports = {
+  Config,
+  ClientConfig,
   constants: {
     KUBERNETES_SERVICEACCOUNT_CA_FILE,
     KUBERNETES_SERVICEACCOUNT_TOKEN_FILE
@@ -91,13 +85,9 @@ exports = module.exports = {
       { userName, contextName, clusterName, namespace }
     ).toYAML()
   },
-  load (env = process.env, options) {
+  load (env, options) {
     let config
-    let reactive = true
-    if (/^test/.test(env.NODE_ENV)) {
-      config = testConfig()
-      reactive = false
-    } else if (env.KUBECONFIG) {
+    if (env.KUBECONFIG) {
       config = readKubeconfig(env.KUBECONFIG)
     } else {
       try {
@@ -106,9 +96,9 @@ exports = module.exports = {
         config = readKubeconfig()
       }
     }
-    return new ClientConfig(config, { ...options, reactive })
+    return new ClientConfig(config, { ...options, reactive: true })
   },
-  getInCluster (env = process.env) {
+  getInCluster (env) {
     try {
       return new ClientConfig(inClusterConfig(env))
     } catch (err) {
