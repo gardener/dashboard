@@ -192,34 +192,30 @@ export default {
     let sortedItemsAtFreeze
     let sortByArrAtFreeze
     let sortDescArrAtFreeze
-    return (items, sortByArr, sortDescArr) => {
-      const searchStringChanged = state.freezeSorting && differenceBy(items, sortedItemsAtFreeze, 'metadata.uid').length > 0
 
-      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
-      if (state.freezeSorting && sortByArrAtFreeze === sortByArr && sortDescArrAtFreeze === sortDescArr && !searchStringChanged) {
-        // If freezed, the list is static items are not added and removed and the order is defined by the cached array
-        return compact(map(sortedItemsAtFreeze, sortedItem => {
-          const storeItem = find(state.filteredShoots, item => {
+    const sortedStaticList = (currentItems) => {
+      return compact(map(sortedItemsAtFreeze, sortedItem => {
+        const storeItem = find(state.filteredShoots, item => {
+          return item.metadata.uid === sortedItem.metadata.uid
+        })
+        if (storeItem) { // check that item is still in store (not removed from socket.io room)
+          const tableContainsItem = some(currentItems, item => { // check that item shall still be visible in table
             return item.metadata.uid === sortedItem.metadata.uid
           })
-          if (storeItem) { // check that item is still in store (not removed from socket.io room)
-            const tableContainsItem = some(items, item => { // check that item shall still be visible in table
-              return item.metadata.uid === sortedItem.metadata.uid
-            })
-            if (!tableContainsItem) {
-              return undefined // item not in table (filtered via table search)
-            }
-            return storeItem
+          if (!tableContainsItem) {
+            return undefined // item not in table (filtered via table search)
           }
-          // Keep Items that are no longer in the store as stale items, to keep the list static
-          return {
-            ...sortedItem,
-            stale: true // Flag them so that the UI can render them accordingly
-          }
-        }))
-      }
+          return storeItem
+        }
+        // Keep Items that are no longer in the store as stale items, to keep the list static
+        return {
+          ...sortedItem,
+          stale: true // Flag them so that the UI can render them accordingly
+        }
+      }))
+    }
 
-      // Regular sorting logic
+    const sortedList = (items, sortByArr, sortDescArr) => {
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
@@ -278,6 +274,24 @@ export default {
       sortDescArrAtFreeze = sortDescArr
 
       return items
+    }
+
+    return (items, sortByArr, sortDescArr) => {
+      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
+      if (state.freezeSorting) {
+        const searchStringChanged = state.freezeSorting && differenceBy(items, sortedItemsAtFreeze, 'metadata.uid').length > 0
+        if (sortByArrAtFreeze === sortByArr && sortDescArrAtFreeze === sortDescArr && !searchStringChanged) {
+          // If freezed, the list is static items are not added and removed and the order is defined by the cached array
+          return sortedStaticList(items)
+        }
+
+        // If the sorting or search has changed, the list needs to be re-sorted
+        sortedItemsAtFreeze = sortedList(sortedItemsAtFreeze, sortByArr, sortDescArr)
+        return sortedStaticList(items)
+      }
+
+      // Regular sorting logic
+      return sortedList(items, sortByArr, sortDescArr)
     }
   },
   numberOfNewItemsSinceFreeze (state) {
