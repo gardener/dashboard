@@ -16,7 +16,7 @@ describe('kube-client', () => {
     const bearer = 'bearer'
     const namespace = 'namespace'
     const name = 'name'
-    const server = 'server'
+    const server = 'https://kubernetes:6443'
 
     const certificateAuthorityData = Buffer.from('certificate-authority-data').toString('base64')
     const clientCertificateData = Buffer.from('client-certificate-data').toString('base64')
@@ -46,6 +46,18 @@ describe('kube-client', () => {
       const kubeconfig = await testClient.getKubeconfig({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
       expect(kubeconfig.currentUser.token).toBe(bearer)
+    })
+
+    it('should create a client from a kubeconfig', async () => {
+      const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
+      getSecretStub.mockReturnValue({
+        data: {
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
+        }
+      })
+      const client = await testClient.createKubeconfigClient({ namespace, name })
+      expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
+      expect(client.cluster.server.hostname).toBe('kubernetes')
     })
 
     it('should get shoot adminkubeconfig', async () => {
