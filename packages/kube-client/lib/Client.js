@@ -100,9 +100,6 @@ class Client {
 
     const adminKubeconfigRequest = await this['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
     const kubeconfigBase64 = _.get(adminKubeconfigRequest, 'status.kubeconfig')
-    if (!kubeconfigBase64) {
-      throw NotFound('No "kubeconfig" found in shoots/adminkubeconfig')
-    }
     return parseKubeconfig(decodeBase64(kubeconfigBase64))
   }
 
