@@ -103,6 +103,9 @@ data:
         description: {{ .description }}
       {{- end }}
       {{- end }}
+      {{- if .Values.terminal.serviceAccountTokenExpiration }}
+      serviceAccountTokenExpiration: {{ .Values.terminal.serviceAccountTokenExpiration }}
+      {{- end }}
       gardenTerminalHost:
         {{- if .Values.terminal.gardenTerminalHost.secretRef }}
         apiServerIngressHost: {{ .Values.terminal.gardenTerminalHost.apiServerIngressHost }}
