@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row>
       <v-col cols="12">
-        <admin-kubeconfig v-model="enableStaticTokenKubeconfig"></admin-kubeconfig>
+        <static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig"></static-token-kubeconfig-switch>
       </v-col>
     </v-row>
     <v-row  v-if="slaDescriptionHtml">
@@ -85,7 +85,7 @@ import asyncRef from '@/mixins/asyncRef'
 
 import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import AdminKubeconfig from '@/components/AdminKubeconfig'
+import StaticTokenKubeconfigSwitch from '@/components/StaticTokenKubeconfigSwitch'
 
 const Purpose = () => import('@/components/Purpose')
 
@@ -108,7 +108,7 @@ export default {
   components: {
     HintColorizer,
     Purpose,
-    AdminKubeconfig
+    StaticTokenKubeconfigSwitch
   },
   mixins: [
     asyncRef('purpose')

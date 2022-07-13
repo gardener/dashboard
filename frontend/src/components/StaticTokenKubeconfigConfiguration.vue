@@ -10,27 +10,28 @@ SPDX-License-Identifier: Apache-2.0
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     width="450"
+    confirm-required
     caption="Configure Admin Kubeconfig">
     <template v-slot:actionComponent>
-      <admin-kubeconfig
+      <static-token-kubeconfig-switch
         v-model="enableStaticTokenKubeconfig"
-      ></admin-kubeconfig>
+      ></static-token-kubeconfig-switch>
     </template>
   </action-button-dialog>
 </template>
 
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import AdminKubeconfig from '@/components/AdminKubeconfig'
+import StaticTokenKubeconfigSwitch from '@/components/StaticTokenKubeconfigSwitch'
 import { updateShootEnableStaticTokenKubeconfig } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import shootItem from '@/mixins/shootItem'
 
 export default {
-  name: 'admin-kubeconfig-configuration',
+  name: 'StaticTokenKubeconfigConfiguration',
   components: {
     ActionButtonDialog,
-    AdminKubeconfig
+    StaticTokenKubeconfigSwitch
   },
   mixins: [
     shootItem

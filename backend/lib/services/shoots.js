@@ -84,7 +84,7 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
 
 exports.replaceEnableStaticTokenKubeconfig = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const enableStaticTokenKubeconfig = body.enableStaticTokenKubeconfig
+  const enableStaticTokenKubeconfig = body.enableStaticTokenKubeconfig === true
   const patchOperations = [{
     op: 'replace',
     path: '/spec/kubernetes/enableStaticTokenKubeconfig',

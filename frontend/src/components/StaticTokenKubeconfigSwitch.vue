@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
-  name: 'AdminKubeconfig',
+  name: 'StaticTokenKubeconfigSwitch',
   components: {
     ExternalLink
   },

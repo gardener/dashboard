@@ -127,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action class="mx-0">
-        <admin-kubeconfig-configuration :shootItem="shootItem"></admin-kubeconfig-configuration>
+        <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
       </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
@@ -150,7 +150,7 @@ import TerminalListTile from '@/components/TerminalListTile'
 import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
-import AdminKubeconfigConfiguration from '@/components/AdminKubeconfigConfiguration'
+import StaticTokenKubeconfigConfiguration from '@/components/StaticTokenKubeconfigConfiguration'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import download from 'downloadjs'
@@ -166,7 +166,7 @@ export default {
     LinkListTile,
     GardenctlCommands,
     TerminalShortcutsTile,
-    AdminKubeconfigConfiguration
+    StaticTokenKubeconfigConfiguration
   },
   props: {
     hideTerminalShortcuts: {
