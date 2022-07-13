@@ -523,92 +523,77 @@ describe('utils', () => {
     })
 
     describe('getIssueSince', () => {
-      const sampleStatuses = {
-        statusLastOperation: {
+      let status
+
+      beforeEach(() => {
+        status = {
           lastOperation: {
             state: 'False',
-            lastUpdateTime: '2000-00-00T00:00:01Z'
-          }
-        },
-        statusLastOperationTrue: {
-          lastOperation: {
-            state: 'True',
-            lastUpdateTime: '2000-00-00T00:00:01Z'
-          }
-        },
-        statusCondition: {
+            lastUpdateTime: '2000-01-01T00:00:01Z'
+          },
           conditions: [
             {
               status: 'True',
-              lastTransitionTime: '2000-00-00T00:00:02Z'
+              lastTransitionTime: '2000-01-01T00:00:02Z'
             },
             {
               status: 'False',
-              lastTransitionTime: '2000-00-00T00:00:03Z'
+              lastTransitionTime: '2000-01-01T00:00:03Z'
             },
             {
               status: 'False',
-              lastTransitionTime: '2000-00-00T00:00:04Z'
+              lastTransitionTime: '2000-01-01T00:00:04Z'
             }
-          ]
-        },
-        statusConstraints: {
+          ],
           constraints: [
             {
               status: 'True',
-              lastTransitionTime: '2000-00-00T00:00:05Z'
+              lastTransitionTime: '2000-01-01T00:00:05Z'
             },
             {
               status: 'False',
-              lastTransitionTime: '2000-00-00T00:00:06Z'
+              lastTransitionTime: '2000-01-01T00:00:06Z'
             },
             {
               status: 'False',
-              lastTransitionTime: '2000-00-00T00:00:07Z'
+              lastTransitionTime: '2000-01-01T00:00:07Z'
             }
-          ]
-        },
-        statusLastErrors: {
+          ],
           lastErrors: [
             {
-              lastUpdateTime: '2000-00-00T00:00:08Z'
+              lastUpdateTime: '2000-01-01T00:00:08Z'
             }
           ]
         }
-      }
-      sampleStatuses.statusAll = {
-        ...sampleStatuses.statusLastOperation,
-        ...sampleStatuses.statusCondition,
-        ...sampleStatuses.statusConstraints,
-        ...sampleStatuses.statusLastErrors
-      }
+      })
 
       it('should not fail when zero', () => {
-        expect(getIssueSince(undefined)).toBe(undefined)
+        expect(getIssueSince()).toBeUndefined()
       })
 
       it('should return undefined for lastOperation == true', () => {
-        expect(getIssueSince({...sampleStatuses.statusLastOperationTrue})).toBe(undefined)
+        status.lastOperation.state = 'True'
+        expect(getIssueSince(pick(status, 'lastOperation'))).toBeUndefined()
       })
 
       it('should return issue since for lastOperation', () => {
-        expect(getIssueSince({...sampleStatuses.statusLastOperation})).toBe('2000-00-00T00:00:01Z')
+        expect(getIssueSince(pick(status, 'lastOperation'))).toBe('2000-01-01T00:00:01Z')
       })
 
       it('should return issue since for condition', () => {
-        expect(getIssueSince({...sampleStatuses.statusCondition})).toBe('2000-00-00T00:00:03Z')
+        expect(getIssueSince(pick(status, 'conditions'))).toBe('2000-01-01T00:00:03Z')
       })
 
       it('should return issue since for constraint', () => {
-        expect(getIssueSince({...sampleStatuses.statusConstraints})).toBe('2000-00-00T00:00:06Z')
+        expect(getIssueSince(pick(status, 'constraints'))).toBe('2000-01-01T00:00:06Z')
       })
 
       it('should return issue since for lastError', () => {
-        expect(getIssueSince({...sampleStatuses.statusLastErrors})).toBe('2000-00-00T00:00:08Z')
+        expect(getIssueSince(pick(status, 'lastErrors'))).toBe('2000-01-01T00:00:08Z')
       })
 
       it('should return issue since for allIssues', () => {
-        expect(getIssueSince({...sampleStatuses.statusAll})).toBe('2000-00-00T00:00:01Z')
+        expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
       })
     })
   })

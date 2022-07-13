@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-tooltip top>
+        <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <div v-on="on">
               <v-badge
