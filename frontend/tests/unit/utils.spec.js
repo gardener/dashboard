@@ -5,6 +5,7 @@
 //
 
 import map from 'lodash/map'
+import pick from 'lodash/pick'
 
 import { getters } from '@/store'
 import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion, getIssueSince } from '@/utils'
@@ -505,96 +506,96 @@ describe('utils', () => {
         expect(defaultCriNameByKubernetesVersion(['cri1', 'cri2'], '1.22.0')).toBe('cri1')
       })
     })
+  })
 
-    describe('html color code', () => {
-      it('should not fail when zero', () => {
-        expect(isHtmlColorCode(undefined)).toBe(false)
-        expect(isHtmlColorCode(null)).toBe(false)
-      })
-
-      it('should return true on html color code', () => {
-        expect(isHtmlColorCode('#0b8062')).toBe(true)
-        expect(isHtmlColorCode('#FfFfFf')).toBe(true)
-      })
-
-      it('should return false on non-html color code', () => {
-        expect(isHtmlColorCode('foo')).toBe(false)
-      })
+  describe('html color code', () => {
+    it('should not fail when zero', () => {
+      expect(isHtmlColorCode(undefined)).toBe(false)
+      expect(isHtmlColorCode(null)).toBe(false)
     })
 
-    describe('getIssueSince', () => {
-      let status
+    it('should return true on html color code', () => {
+      expect(isHtmlColorCode('#0b8062')).toBe(true)
+      expect(isHtmlColorCode('#FfFfFf')).toBe(true)
+    })
 
-      beforeEach(() => {
-        status = {
-          lastOperation: {
-            state: 'False',
-            lastUpdateTime: '2000-01-01T00:00:01Z'
+    it('should return false on non-html color code', () => {
+      expect(isHtmlColorCode('foo')).toBe(false)
+    })
+  })
+
+  describe('getIssueSince', () => {
+    let status
+
+    beforeEach(() => {
+      status = {
+        lastOperation: {
+          state: 'False',
+          lastUpdateTime: '2000-01-01T00:00:01Z'
+        },
+        conditions: [
+          {
+            status: 'True',
+            lastTransitionTime: '2000-01-01T00:00:02Z'
           },
-          conditions: [
-            {
-              status: 'True',
-              lastTransitionTime: '2000-01-01T00:00:02Z'
-            },
-            {
-              status: 'False',
-              lastTransitionTime: '2000-01-01T00:00:03Z'
-            },
-            {
-              status: 'False',
-              lastTransitionTime: '2000-01-01T00:00:04Z'
-            }
-          ],
-          constraints: [
-            {
-              status: 'True',
-              lastTransitionTime: '2000-01-01T00:00:05Z'
-            },
-            {
-              status: 'False',
-              lastTransitionTime: '2000-01-01T00:00:06Z'
-            },
-            {
-              status: 'False',
-              lastTransitionTime: '2000-01-01T00:00:07Z'
-            }
-          ],
-          lastErrors: [
-            {
-              lastUpdateTime: '2000-01-01T00:00:08Z'
-            }
-          ]
-        }
-      })
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:03Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:04Z'
+          }
+        ],
+        constraints: [
+          {
+            status: 'True',
+            lastTransitionTime: '2000-01-01T00:00:05Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:06Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:07Z'
+          }
+        ],
+        lastErrors: [
+          {
+            lastUpdateTime: '2000-01-01T00:00:08Z'
+          }
+        ]
+      }
+    })
 
-      it('should not fail when zero', () => {
-        expect(getIssueSince()).toBeUndefined()
-      })
+    it('should not fail when zero', () => {
+      expect(getIssueSince()).toBeUndefined()
+    })
 
-      it('should return undefined for lastOperation == true', () => {
-        status.lastOperation.state = 'True'
-        expect(getIssueSince(pick(status, 'lastOperation'))).toBeUndefined()
-      })
+    it('should return undefined for lastOperation == true', () => {
+      status.lastOperation.state = 'True'
+      expect(getIssueSince(pick(status, 'lastOperation'))).toBeUndefined()
+    })
 
-      it('should return issue since for lastOperation', () => {
-        expect(getIssueSince(pick(status, 'lastOperation'))).toBe('2000-01-01T00:00:01Z')
-      })
+    it('should return issue since for lastOperation', () => {
+      expect(getIssueSince(pick(status, 'lastOperation'))).toBe('2000-01-01T00:00:01Z')
+    })
 
-      it('should return issue since for condition', () => {
-        expect(getIssueSince(pick(status, 'conditions'))).toBe('2000-01-01T00:00:03Z')
-      })
+    it('should return issue since for condition', () => {
+      expect(getIssueSince(pick(status, 'conditions'))).toBe('2000-01-01T00:00:03Z')
+    })
 
-      it('should return issue since for constraint', () => {
-        expect(getIssueSince(pick(status, 'constraints'))).toBe('2000-01-01T00:00:06Z')
-      })
+    it('should return issue since for constraint', () => {
+      expect(getIssueSince(pick(status, 'constraints'))).toBe('2000-01-01T00:00:06Z')
+    })
 
-      it('should return issue since for lastError', () => {
-        expect(getIssueSince(pick(status, 'lastErrors'))).toBe('2000-01-01T00:00:08Z')
-      })
+    it('should return issue since for lastError', () => {
+      expect(getIssueSince(pick(status, 'lastErrors'))).toBe('2000-01-01T00:00:08Z')
+    })
 
-      it('should return issue since for allIssues', () => {
-        expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
-      })
+    it('should return issue since for allIssues', () => {
+      expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
     })
   })
 })
