@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
-        <!-- TODO check for static kubeconfig enabled when PR merged -->
+        v-if="shootEnableStaticTokenKubeconfig"
         title="Rotate Kubeconfig"
         :shoot-item="shootItem"
         type="kubeconfig"
