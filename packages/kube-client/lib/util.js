@@ -20,10 +20,6 @@ const PatchType = {
   JSON: 'json'
 }
 
-function encodeBase64 (value) {
-  return Buffer.from(value, 'utf8').toString('base64')
-}
-
 function decodeBase64 (value) {
   return Buffer.from(value, 'base64').toString('utf8')
 }
@@ -40,7 +36,7 @@ function setAuthorization (options, type, credentials) {
   type = type.toLowerCase()
   switch (type) {
     case 'basic':
-      return setHeader(options, HTTP2_HEADER_AUTHORIZATION, `Basic ${encodeBase64(credentials)}`)
+      return setHeader(options, HTTP2_HEADER_AUTHORIZATION, `Basic ${Buffer.from(credentials, 'utf8').toString('base64')}`)
     case 'bearer':
       return setHeader(options, HTTP2_HEADER_AUTHORIZATION, `Bearer ${credentials}`)
     default:
@@ -96,7 +92,6 @@ function validateLabelValue (name) {
 }
 
 exports = module.exports = {
-  encodeBase64,
   decodeBase64,
   setHeader,
   setAuthorization,

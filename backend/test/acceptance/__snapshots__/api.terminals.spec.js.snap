@@ -824,15 +824,6 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.kubeconfig",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals",
       ":scheme": "https",
@@ -858,8 +849,8 @@ Array [
       "spec": Object {
         "host": Object {
           "credentials": Object {
-            "secretRef": Object {
-              "name": "fooShoot.kubeconfig",
+            "shootRef": Object {
+              "name": "fooShoot",
               "namespace": "garden-foo",
             },
           },
@@ -905,8 +896,8 @@ Array [
             ],
           },
           "credentials": Object {
-            "secretRef": Object {
-              "name": "fooShoot.kubeconfig",
+            "shootRef": Object {
+              "name": "fooShoot",
               "namespace": "garden-foo",
             },
           },
@@ -961,15 +952,22 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.kubeconfig",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot/adminkubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    Object {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": Object {
+        "expirationSeconds": 600,
+      },
     },
   ],
   Array [
     Object {
-      ":authority": "api.fooshoot.foo.shoot.cluster",
+      ":authority": "shootapiserverhostname:6443",
       ":method": "get",
       ":path": "/api/v1/nodes",
       ":scheme": "https",
@@ -1054,15 +1052,6 @@ Array [
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.ca-cluster",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.kubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
