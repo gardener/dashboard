@@ -235,9 +235,9 @@ describe('store.shoots.getters', () => {
     expect(sortedShoots[0].stale).toBe(undefined)
 
     state.freezeSorting = true
-    shootItems.splice(0,1)
+    shootItems.splice(0, 1)
     expect(shootItems.length).toBe(2)
-    
+
     sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots.length).toBe(3)
     expect(sortedShoots[0].stale).toBe(true)
@@ -254,7 +254,7 @@ describe('store.shoots.getters', () => {
       ...shootItems[0]
     }
     shootItems.push(newShoot)
-    newShoot.name = "shoot4"
+    newShoot.name = 'shoot4'
     expect(shootItems.length).toBe(4)
 
     sortedShoots = sortItems(shootItems, sortBy, sortDesc)
