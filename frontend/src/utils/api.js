@@ -4,58 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
+import fetch from './fetch'
 
-/* General Purpose */
-async function toPlainResponseObject (response) {
-  const { status, statusText } = response
-  const contentType = response.headers.get('Content-Type')
-  const headers = {}
-  for (const [key, value] of response.headers.entries()) {
-    headers[key] = value
-  }
-  let data
-  if (contentType && typeof contentType === 'string') {
-    const [mediaType] = contentType.split(';')
-    switch (mediaType.trim()) {
-      case 'application/json':
-        data = await response.json()
-        break
-      default:
-        data = await response.text()
-        break
-    }
-  }
-  return {
-    status,
-    statusText,
-    headers,
-    data
-  }
-}
-
-async function request (method, url, data) {
-  const options = {
-    method,
-    cache: 'no-cache',
-    headers: {
-      Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  }
-  if (data) {
-    options.headers['Content-Type'] = 'application/json'
-    options.body = JSON.stringify(data)
-  }
-  let response = await fetch(url, options)
-  response = await toPlainResponseObject(response)
-  const { status } = response
-  if (status >= 200 && status < 300) {
-    return response
-  }
-  const error = new Error(`Request failed with status code ${status}`)
-  error.response = response
-  throw error
+function request (method, url, data) {
+  return fetch(url, { method, body: data })
 }
 
 function getResource (url) {
@@ -202,8 +154,8 @@ export function updateShootDns ({ namespace, name, data }) {
 }
 
 export async function getShootSchemaDefinition () {
-  const definitions = await getResource('/api/openapi')
-  return get(definitions, ['data', 'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'])
+  const { data = {} } = await getResource('/api/openapi')
+  return data['com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot']
 }
 
 export function updateShootPurpose ({ namespace, name, data }) {
