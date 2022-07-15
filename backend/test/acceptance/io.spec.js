@@ -106,16 +106,13 @@ describe('socket.io', function () {
       return new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
     }
 
-    async function subscribeShoots (options = {}) {
+    async function subscribeShoots ({ namespace = '_all', ...options } = {}) {
       const asyncIterator = pEvent.iterator(socket, 'shoots', {
         timeout: 1000,
         resolutionEvents: ['subscription_done'],
         rejectionEvents: ['error', 'subscription_error']
       })
-      const event = !options.namespace
-        ? 'subscribeAllShoots'
-        : 'subscribeShoots'
-      socket.emit(event, options)
+      socket.emit('subscribeShoots', { namespace, ...options })
       const shootsByNamespace = {}
       for await (const namespacedEvent of asyncIterator) {
         for (const [key, items] of Object.entries(namespacedEvent.namespaces)) {
