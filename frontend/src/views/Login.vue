@@ -80,6 +80,7 @@ import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
+import { createTokenReview } from '@/utils/api'
 import GSnotify from '@/components/GSnotify.vue'
 import {
   getLoginConfiguration
@@ -157,7 +158,7 @@ export default {
       try {
         const token = this.token
         this.token = undefined
-        await this.$auth.signinWithToken(token)
+        await createTokenReview({ token })
         this.dialog = false
         try {
           await this.$router.push(this.redirectPath)
