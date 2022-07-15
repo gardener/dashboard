@@ -56,6 +56,7 @@ import {
 import { mapGetters } from 'vuex'
 
 export default {
+  name: 'shoot-messages',
   components: {
     GPopper,
     K8sExpirationMessage,

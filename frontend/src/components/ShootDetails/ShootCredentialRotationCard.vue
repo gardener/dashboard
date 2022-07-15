@@ -27,16 +27,9 @@ SPDX-License-Identifier: Apache-2.0
         :shoot-item="shootItem"
         type="certificateAuthorities"
         dense
-        >
-          <template v-slot:subtitle v-if="!isCACertificateValiditiesAcceptable">
-            <v-list-item-subtitle class="d-flex align-center pt-1">
-              <shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
-              <span color="warning">Certificate Authorities will expire in less than one year</span>
-            </v-list-item-subtitle>
-          </template>
-        </credential-tile>
-        <template v-if="shootPurpose!=='testing'">
-              <credential-tile
+        ></credential-tile>
+        <template v-if="!isTestingCluster">
+          <credential-tile
             icon="mdi-developer-board"
             title="Observability Passwords"
             :shoot-item="shootItem"
@@ -68,22 +61,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import CredentialTile from '@/components/CredentialTile'
-import ShootMessages from '@/components/ShootMessages/ShootMessages'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    CredentialTile,
-    ShootMessages
+    CredentialTile
   },
-  mixins: [shootItem],
-  computed: {
-    caColor () {
-      if (!this.isCACertificateValiditiesAcceptable) {
-        return 'warning'
-      }
-      return undefined
-    }
-  }
+  mixins: [shootItem]
 }
 </script>

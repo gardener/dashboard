@@ -1,0 +1,231 @@
+//
+// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Libraries
+import EventEmitter from 'events'
+import Vuex from 'vuex'
+import Vuetify from 'vuetify'
+import Vuelidate from 'vuelidate'
+
+// Components
+import ShootCredentialRotationCard from '@/components/ShootDetails/ShootCredentialRotationCard'
+
+// Utilities
+import { createLocalVue, mount } from '@vue/test-utils'
+
+describe('ShootCredentialRotation.vue', () => {
+  const localVue = createLocalVue()
+  localVue.use(Vuelidate)
+  localVue.use(Vuex)
+
+  let vuetify
+  let store
+  let shootItem
+
+  beforeEach(async () => {
+    shootItem = {
+      spec: {
+        kubernetes: {
+          enableStaticTokenKubeconfig: true
+        }
+      },
+      status: {
+        credentials: {
+          rotation: {
+            certificateAuthorities: {
+              phase: 'Prepared',
+              lastInitiationTime: '2022-07-05T09:22:33Z',
+              lastCompletionTime: '2022-07-05T08:39:03Z'
+            },
+            sshKeypair: {
+              lastInitiationTime: '2022-07-05T09:22:33Z',
+              lastCompletionTime: '2022-07-05T09:31:14Z'
+            },
+            observability: {
+              lastInitiationTime: '2022-07-05T10:01:02Z',
+              lastCompletionTime: '2022-07-05T10:01:42Z'
+            },
+            etcdEncryptionKey: {
+              phase: 'Completing',
+              lastInitiationTime: '2022-07-05T09:22:33Z',
+              lastCompletionTime: '2022-06-27T08:25:58Z'
+            },
+            serviceAccountKey: {
+              phase: 'Completed',
+              lastInitiationTime: '2022-07-05T09:22:33Z',
+              lastCompletionTime: '2022-07-05T09:47:32Z'
+            }
+          }
+        },
+        constraints: []
+      }
+    }
+
+    vuetify = new Vuetify()
+    store = new Vuex.Store({
+      getters: {
+        isAdmin: jest.fn().mockReturnValue(true)
+      }
+    })
+  })
+
+  describe('ShootCredentialRotationCard.vue', () => {
+    it('should have all credential tiles', () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      expect(credentialWrappers.length).toBe(7)
+    })
+
+    it('should hide not available tiles', () => {
+      shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
+      shootItem.spec.purpose = 'testing'
+
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      expect(credentialWrappers.length).toBe(5)
+    })
+  })
+
+  describe('CredentialTile.vue', () => {
+    it('should compute phase', () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [allWrapper, , certificateAuthoritiesWrapper, , , etcdEncryptionKeyWrapper, serviceAccountKeyWrapper] = credentialWrappers.wrappers
+
+      expect(certificateAuthoritiesWrapper.vm.phase).toBe('Prepared')
+      expect(certificateAuthoritiesWrapper.vm.phaseColor).toBe('primary')
+
+      expect(etcdEncryptionKeyWrapper.vm.phase).toBe('Completing')
+      expect(etcdEncryptionKeyWrapper.vm.phaseColor).toBe('info')
+
+      expect(serviceAccountKeyWrapper.vm.phase).toBe('Completed')
+      expect(serviceAccountKeyWrapper.vm.phaseColor).toBe('primary')
+
+      expect(allWrapper.vm.phase).toBe('Ambiguous')
+      expect(allWrapper.vm.phaseColor).toBe('warning')
+
+      shootItem.status.credentials.rotation.etcdEncryptionKey.phase = 'Prepared'
+      shootItem.status.credentials.rotation.serviceAccountKey.phase = 'Prepared'
+
+      expect(allWrapper.vm.phase).toBe('Prepared')
+      expect(allWrapper.vm.phaseColor).toBe('primary')
+    })
+
+    it('should compute lastInitiationTime / lastCompletionTime', () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [allWrapper, , certificateAuthoritiesWrapper] = credentialWrappers.wrappers
+
+      expect(certificateAuthoritiesWrapper.vm.lastInitiationTime).toBe('2022-07-05T09:22:33Z')
+      expect(certificateAuthoritiesWrapper.vm.lastCompletionTime).toBe('2022-07-05T08:39:03Z')
+
+      expect(allWrapper.vm.lastInitiationTime).toBe('2022-07-05T10:01:02Z')
+      expect(allWrapper.vm.lastCompletionTime).toBe('2022-07-05T10:01:42Z')
+    })
+
+    it('should show warning in case CACertificateValiditiesAcceptable constraint is false', async () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        },
+        mocks: {
+          $bus: new EventEmitter()
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [, , certificateAuthoritiesWrapper] = credentialWrappers.wrappers
+
+      let shootMessagesWrapper = certificateAuthoritiesWrapper.findComponent({ name: 'shoot-messages' })
+      expect(shootMessagesWrapper.exists()).toBe(false)
+      expect(certificateAuthoritiesWrapper.vm.iconColor).toBe('primary')
+
+      shootItem.status.constraints.push(
+        {
+          type: 'CACertificateValiditiesAcceptable',
+          status: 'False'
+        }
+      )
+      await certificateAuthoritiesWrapper.vm.$forceUpdate()
+
+      shootMessagesWrapper = certificateAuthoritiesWrapper.findComponent({ name: 'shoot-messages' })
+      expect(shootMessagesWrapper.exists()).toBe(true)
+      expect(certificateAuthoritiesWrapper.vm.iconColor).toBe('warning')
+    })
+  })
+
+  describe('RotateCredentials.vue', () => {
+    let allRotationWrapper
+    let certificateAuthoritiesRotationWrapper
+    let observabilityRotationWrapper
+    let etcdEncryptionKeyRotationWrapper
+    let serviceAccountKeyRotationWrapper
+
+    beforeEach(async () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [allTileWrapper, , certificateAuthoritiesTileWrapper, observabilityTileWrapper, , etcdEncryptionKeyTileWrapper, serviceAccountKeyTileWrapper] = credentialWrappers.wrappers
+
+      allRotationWrapper = allTileWrapper.findComponent({ name: 'rotate-credentials' })
+      certificateAuthoritiesRotationWrapper = certificateAuthoritiesTileWrapper.findComponent({ name: 'rotate-credentials' })
+      observabilityRotationWrapper = observabilityTileWrapper.findComponent({ name: 'rotate-credentials' })
+      etcdEncryptionKeyRotationWrapper = etcdEncryptionKeyTileWrapper.findComponent({ name: 'rotate-credentials' })
+      serviceAccountKeyRotationWrapper = serviceAccountKeyTileWrapper.findComponent({ name: 'rotate-credentials' })
+    })
+
+    it('should compute operation', () => {
+      expect(allRotationWrapper.vm.operation).toEqual(allRotationWrapper.vm.initOperation)
+      expect(certificateAuthoritiesRotationWrapper.vm.operation).toEqual(certificateAuthoritiesRotationWrapper.vm.completionOperation)
+      expect(etcdEncryptionKeyRotationWrapper.vm.operation).toEqual(etcdEncryptionKeyRotationWrapper.vm.completionOperation)
+      expect(serviceAccountKeyRotationWrapper.vm.operation).toEqual(serviceAccountKeyRotationWrapper.vm.initOperation)
+    })
+
+    it('should compute mode', () => {
+      expect(allRotationWrapper.vm.mode).toEqual('init')
+      expect(certificateAuthoritiesRotationWrapper.vm.mode).toEqual('complete')
+      expect(observabilityRotationWrapper.vm.mode).toEqual('rotate')
+      expect(etcdEncryptionKeyRotationWrapper.vm.mode).toEqual('complete')
+      expect(serviceAccountKeyRotationWrapper.vm.mode).toEqual('init')
+    })
+  })
+})

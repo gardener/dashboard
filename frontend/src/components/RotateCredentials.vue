@@ -57,6 +57,7 @@ import includes from 'lodash/includes'
 import get from 'lodash/get'
 
 export default {
+  name: 'rotate-credentials',
   components: {
     ActionButtonDialog
   },
