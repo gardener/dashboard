@@ -175,9 +175,7 @@ class ShootsSubscription extends AbstractSubscription {
     const { namespace, filter } = this.subscribeTo
 
     this.store.commit('SET_SHOOTS_LOADING', true)
-    if (namespace === '_all') {
-      this.socket.emit('subscribeAllShoots', { filter })
-    } else if (namespace) {
+    if (namespace) {
       this.socket.emit('subscribeShoots', { namespace, filter })
     } else {
       console.error(new Error('no namespace specified'))
