@@ -80,16 +80,8 @@ function leaveCommentsRooms (socket) {
   leaveRooms(socket, 'comments')
 }
 
-async function subscribeShoots (socket, { namespace, namespaces, filter, user }) {
+async function subscribeShoots (socket, { namespaces, filter, user }) {
   leaveShootsAndShootRoom(socket)
-
-  // subscribe for all namespaces or a single namespace
-  assert.ok(Array.isArray(namespaces) || namespace, 'Either namespaces or namespace is required')
-  if (!namespace) {
-    namespace = '_all'
-  } else {
-    namespaces = [namespace]
-  }
 
   /* join current rooms */
   const kind = 'shoots'
@@ -116,10 +108,6 @@ async function subscribeShoots (socket, { namespace, namespaces, filter, user })
     }
   }))
   batchEmitter.flush()
-  socket.emit('subscription_done', {
-    kind,
-    namespace
-  })
 }
 
 async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
@@ -156,10 +144,6 @@ async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
     })
   }
   batchEmitter.flush()
-  socket.emit('subscription_done', {
-    kind,
-    namespace: '_all'
-  })
 }
 
 async function subscribeShoot (socket, { namespace, name }) {
@@ -205,37 +189,23 @@ async function subscribeShoot (socket, { namespace, name }) {
   }
 }
 
-function registerShootHandlers (socket, cache) {
-  socket.on('subscribeAllShoots', async ({ filter }) => {
-    const kind = 'shoots'
-    try {
-      const user = getUserFromSocket(socket)
-      const namespaces = await listNamespaces(user)
-
-      if (await authorization.isAdmin(user)) {
-        subscribeShootsAdmin(socket, { namespaces, filter, user })
-      } else {
-        subscribeShoots(socket, { namespaces, filter, user })
-      }
-    } catch (err) {
-      logger.error('Socket %s: failed to subscribe to all shoots: %s', socket.id, err)
-      socket.emit('subscription_error', {
-        kind,
-        code: 500,
-        message: 'Failed to fetch clusters'
-      })
-    }
-  })
+function registerShootHandlers (socket) {
   socket.on('subscribeShoots', async ({ namespace, filter }) => {
     const kind = 'shoots'
     try {
       const user = getUserFromSocket(socket)
       const namespaces = await listNamespaces(user)
-      if (!_.includes(namespaces, namespace)) {
-        throw createError(403, `Not authorized to subscribe for shoots in namespace ${namespace}`)
-      }
 
-      subscribeShoots(socket, { namespace, filter, user })
+      if (namespace !== '_all') {
+        if (!_.includes(namespaces, namespace)) {
+          throw createError(403, `Not authorized to subscribe for shoots in namespace ${namespace}`)
+        }
+        subscribeShoots(socket, { namespaces: [namespace], filter, user })
+      } else if (await authorization.isAdmin(user)) {
+        subscribeShootsAdmin(socket, { namespaces, filter, user })
+      } else {
+        subscribeShoots(socket, { namespaces, filter, user })
+      }
     } catch (err) {
       logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
       socket.emit('subscription_error', {
@@ -244,6 +214,10 @@ function registerShootHandlers (socket, cache) {
         message: 'Failed to fetch clusters'
       })
     }
+    socket.emit('subscription_done', {
+      kind,
+      namespace
+    })
   })
   socket.on('subscribeShoot', async ({ name, namespace }, done) => {
     const object = await subscribeShoot(socket, { name, namespace })
@@ -318,7 +292,7 @@ function initializeServer (httpServer, cache) {
   // handle connections (see https://socket.io/docs/v3/server-application-structure/#each-file-registers-its-own-event-handlers)
   io.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
-    registerShootHandlers(socket, cache)
+    registerShootHandlers(socket)
     registerTicketHandlers(socket, cache, ticketCache)
     socket.on('disconnect', onDisconnect)
   })
