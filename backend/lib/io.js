@@ -6,7 +6,6 @@
 
 'use strict'
 
-const assert = require('assert').strict
 const _ = require('lodash')
 const createServer = require('socket.io')
 const logger = require('./logger')
