@@ -6,7 +6,6 @@
 
 import Vue from 'vue'
 import decode from 'jwt-decode'
-import { createTokenReview } from './api'
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 
@@ -47,10 +46,6 @@ export class UserManager {
 
   redirect (url) {
     window.location = url
-  }
-
-  signinWithToken (token) {
-    return createTokenReview({ token })
   }
 
   isUserLoggedIn () {
