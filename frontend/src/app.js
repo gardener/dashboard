@@ -7,12 +7,28 @@
 import Vue from 'vue'
 import store from '@/store'
 import createRouter from '@/router'
+import { registry, isHttpError } from '@/utils/fetch'
 
 Vue.config.productionTip = false
 
 const App = Vue.extend({
   name: 'app',
+  data () {
+    return {
+      unregister: () => {}
+    }
+  },
   created () {
+    const signout = () => this.$auth.signout()
+    this.unregister = registry.register({
+      error (err) {
+        console.error('Interceptor', err)
+        if (isHttpError(err) && err.statusCode === 401) {
+          setImmediate(signout)
+        }
+        return Promise.reject(err)
+      }
+    })
     // provide the keyboard events for dialogs. Dialogs can't catch keyboard events
     // if any input element of the dialog didn't have the focus.
     window.addEventListener('keyup', ({ key }) => {
@@ -33,6 +49,9 @@ const App = Vue.extend({
         this.$store.commit('SET_GARDENCTL_OPTIONS', JSON.parse(newValue))
       }
     }, false)
+  },
+  beforeDestroy () {
+    this.unregister()
   },
   render (createElement) {
     return createElement('router-view')
