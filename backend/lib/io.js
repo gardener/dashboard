@@ -199,11 +199,11 @@ function registerShootHandlers (socket) {
         if (!_.includes(namespaces, namespace)) {
           throw createError(403, `Not authorized to subscribe for shoots in namespace ${namespace}`)
         }
-        subscribeShoots(socket, { namespaces: [namespace], filter, user })
+        await subscribeShoots(socket, { namespaces: [namespace], filter, user })
       } else if (await authorization.isAdmin(user)) {
-        subscribeShootsAdmin(socket, { namespaces, filter, user })
+        await subscribeShootsAdmin(socket, { namespaces, filter, user })
       } else {
-        subscribeShoots(socket, { namespaces, filter, user })
+        await subscribeShoots(socket, { namespaces, filter, user })
       }
     } catch (err) {
       logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
