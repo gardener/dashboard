@@ -19,11 +19,14 @@ const registry = {
     }
   },
   clear () {
-    interceptors.splice(0, interceptors.length)
+    interceptors.splice(0, this.size)
+  },
+  get size () {
+    return interceptors.length
   }
 }
 
-function fetchInterceptor (url, { method = 'GET', cache = 'no-cache', headers, body, ...options } = {}) {
+function fetchWrapper (url, { method = 'GET', cache = 'no-cache', headers, body, ...options } = {}) {
   headers = {
     accept: 'application/json, text/*;q=0.9, */*;q=0.8',
     'x-requested-with': 'XMLHttpRequest',
@@ -31,7 +34,7 @@ function fetchInterceptor (url, { method = 'GET', cache = 'no-cache', headers, b
   }
   if (body) {
     if (typeof body === 'object') {
-      headers['content-type'] = 'application/json'
+      headers['content-type'] = 'application/json; charset=UTF-8'
       body = JSON.stringify(body)
     }
     options.body = body
@@ -108,4 +111,4 @@ function fulfilledFn (request) {
   }
 }
 
-export { fetchInterceptor as default, registry, isHttpError }
+export { fetchWrapper as default, registry, isHttpError }
