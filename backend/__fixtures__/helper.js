@@ -124,8 +124,30 @@ function parseFieldSelector (obj) {
   return _.reduce(fields, iteratee, {})
 }
 
+function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 'server' }) {
+  return toBase64(JSON.stringify({
+    'current-context': 'default',
+    contexts: [{
+      name: 'default',
+      context: {
+        user: 'user',
+        cluster: 'cluster'
+      }
+    }],
+    users: [{
+      name: 'user',
+      user
+    }],
+    clusters: [{
+      name: 'cluster',
+      cluster
+    }]
+  }))
+}
+
 module.exports = {
   createUrl,
+  createTestKubeconfig,
   parseLabelSelector,
   parseFieldSelector,
   gardenerConfigPath,

@@ -47,7 +47,12 @@ exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   TokenRequest: {
     name: 'token',
     kind: 'TokenRequest',
-    apiVersion: 'authentication.k8s.io/v1',
+    apiVersion: 'authentication.k8s.io/v1'
+  },
+  AdminKubeconfigRequest: {
+    name: 'adminkubeconfig',
+    kind: 'AdminKubeconfigRequest',
+    apiVersion: 'authentication.gardener.cloud/v1alpha1',
     subresource: true
   }
 })
