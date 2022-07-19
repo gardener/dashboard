@@ -42,7 +42,7 @@ const {
   scope,
   client_id: clientId,
   client_secret: clientSecret,
-  usePKCI = !clientSecret,
+  usePKCE = !clientSecret,
   refreshTokenLifetime = 86400,
   rejectUnauthorized = true,
   ca,
@@ -160,7 +160,7 @@ async function authorizationUrl (req, res) {
     state,
     scope
   }
-  if (usePKCI) {
+  if (usePKCE) {
     const codeChallengeMethod = getCodeChallengeMethod(client)
     const codeVerifier = generators.codeVerifier()
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
