@@ -5,6 +5,7 @@
 //
 
 import Vue from 'vue'
+import get from 'lodash/get'
 import store from '@/store'
 import createRouter from '@/router'
 import { registry, isHttpError } from '@/utils/fetch'
@@ -19,12 +20,12 @@ const App = Vue.extend({
     }
   },
   created () {
-    const signout = () => this.$auth.signout()
+    const signout = err => this.$auth.signout(err)
     this.unregister = registry.register({
       error (err) {
-        console.error('Interceptor', err)
         if (isHttpError(err) && err.statusCode === 401) {
-          setImmediate(signout)
+          const message = get(err, 'response.data.message', err.message)
+          setImmediate(() => signout(new Error(message)))
         }
         return Promise.reject(err)
       }
