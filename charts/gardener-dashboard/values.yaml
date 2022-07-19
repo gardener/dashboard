@@ -85,6 +85,10 @@ oidc:
   clientId: dashboard
   # clientSecret is the private secret of the gardener-dashboard aplication
   clientSecret: ~
+  # # force PKCE usage
+  # usePKCE: true
+  # # refreshTokenLifetime is the refresh token expiration period in seconds (defaults to 86400)
+  # refreshTokenLifetime: 2592000 # 30 days
   # # certificate authority of the OpenID provider
   # ca: |
   #   -----BEGIN CERTIFICATE-----
@@ -100,6 +104,8 @@ oidc:
   #  clientId: kube-kubectl
   #  # clientSecret is the public client secret use by kubelogin and all users
   #  clientSecret: ~
+  #  # force PKCE usage (automatically enabled if no clientSecret is given)
+  #  usePKCE: true
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener

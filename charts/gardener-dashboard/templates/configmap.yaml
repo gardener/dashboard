@@ -59,6 +59,12 @@ data:
     {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
+      {{- if .Values.oidc.usePKCE }}
+      usePKCE: true
+      {{- end }}
+      {{- if .Values.oidc.refreshTokenLifetime }}
+      refreshTokenLifetime:  {{ .Values.oidc.refreshTokenLifetime }}
+      {{- end }}
       redirect_uris:
       {{- $protocol := ternary "http" "https" ( empty .Values.ingress.tls ) }}
       {{- range .Values.ingress.hosts }}
@@ -83,7 +89,12 @@ data:
       {{- if .Values.oidc.public }}
       public:
         clientId: {{ .Values.oidc.public.clientId | default "kube-kubectl" }}
-        clientSecret: {{ required ".Values.oidc.public.clientSecret" .Values.oidc.public.clientSecret }}
+        {{- if .Values.oidc.public.clientSecret }}
+        clientSecret: {{ .Values.oidc.public.clientSecret }}
+        {{- end }}
+        {{- if or .Values.oidc.public.usePKCE  (not .Values.oidc.public.clientSecret) }}
+        usePKCE: true
+        {{- end }}
       {{- end }}
     {{- end }}
     {{- if .Values.terminal }}

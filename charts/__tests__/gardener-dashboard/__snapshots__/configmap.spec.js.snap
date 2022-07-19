@@ -93,12 +93,9 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`oidc.public\` 1`] = `
+exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`public.client_secret\` 1`] = `
 Object {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
-  "apiServerUrl": "https://api.garden.example.org",
-  "logFormat": "text",
-  "logLevel": "debug",
   "oidc": Object {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
@@ -115,9 +112,103 @@ Li4u
     "rejectUnauthorized": true,
     "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
   },
-  "port": 8080,
-  "readinessProbe": Object {
-    "periodSeconds": 10,
+}
+`;
+
+exports[`gardener-dashboard configmap kubeconfig download should render the template w/o \`public.client_secret\` 1`] = `
+Object {
+  "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
+  "oidc": Object {
+    "ca": "-----BEGIN CERTIFICATE-----
+Li4u
+-----END CERTIFICATE-----",
+    "issuer": "https://identity.garden.example.org",
+    "public": Object {
+      "clientId": "kube-kubectl",
+      "usePKCE": true,
+    },
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
+    "rejectUnauthorized": true,
+    "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap kubeconfig download should render the template with PKCE flow for the public client 1`] = `
+Object {
+  "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
+  "oidc": Object {
+    "ca": "-----BEGIN CERTIFICATE-----
+Li4u
+-----END CERTIFICATE-----",
+    "issuer": "https://identity.garden.example.org",
+    "public": Object {
+      "clientId": "kube-kubectl",
+      "clientSecret": "kube-kubectl-secret",
+      "usePKCE": true,
+    },
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
+    "rejectUnauthorized": true,
+    "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap oidc should render the template with PKCE flow for the internal client 1`] = `
+Object {
+  "oidc": Object {
+    "ca": "-----BEGIN CERTIFICATE-----
+Li4u
+-----END CERTIFICATE-----",
+    "issuer": "https://identity.garden.example.org",
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
+    "rejectUnauthorized": true,
+    "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
+    "usePKCE": true,
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap oidc should render the template with default scope 1`] = `
+Object {
+  "oidc": Object {
+    "ca": "-----BEGIN CERTIFICATE-----
+Li4u
+-----END CERTIFICATE-----",
+    "issuer": "https://identity.garden.example.org",
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
+    "rejectUnauthorized": true,
+    "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap oidc should render the template with scope containing offline_access 1`] = `
+Object {
+  "oidc": Object {
+    "ca": "-----BEGIN CERTIFICATE-----
+Li4u
+-----END CERTIFICATE-----",
+    "issuer": "https://identity.garden.example.org",
+    "redirect_uris": Array [
+      "https://dashboard.garden.example.org/auth/callback",
+      "https://dashboard.ingress.garden.example.org/auth/callback",
+    ],
+    "refreshTokenLifetime": 2592000,
+    "rejectUnauthorized": true,
+    "scope": "openid email groups offline_access",
   },
 }
 `;
