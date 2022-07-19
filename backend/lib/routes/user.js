@@ -62,7 +62,11 @@ router.route('/kubeconfig')
     } = config
     const {
       issuer: issuerUrl,
-      public: { clientId, clientSecret } = {}
+      public: {
+        clientId = oidc.client_id,
+        clientSecret,
+        usePKCE
+      } = {}
     } = oidc
     const body = {
       server,
@@ -70,9 +74,14 @@ router.route('/kubeconfig')
       insecureSkipTlsVerify,
       oidc: {
         issuerUrl,
-        clientId,
-        clientSecret
+        clientId
       }
+    }
+    if (clientSecret) {
+      body.oidc.clientSecret = clientSecret
+    }
+    if (usePKCE || !clientSecret) {
+      body.oidc.usePKCE = true
     }
     if (oidc.scope) {
       const extraScopes = []

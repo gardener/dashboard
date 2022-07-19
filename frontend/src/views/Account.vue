@@ -335,13 +335,18 @@ export default {
         'oidc-login',
         'get-token',
         '--oidc-issuer-url=' + oidc.issuerUrl,
-        '--oidc-client-id=' + oidc.clientId,
-        '--oidc-client-secret=' + oidc.clientSecret
+        '--oidc-client-id=' + oidc.clientId
       ]
+      if (oidc.clientSecret) {
+        args.push('--oidc-client-secret=' + oidc.clientSecret)
+      }
       if (Array.isArray(oidc.extraScopes)) {
         for (const scope of oidc.extraScopes) {
           args.push('--oidc-extra-scope=' + scope)
         }
+      }
+      if (oidc.usePKCE || !oidc.clientSecret) {
+        args.push('--oidc-use-pkce')
       }
       if (oidc.certificateAuthorityData) {
         args.push('--certificate-authority-data=' + oidc.certificateAuthorityData)
