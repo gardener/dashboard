@@ -41,9 +41,6 @@ describe('socket.io', function () {
     assert.ok(socket.client.user)
     assert.strictEqual(socket.client.user.id, id)
     assert.deepStrictEqual(socket.client.user.groups, groups)
-    assert.deepStrictEqual(socket.client.user.auth, {
-      bearer: await user.bearer
-    })
   }
 
   let agent
