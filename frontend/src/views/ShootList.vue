@@ -40,15 +40,16 @@ SPDX-License-Identifier: Apache-2.0
               </v-badge>
             </div>
           </template>
-          <span class="font-weight-bold">Focus Mode</span><br />
-          Cluster List sorting is freezed.<br />
-          Items in the list will still be updated.<br />
-          New items will not be added to the list.<br />
-          Removed items will be shown as stale (greyed out).
+          <span class="font-weight-bold">Focus Mode</span>
+          <ul>
+            <li>Cluster List sorting is freezed</li>
+            <li>Items in the list will still be updated</li>
+            <li>New clusters will not be added to the list until you disable focus mode</li>
+            <li>Removed items will be shown as stale (greyed out)</li>
+          </ul>
           <template v-if="numberOfNewItemsSinceFreeze > 0">
             <v-divider color="white"></v-divider>
-            <span class="font-weight-bold">{{numberOfNewItemsSinceFreeze}}</span> new clusters were added to the list since you enabled focus mode.<br />
-            New clusters will not be added to the list until you disable focus mode.
+            <span class="font-weight-bold">{{numberOfNewItemsSinceFreeze}}</span> new clusters were added to the list since you enabled focus mode.
           </template>
         </v-tooltip>
         <v-tooltip top v-if="shootSearch || items.length > 3">

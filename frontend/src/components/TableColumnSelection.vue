@@ -16,72 +16,70 @@ SPDX-License-Identifier: Apache-2.0
         Table Options
       </v-tooltip>
     </template>
-    <div class="table-menu">
-      <v-list subheader dense>
-        <v-subheader>Column Selection</v-subheader>
-        <v-list-item v-for="header in headers" :key="header.value" @click.stop="onSetSelectedHeader(header)">
-          <v-list-item-action>
-            <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
-          </v-list-item-action>
-          <v-list-item-content class="primary--text">
-            <v-list-item-title>
-              <v-tooltip v-if="header.customField" top>
-                <template v-slot:activator="{ on: tooltip }">
-                  <div v-on="tooltip">
-                    <v-badge
-                      inline
-                      icon="mdi-playlist-star"
-                      color="primary"
-                      class="mt-0"
-                    >
-                      <span>{{ header.text }}</span>
-                    </v-badge>
-                  </div>
-                </template>
-                Custom Field
-              </v-tooltip>
-              <template v-else>{{ header.text }}</template>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-content>
-            <v-tooltip top style="width: 100%">
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" block text class="text-center primary--text" @click.stop="onReset">
-                  Reset
-                </v-btn>
+    <v-list subheader dense>
+      <v-subheader>Column Selection</v-subheader>
+      <v-list-item v-for="header in headers" :key="header.value" @click.stop="onSetSelectedHeader(header)">
+        <v-list-item-action>
+          <v-icon :color="checkboxColor(header.selected)" v-text="checkboxIcon(header.selected)"/>
+        </v-list-item-action>
+        <v-list-item-content class="primary--text">
+          <v-list-item-title>
+            <v-tooltip v-if="header.customField" top>
+              <template v-slot:activator="{ on: tooltip }">
+                <div v-on="tooltip">
+                  <v-badge
+                    inline
+                    icon="mdi-playlist-star"
+                    color="primary"
+                    class="mt-0"
+                  >
+                    <span>{{ header.text }}</span>
+                  </v-badge>
+                </div>
               </template>
-              <span>Reset to Defaults</span>
+              Custom Field
             </v-tooltip>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-      <v-list subheader dense v-if="filters && filters.length">
-        <v-subheader>Filter Table</v-subheader>
-        <v-list-item
-          v-for="filter in filters"
-          :key="filter.value"
-          :disabled="filter.disabled"
-          :class="{ 'disabled_filter' : filter.disabled}"
-          @click.stop="onToggleFilter(filter)">
-          <v-list-item-action>
-            <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
-          </v-list-item-action>
-          <v-list-item-content class="primary--text">
-            <v-list-item-title>
-              {{filter.text}}
-              <v-tooltip top v-if="filter.helpTooltip">
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on" small>mdi-help-circle-outline</v-icon>
-                </template>
-                <div :key="line" v-for="line in filter.helpTooltip">{{line}}</div>
-              </v-tooltip>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </div>
+            <template v-else>{{ header.text }}</template>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-content>
+          <v-tooltip top style="width: 100%">
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" block text class="text-center primary--text" @click.stop="onReset">
+                Reset
+              </v-btn>
+            </template>
+            <span>Reset to Defaults</span>
+          </v-tooltip>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+    <v-list subheader dense v-if="filters && filters.length">
+      <v-subheader>Filter Table</v-subheader>
+      <v-list-item
+        v-for="filter in filters"
+        :key="filter.value"
+        :disabled="filter.disabled"
+        :class="{ 'disabled_filter' : filter.disabled}"
+        @click.stop="onToggleFilter(filter)">
+        <v-list-item-action>
+          <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
+        </v-list-item-action>
+        <v-list-item-content class="primary--text">
+          <v-list-item-title>
+            {{filter.text}}
+            <v-tooltip top v-if="filter.helpTooltip">
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on" small>mdi-help-circle-outline</v-icon>
+              </template>
+              <div :key="line" v-for="line in filter.helpTooltip">{{line}}</div>
+            </v-tooltip>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
   </v-menu>
 </template>
 
@@ -126,11 +124,6 @@ export default {
 
   .disabled_filter {
     opacity: 0.5;
-  }
-
-  .table-menu {
-    overflow-y: scroll;
-    max-height: 90vh;
   }
 
 </style>
