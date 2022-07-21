@@ -101,6 +101,7 @@ module.exports = {
       requiredConfigurationProperties.push(
         'oidc.issuer',
         'oidc.client_id',
+        'oidc.client_secret',
         'oidc.redirect_uris'
       )
     }

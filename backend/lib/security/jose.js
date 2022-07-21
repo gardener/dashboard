@@ -53,7 +53,7 @@ module.exports = sessionSecret => {
   return {
     encodeState,
     decodeState,
-    sign (payload, secretOrPrivateKey, { expiresIn = '1d', jwtid = uuid.v1(), ...options } = {}) {
+    sign (payload, secretOrPrivateKey, { ...options } = {}) {
       if (isPlainObject(secretOrPrivateKey)) {
         options = secretOrPrivateKey
         secretOrPrivateKey = undefined
@@ -61,11 +61,11 @@ module.exports = sessionSecret => {
       if (!secretOrPrivateKey) {
         secretOrPrivateKey = sessionSecret
       }
-      if (!payload.exp) {
-        options.expiresIn = expiresIn
+      if (!payload.exp && !options.expiresIn) {
+        options.expiresIn = '1d'
       }
-      if (!payload.jti) {
-        options.jwtid = jwtid
+      if (!payload.jti && !options.jwtid) {
+        options.jwtid = uuid.v1()
       }
       return jwtSign(payload, secretOrPrivateKey, options)
     },
