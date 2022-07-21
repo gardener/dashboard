@@ -200,14 +200,13 @@ async function authorizeToken (req, res) {
 function createTokenSet (values) {
   const tokenSet = new TokenSet(values)
   if (!tokenSet.expires_at) {
-    const tokenLifetime = 86400 // default token lifetime is 24 hours
-    let expiresAt = now() + tokenLifetime
+    let expiresAt = now() + refreshTokenLifetime
     try {
       const { iat, exp } = tokenSet.claims()
       if (exp) {
         expiresAt = Number(exp)
       } else if (iat) {
-        expiresAt = Number(iat) + tokenLifetime
+        expiresAt = Number(iat) + refreshTokenLifetime
       }
     } finally {
       tokenSet.expires_at = expiresAt
@@ -382,25 +381,27 @@ function authenticate (options = {}) {
       csrfProtection(req, res)
       let user
       let token = getToken(req.cookies)
-      let tokenSet = await decryptTokenSet(req.cookies)
-      if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
-        tokenSet = await refreshTokenSet(tokenSet)
-        token = await setCookies(res, tokenSet)
-        user = decode(token)
-      } else {
-        user = await verifyToken(token)
-      }
-      const auth = Object.freeze({
-        bearer: tokenSet.id_token
-      })
-      Object.defineProperty(user, 'auth', {
-        value: auth,
-        enumerable: true
-      })
       if (typeof options.createClient === 'function') {
+        let tokenSet = await decryptTokenSet(req.cookies)
+        if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
+          tokenSet = await refreshTokenSet(tokenSet)
+          token = await setCookies(res, tokenSet)
+          user = decode(token)
+        } else {
+          user = await verifyToken(token)
+        }
+        const auth = Object.freeze({
+          bearer: tokenSet.id_token
+        })
+        Object.defineProperty(user, 'auth', {
+          value: auth,
+          enumerable: true
+        })
         Object.defineProperty(user, 'client', {
           value: options.createClient({ auth })
         })
+      } else {
+        user = await verifyToken(token)
       }
       req.user = user
       next()
