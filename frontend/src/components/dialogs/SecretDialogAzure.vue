@@ -64,11 +64,15 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:help-slot>
       <div v-if="vendor==='azure'">
         <p>
-          Before you can provision and access a Kubernetes cluster on Azure, you need to add account credentials.
-          The Gardener needs the credentials to provision and operate the Azure infrastructure for your Kubernetes cluster.
+          Before you can provision and access a Kubernetes cluster on Azure, you need to add account/subscription credentials.
+          The Gardener needs the credentials of a service principal assigned to an account/subscription to provision
+          and operate the Azure infrastructure for your Kubernetes cluster.
         </p>
         <p>
-          Ensure that the account has the <strong>contributor</strong> role.
+          Ensure that the service principal has the permissions defined
+          <external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
+          here</external-link> within your subscription assigned.
+          If no fine-grained permissions are required then assign the <strong>Contributor</strong> role.
         </p>
         <p>
           Read the
