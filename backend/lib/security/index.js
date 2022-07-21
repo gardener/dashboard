@@ -8,6 +8,7 @@
 
 const { promisify } = require('util')
 const assert = require('assert').strict
+const crypto = require('crypto')
 const { split, join, noop, some, every, includes, head, chain } = require('lodash')
 const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
 const cookieParser = require('cookie-parser')
@@ -27,6 +28,8 @@ const {
   encrypt,
   decrypt
 } = require('./jose')(sessionSecret)
+
+const md5 = data => crypto.createHash('md5').update(data).digest('hex')
 
 const {
   COOKIE_HEADER_PAYLOAD,
@@ -363,10 +366,13 @@ async function authorizationCodeExchange (redirectUri, parameters, checks) {
 }
 
 async function refreshTokenSet (tokenSet) {
+  const digest = md5(tokenSet.refresh_token)
   try {
     const client = await exports.getIssuerClient()
+    logger.debug(`Refreshing id_token (digest: ${digest})`)
     return await client.refresh(tokenSet.refresh_token)
   } catch (err) {
+    logger.error(`Failed to refresh id_token (digest: ${digest})`)
     if (err instanceof RPError || err instanceof OPError) {
       throw createError(401, err)
     }
