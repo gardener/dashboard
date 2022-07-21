@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="columnSelectionMenu" absolute>
+  <v-menu :nudge-bottom="20" :nudge-right="20" max-height="80%" left v-model="columnSelectionMenu" absolute>
     <template v-slot:activator="{ on: menu }">
       <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">

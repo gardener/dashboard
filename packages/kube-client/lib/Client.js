@@ -88,8 +88,28 @@ class Client {
     return kubeconfig
   }
 
+  async createShootAdminKubeconfig ({ name, namespace }) {
+    const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
+    const body = {
+      kind,
+      apiVersion,
+      spec: {
+        expirationSeconds: 600 // 10 minutes (lowest possible value https://github.com/gardener/gardener/blob/master/pkg/apis/authentication/validation/validation.go#L34)
+      }
+    }
+
+    const adminKubeconfigRequest = await this['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
+    const kubeconfigBase64 = _.get(adminKubeconfigRequest, 'status.kubeconfig')
+    return parseKubeconfig(decodeBase64(kubeconfigBase64))
+  }
+
   async createKubeconfigClient (secretRef) {
     const kubeconfig = await this.getKubeconfig(secretRef)
+    return new this.constructor(fromKubeconfig(kubeconfig))
+  }
+
+  async createShootAdminKubeconfigClient (shootRef) {
+    const kubeconfig = await this.createShootAdminKubeconfig(shootRef)
     return new this.constructor(fromKubeconfig(kubeconfig))
   }
 
