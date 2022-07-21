@@ -152,15 +152,16 @@ exports.list = async function ({ user }) {
   }
 
   return _
-    .chain(projects)
-    .filter(project => {
-      if (!isAdmin && !isMemberOf(project)) {
-        return false
-      }
-      return true
-    })
-    .map(fromResource)
-    .value()
+  .chain(projects)
+  .filter(project => {
+    if (!isAdmin && !isMemberOf(project)) {
+      return false
+    }
+    const phase = _.get(project, 'status.phase', 'Pending')
+    return phase !== 'Pending'
+  })
+  .map(fromResource)
+  .value()
 }
 
 exports.create = async function ({ user, body }) {
