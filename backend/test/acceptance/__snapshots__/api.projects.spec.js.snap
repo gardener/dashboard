@@ -296,23 +296,6 @@ Array [
   Object {
     "data": Object {
       "createdBy": "admin@example.org",
-      "description": "initial-description",
-      "owner": "admin@example.org",
-      "purpose": "initial-purpose",
-    },
-    "metadata": Object {
-      "name": "initial",
-      "namespace": "garden-initial",
-      "resourceVersion": "42",
-      "role": "project",
-    },
-    "status": Object {
-      "phase": "Initial",
-    },
-  },
-  Object {
-    "data": Object {
-      "createdBy": "admin@example.org",
       "description": "secret-description",
       "owner": "admin@example.org",
       "purpose": "secret-purpose",
@@ -344,7 +327,7 @@ Array [
       "role": "project",
     },
     "status": Object {
-      "phase": "Ready",
+      "phase": "Failed",
     },
   },
 ]

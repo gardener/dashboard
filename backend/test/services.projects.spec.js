@@ -84,7 +84,7 @@ describe('services', function () {
     describe('#list', function () {
       it('should return all projects if user is admin, including not ready projects', async function () {
         const userProjects = await projects.list({ user: createUser('admin@bar.com') })
-        expect(userProjects).toHaveLength(3)
+        expect(userProjects).toHaveLength(2)
       })
 
       it('should return project for user member', async function () {
