@@ -495,7 +495,7 @@ const getters = {
         const vendorName = vendorNameFromImageName(machineImage.name)
         const vendorHint = findVendorHint(state.cfg.vendorHints, vendorName)
 
-        return map(versions, ({ version, expirationDate, cri, classification }) => {
+        return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
           return decorateClassificationObject({
             key: name + '/' + version,
             name,
@@ -505,7 +505,8 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            vendorHint
+            vendorHint,
+            architectures
           })
         })
       }
@@ -582,9 +583,11 @@ const getters = {
       return {}
     }
   },
-  defaultMachineImageForCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+  defaultMachineImageForCloudProfileNameAndMachineType (state, getters) {
+    return (cloudProfileName, machineType) => {
+      const machineImages = filter(getters.machineImagesByCloudProfileName(cloudProfileName), machineImage => {
+        return !machineType.architecture || includes(machineImage.architectures, machineType.architecture)
+      })
       return firstItemMatchingVersionClassification(machineImages)
     }
   },
@@ -1135,7 +1138,7 @@ const getters = {
       const machineType = head(machineTypesForZone) || {}
       const volumeTypesForZone = getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
       const volumeType = head(volumeTypesForZone) || {}
-      const machineImage = getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+      const machineImage = getters.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
       const minVolumeSize = getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
       const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
       const worker = {

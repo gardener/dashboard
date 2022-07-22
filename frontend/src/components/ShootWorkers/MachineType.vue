@@ -22,7 +22,10 @@ SPDX-License-Identifier: Apache-2.0
     >
       <template v-slot:item="{ item }">
         <v-list-item-content>
-          <v-list-item-title>{{item.name}}</v-list-item-title>
+          <v-list-item-title>
+            {{item.name}}
+            <v-chip v-if="item.architecture" color="primary" label x-small class="ml-2" outlined>{{item.architecture}}</v-chip>
+          </v-list-item-title>
           <v-list-item-subtitle>
             <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
             <span v-if="item.gpu">GPU: {{item.gpu}} | </span>

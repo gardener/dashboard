@@ -31,6 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         <machine-image
         :machine-images="machineImages"
         :worker="worker"
+        :machine-type="selectedMachineType"
         :updateOSMaintenance="updateOSMaintenance"
         @update-machine-image="onUpdateMachineImage"
         @valid="onMachineImageValid">
