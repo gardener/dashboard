@@ -34,6 +34,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
       </template>
+      <template v-slot:selection="{ item }">
+         {{item.name}}
+         <v-chip v-if="item.architecture" color="primary" label x-small class="ml-2" outlined>{{item.architecture}}</v-chip>
+      </template>
     </v-select>
   </hint-colorizer>
 </template>
