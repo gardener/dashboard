@@ -127,4 +127,26 @@ describe('kube-client', () => {
       }
     })
   })
+  describe('#dashboardClient', () => {
+    let kubeConfig
+    let kubeClient
+
+    const mockKubeClient = () => {
+      jest.isolateModules(() => {
+        kubeConfig = require('@gardener-dashboard/kube-config')
+        kubeClient = require('../lib')
+      })
+    }
+
+    it('should abort watching kubeconfig changes', () => {
+      mockKubeClient()
+      expect(kubeConfig.load).toBeCalledTimes(1)
+      const firstCall = kubeConfig.load.mock.calls[0]
+      expect(firstCall).toHaveLength(2)
+      const { signal } = firstCall[1]
+      expect(signal.aborted).toBe(false)
+      kubeClient.abortWatcher()
+      expect(signal.aborted).toBe(true)
+    })
+  })
 })
