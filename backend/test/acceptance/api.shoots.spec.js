@@ -359,6 +359,24 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should patch binding', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patchBinding())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/binding`)
+        .set('cookie', await user.cookie)
+        .send({
+          seedName: 'foo-seed'
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
     it('should replace addons', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
 

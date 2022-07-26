@@ -207,3 +207,16 @@ router.route('/:name/spec/purpose')
       next(err)
     }
   })
+
+router.route('/:name/binding')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.patchBindingResource({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })

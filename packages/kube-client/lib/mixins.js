@@ -287,8 +287,12 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
   }
 
   mergePatch (namespace, name, body, options) {
+    if (Array.isArray(name)) {
+      assertName(name[0])
+    } else {
+      assertName(name)
+    }
     assertNamespace(namespace)
-    assertName(name)
     assertBodyObject(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)

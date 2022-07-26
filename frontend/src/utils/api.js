@@ -202,6 +202,12 @@ export function updateShootPurpose ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/purpose`, data)
 }
 
+export function updateShootSeed ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/binding`, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles () {

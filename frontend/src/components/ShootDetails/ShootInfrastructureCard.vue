@@ -49,8 +49,11 @@ SPDX-License-Identifier: Apache-2.0
               <shoot-seed-name :shoot-item="shootItem" />
             </v-list-item-title>
           </v-list-item-content>
-          <v-list-item-action>
+          <v-list-item-action class="mx-0">
             <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+          </v-list-item-action>
+          <v-list-item-action class="mx-0" v-if="canPatchShootBindings">
+            <seed-configuration :shoot-item="shootItem"></seed-configuration>
           </v-list-item-action>
         </v-list-item>
         <v-list-item>
@@ -190,7 +193,6 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters } from 'vuex'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 import get from 'lodash/get'
-import includes from 'lodash/includes'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import head from 'lodash/head'
@@ -200,6 +202,7 @@ import ShootSeedName from '@/components/ShootSeedName'
 import Vendor from '@/components/Vendor'
 import DnsProvider from '@/components/ShootDns/DnsProvider'
 import DnsConfiguration from '@/components/ShootDns/DnsConfiguration'
+import SeedConfiguration from '@/components/SeedConfiguration'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -209,20 +212,19 @@ export default {
     ShootSeedName,
     Vendor,
     DnsProvider,
-    DnsConfiguration
+    DnsConfiguration,
+    SeedConfiguration
   },
   mixins: [shootItem],
   computed: {
     ...mapGetters([
       'namespaces',
       'cloudProfileByName',
-      'floatingPoolsByCloudProfileNameAndRegionAndDomain'
+      'floatingPoolsByCloudProfileNameAndRegionAndDomain',
+      'canPatchShootBindings'
     ]),
     showSeedInfo () {
-      return !!this.shootSeedName && this.hasAccessToGardenNamespace
-    },
-    hasAccessToGardenNamespace () {
-      return includes(this.namespaces, 'garden')
+      return !!this.shootSeedName
     },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginxIngress.enabled', false)

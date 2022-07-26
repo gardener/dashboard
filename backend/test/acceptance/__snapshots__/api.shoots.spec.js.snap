@@ -230,6 +230,58 @@ Object {
 }
 `;
 
+exports[`api shoots should patch binding 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/binding",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/merge-patch+json",
+    },
+    Object {
+      "spec": Object {
+        "seedName": "foo-seed",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should patch binding 2`] = `
+Object {
+  "metadata": Object {
+    "annotations": Object {
+      "gardener.cloud/created-by": "bar@example.org",
+    },
+    "name": "barShoot",
+    "namespace": "garden-foo",
+    "uid": 2,
+  },
+  "spec": Object {
+    "cloudProfileName": "infra1-profileName",
+    "hibernation": Object {
+      "enabled": false,
+    },
+    "kubernetes": Object {
+      "version": "1.16.0",
+    },
+    "provider": Object {
+      "type": "fooInfra",
+    },
+    "purpose": "barPurpose",
+    "region": "foo-west",
+    "secretBindingName": "foo-infra1",
+    "seedName": "foo-seed",
+  },
+  "status": Object {
+    "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
 exports[`api shoots should replace addons 1`] = `
 Array [
   Array [
@@ -981,65 +1033,6 @@ users:
 }
 `;
 
-exports[`api shoots should return shoot seed info when no fallback is needed 1`] = `
-Array [
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "post",
-      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-    Object {
-      "apiVersion": "authorization.k8s.io/v1",
-      "kind": "SelfSubjectAccessReview",
-      "spec": Object {
-        "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
-          "group": "",
-          "resource": "secrets",
-          "verb": "get",
-        },
-      },
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "api.foo-east.infra1.seed.cluster",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/shoot--foo--barShoot/secrets?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet",
-      ":scheme": "https",
-    },
-  ],
-]
-`;
-
-exports[`api shoots should return shoot seed info when no fallback is needed 2`] = `
-Object {
-  "monitoringPassword": "pass-shoot--foo--barShoot-bar.monitoring",
-  "monitoringUsername": "user-shoot--foo--barShoot-bar.monitoring",
-}
-`;
-
 exports[`api shoots should return shoot seed info when need to fallback to old monitoring secret 1`] = `
 Array [
   Array [
@@ -1104,6 +1097,65 @@ exports[`api shoots should return shoot seed info when need to fallback to old m
 Object {
   "monitoringPassword": "pass-shoot--foo--barShoot-monitoring-ingress-credentials",
   "monitoringUsername": "user-shoot--foo--barShoot-monitoring-ingress-credentials",
+}
+`;
+
+exports[`api shoots should return shoot seed info when no fallback is needed 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "api.foo-east.infra1.seed.cluster",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/shoot--foo--barShoot/secrets?labelSelector=name%3Dobservability-ingress%2Cmanaged-by%3Dsecrets-manager%2Cmanager-identity%3Dgardenlet",
+      ":scheme": "https",
+    },
+  ],
+]
+`;
+
+exports[`api shoots should return shoot seed info when no fallback is needed 2`] = `
+Object {
+  "monitoringPassword": "pass-shoot--foo--barShoot-bar.monitoring",
+  "monitoringUsername": "user-shoot--foo--barShoot-bar.monitoring",
 }
 `;
 

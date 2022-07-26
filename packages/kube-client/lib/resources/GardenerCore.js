@@ -66,6 +66,10 @@ class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable
     return this.create([namespace, name, 'adminkubeconfig'], body, options)
   }
 
+  patchBindingResource (namespace, name, body, options) {
+    return this.mergePatch(namespace, [name, 'binding'], body, options)
+  }
+
   static get names () {
     return {
       plural: 'shoots',

@@ -119,6 +119,17 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
+exports.patchBindingResource = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const seedName = body.seedName
+  const payload = {
+    spec: {
+      seedName
+    }
+  }
+  return client['core.gardener.cloud'].shoots.patchBindingResource(namespace, name, payload)
+}
+
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const client = user.client
   const addons = body
