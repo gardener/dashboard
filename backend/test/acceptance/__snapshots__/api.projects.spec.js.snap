@@ -51,6 +51,7 @@ Object {
     "createdBy": "foo@example.org",
     "description": "description",
     "owner": "foo@example.org",
+    "phase": "Ready",
     "purpose": "purpose",
   },
   "metadata": Object {
@@ -111,6 +112,7 @@ Object {
     "createdBy": "foo@example.org",
     "description": "bar-description",
     "owner": "bar@example.org",
+    "phase": "Ready",
     "purpose": "bar-purpose",
   },
   "metadata": Object {
@@ -151,6 +153,7 @@ Object {
     "createdBy": "foo@example.org",
     "description": "foobar",
     "owner": "bar@example.org",
+    "phase": "Ready",
     "purpose": "foo-purpose",
   },
   "metadata": Object {
@@ -222,6 +225,7 @@ Array [
       "createdBy": "foo@example.org",
       "description": "foo-description",
       "owner": "bar@example.org",
+      "phase": "Ready",
       "purpose": "foo-purpose",
     },
     "metadata": Object {
@@ -239,6 +243,7 @@ Array [
       "createdBy": "foo@example.org",
       "description": "bar-description",
       "owner": "bar@example.org",
+      "phase": "Ready",
       "purpose": "bar-purpose",
     },
     "metadata": Object {
@@ -252,6 +257,7 @@ Array [
     "data": Object {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
+      "phase": "Ready",
     },
     "metadata": Object {
       "name": "GroupMember1",
@@ -264,6 +270,7 @@ Array [
     "data": Object {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
+      "phase": "Ready",
     },
     "metadata": Object {
       "name": "GroupMember2",
@@ -277,6 +284,7 @@ Array [
       "createdBy": "admin@example.org",
       "description": "secret-description",
       "owner": "admin@example.org",
+      "phase": "Ready",
       "purpose": "secret-purpose",
     },
     "metadata": Object {
@@ -291,6 +299,7 @@ Array [
       "createdBy": "admin@example.org",
       "description": "trial-description",
       "owner": "admin@example.org",
+      "phase": "Failed",
       "purpose": "trial-purpose",
     },
     "metadata": Object {
@@ -326,6 +335,7 @@ Object {
     "createdBy": "foo@example.org",
     "description": "foo-description",
     "owner": "bar@example.org",
+    "phase": "Ready",
     "purpose": "foo-purpose",
   },
   "metadata": Object {
@@ -373,6 +383,7 @@ Array [
       "createdBy": "foo@example.org",
       "description": "foo-description",
       "owner": "bar@example.org",
+      "phase": "Ready",
       "purpose": "foo-purpose",
     },
     "metadata": Object {
@@ -390,6 +401,7 @@ Array [
       "createdBy": "foo@example.org",
       "description": "bar-description",
       "owner": "bar@example.org",
+      "phase": "Ready",
       "purpose": "bar-purpose",
     },
     "metadata": Object {
@@ -403,6 +415,7 @@ Array [
     "data": Object {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
+      "phase": "Ready",
     },
     "metadata": Object {
       "name": "GroupMember1",
@@ -506,6 +519,7 @@ Object {
     "createdBy": "foo@example.org",
     "description": "description",
     "owner": "baz@example.org",
+    "phase": "Ready",
     "purpose": "purpose",
   },
   "metadata": Object {
