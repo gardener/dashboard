@@ -188,7 +188,7 @@ export default {
       projectDialog: false,
       projectFilter: '',
       projectMenu: false,
-      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' }, status: { phase: 'Ready' } },
+      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' }, data: { phase: 'Ready' } },
       highlightedProjectName: undefined,
       numberOfVisibleProjects: initialVisibleProjects
     }
