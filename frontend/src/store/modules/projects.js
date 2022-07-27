@@ -47,9 +47,8 @@ const actions = {
   },
   async delete ({ commit, state }, { metadata }) {
     const namespace = metadata.namespace
-    const res = await deleteProject({ namespace })
-    // commit('ITEM_DELETED', metadata)
-    return res.data
+    await deleteProject({ namespace })
+    // do not remove project from store as it will stay in termininating phase for a while
   }
 }
 
@@ -66,13 +65,6 @@ const mutations = {
       state.all.splice(index, 1, assign({}, item, newItem))
     } else {
       state.all.push(newItem)
-    }
-  },
-  ITEM_DELETED (state, metadata) {
-    const predicate = item => item.metadata.namespace === metadata.namespace
-    const index = findIndex(state.all, predicate)
-    if (index !== -1) {
-      state.all.splice(index, 1)
     }
   }
 }

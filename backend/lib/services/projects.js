@@ -37,9 +37,7 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
       createdBy: fromSubject(createdBy),
       owner: fromSubject(owner),
       description,
-      purpose
-    },
-    status: {
+      purpose,
       staleSinceTimestamp,
       staleAutoDeleteTimestamp,
       phase
