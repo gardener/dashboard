@@ -7,6 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
+const { projectFilter } = require('../utils')
 const cache = require('../cache')
 const createError = require('http-errors')
 const { dashboardClient, Resources } = require('@gardener-dashboard/kube-client')
@@ -103,47 +104,10 @@ const shoots = {
 
 const projects = {
   async list ({ user }) {
-    const admin = await authorization.isAdmin(user)
-    const isMemberOf = project => {
-      return _
-        .chain(project)
-        .get('spec.members')
-        .find(({ kind, namespace, name }) => {
-          switch (kind) {
-            case 'Group':
-              if (_.includes(user.groups, name)) {
-                return true
-              }
-              break
-            case 'User':
-              if (user.id === name) {
-                return true
-              }
-              break
-            case 'ServiceAccount':
-              if (user.id === `system:serviceaccount:${namespace}:${name}`) {
-                return true
-              }
-              break
-          }
-          return false
-        })
-        .value()
-    }
-    const isReady = project => {
-      return _.get(project, 'status.phase') === 'Ready'
-    }
+    const isAdmin = await authorization.isAdmin(user)
     return _
       .chain(cache.getProjects())
-      .filter(project => {
-        if (!admin && !isMemberOf(project)) {
-          return false
-        }
-        if (!isReady(project)) {
-          return false
-        }
-        return true
-      })
+      .filter(projectFilter(user, isAdmin))
       .value()
   }
 }
