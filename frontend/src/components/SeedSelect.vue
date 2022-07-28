@@ -23,7 +23,7 @@ import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
-  internalPurpose: {
+  seedCluster: {
     required: 'Seed is required.'
   }
 }
@@ -36,25 +36,22 @@ export default {
     },
     value: {
       type: String
+    },
+    valid: {
+      type: Boolean
     }
   },
   data () {
     return {
-      validationErrors,
-      valid: undefined
+      validationErrors
     }
   },
-  validations () {
-    return this.validators
+  validations: {
+    seedCluster: {
+      required
+    }
   },
   computed: {
-    validators () {
-      return {
-        seedCluster: {
-          required
-        }
-      }
-    },
     seedCluster: {
       get () {
         return this.value
@@ -67,19 +64,15 @@ export default {
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    },
-    validateInput () {
-      const valid = !this.$v.$invalid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
     }
   },
   watch: {
-    value (value) {
-      this.validateInput()
+    '$v.seedCluster.$invalid' (value) {
+      this.$emit('update:valid', !value)
     }
+  },
+  mounted () {
+    this.$v.seedCluster.$touch()
   }
 }
 </script>

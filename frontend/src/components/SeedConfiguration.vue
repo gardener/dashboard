@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <action-button-dialog
     :shoot-item="shootItem"
-    :valid="valid"
+    :valid="seedClusterValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     width="450"
@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <seed-select
         v-model="seedName"
         :seedClusters="seedClusters"
-        @valid="onSeedClusterValid"
+        :valid.sync="seedClusterValid"
       ></seed-select>
     </template>
   </action-button-dialog>
@@ -25,18 +25,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import map from 'lodash/map'
+import filter from 'lodash/filter'
+
 import { mapGetters } from 'vuex'
 
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import SeedSelect from '@/components/SeedSelect'
 
-import { updateShootSeed } from '@/utils/api'
+import { updateShootSeedName } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
 import shootItem from '@/mixins/shootItem'
 
 export default {
-  name: 'purpose-configuration',
+  name: 'seed-configuration',
   components: {
     ActionButtonDialog,
     SeedSelect
@@ -54,19 +56,14 @@ export default {
     ...mapGetters([
       'seedList'
     ]),
-    valid () {
-      return this.seedClusterValid
-    },
     seedClusters () {
-      return map(this.seedList, seed => {
+      const filteredSeeds = filter(this.seedList, { data: { type: this.shootCloudProviderKind } })
+      return map(filteredSeeds, seed => {
         return seed.metadata.name
       })
     }
   },
   methods: {
-    onSeedClusterValid (value) {
-      this.seedClusterValid = value
-    },
     async onConfigurationDialogOpened () {
       await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -76,7 +73,7 @@ export default {
     },
     async updateConfiguration () {
       try {
-        await updateShootSeed({
+        await updateShootSeedName({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
@@ -84,7 +81,7 @@ export default {
           }
         })
       } catch (err) {
-        const errorMessage = 'Could not update purpose'
+        const errorMessage = 'Could not update seedname'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })

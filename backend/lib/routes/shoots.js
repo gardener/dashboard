@@ -208,14 +208,14 @@ router.route('/:name/spec/purpose')
     }
   })
 
-router.route('/:name/binding')
+router.route('/:name/spec/seedName')
   .put(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.patchBindingResource({ user, namespace, name, body }))
+      res.send(await shoots.replaceSeedName({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

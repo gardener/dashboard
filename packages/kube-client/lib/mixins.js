@@ -287,11 +287,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
   }
 
   mergePatch (namespace, name, body, options) {
-    if (Array.isArray(name)) {
-      assertName(name[0])
-    } else {
-      assertName(name)
-    }
+    assertName(name)
     assertNamespace(namespace)
     assertBodyObject(body)
     assertOptions(options)
@@ -395,8 +391,10 @@ function assertNamespace (namespace) {
 }
 
 function assertName (name) {
-  if (typeof name !== 'string' || !name) {
-    throw new TypeError('The parameter "name" must be a string')
+  if (Array.isArray(name)) {
+    name = name[0]
+  } if (typeof name !== 'string' || !name) {
+    throw new TypeError('The parameter "name" must be a string or an array of strings')
   }
 }
 
