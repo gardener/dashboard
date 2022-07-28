@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config should reject unauthenticated requests 1`] = `Array []`;
+
+exports[`config should reject unauthenticated requests 2`] = `
+Object {
+  "code": 401,
+  "details": Object {
+    "name": "UnauthorizedError",
+    "stack": "UnauthorizedError: No authorization token was found
+    at verifyToken (/Users/d050337/SAPDevelop/git/gardener/dashboard/backend/lib/security/index.js:226:13)
+    at /Users/d050337/SAPDevelop/git/gardener/dashboard/backend/lib/security/index.js:277:13
+    at Layer.handle [as handle_request] (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/index.js:328:13)
+    at /Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/index.js:280:10)
+    at jsonParser (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/body-parser-npm-1.20.0-1820eff49a-12fffdeac8.zip/node_modules/body-parser/lib/types/json.js:110:7)
+    at Layer.handle [as handle_request] (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/d050337/SAPDevelop/git/gardener/dashboard/.yarn/cache/express-npm-4.18.1-842e583ae1-c3d44c92e4.zip/node_modules/express/lib/router/index.js:328:13)",
+  },
+  "message": "No authorization token was found",
+  "reason": "Unauthorized",
+  "status": "Failure",
+}
+`;
+
 exports[`config should return the frontend configuration 1`] = `
 Array [
   Array [
@@ -39,10 +64,17 @@ Object {
     },
   ],
   "landingPageUrl": "https://gardener.cloud/",
+  "serviceAccountDefaultTokenExpiration": 42,
+}
+`;
+
+exports[`config should return the public frontend configuration 1`] = `Array []`;
+
+exports[`config should return the public frontend configuration 2`] = `
+Object {
   "loginTypes": Array [
     "oidc",
     "token",
   ],
-  "serviceAccountDefaultTokenExpiration": 42,
 }
 `;
