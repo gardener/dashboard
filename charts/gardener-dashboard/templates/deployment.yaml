@@ -149,7 +149,7 @@ spec:
             mountPath: /etc/gardener-dashboard
           {{- if .Values.frontendConfig.assets }}
           - name: assets
-            mountPath: /usr/src/app/public/static/assets
+            mountPath: /app/public/static/assets
           {{- end }}
           {{- if .Values.kubeconfig }}
           - name: gardener-dashboard-secret-kubeconfig
