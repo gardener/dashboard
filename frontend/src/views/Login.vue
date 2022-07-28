@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model="loginType"
                 >
                 <v-tab
-                  v-for="item in cfg.loginTypes"
+                  v-for="item in publicCfg.loginTypes"
                   :key="item"
                   :href="`#${item}`"
                 >
@@ -91,19 +91,19 @@ export default {
   },
   computed: {
     ...mapState([
-      'cfg'
+      'publicCfg'
     ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
     },
     primaryLoginType () {
-      return head(this.cfg.loginTypes) || 'oidc'
+      return head(this.publicCfg.loginTypes) || 'oidc'
     },
     showTokenLoginLink () {
       return this.primaryLoginType === 'oidc'
     },
     landingPageUrl () {
-      return this.cfg.landingPageUrl
+      return this.publicCfg.landingPageUrl
     }
   },
   beforeRouteEnter (to, from, next) {

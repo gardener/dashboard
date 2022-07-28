@@ -13,9 +13,8 @@ const cookieParser = require('cookie-parser')
 const logger = require('./logger')
 const routes = require('./routes')
 const hooks = require('./hooks')()
-const frontendConfigHandler = require('./frontendConfigHandler')
 const { authenticate } = require('./security')
-const { dashboardClient, createClient } = require('@gardener-dashboard/kube-client')
+const { createClient } = require('@gardener-dashboard/kube-client')
 const { notFound, sendError } = require('./middleware')
 // configure router
 const router = express.Router()
@@ -35,6 +34,8 @@ module.exports = {
   router,
   hooks,
   frontendConfig (config) {
-    return frontendConfigHandler(config, dashboardClient)
+    return async (req, res) => {
+      res.json(config.frontendPublic)
+    }
   }
 }

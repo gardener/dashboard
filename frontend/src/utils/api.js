@@ -85,6 +85,10 @@ async function callResourceMethod (url, data) {
 /* Configuration */
 
 export function getConfiguration () {
+  return getResource('/api/config')
+}
+
+export function getPublicConfiguration () {
   return getResource('/config.json')
 }
 

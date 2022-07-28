@@ -6,13 +6,17 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { getPrivileges, getConfiguration } from '@/utils/api'
+import {
+  getPrivileges,
+  getConfiguration,
+  getPublicConfiguration
+} from '@/utils/api'
 
 export default function createGuards (store, userManager, localStorage) {
   return {
     beforeEach: [
       setLoading(store, true),
-      ensureConfigurationLoaded(store),
+      ensureConfigurationLoaded(store, userManager),
       ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
       ensureDataLoaded(store, localStorage)
     ],
@@ -34,12 +38,21 @@ function setLoading (store, value) {
   }
 }
 
-function ensureConfigurationLoaded (store) {
+function ensureConfigurationLoaded (store, userManager) {
   return async function (to, from, next) {
     try {
       if (to.name === 'Error') {
         return next()
       }
+      if (!store.state.publicCfg) {
+        const { data } = await getPublicConfiguration()
+        await store.dispatch('setPublicConfiguration', data)
+      }
+
+      if (!userManager.isUserLoggedIn()) {
+        return next()
+      }
+
       if (!store.state.cfg) {
         const { data } = await getConfiguration()
         await store.dispatch('setConfiguration', data)
