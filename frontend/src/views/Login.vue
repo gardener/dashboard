@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model="loginType"
                 >
                 <v-tab
-                  v-for="item in loginTypes"
+                  v-for="item in cfg.loginTypes"
                   :key="item"
                   :href="`#${item}`"
                 >
@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
+import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
 import GSnotify from '@/components/GSnotify.vue'
 
@@ -85,11 +86,7 @@ export default {
       dialog: false,
       showToken: false,
       token: '',
-
-      loginType: undefined,
-      loginTypes: [
-        'oidc', 'token'
-      ]
+      loginType: undefined
     }
   },
   computed: {
@@ -100,7 +97,7 @@ export default {
       return get(this.$route.query, 'redirectPath', '/')
     },
     primaryLoginType () {
-      return this.cfg.primaryLoginType || 'oidc'
+      return head(this.cfg.loginTypes) || 'oidc'
     },
     showTokenLoginLink () {
       return this.primaryLoginType === 'oidc'

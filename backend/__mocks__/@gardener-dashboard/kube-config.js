@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { Config, ClientConfig, ...originalKubeconfig } = jest.requireActual('@gardener-dashboard/kube-config')
+const { Config, ClientConfig, cleanKubeconfig, ...originalKubeconfig } = jest.requireActual('@gardener-dashboard/kube-config')
 
 const mockLoadResult = new ClientConfig(Config.build({
   server: 'https://kubernetes:6443'
@@ -16,6 +16,7 @@ const mockLoadResult = new ClientConfig(Config.build({
 
 module.exports = {
   ...originalKubeconfig,
+  cleanKubeconfig: jest.fn().mockImplementation(cleanKubeconfig),
   load: jest.fn().mockReturnValue(mockLoadResult),
   mockLoadResult
 }

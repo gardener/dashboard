@@ -10,8 +10,7 @@ const http2 = require('http2')
 const path = require('path')
 
 const {
-  HTTP2_HEADER_CONTENT_TYPE,
-  HTTP2_HEADER_AUTHORIZATION
+  HTTP2_HEADER_CONTENT_TYPE
 } = http2.constants
 
 const PatchType = {
@@ -30,18 +29,6 @@ function setHeader (options, key, value) {
   }
   options.headers[key] = value
   return options
-}
-
-function setAuthorization (options, type, credentials) {
-  type = type.toLowerCase()
-  switch (type) {
-    case 'basic':
-      return setHeader(options, HTTP2_HEADER_AUTHORIZATION, `Basic ${Buffer.from(credentials, 'utf8').toString('base64')}`)
-    case 'bearer':
-      return setHeader(options, HTTP2_HEADER_AUTHORIZATION, `Bearer ${credentials}`)
-    default:
-      throw new TypeError('The authentication type must be one of ["basic", "bearer"]')
-  }
 }
 
 function setContentType (options, value) {
@@ -94,7 +81,6 @@ function validateLabelValue (name) {
 exports = module.exports = {
   decodeBase64,
   setHeader,
-  setAuthorization,
   setContentType,
   PatchType,
   setPatchType,

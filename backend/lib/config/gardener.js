@@ -110,7 +110,7 @@ module.exports = {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
 
-    _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
+    _.set(config, 'frontend.loginTypes', config.oidc ? ['oidc', 'token'] : ['token'])
     _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
     _.set(config, 'frontend.clusterIdentity', config.clusterIdentity)
     if (!config.gitHub && _.has(config, 'frontend.ticket')) {
