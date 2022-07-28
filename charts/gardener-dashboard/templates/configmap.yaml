@@ -157,10 +157,11 @@ data:
         {{- end }}
       {{- end }}
     {{- end }}
-    frontend:
-      {{- if .Values.frontendConfig.landingPageUrl }}
+    frontendPublic:
+      {{- if .Values.frontendConfigPublic.landingPageUrl }}
       landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
       {{- end }}
+    frontend:
       {{- if .Values.frontendConfig.helpMenuItems }}
       helpMenuItems:
       {{- range .Values.frontendConfig.helpMenuItems }}

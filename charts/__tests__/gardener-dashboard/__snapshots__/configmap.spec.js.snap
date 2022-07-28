@@ -97,6 +97,9 @@ exports[`gardener-dashboard configmap kubeconfig download should render the temp
 Object {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
   "apiServerUrl": "https://api.garden.example.org",
+  "frontendPublic": Object {
+    "landingPageUrl": "https://gardener.cloud/",
+  },
   "logFormat": "text",
   "logLevel": "debug",
   "oidc": Object {
@@ -189,9 +192,11 @@ Object {
         "url": "https://github.com/gardener/dashboard/issues/",
       },
     ],
-    "landingPageUrl": "https://gardener.cloud/",
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
+  },
+  "frontendPublic": Object {
+    "landingPageUrl": "https://gardener.cloud/",
   },
   "logFormat": "text",
   "logLevel": "debug",

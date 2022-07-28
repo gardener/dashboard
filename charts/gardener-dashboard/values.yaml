@@ -101,8 +101,11 @@ oidc:
   #  # clientSecret is the public client secret use by kubelogin and all users
   #  clientSecret: ~
 
-frontendConfig:
+# frontendConfigPublic is the configuration that is accessible without authentication
+frontendConfigPublic:
   landingPageUrl: https://github.com/gardener
+
+frontendConfig:
   # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
   # assets:
   #   favicon-16x16.png: |
