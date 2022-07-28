@@ -25,6 +25,49 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
+function projectFilter (user, isAdmin = false) {
+  const isMemberOf = project => {
+    return _
+      .chain(project)
+      .get('spec.members')
+      .find(({ kind, namespace, name }) => {
+        switch (kind) {
+          case 'Group':
+            if (_.includes(user.groups, name)) {
+              return true
+            }
+            break
+          case 'User':
+            if (user.id === name) {
+              return true
+            }
+            break
+          case 'ServiceAccount':
+            if (user.id === `system:serviceaccount:${namespace}:${name}`) {
+              return true
+            }
+            break
+        }
+        return false
+      })
+      .value()
+  }
+
+  const isPending = project => {
+    return _.get(project, 'status.phase', 'Pending') === 'Pending'
+  }
+
+  return project => {
+    if (isPending(project)) {
+      return false
+    }
+    if (!isAdmin && !isMemberOf(project)) {
+      return false
+    }
+    return true
+  }
+}
+
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -58,6 +101,7 @@ function isSeedUnreachable (seed) {
 module.exports = {
   decodeBase64,
   encodeBase64,
+  projectFilter,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
