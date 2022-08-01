@@ -11,6 +11,7 @@ const { shootHasIssue } = require('../utils')
 const { tickets } = require('../services')
 const { bootstrapper } = require('../services/terminals')
 const cache = require('../cache')
+const channels = require('../channels')
 
 async function deleteTickets ({ namespace, name }) {
   try {
@@ -40,7 +41,11 @@ module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
   const handleEvent = event => {
     const { type, object } = event
     const { namespace, name, uid } = object.metadata
-
+    channels.shoots.broadcast({ namespace, name, uid }, type.toLowerCase(), {
+      filter (session) {
+        return session.state.administrator || session.state.namespace === namespace
+      }
+    })
     const namespacedEvents = toNamespacedEvents(event)
     nsp.to(`shoots_${namespace}`).emit('shoots', namespacedEvents)
     nsp.to(`shoot_${namespace}_${name}`).emit('shoots', { ...namespacedEvents, kind: 'shoot' })

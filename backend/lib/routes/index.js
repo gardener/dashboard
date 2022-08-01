@@ -17,6 +17,7 @@ module.exports = {
   '/seeds': require('./seeds'),
   '/shoots': require('./shoots'),
   '/gardener-extensions': require('./gardenerExtensions'),
+  '/stream': require('./stream'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
