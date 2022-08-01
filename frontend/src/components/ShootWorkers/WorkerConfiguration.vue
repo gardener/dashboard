@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :valid="workersValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    width="1200"
+    width="1250"
     confirm-required
     caption="Configure Workers"
     disable-confirm-input-focus>

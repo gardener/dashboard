@@ -19,6 +19,18 @@ SPDX-License-Identifier: Apache-2.0
           label="Group Name">
         </v-text-field>
       </div>
+      <div class="smallInput">
+        <v-select
+          color="primary"
+          item-color="primary"
+          :items="machineArchitectures"
+          :error-messages="getErrorMessages('worker.machine.architecture')"
+          @input="onInputMachineArchitecture"
+          @blur="$v.worker.machine.architecture.$touch()"
+          v-model="worker.machine.architecture"
+          label="Architetcure">
+        </v-select>
+      </div>
       <div class="regularInput">
         <machine-type
         :machine-types="machineTypes"
@@ -142,6 +154,7 @@ import last from 'lodash/last'
 import difference from 'lodash/difference'
 import get from 'lodash/get'
 import set from 'lodash/set'
+import head from 'lodash/head'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -163,6 +176,11 @@ const validationErrors = {
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value'
+    },
+    machine: {
+      architecture: {
+        required: 'Machine Architetcure is required'
+      }
     }
   },
   selectedZones: {
@@ -235,7 +253,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndRegionAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture',
+      'machineArchitecturesByCloudProfileNameAndRegionAndZones',
       'volumeTypesByCloudProfileNameAndRegionAndZones',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
@@ -258,6 +277,11 @@ export default {
           },
           maxSurge: {
             numberOrPercentage
+          },
+          machine: {
+            architecture: {
+              required
+            }
           }
         },
         selectedZones: {
@@ -279,7 +303,10 @@ export default {
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
+      return this.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones, architecture: this.worker.machine.architecture })
+    },
+    machineArchitectures () {
+      return this.machineArchitecturesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
     },
     volumeTypes () {
       return this.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
@@ -300,8 +327,8 @@ export default {
       return get(this.selectedMachineType, 'storage.type') !== 'fixed'
     },
     machineImages () {
-      return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired }) => {
-        return !isExpired
+      return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired, architectures }) => {
+        return !isExpired && includes(architectures, this.worker.machine.architecture)
       })
     },
     minimumVolumeSize () {
@@ -449,6 +476,11 @@ export default {
     onInputZones () {
       this.$v.selectedZones.$touch()
       this.validateInput()
+    },
+    onInputMachineArchitecture () {
+      // Reset machine type and image to default as they won't be supported by new architecture
+      this.worker.machine.type = get(head(this.machineTypes), 'name')
+      this.worker.machine.image = head(this.machineImages)
     },
     onMachineTypeValid ({ valid }) {
       if (this.machineTypeValid !== valid) {

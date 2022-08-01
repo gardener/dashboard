@@ -7,16 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <v-select
-      color="primary"
-      item-color="primary"
-      :items="criItems"
-      :error-messages="getErrorMessages('criName')"
-      @input="onInputCriName"
-      @blur="$v.criName.$touch()"
-      v-model="criName"
-      label="Container Runtime"
-    ></v-select>
+    <hint-colorizer hint-color="warning">
+      <v-select
+        color="primary"
+        item-color="primary"
+        :items="criItems"
+        :error-messages="getErrorMessages('criName')"
+        @input="onInputCriName"
+        @blur="$v.criName.$touch()"
+        v-model="criName"
+        label="Container Runtime"
+        :hint="hint"
+        persistent-hint
+      ></v-select>
+    </hint-colorizer>
     <v-select
       v-if="criContainerRuntimeTypes.length"
       class="ml-1"
@@ -34,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import HintColorizer from '@/components/HintColorizer'
 import { getValidationErrors } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
 import find from 'lodash/find'
@@ -46,12 +51,14 @@ import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   criName: {
-    required: 'An explicit container runtime configuration is required',
-    validCriName: 'The selected machine image does not support the selected container runtime'
+    required: 'An explicit container runtime configuration is required'
   }
 }
 
 export default {
+  components: {
+    HintColorizer
+  },
   props: {
     worker: {
       type: Object,
@@ -72,8 +79,10 @@ export default {
       validationErrors
     }
   },
-  validations () {
-    return this.validators
+  validations: {
+    criName: {
+      required
+    }
   },
   computed: {
     validCriNames () {
@@ -86,7 +95,7 @@ export default {
           text: name
         }
       })
-      if (this.criName && !includes(criItems, this.criName)) {
+      if (this.criName && this.notInList) {
         criItems.push({
           value: this.criName,
           text: this.criName,
@@ -127,15 +136,15 @@ export default {
         }
       }
     },
-    validators () {
-      return {
-        criName: {
-          required,
-          validCriName: value => {
-            return includes(this.validCriNames, value)
-          }
-        }
+    notInList () {
+      // notInList: item may removed from cloud profile or worker changes do not support current selection
+      return !includes(this.validCriNames, this.criName)
+    },
+    hint () {
+      if (this.notInList) {
+        return 'The container runtime may not be supported by the selected machine image'
       }
+      return undefined
     }
   },
   methods: {

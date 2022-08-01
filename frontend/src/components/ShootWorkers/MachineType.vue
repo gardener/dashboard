@@ -24,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>
             {{item.name}}
-            <v-chip v-if="item.architecture" color="primary" label x-small class="ml-2" outlined>{{item.architecture}}</v-chip>
           </v-list-item-title>
           <v-list-item-subtitle>
             <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
@@ -36,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-slot:selection="{ item }">
          {{item.name}}
-         <v-chip v-if="item.architecture" color="primary" label x-small class="ml-2" outlined>{{item.architecture}}</v-chip>
       </template>
     </v-select>
   </hint-colorizer>
@@ -91,18 +89,19 @@ export default {
   computed: {
     machineTypeItems () {
       const machineTypes = this.machineTypes.slice()
-      if (this.notInCloudProfile) {
+      if (this.notInList) {
         machineTypes.push({
           name: this.worker.machine.type
         })
       }
       return machineTypes
     },
-    notInCloudProfile () {
+    notInList () {
+      // notInList: item may removed from cloud profile or worker changes do not support current selection
       return !find(this.machineTypes, ['name', this.worker.machine.type])
     },
     hint () {
-      if (this.notInCloudProfile) {
+      if (this.notInList) {
         return 'This machine type may not be supported by your worker'
       }
       return undefined

@@ -20,11 +20,11 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, architectures, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
+      <v-list-item v-for="({title, architecture, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
         <v-list-item-content class="pt-1">
           <v-list-item-subtitle>
             {{title}}
-            <v-chip v-for="architecture in architectures" color="primary" label x-small class="ml-2" :key="architecture" outlined>{{architecture}}</v-chip>
+            <v-chip v-if="architecture" color="primary" label x-small class="ml-2 px-1" :key="architecture" outlined>{{architecture}}</v-chip>
           </v-list-item-subtitle>
           <v-list-item-title>{{value}} {{description}}</v-list-item-title>
         </v-list-item-content>
@@ -122,9 +122,7 @@ export default {
       const machineType = this.machineType
       if (machineType) {
         item.description = `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
-        if (machineType.architecture) {
-          item.architectures = [machineType.architecture]
-        }
+        item.architecture = machineType.architecture
       }
 
       return item
@@ -193,7 +191,6 @@ export default {
         if (machineImage.expirationDate) {
           item.description = `(Expires: ${machineImage.expirationDateString})`
         }
-        item.architectures = machineImage.architectures
       }
 
       return item

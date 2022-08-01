@@ -23,10 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <vendor-icon :value="item.icon"></vendor-icon>
       </v-list-item-action>
       <v-list-item-content>
-        <v-list-item-title>
-          Name: {{item.name}} | Version: {{item.version}}
-          <v-chip v-for="architecture in item.architectures" :color="item.disabled ? 'orange' : 'primary'" label x-small class="ml-2" :key="architecture" outlined>{{architecture}}</v-chip>
-        </v-list-item-title>
+        <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
         <v-list-item-subtitle v-if="itemDescription(item).length">
           {{itemDescription(item)}}
         </v-list-item-subtitle>
@@ -49,19 +46,25 @@ import VendorIcon from '@/components/VendorIcon'
 import MultiMessage from '@/components/MultiMessage'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
-import get from 'lodash/get'
 
 const validationErrors = {
   worker: {
     machine: {
       image: {
-        required: 'Machine Image is required',
-        supportedArchitecture: 'The selected machine image does not support the architetcure of the selected machine type'
+        required: 'Machine Image is required'
+      }
+    }
+  }
+}
+
+const validations = {
+  worker: {
+    machine: {
+      image: {
+        required
       }
     }
   }
@@ -83,10 +86,6 @@ export default {
     },
     updateOSMaintenance: {
       type: Boolean
-    },
-    machineType: {
-      type: Object,
-      default: () => {}
     }
   },
   data () {
@@ -96,10 +95,24 @@ export default {
     }
   },
   computed: {
+    machineImageItems () {
+      const machineImages = this.machineImages.slice()
+      if (this.notInList) {
+        machineImages.push({
+          ...this.worker.machine.image,
+          key: 'notInList'
+        })
+      }
+      return machineImages
+    },
+    notInList () {
+      // notInList: item may removed from cloud profile or worker changes do not support current selection
+      return !find(this.machineImages, this.worker.machine.image)
+    },
     machineImage: {
       get () {
         const { name, version } = this.worker.machine.image || {}
-        return find(this.machineImages, { name, version }) || {}
+        return find(this.machineImageItems, { name, version }) || {}
       },
       set (machineImage) {
         this.worker.machine.image = pick(machineImage, ['name', 'version'])
@@ -135,6 +148,13 @@ export default {
           severity: 'warning'
         })
       }
+      if (this.notInList) {
+        hints.push({
+          type: 'text',
+          hint: 'This image may not be supported by the selected machine type',
+          severity: 'warning'
+        })
+      }
       return JSON.stringify(hints)
     },
     hintColor () {
@@ -150,39 +170,9 @@ export default {
     },
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
-    },
-    machineImageItems () {
-      const machineTypeArchitecture = this.machineType.architecture
-      return map(this.machineImages, machineImage => {
-        if (machineTypeArchitecture && !includes(machineImage.architectures, machineTypeArchitecture)) {
-          return {
-            ...machineImage,
-            disabled: true
-          }
-        }
-        return machineImage
-      })
-    },
-    validators () {
-      return {
-        worker: {
-          machine: {
-            image: {
-              required,
-              supportedArchitecture: value => {
-                const machineTypeArchitecture = this.machineType.architecture
-                const machineImageArchitectures = get(find(this.machineImages, value), 'architectures')
-                return !machineTypeArchitecture || includes(machineImageArchitectures, machineTypeArchitecture)
-              }
-            }
-          }
-        }
-      }
     }
   },
-  validations () {
-    return this.validators
-  },
+  validations,
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -212,18 +202,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    machineImages (updatedMachineImages) {
-      if (!includes(map(updatedMachineImages, 'name'), this.worker.machine.image.name)) {
-        this.worker.machine.image = undefined
-        this.onInputMachineImage()
-      }
-    },
-    machineType (machineType) {
-      this.$v.$touch()
-      this.validateInput()
-    }
   }
 }
 </script>
