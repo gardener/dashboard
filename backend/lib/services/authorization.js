@@ -50,6 +50,17 @@ exports.canGetOpenAPI = function (user) {
   })
 }
 
+exports.canListShoots = function (user, namespace) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace
+    }
+  })
+}
+
 exports.canGetShoot = function (user, namespace, name) {
   return hasAuthorization(user, {
     resourceAttributes: {

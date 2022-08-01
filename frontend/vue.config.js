@@ -120,7 +120,20 @@ module.exports = {
     }
   },
   devServer: {
+    compress: false,
     proxy: {
+      '/api/stream': {
+        target: proxyTarget,
+        timeout: 5000,
+        proxyTimeout: 5000,
+        onProxyRes: (proxyRes, req, res) => {
+          res.on('close', () => {
+            if (!res.finished) {
+              proxyRes.destroy()
+            }
+          })
+        }
+      },
       '/api': {
         target: proxyTarget,
         changeOrigin: true,

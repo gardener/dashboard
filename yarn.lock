@@ -1457,6 +1457,7 @@ __metadata:
     abort-controller: ^3.0.0
     base64url: ^3.0.1
     better-queue: ^3.8.10
+    better-sse: ^0.8.0
     body-parser: ^1.20.0
     compression: ^1.7.4
     cookie-parser: ^1.4.6
@@ -4180,6 +4181,13 @@ __metadata:
     node-eta: ^0.9.0
     uuid: ^3.0.0
   checksum: 14d03cbf2c71c0a38c6ae40f067781a5908a05b46ff33092f2540eaee1a8e2796fa169eadc1aa12d8117839a3c278423a3852e58af0b3bb66888f2ce49c10073
+  languageName: node
+  linkType: hard
+
+"better-sse@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "better-sse@npm:0.8.0"
+  checksum: 7448f309a4da5bef12404c3c18d1b1c26ea18e6184f7fdf36efcd96b1a12ba88ca1ea21d4872c55cfb0412aa4f2941a933a7bb8affee947c74e7f87ea025b95d
   languageName: node
   linkType: hard
 
