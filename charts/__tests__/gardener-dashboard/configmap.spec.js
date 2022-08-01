@@ -31,7 +31,9 @@ describe('gardener-dashboard', function () {
       expect(documents).toHaveLength(1)
       const [configMap] = documents
       expect(omit(configMap, ['data'])).toMatchSnapshot()
-      expect(Object.keys(configMap.data)).toEqual(['config.yaml'])
+      expect(Object.keys(configMap.data)).toEqual(['config.json', 'config.yaml'])
+      const configJson = configMap.data['config.json']
+      expect(configJson).toMatchSnapshot()
       const config = yaml.load(configMap.data['config.yaml'])
       expect(config).toMatchSnapshot()
     })

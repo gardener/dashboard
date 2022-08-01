@@ -23,17 +23,6 @@ describe('config', function () {
     mockRequest.mockReset()
   })
 
-  it('should return the public frontend configuration', async function () {
-    const res = await agent
-      .get('/config.json')
-      .expect('content-type', /json/)
-      .expect(200)
-
-    expect(mockRequest.mock.calls).toMatchSnapshot()
-
-    expect(res.body).toMatchSnapshot()
-  })
-
   it('should return the frontend configuration', async function () {
     mockRequest.mockResolvedValueOnce({ data: { 'cluster-identity': 'test-id' } })
 
@@ -46,17 +35,6 @@ describe('config', function () {
       .expect(200)
 
     expect(mockRequest).toBeCalledTimes(1)
-    expect(mockRequest.mock.calls).toMatchSnapshot()
-
-    expect(res.body).toMatchSnapshot()
-  })
-
-  it('should reject unauthenticated requests', async function () {
-    const res = await agent
-      .get('/api/config')
-      .expect('content-type', /json/)
-      .expect(401)
-
     expect(mockRequest.mock.calls).toMatchSnapshot()
 
     expect(res.body).toMatchSnapshot()

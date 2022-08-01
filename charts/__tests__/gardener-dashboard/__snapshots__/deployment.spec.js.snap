@@ -116,6 +116,11 @@ Object {
                 "mountPath": "/etc/gardener-dashboard",
                 "name": "gardener-dashboard-config",
               },
+              Object {
+                "mountPath": "/app/public/config.json",
+                "name": "gardener-dashboard-public-config",
+                "subPath": "config.json",
+              },
             ],
           },
         ],
@@ -134,6 +139,19 @@ Object {
               "name": "gardener-dashboard-configmap",
             },
             "name": "gardener-dashboard-config",
+          },
+          Object {
+            "configMap": Object {
+              "defaultMode": 444,
+              "items": Array [
+                Object {
+                  "key": "config.json",
+                  "path": "config.json",
+                },
+              ],
+              "name": "gardener-dashboard-configmap",
+            },
+            "name": "gardener-dashboard-public-config",
           },
         ],
       },

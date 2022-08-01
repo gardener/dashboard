@@ -62,7 +62,6 @@ app.use(['/api', '/config.json'], compression({
   level: zlib.constants.Z_DEFAULT_COMPRESSION
 }))
 app.use('/api', api.router)
-app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

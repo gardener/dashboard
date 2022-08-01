@@ -116,8 +116,6 @@ module.exports = {
       _.unset(config, 'frontend.ticket')
     }
 
-    _.set(config, 'frontendPublic.loginTypes', config.oidc ? ['oidc', 'token'] : ['token'])
-
     return config
   },
   readConfig (path) {

@@ -45,8 +45,15 @@ function ensureConfigurationLoaded (store, userManager) {
         return next()
       }
       if (!store.state.publicCfg) {
-        const { data } = await getPublicConfiguration()
-        await store.dispatch('setPublicConfiguration', data)
+        try {
+          const { data } = await getPublicConfiguration()
+          await store.dispatch('setPublicConfiguration', data)
+        } catch (err) {
+          const { response: { status } = {} } = err
+          if (status === 404) {
+            await store.dispatch('setPublicConfiguration', {})
+          }
+        }
       }
 
       if (!userManager.isUserLoggedIn()) {

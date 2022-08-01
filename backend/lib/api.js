@@ -32,10 +32,5 @@ router.use(sendError)
 // exports
 module.exports = {
   router,
-  hooks,
-  frontendConfig (config) {
-    return async (req, res) => {
-      res.json(config.frontendPublic)
-    }
-  }
+  hooks
 }
