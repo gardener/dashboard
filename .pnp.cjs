@@ -2702,6 +2702,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["abort-controller", "npm:3.0.0"],\
             ["base64url", "npm:3.0.1"],\
             ["better-queue", "npm:3.8.10"],\
+            ["better-sse", "npm:0.8.0"],\
             ["body-parser", "npm:1.20.0"],\
             ["compression", "npm:1.7.4"],\
             ["cookie-parser", "npm:1.4.6"],\
@@ -6202,6 +6203,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/better-queue-memory-npm-1.0.4-8bda911e60-c4d54f73cc.zip/node_modules/better-queue-memory/",\
           "packageDependencies": [\
             ["better-queue-memory", "npm:1.0.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["better-sse", [\
+        ["npm:0.8.0", {\
+          "packageLocation": "./.yarn/cache/better-sse-npm-0.8.0-2e645d2184-7448f309a4.zip/node_modules/better-sse/",\
+          "packageDependencies": [\
+            ["better-sse", "npm:0.8.0"]\
           ],\
           "linkType": "HARD"\
         }]\
