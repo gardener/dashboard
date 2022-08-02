@@ -16,8 +16,9 @@ export default function createGuards (store, userManager, localStorage) {
   return {
     beforeEach: [
       setLoading(store, true),
-      ensureConfigurationLoaded(store, userManager),
+      ensurePublicConfigurationLoaded(store),
       ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
+      ensureConfigurationLoaded(store),
       ensureDataLoaded(store, localStorage)
     ],
     afterEach: [
@@ -38,28 +39,33 @@ function setLoading (store, value) {
   }
 }
 
-function ensureConfigurationLoaded (store, userManager) {
+function ensurePublicConfigurationLoaded (store) {
   return async function (to, from, next) {
+    if (to.name === 'Error') {
+      return next()
+    }
     try {
-      if (to.name === 'Error') {
-        return next()
-      }
       if (!store.state.publicCfg) {
-        try {
-          const { data } = await getPublicConfiguration()
-          await store.dispatch('setPublicConfiguration', data)
-        } catch (err) {
-          const { response: { status } = {} } = err
-          if (status === 404) {
-            await store.dispatch('setPublicConfiguration', {})
-          }
-        }
+        const { data } = await getPublicConfiguration()
+        await store.dispatch('setPublicConfiguration', data)
       }
+      next()
+    } catch (err) {
+      next(err)
+    }
+  }
+}
 
-      if (!userManager.isUserLoggedIn()) {
-        return next()
-      }
-
+function ensureConfigurationLoaded (store) {
+  return async function (to, from, next) {
+    const meta = to.meta || {}
+    if (meta.public) {
+      return next()
+    }
+    if (to.name === 'Error') {
+      return next()
+    }
+    try {
       if (!store.state.cfg) {
         const { data } = await getConfiguration()
         await store.dispatch('setConfiguration', data)
