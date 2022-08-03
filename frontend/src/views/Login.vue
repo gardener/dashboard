@@ -70,7 +70,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import assign from 'lodash/assign'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
@@ -128,7 +127,7 @@ export default {
   methods: {
     async getLoginConfiguration () {
       const { data: cfg } = await getLoginConfiguration()
-      assign(this.cfg, cfg)
+      Object.assign(this.cfg, cfg)
     },
     handleLogin () {
       switch (this.loginType) {
