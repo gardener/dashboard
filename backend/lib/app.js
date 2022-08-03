@@ -57,7 +57,7 @@ app.use(helmet.hsts())
 app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
 app.use('/webhook', githubWebhook.router)
-app.use(['/api'], compression({
+app.use('/api', compression({
   threshold: 8192,
   level: zlib.constants.Z_DEFAULT_COMPRESSION
 }))
