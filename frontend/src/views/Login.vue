@@ -172,8 +172,10 @@ export default {
       this.$snotify.error(message, 'Login Error', config)
     }
   },
-  async mounted () {
+  async created () {
     await this.getLoginConfiguration()
+  },
+  mounted () {
     this.loginType = this.primaryLoginType
   },
   watch: {
