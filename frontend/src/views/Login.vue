@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model="loginType"
                 >
                 <v-tab
-                  v-for="item in publicCfg.loginTypes"
+                  v-for="item in cfg.loginTypes"
                   :key="item"
                   :href="`#${item}`"
                 >
@@ -70,12 +70,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import assign from 'lodash/assign'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
 import GSnotify from '@/components/GSnotify.vue'
+import {
+  getLoginConfiguration
+} from '@/utils/api'
 
 export default {
   components: {
@@ -86,24 +89,25 @@ export default {
       dialog: false,
       showToken: false,
       token: '',
-      loginType: undefined
+      loginType: undefined,
+      cfg: {
+        loginTypes: undefined,
+        landingPageUrl: undefined
+      }
     }
   },
   computed: {
-    ...mapState([
-      'publicCfg'
-    ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
     },
     primaryLoginType () {
-      return head(this.publicCfg.loginTypes) || 'oidc'
+      return head(this.cfg.loginTypes) || 'oidc'
     },
     showTokenLoginLink () {
       return this.primaryLoginType === 'oidc'
     },
     landingPageUrl () {
-      return this.publicCfg.landingPageUrl
+      return this.cfg.landingPageUrl
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -122,6 +126,10 @@ export default {
     })
   },
   methods: {
+    async getLoginConfiguration () {
+      const { data: cfg } = await getLoginConfiguration()
+      assign(this.cfg, cfg)
+    },
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -164,7 +172,8 @@ export default {
       this.$snotify.error(message, 'Login Error', config)
     }
   },
-  mounted () {
+  async mounted () {
+    await this.getLoginConfiguration()
     this.loginType = this.primaryLoginType
   },
   watch: {

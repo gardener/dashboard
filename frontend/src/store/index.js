@@ -102,7 +102,6 @@ if (debug) {
 // initial state
 const state = {
   cfg: null,
-  publicCfg: null,
   kubeconfigData: null,
   ready: false,
   namespace: null,
@@ -1601,11 +1600,6 @@ const actions = {
 
     return state.cfg
   },
-  setPublicConfiguration ({ commit, getters }, value) {
-    commit('SET_PUBLIC_CONFIGURATION', value)
-
-    return state.publicCfg
-  },
   async setNamespace ({ dispatch, commit }, namespace) {
     commit('SET_NAMESPACE', namespace)
     await dispatch('refreshSubjectRules', namespace)
@@ -1692,9 +1686,6 @@ const actions = {
 const mutations = {
   SET_CONFIGURATION (state, value) {
     state.cfg = value
-  },
-  SET_PUBLIC_CONFIGURATION (state, value) {
-    state.publicCfg = value
   },
   SET_READY (state, value) {
     state.ready = value

@@ -88,8 +88,8 @@ export function getConfiguration () {
   return getResource('/api/config')
 }
 
-export function getPublicConfiguration () {
-  return getResource('/config.json')
+export function getLoginConfiguration () {
+  return getResource('/login-config.json')
 }
 
 /* CloudProviders Secrets */
