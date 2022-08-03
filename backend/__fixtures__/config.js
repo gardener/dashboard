@@ -86,7 +86,6 @@ const defaultConfig = {
     features: {
       terminalEnabled: true
     },
-    landingPageUrl: 'https://gardener.cloud/',
     helpMenuItems: [
       {
         title: 'Getting Started',

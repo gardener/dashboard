@@ -70,12 +70,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
 import GSnotify from '@/components/GSnotify.vue'
+import {
+  getLoginConfiguration
+} from '@/utils/api'
 
 export default {
   components: {
@@ -86,13 +88,14 @@ export default {
       dialog: false,
       showToken: false,
       token: '',
-      loginType: undefined
+      loginType: undefined,
+      cfg: {
+        loginTypes: undefined,
+        landingPageUrl: undefined
+      }
     }
   },
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
     },
@@ -122,6 +125,10 @@ export default {
     })
   },
   methods: {
+    async getLoginConfiguration () {
+      const { data: cfg } = await getLoginConfiguration()
+      Object.assign(this.cfg, cfg)
+    },
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -163,6 +170,9 @@ export default {
       }
       this.$snotify.error(message, 'Login Error', config)
     }
+  },
+  async created () {
+    await this.getLoginConfiguration()
   },
   mounted () {
     this.loginType = this.primaryLoginType
