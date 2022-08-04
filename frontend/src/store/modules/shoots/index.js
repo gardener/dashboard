@@ -290,11 +290,12 @@ function setFilteredItems (state, rootState, rootGetters) {
         }
         const lastErrors = get(item, 'status.lastErrors', [])
         const allLastErrorCodes = errorCodesFromArray(lastErrors)
+        if (isTemporaryError(allLastErrorCodes)) {
+          return false
+        }
         const conditions = get(item, 'status.conditions', [])
         const allConditionCodes = errorCodesFromArray(conditions)
-        const noUserError = !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
-        const noTemporaryError = !isTemporaryError(allLastErrorCodes)
-        return noUserError && noTemporaryError
+        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes))
       }
       items = filter(items, predicate)
     }
