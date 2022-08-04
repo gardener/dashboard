@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset></v-divider>
       <credential-tile
         v-if="shootEnableStaticTokenKubeconfig"
-        title="Rotate Kubeconfig"
+        title="Kubeconfig"
         :shoot-item="shootItem"
         type="kubeconfig"
         dense

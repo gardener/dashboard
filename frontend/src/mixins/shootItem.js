@@ -11,8 +11,6 @@ import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import some from 'lodash/some'
 import filter from 'lodash/filter'
-import without from 'lodash/without'
-import compact from 'lodash/compact'
 import { mapGetters } from 'vuex'
 
 import {
@@ -21,7 +19,8 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTypeDelete,
-  isTruthyValue
+  isTruthyValue,
+  rotationTypes
 } from '@/utils'
 
 export const shootItem = {
@@ -260,21 +259,52 @@ export const shootItem = {
       return get(this.shootStatus, 'credentials.rotation', {})
     },
     shootStatusCredentialRotationAggregatedPhase () {
-      const phases = compact(flatMap(this.shootStatusCredentialRotation, 'phase'))
-
-      if (!phases.length) {
-        return undefined
+      const preparingPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Preparing']).length
+      const completingPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Completing']).length
+      if (completingPhaseCount > 0) {
+        const type = 'Completing'
+        return {
+          type,
+          caption: type
+        }
       }
 
-      if (without(phases, 'Prepared').length === 0) {
-        return 'Prepared'
+      if (preparingPhaseCount > 0) {
+        const type = 'Preparing'
+        return {
+          type,
+          caption: type
+        }
       }
 
-      if (without(phases, 'Completed').length === 0) {
-        return 'Completed'
+      const numberOfTwoPhaseOperations = rotationTypes.numberOfTwoPhaseOperations()
+      const preparedPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Prepared']).length
+
+      if (preparedPhaseCount > 0) {
+        if (preparedPhaseCount === numberOfTwoPhaseOperations) {
+          const type = 'Prepared'
+          return {
+            type,
+            caption: type
+          }
+        }
+        return {
+          caption: `Prepared ${preparedPhaseCount}/${numberOfTwoPhaseOperations}`,
+          type: 'Prepared',
+          incomplete: true
+        }
       }
 
-      return 'Ambiguous'
+      const completedPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Completed']).length
+      if (completedPhaseCount === numberOfTwoPhaseOperations) {
+        const type = 'Completed'
+        return {
+          type,
+          caption: type
+        }
+      }
+
+      return undefined
     }
   },
   methods: {

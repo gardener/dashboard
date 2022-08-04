@@ -607,3 +607,49 @@ export function mapTableHeader (headers, valueKey) {
 export function isHtmlColorCode (value) {
   return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
 }
+
+export const rotationTypes = {
+  kubeconfig: {
+    initOperation: 'rotate-kubeconfig-credentials'
+  },
+  certificateAuthorities: {
+    initOperation: 'rotate-ca-start',
+    completionOperation: 'rotate-ca-complete'
+  },
+  observability: {
+    initOperation: 'rotate-observability-credentials'
+  },
+  sshKeypair: {
+    initOperation: 'rotate-ssh-keypair'
+  },
+  etcdEncryptionKey: {
+    initOperation: 'rotate-etcd-encryption-key-start',
+    completionOperation: 'rotate-etcd-encryption-key-complete'
+  },
+  serviceAccountKey: {
+    initOperation: 'rotate-serviceaccount-key-start',
+    completionOperation: 'rotate-serviceaccount-key-complete'
+  },
+  allCredentials: {
+    initOperation: 'rotate-credentials-start',
+    completionOperation: 'rotate-credentials-complete'
+  },
+  initOperation: function (type) {
+    if (this[type]) {
+      return this[type].initOperation
+    }
+    return this.allCredentials.initOperation
+  },
+  completionOperation: function (type) {
+    if (this[type]) {
+      return this[type].completionOperation
+    }
+    return this.allCredentials.completionOperation
+  },
+  numberOfTwoPhaseOperations: function () {
+    return compact(map(this, 'completionOperation')).length - 1
+  },
+  numberOfOperations: function () {
+    return compact(map(this, 'initOperation')).length - 1
+  }
+}

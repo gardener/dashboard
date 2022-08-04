@@ -49,6 +49,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
+import { rotationTypes } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -91,46 +92,16 @@ export default {
       return 'init'
     },
     operation () {
-      if (this.phase === 'Prepared' || this.phase === 'Completing') {
+      if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
         return this.completionOperation
       }
       return this.initOperation
     },
     initOperation () {
-      switch (this.type) {
-        case 'kubeconfig':
-          return 'rotate-kubeconfig-credentials'
-        case 'certificateAuthorities':
-          return 'rotate-ca-start'
-        case 'observability':
-          return 'rotate-observability-credentials'
-        case 'sshKeypair':
-          return 'rotate-ssh-keypair'
-        case 'etcdEncryptionKey':
-          return 'rotate-serviceaccount-key-start'
-        case 'serviceAccountKey':
-          return 'rotate-etcd-encryption-key-start'
-        default:
-          return 'rotate-credentials-start'
-      }
+      return rotationTypes.initOperation(this.type)
     },
     completionOperation () {
-      switch (this.type) {
-        case 'kubeconfig':
-          return undefined
-        case 'certificateAuthorities':
-          return 'rotate-ca-complete'
-        case 'observability':
-          return undefined
-        case 'sshKeypair':
-          return undefined
-        case 'etcdEncryptionKey':
-          return 'rotate-serviceaccount-key-complete'
-        case 'serviceAccountKey':
-          return 'rotate-etcd-encryption-key-complete'
-        default:
-          return 'rotate-credentials-complete'
-      }
+      return rotationTypes.completionOperation(this.type)
     },
     rotationStatus () {
       return get(this.shootStatusCredentialRotation, this.type, {})
@@ -141,6 +112,12 @@ export default {
       }
       return this.shootStatusCredentialRotationAggregatedPhase
     },
+    phaseType () {
+      if (typeof this.phase === 'object') {
+        return get(this.phase, 'type')
+      }
+      return this.phase
+    },
     isActionToBeScheduled () {
       return this.shootGardenOperation === this.operation
     },
@@ -148,22 +125,22 @@ export default {
       if (this.isActionToBeScheduled) {
         return true
       }
-      if (this.mode === 'init' && this.phase === 'Preparing') {
+      if (this.mode === 'init' && this.phaseType === 'Preparing') {
         return true
       }
-      if (this.mode === 'complete' && this.phase === 'Completing') {
+      if (this.mode === 'complete' && this.phaseType === 'Completing') {
         return true
       }
       return false
     },
     isDisabled () {
-      if (this.mode === 'complete' && this.phase !== 'Prepared') {
+      if (this.mode === 'complete' && (this.phaseType !== 'Prepared' || this.phase.incomplete)) {
         return true
       }
-      if (this.isHibernationPreventingMaintenance) {
+      if (this.isHibernationPreventingRotation) {
         return true
       }
-      if (this.mode === 'init' && this.phase && this.phase !== 'Completed') {
+      if (this.mode === 'init' && this.phaseType && this.phaseType !== 'Completed') {
         return true
       }
       return false
@@ -180,7 +157,7 @@ export default {
       }
       return ''
     },
-    isHibernationPreventingMaintenance () {
+    isHibernationPreventingRotation () {
       return this.isShootStatusHibernated &&
         includes(['rotate-credentials-start',
           'rotate-etcd-encryption-key-start',
@@ -219,7 +196,7 @@ export default {
       if (this.isScheduledForMaintenance) {
         return 'This operation is scheduled to be performed during the next maintenance time window'
       }
-      if (this.isHibernationPreventingMaintenance && this.isShootStatusHibernated) {
+      if (this.isHibernationPreventingRotation && this.isShootStatusHibernated) {
         return 'Cluster is hibernated. Wake up cluster to perform this operation.'
       }
       return undefined
@@ -240,7 +217,7 @@ export default {
         },
         'rotate-ca-start': {
           caption: this.isLoading
-            ? 'Initiating certificate authorities rotation'
+            ? 'Preparing certificate authorities rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate Certificate Authorities Rotation',
@@ -298,7 +275,7 @@ export default {
         },
         'rotate-etcd-encryption-key-start': {
           caption: this.isLoading
-            ? 'Initiating etcd encryption key rotation'
+            ? 'Preparing etcd encryption key rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate ETCD Encryption Key Rotation',
@@ -330,7 +307,7 @@ export default {
         },
         'rotate-serviceaccount-key-start': {
           caption: this.isLoading
-            ? 'Initiating ServiceAccount token signing key rotation'
+            ? 'Preparing ServiceAccount token signing key rotation'
             : this.isDisabled
               ? 'Rotation already initiated'
               : 'Initiate ServiceAccount Token Signing Key Rotation',
@@ -363,9 +340,9 @@ export default {
       }
       componentTexts['rotate-credentials-start'] = {
         caption: this.isLoading
-          ? 'Initiating credential rotation'
+          ? 'Preparing credential rotation'
           : this.isDisabled
-            ? 'All credentials rotations need to have reached phase "Completed" in order to perform tis action. Please complete all credential rotations that have already been initiated.'
+            ? 'All credentials rotations need to have reached phase "Completed" in order to initiate the rotation of all credentials. Please complete all credential rotations that have already been initiated.'
             : 'Initiate Rotation of all Credentials',
         buttonText: this.text ? 'Initiate Rotation of all Credentials' : '',
         errorMessage: 'Could not initiate credential rotation',
@@ -387,7 +364,7 @@ export default {
         caption: this.isLoading
           ? 'Completing credential rotation'
           : this.isDisabled
-            ? 'All credentials rotations need to have reached phase "Prepared" in order to perform this action. Ensure that you have triggered the rotation initiation for all required credentials.'
+            ? 'All two-phase credentials rotations need to have reached phase "Prepared" in order to complete the rotation of all credentials. Ensure that you have triggered the rotation initiation for all required credentials.'
             : 'Complete Rotation of all Credentials',
         buttonText: this.text ? 'Complete Rotation of all Credentials' : '',
         errorMessage: 'Could not complete credential rotation',

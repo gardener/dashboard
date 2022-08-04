@@ -125,14 +125,10 @@ describe('ShootCredentialRotation.vue', () => {
       expect(serviceAccountKeyWrapper.vm.phase).toBe('Completed')
       expect(serviceAccountKeyWrapper.vm.phaseColor).toBe('primary')
 
-      expect(allWrapper.vm.phase).toBe('Ambiguous')
-      expect(allWrapper.vm.phaseColor).toBe('warning')
-
-      shootItem.status.credentials.rotation.etcdEncryptionKey.phase = 'Prepared'
-      shootItem.status.credentials.rotation.serviceAccountKey.phase = 'Prepared'
-
-      expect(allWrapper.vm.phase).toBe('Prepared')
-      expect(allWrapper.vm.phaseColor).toBe('primary')
+      expect(allWrapper.vm.phase).toEqual({ caption: 'Completing', type: 'Completing' })
+      expect(allWrapper.vm.phaseType).toBe('Completing')
+      expect(allWrapper.vm.phaseCaption).toBe('Completing')
+      expect(allWrapper.vm.phaseColor).toBe('info')
     })
 
     it('should compute lastInitiationTime / lastCompletionTime', () => {
@@ -150,8 +146,14 @@ describe('ShootCredentialRotation.vue', () => {
       expect(certificateAuthoritiesWrapper.vm.lastInitiationTime).toBe('2022-07-05T09:22:33Z')
       expect(certificateAuthoritiesWrapper.vm.lastCompletionTime).toBe('2022-07-05T08:39:03Z')
 
-      expect(allWrapper.vm.lastInitiationTime).toBe('2022-07-05T10:01:02Z')
-      expect(allWrapper.vm.lastCompletionTime).toBe('2022-07-05T10:01:42Z')
+      // no lastInitiationTime for overall tile
+      expect(allWrapper.vm.lastInitiationTime).toBe(undefined)
+      expect(allWrapper.vm.lastCompletionTime).toBe(undefined)
+
+      // only show lastCompletionTime if all enabled rotations have been rotated at least once
+      shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
+      expect(allWrapper.vm.lastInitiationTime).toBe(undefined)
+      expect(allWrapper.vm.lastCompletionTime).toBe('2022-06-27T08:25:58Z')
     })
 
     it('should show warning in case CACertificateValiditiesAcceptable constraint is false', async () => {
@@ -214,14 +216,14 @@ describe('ShootCredentialRotation.vue', () => {
     })
 
     it('should compute operation', () => {
-      expect(allRotationWrapper.vm.operation).toEqual(allRotationWrapper.vm.initOperation)
+      expect(allRotationWrapper.vm.operation).toEqual(allRotationWrapper.vm.completionOperation)
       expect(certificateAuthoritiesRotationWrapper.vm.operation).toEqual(certificateAuthoritiesRotationWrapper.vm.completionOperation)
       expect(etcdEncryptionKeyRotationWrapper.vm.operation).toEqual(etcdEncryptionKeyRotationWrapper.vm.completionOperation)
       expect(serviceAccountKeyRotationWrapper.vm.operation).toEqual(serviceAccountKeyRotationWrapper.vm.initOperation)
     })
 
     it('should compute mode', () => {
-      expect(allRotationWrapper.vm.mode).toEqual('init')
+      expect(allRotationWrapper.vm.mode).toEqual('complete')
       expect(certificateAuthoritiesRotationWrapper.vm.mode).toEqual('complete')
       expect(observabilityRotationWrapper.vm.mode).toEqual('rotate')
       expect(etcdEncryptionKeyRotationWrapper.vm.mode).toEqual('complete')

@@ -12,21 +12,25 @@ SPDX-License-Identifier: Apache-2.0
     <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
         {{title}}
-        <v-chip v-if="phase" :color="phaseColor" label x-small class="ml-2" outlined>{{phase}}</v-chip>
+        <v-tooltip top :disabled="!showChipTooltip">
+          <template v-slot:activator="{ on }">
+            <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
+          </template>
+          All two-phase operations need to be in phase "Prepared" in order to complete the rotation of all credentials
+        </v-tooltip>
       </v-list-item-title>
       <v-list-item-subtitle class="d-flex align-center">
-        <template v-if="type==='certificateAuthorities' && !isCACertificateValiditiesAcceptable">
+        <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
           <shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
           <span color="warning">Certificate Authorities will expire in less than one year</span>
         </template>
         <template v-else>
-          <span v-if="!!lastInitiationTime">Last Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string></span>
-          <span v-if="!!lastInitiationTime && !!lastCompletionTime"> / </span>
-          <span v-if="!!lastCompletionTime">Last completed: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
+          <span v-if="showLastInitiationTime">Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string></span>
+          <span v-if="showLastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
         </template>
       </v-list-item-subtitle>
     </v-list-item-content>
-    <v-list-item-action :class="{'py-0 my-0' : dense}">
+    <v-list-item-action :class="{'py-0 my-1' : dense}">
       <rotate-credentials :shoot-item="shootItem" :type="type"></rotate-credentials>
     </v-list-item-action>
   </v-list-item>
@@ -39,7 +43,8 @@ import ShootMessages from '@/components/ShootMessages/ShootMessages'
 import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
-import last from 'lodash/last'
+import head from 'lodash/head'
+import { rotationTypes } from '@/utils'
 
 export default {
   name: 'credential-tile',
@@ -71,13 +76,22 @@ export default {
       if (this.type) {
         return this.rotationStatus.lastInitiationTime
       }
-      return last(flatMap(this.shootStatusCredentialRotation, 'lastInitiationTime').sort())
+      // Do not show aggregated initiation time
+      return undefined
     },
     lastCompletionTime () {
       if (this.type) {
         return this.rotationStatus.lastCompletionTime
       }
-      return last(flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime').sort())
+      const allCompletionTimes = flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime').sort()
+      let requiredNumberOfRotationTimes = rotationTypes.numberOfOperations()
+      if (!this.shootEnableStaticTokenKubeconfig) {
+        requiredNumberOfRotationTimes = requiredNumberOfRotationTimes - 1
+      }
+      if (requiredNumberOfRotationTimes === allCompletionTimes.length) {
+        return head(allCompletionTimes)
+      }
+      return undefined
     },
     phase () {
       if (this.type) {
@@ -85,16 +99,25 @@ export default {
       }
       return this.shootStatusCredentialRotationAggregatedPhase
     },
+    phaseType () {
+      if (typeof this.phase === 'object') {
+        return get(this.phase, 'type')
+      }
+      return this.phase
+    },
+    phaseCaption () {
+      if (typeof this.phase === 'object') {
+        return get(this.phase, 'caption')
+      }
+      return this.phase
+    },
     phaseColor () {
-      switch (this.phase) {
-        case 'Preparing':
-        case 'Completing':
-          return 'info'
+      switch (this.phaseType) {
         case 'Prepared':
         case 'Completed':
           return 'primary'
         default:
-          return 'warning'
+          return 'info'
       }
     },
     iconColor () {
@@ -102,6 +125,18 @@ export default {
         return 'warning'
       }
       return 'primary'
+    },
+    showLastInitiationTime () {
+      return (this.lastInitiationTime && !this.lastCompletionTime) || this.lastInitiationTime > this.lastCompletionTime
+    },
+    showLastCompletionTime () {
+      return (this.lastCompletionTime && !this.lastInitiationTime) || this.lastCompletionTime > this.lastInitiationTime
+    },
+    showChip () {
+      return this.phaseType && this.phaseType !== 'Completed'
+    },
+    showChipTooltip () {
+      return this.phaseType === 'Prepared' && typeof this.phase === 'object' && this.phase.incomplete
     }
   }
 }
