@@ -478,7 +478,8 @@ export default {
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
-            '- Clusters with temporary issues that will be retried automatically'
+            '- Clusters with temporary issues that will be retried automatically',
+            '- Clusters with annotation dashboard.gardener.cloud/ignore-issues'
           ],
           disabled: this.filtersDisabled
         },
