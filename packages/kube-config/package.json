@@ -24,6 +24,9 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
+    "@gardener-dashboard/logger": "workspace:*",
+    "@gardener-dashboard/test-utils": "workspace:*",
+    "chokidar": "^3.5.3",
     "gtoken": "^6.0.0",
     "js-yaml": "^4.1.0",
     "lodash": "4.17.21"
@@ -49,7 +52,9 @@
       "standard",
       "plugin:jest/recommended"
     ],
-    "globals": {},
+    "globals": {
+      "fixtures": true
+    },
     "rules": {
       "no-console": "error"
     }
@@ -58,6 +63,9 @@
     "restoreMocks": true,
     "verbose": true,
     "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
@@ -66,7 +74,10 @@
         "lines": 100,
         "statements": 100
       }
-    }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "packageManager": "yarn@3.2.1",
   "engines": {

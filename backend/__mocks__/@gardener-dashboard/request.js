@@ -6,39 +6,37 @@
 
 'use strict'
 
-const { mapKeys, toLower } = require('lodash')
+const { mapKeys, toLower, omit } = require('lodash')
 const { join } = require('path')
+const http2 = require('http2')
 const createError = require('http-errors')
-
 const request = jest.requireActual('@gardener-dashboard/request')
 
 const mockRequest = jest.fn(() => Promise.reject(createError(503, 'Service Unavailable')))
-
-const defaults = Symbol('defaults')
-const pseudoHeaders = Symbol('headers')
+const {
+  HTTP2_HEADER_SCHEME,
+  HTTP2_HEADER_AUTHORITY,
+  HTTP2_HEADER_PATH,
+  HTTP2_HEADER_METHOD,
+  HTTP2_HEADER_AUTHORIZATION
+} = http2.constants
 
 class MockClient {
-  constructor ({ prefixUrl, ...options }) {
-    const { protocol, host, pathname = '/' } = new URL(prefixUrl)
-    this[pseudoHeaders] = {
-      ':scheme': protocol.replace(/:$/, ''),
-      ':authority': host,
-      ':path': pathname
-    }
-    this[defaults] = {
-      options: {
-        prefixUrl,
-        ...options
-      }
-    }
+  #options
+
+  constructor (options) {
+    this.#options = options
   }
 
-  get pseudoHeaders () {
-    return this[pseudoHeaders]
+  get baseUrl () {
+    const { url, relativeUrl } = this.#options
+    return relativeUrl
+      ? new URL(relativeUrl, url)
+      : new URL(url)
   }
 
   get defaults () {
-    return this[defaults]
+    return { options: omit(this.#options, ['agent']) }
   }
 
   stream (path, options) {
@@ -46,15 +44,22 @@ class MockClient {
   }
 
   request (path, { method = 'get', searchParams, headers = {}, json, body } = {}) {
+    const { protocol, host, pathname = '/' } = this.baseUrl
     headers = {
       ...this.defaults.options.headers,
       ...mapKeys(headers, (_, key) => toLower(key)),
-      ':method': method,
-      ...this[pseudoHeaders]
+      [HTTP2_HEADER_METHOD]: method,
+      [HTTP2_HEADER_SCHEME]: protocol.replace(/:$/, ''),
+      [HTTP2_HEADER_AUTHORITY]: host,
+      [HTTP2_HEADER_PATH]: pathname
     }
-    headers[':path'] = join(headers[':path'], path)
+    headers[HTTP2_HEADER_PATH] = join(headers[HTTP2_HEADER_PATH], path)
     if (searchParams) {
-      headers[':path'] += '?' + searchParams
+      headers[HTTP2_HEADER_PATH] += '?' + searchParams
+    }
+    const auth = this.defaults.options.auth
+    if (auth && auth.bearer) {
+      headers[HTTP2_HEADER_AUTHORIZATION] = `Bearer ${auth.bearer}`
     }
     const args = [headers]
     if (json) {

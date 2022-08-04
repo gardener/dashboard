@@ -11,11 +11,8 @@ const createError = require('http-errors')
 const { http } = require('./symbols')
 
 class HttpClient {
-  constructor ({ url, ...options } = {}) {
-    this[http.client] = request.extend({
-      prefixUrl: this.constructor[http.prefixUrl](url),
-      ...options
-    })
+  constructor (options) {
+    this[http.client] = request.extend(options)
   }
 
   [http.request] (url, { searchParams, ...options } = {}) {
@@ -31,8 +28,8 @@ class HttpClient {
     return response
   }
 
-  static [http.prefixUrl] (url) {
-    return url
+  static get [http.relativeUrl] () {
+    return '/'
   }
 
   static extendResponse (response) {

@@ -10,6 +10,7 @@ const _ = require('lodash')
 const config = require('../config')
 
 module.exports = {
+  '/config': require('./config'),
   '/info': require('./info'),
   '/openapi': require('../openapi'),
   '/user': require('./user'),

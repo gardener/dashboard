@@ -10,7 +10,7 @@ const _ = require('lodash')
 const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
-const kubeconfig = require('@gardener-dashboard/kube-config')
+const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
 const { Resources } = require('@gardener-dashboard/kube-client')
 
 const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
@@ -292,7 +292,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       } = secretRef || {}
       const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
       const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
-      const kubeconfigObject = kubeconfig.cleanKubeconfig(rawConfig)
+      const kubeconfigObject = cleanKubeconfig(rawConfig)
 
       targetCluster.apiServer.caData = kubeconfigObject.currentCluster['certificate-authority-data']
       targetCluster.kubeconfigContextNamespace = seedShootNamespace

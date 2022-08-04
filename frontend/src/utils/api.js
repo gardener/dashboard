@@ -85,7 +85,11 @@ async function callResourceMethod (url, data) {
 /* Configuration */
 
 export function getConfiguration () {
-  return getResource('/config.json')
+  return getResource('/api/config')
+}
+
+export function getLoginConfiguration () {
+  return getResource('/login-config.json')
 }
 
 /* CloudProviders Secrets */

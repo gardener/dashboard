@@ -128,9 +128,6 @@ module.exports = {
       },
       '/auth': {
         target: proxyTarget
-      },
-      '/config.json': {
-        target: proxyTarget
       }
     }
   }

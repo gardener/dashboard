@@ -7,57 +7,33 @@
 'use strict'
 
 const _ = require('lodash')
-const { isIP } = require('net')
 const { isHttpError } = require('@gardener-dashboard/request')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { NotFound } = require('http-errors')
-const { decodeBase64, setAuthorization } = require('./util')
+const { decodeBase64 } = require('./util')
 const debug = require('./debug')
 const resources = require('./resources')
 const nonResourceEndpoints = require('./nonResourceEndpoints')
 
 const { fromKubeconfig, parseKubeconfig } = require('@gardener-dashboard/kube-config')
 
-const cluster = Symbol('cluster')
+const kClientConfig = Symbol('kClientConfig')
 
 class Client {
-  // the options are use to create a got instance (see https://github.com/sindresorhus/got#api)
-  constructor ({ auth, ...options } = {}) {
-    const { hostname } = new URL(options.url)
-    // use empty string '' to disable sending the SNI extension
-    const servername = isIP(hostname) !== 0 ? '' : hostname
-    // merge with default options
-    options = {
-      servername,
-      ...options
-    }
-    // set authorization header for basic and bearer authentication scheme
-    if (auth) {
-      if (auth.bearer) {
-        setAuthorization(options, 'bearer', auth.bearer)
-      } else if (auth.user && auth.pass) {
-        setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
-      } else if (typeof auth === 'string') {
-        setAuthorization(options, 'basic', auth)
-      }
-    }
+  constructor (clientConfig, options) {
+    this[kClientConfig] = clientConfig
     // add hooks for logging
     options = debug.attach(options)
-    // kubernetes cluster endpoint info
-    const { url, ca, rejectUnauthorized = true } = options
-    this[cluster] = {
-      server: url,
-      certificateAuthority: ca,
-      insecureSkipTlsVerify: !rejectUnauthorized
-    }
     // assign grouped resources (e.g. core.)
-    resources.assign(this, options)
+    resources.assign(this, clientConfig, options)
     // assign non-resource endpoints (e.g healthz)
-    nonResourceEndpoints.assign(this, options)
+    nonResourceEndpoints.assign(this, clientConfig, options)
   }
 
   get cluster () {
-    const { server, certificateAuthority, insecureSkipTlsVerify } = this[cluster]
+    const server = this[kClientConfig].url
+    const certificateAuthority = this[kClientConfig].ca
+    const insecureSkipTlsVerify = !this[kClientConfig].rejectUnauthorized
     return {
       server: new URL(server),
       certificateAuthority,
