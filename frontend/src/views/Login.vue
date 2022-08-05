@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model="loginType"
                 >
                 <v-tab
-                  v-for="item in loginTypes"
+                  v-for="item in cfg.loginTypes"
                   :key="item"
                   :href="`#${item}`"
                 >
@@ -70,11 +70,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
+import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
 import GSnotify from '@/components/GSnotify.vue'
+import {
+  getLoginConfiguration
+} from '@/utils/api'
 
 export default {
   components: {
@@ -85,22 +88,19 @@ export default {
       dialog: false,
       showToken: false,
       token: '',
-
       loginType: undefined,
-      loginTypes: [
-        'oidc', 'token'
-      ]
+      cfg: {
+        loginTypes: undefined,
+        landingPageUrl: undefined
+      }
     }
   },
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
     },
     primaryLoginType () {
-      return this.cfg.primaryLoginType || 'oidc'
+      return head(this.cfg.loginTypes) || 'oidc'
     },
     showTokenLoginLink () {
       return this.primaryLoginType === 'oidc'
@@ -125,6 +125,10 @@ export default {
     })
   },
   methods: {
+    async getLoginConfiguration () {
+      const { data: cfg } = await getLoginConfiguration()
+      Object.assign(this.cfg, cfg)
+    },
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -166,6 +170,9 @@ export default {
       }
       this.$snotify.error(message, 'Login Error', config)
     }
+  },
+  async created () {
+    await this.getLoginConfiguration()
   },
   mounted () {
     this.loginType = this.primaryLoginType

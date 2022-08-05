@@ -6,11 +6,15 @@
 
 'use strict'
 
+const globalLogger = {
+  log: jest.fn(),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn()
+}
+
 module.exports = {
-  http: {
-    relativeUrl: Symbol('http.relativeUrl'),
-    client: Symbol('http.client'),
-    agent: Symbol('http.agent'),
-    request: Symbol('http.request')
-  }
+  globalLogger
 }

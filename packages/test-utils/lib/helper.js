@@ -30,6 +30,10 @@ function delay (milliseconds = 0) {
   })
 }
 
+function onceEvent (emitter, name) {
+  return new Promise(resolve => emitter.once(name, resolve))
+}
+
 function hash (data, { algorithm = 'md5', encoding = 'hex' } = {}) {
   return crypto
     .createHash(algorithm)
@@ -54,6 +58,7 @@ module.exports = {
   getOwnSymbolProperty,
   nextTick,
   delay,
+  onceEvent,
   hash,
   randomNumber,
   encodeBase64,

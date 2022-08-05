@@ -150,11 +150,11 @@ const projectList = [
   }),
   getProject({
     uid: 5,
-    name: 'initial',
+    name: 'pending',
     createdBy: 'admin@example.org',
-    description: 'initial-description',
-    purpose: 'initial-purpose',
-    phase: 'Initial'
+    description: 'pending-description',
+    purpose: 'pending-purpose',
+    phase: 'Pending'
   }),
   getProject({
     uid: 6,
@@ -169,7 +169,8 @@ const projectList = [
     createdBy: 'admin@example.org',
     description: 'trial-description',
     purpose: 'trial-purpose',
-    costObject: '1234567890'
+    costObject: '1234567890',
+    phase: 'Failed'
   })
 ]
 

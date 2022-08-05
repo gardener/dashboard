@@ -12,7 +12,6 @@ export default function createGuards (store, userManager, localStorage) {
   return {
     beforeEach: [
       setLoading(store, true),
-      ensureConfigurationLoaded(store),
       ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
       ensureDataLoaded(store, localStorage)
     ],
@@ -30,23 +29,6 @@ function setLoading (store, value) {
       if (typeof next === 'function') {
         next()
       }
-    }
-  }
-}
-
-function ensureConfigurationLoaded (store) {
-  return async function (to, from, next) {
-    try {
-      if (to.name === 'Error') {
-        return next()
-      }
-      if (!store.state.cfg) {
-        const { data } = await getConfiguration()
-        await store.dispatch('setConfiguration', data)
-      }
-      next()
-    } catch (err) {
-      next(err)
     }
   }
 }
@@ -94,6 +76,7 @@ function ensureDataLoaded (store, localStorage) {
     }
     try {
       await Promise.all([
+        ensureConfigurationLoaded(store),
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
@@ -174,6 +157,13 @@ function setNamespace (store, namespace) {
   const namespaces = store.getters.namespaces
   if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
     return store.dispatch('setNamespace', namespace)
+  }
+}
+
+async function ensureConfigurationLoaded (store) {
+  if (!store.state.cfg) {
+    const { data } = await getConfiguration()
+    await store.dispatch('setConfiguration', data)
   }
 }
 

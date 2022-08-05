@@ -300,6 +300,7 @@ export function getProjectDetails (project) {
   const purpose = projectData.purpose || ''
   const staleSinceTimestamp = projectData.staleSinceTimestamp
   const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
+  const phase = projectData.phase
 
   return {
     projectName,
@@ -311,7 +312,8 @@ export function getProjectDetails (project) {
     description,
     purpose,
     staleSinceTimestamp,
-    staleAutoDeleteTimestamp
+    staleAutoDeleteTimestamp,
+    phase
   }
 }
 

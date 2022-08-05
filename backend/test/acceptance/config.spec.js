@@ -26,8 +26,11 @@ describe('config', function () {
   it('should return the frontend configuration', async function () {
     mockRequest.mockResolvedValueOnce({ data: { 'cluster-identity': 'test-id' } })
 
+    const user = fixtures.auth.createUser({ id: 'john.doe@example.org' })
+
     const res = await agent
-      .get('/config.json')
+      .get('/api/config')
+      .set('cookie', await user.cookie)
       .expect('content-type', /json/)
       .expect(200)
 

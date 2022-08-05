@@ -13,6 +13,7 @@ const { Client, extend } = require('../lib')
 const {
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
+  HTTP2_HEADER_AUTHORIZATION,
   HTTP2_HEADER_SCHEME,
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
@@ -26,7 +27,7 @@ const {
 jest.useFakeTimers('legacy')
 
 describe('Client', () => {
-  const prefixUrl = 'https://127.0.0.1:31415/test'
+  const url = new URL('https://127.0.0.1:31415/test')
   const xRequestId = '4711'
   const statusCode = 200
   const contentType = 'application/json'
@@ -74,7 +75,7 @@ describe('Client', () => {
       request: jest.fn().mockResolvedValue(stream)
     }
     client = new Client({
-      prefixUrl,
+      url,
       agent,
       headers: {
         'X-Request-Id': xRequestId
@@ -85,11 +86,43 @@ describe('Client', () => {
   describe('#constructor', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
+      expect(client.baseUrl.href).toBe(url.href)
       expect(client.responseTimeout).toBe(15000)
     })
 
     it('should throw a type error', () => {
       expect(() => new Client()).toThrowError(TypeError)
+    })
+
+    it('should create an instance with url and relativeUrl', () => {
+      client = new Client({
+        url: url.origin,
+        relativeUrl: url.pathname
+      })
+      expect(client.baseUrl.href).toBe(url.href)
+    })
+
+    it('should create an instance with bearer authorization', () => {
+      client = new Client({
+        url,
+        auth: {
+          bearer: 'token'
+        }
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Bearer token')
+    })
+
+    it('should create an instance with basic authorization', () => {
+      client = new Client({
+        url,
+        auth: {
+          user: 'a',
+          pass: 'b'
+        }
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Basic YTpi')
     })
   })
 
@@ -102,7 +135,7 @@ describe('Client', () => {
         throw new Error(message)
       })
       const client = new Client({
-        prefixUrl,
+        url,
         hooks: {
           beforeRequest: [beforeRequestSpy],
           afterResponse: [afterResponseSpy]
@@ -192,13 +225,13 @@ describe('Client', () => {
     })
 
     it('should return a response with responseType "text"', async () => {
-      client.defaults.options.responseType = 'text'
+      client.responseType = 'text'
       const response = await client.fetch()
       expect(response.type).toBe('text')
     })
 
     it('should return a response and destroy the stream', async () => {
-      client.defaults.options.responseType = 'text'
+      client.responseType = 'text'
       const response = await client.fetch()
       const error = new Error('error')
       response.destroy(error)
@@ -241,7 +274,7 @@ describe('Client', () => {
   describe('#defaults', () => {
     it('should return the default options', () => {
       const foo = 'bar'
-      const options = { prefixUrl, foo }
+      const options = { url, foo }
       const client = new Client(options)
       expect(client.defaults.options).toEqual(options)
     })
@@ -249,7 +282,7 @@ describe('Client', () => {
 
   describe('#extend', () => {
     it('should create a http client', () => {
-      const client = extend({ prefixUrl })
+      const client = extend({ url })
       expect(client).toBeInstanceOf(Client)
     })
   })
