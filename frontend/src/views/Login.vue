@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-title>
               <v-card-text class="login-form d-flex align-center justify-center py-0">
                 <v-skeleton-loader
-                  v-if="!!loading"
+                  v-if="loading"
                   width="100%"
                   type="card"
                 ></v-skeleton-loader>
