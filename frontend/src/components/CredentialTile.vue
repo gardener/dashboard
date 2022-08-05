@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:activator="{ on }">
             <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
-          All two-phase operations need to be in phase "Prepared" in order to complete the rotation of all credentials
+          All two-phase credentials rotations need to be in phase "Prepared" in order to complete the rotation of all credentials
         </v-tooltip>
       </v-list-item-title>
       <v-list-item-subtitle class="d-flex align-center">
@@ -25,6 +25,12 @@ SPDX-License-Identifier: Apache-2.0
           <span color="warning">Certificate Authorities will expire in less than one year</span>
         </template>
         <template v-else>
+          <v-tooltip v-if="phaseIcon" top>
+            <template v-slot:activator="{ on }">
+              <v-icon v-on="on" small class="mr-1">{{phaseIcon}}</v-icon>
+            </template>
+          {{phaseTooltip}}
+          </v-tooltip>
           <span v-if="showLastInitiationTime">Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string></span>
           <span v-if="showLastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
         </template>
@@ -137,6 +143,24 @@ export default {
     },
     showChipTooltip () {
       return this.phaseType === 'Prepared' && typeof this.phase === 'object' && this.phase.incomplete
+    },
+    phaseIcon () {
+      if (get(rotationTypes, [this.type, 'completionOperation'])) {
+        return 'mdi-numeric-2-box-multiple'
+      }
+      if (get(rotationTypes, [this.type, 'initOperation'])) {
+        return 'mdi-numeric-1-box'
+      }
+      return undefined
+    },
+    phaseTooltip () {
+      if (get(rotationTypes, [this.type, 'completionOperation'])) {
+        return 'Two-phase roation: You need to prepare the operation in order to be able to complete it'
+      }
+      if (get(rotationTypes, [this.type, 'initOperation'])) {
+        return 'One-phase rotation: Rotation will be completed in one step'
+      }
+      return undefined
     }
   }
 }

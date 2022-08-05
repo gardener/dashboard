@@ -218,9 +218,7 @@ export default {
         'rotate-ca-start': {
           caption: this.isLoading
             ? 'Preparing certificate authorities rotation'
-            : this.isDisabled
-              ? 'Rotation already initiated'
-              : 'Initiate Certificate Authorities Rotation',
+            : 'Initiate Certificate Authorities Rotation',
           errorMessage: 'Could not initiate the rotation of certificate authorities',
           successMessage: `Rotation of certificate authorities initiated for ${this.shootName}`,
           heading: 'Do you want to initiate the rotation of certificate authorities?',
@@ -234,9 +232,7 @@ export default {
         'rotate-ca-complete': {
           caption: this.isLoading
             ? 'Completing certificate authorities rotation'
-            : this.isDisabled
-              ? 'Rotation initiation not completed'
-              : 'Complete Certificate Authorities Rotation',
+            : 'Complete Certificate Authorities Rotation',
           errorMessage: 'Could not complete the rotation of certificate authorities',
           successMessage: `Rotation of certificate authorities completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of certificate authorities?',
@@ -276,9 +272,7 @@ export default {
         'rotate-etcd-encryption-key-start': {
           caption: this.isLoading
             ? 'Preparing etcd encryption key rotation'
-            : this.isDisabled
-              ? 'Rotation already initiated'
-              : 'Initiate ETCD Encryption Key Rotation',
+            : 'Initiate ETCD Encryption Key Rotation',
           errorMessage: 'Could not initiate the rotation of etcd encryption key',
           successMessage: `Rotation of etcd encryption key initiated for ${this.shootName}`,
           heading: 'Do you want to initiate the rotation of etcd encryption key?',
@@ -292,9 +286,7 @@ export default {
         'rotate-etcd-encryption-key-complete': {
           caption: this.isLoading
             ? 'Completing etcd encryption key rotation'
-            : this.isDisabled
-              ? 'Rotation initiation not completed'
-              : 'Complete ETCD Encryption Key Rotation',
+            : 'Complete ETCD Encryption Key Rotation',
           errorMessage: 'Could not complete the rotation of etcd encryption key',
           successMessage: `Rotation of etcd encryption key completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of etcd encryption key?',
@@ -308,9 +300,7 @@ export default {
         'rotate-serviceaccount-key-start': {
           caption: this.isLoading
             ? 'Preparing ServiceAccount token signing key rotation'
-            : this.isDisabled
-              ? 'Rotation already initiated'
-              : 'Initiate ServiceAccount Token Signing Key Rotation',
+            : 'Initiate ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not initiate the rotation of ServiceAccount token signing key',
           successMessage: `Rotation of ServiceAccount token signing key initiated for ${this.shootName}`,
           heading: 'Do you want to initiate the rotation of ServiceAccount token signing key?',
@@ -324,9 +314,7 @@ export default {
         'rotate-serviceaccount-key-complete': {
           caption: this.isLoading
             ? 'Completing ServiceAccount token signing key rotation'
-            : this.isDisabled
-              ? 'Rotation initiation not completed'
-              : 'Complete ServiceAccount Token Signing Key Rotation',
+            : 'Complete ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not complete the rotation of ServiceAccount token signing key',
           successMessage: `Rotation of ServiceAccount token signing key completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of ServiceAccount token signing key?',
@@ -341,9 +329,7 @@ export default {
       componentTexts['rotate-credentials-start'] = {
         caption: this.isLoading
           ? 'Preparing credential rotation'
-          : this.isDisabled
-            ? 'All credentials rotations need to have reached phase "Completed" in order to initiate the rotation of all credentials. Please complete all credential rotations that have already been initiated.'
-            : 'Initiate Rotation of all Credentials',
+          : 'Initiate Rotation of all Credentials',
         buttonText: this.text ? 'Initiate Rotation of all Credentials' : '',
         errorMessage: 'Could not initiate credential rotation',
         successMessage: `Credential rotation initiated for ${this.shootName}`,
@@ -364,7 +350,7 @@ export default {
         caption: this.isLoading
           ? 'Completing credential rotation'
           : this.isDisabled
-            ? 'All two-phase credentials rotations need to have reached phase "Prepared" in order to complete the rotation of all credentials. Ensure that you have triggered the rotation initiation for all required credentials.'
+            ? 'All two-phase credentials rotations need to be in phase "Prepared" in order to complete the rotation of all credentials'
             : 'Complete Rotation of all Credentials',
         buttonText: this.text ? 'Complete Rotation of all Credentials' : '',
         errorMessage: 'Could not complete credential rotation',
