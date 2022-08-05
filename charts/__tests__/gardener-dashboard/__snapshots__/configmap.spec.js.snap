@@ -140,6 +140,14 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 2`] = `
+"{
+   \\"landingPageUrl\\": \\"https://gardener.cloud/\\",
+   \\"loginTypes\\": [\\"oidc\\", \\"token\\"]
+}
+"
+`;
+
+exports[`gardener-dashboard configmap should render the template w/ defaults values 3`] = `
 Object {
   "apiServerUrl": "https://api.garden.example.org",
   "frontend": Object {
@@ -189,7 +197,6 @@ Object {
         "url": "https://github.com/gardener/dashboard/issues/",
       },
     ],
-    "landingPageUrl": "https://gardener.cloud/",
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
   },

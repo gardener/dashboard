@@ -38,11 +38,6 @@ Object {
       "url": "https://github.com/gardener/dashboard/issues/",
     },
   ],
-  "landingPageUrl": "https://gardener.cloud/",
-  "loginTypes": Array [
-    "oidc",
-    "token",
-  ],
   "serviceAccountDefaultTokenExpiration": 42,
 }
 `;

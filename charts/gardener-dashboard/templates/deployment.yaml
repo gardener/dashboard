@@ -47,6 +47,13 @@ spec:
           - key: config.yaml
             path: config.yaml
           defaultMode: 420
+      - name: gardener-dashboard-login-config
+        configMap:
+          name: gardener-dashboard-configmap
+          items:
+          - key: login-config.json
+            path: login-config.json
+          defaultMode: 0444
       {{- if .Values.frontendConfig.assets }}
       - name: assets
         configMap:
@@ -66,7 +73,7 @@ spec:
       containers:
         - name: gardener-dashboard
           {{- if .Values.nodeOptions }}
-          args: 
+          args:
           {{- range .Values.nodeOptions }}
           - {{ . }}
           {{- end }}
@@ -147,6 +154,9 @@ spec:
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard
+          - name: gardener-dashboard-login-config
+            mountPath: /app/public/login-config.json
+            subPath: login-config.json
           {{- if .Values.frontendConfig.assets }}
           - name: assets
             mountPath: /app/public/static/assets
