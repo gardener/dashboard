@@ -32,7 +32,8 @@ SPDX-License-Identifier: Apache-2.0
           {{phaseTooltip}}
           </v-tooltip>
           <span v-if="showLastInitiationTime">Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string></span>
-          <span v-if="showLastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
+          <span v-else-if="showLastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
+          <span v-else>Not yet rotated</span>
         </template>
       </v-list-item-subtitle>
     </v-list-item-content>
