@@ -7,18 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <action-button-dialog
     :shoot-item="shootItem"
-    :valid="seedClusterValid"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     width="450"
     caption="Configure Seed"
     confirm-required>
     <template v-slot:actionComponent>
-      <seed-select
+      <v-select
+        hint="Change seed cluster for this shoot's control plane"
+        color="primary"
+        item-color="primary"
+        label="Seed Cluster"
+        :items="seedNames"
         v-model="seedName"
-        :seedClusters="seedClusters"
-        :valid.sync="seedClusterValid"
-      ></seed-select>
+        persistent-hint>
+      </v-select>
     </template>
   </action-button-dialog>
 </template>
@@ -30,7 +33,6 @@ import filter from 'lodash/filter'
 import { mapGetters } from 'vuex'
 
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import SeedSelect from '@/components/SeedSelect'
 
 import { updateShootSeedName } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -40,24 +42,22 @@ import shootItem from '@/mixins/shootItem'
 export default {
   name: 'seed-configuration',
   components: {
-    ActionButtonDialog,
-    SeedSelect
+    ActionButtonDialog
   },
   mixins: [
     shootItem
   ],
   data () {
     return {
-      seedName: undefined,
-      seedClusterValid: false
+      seedName: undefined
     }
   },
   computed: {
     ...mapGetters([
       'seedList'
     ]),
-    seedClusters () {
-      const filteredSeeds = filter(this.seedList, { data: { type: this.shootCloudProviderKind } })
+    seedNames () {
+      const filteredSeeds = filter(this.seedList, ['data.type', this.shootCloudProviderKind])
       return map(filteredSeeds, seed => {
         return seed.metadata.name
       })
@@ -81,7 +81,7 @@ export default {
           }
         })
       } catch (err) {
-        const errorMessage = 'Could not update seedname'
+        const errorMessage = 'Could not update seedName'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })

@@ -122,12 +122,12 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
 exports.replaceSeedName = async function ({ user, namespace, name, body }) {
   const client = user.client
   const seedName = body.seedName
-  const payload = {
-    spec: {
-      seedName
-    }
-  }
-  return client['core.gardener.cloud'].shoots.mergePatch(namespace, [name, 'binding'], payload)
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/seedName',
+    value: seedName
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
