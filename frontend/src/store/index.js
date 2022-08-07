@@ -68,7 +68,7 @@ import split from 'lodash/split'
 import pick from 'lodash/pick'
 
 import moment from '@/utils/moment'
-import { createIoPlugin } from '@/utils/Emitter'
+import createEventStreamPlugin from './plugins/eventStreamPlugin'
 import createMediaPlugin from './plugins/mediaPlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -92,7 +92,7 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createIoPlugin(Vue.auth),
+  createEventStreamPlugin(),
   createMediaPlugin(window)
 ]
 if (debug) {
@@ -160,7 +160,8 @@ const state = {
   darkTheme: false,
   colorScheme: 'auto',
   subscriptions: {},
-  gardenctlOptions: {}
+  gardenctlOptions: {},
+  topics: []
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -889,29 +890,6 @@ const getters = {
       return getters['shoots/itemByNameAndNamespace']({ namespace, name })
     }
   },
-  ticketsByNamespaceAndName (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/issues']({ projectName, name })
-    }
-  },
-  ticketCommentsByIssueNumber (state, getters) {
-    return ({ issueNumber }) => {
-      return getters['tickets/comments']({ issueNumber })
-    }
-  },
-  latestUpdatedTicketByNameAndNamespace (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/latestUpdated']({ projectName, name })
-    }
-  },
-  ticketsLabels (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/labels']({ projectName, name })
-    }
-  },
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
@@ -943,9 +921,6 @@ const getters = {
   },
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
-  },
-  ticketList (state) {
-    return state.tickets.all
   },
   username (state) {
     const user = state.user
@@ -1394,93 +1369,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  clearShoots ({ dispatch, commit }) {
-    return dispatch('shoots/clearAll')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  clearIssues ({ dispatch, commit }) {
-    return dispatch('tickets/clearIssues')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  clearComments ({ dispatch, commit }) {
-    return dispatch('tickets/clearComments')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  async subscribeShoot ({ commit, dispatch, getters }, { name, namespace }) {
-    await dispatch('shoots/clearAll')
-    return new Promise((resolve, reject) => {
-      const done = err => {
-        unsubscribe()
-        clearTimeout(timeoutId)
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      }
-      const handleSubscriptionTimeout = () => {
-        done(Object.assign(new Error('Cluster subscription timed out'), {
-          code: 504,
-          reason: 'Timeout'
-        }))
-      }
-      const handleSubscriptionAcknowledgement = object => {
-        if (object.kind === 'Status') {
-          let { code, reason, message } = object
-          if (code === 404) {
-            reason = 'Cluster not found'
-            message = 'The cluster you are looking for doesn\'t exist'
-          } else if (code === 403) {
-            reason = 'Access to cluster denied'
-          } else if (code >= 500) {
-            reason = 'Oops, something went wrong'
-            message = 'An unexpected error occurred. Please try again later'
-          }
-          done(Object.assign(new Error(message), { code, reason }))
-        } else {
-          done()
-        }
-      }
-      const unsubscribe = store.subscribeAction(({ type, payload }, state) => {
-        if (type === 'subscribeShootAcknowledgement') {
-          handleSubscriptionAcknowledgement(payload)
-        }
-      })
-      const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
-      commit('SUBSCRIBE', ['shoot', { name, namespace }])
-    })
-  },
-  subscribeShootAcknowledgement ({ commit, dispatch, state, getters }, object) {
-    if (object.kind === 'Shoot') {
-      commit('shoots/HANDLE_EVENTS', {
-        rootState: state,
-        rootGetters: getters,
-        events: [{
-          type: 'ADDED',
-          object
-        }]
-      })
-      const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = [dispatch('getShootInfo', metadata)]
-        const seedName = spec.seedName
-        if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
-          promises.push(dispatch('getShootSeedInfo', metadata))
-        }
-        try {
-          await Promise.all(promises)
-        } catch (err) {
-          console.error('Failed to fetch shoot or shootSeed info:', err.message)
-        }
-      }
-      fetchShootAndShootSeedInfo(object)
-    }
-  },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
       .catch(err => {
@@ -1492,23 +1380,6 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
-  },
-  async subscribeShoots ({ dispatch, commit, state, getters }) {
-    try {
-      const namespace = state.namespace
-      const filter = getFilterValue(state, getters)
-      commit('SUBSCRIBE', ['shoots', { namespace, filter }])
-    } catch (err) { /* ignore error */ }
-  },
-  async subscribeComments ({ dispatch, commit }, { name, namespace }) {
-    try {
-      commit('SUBSCRIBE', ['comments', { name, namespace }])
-    } catch (err) { /* ignore error */ }
-  },
-  async unsubscribeComments ({ dispatch, commit }) {
-    try {
-      commit('UNSUBSCRIBE', 'comments')
-    } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
@@ -1797,6 +1668,9 @@ const mutations = {
   SET_GARDENCTL_OPTIONS (state, value) {
     state.gardenctlOptions = value
     localStorage.setObject('global/gardenctl', value)
+  },
+  SET_TOPICS (state, topics) {
+    state.topics = Array.isArray(topics) ? topics : []
   }
 }
 

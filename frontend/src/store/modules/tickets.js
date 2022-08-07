@@ -8,14 +8,13 @@ import Vue from 'vue'
 import assign from 'lodash/assign'
 import filter from 'lodash/filter'
 import findIndex from 'lodash/findIndex'
-import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import flatMap from 'lodash/flatMap'
 import matches from 'lodash/matches'
 import matchesProperty from 'lodash/matchesProperty'
 import orderBy from 'lodash/orderBy'
-import unionBy from 'lodash/unionBy'
+import uniqBy from 'lodash/uniqBy'
 
 const eql = ({ projectName, name, state = undefined }) => {
   const source = { metadata: { projectName } }
@@ -43,21 +42,26 @@ const getOpenIssues = ({ state, name, projectName }) => {
 }
 // getters
 const getters = {
-  items: state => state.all,
-  issues: (state) => ({ name, projectName }) => {
-    return getOpenIssues({ state, name, projectName })
+  items (state) {
+    return state.all
   },
-  comments: (state) => ({ issueNumber }) => {
-    return state.allComments[issueNumber]
+  issues (state) {
+    return ({ name, projectName }) => getOpenIssues({ state, name, projectName })
   },
-  latestUpdated: (state) => ({ name, projectName }) => {
-    const latestUpdatedIssue = head(getOpenIssues({ state, name, projectName }))
-    return latestUpdatedIssue
+  comments (state) {
+    return ({ issueNumber }) => state.allComments[issueNumber]
   },
-  labels: (state) => ({ name, projectName }) => {
-    const issues = getOpenIssues({ state, name, projectName })
-    const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
-    return labels
+  latestUpdated (state, getters) {
+    return ({ name, projectName }) => {
+      const issues = getters.issues({ name, projectName })
+      return head(issues)
+    }
+  },
+  labels (state, getters) {
+    return ({ name, projectName }) => {
+      const issues = getters.issues({ name, projectName })
+      return uniqBy(flatMap(issues, 'data.labels'), 'id')
+    }
   }
 }
 
@@ -78,8 +82,8 @@ const orderTicketsByUpdatedAt = state => {
 }
 // mutations
 const mutations = {
-  HANDLE_ISSUE_EVENTS (state, events) {
-    forEach(events, event => {
+  HANDLE_ISSUES_EVENTS (state, events) {
+    for (const event of events) {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
@@ -91,11 +95,11 @@ const mutations = {
         default:
           console.error('undhandled event type', event.type)
       }
-    })
+    }
     orderTicketsByUpdatedAt(state)
   },
   HANDLE_COMMENTS_EVENTS (state, events) {
-    forEach(events, event => {
+    for (const event of events) {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
@@ -107,7 +111,7 @@ const mutations = {
         default:
           console.error('undhandled event type', event.type)
       }
-    })
+    }
     orderTicketsByUpdatedAt(state)
   },
   CLEAR_ISSUES (state) {

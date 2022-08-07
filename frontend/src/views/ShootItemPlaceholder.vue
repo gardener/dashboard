@@ -51,12 +51,13 @@ export default {
   },
   methods: {
     ...mapActions([
-      'subscribeShoot',
-      'subscribeComments',
-      'unsubscribeComments',
       'fetchcloudProviderSecrets',
       'ensureProjectTerminalShortcutsLoaded'
     ]),
+    ...mapActions('shoots', {
+      subscribeShoot: 'subscribe',
+      unsubscribeShoot: 'unsubscribe'
+    }),
     handleShootEvents (events) {
       const { namespace, name } = get(this.$route, 'params', {})
       const event = findLast(events, { object: { metadata: { namespace, name } } })
@@ -79,8 +80,7 @@ export default {
       this.component = 'shoot-item-loading'
       try {
         const promises = [
-          this.subscribeShoot(params),
-          this.subscribeComments(params)
+          this.subscribeShoot(params)
         ]
         if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
           promises.push(this.fetchcloudProviderSecrets()) // Required for purpose configuration
@@ -98,7 +98,7 @@ export default {
   },
   async beforeRouteLeave (to, from, next) {
     try {
-      await this.unsubscribeComments()
+      await this.unsubscribeShoot()
     } finally {
       next()
     }

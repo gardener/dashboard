@@ -91,14 +91,14 @@ function ensureDataLoaded (store, localStorage) {
         case 'Secret': {
           await Promise.all([
             store.dispatch('fetchcloudProviderSecrets'),
-            store.dispatch('subscribeShoots')
+            store.dispatch('shoots/subscribe')
           ])
           break
         }
         case 'NewShoot':
         case 'NewShootEditor': {
           const promises = [
-            store.dispatch('subscribeShoots')
+            store.dispatch('shoots/subscribe')
           ]
           if (store.getters.canGetSecrets) {
             promises.push(store.dispatch('fetchcloudProviderSecrets'))
@@ -128,7 +128,7 @@ function ensureDataLoaded (store, localStorage) {
           await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
 
           const promises = [
-            store.dispatch('subscribeShoots')
+            store.dispatch('shoots/subscribe')
           ]
 
           if (store.getters.canUseProjectTerminalShortcuts) {
@@ -141,7 +141,7 @@ function ensureDataLoaded (store, localStorage) {
         case 'Administration': {
           await Promise.all([
             store.dispatch('fetchMembers'),
-            store.dispatch('subscribeShoots')
+            store.dispatch('shoots/subscribe')
           ])
           break
         }
