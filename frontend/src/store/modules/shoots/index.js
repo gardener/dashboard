@@ -22,7 +22,16 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import getters from './getters'
 import { keyForShoot, findItem } from './helper'
-import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
+import {
+  getShoots,
+  getShoot,
+  getIssues,
+  getIssuesAndComments,
+  getShootInfo,
+  getShootSeedInfo,
+  createShoot,
+  deleteShoot
+} from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import {
@@ -47,7 +56,8 @@ const state = {
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
-  initialNewShootResource: undefined
+  initialNewShootResource: undefined,
+  topic: undefined
 }
 
 // actions
@@ -58,6 +68,60 @@ const actions = {
    */
   clearAll ({ commit }) {
     commit('CLEAR_ALL')
+  },
+  async subscribe ({ commit, state, getters, rootState, rootGetters }, { namespace, name } = {}) {
+    const events = {}
+    let topic = 'shoots'
+
+    if (namespace && name) {
+      const options = { namespace, name }
+      topic += `;${namespace}/${name}`
+
+      const [
+        { data: shoot },
+        { data: { issues = [], comments = [] } }
+      ] = await Promise.all([
+        getShoot(options),
+        getIssuesAndComments(options)
+      ])
+      events.shoots = [shoot].map(object => ({ type: 'ADDED', object }))
+      events.issues = issues.map(object => ({ type: 'ADDED', object }))
+      events.comments = comments.map(object => ({ type: 'ADDED', object }))
+    } else {
+      const options = {
+        namespace: rootState.namespace
+      }
+      if (options.namespace !== '_all') {
+        topic += `;${options.namespace}`
+      } else if (getters.onlyShootsWithIssues) {
+        options.labelSelector = 'shoot.gardener.cloud/status!=healthy'
+        topic += ':unhealthy'
+      }
+
+      const [
+        { data: { items } },
+        { data: { issues = [] } }
+      ] = await Promise.all([
+        getShoots(options),
+        getIssues(options)
+      ])
+      events.shoots = items.map(object => ({ type: 'ADDED', object }))
+      events.issues = issues.map(object => ({ type: 'ADDED', object }))
+      events.comments = []
+    }
+    commit('CLEAR_ALL')
+    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
+    commit('SET_TOPICS', [topic], { root: true })
+    commit('HANDLE_EVENTS', { rootState, rootGetters, events: events.shoots })
+    commit('tickets/HANDLE_ISSUES_EVENTS', events.issues, { root: true })
+    commit('tickets/HANDLE_COMMENTS_EVENTS', events.comments, { root: true })
+  },
+  unsubscribe ({ commit }) {
+    commit('CLEAR_ALL')
+    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
+    commit('SET_TOPICS', [], { root: true })
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -272,9 +336,13 @@ const actions = {
   }
 }
 
+function onlyAllShootsWithIssues (state, rootState) {
+  return rootState.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
+}
+
 function setFilteredItems (state, rootState, rootGetters) {
   let items = Object.values(state.shoots)
-  if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
+  if (onlyAllShootsWithIssues(state, rootState)) {
     if (get(state, 'shootListFilters.progressing', false)) {
       const predicate = item => {
         return !isStatusProgressing(get(item, 'metadata', {}))
@@ -364,19 +432,17 @@ const mutations = {
     putItem(state, newItem)
   },
   HANDLE_EVENTS (state, { rootState, rootGetters, events }) {
-    const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
     let setFilteredItemsRequired = false
-    forEach(events, event => {
+    for (const event of events) {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
-          if (rootState.namespace !== '_all' ||
-            !onlyShootsWithIssues ||
-            onlyShootsWithIssues === shootHasIssue(event.object)) {
+          if (onlyAllShootsWithIssues(state, rootState) && !shootHasIssue(event.object)) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
-            putItem(state, event.object)
-            setFilteredItemsRequired = true
+            continue
           }
+          putItem(state, event.object)
+          setFilteredItemsRequired = true
           break
         case 'DELETED':
           deleteItem(state, event.object)
@@ -385,7 +451,7 @@ const mutations = {
         default:
           console.error('undhandled event type', event.type)
       }
-    })
+    }
     if (setFilteredItemsRequired) {
       setFilteredItems(state, rootState, rootGetters)
     }

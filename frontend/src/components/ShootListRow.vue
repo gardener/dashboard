@@ -86,11 +86,11 @@ SPDX-License-Identifier: Apache-2.0
         </router-link>
       </template>
       <template v-if="cell.header.value === 'ticketLabels'">
-        <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
+        <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
         <div class="labels" v-else>
-          <ticket-label v-for="label in shootTicketsLabels" :key="label.id" :label="label"></ticket-label>
+          <ticket-label v-for="label in shootTicketLabels" :key="label.id" :label="label"></ticket-label>
         </div>
       </template>
       <template v-if="cell.header.customField">
@@ -180,11 +180,13 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'latestUpdatedTicketByNameAndNamespace',
-      'ticketsLabels',
       'canGetSecrets',
       'canDeleteShoots'
     ]),
+    ...mapGetters('tickets', {
+      latestUpdatedTicket: 'latestUpdated',
+      ticketLabels: 'labels'
+    }),
     isInfoAvailable () {
       // operator not yet updated shoot resource
       if (this.shootLastOperation.type === undefined || this.shootLastOperation.state === undefined) {
@@ -219,10 +221,16 @@ export default {
         : 'Show Cluster Access'
     },
     shootLastUpdatedTicketTimestamp () {
-      return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)
+      return this.latestUpdatedTicket({
+        projectName: this.shootProjectName,
+        name: this.shootName
+      })
     },
-    shootTicketsLabels () {
-      return this.ticketsLabels(this.shootMetadata)
+    shootTicketLabels () {
+      return this.ticketLabels({
+        projectName: this.shootProjectName,
+        name: this.shootName
+      })
     },
     cells () {
       return map(this.visibleHeaders, header => {

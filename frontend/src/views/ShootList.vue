@@ -155,9 +155,11 @@ export default {
   methods: {
     ...mapActions([
       'setSelectedShoot',
-      'setShootListFilter',
-      'subscribeShoots'
+      'setShootListFilter'
     ]),
+    ...mapActions('shoots', {
+      subscribeShoots: 'subscribe'
+    }),
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -221,7 +223,7 @@ export default {
       ]))
 
       if (key === 'onlyShootsWithIssues') {
-        this.subscribeShoots()
+        await this.subscribeShoots()
       }
     },
     isFilterActive (key) {
@@ -235,23 +237,25 @@ export default {
   computed: {
     ...mapGetters({
       mappedItems: 'shootList',
-      selectedItem: 'selectedShoot',
-      isAdmin: 'isAdmin',
-      getShootListFilters: 'getShootListFilters',
-      canPatchShoots: 'canPatchShoots',
-      canDeleteShoots: 'canDeleteShoots',
-      canCreateShoots: 'canCreateShoots',
-      canGetSecrets: 'canGetSecrets',
-      onlyShootsWithIssues: 'onlyShootsWithIssues',
-      projectFromProjectList: 'projectFromProjectList',
-      projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList',
-      shootCustomFields: 'shootCustomFields',
-      ticketsLabels: 'ticketsLabels',
-      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
-      sortItems: 'shoots/sortItems',
-      searchItems: 'shoots/searchItems'
+      selectedItem: 'selectedShoot'
     }),
+    ...mapGetters([
+      'isAdmin',
+      'getShootListFilters',
+      'canPatchShoots',
+      'canDeleteShoots',
+      'canCreateShoots',
+      'canGetSecrets',
+      'onlyShootsWithIssues',
+      'projectFromProjectList',
+      'projectName',
+      'shootCustomFieldList',
+      'shootCustomFields'
+    ]),
+    ...mapGetters('shoots', [
+      'sortItems',
+      'searchItems'
+    ]),
     ...mapState([
       'shootsLoading',
       'cfg',
