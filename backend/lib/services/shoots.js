@@ -18,10 +18,12 @@ const semver = require('semver')
 
 const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain } = utils
 
-exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
+exports.list = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
   const client = user.client
   const query = {}
-  if (shootsWithIssuesOnly) {
+  if (labelSelector) {
+    query.labelSelector = labelSelector
+  } else if (shootsWithIssuesOnly) {
     query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
   }
   if (!namespace) {

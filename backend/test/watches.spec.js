@@ -6,7 +6,6 @@
 
 'use strict'
 
-const assert = require('assert').strict
 const EventEmitter = require('events')
 const _ = require('lodash')
 const logger = require('../lib/logger')
@@ -15,9 +14,27 @@ const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
+const channels = require('../lib/channels')
+
+const uuidPattern = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+
+class MockSession extends EventEmitter {
+  push = jest.fn()
+  isConnected = true
+  state = {
+    events: ['shoots', 'issues']
+  }
+
+  constructor (channel, metadata = null) {
+    super()
+    this.state.metadata = metadata
+    if (Reflect.has(metadata, 'name')) {
+      this.state.events.push('comments')
+    }
+  }
+}
 
 describe('watches', function () {
-  const io = {}
   const foo = { metadata: { name: 'foo', uid: 1 }, spec: { namespace: 'foo' } }
   const bar = { metadata: { name: 'bar', uid: 2 } }
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
@@ -49,7 +66,7 @@ describe('watches', function () {
 
     it('should watch seeds', async function () {
       const bootstrapStub = jest.spyOn(bootstrapper, 'bootstrapResource')
-      watches.seeds(io, informer)
+      watches.seeds(informer)
       informer.emit('add', foo)
       informer.emit('add', bar)
       informer.emit('update', { kind, ...bar }, bar)
@@ -62,27 +79,6 @@ describe('watches', function () {
   })
 
   describe('shoots', function () {
-    class Room {
-      constructor (namespace, events, kind = 'shoots', eventName = 'shoots') {
-        this.kind = kind
-        this.eventName = eventName
-        this.namespace = namespace
-        this.events = events
-      }
-
-      emit (name, { kind, namespaces }) {
-        assert.strictEqual(name, this.eventName)
-        assert.strictEqual(kind, this.kind)
-        assert.strictEqual(namespaces[this.namespace].length, 1)
-        const { objectKey, ...actualEvent } = namespaces[this.namespace][0]
-        assert.strictEqual(objectKey, actualEvent.object.metadata.uid)
-        assert.notStrictEqual(this.events.length, 0)
-        const expectedEvent = this.events[0]
-        assert.deepStrictEqual(actualEvent, expectedEvent)
-        this.events.shift()
-      }
-    }
-
     const foobarUnhealthy = _
       .chain(foobar)
       .cloneDeep()
@@ -96,41 +92,30 @@ describe('watches', function () {
       .value()
 
     let shootsWithIssues
-    let fooRoom
-    let fooBazRoom
-    let fooBarRoom
-    let fooIssuesRoom
-
-    const nsp = {
-      to (room) {
-        switch (room) {
-          case 'shoots_foo':
-            return fooRoom
-          case 'shoot_foo_bar':
-            return fooBarRoom
-          case 'shoot_foo_baz':
-            return fooBazRoom
-          case 'shoots_foo_issues':
-            return fooIssuesRoom
-          default:
-            assert.fail(`Unexpect room ${room}`)
-        }
-      }
-    }
-
-    const io = {
-      of (namespace) {
-        assert.strictEqual(namespace, '/')
-        return nsp
-      }
-    }
+    let fooSession
+    let fooBarSession
+    let fooBazSession
+    let fooIssuesSession
 
     let deleteTicketsStub
     let bootstrapResourceStub
     let removeResourceStub
     let findProjectByNamespaceStub
 
-    beforeEach(function () {
+    beforeEach(() => {
+      fooSession = new MockSession('shoots', { namespace: 'foo' })
+      channels.tickets.register(fooSession)
+      channels.shoots.register(fooSession)
+      fooBarSession = new MockSession('shoots', { namespace: 'foo', name: 'bar' })
+      channels.tickets.register(fooBarSession)
+      channels.shoots.register(fooBarSession)
+      fooBazSession = new MockSession('shoots', { namespace: 'foo', name: 'baz' })
+      channels.tickets.register(fooBazSession)
+      channels.shoots.register(fooBazSession)
+      fooIssuesSession = new MockSession('unhealthyShoots', { namespace: 'foo' })
+      channels.tickets.register(fooIssuesSession)
+      channels.unhealthyShoots.register(fooIssuesSession)
+
       shootsWithIssues = new Set()
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
@@ -140,28 +125,38 @@ describe('watches', function () {
       })
     })
 
+    afterEach(() => {
+      for (const channel of Object.values(channels)) {
+        for (const session of channel.activeSessions) {
+          channel.deregister(session)
+        }
+      }
+    })
+
     it('should watch shoots without issues', async function () {
-      watches.shoots(io, informer)
-
-      fooRoom = new Room('foo', [
-        { type: 'ADDED', object: foobar },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'DELETED', object: foobar }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'ADDED', object: foobar },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'DELETED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [])
+      watches.shoots(informer)
 
       informer.emit('add', foobar)
       informer.emit('update', foobar)
       informer.emit('delete', foobar)
+
+      const expectedCalls = [
+        [
+          { type: 'ADDED', object: foobar },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'MODIFIED', object: foobar },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'DELETED', object: foobar },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ]
+      ]
 
       expect(logger.error).not.toBeCalled()
       expect(bootstrapResourceStub).toBeCalledTimes(2)
@@ -171,41 +166,16 @@ describe('watches', function () {
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
 
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
+      expect(fooSession.push).toBeCalledTimes(3)
+      expect(fooSession.push.mock.calls).toEqual(expectedCalls)
+      expect(fooBarSession.push).toBeCalledTimes(3)
+      expect(fooBarSession.push.mock.calls).toEqual(expectedCalls)
+      expect(fooBazSession.push).toBeCalledTimes(0)
+      expect(fooIssuesSession.push).toBeCalledTimes(0)
     })
 
     it('should watch shoots with issues', async function () {
-      watches.shoots(io, informer, { shootsWithIssues })
-
-      fooRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'MODIFIED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'DELETED', object: foobar },
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ])
+      watches.shoots(informer, { shootsWithIssues })
 
       expect(shootsWithIssues).toHaveProperty('size', 0)
       informer.emit('add', foobarUnhealthy)
@@ -219,15 +189,41 @@ describe('watches', function () {
       informer.emit('delete', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
+      const expectedCalls = [
+        [
+          { type: 'ADDED', object: foobarUnhealthy },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'DELETED', object: foobar },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'ADDED', object: foobazUnhealthy },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'MODIFIED', object: foobazUnhealthy },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ],
+        [
+          { type: 'DELETED', object: foobazUnhealthy },
+          'shoots',
+          expect.stringMatching(uuidPattern)
+        ]
+      ]
+
       expect(bootstrapResourceStub).toBeCalledTimes(4)
       expect(removeResourceStub).toBeCalledTimes(1)
       expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
-
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
+      expect(fooSession.push).toBeCalledTimes(5)
+      expect(fooIssuesSession.push).toBeCalledTimes(5)
+      expect(fooIssuesSession.push.mock.calls).toEqual(expectedCalls)
     })
 
     it('should delete tickets for a deleted shoot', async function () {
@@ -238,22 +234,7 @@ describe('watches', function () {
         }
       })
 
-      watches.shoots(io, informer)
-
-      fooRoom = new Room('foo', [
-        { type: 'DELETED', object: foobar },
-        { type: 'DELETED', object: foobaz }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'DELETED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [
-        { type: 'DELETED', object: foobaz }
-      ], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [])
+      watches.shoots(informer)
 
       informer.emit('delete', foobar)
       informer.emit('delete', foobaz)
@@ -262,61 +243,16 @@ describe('watches', function () {
       expect(removeResourceStub).toBeCalledTimes(2)
       expect(removeResourceStub.mock.calls).toEqual([[foobar], [foobaz]])
       expect(deleteTicketsStub).toBeCalledTimes(2)
-
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
     })
   })
 
   describe('tickets', function () {
-    const issueEvent = {}
-    const issuesRoom = {
-      emit (name, payload) {
-        assert.strictEqual(name, 'issues')
-        assert.deepStrictEqual(payload, {
-          kind: 'issues',
-          events: [issueEvent]
-        })
-      }
+    const metadata = {
+      projectName: 'foo',
+      name: 'bar'
     }
-
-    const commentEvent = {
-      object: {
-        metadata: {
-          projectName: 'foo',
-          name: 'bar'
-        }
-      }
-    }
-    const commentsRoom = {
-      emit (name, payload) {
-        assert.strictEqual(name, 'comments')
-        assert.deepStrictEqual(payload, {
-          kind: 'comments',
-          events: [commentEvent]
-        })
-      }
-    }
-
-    const nsp = {
-      to (room) {
-        switch (room) {
-          case 'issues':
-            return issuesRoom
-          case 'comments_foo/bar':
-            return commentsRoom
-        }
-      }
-    }
-
-    const io = {
-      of (namespace) {
-        assert.strictEqual(namespace, '/')
-        return nsp
-      }
-    }
+    const issueEvent = { object: { metadata } }
+    const commentEvent = { object: { metadata } }
 
     const ticketCache = {
       on (eventName, handler) {
@@ -349,7 +285,7 @@ describe('watches', function () {
 
     it('should log missing gitHub config', async function () {
       gitHubStub.mockReturnValue(false)
-      watches.tickets(io, ticketCache)
+      watches.tickets(ticketCache)
       expect(logger.warn).toBeCalledTimes(1)
     })
 
@@ -359,7 +295,7 @@ describe('watches', function () {
         status: 503
       }))
 
-      await watches.tickets(io, ticketCache, { minTimeout: 1 })
+      await watches.tickets(ticketCache, { minTimeout: 1 })
       expect(loadOpenIssuesStub).toBeCalledTimes(2)
       expect(logger.info).toBeCalledTimes(2)
     })
@@ -368,7 +304,7 @@ describe('watches', function () {
       gitHubStub.mockReturnValue(true)
       loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
 
-      await watches.tickets(io, ticketCache)
+      await watches.tickets(ticketCache)
       expect(loadOpenIssuesStub).toBeCalledTimes(1)
       expect(logger.error).toBeCalledTimes(1)
     })
