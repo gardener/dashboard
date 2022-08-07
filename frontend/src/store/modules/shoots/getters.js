@@ -44,7 +44,10 @@ export function getRawVal (rootGetters, item, column) {
     case 'seed':
       return get(item, 'spec.seedName')
     case 'ticketLabels': {
-      const labels = rootGetters.ticketsLabels(metadata)
+      const labels = rootGetters['tickets/labels']({
+        projectName: rootGetters.projectNameByNamespace(metadata),
+        name: metadata.name
+      })
       return join(map(labels, 'name'), ' ')
     }
     case 'errorCodes':
@@ -115,8 +118,11 @@ export function getSortVal (rootGetters, item, sortBy) {
       return lastErrorTransitionTime
     }
     case 'ticket': {
-      const { namespace, name } = item.metadata
-      return rootGetters.latestUpdatedTicketByNameAndNamespace({ namespace, name })
+      const metadata = item.metadata
+      return rootGetters['tickets/latestUpdated']({
+        projectName: rootGetters.projectNameByNamespace(metadata),
+        name: metadata.name
+      })
     }
     default:
       return toLower(value)
@@ -138,8 +144,8 @@ export default {
   getShootListFilters (state) {
     return state.shootListFilters
   },
-  onlyShootsWithIssues (state, getters) {
-    return get(getters.getShootListFilters, 'onlyShootsWithIssues', true)
+  onlyShootsWithIssues (state) {
+    return get(state.shootListFilters, 'onlyShootsWithIssues', true)
   },
   newShootResource (state) {
     return state.newShootResource

@@ -68,7 +68,34 @@ export function deleteCloudProviderSecret ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
 }
 
+/* Tickets */
+
+export function getIssues ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
+  return getResource(`/api/namespaces/${namespace}/tickets`)
+}
+
+export function getIssuesAndComments ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/tickets/${name}`)
+}
+
 /* Shoot Clusters */
+
+export function getShoots ({ namespace, labelSelector }) {
+  const search = labelSelector
+    ? '?' + new URLSearchParams({ labelSelector }).toString()
+    : ''
+  namespace = encodeURIComponent(namespace)
+  return getResource(`/api/namespaces/${namespace}/shoots` + search)
+}
+
+export function getShoot ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}`)
+}
 
 export function createShoot ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)

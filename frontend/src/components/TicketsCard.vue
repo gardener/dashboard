@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import map from 'lodash/map'
@@ -48,16 +48,20 @@ export default {
   components: {
     Ticket
   },
-  props: {
-    tickets: {
-      type: Array
-    }
-  },
   mixins: [shootItem, sanitizeUrl],
   computed: {
     ...mapState([
       'cfg'
     ]),
+    ...mapGetters('tickets', {
+      ticketsByProjectAndName: 'issues'
+    }),
+    tickets () {
+      return this.ticketsByProjectAndName({
+        projectName: this.shootProjectName,
+        name: this.shootName
+      })
+    },
     gitHubRepoUrl () {
       return get(this.cfg, 'ticket.gitHubRepoUrl')
     },
