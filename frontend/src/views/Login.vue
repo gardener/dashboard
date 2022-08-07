@@ -80,11 +80,8 @@ import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
-import { createTokenReview } from '@/utils/api'
+import { createTokenReview, getLoginConfiguration } from '@/utils/api'
 import GSnotify from '@/components/GSnotify.vue'
-import {
-  getLoginConfiguration
-} from '@/utils/api'
 
 export default {
   components: {
