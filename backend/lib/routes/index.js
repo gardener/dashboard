@@ -15,11 +15,11 @@ module.exports = {
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/seeds': require('./seeds'),
-  '/shoots': require('./shoots'),
   '/gardener-extensions': require('./gardenerExtensions'),
   '/stream': require('./stream'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
+  '/namespaces/:namespace/tickets': require('./tickets'),
   '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members')
 }

@@ -22,51 +22,60 @@ async function deleteTickets ({ namespace, name }) {
   }
 }
 
-function toNamespacedEvents ({ type, object }) {
-  const { namespace, uid } = object.metadata
-  return {
-    kind: 'shoots',
-    namespaces: {
-      [namespace]: [{
-        type,
-        object,
-        objectKey: uid // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
-      }]
-    }
-  }
-}
-
-module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
-  const nsp = io.of('/')
+module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
   const handleEvent = event => {
-    const { type, object } = event
-    const { namespace, name, uid } = object.metadata
-    channels.shoots.broadcast({ namespace, name, uid }, type.toLowerCase(), {
-      filter (session) {
-        return session.state.administrator || session.state.namespace === namespace
-      }
-    })
-    const namespacedEvents = toNamespacedEvents(event)
-    nsp.to(`shoots_${namespace}`).emit('shoots', namespacedEvents)
-    nsp.to(`shoot_${namespace}_${name}`).emit('shoots', { ...namespacedEvents, kind: 'shoot' })
+    const eventName = 'shoots'
+    const { namespace, name, uid } = event.object.metadata
 
-    if (shootHasIssue(object)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('shoots', namespacedEvents)
-      if (!shootsWithIssues.has(uid)) {
-        shootsWithIssues.add(uid)
-      } else if (type === 'DELETED') {
-        shootsWithIssues.delete(uid)
+    const matchesMetadata = metadata => {
+      if (metadata.allNamespaces) {
+        return true
       }
-    } else if (shootsWithIssues.has(uid)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('shoots', toNamespacedEvents({ type: 'DELETED', object }))
-      shootsWithIssues.delete(uid)
+      if (metadata.namespace !== namespace) {
+        return false
+      }
+      if (metadata.name) {
+        return metadata.name === name
+      }
+      return true
     }
+    const shootBroadcast = ({ type, object }) => {
+      channels.shoots.broadcast({ type, object }, eventName, {
+        filter (session) {
+          const { events, metadata } = session.state
+          return events.includes(eventName) && matchesMetadata(metadata)
+        }
+      })
+    }
+    shootBroadcast(event)
+
+    const unhealthyShootsBroadcast = ({ type, object }) => {
+      if (shootHasIssue(object)) {
+        if (!shootsWithIssues.has(uid)) {
+          shootsWithIssues.add(uid)
+        } else if (type === 'DELETED') {
+          shootsWithIssues.delete(uid)
+        }
+      } else if (shootsWithIssues.has(uid)) {
+        type = 'DELETED'
+        shootsWithIssues.delete(uid)
+      } else {
+        return
+      }
+      channels.unhealthyShoots.broadcast({ type, object }, eventName, {
+        filter (session) {
+          const { events, metadata } = session.state
+          return events.includes(eventName) && matchesMetadata(metadata)
+        }
+      })
+    }
+    unhealthyShootsBroadcast(event)
 
     bootstrapper.handleResourceEvent(event)
 
-    switch (type) {
+    switch (event.type) {
       case 'DELETED':
-        deleteTickets(object.metadata)
+        deleteTickets(event.object.metadata)
         break
     }
   }

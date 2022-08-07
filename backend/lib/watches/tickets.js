@@ -10,26 +10,43 @@ const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
 const tickets = require('../services/tickets')
+const channels = require('../channels')
 
-module.exports = (io, ticketCache, retryOptions = {}) => {
+module.exports = (ticketCache, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for tickets feature')
     return
   }
-  const nsp = io.of('/')
   ticketCache.on('issue', event => {
-    const room = 'issues'
-    nsp.to(room).emit('issues', {
-      kind: 'issues',
-      events: [event]
+    const eventName = 'issues'
+    const { projectName } = event.object.metadata
+    const matchesMetadata = metadata => {
+      if (!metadata) {
+        return true
+      }
+      return metadata.projectName === projectName
+    }
+    channels.tickets.broadcast(event, eventName, {
+      filter (session) {
+        const { events, metadata } = session.state
+        return events.includes(eventName) && matchesMetadata(metadata)
+      }
     })
   })
   ticketCache.on('comment', event => {
+    const eventName = 'comments'
     const { projectName, name } = event.object.metadata
-    const room = `comments_${projectName}/${name}`
-    nsp.to(room).emit('comments', {
-      kind: 'comments',
-      events: [event]
+    const matchesMetadata = metadata => {
+      if (!metadata) {
+        return false
+      }
+      return metadata.projectName === projectName && metadata.name === name
+    }
+    channels.tickets.broadcast(event, eventName, {
+      filter (session) {
+        const { events, metadata } = session.state
+        return events.includes(eventName) && matchesMetadata(metadata)
+      }
     })
   })
 

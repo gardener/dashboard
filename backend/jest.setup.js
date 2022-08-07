@@ -9,8 +9,6 @@
 require('abort-controller/polyfill')
 const http = require('http')
 const { Test } = require('supertest')
-const pEvent = require('p-event')
-const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
 const { matchers, ...fixtures } = require('./__fixtures__')
 
@@ -47,51 +45,8 @@ function createHttpAgent () {
   return agent
 }
 
-function createSocketAgent (cache) {
-  const server = http.createServer()
-  const io = require('./lib/io')(server, cache)
-  server.listen(0, '127.0.0.1')
-
-  const agent = {
-    io,
-    server,
-    async close () {
-      await new Promise(resolve => server.close(resolve))
-      await new Promise(resolve => io.close(resolve))
-    },
-    async connect ({ cookie, user } = {}) {
-      const { address: hostname, port } = server.address()
-      const origin = `http://[${hostname}]:${port}`
-      const extraHeaders = {}
-      if (cookie) {
-        extraHeaders.cookie = cookie
-      } else if (user) {
-        extraHeaders.cookie = await user.cookie
-      }
-      const socket = ioClient(origin, {
-        path: '/api/events',
-        extraHeaders,
-        reconnectionDelay: 0,
-        forceNew: true,
-        autoConnect: false,
-        transports: ['websocket']
-      })
-      socket.connect()
-      await pEvent(socket, 'connect', {
-        timeout: 1000,
-        rejectionEvents: ['error', 'connect_error']
-      })
-      return socket
-    }
-  }
-
-  return agent
-}
-
 function createAgent (type = 'http', cache) {
   switch (type) {
-    case 'io':
-      return createSocketAgent(cache)
     default:
       return createHttpAgent()
   }
