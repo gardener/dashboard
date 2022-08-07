@@ -8,7 +8,7 @@
 
 const { bootstrapper } = require('../services/terminals')
 
-module.exports = (io, informer) => {
+module.exports = informer => {
   const handleEvent = event => {
     bootstrapper.handleResourceEvent(event)
   }

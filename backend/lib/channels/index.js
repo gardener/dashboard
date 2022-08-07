@@ -6,6 +6,10 @@
 
 'use strict'
 
+const { createChannel } = require('better-sse')
+
 module.exports = {
-  shoots: require('./shoots')
+  shoots: createChannel(),
+  unhealthyShoots: createChannel(),
+  tickets: createChannel()
 }
