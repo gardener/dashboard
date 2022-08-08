@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
                   <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
                 </div>
                 <v-tabs
-                  v-if="!loading"
+                  v-show="!loading"
                   centered
                   color="primary"
                   v-model="loginType"
@@ -34,11 +34,11 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-title>
               <v-card-text class="login-form d-flex align-center justify-center py-0">
                 <v-skeleton-loader
-                  v-if="loading"
+                  v-show="loading"
                   width="100%"
                   type="card"
                 ></v-skeleton-loader>
-                <v-tabs-items v-if="!loading" v-model="loginType">
+                <v-tabs-items v-show="!loading" v-model="loginType">
                     <v-tab-item id="oidc">
                       <div class="text-subtitle-1 text-center">Press Login to be redirected to configured<br> OpenID Connect Provider.</div>
                     </v-tab-item >
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                     </v-tab-item>
                   </v-tabs-items>
               </v-card-text>
-              <v-card-actions v-if="!loading" class="bt-2 pb-4">
+              <v-card-actions v-show="!loading" class="bt-2 pb-4">
                 <div class="d-flex justify-center flex-grow-1">
                   <v-btn @click="handleLogin" color="primary">Login</v-btn>
                 </div>
