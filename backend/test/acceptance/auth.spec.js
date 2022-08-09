@@ -17,8 +17,43 @@ const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
-  decodeState
+  decodeState,
+  setCookies,
+  sign,
+  decrypt,
+  decode
 } = security
+
+async function getCookieValue (tokenSet) {
+  const values = []
+  const res = {
+    cookie (key, value) {
+      values.push(`${key}=${value}`)
+    }
+  }
+  await setCookies(res, tokenSet)
+  return values.join(';')
+}
+
+async function parseCookies (res) {
+  const {
+    [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
+    [COOKIE_SIGNATURE]: cookieSignature,
+    [COOKIE_TOKEN]: cookieToken
+  } = setCookieParser.parse(res, {
+    decodeValues: true,
+    map: true
+  })
+  assert.strictEqual(cookieHeaderPayload.sameSite, 'Lax')
+  assert.strictEqual(cookieHeaderPayload.httpOnly, undefined)
+  assert.strictEqual(cookieSignature.sameSite, 'Lax')
+  assert.strictEqual(cookieSignature.httpOnly, true)
+  assert.strictEqual(cookieToken.sameSite, 'Lax')
+  assert.strictEqual(cookieToken.httpOnly, true)
+  const accessToken = [...cookieHeaderPayload.value.split('.'), cookieSignature.value].join('.')
+  const [idToken, refreshToken] = (await decrypt(cookieToken.value)).split(',')
+  return [accessToken, idToken, refreshToken]
+}
 
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
@@ -64,6 +99,15 @@ class Client {
     tokenSet.expires_at = tokenSet.claims().exp
     return tokenSet
   }
+
+  refresh (token) {
+    const tokenSet = new TokenSet({
+      id_token: token,
+      refresh_token: 'refresh-token'
+    })
+    tokenSet.expires_at = tokenSet.claims().exp
+    return tokenSet
+  }
 }
 
 describe('auth', function () {
@@ -73,6 +117,7 @@ describe('auth', function () {
 
   let agent
   let getIssuerClientStub
+  let mockRefresh
 
   beforeAll(() => {
     agent = createAgent()
@@ -88,6 +133,7 @@ describe('auth', function () {
       CLOCK_TOLERANCE: oidc.clockTolerance || 30
     })
     getIssuerClientStub = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
+    mockRefresh = jest.spyOn(client, 'refresh')
   })
 
   it('should redirect to authorization url without frontend redirectUrl', async function () {
@@ -230,34 +276,17 @@ describe('auth', function () {
       }
     ])
 
-    const {
-      [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
-      [COOKIE_SIGNATURE]: cookieSignature,
-      [COOKIE_TOKEN]: cookieToken
-    } = setCookieParser.parse(res, {
-      decodeValues: true,
-      map: true
-    })
-    const [header, payload] = cookieHeaderPayload.value.split('.')
-    const signature = cookieSignature.value
-    const token = [header, payload, signature].join('.')
-    expect(cookieHeaderPayload.sameSite).toBe('Lax')
-    expect(cookieHeaderPayload.httpOnly).toBeUndefined()
-    expect(cookieSignature.sameSite).toBe('Lax')
-    expect(cookieSignature.httpOnly).toBe(true)
-    expect(cookieToken.sameSite).toBe('Lax')
-    expect(cookieToken.httpOnly).toBe(true)
-    expect(await security.verify(token)).toEqual(expect.objectContaining({
+    const [accessToken, idToken, refreshToken] = await parseCookies(res)
+    const payload = await security.verify(accessToken)
+    expect(payload).toEqual(expect.objectContaining({
       id,
       iat: expect.toBeWithinRange(now, now + 3),
       aud: ['gardener'],
       exp: expiresAt,
       jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     }))
-    expect((await security.decrypt(cookieToken.value)).split(',')).toEqual([
-      bearer,
-      expiresAt.toString()
-    ])
+    expect(idToken).toEqual(bearer)
+    expect(refreshToken).toBeUndefined()
     expect(res.body.id).toBe(id)
   })
 
@@ -284,5 +313,76 @@ describe('auth', function () {
     expect(cookieSignature.expires).toEqual(ZERO_DATE)
     expect(cookieToken.value).toHaveLength(0)
     expect(cookieToken.expires).toEqual(ZERO_DATE)
+  })
+
+  it('should successfully refresh a token', async function () {
+    const iat = Math.floor(Date.now() / 1000)
+
+    const idTokenPayload = {
+      iat,
+      sub: id,
+      exp: iat - 60
+    }
+    const accessTokenPayload = {
+      iat,
+      id,
+      exp: iat + 24 * 60 * 60,
+      refresh_at: idTokenPayload.exp,
+      aud: ['gardener']
+    }
+    // in this test the refreshToken is return as new idToken in the `client.refresh` mock implementation
+    const refreshTokenPayload = {
+      iat: iat + 60,
+      sub: id,
+      exp: iat + 61 * 60
+    }
+    const tokenSet = new TokenSet({
+      id_token: await sign(idTokenPayload),
+      access_token: await sign(accessTokenPayload),
+      refresh_token: await sign(refreshTokenPayload)
+    })
+
+    mockRequest.mockImplementation(fixtures.auth.mocks.reviewToken())
+
+    const res = await agent
+      .get('/auth/token')
+      .set('cookie', await getCookieValue(tokenSet))
+      .expect('content-type', /json/)
+      .expect(200)
+
+    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest.mock.calls[0]).toEqual([
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
+        ':method': 'post',
+        ':path': '/apis/authentication.k8s.io/v1/tokenreviews'
+      },
+      {
+        apiVersion: 'authentication.k8s.io/v1',
+        kind: 'TokenReview',
+        metadata: {
+          name: expect.stringMatching(/^token-\d+/)
+        },
+        spec: {
+          token: tokenSet.refresh_token
+        }
+      }
+    ])
+    expect(mockRefresh).toBeCalledTimes(1)
+    expect(mockRefresh.mock.calls[0]).toEqual([tokenSet.refresh_token])
+
+    const [accessToken, idToken, refreshToken] = await parseCookies(res)
+    expect(idToken).toEqual(tokenSet.refresh_token)
+    expect(refreshToken).toBe('refresh-token')
+    const payload = decode(accessToken)
+    expect(payload).toEqual(res.body)
+    expect(payload).toEqual({
+      jti: expect.stringMatching(/^[a-z0-9-]+$/),
+      id,
+      iat: accessTokenPayload.iat,
+      exp: accessTokenPayload.exp,
+      aud: accessTokenPayload.aud,
+      refresh_at: refreshTokenPayload.exp
+    })
   })
 })
