@@ -57,12 +57,11 @@ app.use(helmet.hsts())
 app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
 app.use('/webhook', githubWebhook.router)
-app.use(['/api', '/config.json'], compression({
+app.use('/api', compression({
   threshold: 8192,
   level: zlib.constants.Z_DEFAULT_COMPRESSION
 }))
 app.use('/api', api.router)
-app.get('/config.json', api.frontendConfig(config))
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

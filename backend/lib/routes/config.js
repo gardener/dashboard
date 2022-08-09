@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,24 +7,33 @@
 'use strict'
 
 const _ = require('lodash')
-const logger = require('./logger')
-const markdown = require('./markdown')
+const logger = require('../logger')
+const markdown = require('../markdown')
+const express = require('express')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const config = require('../config')
 
-module.exports = function handler (config, dashboardClient) {
-  const frontendConfig = sanitizeFrontendConfig(config.frontend)
+const router = module.exports = express.Router()
 
-  return async (req, res) => {
-    if (!frontendConfig.clusterIdentity) {
-      try {
-        const { data } = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
-        frontendConfig.clusterIdentity = data['cluster-identity']
-      } catch (err) {
-        logger.error('Failed to get configmap kube-system/cluster-identity: %s', err.message)
+const frontendConfig = sanitizeFrontendConfig(config.frontend)
+
+router.route('/')
+  .get(async (req, res, next) => {
+    try {
+      if (!frontendConfig.clusterIdentity) {
+        try {
+          const { data } = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
+          frontendConfig.clusterIdentity = data['cluster-identity']
+        } catch (err) {
+          logger.error('Failed to get configmap kube-system/cluster-identity: %s', err.message)
+        }
       }
+
+      res.send(frontendConfig)
+    } catch (err) {
+      next(err)
     }
-    res.json(frontendConfig)
-  }
-}
+  })
 
 function sanitizeFrontendConfig (frontendConfig) {
   const converter = markdown.createConverter()

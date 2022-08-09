@@ -34,17 +34,18 @@ async function fetchGardenerVersion () {
         caBundle
       }
     } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1beta1.core.gardener.cloud')
-    const options = {
-      prefixUrl: `https://${service.name}.${service.namespace}`,
-      resolveBodyOnly: true,
-      responseType: 'json'
+    const clientConfig = {
+      url: `https://${service.name}.${service.namespace}`,
+      extend (options) {
+        return Object.assign(Object.create(this), options)
+      }
     }
     if (caBundle) {
-      options.ca = decodeBase64(caBundle)
+      clientConfig.ca = decodeBase64(caBundle)
     } else if (process.env.NODE_ENV !== 'production' && insecureSkipTLSVerify === true) {
-      options.rejectUnauthorized = false
+      clientConfig.rejectUnauthorized = false
     }
-    const client = extend(options)
+    const client = extend(clientConfig.extend({ responseType: 'json' }))
     const version = await client.request('version')
     return version
   } catch (err) {

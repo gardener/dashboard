@@ -133,6 +133,32 @@ class Config {
       ? input
       : new Config(input)
   }
+
+  static build (cluster, user, { userName = 'robot', clusterName = 'garden', contextName = 'default', namespace } = {}) {
+    const context = {
+      cluster: clusterName,
+      user: userName
+    }
+    if (namespace) {
+      context.namespace = namespace
+    }
+
+    return new Config({
+      clusters: [{
+        name: clusterName,
+        cluster
+      }],
+      users: [{
+        name: userName,
+        user
+      }],
+      contexts: [{
+        name: contextName,
+        context
+      }],
+      'current-context': contextName
+    })
+  }
 }
 
 module.exports = Config
