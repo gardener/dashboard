@@ -9,7 +9,7 @@
 const { promisify } = require('util')
 const assert = require('assert').strict
 const crypto = require('crypto')
-const { split, join, noop, some, every, includes, head, chain } = require('lodash')
+const { split, join, noop, some, every, includes, head, chain, pick } = require('lodash')
 const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
@@ -38,6 +38,7 @@ const {
   COOKIE_CODE_VERIFIER,
   GARDENER_AUDIENCE
 } = require('./constants')
+const { token } = require('morgan')
 
 const {
   issuer,
@@ -46,7 +47,7 @@ const {
   client_id: clientId,
   client_secret: clientSecret,
   usePKCE = !clientSecret,
-  refreshTokenLifetime = 86400,
+  sessionLifetime = 86400,
   rejectUnauthorized = true,
   ca,
   clockTolerance = 15
@@ -195,56 +196,45 @@ async function authorizeToken (req, res) {
     .get('token')
     .trim()
     .value()
-  const tokenSet = createTokenSet({ id_token: idToken })
-  const token = await setCookies(res, tokenSet)
-  return decode(token)
+  const payload = {}
+  const tokenSet = new TokenSet({ id_token: idToken })
+  tokenSet.access_token = await createAccessToken(payload, idToken)
+  await setCookies(res, tokenSet)
+  return decode(tokenSet.access_token)
 }
 
-function createTokenSet (values) {
-  const tokenSet = new TokenSet(values)
-  if (!tokenSet.expires_at) {
-    let expiresAt = now() + refreshTokenLifetime
-    try {
-      const { iat, exp } = tokenSet.claims()
-      if (exp) {
-        expiresAt = Number(exp)
-      } else if (iat) {
-        expiresAt = Number(iat) + refreshTokenLifetime
-      }
-    } finally {
-      tokenSet.expires_at = expiresAt
+async function createAccessToken (payload, idToken) {
+  const { username, groups } = await authentication.isAuthenticated({ token: idToken })
+  Object.assign(payload, {
+    id: username,
+    groups,
+    aud: [GARDENER_AUDIENCE]
+  })
+  const idTokenPayload = decode(idToken)
+  if (idTokenPayload) {
+    const { email, name, iat, exp } = idTokenPayload
+    if (email) {
+      payload.email = email
+    }
+    if (name) {
+      payload.name = name
+    }
+    if (iat) {
+      payload.nbf = Number(iat)
+      payload.iat ??= Number(iat)
+    }
+    if (exp) {
+      payload.exp ??= Number(exp)
     }
   }
-  return tokenSet
-}
-
-async function createToken (tokenSet) {
-  const { username: id, groups } = await authentication.isAuthenticated({ token: tokenSet.id_token })
-  const payload = {
-    id,
-    groups
-  }
-  try {
-    const claims = tokenSet.claims()
-    payload.email = claims.email
-    if (claims.name) {
-      payload.name = claims.name
-    }
-  } catch (err) { /* ignore error */ }
-  const options = {
-    audience: [GARDENER_AUDIENCE]
-  }
-  if (tokenSet.refresh_token) {
-    options.expiresIn = Math.max(tokenSet.expires_in, refreshTokenLifetime)
-  } else {
-    payload.exp = tokenSet.expires_at
-  }
-  return sign(payload, options)
+  payload.iat ??= now()
+  payload.exp ??= payload.iat + sessionLifetime
+  return sign(payload)
 }
 
 async function setCookies (res, tokenSet) {
-  const token = await createToken(tokenSet)
-  const [header, payload, signature] = split(token, '.')
+  const accessToken = tokenSet.access_token
+  const [header, payload, signature] = split(accessToken, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
@@ -256,7 +246,7 @@ async function setCookies (res, tokenSet) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const values = [tokenSet.id_token, tokenSet.expires_at]
+  const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
     values.push(tokenSet.refresh_token)
   }
@@ -267,7 +257,7 @@ async function setCookies (res, tokenSet) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  return token
+  return accessToken
 }
 
 async function authorizationCallback (req, res) {
@@ -298,7 +288,7 @@ function isXmlHttpRequest ({ headers = {} }) {
   return headers['x-requested-with'] === 'XMLHttpRequest'
 }
 
-function getToken (cookies) {
+function getAccessToken (cookies) {
   const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
   const signature = cookies[COOKIE_SIGNATURE]
   if (header && payload && signature) {
@@ -336,7 +326,7 @@ function csrfProtection (req) {
   }
 }
 
-async function decryptTokenSet (cookies) {
+async function getTokenSet (cookies) {
   const encryptedValues = cookies[COOKIE_TOKEN]
   if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
@@ -345,18 +335,26 @@ async function decryptTokenSet (cookies) {
   if (!values) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
-  const [idToken, expiresAt, refreshToken] = values.split(',')
-  return createTokenSet({
+  const [idToken, refreshToken] = values.split(',')
+  const accessToken = getAccessToken(cookies)
+  const tokenSet = new TokenSet({
     id_token: idToken,
     refresh_token: refreshToken,
-    expires_at: expiresAt ? Number(expiresAt) : undefined
+    access_token: accessToken
   })
+  return tokenSet
 }
 
 async function authorizationCodeExchange (redirectUri, parameters, checks) {
   try {
     const client = await exports.getIssuerClient()
-    return await client.callback(redirectUri, parameters, checks)
+    const payload = {}
+    const tokenSet = await client.callback(redirectUri, parameters, checks)
+    if (token.refresh_token) {
+      payload.rat = tokenSet.expires_at
+    }
+    tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
+    return tokenSet
   } catch (err) {
     if (err instanceof RPError || err instanceof OPError) {
       throw createError(401, err)
@@ -370,7 +368,13 @@ async function refreshTokenSet (tokenSet) {
   try {
     const client = await exports.getIssuerClient()
     logger.debug(`Refreshing id_token (digest: ${digest})`)
-    return await client.refresh(tokenSet.refresh_token)
+    const payload = pick(decode(tokenSet.accessToken), ['iat', 'exp'])
+    tokenSet = await client.refresh(tokenSet.refresh_token)
+    if (tokenSet.refresh_token) {
+      payload.rat = tokenSet.expires_at
+    }
+    tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
+    return tokenSet
   } catch (err) {
     logger.error(`Failed to refresh id_token (digest: ${digest})`)
     if (err instanceof RPError || err instanceof OPError) {
@@ -380,22 +384,22 @@ async function refreshTokenSet (tokenSet) {
   }
 }
 
+async function refreshToken (req, res) {
+  let tokenSet = await getTokenSet(req.cookies)
+  if (tokenSet.refresh_token) {
+    tokenSet = await refreshTokenSet(tokenSet)
+    await setCookies(res, tokenSet)
+  }
+}
+
 function authenticate (options = {}) {
   assert.ok(options.createClient === false || typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
-      let user
-      let token = getToken(req.cookies)
+      const tokenSet = await getTokenSet(req.cookies)
+      const user = await verifyToken(tokenSet.access_token)
       if (typeof options.createClient === 'function') {
-        let tokenSet = await decryptTokenSet(req.cookies)
-        if (tokenSet.refresh_token && tokenSet.expires_in < clockTolerance) {
-          tokenSet = await refreshTokenSet(tokenSet)
-          token = await setCookies(res, tokenSet)
-          user = decode(token)
-        } else {
-          user = await verifyToken(token)
-        }
         const auth = Object.freeze({
           bearer: tokenSet.id_token
         })
@@ -406,8 +410,6 @@ function authenticate (options = {}) {
         Object.defineProperty(user, 'client', {
           value: options.createClient({ auth })
         })
-      } else {
-        user = await verifyToken(token)
       }
       req.user = user
       next()
@@ -456,6 +458,7 @@ exports = module.exports = {
   clearCookies,
   authorizationUrl,
   authorizationCallback,
+  refreshToken,
   authorizeToken,
   authenticate,
   authenticateSocket

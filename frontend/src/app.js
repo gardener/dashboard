@@ -20,12 +20,23 @@ const App = Vue.extend({
     }
   },
   created () {
-    const signout = err => this.$auth.signout(err)
+    const vm = this
+    let refreshTokenPromise
     this.unregister = registry.register({
-      error (err) {
+      requestFulfilled (...args) {
+        if (!vm.$auth.isRefreshRequired(30)) {
+          return Promise.resolve(args)
+        }
+        if (!refreshTokenPromise) {
+          refreshTokenPromise = vm.$auth.refreshToken()
+          refreshTokenPromise.finally(() => (refreshTokenPromise = undefined))
+        }
+        return refreshTokenPromise.then(() => args)
+      },
+      responseRejected (err) {
         if (isHttpError(err) && err.statusCode === 401) {
           const message = get(err, 'response.data.message', err.message)
-          setImmediate(() => signout(new Error(message)))
+          setImmediate(() => vm.$auth.signout(new Error(message)))
         }
         return Promise.reject(err)
       }

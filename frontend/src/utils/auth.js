@@ -6,8 +6,13 @@
 
 import Vue from 'vue'
 import decode from 'jwt-decode'
+import createError, { isHttpError } from 'http-errors'
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+
+function now () {
+  return Math.floor(Date.now() / 1000)
+}
 
 export class UserManager {
   constructor () {
@@ -48,16 +53,46 @@ export class UserManager {
     window.location = url
   }
 
-  isUserLoggedIn () {
+  async refreshToken () {
+    try {
+      // this request must not be intercepted, otherwise this would lead to an infinite loop
+      const res = await fetch('/auth/token', { cache: 'no-store' })
+      if (res.status === 401) {
+        const err = createError(401, 'Failed to obtain new id_token by using refresh_token')
+        try {
+          const body = await res.json()
+          if (body.message) {
+            err.message = body.message
+          }
+        } catch (err) { /* ignore error */ }
+        throw err
+      }
+    } catch (err) {
+      if (isHttpError(err) && err.statusCode === 401) {
+        throw err
+      }
+    }
+  }
+
+  isRefreshRequired (tolerance = 30) {
+    const t = this.timeUntil('rat')
+    return typeof t === 'number' && t > tolerance
+  }
+
+  timeUntil (key) {
     try {
       const user = this.getUser()
       if (user) {
-        const exp = user.exp
-        if (typeof exp === 'number' && !isNaN(exp)) {
-          return 1000 * exp > Date.now()
+        const t = Number(user[key])
+        if (typeof t === 'number' && !isNaN(t)) {
+          return t - now()
         }
       }
     } catch (err) { /* ignore error */ }
-    return false
+  }
+
+  isUserLoggedIn () {
+    const t = this.timeUntil('exp')
+    return typeof t === 'number' && t > 0
   }
 }

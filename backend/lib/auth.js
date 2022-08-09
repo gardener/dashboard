@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser')
 const {
   authorizationUrl,
   authorizationCallback,
+  refreshToken,
   authorizeToken,
   clearCookies
 } = require('./security')
@@ -56,5 +57,15 @@ router.route('/callback')
       res.redirect(redirectPath)
     } catch (err) {
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
+    }
+  })
+
+router.route('/token')
+  .get(async (req, res, next) => {
+    try {
+      await refreshToken(req, res)
+      res.status(200).end()
+    } catch (err) {
+      next(err)
     }
   })
