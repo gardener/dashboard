@@ -123,11 +123,11 @@ describe('utils', () => {
 
       beforeEach(() => {
         unregister = registry.register({
-          response (res) {
+          responseFulfilled (res) {
             res.headerMap.set('foo', 'bar')
             return Promise.resolve(res)
           },
-          error (err) {
+          responseRejected (err) {
             return Promise.reject(err)
           }
         })
@@ -147,7 +147,7 @@ describe('utils', () => {
         unregister()
         expect(registry.size).toBe(0)
         registry.register({
-          error (err) {
+          responseRejected (err) {
             return isHttpError(err) && err.status === 401
               ? Promise.resolve(err.response.data)
               : Promise.reject(err)
