@@ -76,11 +76,12 @@ describe('security', function () {
       })
       mockGetIssuerClient = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
       mockRefresh = jest.spyOn(client, 'refresh').mockImplementation(async () => {
-        const idToken = await jose.sign({ sub }, { expiresIn })
+        const iat = now()
+        const idToken = await jose.sign({ iat, sub }, { expiresIn })
         return {
           id_token: idToken,
-          expires_at: now() + expiresIn,
-          refresh_token: 'refresh-token'
+          expires_at: iat + expiresIn,
+          refresh_token: 'new-refresh-token'
         }
       })
       mockCodeVerifier = jest.spyOn(openidClient.generators, 'codeVerifier').mockReturnValue('code-verifier')
@@ -144,18 +145,32 @@ describe('security', function () {
         COOKIE_SIGNATURE,
         COOKIE_TOKEN
       } = security
-      const createClient = jest.fn()
-      const authenticate = security.authenticate({ createClient })
-      const exp = now() - 3600
-      const idToken = await jose.sign({ sub: 'john.doe@example.org', exp })
-      const encryptedValues = await jose.encrypt([idToken, exp, 'refresh-token'].join(','))
+      const sub = 'john.doe@example.org'
+      const iat = now()
+      const idTokenPayload = {
+        iat,
+        sub,
+        exp: iat - 60
+      }
+      const accessTokenPayload = {
+        iat,
+        id: sub,
+        exp: iat + 24 * expiresIn,
+        refresh_at: idTokenPayload.exp,
+        aud: ['gardener']
+      }
+      const idToken = await jose.sign(idTokenPayload)
+      const accessToken = await jose.sign(accessTokenPayload)
+      const refreshToken = 'refresh-token'
+      const [header, payload, signature] = accessToken.split('.')
+      const encryptedValues = await jose.encrypt([idToken, refreshToken].join(','))
       const req = {
         headers: {
           'x-requested-with': 'XMLHttpRequest'
         },
         cookies: {
-          [COOKIE_HEADER_PAYLOAD]: 'a.b',
-          [COOKIE_SIGNATURE]: 'c',
+          [COOKIE_HEADER_PAYLOAD]: [header, payload].join('.'),
+          [COOKIE_SIGNATURE]: signature,
           [COOKIE_TOKEN]: encryptedValues
         }
       }
@@ -163,27 +178,33 @@ describe('security', function () {
         cookie: jest.fn(),
         clearCookie: jest.fn()
       }
-      const next = jest.fn()
-      await authenticate(req, res, next)
+      const user = await security.refreshToken(req, res)
+
       expect(mockGetIssuerClient).toBeCalledTimes(1)
       expect(mockRefresh).toBeCalledTimes(1)
-      expect(mockRefresh.mock.calls[0]).toEqual(['refresh-token'])
+      expect(mockRefresh.mock.calls[0]).toEqual([refreshToken])
+      expect(mockRefresh.mock.results[0].value).toBeInstanceOf(Promise)
       const tokenSet = await mockRefresh.mock.results[0].value
+      expect(tokenSet).toEqual(expect.objectContaining({
+        id_token: expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
+        expires_at: expect.any(Number),
+        refresh_token: 'new-refresh-token'
+      }))
       expect(mockIsAuthenticated).toBeCalledTimes(1)
       expect(mockIsAuthenticated.mock.calls[0]).toEqual([{
         token: tokenSet.id_token
       }])
-      expect(req.user).toEqual({
-        jti: expect.stringMatching(/^[a-z0-9-]{36}$/),
+      expect(user).toEqual({
+        iat: accessTokenPayload.iat,
+        jti: expect.stringMatching(/^[a-z0-9-]+$/),
         id: sub,
         groups: [],
-        iat: expect.any(Number),
-        exp: expect.any(Number),
         aud: ['gardener'],
-        auth: {
-          bearer: expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]{43}$/)
-        }
+        exp: accessTokenPayload.exp,
+        refresh_at: security.decode(tokenSet.id_token).exp
       })
+
+      expect(res.clearCookie).not.toBeCalled()
       expect(res.cookie).toBeCalledTimes(3)
       expect(res.cookie.mock.calls).toEqual([
         [
@@ -202,8 +223,6 @@ describe('security', function () {
           { secure: false, httpOnly: true, expires: undefined, sameSite: 'Lax' }
         ]
       ])
-      expect(next).toBeCalledTimes(1)
-      expect(next.mock.calls[0]).toEqual([])
     })
   })
 })
