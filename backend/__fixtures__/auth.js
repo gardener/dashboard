@@ -145,7 +145,8 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const { spec: { token } } = json
-      const { id: username, groups } = decode(token)
+      const { id, sub, email, groups } = decode(token)
+      const username = id || sub || email
       const authenticated = username.endsWith(domain)
       const user = authenticated ? { username, groups } : {}
       return Promise.resolve({

@@ -30,6 +30,7 @@ const {
 } = require('./jose')(sessionSecret)
 
 const md5 = data => crypto.createHash('md5').update(data).digest('hex')
+const { isHttpError } = createError
 
 const {
   COOKIE_HEADER_PAYLOAD,
@@ -38,7 +39,6 @@ const {
   COOKIE_CODE_VERIFIER,
   GARDENER_AUDIENCE
 } = require('./constants')
-const { token } = require('morgan')
 
 const {
   issuer,
@@ -187,10 +187,6 @@ async function authorizationUrl (req, res) {
   return client.authorizationUrl(params)
 }
 
-function now () {
-  return Math.floor(Date.now() / 1000)
-}
-
 async function authorizeToken (req, res) {
   const idToken = chain(req.body)
     .get('token')
@@ -212,23 +208,18 @@ async function createAccessToken (payload, idToken) {
   })
   const idTokenPayload = decode(idToken)
   if (idTokenPayload) {
-    const { email, name, iat, exp } = idTokenPayload
+    const { email, name, exp } = idTokenPayload
     if (email) {
       payload.email = email
     }
     if (name) {
       payload.name = name
     }
-    if (iat) {
-      payload.nbf = Number(iat)
-      payload.iat ??= Number(iat)
-    }
     if (exp) {
       payload.exp ??= Number(exp)
     }
   }
-  payload.iat ??= now()
-  payload.exp ??= payload.iat + sessionLifetime
+  payload.exp ??= Math.floor(Date.now() / 1000) + sessionLifetime
   return sign(payload)
 }
 
@@ -297,7 +288,7 @@ function getAccessToken (cookies) {
   throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
 }
 
-async function verifyToken (token) {
+async function verifyAccessToken (token) {
   try {
     const audience = [GARDENER_AUDIENCE]
     return await verify(token, { audience })
@@ -327,6 +318,7 @@ function csrfProtection (req) {
 }
 
 async function getTokenSet (cookies) {
+  const accessToken = getAccessToken(cookies)
   const encryptedValues = cookies[COOKIE_TOKEN]
   if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
@@ -336,7 +328,6 @@ async function getTokenSet (cookies) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
   const [idToken, refreshToken] = values.split(',')
-  const accessToken = getAccessToken(cookies)
   const tokenSet = new TokenSet({
     id_token: idToken,
     refresh_token: refreshToken,
@@ -350,8 +341,8 @@ async function authorizationCodeExchange (redirectUri, parameters, checks) {
     const client = await exports.getIssuerClient()
     const payload = {}
     const tokenSet = await client.callback(redirectUri, parameters, checks)
-    if (token.refresh_token) {
-      payload.rat = tokenSet.expires_at
+    if (tokenSet.refresh_token) {
+      payload.refresh_at = tokenSet.expires_at
     }
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
@@ -368,10 +359,10 @@ async function refreshTokenSet (tokenSet) {
   try {
     const client = await exports.getIssuerClient()
     logger.debug(`Refreshing id_token (digest: ${digest})`)
-    const payload = pick(decode(tokenSet.accessToken), ['iat', 'exp'])
+    const payload = pick(decode(tokenSet.access_token), ['iat', 'exp'])
     tokenSet = await client.refresh(tokenSet.refresh_token)
     if (tokenSet.refresh_token) {
-      payload.rat = tokenSet.expires_at
+      payload.refresh_at = tokenSet.expires_at
     }
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
@@ -385,11 +376,22 @@ async function refreshTokenSet (tokenSet) {
 }
 
 async function refreshToken (req, res) {
+  csrfProtection(req, res)
   let tokenSet = await getTokenSet(req.cookies)
+  let user = await verifyAccessToken(tokenSet.access_token)
   if (tokenSet.refresh_token) {
-    tokenSet = await refreshTokenSet(tokenSet)
-    await setCookies(res, tokenSet)
+    try {
+      tokenSet = await refreshTokenSet(tokenSet)
+      await setCookies(res, tokenSet)
+    } catch (err) {
+      if (isHttpError(err) && err.statusCode === 401) {
+        clearCookies(res)
+      }
+      throw err
+    }
+    user = decode(tokenSet.access_token)
   }
+  return user
 }
 
 function authenticate (options = {}) {
@@ -398,7 +400,7 @@ function authenticate (options = {}) {
     try {
       csrfProtection(req, res)
       const tokenSet = await getTokenSet(req.cookies)
-      const user = await verifyToken(tokenSet.access_token)
+      const user = await verifyAccessToken(tokenSet.access_token)
       if (typeof options.createClient === 'function') {
         const auth = Object.freeze({
           bearer: tokenSet.id_token
@@ -455,6 +457,7 @@ exports = module.exports = {
   verify,
   encrypt,
   decrypt,
+  setCookies,
   clearCookies,
   authorizationUrl,
   authorizationCallback,
