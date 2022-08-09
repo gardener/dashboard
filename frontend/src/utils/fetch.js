@@ -27,23 +27,33 @@ const registry = {
 }
 
 function fetchWrapper (url, { method = 'GET', cache = 'no-cache', headers, body, ...options } = {}) {
-  headers = {
-    accept: 'application/json, text/*;q=0.9, */*;q=0.8',
-    'x-requested-with': 'XMLHttpRequest',
-    ...headers
-  }
-  if (body) {
-    if (typeof body === 'object') {
-      headers['content-type'] = 'application/json; charset=UTF-8'
-      body = JSON.stringify(body)
+  let promise = new Promise(resolve => {
+    headers = {
+      accept: 'application/json, text/*;q=0.9, */*;q=0.8',
+      'x-requested-with': 'XMLHttpRequest',
+      ...headers
     }
-    options.body = body
+    if (body) {
+      if (typeof body === 'object') {
+        headers['content-type'] = 'application/json; charset=UTF-8'
+        body = JSON.stringify(body)
+      }
+      options.body = body
+    }
+    resolve([url, { method, cache, headers, ...options }])
+  })
+  for (const { requestFulfilled, requestRejected } of interceptors) {
+    if (requestFulfilled || requestRejected) {
+      promise = promise.then(args => requestFulfilled(...args), requestRejected)
+    }
   }
-  const request = new Request(url, { method, cache, headers, ...options })
-  let promise = fetch(request).then(fulfilledFn(request), rejectedFn(request))
-  for (const { response, error } of interceptors) {
-    if (response || error) {
-      promise = promise.then(response, error)
+  promise = promise.then(args => {
+    const request = new Request(...args)
+    return fetch(request).then(fulfilledFn(request), rejectedFn(request))
+  })
+  for (const { responseFulfilled, responseRejected } of interceptors) {
+    if (responseFulfilled || responseRejected) {
+      promise = promise.then(responseFulfilled, responseRejected)
     }
   }
   return promise
@@ -111,4 +121,4 @@ function fulfilledFn (request) {
   }
 }
 
-export { fetchWrapper as default, registry, isHttpError }
+export { fetchWrapper as default, registry, isHttpError, createError }
