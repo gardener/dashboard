@@ -148,12 +148,16 @@ describe('ShootCredentialRotation.vue', () => {
 
       // no lastInitiationTime for overall tile
       expect(allWrapper.vm.lastInitiationTime).toBe(undefined)
+
+      // no lastCompletionTime if enableStaticTokenKubeconfig is true and kubeconfig value is not set
       expect(allWrapper.vm.lastCompletionTime).toBe(undefined)
 
-      // only show lastCompletionTime if all enabled rotations have been rotated at least once
       shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
-      expect(allWrapper.vm.lastInitiationTime).toBe(undefined)
       expect(allWrapper.vm.lastCompletionTime).toBe('2022-06-27T08:25:58Z')
+
+      // no lastCompletionTime if lastCompletionTime is not set for all items
+      shootItem.status.credentials.rotation.observability.lastCompletionTime = undefined
+      expect(allWrapper.vm.lastCompletionTime).toBe(undefined)
     })
 
     it('should show warning in case CACertificateValiditiesAcceptable constraint is false', async () => {
