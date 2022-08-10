@@ -10,38 +10,43 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon v-if="!dense" :color="iconColor">mdi-key-change</v-icon>
     </v-list-item-icon>
     <v-list-item-content :class="{'py-0 my-0' : dense}">
-      <v-tooltip :disabled="!phaseTooltip" top>
-        <template v-slot:activator="{ on }">
-          <v-list-item-title v-on="on" class="d-flex align-center">
-            {{title}}
-            <v-tooltip top :disabled="!showChipTooltip">
-              <template v-slot:activator="{ on }">
-                <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
-              </template>
-              <div>
-                <strong>
-                  All two-phase credentials rotations need to be in phase
-                  <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
-                  in order to perform this operation
-                </strong>
-              </div>
-              <div>Please initiate rotation of the followig phases</div>
-              <ul v-if="phase">
-                <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
-              </ul>
-            </v-tooltip>
-          </v-list-item-title>
-        </template>
-        {{phaseTooltip}}
-      </v-tooltip>
+      <v-list-item-title class="d-flex align-center">
+        {{title}}
+        <v-tooltip top v-if="phaseType === 'Prepared'">
+          <template v-slot:activator="{ on }">
+            <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
+          </template>
+          <template v-if="phase.incomplete">
+            <div>
+              <strong>
+                All two-phase credentials rotations need to be in phase
+                <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
+                in order to perform this operation
+              </strong>
+            </div>
+            <div>Please initiate rotation of the followig phases</div>
+            <ul v-if="phase">
+              <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
+            </ul>
+          </template>
+          <template v-else>
+            <div>
+              This two-phase oepration is in phase
+              <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
+            </div>
+            <div>
+              Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string>
+            </div>
+          </template>
+        </v-tooltip>
+      </v-list-item-title>
       <v-list-item-subtitle class="d-flex align-center">
         <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
           <shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
           <span color="warning">Certificate Authorities will expire in less than one year</span>
         </template>
         <template v-else>
-          <span v-if="showLastInitiationTime">Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string></span>
-          <span v-else-if="showLastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
+          <span v-if="!!lastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
           <span v-else>Not yet rotated</span>
         </template>
       </v-list-item-subtitle>
@@ -139,26 +144,8 @@ export default {
       }
       return 'primary'
     },
-    showLastInitiationTime () {
-      return (this.lastInitiationTime && !this.lastCompletionTime) || this.lastInitiationTime > this.lastCompletionTime
-    },
-    showLastCompletionTime () {
-      return (this.lastCompletionTime && !this.lastInitiationTime) || this.lastCompletionTime > this.lastInitiationTime
-    },
     showChip () {
       return this.phaseType && this.phaseType !== 'Completed'
-    },
-    showChipTooltip () {
-      return this.phaseType === 'Prepared' && typeof this.phase === 'object' && this.phase.incomplete
-    },
-    phaseTooltip () {
-      if (get(rotationTypes, [this.type, 'twoPhase'])) {
-        return 'Two-phase roation: You need to prepare the operation in order to be able to complete it'
-      }
-      if (get(rotationTypes, [this.type, 'onePhase'])) {
-        return 'One-phase rotation: Rotation will be completed in one step'
-      }
-      return undefined
     },
     title () {
       return this.getRotationTitle(this.type)
