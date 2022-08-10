@@ -12,10 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       hide-details
     ></v-checkbox>
-    <div class="text-caption mt-1">It is <strong>not</strong> the recommended method to access the shoot cluster as the static token <code>kubeconfig</code> has some security flaws associated with it.</div>
-    <div>
-      <external-link class="text-caption" url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md">More information</external-link>
-    </div>
+    <div class="text-caption mt-1">There are more <external-link class="text-caption" url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md">secure alternatives</external-link> to access the Shoot cluster.</div>
   </div>
 </template>
 <script>
@@ -23,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
-  name: 'StaticTokenKubeconfigSwitch',
+  name: 'static-token-kubeconfig-switch',
   components: {
     ExternalLink
   },

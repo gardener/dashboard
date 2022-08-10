@@ -28,7 +28,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import shootItem from '@/mixins/shootItem'
 
 export default {
-  name: 'StaticTokenKubeconfigConfiguration',
+  name: 'static-token-kubeconfig-configuration',
   components: {
     ActionButtonDialog,
     StaticTokenKubeconfigSwitch
@@ -38,12 +38,12 @@ export default {
   ],
   data () {
     return {
-      enableStaticTokenKubeconfig: undefined
+      enableStaticTokenKubeconfig: this.shootEnableStaticTokenKubeconfig
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      await this.reset()
+      this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         await this.updateConfiguration()
@@ -66,7 +66,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    async reset () {
+    reset () {
       this.enableStaticTokenKubeconfig = this.shootEnableStaticTokenKubeconfig
     }
   }
