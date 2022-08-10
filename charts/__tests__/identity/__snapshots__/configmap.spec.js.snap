@@ -1,5 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`identity configmap should render the template w/ additional redirect URIs 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": Object {
+    "name": "identity-configmap",
+    "namespace": "garden",
+  },
+}
+`;
+
+exports[`identity configmap should render the template w/ additional redirect URIs 2`] = `
+Object {
+  "staticClients": Array [
+    Object {
+      "id": "dashboard",
+      "name": "Gardener Dashboard",
+      "redirectURIs": Array [
+        "https://dashboard.garden.example.org/auth/callback",
+        "https://dashboard.ingress.garden.example.org/auth/callback",
+        "http://localhost:8080/auth/callback",
+        "https://additional.example.org/foo",
+      ],
+      "secret": "sHq4vLoiQcIWbO3h",
+    },
+    Object {
+      "id": "kube-kubectl",
+      "name": "Kubectl",
+      "public": true,
+      "secret": "if6ji0dTFE4rQfj8",
+      "trustedPeers": Array [
+        "dashboard",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`identity configmap should render the template w/ defaults values 1`] = `
 Object {
   "apiVersion": "v1",

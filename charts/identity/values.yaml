@@ -38,6 +38,9 @@ dashboardOrigins:
 dashboardClientSecret: sHq4vLoiQcIWbO3h
 kubectlClientSecret: if6ji0dTFE4rQfj8
 
+# additionalRedirectURIs:
+# - 'https://additional.example.org/callback'
+
 additionalStaticClients: ~
 # - name: additional identity example client
 #   id: exampleClient

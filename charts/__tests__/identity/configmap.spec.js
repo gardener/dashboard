@@ -7,7 +7,7 @@
 'use strict'
 
 const yaml = require('js-yaml')
-const { omit } = require('lodash')
+const { omit, pick } = require('lodash')
 const { basename } = require('path')
 const { helm } = fixtures
 
@@ -32,6 +32,19 @@ describe('identity', function () {
       expect(Object.keys(configMap.data)).toEqual(['config.yaml'])
       const config = yaml.load(configMap.data['config.yaml'])
       expect(config).toMatchSnapshot()
+    })
+
+    it('should render the template w/ additional redirect URIs', async function () {
+      const values = {
+        additionalRedirectURIs: ['https://additional.example.org/foo']
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [configMap] = documents
+      expect(omit(configMap, ['data'])).toMatchSnapshot()
+      expect(Object.keys(configMap.data)).toEqual(['config.yaml'])
+      const config = yaml.load(configMap.data['config.yaml'])
+      expect(pick(config, ['staticClients'])).toMatchSnapshot()
     })
   })
 })

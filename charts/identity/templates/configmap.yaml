@@ -36,6 +36,11 @@ data:
       {{- range .Values.dashboardOrigins }}
         - "{{ . }}/auth/callback"
       {{- end }}
+      {{- if .Values.additionalRedirectURIs }}
+      {{- range .Values.additionalRedirectURIs }}
+        - {{ quote . }}
+      {{- end }}
+      {{- end }}
       name: Gardener Dashboard
       secret: {{ .Values.dashboardClientSecret }}
     - id: kube-kubectl
