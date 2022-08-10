@@ -367,7 +367,7 @@ describe('api', function () {
         .put(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`)
         .set('cookie', await user.cookie)
         .send({
-          seedName: 'foo-seed'
+          seedName: 'foo-new-seed'
         })
         .expect('content-type', /json/)
         .expect(200)

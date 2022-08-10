@@ -772,13 +772,15 @@ Array [
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/binding",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-      "content-type": "application/merge-patch+json",
+      "content-type": "application/json-patch+json",
     },
-    Object {
-      "spec": Object {
-        "seedName": "foo-seed",
+    Array [
+      Object {
+        "op": "replace",
+        "path": "/spec/seedName",
+        "value": "foo-new-seed",
       },
-    },
+    ],
   ],
 ]
 `;
@@ -807,7 +809,7 @@ Object {
     "purpose": "barPurpose",
     "region": "foo-west",
     "secretBindingName": "foo-infra1",
-    "seedName": "foo-seed",
+    "seedName": "foo-new-seed",
   },
   "status": Object {
     "technicalID": "shoot--foo--barShoot",

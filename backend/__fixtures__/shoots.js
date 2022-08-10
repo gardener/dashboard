@@ -260,19 +260,18 @@ const mocks = {
     }
   },
   patchBinding () {
-    return (headers, json) => {
+    return (headers, json) => {      
       const matchResult = matchBinding(headers[':path'])
       if (matchResult === false) {
         return Promise.reject(createError(503))
       }
       const { params: { namespace, name } = {} } = matchResult
-      const item = shoots.get(namespace, name)
+      let item = shoots.get(namespace, name)
       if (!item) {
         return Promise.reject(createError(404))
       }
 
-      const { seedName } = json.spec
-      item.spec.seedName = seedName
+      item = applyPatch(item, json).newDocument
 
       return Promise.resolve(item)
     }
