@@ -11,19 +11,16 @@ SPDX-License-Identifier: Apache-2.0
     </v-toolbar>
     <v-list>
       <credential-tile
-        title="Rotate All Credentials"
         :shoot-item="shootItem"
         ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
         v-if="shootEnableStaticTokenKubeconfig"
-        title="Kubeconfig"
         :shoot-item="shootItem"
         type="kubeconfig"
         dense
         ></credential-tile>
       <credential-tile
-        title="Certificate Authorities"
         :shoot-item="shootItem"
         type="certificateAuthorities"
         dense
@@ -31,26 +28,22 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="!isTestingCluster">
           <credential-tile
             icon="mdi-developer-board"
-            title="Observability Passwords"
             :shoot-item="shootItem"
             type="observability"
             dense
           ></credential-tile>
         </template>
           <credential-tile
-          title="SSH Key Pair for Worker Nodes"
           :shoot-item="shootItem"
           type="sshKeypair"
           dense
           ></credential-tile>
           <credential-tile
-          title="ETCD Encryption Key"
           :shoot-item="shootItem"
           type="etcdEncryptionKey"
           dense
           ></credential-tile>
           <credential-tile
-          title="ServiceAccount Token Signing Key"
           :shoot-item="shootItem"
           type="serviceAccountKey"
           dense

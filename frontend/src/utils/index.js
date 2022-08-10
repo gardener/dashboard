@@ -612,29 +612,42 @@ export function isHtmlColorCode (value) {
 
 export const rotationTypes = {
   kubeconfig: {
-    initOperation: 'rotate-kubeconfig-credentials'
+    initOperation: 'rotate-kubeconfig-credentials',
+    onePhase: true,
+    title: 'Kubeconfig'
   },
   certificateAuthorities: {
     initOperation: 'rotate-ca-start',
-    completionOperation: 'rotate-ca-complete'
+    completionOperation: 'rotate-ca-complete',
+    twoPhase: true,
+    title: 'Certificate Authorities'
   },
   observability: {
-    initOperation: 'rotate-observability-credentials'
+    initOperation: 'rotate-observability-credentials',
+    onePhase: true,
+    title: 'Observability Passwords'
   },
   sshKeypair: {
-    initOperation: 'rotate-ssh-keypair'
+    initOperation: 'rotate-ssh-keypair',
+    onePhase: true,
+    title: 'SSH Key Pair for Worker Nodes'
   },
   etcdEncryptionKey: {
     initOperation: 'rotate-etcd-encryption-key-start',
-    completionOperation: 'rotate-etcd-encryption-key-complete'
+    completionOperation: 'rotate-etcd-encryption-key-complete',
+    twoPhase: true,
+    title: 'ETCD Encryption Key'
   },
   serviceAccountKey: {
     initOperation: 'rotate-serviceaccount-key-start',
-    completionOperation: 'rotate-serviceaccount-key-complete'
+    completionOperation: 'rotate-serviceaccount-key-complete',
+    twoPhase: true,
+    title: 'ServiceAccount Token Signing Key'
   },
   allCredentials: {
     initOperation: 'rotate-credentials-start',
-    completionOperation: 'rotate-credentials-complete'
+    completionOperation: 'rotate-credentials-complete',
+    title: 'Rotate All Credentials'
   },
   initOperation: function (type) {
     if (this[type]) {
@@ -649,9 +662,11 @@ export const rotationTypes = {
     return this.allCredentials.completionOperation
   },
   numberOfTwoPhaseOperations: function () {
-    return compact(map(this, 'completionOperation')).length - 1
+    return filter(this, { twoPhase: true }).length
   },
   numberOfOperations: function () {
-    return compact(map(this, 'initOperation')).length - 1
+    return filter(this, rotation => {
+      return rotation.onePhase || rotation.twoPhase
+    }).length
   }
 }

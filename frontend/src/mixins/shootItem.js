@@ -278,7 +278,8 @@ export const shootItem = {
       }
 
       const numberOfTwoPhaseOperations = rotationTypes.numberOfTwoPhaseOperations()
-      const preparedPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Prepared']).length
+      const preparedPhases = filter(this.shootStatusCredentialRotation, ['phase', 'Prepared'])
+      const preparedPhaseCount = preparedPhases.length
 
       if (preparedPhaseCount > 0) {
         if (preparedPhaseCount === numberOfTwoPhaseOperations) {
@@ -288,10 +289,19 @@ export const shootItem = {
             caption: type
           }
         }
+
+        const unpreparedRotations = filter(rotationTypes, (rotationType, key) => {
+          if (!rotationType.twoPhase) {
+            return false
+          }
+          return get(this.shootStatusCredentialRotation, [key, 'phase']) !== 'Prepared'
+        })
+
         return {
           caption: `Prepared ${preparedPhaseCount}/${numberOfTwoPhaseOperations}`,
           type: 'Prepared',
-          incomplete: true
+          incomplete: true,
+          unpreparedRotations
         }
       }
 

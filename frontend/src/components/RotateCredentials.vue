@@ -107,10 +107,10 @@ export default {
       return get(this.shootStatusCredentialRotation, this.type, {})
     },
     phase () {
-      if (this.type) {
-        return this.rotationStatus.phase
+      if (this.type === 'allCredentials') {
+        return this.shootStatusCredentialRotationAggregatedPhase
       }
-      return this.shootStatusCredentialRotationAggregatedPhase
+      return this.rotationStatus.phase
     },
     phaseType () {
       if (typeof this.phase === 'object') {
@@ -131,22 +131,31 @@ export default {
       if (this.mode === 'complete' && this.phaseType === 'Completing') {
         return true
       }
+      if (this.isScheduled) {
+        return true
+      }
       return false
     },
     isDisabled () {
-      if (this.mode === 'complete' && (this.phaseType !== 'Prepared' || this.phase.incomplete)) {
+      if (this.phase && this.phase.incomplete) {
         return true
       }
       if (this.isHibernationPreventingRotation) {
         return true
       }
-      if (this.mode === 'init' && this.phaseType && this.phaseType !== 'Completed') {
+      if (this.isScheduledOperation) {
         return true
       }
       return false
     },
     isScheduledForMaintenance () {
       return this.shootAnnotations['maintenance.gardener.cloud/operation'] === this.operation
+    },
+    isScheduled () {
+      return this.shootAnnotations['gardener.cloud/operation'] === this.operation
+    },
+    isScheduledOperation () {
+      return !!this.shootAnnotations['gardener.cloud/operation']
     },
     isMaintenanceDisabled () {
       return !this.isScheduledForMaintenance && !!this.shootAnnotations['maintenance.gardener.cloud/operation']
@@ -197,7 +206,13 @@ export default {
         return 'This operation is scheduled to be performed during the next maintenance time window'
       }
       if (this.isHibernationPreventingRotation && this.isShootStatusHibernated) {
-        return 'Cluster is hibernated. Wake up cluster to perform this operation.'
+        return 'Cluster is hibernated. Wake up cluster to perform this operation'
+      }
+      if (this.phase && this.phase.incomplete) {
+        return 'Operation is disabled because all two-phase operations need to be in the same phase'
+      }
+      if (this.isScheduledOperation) {
+        return 'There is alread an operation scheduled for this cluster'
       }
       return undefined
     },
@@ -349,9 +364,7 @@ export default {
       componentTexts['rotate-credentials-complete'] = {
         caption: this.isLoading
           ? 'Completing credential rotation'
-          : this.isDisabled
-            ? 'All two-phase credentials rotations need to be in phase "Prepared" in order to complete the rotation of all credentials'
-            : 'Complete Rotation of all Credentials',
+          : 'Complete Rotation of all Credentials',
         buttonText: this.text ? 'Complete Rotation of all Credentials' : '',
         errorMessage: 'Could not complete credential rotation',
         successMessage: `Credential rotation completed for ${this.shootName}`,

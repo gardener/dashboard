@@ -5,6 +5,7 @@
 //
 
 import { shootItem } from '@/mixins/shootItem'
+import { rotationTypes } from '@/utils'
 import { shallowMount } from '@vue/test-utils'
 
 describe('shootItem', () => {
@@ -79,7 +80,10 @@ describe('shootItem', () => {
           shootItem: shootItemProp
         }
       })
-      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true })
+      const unpreparedRotations = [
+        rotationTypes.serviceAccountKey
+      ]
+      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true, unpreparedRotations })
     })
   })
 })
