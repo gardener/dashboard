@@ -260,7 +260,7 @@ const mocks = {
     }
   },
   patchBinding () {
-    return (headers, json) => {      
+    return (headers, json) => {
       const matchResult = matchBinding(headers[':path'])
       if (matchResult === false) {
         return Promise.reject(createError(503))
