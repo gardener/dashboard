@@ -65,6 +65,7 @@ import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import head from 'lodash/head'
+import compact from 'lodash/compact'
 import { rotationTypes } from '@/utils'
 
 export default {
@@ -101,7 +102,7 @@ export default {
       if (this.type !== 'allCredentials') {
         return this.rotationStatus.lastCompletionTime
       }
-      const allCompletionTimes = flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime').sort()
+      const allCompletionTimes = compact(flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime')).sort()
       let requiredNumberOfRotationTimes = rotationTypes.numberOfOperations()
       if (!this.shootEnableStaticTokenKubeconfig) {
         requiredNumberOfRotationTimes = requiredNumberOfRotationTimes - 1
