@@ -8,6 +8,7 @@
 
 const { mockRequest } = require('@gardener-dashboard/request')
 const kubeconfig = require('@gardener-dashboard/kube-config')
+const originalKubeconfig = jest.requireActual('@gardener-dashboard/kube-config')
 const logger = require('../../lib/logger')
 
 describe('api', function () {
@@ -21,9 +22,9 @@ describe('api', function () {
     return agent.close()
   })
 
-  beforeEach(() => {
+  afterEach(() => {
     mockRequest.mockReset()
-    jest.clearAllMocks()
+    kubeconfig.cleanKubeconfig.mockClear()
   })
 
   describe('shoots', function () {
@@ -110,8 +111,6 @@ describe('api', function () {
     })
 
     it('should return shoot info', async function () {
-      const cleanKubeconfigSpy = jest.spyOn(kubeconfig, 'cleanKubeconfig')
-
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
@@ -127,13 +126,13 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(cleanKubeconfigSpy).toBeCalledTimes(1)
+      expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
 
       expect(res.body).toMatchSnapshot()
     })
 
     it('should return shoot seed info when no fallback is needed', async function () {
-      const cleanKubeconfigSpy = jest.spyOn(kubeconfig, 'cleanKubeconfig')
+      jest.spyOn(originalKubeconfig, 'cleanKubeconfig')
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -149,13 +148,14 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(cleanKubeconfigSpy).toBeCalledTimes(1)
+      expect(originalKubeconfig.cleanKubeconfig).toBeCalledTimes(1)
+      originalKubeconfig.cleanKubeconfig.mockRestore()
 
       expect(res.body).toMatchSnapshot()
     })
 
     it('should return shoot seed info when need to fallback to old monitoring secret', async function () {
-      const cleanKubeconfigSpy = jest.spyOn(kubeconfig, 'cleanKubeconfig')
+      jest.spyOn(originalKubeconfig, 'cleanKubeconfig')
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -172,7 +172,8 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(cleanKubeconfigSpy).toBeCalledTimes(1)
+      expect(originalKubeconfig.cleanKubeconfig).toBeCalledTimes(1)
+      originalKubeconfig.cleanKubeconfig.mockRestore()
 
       expect(res.body).toMatchSnapshot()
     })

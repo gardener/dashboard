@@ -13,6 +13,15 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 data:
+  login-config.json: |
+    {
+       "landingPageUrl": {{ quote .Values.frontendConfig.landingPageUrl }},
+       {{- if .Values.oidc }}
+       "loginTypes": ["oidc", "token"]
+       {{- else }}
+       "loginTypes": ["token"]
+       {{- end }}
+    }
   config.yaml: |
     ---
     port: {{ .Values.containerPort }}
@@ -158,9 +167,6 @@ data:
       {{- end }}
     {{- end }}
     frontend:
-      {{- if .Values.frontendConfig.landingPageUrl }}
-      landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
-      {{- end }}
       {{- if .Values.frontendConfig.helpMenuItems }}
       helpMenuItems:
       {{- range .Values.frontendConfig.helpMenuItems }}

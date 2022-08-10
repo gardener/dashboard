@@ -16,14 +16,19 @@ describe('kube-client', () => {
     const bearer = 'bearer'
     const namespace = 'namespace'
     const name = 'name'
-    const server = 'server'
+    const server = 'https://kubernetes:6443'
+
+    const certificateAuthorityData = Buffer.from('certificate-authority-data').toString('base64')
+    const clientCertificateData = Buffer.from('client-certificate-data').toString('base64')
 
     let testClient
     let getSecretStub
+    let createShootAdminKubeconfigStub
 
     beforeEach(() => {
       testClient = createClient({ auth: { bearer } })
       getSecretStub = jest.spyOn(testClient.core.secrets, 'get')
+      createShootAdminKubeconfigStub = jest.spyOn(testClient['core.gardener.cloud'].shoots, 'createAdminKubeconfigRequest')
     })
 
     it('should create a client', () => {
@@ -41,6 +46,39 @@ describe('kube-client', () => {
       const kubeconfig = await testClient.getKubeconfig({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
       expect(kubeconfig.currentUser.token).toBe(bearer)
+    })
+
+    it('should create a client from a kubeconfig', async () => {
+      const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
+      getSecretStub.mockReturnValue({
+        data: {
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
+        }
+      })
+      const client = await testClient.createKubeconfigClient({ namespace, name })
+      expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
+      expect(client.cluster.server.hostname).toBe('kubernetes')
+    })
+
+    it('should get shoot adminkubeconfig', async () => {
+      const user = {
+        'client-certificate-data': certificateAuthorityData,
+        'client-key-data': clientCertificateData
+      }
+      const testKubeconfig = fixtures.helper.createTestKubeconfig(user, { server })
+      createShootAdminKubeconfigStub.mockReturnValue({
+        status: {
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
+        }
+      })
+      const kubeconfig = await testClient.createShootAdminKubeconfig({ namespace, name })
+      expect(createShootAdminKubeconfigStub).toHaveBeenCalledWith(namespace, name, {
+        apiVersion: 'authentication.gardener.cloud/v1alpha1',
+        kind: 'AdminKubeconfigRequest',
+        spec: { expirationSeconds: 600 }
+      })
+      expect(kubeconfig.currentUser['client-certificate-data']).toBe(certificateAuthorityData)
+      expect(kubeconfig.currentUser['client-key-data']).toBe(clientCertificateData)
       expect(kubeconfig.currentCluster.server).toBe(server)
     })
 
@@ -63,27 +101,52 @@ describe('kube-client', () => {
   })
 
   describe('#createDashboardClient', () => {
-    const server = new URL(mockLoadResult.url)
-    const servername = server.hostname
-    const headers = {
-      authorization: `Bearer ${mockLoadResult.auth.bearer}`
-    }
-
+    const { url, auth } = mockLoadResult
+    const server = new URL(url)
     let testClient
 
     beforeEach(() => {
       jest.clearAllMocks()
-      testClient = createDashboardClient()
+      testClient = createDashboardClient({})
     })
 
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
       expect(extend).toHaveBeenCalledTimes(24)
-      expect(extend).toHaveBeenCalledWith(expect.objectContaining({
-        servername,
-        headers
-      }))
+      for (let i = 0; i < extend.mock.calls.length; i++) {
+        const call = extend.mock.calls[i]
+        expect(call).toHaveLength(1)
+        const clientConfig = call[0]
+        expect(clientConfig.constructor.name).toBe('ClientConfig')
+        expect(clientConfig.url).toBe(url)
+        expect(clientConfig.auth).toBe(auth)
+        // all endpoints except healthz have json responseType
+        const responseType = i !== 22 ? 'json' : undefined
+        expect(clientConfig.responseType).toBe(responseType)
+      }
+    })
+  })
+  describe('#dashboardClient', () => {
+    let kubeConfig
+    let kubeClient
+
+    const mockKubeClient = () => {
+      jest.isolateModules(() => {
+        kubeConfig = require('@gardener-dashboard/kube-config')
+        kubeClient = require('../lib')
+      })
+    }
+
+    it('should abort watching kubeconfig changes', () => {
+      mockKubeClient()
+      expect(kubeConfig.load).toBeCalledTimes(1)
+      const firstCall = kubeConfig.load.mock.calls[0]
+      expect(firstCall).toHaveLength(2)
+      const { signal } = firstCall[1]
+      expect(signal.aborted).toBe(false)
+      kubeClient.abortWatcher()
+      expect(signal.aborted).toBe(true)
     })
   })
 })
