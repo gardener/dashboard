@@ -98,6 +98,7 @@ export default {
   },
   async beforeRouteLeave (to, from, next) {
     try {
+      this.component = 'div'
       await this.unsubscribeShoot()
     } finally {
       next()
