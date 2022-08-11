@@ -380,7 +380,9 @@ function setFilteredItems (state, rootState, rootGetters) {
         if (!hideClustersWithLabels) {
           return true
         }
-        const ticketsForCluster = rootGetters.ticketsByNamespaceAndName(get(item, 'metadata', {}))
+        const metadata = get(item, 'metadata', {})
+        metadata.projectName = rootGetters.projectNameByNamespace(metadata)
+        const ticketsForCluster = rootGetters['tickets/issues'](metadata)
         if (!ticketsForCluster.length) {
           return true
         }
