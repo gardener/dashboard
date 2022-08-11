@@ -175,13 +175,6 @@ class Shortcut {
   }
 }
 
-function getFilterValue (state, getters) {
-  if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
-    return 'issues'
-  }
-  return null
-}
-
 const vendorNameFromImageName = imageName => {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
