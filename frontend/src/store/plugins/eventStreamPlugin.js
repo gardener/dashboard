@@ -64,9 +64,10 @@ function unsubscribeFn (eventSource, onShoots, onIssues, onComments) {
 }
 
 export default function () {
+  let unsubscribe
+
   return store => {
     store.subscribe((mutation, state) => {
-      let unsubscribe
       switch (mutation.type) {
         case 'SET_TOPICS': {
           if (typeof unsubscribe === 'function') {
