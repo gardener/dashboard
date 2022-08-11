@@ -53,12 +53,13 @@ async function canSubscribeTopic (user, topic) {
         topic.metadata = { allNamespaces: true }
         return true
       }
-      const namespaces = _
+      const projects = _
         .chain(cache.getProjects())
         .filter(projectFilter(user, false))
-        .map('spec.namespace')
         .value()
-      topic.metadata = { namespaces }
+      const namespaces = _.map(projects, 'spec.namespace')
+      const projectNames = _.map(projects, 'metadata.name')
+      topic.metadata = { namespaces, projectNames }
       const canListShootsList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
       return canListShootsList.every(value => value)
     }
@@ -94,14 +95,14 @@ async function handleEventStream (req, res) {
     username: user.id,
     groups: user.groups,
     events: [],
-    metadata: null
+    metadata: {}
   }
   const channelKeys = []
   const topics = req.topics
   for (const { key, labels, metadata } of topics) {
     switch (key) {
       case 'shoots': {
-        state.metadata = { ...metadata }
+        Object.assign(state.metadata, metadata)
         state.events.push('shoots', 'issues')
         if (state.metadata.name) {
           state.events.push('comments')
