@@ -206,9 +206,9 @@ Li4u
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
-    "refreshTokenLifetime": 2592000,
     "rejectUnauthorized": true,
     "scope": "openid email groups offline_access",
+    "sessionLifetime": 2592000,
   },
 }
 `;
