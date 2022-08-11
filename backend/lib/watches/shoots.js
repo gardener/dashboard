@@ -31,13 +31,13 @@ module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
       if (metadata.allNamespaces) {
         return true
       }
-      if (metadata.namespace !== namespace) {
-        return false
+      if (Array.isArray(metadata.namespaces)) {
+        return metadata.namespaces.includes(namespace)
       }
       if (metadata.name) {
-        return metadata.name === name
+        return metadata.namespace === namespace && metadata.name === name
       }
-      return true
+      return metadata.namespace === namespace
     }
     const shootBroadcast = ({ type, object }) => {
       channels.shoots.broadcast({ type, object }, eventName, {
