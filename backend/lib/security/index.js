@@ -29,6 +29,7 @@ const {
   decrypt
 } = require('./jose')(sessionSecret)
 
+const now = () => Math.floor(Date.now() / 1000)
 const md5 = data => crypto.createHash('md5').update(data).digest('hex')
 const { isHttpError } = createError
 
@@ -219,7 +220,7 @@ async function createAccessToken (payload, idToken) {
       payload.exp ??= Number(exp)
     }
   }
-  payload.exp ??= Math.floor(Date.now() / 1000) + sessionLifetime
+  payload.exp ??= now() + sessionLifetime
   return sign(payload)
 }
 
@@ -339,9 +340,16 @@ async function getTokenSet (cookies) {
 async function authorizationCodeExchange (redirectUri, parameters, checks) {
   try {
     const client = await exports.getIssuerClient()
-    const payload = {}
+    const iat = now()
+    const payload = { iat }
     const tokenSet = await client.callback(redirectUri, parameters, checks)
     if (tokenSet.refresh_token) {
+      /**
+       * If the tokenSet contains a refresh_token the session will be valid forever
+       * and the id_token has a very short lifetime. In this case the expiration time
+       * of the access_token will be the configured sessionLifetime.
+       */
+      payload.exp = iat + sessionLifetime
       payload.refresh_at = tokenSet.expires_at
     }
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
