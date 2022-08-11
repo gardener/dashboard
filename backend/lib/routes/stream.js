@@ -6,12 +6,14 @@
 
 'use strict'
 
+const _ = require('lodash')
 const express = require('express')
 const createError = require('http-errors')
 const { createSession } = require('better-sse')
 const { authorization } = require('../services')
 const channels = require('../channels')
 const cache = require('../cache')
+const { projectFilter } = require('../utils')
 
 const router = module.exports = express.Router()
 
@@ -26,7 +28,7 @@ function getTopics ({ topic }) {
 function parseTopic (topic) {
   const [id, pathname] = topic.split(';')
   const [key, ...labels] = id.split(':')
-  const args = pathname.split('/')
+  const args = typeof pathname === 'string' ? pathname.split('/') : []
   return {
     key,
     labels,
@@ -34,28 +36,43 @@ function parseTopic (topic) {
   }
 }
 
-function canSubscribeTopic (user, topic) {
-  const { key, args } = parseTopic(topic)
+async function canSubscribeTopic (user, topic) {
+  const { key, args } = topic
   switch (key) {
     case 'shoots': {
-      if (!args.length) {
-        return authorization.isAdmin(user)
+      if (args.length) {
+        const [namespace, name] = args
+        const projectName = cache.findProjectByNamespace(namespace)?.metadata.name
+        topic.metadata = { namespace, projectName }
+        if (!name) {
+          topic.metadata.name = name
+          return authorization.canListShoots(user, namespace)
+        }
+        return authorization.canGetShoot(user, namespace, name)
+      } else if (await authorization.isAdmin(user)) {
+        topic.metadata = { allNamespaces: true }
+        return true
       }
-      const [namespace, name] = args
-      if (!name) {
-        return authorization.canListShoots(user, namespace)
-      }
-      return authorization.canGetShoot(user, namespace, name)
+      const namespaces = _
+        .chain(cache.getProjects())
+        .filter(projectFilter(user, false))
+        .map('spec.namespace')
+        .value()
+      topic.metadata = { namespaces }
+      const canListShootsList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
+      return canListShootsList.every(value => value)
     }
   }
-  return Promise.reject(new TypeError('Invalid topic'))
+  throw new TypeError('Invalid topic')
 }
 
 function authorizeTopicFn (user) {
   return async topic => {
-    if (!await canSubscribeTopic(user, topic)) {
+    const parsedTopic = parseTopic(topic)
+    if (!await canSubscribeTopic(user, parsedTopic)) {
       throw createError(403, `No authorization to subscribe topic "${topic}"`)
     }
+    return parsedTopic
   }
 }
 
@@ -63,7 +80,8 @@ async function authorizationMiddleware (req, res, next) {
   const user = req.user
   const topics = getTopics(req.query)
   try {
-    await Promise.all(topics.map(authorizeTopicFn(user)))
+    const authorizeTopic = authorizeTopicFn(user)
+    req.topics = await Promise.all(topics.map(authorizeTopic))
     next()
   } catch (err) {
     next(err)
@@ -79,20 +97,14 @@ async function handleEventStream (req, res) {
     metadata: null
   }
   const channelKeys = []
-  const topics = getTopics(req.query)
-  for (const topic of topics) {
-    const { key, labels, args } = parseTopic(topic)
+  const topics = req.topics
+  for (const { key, labels, metadata } of topics) {
     switch (key) {
       case 'shoots': {
+        state.metadata = { ...metadata }
         state.events.push('shoots', 'issues')
-        if (args.length) {
-          const [namespace, name] = args
-          const projectName = cache.findProjectByNamespace(namespace)?.metadata.name
-          state.metadata = { namespace, projectName }
-          if (name) {
-            state.events.push('comments')
-            state.metadata.name = name
-          }
+        if (state.metadata.name) {
+          state.events.push('comments')
         }
         channelKeys.push('tickets')
         channelKeys.push(labels.includes('unhealthy') ? 'unhealthyShoots' : 'shoots')
