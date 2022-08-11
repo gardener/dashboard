@@ -108,7 +108,7 @@ describe('gardener-dashboard', function () {
       it('should render the template with scope containing offline_access', async function () {
         Object.assign(values.oidc, {
           scope: 'openid email groups offline_access',
-          refreshTokenLifetime: 30 * 24 * 60 * 60
+          sessionLifetime: 30 * 24 * 60 * 60
         })
         expect.assertions(2)
         await assertTemplate()
