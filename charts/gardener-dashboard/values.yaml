@@ -87,8 +87,8 @@ oidc:
   clientSecret: ~
   # # force PKCE usage
   # usePKCE: true
-  # # refreshTokenLifetime is the refresh token expiration period in seconds (defaults to 86400)
-  # refreshTokenLifetime: 2592000 # 30 days
+  # # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
+  # sessionLifetime: 86400
   # # certificate authority of the OpenID provider
   # ca: |
   #   -----BEGIN CERTIFICATE-----

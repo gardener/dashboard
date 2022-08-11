@@ -71,8 +71,8 @@ data:
       {{- if .Values.oidc.usePKCE }}
       usePKCE: true
       {{- end }}
-      {{- if .Values.oidc.refreshTokenLifetime }}
-      refreshTokenLifetime:  {{ .Values.oidc.refreshTokenLifetime }}
+      {{- if .Values.oidc.sessionLifetime }}
+      sessionLifetime:  {{ .Values.oidc.sessionLifetime }}
       {{- end }}
       redirect_uris:
       {{- $protocol := ternary "http" "https" ( empty .Values.ingress.tls ) }}
