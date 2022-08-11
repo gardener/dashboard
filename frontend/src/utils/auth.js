@@ -76,7 +76,7 @@ export class UserManager {
 
   isRefreshRequired (tolerance = 30) {
     const t = this.timeUntil('refresh_at')
-    return typeof t === 'number' && t > tolerance
+    return typeof t === 'number' && t < tolerance
   }
 
   timeUntil (key) {
