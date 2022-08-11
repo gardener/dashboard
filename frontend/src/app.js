@@ -29,7 +29,9 @@ const App = Vue.extend({
         }
         if (!refreshTokenPromise) {
           refreshTokenPromise = vm.$auth.refreshToken()
-          refreshTokenPromise.finally(() => (refreshTokenPromise = undefined))
+          refreshTokenPromise.finally(() => {
+            refreshTokenPromise = undefined
+          })
         }
         return refreshTokenPromise.then(() => args)
       },
