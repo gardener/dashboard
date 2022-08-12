@@ -12,6 +12,10 @@ const fixtures = require('../__fixtures__')
 const { cache: internalCache } = cache
 
 describe('cache', function () {
+  afterEach(() => {
+    internalCache.clear()
+  })
+
   it('should dispatch "synchronize" to internal cache', function () {
     const stub = jest.spyOn(internalCache, 'set')
     const a = { store: { id: 1 } }
