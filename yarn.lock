@@ -1469,6 +1469,7 @@ __metadata:
     eslint-plugin-jest: ^26.4.5
     eslint-plugin-n: ^15.2.0
     eslint-plugin-promise: ^6.0.0
+    eventsource: ^2.0.2
     express: ^4.18.1
     express-static-gzip: ^2.1.7
     fast-json-patch: ^3.1.1
@@ -6469,6 +6470,13 @@ __metadata:
   version: 3.3.0
   resolution: "events@npm:3.3.0"
   checksum: f6f487ad2198aa41d878fa31452f1a3c00958f46e9019286ff4787c84aac329332ab45c9cdc8c445928fc6d7ded294b9e005a7fce9426488518017831b272780
+  languageName: node
+  linkType: hard
+
+"eventsource@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "eventsource@npm:2.0.2"
+  checksum: c0072d972753e10c705d9b2285b559184bf29d011bc208973dde9c8b6b8b7b6fdad4ef0846cecb249f7b1585e860fdf324cbd2ac854a76bc53649e797496e99a
   languageName: node
   linkType: hard
 

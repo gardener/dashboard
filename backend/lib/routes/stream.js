@@ -45,9 +45,9 @@ async function canSubscribeTopic (user, topic) {
         const projectName = cache.findProjectByNamespace(namespace)?.metadata.name
         topic.metadata = { namespace, projectName }
         if (!name) {
-          topic.metadata.name = name
           return authorization.canListShoots(user, namespace)
         }
+        topic.metadata.name = name
         return authorization.canGetShoot(user, namespace, name)
       } else if (await authorization.isAdmin(user)) {
         topic.metadata = { allNamespaces: true }
