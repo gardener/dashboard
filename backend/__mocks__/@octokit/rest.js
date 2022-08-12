@@ -13,6 +13,9 @@ const octokitRest = jest.requireActual('@octokit/rest')
 
 const serviceUnavailable = createError(503)
 
+const mockListIssues = jest.fn().mockReturnValue(fixtures.github.issues.list())
+const mockListComments = jest.fn().mockReturnValue(fixtures.github.comments.list())
+
 function searchIssues (q) {
   const tokens = chain(q)
     .split(/ +/)
@@ -32,7 +35,7 @@ function searchIssues (q) {
       state = token.substring(6)
     }
   }
-  const issueList = fixtures.github.issues.list()
+  const issueList = mockListIssues()
   const items = filter(issueList, issue => {
     if (state && state !== issue.state) {
       return false
@@ -46,7 +49,7 @@ function searchIssues (q) {
 }
 
 function getIssueComments (number) {
-  const commentList = fixtures.github.comments.list()
+  const commentList = mockListComments()
   const comments = filter(commentList, ['number', number])
   return Promise.resolve(comments)
 }
@@ -70,5 +73,7 @@ const Octokit = jest.fn().mockImplementation(options => {
 })
 
 module.exports = {
-  Octokit
+  Octokit,
+  mockListIssues,
+  mockListComments
 }

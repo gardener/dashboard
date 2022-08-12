@@ -9,6 +9,7 @@
 require('abort-controller/polyfill')
 const http = require('http')
 const { Test } = require('supertest')
+const EventSource = require('eventsource')
 const { createTerminus } = require('@godaddy/terminus')
 const { matchers, ...fixtures } = require('./__fixtures__')
 
@@ -32,6 +33,46 @@ function createHttpAgent () {
     server,
     close () {
       server.close()
+    },
+    watch (topic) {
+      const headers = {}
+      return {
+        set (key, value) {
+          headers[key] = value
+          return this
+        },
+        connect () {
+          return new Promise((resolve, reject) => {
+            const connect = ({ port }) => {
+              const url = new URL('/api/stream', `http://127.0.0.1:${port}`)
+              url.searchParams.append('topic', topic)
+              const eventSource = new EventSource(url.toString(), { headers })
+              let settled = false
+              const onOpen = () => {
+                if (!settled) {
+                  settled = true
+                  resolve(eventSource)
+                }
+              }
+              const onError = err => {
+                eventSource.close()
+                if (!settled) {
+                  settled = true
+                  reject(err)
+                }
+              }
+              eventSource.addEventListener('open', onOpen)
+              eventSource.addEventListener('error', onError)
+            }
+            const address = server.address()
+            if (address) {
+              connect(address)
+            } else {
+              server.listen(0, '127.0.0.1', () => connect(server.address()))
+            }
+          })
+        }
+      }
     }
   }
 

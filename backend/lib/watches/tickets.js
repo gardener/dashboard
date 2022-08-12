@@ -18,33 +18,10 @@ module.exports = (ticketCache, retryOptions = {}) => {
     return
   }
   ticketCache.on('issue', event => {
-    const eventName = 'issues'
-    const { projectName } = event.object.metadata
-    const matchesMetadata = metadata => {
-      if (Array.isArray(metadata.projectNames)) {
-        return metadata.projectNames.includes(projectName)
-      }
-      return metadata.projectName === projectName
-    }
-    channels.tickets.broadcast(event, eventName, {
-      filter (session) {
-        const { events, metadata } = session.state
-        return events.includes(eventName) && matchesMetadata(metadata)
-      }
-    })
+    channels.tickets.publish('issues', event)
   })
   ticketCache.on('comment', event => {
-    const eventName = 'comments'
-    const { projectName, name } = event.object.metadata
-    const matchesMetadata = metadata => {
-      return metadata.projectName === projectName && metadata.name === name
-    }
-    channels.tickets.broadcast(event, eventName, {
-      filter (session) {
-        const { events, metadata } = session.state
-        return events.includes(eventName) && matchesMetadata(metadata)
-      }
-    })
+    channels.tickets.publish('comments', event)
   })
 
   async function loadAllOpenIssues () {

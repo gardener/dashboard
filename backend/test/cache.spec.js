@@ -6,7 +6,9 @@
 
 'use strict'
 
+const { Store } = require('@gardener-dashboard/kube-client')
 const cache = require('../lib/cache')
+const fixtures = require('../__fixtures__')
 const { cache: internalCache } = cache
 
 describe('cache', function () {
@@ -48,6 +50,22 @@ describe('cache', function () {
     const stub = jest.spyOn(internalCache, 'getProjects').mockReturnValue(list)
     expect(cache.getProjects()).toBe(list)
     expect(stub).toBeCalledTimes(1)
+  })
+
+  it('should dispatch "getShoots" to internal cache', function () {
+    const object = { metadata: { uid: 1 } }
+    const list = [object]
+    const store = new Store()
+    store.replace(list)
+    internalCache.set('shoots', store)
+    expect(cache.getShoots()).toEqual(list)
+  })
+
+  it('should dispatch "getShoot" to internal cache', function () {
+    const store = new Store()
+    store.replace(fixtures.shoots.list())
+    internalCache.set('shoots', store)
+    expect(cache.getShoot('garden-foo', 'fooShoot')).toBe(store.getByKey(1))
   })
 
   it('should dispatch "getControllerRegistrations" to internal cache', function () {

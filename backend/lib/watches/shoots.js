@@ -24,32 +24,10 @@ async function deleteTickets ({ namespace, name }) {
 
 module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
   const handleEvent = event => {
-    const eventName = 'shoots'
-    const { namespace, name, uid } = event.object.metadata
+    channels.shoots.publish('shoots', event)
 
-    const matchesMetadata = metadata => {
-      if (metadata.allNamespaces) {
-        return true
-      }
-      if (Array.isArray(metadata.namespaces)) {
-        return metadata.namespaces.includes(namespace)
-      }
-      if (metadata.name) {
-        return metadata.namespace === namespace && metadata.name === name
-      }
-      return metadata.namespace === namespace
-    }
-    const shootBroadcast = ({ type, object }) => {
-      channels.shoots.broadcast({ type, object }, eventName, {
-        filter (session) {
-          const { events, metadata } = session.state
-          return events.includes(eventName) && matchesMetadata(metadata)
-        }
-      })
-    }
-    shootBroadcast(event)
-
-    const unhealthyShootsBroadcast = ({ type, object }) => {
+    const unhealthyShootsPublish = ({ type, object }) => {
+      const { uid } = object.metadata
       if (shootHasIssue(object)) {
         if (!shootsWithIssues.has(uid)) {
           shootsWithIssues.add(uid)
@@ -62,14 +40,9 @@ module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
       } else {
         return
       }
-      channels.unhealthyShoots.broadcast({ type, object }, eventName, {
-        filter (session) {
-          const { events, metadata } = session.state
-          return events.includes(eventName) && matchesMetadata(metadata)
-        }
-      })
+      channels.unhealthyShoots.publish('shoots', { type, object })
     }
-    unhealthyShootsBroadcast(event)
+    unhealthyShootsPublish(event)
 
     bootstrapper.handleResourceEvent(event)
 

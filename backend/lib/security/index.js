@@ -6,12 +6,10 @@
 
 'use strict'
 
-const { promisify } = require('util')
 const assert = require('assert').strict
 const crypto = require('crypto')
-const { split, join, noop, some, every, includes, head, chain, pick } = require('lodash')
+const { split, join, some, every, includes, head, chain, pick } = require('lodash')
 const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
-const cookieParser = require('cookie-parser')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication } = require('../services')
@@ -403,46 +401,28 @@ async function refreshToken (req, res) {
 }
 
 function authenticate (options = {}) {
-  assert.ok(options.createClient === false || typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
+  assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
       const tokenSet = await getTokenSet(req.cookies)
       const user = await verifyAccessToken(tokenSet.access_token)
-      if (typeof options.createClient === 'function') {
-        const auth = Object.freeze({
-          bearer: tokenSet.id_token
-        })
-        Object.defineProperty(user, 'auth', {
-          value: auth,
-          enumerable: true
-        })
-        Object.defineProperty(user, 'client', {
-          value: options.createClient({ auth })
-        })
-      }
+      const auth = Object.freeze({
+        bearer: tokenSet.id_token
+      })
+      Object.defineProperty(user, 'auth', {
+        value: auth,
+        enumerable: true
+      })
+      Object.defineProperty(user, 'client', {
+        value: options.createClient({ auth })
+      })
       req.user = user
       next()
     } catch (err) {
       clearCookies(res)
       next(err)
     }
-  }
-}
-
-function authenticateSocket () {
-  const authenticateAsync = promisify(authenticate({ createClient: false }))
-  const cookieParserAsync = promisify(cookieParser())
-  return async (socket) => {
-    const res = {
-      clearCookie: noop,
-      cookie: noop
-    }
-    const req = socket.request
-    await cookieParserAsync(req, res)
-    await authenticateAsync(req, res)
-    const user = socket.client.user = req.user
-    return user
   }
 }
 
@@ -471,6 +451,5 @@ exports = module.exports = {
   authorizationCallback,
   refreshToken,
   authorizeToken,
-  authenticate,
-  authenticateSocket
+  authenticate
 }
