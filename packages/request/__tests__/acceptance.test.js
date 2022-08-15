@@ -183,7 +183,7 @@ describe('Acceptance Tests', function () {
       pingInterval: false
     })
     client = new Client({
-      prefixUrl: server.origin,
+      url: server.origin,
       agent,
       ca: cert
     })

@@ -23,7 +23,7 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
-  const { staleSinceTimestamp, staleAutoDeleteTimestamp } = status
+  const { staleSinceTimestamp, staleAutoDeleteTimestamp, phase } = status
   const resourceQuota = cache.findGardenerResourceQuotaByNamespace(namespace)
   let quotaStatus
   if (resourceQuota) {
@@ -46,7 +46,8 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
       purpose,
       staleSinceTimestamp,
       staleAutoDeleteTimestamp,
-      quotaStatus
+      quotaStatus,
+      phase
     }
   }
 }
@@ -122,7 +123,7 @@ function getProjectName (namespace) {
   return cache.findProjectByNamespace(namespace).metadata.name
 }
 
-exports.list = async function ({ user, qs = {} }) {
+exports.list = async function ({ user }) {
   const projects = cache.getProjects()
   const isAdmin = await authorization.isAdmin(user)
   const isMemberOf = project => {
@@ -155,23 +156,14 @@ exports.list = async function ({ user, qs = {} }) {
     return hasGroupMembership || hasUserMembership || hasServiceAccountMembership
   }
 
-  const phases = _
-    .chain(qs)
-    .get('phase', 'Ready')
-    .split(',')
-    .compact()
-    .value()
   return _
     .chain(projects)
     .filter(project => {
       if (!isAdmin && !isMemberOf(project)) {
         return false
       }
-      if (!_.isEmpty(phases)) {
-        const phase = _.get(project, 'status.phase', 'Initial')
-        return _.includes(phases, phase)
-      }
-      return true
+      const phase = _.get(project, 'status.phase', 'Pending')
+      return phase !== 'Pending'
     })
     .map(fromResource)
     .value()

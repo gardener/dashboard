@@ -24,6 +24,12 @@ describe('kube-client', () => {
     }
 
     const url = 'https://kubernetes/foo/bar'
+    const relativeUrl = '/'
+    const clientConfig = {
+      extend (options) {
+        return Object.assign(Object.create(this), options)
+      }
+    }
     const options = { url }
     let extendStub
     let endpoints
@@ -35,19 +41,27 @@ describe('kube-client', () => {
         .mockImplementation(options => {
           return new EchoClient(options)
         })
-      endpoints = assign({}, options)
+      endpoints = assign({}, clientConfig, options)
     })
 
     it('should assign all non resource endpoints', () => {
       expect(Object.keys(endpoints)).toHaveLength(3)
       expect(extendStub).toBeCalledTimes(3)
+      expect(endpoints.api).toBeInstanceOf(HttpClient)
+      expect(endpoints.api[http.client].options).toEqual({
+        url,
+        relativeUrl,
+        responseType: 'json'
+      })
       expect(endpoints.healthz).toBeInstanceOf(HttpClient)
       expect(endpoints.healthz[http.client].options).toEqual({
-        prefixUrl: url
+        url,
+        relativeUrl
       })
       expect(endpoints.openapi).toBeInstanceOf(HttpClient)
       expect(endpoints.openapi[http.client].options).toEqual({
-        prefixUrl: url,
+        url,
+        relativeUrl,
         responseType: 'json'
       })
     })

@@ -10,9 +10,12 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig } = require('../lib')
+const EventEmitter = require('events')
+const chokidar = require('chokidar')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
+const Config = require('../lib/Config')
+const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
@@ -30,30 +33,47 @@ describe('kube-config', () => {
   const accessToken = 'access-token'
 
   beforeEach(() => {
+    jest.spyOn(chokidar, 'watch').mockImplementationOnce(() => {
+      const emitter = new EventEmitter()
+      emitter.close = jest.fn().mockImplementation(() => Promise.resolve())
+      process.nextTick(() => emitter.emit('ready'))
+      return emitter
+    })
     jest.spyOn(fs, 'readFileSync')
   })
 
   afterEach(() => {
+    chokidar.watch.mockRestore()
     fs.readFileSync.mockRestore()
   })
 
   describe('#load', () => {
-    it('should return the test config', () => {
-      const config = load()
-      expect(config).toEqual({
-        url: server.origin,
-        auth: {
-          bearer: token
-        }
+    let ac
+
+    function loadConfig (env) {
+      const clientConfig = load(env, {
+        signal: ac.signal
       })
+      if (!clientConfig.watcher) {
+        return Promise.resolve(clientConfig)
+      }
+      return new Promise(resolve => clientConfig.watcher.on('ready', () => resolve(clientConfig)))
+    }
+
+    beforeEach(() => {
+      ac = new AbortController()
+      fs.readFileSync.mockClear()
     })
 
-    it('should return the in cluster config', () => {
+    afterEach(() => {
+      ac.abort()
+    })
+
+    it('should return the in cluster config', async () => {
       fs.readFileSync
         .mockReturnValueOnce(token)
         .mockReturnValueOnce(ca)
-      const config = load({
-        NODE_ENV: 'development',
+      const config = await loadConfig({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
       })
@@ -70,7 +90,7 @@ describe('kube-config', () => {
       })
     })
 
-    it('should return the config from KUBECONFIG environment variable', () => {
+    it('should return the config from KUBECONFIG environment variable', async () => {
       const kubeconfig = dumpKubeconfig({
         userName: user,
         namespace,
@@ -79,8 +99,7 @@ describe('kube-config', () => {
         caData
       })
       fs.readFileSync.mockReturnValue(kubeconfig)
-      const config = load({
-        NODE_ENV: 'development',
+      const config = await loadConfig({
         KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config'
       })
       expect(fs.readFileSync).toHaveBeenCalledTimes(1)
@@ -93,19 +112,7 @@ describe('kube-config', () => {
       })
     })
 
-    it('should dump KUBECONFIG without providing a ca', () => {
-      const kubeconfig = yaml.load(dumpKubeconfig({
-        userName: user,
-        namespace,
-        token,
-        server: server.origin
-      }))
-      expect(kubeconfig.clusters).toHaveLength(1)
-      const cluster = kubeconfig.clusters[0]
-      expect(cluster).not.toHaveProperty('certificate-authority-data')
-    })
-
-    it('should return the config from the users homedir', () => {
+    it('should return the config from the users homedir', async () => {
       const defaultKubeconfigPath = path.join(os.homedir(), '.kube', 'config')
       const kubeconfig = yaml.dump({
         apiVersion: 'v1',
@@ -146,7 +153,7 @@ describe('kube-config', () => {
             return clientKey
         }
       })
-      const config = load({
+      const config = await loadConfig({
         NODE_ENV: 'development'
       })
       expect(config).toEqual({
@@ -231,6 +238,20 @@ describe('kube-config', () => {
       })
     })
 
+    it('should return a config with keyData and certData', () => {
+      const base64Encode = data => Buffer.from(data, 'utf8').toString('base64')
+      kubeconfig.users[0].user = {
+        'client-key-data': base64Encode('key'),
+        'client-certificate-data': base64Encode('cert')
+      }
+      const config = fromKubeconfig(kubeconfig)
+      expect(config).toEqual({
+        rejectUnauthorized: true,
+        key: 'key',
+        cert: 'cert'
+      })
+    })
+
     it('should fail to parse the kubeconfig', () => {
       expect(() => fromKubeconfig()).toThrow(TypeError)
     })
@@ -290,13 +311,19 @@ describe('kube-config', () => {
   })
 
   describe('#getInCluster', () => {
+    const noEntityError = path => {
+      Object.assign(new Error(`ENOENT: no such file or directory, open '${path}'`), {
+        code: 'ENOENT',
+        path
+      })
+    }
     it('should fail with "kubernetes service endpoint not defined"', () => {
-      expect(() => getInCluster()).toThrow(/kubernetes service endpoint not defined$/)
+      expect(() => getInCluster({})).toThrow(/kubernetes service endpoint not defined$/)
     })
 
     it('should fail with "serviceaccount token not found"', () => {
       fs.readFileSync
-        .mockReturnValueOnce(null)
+        .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_TOKEN_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
@@ -306,7 +333,7 @@ describe('kube-config', () => {
     it('should fail with "serviceaccount certificate authority not found"', () => {
       fs.readFileSync
         .mockReturnValueOnce(token)
-        .mockReturnValueOnce(null)
+        .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_CA_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port
@@ -355,6 +382,28 @@ describe('kube-config', () => {
       expect(kubeconfig.users).toHaveLength(1)
       const { user } = kubeconfig.users[0]
       expect(user['auth-provider']).toBeUndefined()
+    })
+  })
+
+  describe('#parseKubeconfig', () => {
+    it('should return the input object instance', () => {
+      const input = Config.build({}, undefined)
+      const kubeconfig = parseKubeconfig(input)
+      expect(kubeconfig).toBe(input)
+    })
+  })
+
+  describe('#dumpKubeconfig', () => {
+    it('should dump KUBECONFIG without providing a ca', () => {
+      const kubeconfig = yaml.load(dumpKubeconfig({
+        userName: user,
+        namespace,
+        token,
+        server: server.origin
+      }))
+      expect(kubeconfig.clusters).toHaveLength(1)
+      const cluster = kubeconfig.clusters[0]
+      expect(cluster).not.toHaveProperty('certificate-authority-data')
     })
   })
 

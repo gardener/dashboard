@@ -34,7 +34,9 @@ async function writeNumbers (stream, max = 10) {
 
 describe('kube-client', () => {
   describe('HttpClient', () => {
-    const prefixUrl = 'https://127.0.0.1:31415/test'
+    const options = {
+      url: 'https://127.0.0.1:31415/test'
+    }
     const url = 'url'
     const method = 'GET'
 
@@ -42,12 +44,12 @@ describe('kube-client', () => {
 
     beforeEach(() => {
       jest.clearAllMocks()
-      testClient = new TestClient({ prefixUrl })
+      testClient = new TestClient(options)
     })
 
     it('should create a HttpClient instance', () => {
       expect(extend).toBeCalledTimes(1)
-      expect(extend.mock.calls[0]).toEqual([{ prefixUrl }])
+      expect(extend.mock.calls[0]).toEqual([options])
       expect(testClient[http.client]).toBe(mockClient)
     })
 

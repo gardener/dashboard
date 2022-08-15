@@ -33,7 +33,8 @@ import {
   shortRandomString,
   shootAddonList,
   randomMaintenanceBegin,
-  maintenanceWindowWithBeginAndTimezone
+  maintenanceWindowWithBeginAndTimezone,
+  isTruthyValue
 } from '@/utils'
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
 import find from 'lodash/find'
@@ -283,13 +284,18 @@ function setFilteredItems (state, rootState, rootGetters) {
     }
     if (get(state, 'shootListFilters.noOperatorAction', false)) {
       const predicate = item => {
+        const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
+        if (ignoreIssues) {
+          return false
+        }
         const lastErrors = get(item, 'status.lastErrors', [])
         const allLastErrorCodes = errorCodesFromArray(lastErrors)
+        if (isTemporaryError(allLastErrorCodes)) {
+          return false
+        }
         const conditions = get(item, 'status.conditions', [])
         const allConditionCodes = errorCodesFromArray(conditions)
-        const noUserError = !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
-        const noTemporaryError = !isTemporaryError(allLastErrorCodes)
-        return noUserError && noTemporaryError
+        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes))
       }
       items = filter(items, predicate)
     }
