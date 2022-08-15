@@ -123,6 +123,7 @@ const matchOptions = { decode: decodeURIComponent }
 const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots', matchOptions)
 const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name', matchOptions)
 const matchAdminKubeconfig = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name/adminkubeconfig', matchOptions)
+const matchBinding = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name/binding', matchOptions)
 
 const mocks = {
   list () {
@@ -255,6 +256,23 @@ const mocks = {
       const { params: { namespace, name } = {} } = matchResult
       const item = shoots.get(namespace, name)
       set(item, 'metadata.annotations["confirmation.gardener.cloud/deletion"]', 'true')
+      return Promise.resolve(item)
+    }
+  },
+  patchBinding () {
+    return (headers, json) => {
+      const matchResult = matchBinding(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
+      let item = shoots.get(namespace, name)
+      if (!item) {
+        return Promise.reject(createError(404))
+      }
+
+      item = applyPatch(item, json).newDocument
+
       return Promise.resolve(item)
     }
   }

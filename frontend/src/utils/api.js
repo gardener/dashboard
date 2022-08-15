@@ -85,7 +85,11 @@ async function callResourceMethod (url, data) {
 /* Configuration */
 
 export function getConfiguration () {
-  return getResource('/config.json')
+  return getResource('/api/config')
+}
+
+export function getLoginConfiguration () {
+  return getResource('/login-config.json')
 }
 
 /* CloudProviders Secrets */
@@ -200,6 +204,12 @@ export function updateShootPurpose ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/purpose`, data)
+}
+
+export function updateShootSeedName ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`, data)
 }
 
 /* Cloud Profiles */

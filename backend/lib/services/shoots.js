@@ -7,7 +7,7 @@
 'use strict'
 
 const { isHttpError } = require('@gardener-dashboard/request')
-const kubeconfig = require('@gardener-dashboard/kube-config')
+const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
@@ -117,6 +117,17 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
     }
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
+exports.replaceSeedName = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const seedName = body.seedName
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/seedName',
+    value: seedName
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
@@ -258,7 +269,7 @@ exports.info = async function ({ user, namespace, name }) {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
-            const kubeconfigObject = kubeconfig.cleanKubeconfig(value)
+            const kubeconfigObject = cleanKubeconfig(value)
             data[key] = kubeconfigObject.toYAML()
             data.serverUrl = kubeconfigObject.currentCluster.server
           } catch (err) {

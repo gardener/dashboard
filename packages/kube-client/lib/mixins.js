@@ -34,14 +34,14 @@ const V1 = superclass => class extends superclass {
 }
 
 const CoreGroup = superclass => class extends superclass {
-  static [http.prefixUrl] (url) {
-    return new URL(join('api', this.version), url).toString()
+  static get [http.relativeUrl] () {
+    return join('api', this.version)
   }
 }
 
 const NamedGroup = superclass => class extends superclass {
-  static [http.prefixUrl] (url) {
-    return new URL(join('apis', this.group, this.version), url).toString()
+  static get [http.relativeUrl] () {
+    return join('apis', this.group, this.version)
   }
 }
 
@@ -287,8 +287,8 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
   }
 
   mergePatch (namespace, name, body, options) {
-    assertNamespace(namespace)
     assertName(name)
+    assertNamespace(namespace)
     assertBodyObject(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
@@ -391,8 +391,11 @@ function assertNamespace (namespace) {
 }
 
 function assertName (name) {
+  if (Array.isArray(name)) {
+    name = name[0]
+  }
   if (typeof name !== 'string' || !name) {
-    throw new TypeError('The parameter "name" must be a string')
+    throw new TypeError('The parameter "name" must be a string or an array of strings')
   }
 }
 
