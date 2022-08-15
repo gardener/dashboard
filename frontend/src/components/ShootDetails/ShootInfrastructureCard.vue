@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-action class="mx-0">
             <copy-btn :clipboard-text="shootSeedName"></copy-btn>
           </v-list-item-action>
-          <v-list-item-action class="mx-0" v-if="canPatchShootBindings">
+          <v-list-item-action class="mx-0" v-if="canPatchShootsBinding">
             <seed-configuration :shoot-item="shootItem"></seed-configuration>
           </v-list-item-action>
         </v-list-item>
@@ -221,7 +221,7 @@ export default {
       'namespaces',
       'cloudProfileByName',
       'floatingPoolsByCloudProfileNameAndRegionAndDomain',
-      'canPatchShootBindings'
+      'canPatchShootsBinding'
     ]),
     showSeedInfo () {
       return !!this.shootSeedName

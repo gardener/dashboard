@@ -1016,7 +1016,7 @@ const getters = {
   canDeleteShoots (state) {
     return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'shoots')
   },
-  canPatchShootBindings (state) {
+  canPatchShootsBinding (state) {
     return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'shoots/binding')
   },
   canGetSecrets (state) {
