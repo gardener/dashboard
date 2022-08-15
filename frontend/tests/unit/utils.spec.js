@@ -7,7 +7,13 @@
 import map from 'lodash/map'
 
 import { getters } from '@/store'
-import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion } from '@/utils'
+import {
+  canI,
+  selectedImageIsNotLatest,
+  isHtmlColorCode,
+  defaultCriNameByKubernetesVersion,
+  getProjectQuotaStatus
+} from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -505,20 +511,58 @@ describe('utils', () => {
         expect(defaultCriNameByKubernetesVersion(['cri1', 'cri2'], '1.22.0')).toBe('cri1')
       })
     })
+  })
+  describe('html color code', () => {
+    it('should not fail when zero', () => {
+      expect(isHtmlColorCode(undefined)).toBe(false)
+      expect(isHtmlColorCode(null)).toBe(false)
+    })
 
-    describe('html color code', () => {
-      it('should not fail when zero', () => {
-        expect(isHtmlColorCode(undefined)).toBe(false)
-        expect(isHtmlColorCode(null)).toBe(false)
+    it('should return true on html color code', () => {
+      expect(isHtmlColorCode('#0b8062')).toBe(true)
+      expect(isHtmlColorCode('#FfFfFf')).toBe(true)
+    })
+
+    it('should return false on non-html color code', () => {
+      expect(isHtmlColorCode('foo')).toBe(false)
+    })
+  })
+
+  describe('getProjectQuotaStatus', () => {
+    const project = {
+      data: {
+        quotaStatus: {
+          hard: {
+            'count/configmaps': 22,
+            'count/shoots.core.gardener.cloud': 12
+          },
+          used: {
+            'count/shoots.core.gardener.cloud': 6
+          }
+        }
+      }
+    }
+
+    it('should return ProjectQuotaStatus object', () => {
+      const projectQuotaStatus = getProjectQuotaStatus(project)
+
+      const projectQuotaStatusConfigmaps = projectQuotaStatus[0]
+      const projectQuotaStatusShoots = projectQuotaStatus[1]
+      expect(projectQuotaStatusConfigmaps).toEqual({
+        key: 'count/configmaps',
+        resourceName: 'configmaps',
+        caption: 'Configmaps',
+        limitValue: 22,
+        usedValue: 0,
+        percentage: 0
       })
-
-      it('should return true on html color code', () => {
-        expect(isHtmlColorCode('#0b8062')).toBe(true)
-        expect(isHtmlColorCode('#FfFfFf')).toBe(true)
-      })
-
-      it('should return false on non-html color code', () => {
-        expect(isHtmlColorCode('foo')).toBe(false)
+      expect(projectQuotaStatusShoots).toEqual({
+        key: 'count/shoots.core.gardener.cloud',
+        resourceName: 'shoots.core.gardener.cloud',
+        caption: 'Shoots',
+        limitValue: 12,
+        usedValue: 6,
+        percentage: 50
       })
     })
   })

@@ -9,6 +9,7 @@
 const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 
 const cache = require('../lib/cache')
+const _ = require('lodash')
 
 jest.mock('../lib/io')
 jest.mock('../lib/watches')
@@ -38,7 +39,13 @@ describe('hooks', () => {
 
     it('#createInformers', async function () {
       for (const key of LifecycleHooks.resources) {
-        const observable = dashboardClient['core.gardener.cloud'][key]
+        let observable
+        if (_.startsWith(key, 'core/')) {
+          observable = dashboardClient.core[key.substring(5)]
+        } else {
+          observable = dashboardClient['core.gardener.cloud'][key]
+        }
+
         const informer = {
           names: {
             plural: key

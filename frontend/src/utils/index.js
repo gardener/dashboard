@@ -24,6 +24,7 @@ import split from 'lodash/split'
 import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
+import upperFirst from 'lodash/upperFirst'
 import moment from './moment'
 import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
@@ -313,6 +314,27 @@ export function getProjectDetails (project) {
     staleSinceTimestamp,
     staleAutoDeleteTimestamp
   }
+}
+
+export function getProjectQuotaStatus (project) {
+  if (!project.data.quotaStatus) {
+    return undefined
+  }
+  const { hard, used } = project.data.quotaStatus
+  return map(hard, (limitValue, key) => {
+    const usedValue = used[key] || 0
+    const percentage = (usedValue / limitValue) * 100
+    const resourceName = replace(key, 'count/', '')
+    const caption = upperFirst(head(split(resourceName, '.')))
+    return {
+      key,
+      resourceName,
+      caption,
+      limitValue,
+      usedValue,
+      percentage
+    }
+  })
 }
 
 export function isShootStatusHibernated (status) {

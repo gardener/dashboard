@@ -285,6 +285,22 @@ SPDX-License-Identifier: Apache-2.0
               </v-list>
             </v-card>
           </v-col>
+          <v-col v-if="projectQuotaStatus" class="pa-3">
+            <v-card>
+              <v-toolbar flat dense :color="toolbarColor">
+                <v-toolbar-title class="text-subtitle-1">Quota</v-toolbar-title>
+              </v-toolbar>
+              <v-list>
+                <v-list-item v-for="resourceQuota in projectQuotaStatus" :key="resourceQuota.caption" dense>
+                  <v-list-item-content class="py-0 my-0">
+                    <v-list-item-title>
+                      <resource-quota :resourceQuota="resourceQuota"></resource-quota>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -316,8 +332,9 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import ShootCustomField from '@/components/ShootCustomField'
+import ResourceQuota from '@/components/ResourceQuota'
 import { errorDetailsFromError } from '@/utils/error'
-import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { transformHtml, getProjectDetails, getProjectQuotaStatus, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -332,7 +349,8 @@ export default {
     AccountAvatar,
     GDialog,
     TimeString,
-    ShootCustomField
+    ShootCustomField,
+    ResourceQuota
   },
   data () {
     return {
@@ -384,6 +402,9 @@ export default {
     },
     projectDetails () {
       return getProjectDetails(this.project)
+    },
+    projectQuotaStatus () {
+      return getProjectQuotaStatus(this.project)
     },
     userList () {
       const members = new Set()

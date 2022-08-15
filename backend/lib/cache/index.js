@@ -40,6 +40,10 @@ class Cache extends Map {
     return this.get('controllerregistrations').list()
   }
 
+  getResourceQuotas () {
+    return this.get('core/resourcequotas').list()
+  }
+
   getTicketCache () {
     return this.ticketCache
   }
@@ -85,12 +89,18 @@ module.exports = {
   getControllerRegistrations () {
     return cache.getControllerRegistrations()
   },
+  getResourceQuotas () {
+    return cache.getResourceQuotas()
+  },
   findProjectByNamespace (namespace) {
     const project = cache.get('projects').find(['spec.namespace', namespace])
     if (!project) {
       throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
     }
     return project
+  },
+  findGardenerResourceQuotaByNamespace (namespace) {
+    return cache.get('core/resourcequotas').find({ metadata: { namespace, name: 'gardener' } })
   },
   getTicketCache () {
     return cache.getTicketCache()

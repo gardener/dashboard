@@ -57,6 +57,13 @@ describe('cache', function () {
     expect(stub).toBeCalledTimes(1)
   })
 
+  it('should dispatch "getResourceQuotas" to internal cache', function () {
+    const list = []
+    const stub = jest.spyOn(internalCache, 'getResourceQuotas').mockReturnValue(list)
+    expect(cache.getResourceQuotas()).toEqual(list)
+    expect(stub).toBeCalledTimes(1)
+  })
+
   describe('Cache', function () {
     const Cache = internalCache.constructor
     let cache

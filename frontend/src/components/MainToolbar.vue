@@ -9,6 +9,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
+    <div v-if="resourceQuota" class="d-flex text-caption">
+      Used {{resourceQuota.caption}} Quota:
+     <resource-quota hide-caption :resourceQuota="resourceQuota"></resource-quota>
+    </div>
     <div class="text-center mr-6" v-if="helpMenuItems.length">
       <v-menu
         v-model="help"
@@ -151,14 +155,18 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
+import find from 'lodash/find'
 import Breadcrumb from '@/components/Breadcrumb'
 import InfoDialog from '@/components/dialogs/InfoDialog'
+import ResourceQuota from '@/components/ResourceQuota'
+import { getProjectQuotaStatus } from '@/utils'
 
 export default {
   name: 'toolbar-background',
   components: {
     Breadcrumb,
-    InfoDialog
+    InfoDialog,
+    ResourceQuota
   },
   data () {
     return {
@@ -189,7 +197,8 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin'
+      'isAdmin',
+      'projectFromProjectList'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -243,6 +252,12 @@ export default {
             break
         }
       }
+    },
+    resourceQuota () {
+      const project = this.projectFromProjectList
+      const projectQuotaStatus = getProjectQuotaStatus(project)
+      const resourceQuota = get(this.$route, 'meta.resourceQuota')
+      return find(projectQuotaStatus, ['key', resourceQuota])
     }
   }
 }

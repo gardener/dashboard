@@ -58,8 +58,18 @@ class LifecycleHooks {
 
   static createInformers (client) {
     const informers = {}
+
+    const resourceNameRegex = /^((.+)\/)?(.+)$/
     for (const key of this.resources) {
-      const observable = client['core.gardener.cloud'][key]
+      let [, , apiGroup, name] = resourceNameRegex.exec(key)
+      if (!name) {
+        continue
+      }
+      if (!apiGroup) {
+        apiGroup = 'core.gardener.cloud'
+      }
+
+      const observable = client[apiGroup][name]
       informers[key] = observable.constructor.scope === 'Namespaced'
         ? observable.informerAllNamespaces()
         : observable.informer()
@@ -74,7 +84,8 @@ class LifecycleHooks {
       'seeds',
       'shoots',
       'projects',
-      'controllerregistrations'
+      'controllerregistrations',
+      'core/resourcequotas'
     ]
   }
 }

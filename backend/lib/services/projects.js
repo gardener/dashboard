@@ -24,6 +24,12 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
   const { name, resourceVersion, creationTimestamp, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
   const { staleSinceTimestamp, staleAutoDeleteTimestamp } = status
+  const resourceQuota = cache.findGardenerResourceQuotaByNamespace(namespace)
+  let quotaStatus
+  if (resourceQuota) {
+    quotaStatus = resourceQuota.status
+  }
+
   return {
     metadata: {
       name,
@@ -39,7 +45,8 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
       description,
       purpose,
       staleSinceTimestamp,
-      staleAutoDeleteTimestamp
+      staleAutoDeleteTimestamp,
+      quotaStatus
     }
   }
 }

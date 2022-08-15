@@ -152,6 +152,16 @@ Object {
     "description": "foobar",
     "owner": "bar@example.org",
     "purpose": "foo-purpose",
+    "quotaStatus": Object {
+      "hard": Object {
+        "count/configmaps": "22",
+        "count/secrets": "70",
+      },
+      "used": Object {
+        "count/configmaps": "5",
+        "count/secrets": "12",
+      },
+    },
   },
   "metadata": Object {
     "annotations": Object {
@@ -223,6 +233,16 @@ Array [
       "description": "foo-description",
       "owner": "bar@example.org",
       "purpose": "foo-purpose",
+      "quotaStatus": Object {
+        "hard": Object {
+          "count/configmaps": "22",
+          "count/secrets": "70",
+        },
+        "used": Object {
+          "count/configmaps": "5",
+          "count/secrets": "12",
+        },
+      },
     },
     "metadata": Object {
       "annotations": Object {
@@ -327,6 +347,16 @@ Object {
     "description": "foo-description",
     "owner": "bar@example.org",
     "purpose": "foo-purpose",
+    "quotaStatus": Object {
+      "hard": Object {
+        "count/configmaps": "22",
+        "count/secrets": "70",
+      },
+      "used": Object {
+        "count/configmaps": "5",
+        "count/secrets": "12",
+      },
+    },
   },
   "metadata": Object {
     "annotations": Object {
@@ -374,6 +404,16 @@ Array [
       "description": "foo-description",
       "owner": "bar@example.org",
       "purpose": "foo-purpose",
+      "quotaStatus": Object {
+        "hard": Object {
+          "count/configmaps": "22",
+          "count/secrets": "70",
+        },
+        "used": Object {
+          "count/configmaps": "5",
+          "count/secrets": "12",
+        },
+      },
     },
     "metadata": Object {
       "annotations": Object {
@@ -507,6 +547,16 @@ Object {
     "description": "description",
     "owner": "baz@example.org",
     "purpose": "purpose",
+    "quotaStatus": Object {
+      "hard": Object {
+        "count/configmaps": "22",
+        "count/secrets": "70",
+      },
+      "used": Object {
+        "count/configmaps": "5",
+        "count/secrets": "12",
+      },
+    },
   },
   "metadata": Object {
     "annotations": Object {
