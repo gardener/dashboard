@@ -20,11 +20,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, architecture, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
+      <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
         <v-list-item-content class="pt-1">
           <v-list-item-subtitle>
             {{title}}
-            <v-chip v-if="architecture" color="primary" label x-small class="ml-2 px-1" :key="architecture" outlined>{{architecture}}</v-chip>
           </v-list-item-subtitle>
           <v-list-item-title>{{value}} {{description}}</v-list-item-title>
         </v-list-item-content>
@@ -39,6 +38,7 @@ import GPopper from '@/components/GPopper'
 import VendorIcon from '@/components/VendorIcon'
 import find from 'lodash/find'
 import join from 'lodash/join'
+import map from 'lodash/map'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 
@@ -79,6 +79,13 @@ export default {
     },
     workerGroupDescriptions () {
       const description = []
+      if (this.workerGroup.machine.architecture) {
+        description.push({
+          title: 'Machine Architetcure',
+          value: this.workerGroup.machine.architecture
+        })
+      }
+
       description.push(this.machineTypeDescription)
       const volumeTypeDescription = this.volumeTypeDescription
       if (volumeTypeDescription) {
@@ -89,6 +96,20 @@ export default {
         description.push(volumeSizeDescription)
       }
       description.push(this.machineImageDescription)
+
+      if (this.workerGroup.cri) {
+        let value
+        if (this.workerGroup.cri.containerRuntimes && this.workerGroup.cri.containerRuntimes.length) {
+          const containerRuntimes = map(this.workerGroup.cri.containerRuntimes, 'type')
+          value = `${this.workerGroup.cri.name} (${join(containerRuntimes, ', ')})`
+        } else {
+          value = this.workerGroup.cri.name
+        }
+        description.push({
+          title: 'Container Runtime',
+          value
+        })
+      }
 
       const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
       if (minimum >= 0 && maximum >= 0) {
@@ -122,7 +143,6 @@ export default {
       const machineType = this.machineType
       if (machineType) {
         item.description = `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
-        item.architecture = machineType.architecture
       }
 
       return item
