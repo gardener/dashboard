@@ -109,6 +109,9 @@ export const shootItem = {
     shootK8sVersion () {
       return get(this.shootSpec, 'kubernetes.version')
     },
+    shootEnableStaticTokenKubeconfig () {
+      return get(this.shootSpec, 'kubernetes.enableStaticTokenKubeconfig', true)
+    },
     shootCloudProfileName () {
       return this.shootSpec.cloudProfileName
     },
