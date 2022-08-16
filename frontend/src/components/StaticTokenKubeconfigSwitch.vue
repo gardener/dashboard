@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-checkbox
       v-model="enableStaticTokenKubeconfig"
-      label="Enable static token kubeconfig"
+      label="Enable static token kubeconfig (not recommended)"
       color="primary"
       hide-details
     ></v-checkbox>
