@@ -213,9 +213,6 @@ export const shootItem = {
     isSeedUnreachable () {
       return this.isSeedUnreachableByName(this.shootSeedName)
     },
-    shootStatusSeedName () {
-      return get(this.shootItem, 'status.seed')
-    },
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
     },

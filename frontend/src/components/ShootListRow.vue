@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
       <template v-if="cell.header.value === 'ticket'">
-        <router-link :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+        <external-link v-if="shootLastUpdatedTicketUrl" :url="shootLastUpdatedTicketUrl">
           <time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"></time-string>
-        </router-link>
+        </external-link>
       </template>
       <template v-if="cell.header.value === 'ticketLabels'">
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
@@ -147,6 +147,7 @@ import ShootSeedName from '@/components/ShootSeedName'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
 import ShootListRowActions from '@/components/ShootListRowActions'
 import AutoHide from '@/components/AutoHide'
+import ExternalLink from '@/components/ExternalLink'
 
 import {
   isTypeDelete
@@ -169,7 +170,8 @@ export default {
     Vendor,
     ShootMessages,
     ShootListRowActions,
-    AutoHide
+    AutoHide,
+    ExternalLink
   },
   props: {
     visibleHeaders: {
@@ -218,8 +220,14 @@ export default {
         ? 'Cluster Access'
         : 'Show Cluster Access'
     },
-    shootLastUpdatedTicketTimestamp () {
+    shootLastUpdatedTicket () {
       return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)
+    },
+    shootLastUpdatedTicketUrl () {
+      return get(this.shootLastUpdatedTicket, 'data.html_url')
+    },
+    shootLastUpdatedTicketTimestamp () {
+      return get(this.shootLastUpdatedTicket, 'metadata.updated_at')
     },
     shootTicketsLabels () {
       return this.ticketsLabels(this.shootMetadata)
