@@ -137,7 +137,7 @@ export default {
       }
     },
     notInList () {
-      // notInList: item may removed from cloud profile or worker changes do not support current selection
+      // notInList: selected value may have been removed from cloud profile or other worker changes do not support current selection anymore
       return !includes(this.validCriNames, this.criName)
     },
     hint () {

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
           @input="onInputMachineArchitecture"
           @blur="$v.worker.machine.architecture.$touch()"
           v-model="worker.machine.architecture"
-          label="Architetcure">
+          label="Architecture">
         </v-select>
       </div>
       <div class="regularInput">
@@ -179,7 +179,7 @@ const validationErrors = {
     },
     machine: {
       architecture: {
-        required: 'Machine Architetcure is required'
+        required: 'Machine Architecture is required'
       }
     }
   },

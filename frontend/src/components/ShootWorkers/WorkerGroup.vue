@@ -81,7 +81,7 @@ export default {
       const description = []
       if (this.workerGroup.machine.architecture) {
         description.push({
-          title: 'Machine Architetcure',
+          title: 'Machine Architecture',
           value: this.workerGroup.machine.architecture
         })
       }
