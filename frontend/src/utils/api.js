@@ -375,3 +375,9 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 export function getGardenerExtensions () {
   return getResource('/api/gardener-extensions')
 }
+
+/* Resource Quotas */
+
+export function getResourceQuota ({ namespace, name }) {
+  return getResource(`/api/namespaces/${namespace}/resource-quotas/${name}`)
+}

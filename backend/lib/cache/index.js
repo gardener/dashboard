@@ -99,8 +99,8 @@ module.exports = {
     }
     return project
   },
-  findGardenerResourceQuotaByNamespace (namespace) {
-    return cache.get('core/resourcequotas').find({ metadata: { namespace, name: 'gardener' } })
+  findResourceQuotaByNamespace (namespace, name) {
+    return cache.get('core/resourcequotas').find({ metadata: { namespace, name } })
   },
   getTicketCache () {
     return cache.getTicketCache()

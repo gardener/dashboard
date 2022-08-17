@@ -487,7 +487,8 @@ export default {
   methods: {
     ...mapActions([
       'patchProject',
-      'deleteProject'
+      'deleteProject',
+      'projects/getProjectQuota'
     ]),
     onEditOwner () {
       this.editOwner = !this.editOwner
@@ -568,6 +569,9 @@ export default {
       this.detailedMessage = undefined
       this.edit = false
     }
+  },
+  mounted () {
+    this['projects/getProjectQuota'](this.project.metadata)
   }
 }
 </script>

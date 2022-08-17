@@ -21,7 +21,8 @@ module.exports = {
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
-  '/namespaces/:namespace/members': require('./members')
+  '/namespaces/:namespace/members': require('./members'),
+  '/namespaces/:namespace/resource-quotas': require('./resourceQuotas'),
 }
 
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {

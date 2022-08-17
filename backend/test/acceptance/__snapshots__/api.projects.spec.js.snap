@@ -155,16 +155,6 @@ Object {
     "owner": "bar@example.org",
     "phase": "Ready",
     "purpose": "foo-purpose",
-    "quotaStatus": Object {
-      "hard": Object {
-        "count/configmaps": "22",
-        "count/secrets": "70",
-      },
-      "used": Object {
-        "count/configmaps": "5",
-        "count/secrets": "12",
-      },
-    },
   },
   "metadata": Object {
     "annotations": Object {
@@ -237,16 +227,6 @@ Array [
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "foo-purpose",
-      "quotaStatus": Object {
-        "hard": Object {
-          "count/configmaps": "22",
-          "count/secrets": "70",
-        },
-        "used": Object {
-          "count/configmaps": "5",
-          "count/secrets": "12",
-        },
-      },
     },
     "metadata": Object {
       "annotations": Object {
@@ -357,16 +337,6 @@ Object {
     "owner": "bar@example.org",
     "phase": "Ready",
     "purpose": "foo-purpose",
-    "quotaStatus": Object {
-      "hard": Object {
-        "count/configmaps": "22",
-        "count/secrets": "70",
-      },
-      "used": Object {
-        "count/configmaps": "5",
-        "count/secrets": "12",
-      },
-    },
   },
   "metadata": Object {
     "annotations": Object {
@@ -415,16 +385,6 @@ Array [
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "foo-purpose",
-      "quotaStatus": Object {
-        "hard": Object {
-          "count/configmaps": "22",
-          "count/secrets": "70",
-        },
-        "used": Object {
-          "count/configmaps": "5",
-          "count/secrets": "12",
-        },
-      },
     },
     "metadata": Object {
       "annotations": Object {
@@ -561,16 +521,6 @@ Object {
     "owner": "baz@example.org",
     "phase": "Ready",
     "purpose": "purpose",
-    "quotaStatus": Object {
-      "hard": Object {
-        "count/configmaps": "22",
-        "count/secrets": "70",
-      },
-      "used": Object {
-        "count/configmaps": "5",
-        "count/secrets": "12",
-      },
-    },
   },
   "metadata": Object {
     "annotations": Object {

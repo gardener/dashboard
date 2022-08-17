@@ -296,8 +296,7 @@ function newShootRoute (context, path) {
     component: NewShoot,
     meta: {
       breadcrumbs: newShootBreadcrumbs,
-      tabs: newShootTabs,
-      resourceQuota: 'count/shoots.core.gardener.cloud'
+      tabs: newShootTabs
     }
   }
 }
@@ -309,8 +308,7 @@ function newShootEditorRoute (context, path) {
     component: NewShootEditor,
     meta: {
       breadcrumbs: newShootEditorBreadcrumbs,
-      tabs: newShootTabs,
-      resourceQuota: 'count/shoots.core.gardener.cloud'
+      tabs: newShootTabs
     }
   }
 }
@@ -382,8 +380,7 @@ function secretListRoute ({ getters }, path) {
           return !getters.canGetSecrets
         }
       },
-      breadcrumbs: secretsBreadcrumbs,
-      resourceQuota: 'count/secretbindings.core.gardener.cloud'
+      breadcrumbs: secretsBreadcrumbs
     }
   }
 }
@@ -409,8 +406,7 @@ function membersRoute (context, path) {
         title: 'Members',
         icon: 'mdi-account-multiple-outline'
       },
-      breadcrumbs: membersBreadcrumbs,
-      resourceQuota: 'count/serviceaccounts'
+      breadcrumbs: membersBreadcrumbs
     }
   }
 }

@@ -530,15 +530,13 @@ describe('utils', () => {
 
   describe('getProjectQuotaStatus', () => {
     const project = {
-      data: {
-        quotaStatus: {
-          hard: {
-            'count/configmaps': 22,
-            'count/shoots.core.gardener.cloud': 12
-          },
-          used: {
-            'count/shoots.core.gardener.cloud': 6
-          }
+      quotaStatus: {
+        hard: {
+          'count/configmaps': 22,
+          'count/shoots.core.gardener.cloud': 12
+        },
+        used: {
+          'count/shoots.core.gardener.cloud': 6
         }
       }
     }
