@@ -2,18 +2,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.kubeconfig }}
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: gardener-dashboard-kubeconfig
+  name: gardener-dashboard-service
   namespace: {{ .Release.Namespace }}
   labels:
     app: gardener-dashboard
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-type: Opaque
-data:
-  kubeconfig: {{ required ".Values.kubeconfig is required" (b64enc .Values.kubeconfig) }}
-{{- end }}
+spec:
+  ports:
+  - port: {{ .Values.global.servicePort }}
+    targetPort: {{ .Values.global.containerPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: gardener-dashboard
+    release: {{ .Release.Name }}
+  type: ClusterIP
+  sessionAffinity: ClientIP
