@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if not .Values.kubeconfig }}
+{{- if not .Values.global.kubeconfig }}
 apiVersion: {{ include "rbacversion" . }}
 kind: ClusterRoleBinding
 metadata:
