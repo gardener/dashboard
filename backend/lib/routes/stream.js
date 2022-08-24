@@ -113,7 +113,9 @@ async function handleEventStream (req, res) {
       }
     }
   }
-  const session = await createSession(req, res)
+  const session = await createSession(req, res, {
+    keepAlive: 15000
+  })
   Object.assign(session.state, state)
   for (const key of channelKeys) {
     channels[key].register(session)
