@@ -220,9 +220,9 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "gardener-dashboard-0.2.0",
+      "chart": "runtime-0.2.0",
       "heritage": "Helm",
-      "release": "dashboard",
+      "release": "runtime",
     },
     "name": "gardener-dashboard-configmap",
     "namespace": "garden",
@@ -462,9 +462,9 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "gardener-dashboard-0.2.0",
+      "chart": "runtime-0.2.0",
       "heritage": "Helm",
-      "release": "dashboard",
+      "release": "runtime",
     },
     "name": "gardener-dashboard-github",
     "namespace": "garden",

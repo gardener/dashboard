@@ -7,9 +7,9 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "gardener-dashboard-0.2.0",
+      "chart": "runtime-0.2.0",
       "heritage": "Helm",
-      "release": "dashboard",
+      "release": "runtime",
     },
     "name": "gardener-dashboard-service",
     "namespace": "garden",
@@ -25,7 +25,7 @@ Object {
     ],
     "selector": Object {
       "app": "gardener-dashboard",
-      "release": "dashboard",
+      "release": "runtime",
     },
     "sessionAffinity": "ClientIP",
     "type": "ClusterIP",
