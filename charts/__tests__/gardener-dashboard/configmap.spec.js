@@ -12,7 +12,7 @@ const { basename } = require('path')
 const { helm, helper } = fixtures
 const { getCertificate } = helper
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {
@@ -41,11 +41,13 @@ describe('gardener-dashboard', function () {
     describe('kubeconfig download', function () {
       it('should render the template w/ `oidc.public`', async function () {
         const values = {
-          apiServerCa: getCertificate('apiServerCa'),
-          oidc: {
-            public: {
-              clientId: 'kube-kubectl',
-              clientSecret: 'kube-kubectl-secret'
+          global: {
+            apiServerCa: getCertificate('apiServerCa'),
+            oidc: {
+              public: {
+                clientId: 'kube-kubectl',
+                clientSecret: 'kube-kubectl-secret'
+              }
             }
           }
         }
@@ -60,20 +62,22 @@ describe('gardener-dashboard', function () {
     describe('access restrictions', function () {
       it('should render the template w/o `item.options`', async function () {
         const values = {
-          frontendConfig: {
-            accessRestriction: {
-              noItemsText: 'no items text',
-              items: [
-                {
-                  key: 'foo',
-                  display: {
-                    visibleIf: true
-                  },
-                  input: {
-                    title: 'Foo'
+          global: {
+            frontendConfig: {
+              accessRestriction: {
+                noItemsText: 'no items text',
+                items: [
+                  {
+                    key: 'foo',
+                    display: {
+                      visibleIf: true
+                    },
+                    input: {
+                      title: 'Foo'
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }
@@ -86,49 +90,51 @@ describe('gardener-dashboard', function () {
 
       it('should render the template w/ `item.options`', async function () {
         const values = {
-          frontendConfig: {
-            accessRestriction: {
-              items: [
-                {
-                  key: 'foo',
-                  display: {
-                    visibleIf: true,
-                    title: 'display Foo',
-                    description: 'display Foo description'
-                  },
-                  input: {
-                    title: 'input Foo',
-                    description: 'input Foo description',
-                    inverted: true
-                  },
-                  options: [
-                    {
-                      key: 'foo-option-1',
-                      display: {
-                        visibleIf: false,
-                        title: 'display Foo Option 1',
-                        description: 'display Foo  Option 1 description'
-                      },
-                      input: {
-                        title: 'input Foo Option 1',
-                        description: 'input Foo  Option 1 description',
-                        inverted: false
-                      }
+          global: {
+            frontendConfig: {
+              accessRestriction: {
+                items: [
+                  {
+                    key: 'foo',
+                    display: {
+                      visibleIf: true,
+                      title: 'display Foo',
+                      description: 'display Foo description'
                     },
-                    {
-                      key: 'foo-option-2',
-                      display: {
-                        visibleIf: true
+                    input: {
+                      title: 'input Foo',
+                      description: 'input Foo description',
+                      inverted: true
+                    },
+                    options: [
+                      {
+                        key: 'foo-option-1',
+                        display: {
+                          visibleIf: false,
+                          title: 'display Foo Option 1',
+                          description: 'display Foo  Option 1 description'
+                        },
+                        input: {
+                          title: 'input Foo Option 1',
+                          description: 'input Foo  Option 1 description',
+                          inverted: false
+                        }
                       },
-                      input: {
-                        title: 'input Foo Option 2',
-                        description: 'input Foo  Option 2 description',
-                        inverted: true
+                      {
+                        key: 'foo-option-2',
+                        display: {
+                          visibleIf: true
+                        },
+                        input: {
+                          title: 'input Foo Option 2',
+                          description: 'input Foo  Option 2 description',
+                          inverted: true
+                        }
                       }
-                    }
-                  ]
-                }
-              ]
+                    ]
+                  }
+                ]
+              }
             }
           }
         }
@@ -143,10 +149,12 @@ describe('gardener-dashboard', function () {
     describe('token request', function () {
       it('should render the template', async function () {
         const values = {
-          frontendConfig: {
-            serviceAccountDefaultTokenExpiration: 42
-          },
-          tokenRequestAudiences: ['foo', 'bar']
+          global: {
+            frontendConfig: {
+              serviceAccountDefaultTokenExpiration: 42
+            },
+            tokenRequestAudiences: ['foo', 'bar']
+          }
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -163,23 +171,25 @@ describe('gardener-dashboard', function () {
 
       it('should render the template', async function () {
         const values = {
-          frontendConfig: {
-            ticket: {
-              avatarSource: 'gravatar',
-              gitHubRepoUrl: 'https://github.com/gardener/tickets',
-              hideClustersWithLabels: ['ignore1', 'ignore2'],
-              newTicketLabels: ['default-label'],
-              issueDescriptionTemplate: 'issue description'
-            }
-          },
-          gitHub: {
-            apiUrl: 'https://github.com/api/v3/',
-            org: 'gardener',
-            repository: 'tickets',
-            webhookSecret: 'webhookSecret',
-            authentication: {
-              username: 'dashboard-tickets',
-              token: 'webhookAuthenticationToken'
+          global: {
+            frontendConfig: {
+              ticket: {
+                avatarSource: 'gravatar',
+                gitHubRepoUrl: 'https://github.com/gardener/tickets',
+                hideClustersWithLabels: ['ignore1', 'ignore2'],
+                newTicketLabels: ['default-label'],
+                issueDescriptionTemplate: 'issue description'
+              }
+            },
+            gitHub: {
+              apiUrl: 'https://github.com/api/v3/',
+              org: 'gardener',
+              repository: 'tickets',
+              webhookSecret: 'webhookSecret',
+              authentication: {
+                username: 'dashboard-tickets',
+                token: 'webhookAuthenticationToken'
+              }
             }
           }
         }
@@ -197,9 +207,11 @@ describe('gardener-dashboard', function () {
     describe('unreachable seeds', function () {
       it('should render the template', async function () {
         const values = {
-          unreachableSeeds: {
-            matchLabels: {
-              seed: 'unreachable'
+          global: {
+            unreachableSeeds: {
+              matchLabels: {
+                seed: 'unreachable'
+              }
             }
           }
         }
@@ -214,10 +226,12 @@ describe('gardener-dashboard', function () {
     describe('alert', function () {
       it('should render the template w/o `alert.identifier`', async function () {
         const values = {
-          frontendConfig: {
-            alert: {
-              message: 'foo',
-              type: 'warning'
+          global: {
+            frontendConfig: {
+              alert: {
+                message: 'foo',
+                type: 'warning'
+              }
             }
           }
         }
@@ -230,11 +244,13 @@ describe('gardener-dashboard', function () {
 
       it('should render the template w/ `alert.identifier`', async function () {
         const values = {
-          frontendConfig: {
-            alert: {
-              message: 'foo',
-              type: 'warning',
-              identifier: 'bar'
+          global: {
+            frontendConfig: {
+              alert: {
+                message: 'foo',
+                type: 'warning',
+                identifier: 'bar'
+              }
             }
           }
         }
@@ -250,26 +266,28 @@ describe('gardener-dashboard', function () {
     describe('terminal shortcuts', function () {
       it('should render the template', async function () {
         const values = {
-          frontendConfig: {
-            terminal: {
-              shortcuts: [
-                {
-                  title: 'title',
-                  description: 'description',
-                  target: 'foo-target',
-                  container: {
-                    command: [
-                      'command'
-                    ],
-                    image: 'repo:tag',
-                    args: [
-                      'a',
-                      'b',
-                      'c'
-                    ]
+          global: {
+            frontendConfig: {
+              terminal: {
+                shortcuts: [
+                  {
+                    title: 'title',
+                    description: 'description',
+                    target: 'foo-target',
+                    container: {
+                      command: [
+                        'command'
+                      ],
+                      image: 'repo:tag',
+                      args: [
+                        'a',
+                        'b',
+                        'c'
+                      ]
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }
@@ -284,25 +302,27 @@ describe('gardener-dashboard', function () {
     describe('terminal config', function () {
       it('should render the template', async function () {
         const values = {
-          terminal: {
-            bootstrap: {
-              disabled: false
-            },
-            container: {
-              image: 'chart-test:0.1.0'
-            },
-            garden: {
-              operatorCredentials: {
-                serviceAccountRef: {
-                  name: 'robot',
-                  namespace: 'garden'
+          global: {
+            terminal: {
+              bootstrap: {
+                disabled: false
+              },
+              container: {
+                image: 'chart-test:0.1.0'
+              },
+              garden: {
+                operatorCredentials: {
+                  serviceAccountRef: {
+                    name: 'robot',
+                    namespace: 'garden'
+                  }
                 }
-              }
-            },
-            gardenTerminalHost: {
-              seedRef: 'my-seed'
-            },
-            serviceAccountTokenExpiration: 42
+              },
+              gardenTerminalHost: {
+                seedRef: 'my-seed'
+              },
+              serviceAccountTokenExpiration: 42
+            }
           }
         }
         const documents = await renderTemplates(templates, values)
@@ -316,15 +336,17 @@ describe('gardener-dashboard', function () {
     describe('themes', function () {
       it('should render the template', async function () {
         const values = {
-          frontendConfig: {
-            themes: {
-              light: {
-                primary: '#ff0000',
-                'main-navigation-title': 'grey.darken3'
-              },
-              dark: {
-                primary: '#ff0000',
-                'main-navigation-title': 'grey.darken3'
+          global: {
+            frontendConfig: {
+              themes: {
+                light: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                },
+                dark: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                }
               }
             }
           }
@@ -338,11 +360,13 @@ describe('gardener-dashboard', function () {
 
       it('should render the template with light theme values only', async function () {
         const values = {
-          frontendConfig: {
-            themes: {
-              light: {
-                primary: '#ff0000',
-                'main-navigation-title': 'grey.darken3'
+          global: {
+            frontendConfig: {
+              themes: {
+                light: {
+                  primary: '#ff0000',
+                  'main-navigation-title': 'grey.darken3'
+                }
               }
             }
           }
@@ -356,10 +380,12 @@ describe('gardener-dashboard', function () {
 
       it('should render the template with sla description markdown hyperlink', async function () {
         const values = {
-          frontendConfig: {
-            sla: {
-              title: 'SLA title',
-              description: '[foo](https://bar.baz)'
+          global: {
+            frontendConfig: {
+              sla: {
+                title: 'SLA title',
+                description: '[foo](https://bar.baz)'
+              }
             }
           }
         }
@@ -374,23 +400,25 @@ describe('gardener-dashboard', function () {
     describe('vendorHints', function () {
       it('should render the template', async function () {
         const values = {
-          frontendConfig: {
-            vendorHints: [
-              {
-                matchNames: [
-                  'foo',
-                  'bar'
-                ],
-                message: '[foo](https://bar.baz)',
-                severity: 'warning'
-              },
-              {
-                matchNames: [
-                  'fooz'
-                ],
-                message: 'other message'
-              }
-            ]
+          global: {
+            frontendConfig: {
+              vendorHints: [
+                {
+                  matchNames: [
+                    'foo',
+                    'bar'
+                  ],
+                  message: '[foo](https://bar.baz)',
+                  severity: 'warning'
+                },
+                {
+                  matchNames: [
+                    'fooz'
+                  ],
+                  message: 'other message'
+                }
+              ]
+            }
           }
         }
 
@@ -405,8 +433,13 @@ describe('gardener-dashboard', function () {
     describe('clusterIdentity', function () {
       it('should render the template', async function () {
         const clusterIdentity = 'my-lanscape-dev'
+        const values = {
+          global: {
+            clusterIdentity
+          }
+        }
 
-        const documents = await renderTemplates(templates, { clusterIdentity })
+        const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])

@@ -9,7 +9,7 @@
 const { basename } = require('path')
 const { helm } = fixtures
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {
@@ -24,8 +24,10 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with default values', async function () {
       const values = {
-        vpa: {
-          dummy: false
+        global: {
+          vpa: {
+            dummy: false
+          }
         }
       }
       const documents = await renderTemplates(templates, values)
@@ -44,13 +46,15 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with overwritten values', async function () {
       const values = {
-        vpa: {
-          updateMode: 'Auto',
-          controlledValues: 'RequestsAndLimits',
-          minAllowedCpu: '30m',
-          minAllowedMemory: '60Mi',
-          maxAllowedCpu: '1000m',
-          maxAllowedMemory: '1200Mi'
+        global: {
+          vpa: {
+            updateMode: 'Auto',
+            controlledValues: 'RequestsAndLimits',
+            minAllowedCpu: '30m',
+            minAllowedMemory: '60Mi',
+            maxAllowedCpu: '1000m',
+            maxAllowedMemory: '1200Mi'
+          }
         }
       }
       const documents = await renderTemplates(templates, values)

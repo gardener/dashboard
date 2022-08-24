@@ -10,7 +10,7 @@ const { basename } = require('path')
 const { helm, helper } = fixtures
 const { encodeBase64 } = helper
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {
@@ -25,9 +25,11 @@ describe('gardener-dashboard', function () {
 
     it('should render the template', async function () {
       const values = {
-        frontendConfig: {
-          assets: {
-            'bar.png': encodeBase64('foo\n')
+        global: {
+          frontendConfig: {
+            assets: {
+              'bar.png': encodeBase64('foo\n')
+            }
           }
         }
       }
