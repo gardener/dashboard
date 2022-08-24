@@ -16,7 +16,7 @@ const {
 } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 function renderTemplates (templates, values) {
   return helm.renderChartTemplates(chart, templates, values)
 }
@@ -37,11 +37,13 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with tls and a secret', async function () {
       const values = {
-        ingress: {
-          tls: {
-            secretName: tlsSecretName,
-            key: getPrivateKey('tls.key'),
-            crt: getCertificate('tls.crt')
+        global: {
+          ingress: {
+            tls: {
+              secretName: tlsSecretName,
+              key: getPrivateKey('tls.key'),
+              crt: getCertificate('tls.crt')
+            }
           }
         }
       }
@@ -54,9 +56,11 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with tls', async function () {
       const values = {
-        ingress: {
-          tls: {
-            secretName: tlsSecretName
+        global: {
+          ingress: {
+            tls: {
+              secretName: tlsSecretName
+            }
           }
         }
       }
@@ -68,7 +72,7 @@ describe('gardener-dashboard', function () {
       expect(ingress.spec.tls).toHaveLength(1)
       expect(ingress.spec.tls[0]).toEqual({
         secretName: tlsSecretName,
-        hosts: defaults.ingress.hosts
+        hosts: defaults.global.ingress.hosts
       })
 
       expect(tlsSecret).toBeFalsy()
@@ -76,8 +80,10 @@ describe('gardener-dashboard', function () {
 
     it('should render the template without tls', async function () {
       const values = {
-        ingress: {
-          tls: null
+        global: {
+          ingress: {
+            tls: null
+          }
         }
       }
       const documents = await renderTemplates(templates, values)

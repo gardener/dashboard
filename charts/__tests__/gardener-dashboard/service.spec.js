@@ -9,7 +9,7 @@
 const { basename } = require('path')
 const { helm } = fixtures
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {

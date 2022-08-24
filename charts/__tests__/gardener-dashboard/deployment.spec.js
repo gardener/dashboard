@@ -9,7 +9,7 @@
 const { basename } = require('path')
 const { helm } = fixtures
 
-const chart = basename(__dirname)
+const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {
@@ -44,7 +44,9 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with node options', async function () {
       const values = {
-        nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
+        global: {
+          nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
+        }
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -57,7 +59,9 @@ describe('gardener-dashboard', function () {
 
     it('should render the template with an empty list node options', async function () {
       const values = {
-        nodeOptions: []
+        global: {
+          nodeOptions: []
+        }
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
