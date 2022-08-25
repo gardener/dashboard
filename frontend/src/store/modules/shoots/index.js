@@ -71,13 +71,7 @@ const actions = {
     commit('CLEAR_ALL')
   },
   async subscribe ({ commit, dispatch, state, getters, rootState, rootGetters }, { namespace, name } = {}) {
-    const events = {}
-    let topic = 'shoots'
-
-    if (namespace && name) {
-      const options = { namespace, name }
-      topic += `;${namespace}/${name}`
-
+    const fetchShoot = async options => {
       const [
         { data: shoot },
         { data: { issues = [], comments = [] } }
@@ -85,10 +79,53 @@ const actions = {
         getShoot(options),
         getIssuesAndComments(options)
       ])
-      dispatch('assignInfoAndSeedInfo', shoot) // run silently in the background
-      events.shoots = [shoot].map(object => ({ type: 'ADDED', object }))
-      events.issues = issues.map(object => ({ type: 'ADDED', object }))
-      events.comments = comments.map(object => ({ type: 'ADDED', object }))
+      assignInfoAndSeedInfo(shoot)
+      return { shoots: [shoot], issues, comments }
+    }
+
+    const fetchShoots = async options => {
+      const [
+        { data: { items } },
+        { data: { issues = [] } }
+      ] = await Promise.all([
+        getShoots(options),
+        getIssues(options)
+      ])
+      return { shoots: items, issues, comments: [] }
+    }
+
+    const assignInfoAndSeedInfo = async ({ metadata, spec }) => {
+      const promises = [dispatch('getInfo', metadata)]
+      const seedName = spec.seedName
+      if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
+        promises.push(dispatch('getSeedInfo', metadata))
+      }
+      try {
+        await Promise.all(promises)
+      } catch (err) {
+        console.error('Failed to fetch shoot or shootSeed info:', err.message)
+      }
+    }
+
+    const toEvent = object => ({ type: 'ADDED', object })
+
+    const handleData = async promise => {
+      try {
+        const { shoots, issues, comments } = await promise
+        commit('HANDLE_EVENTS', { rootState, rootGetters, events: shoots.map(toEvent) })
+        commit('tickets/HANDLE_ISSUES_EVENTS', issues.map(toEvent), { root: true })
+        commit('tickets/HANDLE_COMMENTS_EVENTS', comments.map(toEvent), { root: true })
+      } finally {
+        commit('SET_SHOOTS_LOADING', false, { root: true })
+      }
+    }
+
+    let topic = 'shoots'
+    let dataPromise
+    if (namespace && name) {
+      const options = { namespace, name }
+      topic += `;${namespace}/${name}`
+      dataPromise = fetchShoot(options)
     } else {
       const options = {
         namespace: rootState.namespace
@@ -99,43 +136,21 @@ const actions = {
         options.labelSelector = 'shoot.gardener.cloud/status!=healthy'
         topic += ':unhealthy'
       }
-
-      const [
-        { data: { items } },
-        { data: { issues = [] } }
-      ] = await Promise.all([
-        getShoots(options),
-        getIssues(options)
-      ])
-      events.shoots = items.map(object => ({ type: 'ADDED', object }))
-      events.issues = issues.map(object => ({ type: 'ADDED', object }))
-      events.comments = []
+      dataPromise = fetchShoots(options)
     }
+    handleData(dataPromise)
+
+    commit('SET_SHOOTS_LOADING', true, { root: true })
     commit('CLEAR_ALL')
     commit('tickets/CLEAR_ISSUES', undefined, { root: true })
     commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
     commit('SET_TOPICS', [topic], { root: true })
-    commit('HANDLE_EVENTS', { rootState, rootGetters, events: events.shoots })
-    commit('tickets/HANDLE_ISSUES_EVENTS', events.issues, { root: true })
-    commit('tickets/HANDLE_COMMENTS_EVENTS', events.comments, { root: true })
   },
   unsubscribe ({ commit }) {
     commit('CLEAR_ALL')
     commit('tickets/CLEAR_ISSUES', undefined, { root: true })
     commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
     commit('SET_TOPICS', [], { root: true })
-  },
-  async assignInfoAndSeedInfo ({ dispatch, getters }, { metadata, spec }) {
-    const promises = [dispatch('getInfo', metadata)]
-    const seedName = spec.seedName
-    if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
-      promises.push(dispatch('getSeedInfo', metadata))
-    }
-    try {
-      await Promise.all(promises)
-    } catch (err) {
-      console.error('Failed to fetch shoot or shootSeed info:', err.message)
-    }
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
