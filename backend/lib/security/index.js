@@ -364,7 +364,7 @@ async function refreshTokenSet (tokenSet) {
   const digest = md5(tokenSet.refresh_token)
   try {
     const client = await exports.getIssuerClient()
-    logger.debug(`Refreshing id_token (digest: ${digest})`)
+    logger.debug('Refreshing id_token (digest: %s)', digest)
     const payload = pick(decode(tokenSet.access_token), ['iat', 'exp'])
     tokenSet = await client.refresh(tokenSet.refresh_token)
     if (tokenSet.refresh_token) {
@@ -373,7 +373,7 @@ async function refreshTokenSet (tokenSet) {
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
   } catch (err) {
-    logger.error(`Failed to refresh id_token (digest: ${digest})`)
+    logger.error('Failed to refresh id_token (digest: %s): %s - %s', digest, err.name, err.message)
     if (err instanceof RPError || err instanceof OPError) {
       throw createError(401, err)
     }
@@ -420,6 +420,7 @@ function authenticate (options = {}) {
       req.user = user
       next()
     } catch (err) {
+      logger.error('Authentication failed: %s - %s', err.name, err.message)
       clearCookies(res)
       next(err)
     }
