@@ -8,8 +8,12 @@
 
 const _ = require('lodash')
 const logger = require('./logger')
+const morgan = require('morgan')
+
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
+
+const requestLogger = morgan('common', logger)
 
 function noCache (staticPaths = []) {
   const isStatic = path => {
@@ -112,6 +116,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 module.exports = {
   noCache,
   historyFallback,
+  requestLogger,
   notFound,
   sendError,
   renderError,
