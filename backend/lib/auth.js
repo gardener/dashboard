@@ -16,10 +16,12 @@ const {
   authorizeToken,
   clearCookies
 } = require('./security')
+const { requestLogger } = require('./middleware')
 
 // configure router
 const router = exports.router = express.Router()
 
+router.use(requestLogger)
 router.use(cookieParser())
 router.use(bodyParser.json())
 router.route('/')
@@ -63,7 +65,7 @@ router.route('/callback')
 router.route('/token')
   .get(async (req, res, next) => {
     try {
-      res.status(200).send(await refreshToken(req, res))
+      res.send(await refreshToken(req, res))
     } catch (err) {
       next(err)
     }
