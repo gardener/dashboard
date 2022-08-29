@@ -197,13 +197,14 @@ describe('auth', function () {
     const bearer = await user.bearer
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
       .redirects(0)
       .expect(302)
 
-    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest).toBeCalledTimes(2)
     expect(mockRequest.mock.calls[0]).toEqual([
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
@@ -221,6 +222,7 @@ describe('auth', function () {
         }
       }
     ])
+    expect(mockRequest.mock.calls[1]).toMatchSnapshot()
 
     expect(getIssuerClientStub).toBeCalledTimes(1)
     expect(res.headers).toHaveProperty('location', '/')
@@ -250,6 +252,7 @@ describe('auth', function () {
     const now = Math.floor(Date.now() / 1000)
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     const res = await agent
       .post('/auth')
@@ -257,7 +260,7 @@ describe('auth', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest).toBeCalledTimes(2)
     expect(mockRequest.mock.calls[0]).toEqual([
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
@@ -275,6 +278,7 @@ describe('auth', function () {
         }
       }
     ])
+    expect(mockRequest.mock.calls[1]).toMatchSnapshot()
 
     const [accessToken, idToken, refreshToken] = await parseCookies(res)
     const payload = await security.verify(accessToken)
@@ -282,6 +286,7 @@ describe('auth', function () {
       id,
       iat: expect.toBeWithinRange(now, now + 3),
       aud: ['gardener'],
+      isAdmin: false,
       exp: expiresAt,
       jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     }))
@@ -342,7 +347,8 @@ describe('auth', function () {
       refresh_token: await sign(refreshTokenPayload)
     })
 
-    mockRequest.mockImplementation(fixtures.auth.mocks.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     const res = await agent
       .get('/auth/token')
@@ -350,8 +356,8 @@ describe('auth', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toBeCalledTimes(1)
-    expect(mockRequest.mock.calls[0]).toEqual([
+    expect(mockRequest).toBeCalledTimes(2)
+    expect(mockRequest.mock.calls).toEqual([[
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
         ':method': 'post',
@@ -367,7 +373,26 @@ describe('auth', function () {
           token: tokenSet.refresh_token
         }
       }
-    ])
+    ], [
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority']),
+        authorization: `Bearer ${tokenSet.refresh_token}`,
+        ':method': 'post',
+        ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'
+      },
+      {
+        apiVersion: 'authorization.k8s.io/v1',
+        kind: 'SelfSubjectAccessReview',
+        spec: {
+          nonResourceAttributes: undefined,
+          resourceAttributes: {
+            group: '',
+            resource: 'secrets',
+            verb: 'get'
+          }
+        }
+      }
+    ]])
     expect(mockRefresh).toBeCalledTimes(1)
     expect(mockRefresh.mock.calls[0]).toEqual([tokenSet.refresh_token])
 
@@ -382,6 +407,7 @@ describe('auth', function () {
       iat: accessTokenPayload.iat,
       exp: accessTokenPayload.exp,
       aud: accessTokenPayload.aud,
+      isAdmin: false,
       refresh_at: refreshTokenPayload.exp
     })
   })

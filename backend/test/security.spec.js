@@ -35,6 +35,7 @@ describe('security', function () {
 
     let config
     let authentication
+    let authorization
     let security
     let jose
     let issuer
@@ -45,6 +46,7 @@ describe('security', function () {
     let mockCodeChallenge
     let mockRefresh
     let mockIsAuthenticated
+    let mockIsAdmin
 
     const now = () => Math.floor(Date.now() / 1000)
 
@@ -59,6 +61,7 @@ describe('security', function () {
         require('../lib/config/gardener').readConfig.mockReturnValue(config)
         openidClient = require('openid-client')
         authentication = require('../lib/services/authentication')
+        authorization = require('../lib/services/authorization')
         jose = require('../lib/security/jose')(config.sessionSecret)
         security = require('../lib/security')
       })
@@ -87,6 +90,7 @@ describe('security', function () {
       mockCodeVerifier = jest.spyOn(openidClient.generators, 'codeVerifier').mockReturnValue('code-verifier')
       mockCodeChallenge = jest.spyOn(openidClient.generators, 'codeChallenge').mockReturnValue('code-challenge')
       mockIsAuthenticated = jest.spyOn(authentication, 'isAuthenticated').mockResolvedValue({ username: sub, groups: [] })
+      mockIsAdmin = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
     }
 
     afterEach(() => {
@@ -194,6 +198,10 @@ describe('security', function () {
       expect(mockIsAuthenticated.mock.calls[0]).toEqual([{
         token: tokenSet.id_token
       }])
+      expect(mockIsAdmin).toBeCalledTimes(1)
+      expect(mockIsAdmin.mock.calls[0]).toEqual([{
+        auth: { bearer: tokenSet.id_token }
+      }])
       expect(user).toEqual({
         iat: accessTokenPayload.iat,
         jti: expect.stringMatching(/^[a-z0-9-]+$/),
@@ -201,7 +209,8 @@ describe('security', function () {
         groups: [],
         aud: ['gardener'],
         exp: accessTokenPayload.exp,
-        refresh_at: security.decode(tokenSet.id_token).exp
+        refresh_at: security.decode(tokenSet.id_token).exp,
+        isAdmin: false
       })
 
       expect(res.clearCookie).not.toBeCalled()
