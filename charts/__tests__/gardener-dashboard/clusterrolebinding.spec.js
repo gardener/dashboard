@@ -13,7 +13,7 @@ const chart = basename(__dirname) + '/charts/application' // TODO discuss
 const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
 
 describe('gardener-dashboard', function () {
-  describe('rbac', function () {
+  describe('clusterrolebinding', function () {
     let templates
 
     beforeEach(() => {
@@ -28,6 +28,24 @@ describe('gardener-dashboard', function () {
       expect(documents).toHaveLength(1)
       const [clusterRoleBinding] = documents
       expect(clusterRoleBinding).toMatchSnapshot()
+    })
+
+    describe('virtual garden', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            virtualGarden: {
+              enabled: true,
+              userName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard'
+            },
+            serviceAccountName: 'gardener-dashboard'
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [clusterRoleBinding] = documents
+        expect(clusterRoleBinding).toMatchSnapshot()
+      })
     })
   })
 })
