@@ -70,7 +70,7 @@ const actions = {
   clearAll ({ commit }) {
     commit('CLEAR_ALL')
   },
-  async subscribe ({ commit, dispatch, state, getters, rootState, rootGetters }, { namespace, name } = {}) {
+  subscribe ({ commit, dispatch, state, getters, rootState, rootGetters }, { namespace, name } = {}) {
     const fetchShoot = async options => {
       const [
         { data: shoot },
@@ -109,12 +109,18 @@ const actions = {
 
     const toEvent = object => ({ type: 'ADDED', object })
 
-    const handleData = async promise => {
+    const handleData = async (topics, promise) => {
       try {
         const { shoots, issues, comments } = await promise
+        commit('SET_TOPICS', topics, { root: true })
         commit('HANDLE_EVENTS', { rootState, rootGetters, events: shoots.map(toEvent) })
         commit('tickets/HANDLE_ISSUES_EVENTS', issues.map(toEvent), { root: true })
         commit('tickets/HANDLE_COMMENTS_EVENTS', comments.map(toEvent), { root: true })
+      } catch (err) {
+        commit('SET_ALERT', {
+          type: 'error',
+          message: get(err, 'response.data.message', err.message)
+        }, { root: true })
       } finally {
         commit('SET_SHOOTS_LOADING', false, { root: true })
       }
@@ -127,24 +133,28 @@ const actions = {
       topic += `;${namespace}/${name}`
       dataPromise = fetchShoot(options)
     } else {
-      const options = {
-        namespace: rootState.namespace
+      namespace ??= rootState.namespace
+      if (namespace) {
+        const options = { namespace }
+        if (options.namespace !== '_all') {
+          topic += `;${options.namespace}`
+        } else if (getters.onlyShootsWithIssues) {
+          options.labelSelector = 'shoot.gardener.cloud/status!=healthy'
+          topic += ':unhealthy'
+        }
+        dataPromise = fetchShoots(options)
       }
-      if (options.namespace !== '_all') {
-        topic += `;${options.namespace}`
-      } else if (getters.onlyShootsWithIssues) {
-        options.labelSelector = 'shoot.gardener.cloud/status!=healthy'
-        topic += ':unhealthy'
-      }
-      dataPromise = fetchShoots(options)
     }
-    handleData(dataPromise)
 
-    commit('SET_SHOOTS_LOADING', true, { root: true })
     commit('CLEAR_ALL')
     commit('tickets/CLEAR_ISSUES', undefined, { root: true })
     commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
-    commit('SET_TOPICS', [topic], { root: true })
+
+    if (dataPromise) {
+      commit('SET_SHOOTS_LOADING', true, { root: true })
+      // await and handle response data in the background
+      handleData([topic], dataPromise)
+    }
   },
   unsubscribe ({ commit }) {
     commit('CLEAR_ALL')
