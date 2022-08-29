@@ -14,8 +14,14 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: gardener.cloud:system:dashboard
 subjects:
+{{- if and .Values.global.virtualGarden.enabled .Values.global.virtualGarden.userName }}
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: {{ .Values.global.virtualGarden.userName }}
+{{- else }}
 - kind: ServiceAccount
-  name: gardener-dashboard
+  name: {{ required ".Values.global.serviceAccountName is required" .Values.global.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
+{{- end }}

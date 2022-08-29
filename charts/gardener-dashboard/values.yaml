@@ -13,6 +13,15 @@ global:
     tag: latest
     pullPolicy: IfNotPresent
 
+  # virtualGarden defines deployment related configuration
+  virtualGarden:
+    # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
+    enabled: false
+    # userName is the fully qualified name of the dashboard user, as it would be returned by the tokenreview (.status.user.username) on the virtual garden
+    # userName: runtime-cluster:system:serviceaccount:garden:gardener-dashboard
+
+  serviceAccountName: gardener-dashboard
+
   # vertical Pod autoscaling disabled by default
   # vpa:
   #   updateMode: Off
