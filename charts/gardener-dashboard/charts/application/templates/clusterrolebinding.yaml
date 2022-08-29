@@ -1,12 +1,11 @@
-# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if not .Values.global.kubeconfig }}
 apiVersion: {{ include "rbacversion" . }}
 kind: ClusterRoleBinding
 metadata:
-  name:  garden.sapcloud.io:dashboard:admin
+  name: gardener.cloud:system:dashboard
   labels:
     app: gardener-dashboard
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -20,4 +19,3 @@ subjects:
 - kind: ServiceAccount
   name: gardener-dashboard
   namespace: {{ .Release.Namespace }}
-{{- end }}
