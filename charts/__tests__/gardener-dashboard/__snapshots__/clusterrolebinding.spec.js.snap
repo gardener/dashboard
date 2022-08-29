@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gardener-dashboard rbac should render the template with default values 1`] = `
+Object {
+  "apiVersion": "rbac.authorization.k8s.io/v1",
+  "kind": "ClusterRoleBinding",
+  "metadata": Object {
+    "labels": Object {
+      "app": "gardener-dashboard",
+      "chart": "application-0.2.0",
+      "heritage": "Helm",
+      "release": "application",
+    },
+    "name": "gardener.cloud:system:dashboard",
+  },
+  "roleRef": Object {
+    "apiGroup": "rbac.authorization.k8s.io",
+    "kind": "ClusterRole",
+    "name": "cluster-admin",
+  },
+  "subjects": Array [
+    Object {
+      "kind": "ServiceAccount",
+      "name": "gardener-dashboard",
+      "namespace": "garden",
+    },
+  ],
+}
+`;
