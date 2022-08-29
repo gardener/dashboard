@@ -310,9 +310,15 @@ export default {
         this.$refs.accessRestrictions.applyTo(shootResource)
       }
 
-      const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
+      const {
+        name,
+        kubernetesVersion,
+        purpose,
+        enableStaticTokenKubeconfig
+      } = this.$refs.clusterDetails.getDetailsData()
       set(shootResource, 'metadata.name', name)
       set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
+      set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', enableStaticTokenKubeconfig)
       set(shootResource, 'spec.purpose', purpose)
 
       const workers = await this.$manageWorkers.dispatch('getWorkers')
@@ -418,9 +424,18 @@ export default {
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
+      const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
-      await this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
+      await this.$refs.clusterDetails.setDetailsData({
+        name,
+        kubernetesVersion,
+        purpose,
+        secret,
+        cloudProfileName,
+        updateK8sMaintenance: k8sUpdates,
+        enableStaticTokenKubeconfig
+      })
 
       const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
