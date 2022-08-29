@@ -1499,9 +1499,11 @@ const actions = {
 
     return state.cfg
   },
-  async setNamespace ({ dispatch, commit }, namespace) {
-    commit('SET_NAMESPACE', namespace)
-    await dispatch('refreshSubjectRules', namespace)
+  async setNamespace ({ dispatch, commit, state }, namespace) {
+    if (namespace && state.namespace !== namespace) {
+      commit('SET_NAMESPACE', namespace)
+      await dispatch('refreshSubjectRules', namespace)
+    }
     return state.namespace
   },
   async refreshSubjectRules ({ commit }, namespace) {
@@ -1590,10 +1592,7 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    if (value !== state.namespace) {
-      state.namespace = value
-      // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
-    }
+    state.namespace = value
   },
   SET_SUBJECT_RULES (state, value) {
     state.subjectRules = value

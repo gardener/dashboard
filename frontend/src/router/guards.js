@@ -71,16 +71,20 @@ function ensureDataLoaded (store, localStorage) {
       return next()
     }
     try {
+      const namespace = to.params.namespace || to.query.namespace
       await Promise.all([
         ensureConfigurationLoaded(store),
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
         ensureKubeconfigDataLoaded(store),
-        ensureExtensionInformationLoaded(store)
+        ensureExtensionInformationLoaded(store),
+        store.dispatch('setNamespace', namespace)
       ])
 
-      await setNamespace(store, to.params.namespace || to.query.namespace)
+      if (namespace && namespace !== '_all' && !includes(store.getters.namespaces, namespace)) {
+        store.commit('SET_NAMESPACE', null)
+      }
 
       switch (to.name) {
         case 'Secrets':
@@ -146,13 +150,6 @@ function ensureDataLoaded (store, localStorage) {
     } catch (err) {
       next(err)
     }
-  }
-}
-
-function setNamespace (store, namespace) {
-  const namespaces = store.getters.namespaces
-  if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
-    return store.dispatch('setNamespace', namespace)
   }
 }
 
