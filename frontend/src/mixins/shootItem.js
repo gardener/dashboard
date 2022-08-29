@@ -156,7 +156,6 @@ export const shootItem = {
     shootMaintenance () {
       return get(this.shootSpec, 'maintenance', [])
     },
-
     shootInfo () {
       return get(this.shootItem, 'info', {})
     },
@@ -213,9 +212,6 @@ export const shootItem = {
     },
     isSeedUnreachable () {
       return this.isSeedUnreachableByName(this.shootSeedName)
-    },
-    shootStatusSeedName () {
-      return get(this.shootStatus, 'seed')
     },
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
