@@ -14,6 +14,10 @@ const defaults = {
       tag: '1.26.0-dev-4d529c1'
     },
     apiServerUrl: 'https://api.garden.example.org',
+    virtualGarden: {
+      enabled: false
+    },
+    serviceAccountName: 'gardener-dashboard',
     ingress: {
       annotations: {
         'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
