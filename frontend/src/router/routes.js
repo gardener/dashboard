@@ -197,12 +197,6 @@ function homeRoute ({ getters, dispatch }, path) {
     },
     async beforeEnter (to, from, next) {
       const namespace = getters.defaultNamespace
-      try {
-        await dispatch('refreshSubjectRules', namespace) // namespace may also be undefined and will be defaulted
-      } catch (error) {
-        console.error('could not refresh subject rules', error.message)
-      }
-
       if (namespace) {
         return next({
           name: 'ShootList',
