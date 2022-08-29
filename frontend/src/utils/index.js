@@ -649,22 +649,22 @@ export const rotationTypes = {
     completionOperation: 'rotate-credentials-complete',
     title: 'Rotate All Credentials'
   },
-  initOperation: function (type) {
+  initOperation (type) {
     if (this[type]) {
       return this[type].initOperation
     }
     return this.allCredentials.initOperation
   },
-  completionOperation: function (type) {
+  completionOperation (type) {
     if (this[type]) {
       return this[type].completionOperation
     }
     return this.allCredentials.completionOperation
   },
-  numberOfTwoPhaseOperations: function () {
+  numberOfTwoPhaseOperations () {
     return filter(this, { twoPhase: true }).length
   },
-  numberOfOperations: function () {
+  numberOfOperations () {
     return filter(this, rotation => {
       return rotation.onePhase || rotation.twoPhase
     }).length
