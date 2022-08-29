@@ -24,7 +24,8 @@ const App = Vue.extend({
     let refreshTokenPromise
     this.unregister = registry.register({
       requestFulfilled (...args) {
-        if (!vm.$auth.isRefreshRequired(30)) {
+        const url = args[0] ?? ''
+        if (!url.startsWith('/api') || !vm.$auth.isRefreshRequired(30)) {
           return Promise.resolve(args)
         }
         if (!refreshTokenPromise) {
