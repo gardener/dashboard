@@ -22,7 +22,7 @@ module.exports = {
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members'),
-  '/namespaces/:namespace/resource-quotas': require('./resourceQuotas'),
+  '/namespaces/:namespace/resource-quotas': require('./resourceQuotas')
 }
 
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {

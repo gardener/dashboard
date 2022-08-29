@@ -18,7 +18,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      
+
       res.send(await resourceQuotas.read({ user, namespace, name }))
     } catch (err) {
       next(err)

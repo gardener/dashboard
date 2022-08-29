@@ -19,7 +19,7 @@ Array [
           "group": "",
           "name": "gardener",
           "namespace": "garden-foo",
-          "resource": "resourcequota",
+          "resource": "resourcequotas",
           "verb": "get",
         },
       },

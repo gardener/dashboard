@@ -533,10 +533,10 @@ describe('utils', () => {
       quotaStatus: {
         hard: {
           'count/configmaps': 22,
-          'count/shoots.core.gardener.cloud': 12
+          'count/shoots.core.gardener.cloud': 25
         },
         used: {
-          'count/shoots.core.gardener.cloud': 6
+          'count/shoots.core.gardener.cloud': 20
         }
       }
     }
@@ -552,15 +552,18 @@ describe('utils', () => {
         caption: 'Configmaps',
         limitValue: 22,
         usedValue: 0,
-        percentage: 0
+        percentage: 0,
+        progressColor: 'primary'
       })
+
       expect(projectQuotaStatusShoots).toEqual({
         key: 'count/shoots.core.gardener.cloud',
         resourceName: 'shoots.core.gardener.cloud',
         caption: 'Shoots',
-        limitValue: 12,
-        usedValue: 6,
-        percentage: 50
+        limitValue: 25,
+        usedValue: 20,
+        percentage: 80,
+        progressColor: 'warning'
       })
     })
   })

@@ -31,7 +31,7 @@ describe('api', function () {
 
     it('should return a resource quota', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      
+
       const res = await agent
         .get(`/api/namespaces/${namespace}/resource-quotas/${name}`)
         .set('cookie', await user.cookie)

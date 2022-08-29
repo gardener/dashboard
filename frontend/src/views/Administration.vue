@@ -288,17 +288,51 @@ SPDX-License-Identifier: Apache-2.0
           <v-col v-if="projectQuotaStatus" class="pa-3">
             <v-card>
               <v-toolbar flat dense :color="toolbarColor">
-                <v-toolbar-title class="text-subtitle-1">Quota</v-toolbar-title>
+                <v-toolbar-title class="text-subtitle-1 d-flex align-center">Quota</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <resource-quota-help></resource-quota-help>
               </v-toolbar>
-              <v-list>
-                <v-list-item v-for="resourceQuota in projectQuotaStatus" :key="resourceQuota.caption" dense>
-                  <v-list-item-content class="py-0 my-0">
-                    <v-list-item-title>
-                      <resource-quota :resourceQuota="resourceQuota"></resource-quota>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
+              <v-simple-table>
+                <template v-slot:default>
+                  <thead>
+                    <tr>
+                      <th class="text-left">
+                        Resource Name
+                      </th>
+                      <th class="text-left">
+                        Used Quota
+                      </th>
+                      <th class="text-left">
+                       Quantity
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="resourceQuota in projectQuotaStatus"
+                      :key="resourceQuota.key"
+                    >
+                      <td>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <span v-on="on">{{ resourceQuota.caption }}</span>
+                          </template>
+                          {{ resourceQuota.resourceName }}
+                        </v-tooltip>
+                      </td>
+                      <td>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-progress-linear v-on="on" :value="resourceQuota.percentage" :color="resourceQuota.progressColor"></v-progress-linear>
+                          </template>
+                          {{ resourceQuota.percentage }}%
+                        </v-tooltip>
+                      </td>
+                      <td>{{resourceQuota.usedValue}} / {{resourceQuota.limitValue}}</td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
             </v-card>
           </v-col>
         </v-row>
@@ -332,7 +366,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import ShootCustomField from '@/components/ShootCustomField'
-import ResourceQuota from '@/components/ResourceQuota'
+import ResourceQuotaHelp from '@/components/ResourceQuotaHelp'
 import { errorDetailsFromError } from '@/utils/error'
 import { transformHtml, getProjectDetails, getProjectQuotaStatus, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
@@ -350,7 +384,7 @@ export default {
     GDialog,
     TimeString,
     ShootCustomField,
-    ResourceQuota
+    ResourceQuotaHelp
   },
   data () {
     return {

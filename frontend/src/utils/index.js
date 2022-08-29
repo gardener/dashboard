@@ -25,6 +25,7 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import upperFirst from 'lodash/upperFirst'
+import round from 'lodash/round'
 import moment from './moment'
 import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
@@ -326,16 +327,24 @@ export function getProjectQuotaStatus (project) {
   const { hard, used } = project.quotaStatus
   return map(hard, (limitValue, key) => {
     const usedValue = used[key] || 0
-    const percentage = (usedValue / limitValue) * 100
+    const percentage = round((usedValue / limitValue) * 100, 2)
     const resourceName = replace(key, 'count/', '')
     const caption = upperFirst(head(split(resourceName, '.')))
+    let progressColor = 'primary'
+    if (percentage === 100) {
+      progressColor = 'error'
+    }
+    if (percentage >= 80) {
+      progressColor = 'warning'
+    }
     return {
       key,
       resourceName,
       caption,
       limitValue,
       usedValue,
-      percentage
+      percentage,
+      progressColor
     }
   })
 }
