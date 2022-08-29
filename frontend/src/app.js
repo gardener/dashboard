@@ -36,9 +36,13 @@ const App = Vue.extend({
         return refreshTokenPromise.then(() => args)
       },
       responseRejected (err) {
+        console.error('Response has been rejected: %s - %s', err.name, err.message) // eslint-disable-line
         if (isHttpError(err) && err.statusCode === 401) {
           const message = get(err, 'response.data.message', err.message)
-          setImmediate(() => vm.$auth.signout(new Error(message)))
+          setImmediate(() => {
+            console.log('Received response with status 401 --> Redirecting to logout page') // eslint-disable-line
+            vm.$auth.signout(new Error(message))
+          })
         }
         return Promise.reject(err)
       }
