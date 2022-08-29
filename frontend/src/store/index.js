@@ -46,7 +46,6 @@ import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import camelCase from 'lodash/camelCase'
 import compact from 'lodash/compact'
-import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
@@ -1316,14 +1315,6 @@ const getters = {
 
 // actions
 const actions = {
-  fetchAll ({ dispatch, commit }, resources) {
-    const iteratee = (value, key) => dispatch(key, value)
-    return Promise
-      .all(map(resources, iteratee))
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   fetchCloudProfiles ({ dispatch }) {
     return dispatch('cloudProfiles/getAll')
       .catch(err => {
@@ -1539,13 +1530,6 @@ const actions = {
       }
     }
   },
-  setUser ({ dispatch, commit }, value) {
-    commit('SET_USER', value)
-    return state.user
-  },
-  unsetUser ({ dispatch, commit }) {
-    commit('SET_USER', null)
-  },
   setSidebar ({ commit }, value) {
     commit('SET_SIDEBAR', value)
     return state.sidebar
@@ -1557,14 +1541,6 @@ const actions = {
   unsetLoading ({ commit }) {
     commit('SET_LOADING', false)
     return state.loading
-  },
-  setWebsocketConnectionError ({ commit }, { reason, reconnectAttempt }) {
-    commit('SET_WEBSOCKET_CONNECTION_ERROR', { reason, reconnectAttempt })
-    return state.websocketConnectionError
-  },
-  unsetWebsocketConnectionError ({ commit }) {
-    commit('SET_WEBSOCKET_CONNECTION_ERROR', null)
-    return state.websocketConnectionError
   },
   setError ({ commit }, value) {
     commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
@@ -1619,13 +1595,6 @@ const mutations = {
   SET_SHOOTS_LOADING (state, value) {
     state.shootsLoading = value
   },
-  SET_WEBSOCKET_CONNECTION_ERROR (state, value) {
-    if (value) {
-      state.websocketConnectionError = merge({}, state.websocketConnectionError, value)
-    } else {
-      state.websocketConnectionError = null
-    }
-  },
   SET_ALERT (state, value) {
     state.alert = value
   },
@@ -1650,12 +1619,6 @@ const mutations = {
   SET_DARK_THEME (state, value) {
     state.darkTheme = value
     Vue.vuetify.framework.theme.dark = value
-  },
-  SUBSCRIBE (state, [key, value]) {
-    Vue.set(state.subscriptions, key, value)
-  },
-  UNSUBSCRIBE (state, key) {
-    Vue.delete(state.subscriptions, key)
   },
   SET_GARDENCTL_OPTIONS (state, value) {
     state.gardenctlOptions = value
