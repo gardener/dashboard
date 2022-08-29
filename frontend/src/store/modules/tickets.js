@@ -52,7 +52,7 @@ const getters = {
   },
   latestUpdated: (state) => ({ name, projectName }) => {
     const latestUpdatedIssue = head(getOpenIssues({ state, name, projectName }))
-    return get(latestUpdatedIssue, 'metadata.updated_at')
+    return latestUpdatedIssue
   },
   labels: (state) => ({ name, projectName }) => {
     const issues = getOpenIssues({ state, name, projectName })
