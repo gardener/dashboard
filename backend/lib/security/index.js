@@ -12,7 +12,7 @@ const { split, join, some, every, includes, head, chain, pick } = require('lodas
 const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
-const { authentication } = require('../services')
+const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
 const { sessionSecret, oidc = {} } = require('../config')
@@ -199,11 +199,25 @@ async function authorizeToken (req, res) {
 }
 
 async function createAccessToken (payload, idToken) {
-  const { username, groups } = await authentication.isAuthenticated({ token: idToken })
+  const results = await Promise.allSettled([
+    authentication.isAuthenticated({ token: idToken }),
+    authorization.isAdmin({ auth: { bearer: idToken } })
+  ])
+  // throw an error if any promise has been rejected
+  for (const { status, reason: err } of results) {
+    if (status === 'rejected') {
+      throw err
+    }
+  }
+  const [
+    { value: { username, groups } },
+    { value: isAdmin }
+  ] = results
   Object.assign(payload, {
     id: username,
     groups,
-    aud: [GARDENER_AUDIENCE]
+    aud: [GARDENER_AUDIENCE],
+    isAdmin
   })
   const idTokenPayload = decode(idToken)
   if (idTokenPayload) {

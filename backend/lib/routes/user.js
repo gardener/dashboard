@@ -19,19 +19,6 @@ function getToken ({ auth = {} } = {}) {
   return auth.bearer
 }
 
-router.route('/privileges')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user || {}
-      const isAdmin = await authorization.isAdmin(user)
-      res.send({
-        isAdmin
-      })
-    } catch (err) {
-      next(err)
-    }
-  })
-
 router.route('/subjectrules')
   .post(async (req, res, next) => {
     try {

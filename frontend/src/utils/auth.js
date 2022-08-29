@@ -84,15 +84,15 @@ export class UserManager {
       const user = this.getUser()
       if (user) {
         const t = Number(user[key])
-        if (typeof t === 'number' && !isNaN(t)) {
+        if (!Number.isNaN(t)) {
           return t - now()
         }
       }
     } catch (err) { /* ignore error */ }
   }
 
-  isUserLoggedIn () {
+  isSessionExpired (tolerance = 1) {
     const t = this.timeUntil('exp')
-    return typeof t === 'number' && t > 0
+    return typeof t === 'number' && t < tolerance
   }
 }

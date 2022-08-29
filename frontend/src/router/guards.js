@@ -6,7 +6,7 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { getPrivileges, getConfiguration } from '@/utils/api'
+import { getConfiguration } from '@/utils/api'
 
 export default function createGuards (store, userManager, localStorage) {
   return {
@@ -34,34 +34,30 @@ function setLoading (store, value) {
 }
 
 function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
-  return async (to, from, next) => {
-    try {
-      const { meta = {}, path } = to
-      if (meta.public) {
-        return next()
-      }
-      if (userManager.isUserLoggedIn()) {
-        const user = userManager.getUser()
-        const storedUser = store.state.user
-        if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin } } = await getPrivileges()
-
-          await store.dispatch('setUser', { ...user, isAdmin })
-        }
-        return next()
-      }
+  return (to, from, next) => {
+    const { meta = {}, path } = to
+    if (meta.public) {
+      return next()
+    }
+    const user = userManager.getUser()
+    if (!user) {
+      console.log('No user found --> Redirecting to login page') // eslint-disable-line
       const query = path !== '/' ? { redirectPath: path } : undefined
       return next({
         name: 'Login',
         query
       })
-    } catch (err) {
-      const { response: { status, data = {} } = {} } = err
-      if (status === 401) {
-        return userManager.signout(new Error(data.message))
-      }
-      next(err)
     }
+    if (userManager.isSessionExpired()) {
+      console.log('Session is expired --> Redirecting to logout page') // eslint-disable-line
+      userManager.signout()
+      return next(false)
+    }
+    const storedUser = store.state.user
+    if (!storedUser || storedUser.jti !== user.jti) {
+      store.commit('SET_USER', user)
+    }
+    return next()
   }
 }
 
