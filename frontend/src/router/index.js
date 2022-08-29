@@ -37,7 +37,10 @@ export default function createRouter (store) {
     if (expirationTime) {
       if (expirationTime > currentTime) {
         const delay = expirationTime - currentTime
-        timeoutID = setTimeout(() => userManager.signout(), delay)
+        timeoutID = setTimeout(() => {
+          console.log('Session is expiring --> Redirecting to logout page') // eslint-disable-line
+          userManager.signout()
+        }, delay)
       } else {
         console.error('Expiration time of a new token is not expected to be in the past')
       }
