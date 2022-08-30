@@ -39,12 +39,8 @@ describe('hooks', () => {
 
     it('#createInformers', async function () {
       for (const key of LifecycleHooks.resources) {
-        let observable
-        if (_.startsWith(key, 'core/')) {
-          observable = dashboardClient.core[key.substring(5)]
-        } else {
-          observable = dashboardClient['core.gardener.cloud'][key]
-        }
+        const [apiGroup, name] = _.split(key, '/')
+        const observable = dashboardClient[apiGroup][name]
 
         const informer = {
           names: {

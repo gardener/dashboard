@@ -285,24 +285,30 @@ SPDX-License-Identifier: Apache-2.0
               </v-list>
             </v-card>
           </v-col>
-          <v-col v-if="projectQuotaStatus" class="pa-3">
+          <v-col class="pa-3">
             <v-card>
               <v-toolbar flat dense :color="toolbarColor">
                 <v-toolbar-title class="text-subtitle-1 d-flex align-center">Quota</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <resource-quota-help></resource-quota-help>
               </v-toolbar>
-              <v-simple-table>
+              <v-skeleton-loader
+                v-show="!projectQuotaStatus"
+                height="400"
+                type="table: table-heading, table-thead, table-tbody"
+                :types="{ 'table-thead': 'heading@3', 'table-row': 'table-cell@3' }"
+              ></v-skeleton-loader>
+              <v-simple-table v-show="projectQuotaStatus">
                 <template v-slot:default>
                   <thead>
                     <tr>
                       <th class="text-left">
                         Resource Name
                       </th>
-                      <th class="text-left">
+                      <th class="text-center">
                         Used Quota
                       </th>
-                      <th class="text-left">
+                      <th class="text-center">
                        Quantity
                       </th>
                     </tr>
@@ -320,7 +326,7 @@ SPDX-License-Identifier: Apache-2.0
                           {{ resourceQuota.resourceName }}
                         </v-tooltip>
                       </td>
-                      <td>
+                      <td class="text-center">
                         <v-tooltip top>
                           <template v-slot:activator="{ on }">
                             <v-progress-linear v-on="on" :value="resourceQuota.percentage" :color="resourceQuota.progressColor"></v-progress-linear>
@@ -328,7 +334,7 @@ SPDX-License-Identifier: Apache-2.0
                           {{ resourceQuota.percentage }}%
                         </v-tooltip>
                       </td>
-                      <td>{{resourceQuota.usedValue}} / {{resourceQuota.limitValue}}</td>
+                      <td class="text-center">{{resourceQuota.usedValue}} / {{resourceQuota.limitValue}}</td>
                     </tr>
                   </tbody>
                 </template>
@@ -521,8 +527,10 @@ export default {
   methods: {
     ...mapActions([
       'patchProject',
-      'deleteProject',
-      'projects/getProjectQuota'
+      'deleteProject'
+    ]),
+    ...mapActions('projects', [
+      'getProjectQuota'
     ]),
     onEditOwner () {
       this.editOwner = !this.editOwner
@@ -604,8 +612,17 @@ export default {
       this.edit = false
     }
   },
-  mounted () {
-    this['projects/getProjectQuota'](this.project.metadata)
+  created () {
+    // watch the params of the route to fetch the data again
+    this.$watch(
+      () => this.$route.params,
+      () => {
+        this.getProjectQuota(this.project.metadata)
+      },
+      // fetch the data when the view is created and the data is
+      // already being observed
+      { immediate: true }
+    )
   }
 }
 </script>

@@ -10,6 +10,8 @@ const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kub
 const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
+const assert = require('assert').strict
+const _ = require('lodash')
 
 class LifecycleHooks {
   constructor (client) {
@@ -59,15 +61,10 @@ class LifecycleHooks {
 
   static createInformers (client) {
     const informers = {}
-
-    const resourceNameRegex = /^((.+)\/)?(.+)$/
     for (const key of this.resources) {
-      let [, , apiGroup, name] = resourceNameRegex.exec(key)
-      if (!name) {
-        continue
-      }
-      if (!apiGroup) {
-        apiGroup = 'core.gardener.cloud'
+      const [apiGroup, name] = _.split(key, '/')
+      if (!apiGroup || !name) {
+        assert.fail('Invalid resource key. Need to have format apiGroup/resourceName.')
       }
 
       const observable = client[apiGroup][name]
@@ -80,12 +77,12 @@ class LifecycleHooks {
 
   static get resources () {
     return [
-      'cloudprofiles',
-      'quotas',
-      'seeds',
-      'shoots',
-      'projects',
-      'controllerregistrations',
+      'core.gardener.cloud/cloudprofiles',
+      'core.gardener.cloud/quotas',
+      'core.gardener.cloud/seeds',
+      'core.gardener.cloud/shoots',
+      'core.gardener.cloud/projects',
+      'core.gardener.cloud/controllerregistrations',
       'core/resourcequotas'
     ]
   }
