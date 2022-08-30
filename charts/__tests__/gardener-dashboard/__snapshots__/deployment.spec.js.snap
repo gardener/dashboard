@@ -121,6 +121,11 @@ Object {
                 "name": "gardener-dashboard-login-config",
                 "subPath": "login-config.json",
               },
+              Object {
+                "mountPath": "/var/run/secrets/projected/serviceaccount",
+                "name": "service-account-token",
+                "readOnly": true,
+              },
             ],
           },
         ],
@@ -152,6 +157,19 @@ Object {
               "name": "gardener-dashboard-configmap",
             },
             "name": "gardener-dashboard-login-config",
+          },
+          Object {
+            "name": "service-account-token",
+            "projected": Object {
+              "sources": Array [
+                Object {
+                  "serviceAccountToken": Object {
+                    "expirationSeconds": 43200,
+                    "path": "token",
+                  },
+                },
+              ],
+            },
           },
         ],
       },
