@@ -82,6 +82,17 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
+exports.replaceEnableStaticTokenKubeconfig = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const enableStaticTokenKubeconfig = body.enableStaticTokenKubeconfig === true
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/kubernetes/enableStaticTokenKubeconfig',
+    value: enableStaticTokenKubeconfig
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
+}
+
 exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
   const client = user.client
   const enabled = !!body.enabled
@@ -117,6 +128,17 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
     }
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
+exports.replaceSeedName = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const seedName = body.seedName
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/seedName',
+    value: seedName
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {

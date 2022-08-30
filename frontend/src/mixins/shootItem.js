@@ -109,6 +109,9 @@ export const shootItem = {
     shootK8sVersion () {
       return get(this.shootSpec, 'kubernetes.version')
     },
+    shootEnableStaticTokenKubeconfig () {
+      return get(this.shootSpec, 'kubernetes.enableStaticTokenKubeconfig', true)
+    },
     shootCloudProfileName () {
       return this.shootSpec.cloudProfileName
     },
@@ -209,9 +212,6 @@ export const shootItem = {
     },
     isSeedUnreachable () {
       return this.isSeedUnreachableByName(this.shootSeedName)
-    },
-    shootStatusSeedName () {
-      return get(this.shootItem, 'status.seed')
     },
     shootSelectedAccessRestrictions () {
       return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })

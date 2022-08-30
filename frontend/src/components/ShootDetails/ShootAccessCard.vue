@@ -100,8 +100,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>
+        <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Static token kubeconfig is disabled for this cluster</v-list-item-subtitle>
+        <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Static token kubeconfig currently not available</v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
@@ -111,10 +113,10 @@ SPDX-License-Identifier: Apache-2.0
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <copy-btn :clipboard-text="kubeconfig"></copy-btn>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
+      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig" color="action-button">
@@ -123,6 +125,9 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
       </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
@@ -145,6 +150,7 @@ import TerminalListTile from '@/components/TerminalListTile'
 import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
+import StaticTokenKubeconfigConfiguration from '@/components/StaticTokenKubeconfigConfiguration'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import download from 'downloadjs'
@@ -159,7 +165,8 @@ export default {
     TerminalListTile,
     LinkListTile,
     GardenctlCommands,
-    TerminalShortcutsTile
+    TerminalShortcutsTile,
+    StaticTokenKubeconfigConfiguration
   },
   props: {
     hideTerminalShortcuts: {
@@ -179,7 +186,8 @@ export default {
       'hasShootTerminalAccess',
       'isAdmin',
       'hasControlPlaneTerminalAccess',
-      'isTerminalShortcutsFeatureEnabled'
+      'isTerminalShortcutsFeatureEnabled',
+      'canPatchShoots'
     ]),
     ...mapState([
       'cfg'
@@ -250,8 +258,11 @@ export default {
     isCredentialsTileVisible () {
       return !!this.username && !!this.password
     },
-    isKubeconfigTileVisible () {
+    isKubeconfigAvailable () {
       return !!this.kubeconfig
+    },
+    isKubeconfigTileVisible () {
+      return this.isKubeconfigAvailable || this.canPatchShoots
     },
     isGardenctlTileVisible () {
       return this.isAdmin
