@@ -5,49 +5,14 @@
 //
 
 import Vue from 'vue'
-import get from 'lodash/get'
 import store from '@/store'
 import createRouter from '@/router'
-import { registry, isHttpError } from '@/utils/fetch'
 
 Vue.config.productionTip = false
 
 const App = Vue.extend({
   name: 'app',
-  data () {
-    return {
-      unregister: () => {}
-    }
-  },
   created () {
-    const vm = this
-    let refreshTokenPromise
-    this.unregister = registry.register({
-      requestFulfilled (...args) {
-        const url = args[0] ?? ''
-        if (!url.startsWith('/api') || !vm.$auth.isRefreshRequired(30)) {
-          return Promise.resolve(args)
-        }
-        if (!refreshTokenPromise) {
-          refreshTokenPromise = vm.$auth.refreshToken()
-          refreshTokenPromise.finally(() => {
-            refreshTokenPromise = undefined
-          })
-        }
-        return refreshTokenPromise.then(() => args)
-      },
-      responseRejected (err) {
-        console.error('Response has been rejected: %s - %s', err.name, err.message) // eslint-disable-line
-        if (isHttpError(err) && err.statusCode === 401) {
-          const message = get(err, 'response.data.message', err.message)
-          setImmediate(() => {
-            console.log('Received response with status 401 --> Redirecting to logout page') // eslint-disable-line
-            vm.$auth.signout(new Error(message))
-          })
-        }
-        return Promise.reject(err)
-      }
-    })
     // provide the keyboard events for dialogs. Dialogs can't catch keyboard events
     // if any input element of the dialog didn't have the focus.
     window.addEventListener('keyup', ({ key }) => {
@@ -68,9 +33,6 @@ const App = Vue.extend({
         this.$store.commit('SET_GARDENCTL_OPTIONS', JSON.parse(newValue))
       }
     }, false)
-  },
-  beforeDestroy () {
-    this.unregister()
   },
   render (createElement) {
     return createElement('router-view')

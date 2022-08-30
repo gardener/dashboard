@@ -5,6 +5,7 @@
 //
 
 import fetch from './fetch'
+export { registry as interceptors } from './fetch'
 
 function request (method, url, data) {
   return fetch(url, { method, body: data })
@@ -361,4 +362,59 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 
 export function getGardenerExtensions () {
   return getResource('/api/gardener-extensions')
+}
+
+export default {
+  getConfiguration,
+  getLoginConfiguration,
+  getCloudProviderSecrets,
+  updateCloudProviderSecret,
+  createCloudProviderSecret,
+  deleteCloudProviderSecret,
+  getIssues,
+  getIssuesAndComments,
+  getShoots,
+  getShoot,
+  createShoot,
+  deleteShoot,
+  replaceShoot,
+  addShootAnnotation,
+  getShootInfo,
+  getShootSeedInfo,
+  updateShootVersion,
+  updateShootEnableStaticTokenKubeconfig,
+  updateShootMaintenance,
+  updateShootHibernationSchedules,
+  updateShootHibernation,
+  patchShootProvider,
+  updateShootAddons,
+  updateShootDns,
+  getShootSchemaDefinition,
+  updateShootPurpose,
+  updateShootSeedName,
+  getCloudprofiles,
+  getSeeds,
+  getProjects,
+  createProject,
+  patchProject,
+  updateProject,
+  deleteProject,
+  getMembers,
+  addMember,
+  updateMember,
+  getMember,
+  deleteMember,
+  createTokenReview,
+  getSubjectRules,
+  getToken,
+  getKubeconfigData,
+  getInfo,
+  createTerminal,
+  fetchTerminalSession,
+  listTerminalSessions,
+  deleteTerminal,
+  heartbeat,
+  terminalConfig,
+  listProjectTerminalShortcuts,
+  getGardenerExtensions
 }
