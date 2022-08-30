@@ -6,11 +6,20 @@
 
 function subscribe (store) {
   const params = new URLSearchParams()
-  params.set('padding', '1')
   for (const topic of store.state.topics) {
     params.append('topic', topic)
   }
   const eventSource = new EventSource('/api/stream?' + params.toString())
+
+  const onError = e => {
+    if (e.target.readyState === EventSource.CLOSED) {
+      store.commit('SET_ALERT', {
+        type: 'error',
+        message: 'Connection for automatic server updates is closed'
+      })
+    }
+  }
+  eventSource.addEventListener('error', onError)
 
   /* handle 'shoots' events */
   const onShoots = e => {
@@ -51,14 +60,11 @@ function subscribe (store) {
   }
   eventSource.addEventListener('comments', onComments)
 
-  return unsubscribeFn(eventSource, onShoots, onIssues, onComments)
-}
-
-function unsubscribeFn (eventSource, onShoots, onIssues, onComments) {
   return () => {
-    eventSource.removeEventListener('shoots', onShoots)
-    eventSource.removeEventListener('issues', onIssues)
     eventSource.removeEventListener('comments', onComments)
+    eventSource.removeEventListener('issues', onIssues)
+    eventSource.removeEventListener('shoots', onShoots)
+    eventSource.removeEventListener('error', onShoots)
     eventSource.close()
   }
 }
