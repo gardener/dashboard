@@ -60,6 +60,17 @@ spec:
           name: dashboard-assets
           defaultMode: 0444
       {{- end }}
+      {{- if .Values.global.serviceAccountTokenVolumeProjection.enabled }}
+      - name: service-account-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: {{ required ".Values.global.serviceAccountTokenVolumeProjection.expirationSeconds is required" .Values.global.serviceAccountTokenVolumeProjection.expirationSeconds }}
+              {{- if .Values.global.serviceAccountTokenVolumeProjection.audience }}
+              audience: {{ .Values.global.serviceAccountTokenVolumeProjection.audience }}
+              {{- end }}
+      {{- end }}
       {{- if .Values.global.kubeconfig }}
       - name: gardener-dashboard-secret-kubeconfig
         secret:
@@ -67,8 +78,11 @@ spec:
       {{- end }}
       {{- if .Values.global.kubeconfig }}
       automountServiceAccountToken: false
+      {{- end }}
+      {{- if .Values.global.serviceAccountTokenVolumeProjection.enabled }}
+      serviceAccountName: {{ required ".Values.global.serviceAccountName is required" .Values.global.serviceAccountName }}
       {{- else }}
-      serviceAccountName: gardener-dashboard
+      serviceAccountName: default
       {{- end }}
       containers:
         - name: gardener-dashboard
@@ -160,6 +174,11 @@ spec:
           {{- if .Values.global.frontendConfig.assets }}
           - name: assets
             mountPath: /app/public/static/assets
+          {{- end }}
+          {{- if .Values.global.serviceAccountTokenVolumeProjection.enabled }}
+          - name: service-account-token
+            mountPath: /var/run/secrets/projected/serviceaccount
+            readOnly: true
           {{- end }}
           {{- if .Values.global.kubeconfig }}
           - name: gardener-dashboard-secret-kubeconfig
