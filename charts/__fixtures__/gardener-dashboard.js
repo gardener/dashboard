@@ -18,6 +18,10 @@ const defaults = {
       enabled: false
     },
     serviceAccountName: 'gardener-dashboard',
+    serviceAccountTokenVolumeProjection: {
+      enabled: true,
+      expirationSeconds: 43200
+    },
     ingress: {
       annotations: {
         'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
