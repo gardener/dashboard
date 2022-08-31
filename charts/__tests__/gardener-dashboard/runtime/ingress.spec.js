@@ -14,7 +14,7 @@ const {
 } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
-const renderTemplates = helm.renderTemplatesFn(basename(__dirname), 'charts/runtime')
+const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
 
 describe('gardener-dashboard', function () {
   describe('ingress', function () {
