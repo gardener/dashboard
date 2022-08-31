@@ -7,7 +7,7 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "application-0.2.0",
+      "chart": "application-0.1.0",
       "heritage": "Helm",
       "release": "application",
     },

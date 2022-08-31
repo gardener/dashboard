@@ -220,7 +220,7 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "runtime-0.2.0",
+      "chart": "runtime-0.1.0",
       "heritage": "Helm",
       "release": "runtime",
     },
@@ -462,7 +462,7 @@ Object {
   "metadata": Object {
     "labels": Object {
       "app": "gardener-dashboard",
-      "chart": "runtime-0.2.0",
+      "chart": "runtime-0.1.0",
       "heritage": "Helm",
       "release": "runtime",
     },
