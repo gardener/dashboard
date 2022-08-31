@@ -1,5 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`gardener-dashboard deployment should not project service account token if disabled 1`] = `
+Array [
+  Object {
+    "configMap": Object {
+      "defaultMode": 420,
+      "items": Array [
+        Object {
+          "key": "config.yaml",
+          "path": "config.yaml",
+        },
+      ],
+      "name": "gardener-dashboard-configmap",
+    },
+    "name": "gardener-dashboard-config",
+  },
+  Object {
+    "configMap": Object {
+      "defaultMode": 444,
+      "items": Array [
+        Object {
+          "key": "login-config.json",
+          "path": "login-config.json",
+        },
+      ],
+      "name": "gardener-dashboard-configmap",
+    },
+    "name": "gardener-dashboard-login-config",
+  },
+]
+`;
+
+exports[`gardener-dashboard deployment should not project service account token if disabled 2`] = `
+Array [
+  Object {
+    "mountPath": "/etc/gardener-dashboard",
+    "name": "gardener-dashboard-config",
+  },
+  Object {
+    "mountPath": "/app/public/login-config.json",
+    "name": "gardener-dashboard-login-config",
+    "subPath": "login-config.json",
+  },
+]
+`;
+
 exports[`gardener-dashboard deployment should render the template with default values 1`] = `
 Object {
   "apiVersion": "apps/v1",
@@ -186,4 +231,29 @@ Array [
   "--gc-interval=100",
   "server.js",
 ]
+`;
+
+exports[`gardener-dashboard deployment virtual garden should render the template 1`] = `
+Object {
+  "name": "service-account-token",
+  "projected": Object {
+    "sources": Array [
+      Object {
+        "serviceAccountToken": Object {
+          "audience": "https://identity.garden.example.org",
+          "expirationSeconds": 3600,
+          "path": "token",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard deployment virtual garden should render the template 2`] = `
+Object {
+  "mountPath": "/var/run/secrets/projected/serviceaccount",
+  "name": "service-account-token",
+  "readOnly": true,
+}
 `;
