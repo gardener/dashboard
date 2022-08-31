@@ -461,11 +461,15 @@ const getters = {
   },
   machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture (state, getters) {
     return ({ cloudProfileName, region, zones, architecture }) => {
-      let machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
-      machineTypes = map(machineTypes, machineType => {
-        if (!machineType.architecture) {
-          machineType.architecture = 'amd64' // default if not maintained
-        }
+      let machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      machineTypes = map(machineTypes, item => {
+        const machineType = { ...item }
+        machineType.architecture ??= 'amd64' // default if not maintained
         return machineType
       })
 
@@ -474,8 +478,14 @@ const getters = {
   },
   machineArchitecturesByCloudProfileNameAndRegionAndZones (state, getters) {
     return ({ cloudProfileName, region, zones }) => {
-      const machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
-      return uniq(map(machineTypes, 'architecture')).sort()
+      const machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      const architectures = uniq(map(machineTypes, 'architecture'))
+      return architectures.sort()
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
@@ -602,9 +612,8 @@ const getters = {
   },
   defaultMachineImageForCloudProfileNameAndMachineType (state, getters) {
     return (cloudProfileName, machineType) => {
-      const machineImages = filter(getters.machineImagesByCloudProfileName(cloudProfileName), machineImage => {
-        return includes(machineImage.architectures, machineType.architecture)
-      })
+      const allMachineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+      const machineImages = filter(allMachineImages, ({ architectures }) => includes(architectures, machineType.architecture))
       return firstItemMatchingVersionClassification(machineImages)
     }
   },

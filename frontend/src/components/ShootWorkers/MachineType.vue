@@ -88,7 +88,7 @@ export default {
   },
   computed: {
     machineTypeItems () {
-      const machineTypes = this.machineTypes.slice()
+      const machineTypes = [...this.machineTypes]
       if (this.notInList) {
         machineTypes.push({
           name: this.worker.machine.type

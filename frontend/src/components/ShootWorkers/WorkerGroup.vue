@@ -79,10 +79,11 @@ export default {
     },
     workerGroupDescriptions () {
       const description = []
-      if (this.workerGroup.machine.architecture) {
+      const machineArchitecture = this.workerGroup.machine.architecture
+      if (machineArchitecture) {
         description.push({
           title: 'Machine Architecture',
-          value: this.workerGroup.machine.architecture
+          value: machineArchitecture
         })
       }
 
@@ -97,13 +98,14 @@ export default {
       }
       description.push(this.machineImageDescription)
 
-      if (this.workerGroup.cri) {
+      const cri = this.workerGroup.cri
+      if (cri) {
         let value
-        if (this.workerGroup.cri.containerRuntimes && this.workerGroup.cri.containerRuntimes.length) {
-          const containerRuntimes = map(this.workerGroup.cri.containerRuntimes, 'type')
-          value = `${this.workerGroup.cri.name} (${join(containerRuntimes, ', ')})`
+        if (cri.containerRuntimes?.length) {
+          const containerRuntimes = map(cri.containerRuntimes, 'type')
+          value = `${cri.name} (${join(containerRuntimes, ', ')})`
         } else {
-          value = this.workerGroup.cri.name
+          value = cri.name
         }
         description.push({
           title: 'Container Runtime',

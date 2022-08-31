@@ -96,7 +96,7 @@ export default {
   },
   computed: {
     machineImageItems () {
-      const machineImages = this.machineImages.slice()
+      const machineImages = [...this.machineImages]
       if (this.notInList) {
         machineImages.push({
           ...this.worker.machine.image,
