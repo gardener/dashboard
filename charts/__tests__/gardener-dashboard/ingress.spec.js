@@ -10,16 +10,11 @@ const { basename } = require('path')
 const {
   helm,
   helper,
-  'gardener-dashboard': {
-    defaults
-  }
+  'gardener-dashboard': defaults
 } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
-const chart = basename(__dirname) + '/charts/runtime' // TODO discuss
-function renderTemplates (templates, values) {
-  return helm.renderChartTemplates(chart, templates, values)
-}
+const renderTemplates = helm.renderTemplatesFn(basename(__dirname), 'charts/runtime')
 
 describe('gardener-dashboard', function () {
   describe('ingress', function () {

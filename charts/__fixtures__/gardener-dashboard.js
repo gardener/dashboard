@@ -105,6 +105,4 @@ const defaults = {
   }
 }
 
-module.exports = {
-  defaults
-}
+module.exports = defaults
