@@ -456,12 +456,36 @@ const getters = {
   },
   machineTypesByCloudProfileName (state, getters) {
     return ({ cloudProfileName }) => {
-      return getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName })
     }
   },
-  machineTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+  machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture (state, getters) {
+    return ({ cloudProfileName, region, zones, architecture }) => {
+      let machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      machineTypes = map(machineTypes, item => {
+        const machineType = { ...item }
+        machineType.architecture ??= 'amd64' // default if not maintained
+        return machineType
+      })
+
+      return filter(machineTypes, { architecture })
+    }
+  },
+  machineArchitecturesByCloudProfileNameAndRegionAndZones (state, getters) {
     return ({ cloudProfileName, region, zones }) => {
-      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
+      const machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      const architectures = uniq(map(machineTypes, 'architecture'))
+      return architectures.sort()
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
@@ -495,7 +519,10 @@ const getters = {
         const vendorName = vendorNameFromImageName(machineImage.name)
         const vendorHint = findVendorHint(state.cfg.vendorHints, vendorName)
 
-        return map(versions, ({ version, expirationDate, cri, classification }) => {
+        return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
+          if (isEmpty(architectures)) {
+            architectures = ['amd64'] // default if not maintained
+          }
           return decorateClassificationObject({
             key: name + '/' + version,
             name,
@@ -505,7 +532,8 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            vendorHint
+            vendorHint,
+            architectures
           })
         })
       }
@@ -582,9 +610,10 @@ const getters = {
       return {}
     }
   },
-  defaultMachineImageForCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+  defaultMachineImageForCloudProfileNameAndMachineType (state, getters) {
+    return (cloudProfileName, machineType) => {
+      const allMachineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+      const machineImages = filter(allMachineImages, ({ architectures }) => includes(architectures, machineType.architecture))
       return firstItemMatchingVersionClassification(machineImages)
     }
   },
@@ -1134,11 +1163,12 @@ const getters = {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
       const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      const architecture = head(getters.machineArchitecturesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones }))
+      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({ cloudProfileName, region, zones, architecture })
       const machineType = head(machineTypesForZone) || {}
       const volumeTypesForZone = getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
       const volumeType = head(volumeTypesForZone) || {}
-      const machineImage = getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+      const machineImage = getters.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
       const minVolumeSize = getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
       const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
       const worker = {
@@ -1149,7 +1179,8 @@ const getters = {
         maxSurge: 1,
         machine: {
           type: machineType.name,
-          image: pick(machineImage, ['name', 'version'])
+          image: pick(machineImage, ['name', 'version']),
+          architecture
         },
         zones,
         cri: {
