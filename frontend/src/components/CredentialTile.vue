@@ -12,11 +12,11 @@ SPDX-License-Identifier: Apache-2.0
     <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
         {{title}}
-        <v-tooltip top v-if="phaseType === 'Prepared'">
+        <v-tooltip top :disabled="phaseType !== 'Prepared'">
           <template v-slot:activator="{ on }">
             <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
-          <template v-if="phase.incomplete">
+          <template v-if="phase && phase.incomplete">
             <div>
               <strong>
                 All two-phase credentials rotations need to be in phase

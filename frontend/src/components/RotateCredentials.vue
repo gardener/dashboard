@@ -127,17 +127,24 @@ export default {
     isActionToBeScheduled () {
       return this.shootGardenOperation === this.operation
     },
-    isLoading () {
-      if (this.isActionToBeScheduled) {
-        return true
-      }
+    isProgressingPhase () {
       if (this.mode === 'init' && this.phaseType === 'Preparing') {
         return true
       }
       if (this.mode === 'complete' && this.phaseType === 'Completing') {
         return true
       }
+      return false
+    },
+    isLoading () {
+      if (this.isActionToBeScheduled) {
+        return true
+      }
       if (this.isScheduled) {
+        return true
+      }
+      if (this.isProgressingPhase && this.type !== 'allCredentials') {
+        // Only show the loading indicator for the rotation that is actually running, not for the overall trigger button
         return true
       }
       return false
@@ -150,6 +157,9 @@ export default {
         return true
       }
       if (this.isScheduledOperation) {
+        return true
+      }
+      if (this.isProgressingPhase) {
         return true
       }
       return false
@@ -219,6 +229,9 @@ export default {
       }
       if (this.isScheduledOperation) {
         return 'There is alread an operation scheduled for this cluster'
+      }
+      if (this.isProgressingPhase && this.type === 'allCredentials') {
+        return 'A rotation operation is currently running'
       }
       return undefined
     },
