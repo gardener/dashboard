@@ -5,7 +5,7 @@
 //
 
 import { shootItem } from '@/mixins/shootItem'
-import { rotationTypes } from '@/utils'
+import { rotationTypes } from '@/utils/credentialsRotation'
 import { shallowMount } from '@vue/test-utils'
 
 describe('shootItem', () => {
@@ -14,7 +14,7 @@ describe('shootItem', () => {
     mixins: [shootItem]
   }
 
-  describe('shootStatusCredentialRotationAggregatedPhase', () => {
+  describe('shootStatusCredentialsRotationAggregatedPhase', () => {
     let shootItemProp
 
     beforeEach(async () => {
@@ -48,7 +48,7 @@ describe('shootItem', () => {
           shootItem: shootItemProp
         }
       })
-      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Completing', caption: 'Completing' })
+      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Completing', caption: 'Completing' })
     })
 
     it('should return completed phase', () => {
@@ -59,7 +59,7 @@ describe('shootItem', () => {
           shootItem: shootItemProp
         }
       })
-      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Completed', caption: 'Completed' })
+      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Completed', caption: 'Completed' })
     })
 
     it('should return prepared phase', () => {
@@ -70,7 +70,7 @@ describe('shootItem', () => {
           shootItem: shootItemProp
         }
       })
-      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared' })
+      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared' })
     })
 
     it('should return incomplete prepared phase', () => {
@@ -83,7 +83,8 @@ describe('shootItem', () => {
       const unpreparedRotations = [
         rotationTypes.serviceAccountKey
       ]
-      expect(wrapper.vm.shootStatusCredentialRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true, unpreparedRotations })
+
+      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true, unpreparedRotations })
     })
   })
 })

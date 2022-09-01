@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
-import { rotationTypes } from '@/utils'
+import { rotationTypes } from '@/utils/credentialsRotation'
 import { SnotifyPosition } from 'vue-snotify'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -98,17 +98,23 @@ export default {
       return this.initOperation
     },
     initOperation () {
-      return rotationTypes.initOperation(this.type)
+      if (rotationTypes[this.type]) {
+        return rotationTypes[this.type].initOperation
+      }
+      return rotationTypes.allCredentials.initOperation
     },
     completionOperation () {
-      return rotationTypes.completionOperation(this.type)
+      if (rotationTypes[this.type]) {
+        return rotationTypes[this.type].completionOperation
+      }
+      return rotationTypes.allCredentials.completionOperation
     },
     rotationStatus () {
-      return get(this.shootStatusCredentialRotation, this.type, {})
+      return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     phase () {
       if (this.type === 'allCredentials') {
-        return this.shootStatusCredentialRotationAggregatedPhase
+        return this.shootStatusCredentialsRotationAggregatedPhase
       }
       return this.rotationStatus.phase
     },

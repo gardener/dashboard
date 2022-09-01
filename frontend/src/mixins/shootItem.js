@@ -19,9 +19,9 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTypeDelete,
-  isTruthyValue,
-  rotationTypes
+  isTruthyValue
 } from '@/utils'
+import { rotationTypes } from '@/utils/credentialsRotation'
 
 export const shootItem = {
   props: {
@@ -251,34 +251,46 @@ export const shootItem = {
     shootStatus () {
       return get(this.shootItem, 'status', {})
     },
-    shootStatusCredentialRotation () {
+    shootStatusCredentialsRotation () {
       return get(this.shootStatus, 'credentials.rotation', {})
     },
-    shootStatusCredentialRotationAggregatedPhase () {
-      const preparingPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Preparing']).length
-      const completingPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Completing']).length
-      if (completingPhaseCount > 0) {
-        const type = 'Completing'
-        return {
-          type,
-          caption: type
+    shootStatusCredentialsRotationAggregatedPhase () {
+      let preparedRotationsCount = 0
+      let completedPhasesCount = 0
+      const unpreparedRotations = []
+      const keys = Object.keys(this.shootStatusCredentialsRotation)
+      for (let i = 0; i < keys.length; i++) {
+        // use simple for loop to support early exit (immediately return in case of progressing phase)
+        const rotationKey = keys[i]
+        const rotationStatus = this.shootStatusCredentialsRotation[rotationKey]
+        const rotationType = get(rotationTypes, rotationKey)
+        if (!rotationType) {
+          // If gardener introduces a new rotation type, ignore it to avoid breaking our logic
+          continue
+        }
+        switch (rotationStatus.phase) {
+          case 'Preparing':
+          case 'Completing':
+            return {
+              type: rotationStatus.phase,
+              caption: rotationStatus.phase
+            }
+          case 'Prepared':
+            preparedRotationsCount++
+            break
+          case 'Completed':
+            completedPhasesCount++
+            // fallthrough
+          default:
+            if (rotationType.twoPhase) {
+              unpreparedRotations.push(rotationType)
+            }
         }
       }
 
-      if (preparingPhaseCount > 0) {
-        const type = 'Preparing'
-        return {
-          type,
-          caption: type
-        }
-      }
-
-      const numberOfTwoPhaseOperations = rotationTypes.numberOfTwoPhaseOperations()
-      const preparedPhases = filter(this.shootStatusCredentialRotation, ['phase', 'Prepared'])
-      const preparedPhaseCount = preparedPhases.length
-
-      if (preparedPhaseCount > 0) {
-        if (preparedPhaseCount === numberOfTwoPhaseOperations) {
+      const numberOfTwoPhaseOperations = filter(rotationTypes, { twoPhase: true }).length
+      if (preparedRotationsCount > 0) {
+        if (preparedRotationsCount === numberOfTwoPhaseOperations) {
           const type = 'Prepared'
           return {
             type,
@@ -286,23 +298,15 @@ export const shootItem = {
           }
         }
 
-        const unpreparedRotations = filter(rotationTypes, (rotationType, key) => {
-          if (!rotationType.twoPhase) {
-            return false
-          }
-          return get(this.shootStatusCredentialRotation, [key, 'phase']) !== 'Prepared'
-        })
-
         return {
-          caption: `Prepared ${preparedPhaseCount}/${numberOfTwoPhaseOperations}`,
+          caption: `Prepared ${preparedRotationsCount}/${numberOfTwoPhaseOperations}`,
           type: 'Prepared',
           incomplete: true,
           unpreparedRotations
         }
       }
 
-      const completedPhaseCount = filter(this.shootStatusCredentialRotation, ['phase', 'Completed']).length
-      if (completedPhaseCount === numberOfTwoPhaseOperations) {
+      if (completedPhasesCount === numberOfTwoPhaseOperations) {
         const type = 'Completed'
         return {
           type,

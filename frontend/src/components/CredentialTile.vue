@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -66,7 +66,7 @@ import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import head from 'lodash/head'
 import compact from 'lodash/compact'
-import { rotationTypes } from '@/utils'
+import { rotationTypes } from '@/utils/credentialsRotation'
 
 export default {
   name: 'credential-tile',
@@ -89,7 +89,7 @@ export default {
   mixins: [shootItem],
   computed: {
     rotationStatus () {
-      return get(this.shootStatusCredentialRotation, this.type, {})
+      return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     lastInitiationTime () {
       if (this.type !== 'allCredentials') {
@@ -102,11 +102,12 @@ export default {
       if (this.type !== 'allCredentials') {
         return this.rotationStatus.lastCompletionTime
       }
-      const allCompletionTimes = compact(flatMap(this.shootStatusCredentialRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimes = rotationTypes.numberOfOperations()
+      const allCompletionTimes = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
+      let requiredNumberOfRotationTimes = Object.keys(rotationTypes).length - 1 // There is no "all credentials" rotation type in the rotation status
       if (!this.shootEnableStaticTokenKubeconfig) {
         requiredNumberOfRotationTimes = requiredNumberOfRotationTimes - 1
       }
+
       if (requiredNumberOfRotationTimes === allCompletionTimes.length) {
         return head(allCompletionTimes)
       }
@@ -114,7 +115,7 @@ export default {
     },
     phase () {
       if (this.type === 'allCredentials') {
-        return this.shootStatusCredentialRotationAggregatedPhase
+        return this.shootStatusCredentialsRotationAggregatedPhase
       }
       return this.rotationStatus.phase
     },
