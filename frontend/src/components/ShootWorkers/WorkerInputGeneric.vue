@@ -24,9 +24,9 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           item-color="primary"
           :items="machineArchitectures"
-          :error-messages="getErrorMessages('machineArchitectureInternal')"
-          @blur="$v.machineArchitectureInternal.$touch()"
-          v-model="machineArchitectureInternal"
+          :error-messages="getErrorMessages('machineArchitecture')"
+          @blur="$v.machineArchitecture.$touch()"
+          v-model="machineArchitecture"
           label="Architecture">
         </v-select>
       </div>
@@ -69,11 +69,11 @@ SPDX-License-Identifier: Apache-2.0
         <size-input
           :min="minimumVolumeSize"
           color="primary"
-          :error-messages="getErrorMessages('volumeSizeInternal')"
+          :error-messages="getErrorMessages('volumeSize')"
           @input="onInputVolumeSize"
-          @blur="$v.volumeSizeInternal.$touch()"
+          @blur="$v.volumeSize.$touch()"
           label="Volume Size"
-          v-model="volumeSizeInternal"
+          v-model="volumeSize"
         ></size-input>
       </div>
       <div class="smallInput">
@@ -181,10 +181,10 @@ const validationErrors = {
   selectedZones: {
     required: 'Zone is required'
   },
-  volumeSizeInternal: {
+  volumeSize: {
     minVolumeSize: 'Invalid volume size'
   },
-  machineArchitectureInternal: {
+  machineArchitecture: {
     required: 'Machine Architecture is required'
   }
 }
@@ -243,7 +243,7 @@ export default {
       machineImageValid: undefined,
       containerRuntimeValid: undefined,
       immutableZones: undefined,
-      volumeSizeInternal: undefined
+      volumeSize: undefined
     }
   },
   validations () {
@@ -282,7 +282,7 @@ export default {
             return this.zonedCluster
           })
         },
-        volumeSizeInternal: {
+        volumeSize: {
           minVolumeSize (value) {
             if (!this.canDefineVolumeSize) {
               return true
@@ -293,7 +293,7 @@ export default {
             return minValue(this.minimumVolumeSize)(parseSize(value))
           }
         },
-        machineArchitectureInternal: {
+        machineArchitecture: {
           required
         }
       }
@@ -435,7 +435,7 @@ export default {
     machineImageCri () {
       return get(this.selectedMachineImage, 'cri')
     },
-    machineArchitectureInternal: {
+    machineArchitecture: {
       get () {
         return this.worker.machine.architecture
       },
@@ -465,16 +465,16 @@ export default {
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
-      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSizeInternal) {
+      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSize) {
         // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
         // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
         // to the default storage size defined for this machine type, remove volume object (contains only size information which
         // is redundant / not allowed in this case)
         delete this.worker.volume
       } else {
-        set(this.worker, 'volume.size', this.volumeSizeInternal)
+        set(this.worker, 'volume.size', this.volumeSize)
       }
-      this.$v.volumeSizeInternal.$touch()
+      this.$v.volumeSize.$touch()
       this.validateInput()
     },
     onInputminimum () {
@@ -539,8 +539,8 @@ export default {
       }
       // volume size is not defined on worker (=default storage size)
       if (storage.type !== 'fixed') {
-        // storage can be defined, set volumeSizeInternal (=displayed size in size-input) to default storage size
-        this.volumeSizeInternal = storage.size
+        // storage can be defined, set volumeSize (=displayed size in size-input) to default storage size
+        this.volumeSize = storage.size
       }
     },
     resetWorkerMachine () {
@@ -553,7 +553,7 @@ export default {
     this.validateInput()
     const volumeSize = get(this.worker, 'volume.size')
     if (volumeSize) {
-      this.volumeSizeInternal = volumeSize
+      this.volumeSize = volumeSize
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
