@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`gardener-dashboard deployment kubeconfig should render the template 1`] = `
+Object {
+  "name": "gardener-dashboard-secret-kubeconfig",
+  "secret": Object {
+    "secretName": "gardener-dashboard-kubeconfig",
+  },
+}
+`;
+
+exports[`gardener-dashboard deployment kubeconfig should render the template 2`] = `
+Object {
+  "mountPath": "/etc/gardener-dashboard/secrets/kubeconfig",
+  "name": "gardener-dashboard-secret-kubeconfig",
+  "readOnly": true,
+}
+`;
+
+exports[`gardener-dashboard deployment kubeconfig should render the template 3`] = `
+Object {
+  "name": "KUBECONFIG",
+  "value": "/etc/gardener-dashboard/secrets/kubeconfig/kubeconfig",
+}
+`;
+
 exports[`gardener-dashboard deployment should not project service account token if disabled 1`] = `
 Array [
   Object {

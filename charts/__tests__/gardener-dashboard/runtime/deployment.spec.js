@@ -71,6 +71,33 @@ describe('gardener-dashboard', function () {
       expect(container.args).toBeUndefined()
     })
 
+    describe('kubeconfig', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            kubeconfig: 'apiVersion: v1'
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [deployment] = documents
+        expect(deployment.spec.template.spec.automountServiceAccountToken).toBeFalsy()
+        const volumes = deployment.spec.template.spec.volumes
+        expect(volumes).toHaveLength(4)
+        const [, , , kubeconfigVolume] = volumes
+        expect(kubeconfigVolume).toMatchSnapshot()
+        const containers = deployment.spec.template.spec.containers
+        expect(containers).toHaveLength(1)
+        const [container] = containers
+        expect(container.volumeMounts).toHaveLength(4)
+        const [, , , kubeconfigVolumeMount] = container.volumeMounts
+        expect(kubeconfigVolumeMount).toMatchSnapshot()
+        expect(container.env).toHaveLength(5)
+        const [, , , , kubeconfigEnv] = container.env
+        expect(kubeconfigEnv).toMatchSnapshot()
+      })
+    })
+
     it('should not project service account token if disabled', async function () {
       const values = {
         global: {
