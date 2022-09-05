@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="resourceQuotaHelpMessage">
+  <div v-if="resourceQuotaHelpText">
     <v-tooltip top>
       <template v-slot:activator="{ on }">
         <v-btn
@@ -45,10 +45,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'resourceQuotaHelpMessage'
+      'resourceQuotaHelpText'
     ]),
     resourceQuotaHelpHtml () {
-      return transformHtml(this.resourceQuotaHelpMessage, true)
+      return transformHtml(this.resourceQuotaHelpText, true)
     }
   },
   methods: {

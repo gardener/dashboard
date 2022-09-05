@@ -60,7 +60,7 @@ function sanitizeFrontendConfig (frontendConfig) {
   convertAndSanitize(costObject, 'description')
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
-  convertAndSanitize(resourceQuotaHelp, 'message')
+  convertAndSanitize(resourceQuotaHelp, 'text')
 
   for (const item of items) {
     const {

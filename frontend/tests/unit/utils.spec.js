@@ -12,7 +12,8 @@ import {
   selectedImageIsNotLatest,
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
-  getProjectQuotaStatus
+  getProjectQuotaStatus,
+  aggregateResourceQuotaStatus
 } from '@/utils'
 
 describe('utils', () => {
@@ -532,8 +533,8 @@ describe('utils', () => {
     const project = {
       quotaStatus: {
         hard: {
-          'count/configmaps': 22,
-          'count/shoots.core.gardener.cloud': 25
+          'count/shoots.core.gardener.cloud': 25,
+          'count/configmaps': 22
         },
         used: {
           'count/shoots.core.gardener.cloud': 20
@@ -564,6 +565,52 @@ describe('utils', () => {
         usedValue: 20,
         percentage: 80,
         progressColor: 'warning'
+      })
+    })
+  })
+
+  describe('aggregateResourceQuotaStatus', () => {
+    const resourceQuotaStatuses = [
+      {
+        hard: {
+          'count/shoots.core.gardener.cloud': '25',
+          'count/configmaps': '22',
+          'count/secrets': '70'
+        },
+        used: {
+          'count/shoots.core.gardener.cloud': '10',
+          'count/secrets': '70'
+        }
+      },
+      {
+        hard: {
+          'count/rolebindings': '14',
+          'count/shoots.core.gardener.cloud': '30',
+          'count/configmaps': '10'
+        },
+        used: {
+          'count/shoots.core.gardener.cloud': '20',
+          'count/configmaps': '5',
+          'count/secrets': '50'
+        }
+      }
+    ]
+
+    it('should return aggregated resource quota status', () => {
+      const aggregatedQuotaStatus = aggregateResourceQuotaStatus(resourceQuotaStatuses)
+
+      expect(aggregatedQuotaStatus).toEqual({
+        hard: {
+          'count/shoots.core.gardener.cloud': '25',
+          'count/configmaps': '10',
+          'count/secrets': '70',
+          'count/rolebindings': '14'
+        },
+        used: {
+          'count/shoots.core.gardener.cloud': '20',
+          'count/configmaps': '5',
+          'count/secrets': '70'
+        }
       })
     })
   })

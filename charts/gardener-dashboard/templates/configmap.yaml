@@ -339,3 +339,7 @@ data:
       {{- if .Values.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.frontendConfig.serviceAccountDefaultTokenExpiration }}
       {{- end }}
+      {{- if .Values.frontendConfig.resourceQuotaHelp }}
+      resourceQuotaHelp:
+        text: {{ quote .Values.frontendConfig.resourceQuotaHelp.text }}
+      {{- end }}

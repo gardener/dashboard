@@ -99,8 +99,9 @@ module.exports = {
     }
     return project
   },
-  findResourceQuotaByNamespace (namespace, name) {
-    return cache.get('core/resourcequotas').find({ metadata: { namespace, name } })
+  findResourceQuotasByNamespace (namespace) {
+    const resourceQuotas = cache.getResourceQuotas()
+    return _.filter(resourceQuotas, { metadata: { namespace } })
   },
   getTicketCache () {
     return cache.getTicketCache()

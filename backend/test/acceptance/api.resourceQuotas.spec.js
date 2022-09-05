@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -25,15 +25,13 @@ describe('api', function () {
 
   describe('resourceQuotas', function () {
     const user = fixtures.user.create({ id: 'john.doe@example.org' })
-
-    const name = 'gardener'
     const namespace = 'garden-foo'
 
     it('should return a resource quota', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/resource-quotas/${name}`)
+        .get(`/api/namespaces/${namespace}/resource-quotas`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
 

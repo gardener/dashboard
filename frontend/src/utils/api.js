@@ -390,6 +390,6 @@ export function getGardenerExtensions () {
 
 /* Resource Quotas */
 
-export function getResourceQuota ({ namespace, name }) {
-  return getResource(`/api/namespaces/${namespace}/resource-quotas/${name}`)
+export function getResourceQuotas ({ namespace }) {
+  return getResource(`/api/namespaces/${namespace}/resource-quotas`)
 }

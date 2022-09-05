@@ -17,10 +17,9 @@ Array [
         "nonResourceAttributes": undefined,
         "resourceAttributes": Object {
           "group": "",
-          "name": "gardener",
           "namespace": "garden-foo",
           "resource": "resourcequotas",
-          "verb": "get",
+          "verb": "list",
         },
       },
     },
@@ -29,16 +28,20 @@ Array [
 `;
 
 exports[`api resourceQuotas should return a resource quota 2`] = `
-Object {
-  "status": Object {
-    "hard": Object {
-      "count/configmaps": "22",
-      "count/secrets": "70",
-    },
-    "used": Object {
-      "count/configmaps": "5",
-      "count/secrets": "12",
+Array [
+  Object {
+    "metadata": Object {},
+    "spec": Object {},
+    "status": Object {
+      "hard": Object {
+        "count/configmaps": "22",
+        "count/secrets": "70",
+      },
+      "used": Object {
+        "count/configmaps": "5",
+        "count/secrets": "12",
+      },
     },
   },
-}
+]
 `;

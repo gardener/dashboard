@@ -1,12 +1,12 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { cloneDeep, find } = require('lodash')
+const { cloneDeep } = require('lodash')
 
 function getResourceQuotas ({ uid, name, namespace, hard, used }) {
   const metadata = {
@@ -46,13 +46,6 @@ const resourceQuotasList = [
 ]
 
 const resourceQuotas = {
-  create (options) {
-    return getResourceQuotas(options)
-  },
-  get (name, namespace) {
-    const items = resourceQuotas.list()
-    return find(items.metadata, { name, namespace })
-  },
   list () {
     return cloneDeep(resourceQuotasList)
   }

@@ -413,5 +413,22 @@ describe('gardener-dashboard', function () {
         expect(config.clusterIdentity).toBe(clusterIdentity)
       })
     })
+
+    describe('resourceQuotaHelp', function () {
+      it('should render the template with resourceQuotaHelp markdown', async function () {
+        const values = {
+          frontendConfig: {
+            resourceQuotaHelp: {
+              text: '[foo](https://bar.baz)'
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.resourceQuotaHelp'])).toMatchSnapshot()
+      })
+    })
   })
 })

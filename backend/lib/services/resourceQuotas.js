@@ -6,27 +6,27 @@
 
 'use strict'
 
-const { Forbidden, NotFound } = require('http-errors')
+const _ = require('lodash')
+const { Forbidden } = require('http-errors')
 const authorization = require('./authorization')
-const { findResourceQuotaByNamespace } = require('../cache')
+const { findResourceQuotasByNamespace } = require('../cache')
 
-function fromResource (resourceQuota) {
-  const { status } = resourceQuota
-  return {
-    status
-  }
+function fromResource (resourceQuotas) {
+  return _.map(resourceQuotas, ({ status }) => {
+    return {
+      metadata: {},
+      spec: {},
+      status
+    }
+  })
 }
 
-exports.read = async function ({ user, namespace, name }) {
-  const allowed = await authorization.canGetResourceQuota(user, namespace, name)
+exports.list = async function ({ user, namespace }) {
+  const allowed = await authorization.canListResourceQuotas(user, namespace)
   if (!allowed) {
-    throw new Forbidden(`You are not allowed to get resource quota ${name} in namespace ${namespace}`)
+    throw new Forbidden(`You are not allowed to list resource quotas in namespace ${namespace}`)
   }
 
-  const resourceQuota = findResourceQuotaByNamespace(namespace, name)
-  if (!resourceQuota) {
-    throw new NotFound(`Resource Quota with name ${name} and namespace ${namespace} not found`)
-  }
-
-  return fromResource(resourceQuota)
+  const resourceQuotas = findResourceQuotasByNamespace(namespace)
+  return fromResource(resourceQuotas)
 }

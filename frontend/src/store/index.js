@@ -1308,8 +1308,8 @@ const getters = {
   nodesCIDR (state) {
     return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
   },
-  resourceQuotaHelpMessage (state) {
-    return get(state, 'cfg.resourceQuotaHelp.message')
+  resourceQuotaHelpText (state) {
+    return get(state, 'cfg.resourceQuotaHelp.text')
   }
 }
 

@@ -8,8 +8,10 @@ import Vue from 'vue'
 import findIndex from 'lodash/findIndex'
 import find from 'lodash/find'
 import assign from 'lodash/assign'
-import { getProjects, createProject, patchProject, updateProject, deleteProject, getResourceQuota } from '@/utils/api'
+import map from 'lodash/map'
+import { getProjects, createProject, patchProject, updateProject, deleteProject, getResourceQuotas } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
+import { aggregateResourceQuotaStatus } from '@/utils'
 
 // initial state
 const state = {
@@ -55,8 +57,11 @@ const actions = {
   },
   async getProjectQuota ({ commit, rootState }, { namespace, name }) {
     try {
-      const { data } = await getResourceQuota({ namespace, name: 'gardener' })
-      commit('RECEIVE_PROJECT_QUOTA', { name, data })
+      const { data } = await getResourceQuotas({ namespace })
+      const quotaStatuses = map(data, 'status')
+      const aggregatedQuotaStatus = aggregateResourceQuotaStatus(quotaStatuses)
+
+      commit('RECEIVE_PROJECT_QUOTA', { name, aggregatedQuotaStatus })
     } catch (error) {
       // ignore if no quota found
       if (isNotFound(error)) {
@@ -82,11 +87,11 @@ const mutations = {
       state.all.push(newItem)
     }
   },
-  RECEIVE_PROJECT_QUOTA (state, { name, data }) {
+  RECEIVE_PROJECT_QUOTA (state, { name, aggregatedQuotaStatus }) {
     const predicate = item => item.metadata.name === name
     const item = find(state.all, predicate)
     if (item !== undefined) {
-      Vue.set(item, 'quotaStatus', data.status)
+      Vue.set(item, 'quotaStatus', aggregatedQuotaStatus)
     }
   }
 }
