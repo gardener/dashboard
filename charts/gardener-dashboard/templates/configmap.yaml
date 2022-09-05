@@ -341,5 +341,5 @@ data:
       {{- end }}
       {{- if .Values.frontendConfig.resourceQuotaHelp }}
       resourceQuotaHelp:
-        text: {{ quote .Values.frontendConfig.resourceQuotaHelp.text }}
+        text: {{ required ".Values.frontendConfig.resourceQuotaHelp.text is required" .Values.frontendConfig.resourceQuotaHelp.text | quote }}
       {{- end }}

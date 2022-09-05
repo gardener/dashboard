@@ -336,7 +336,7 @@ export function getProjectQuotaStatus (project) {
     if (percentage >= 80) {
       progressColor = 'warning'
     }
-    if (percentage === 100) {
+    if (percentage >= 100) {
       progressColor = 'error'
     }
     return {
