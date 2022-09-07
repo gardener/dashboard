@@ -19,14 +19,37 @@ SPDX-License-Identifier: Apache-2.0
           {{workerGroup.name}}
       </v-chip>
     </template>
-    <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
-        <v-list-item-content class="pt-1">
-          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-          <v-list-item-title>{{value}} {{description}}</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
+    <v-tabs
+    color="primary"
+    v-model="tab">
+      <v-tab
+        key="overview"
+        href="#overview"
+      >
+        Overview
+      </v-tab>
+      <v-tab
+        key="yaml"
+        href="#yaml"
+      >
+        Yaml
+      </v-tab>
+    </v-tabs>
+    <v-tabs-items v-model="tab">
+      <v-tab-item id="overview">
+        <v-list class="pa-0">
+          <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
+            <v-list-item-content class="pt-1">
+              <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+              <v-list-item-title>{{value}} {{description}}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-tab-item>
+      <v-tab-item id="yaml">
+        <code-block lang="yaml" :content="workerGroupYaml"></code-block>
+      </v-tab-item>
+    </v-tabs-items>
   </g-popper>
 </template>
 
@@ -34,6 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import GPopper from '@/components/GPopper'
 import VendorIcon from '@/components/VendorIcon'
+import CodeBlock from '@/components/CodeBlock'
 import find from 'lodash/find'
 import join from 'lodash/join'
 import get from 'lodash/get'
@@ -43,7 +67,8 @@ export default {
   name: 'worker-group',
   components: {
     GPopper,
-    VendorIcon
+    VendorIcon,
+    CodeBlock
   },
   props: {
     workerGroup: {
@@ -51,6 +76,12 @@ export default {
     },
     cloudProfileName: {
       type: String
+    }
+  },
+  data () {
+    return {
+      tab: 'overview',
+      workerGroupYaml: undefined
     }
   },
   computed: {
@@ -192,6 +223,14 @@ export default {
     machineImageIcon () {
       return get(this.machineImage, 'icon')
     }
+  },
+  methods: {
+    async updateWorkerGroupYaml (value) {
+      this.workerGroupYaml = await this.$yaml.dump(value)
+    }
+  },
+  created () {
+    this.updateWorkerGroupYaml(this.workerGroup)
   }
 }
 </script>
@@ -199,5 +238,6 @@ export default {
 <style lang="scss" scoped>
   ::v-deep .popper {
     text-align: initial;
+    width: 600px;
   }
 </style>
