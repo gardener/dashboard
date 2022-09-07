@@ -19,8 +19,10 @@ SPDX-License-Identifier: Apache-2.0
         :updateOSMaintenance="updateOSMaintenance"
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
+        :initial-zones="initialZones"
         :kubernetes-version="kubernetesVersion"
-        @valid="onWorkerValid">
+        @valid="onWorkerValid"
+        @removed-zone="onRemovedZone">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
             small
@@ -66,12 +68,15 @@ import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createSh
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import map from 'lodash/map'
+import uniq from 'lodash/uniq'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
 import get from 'lodash/get'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -97,7 +102,8 @@ export default {
       updateOSMaintenance: undefined,
       isNewCluster: false,
       existingWorkerCIDR: undefined,
-      kubernetesVersion: undefined
+      kubernetesVersion: undefined,
+      initialZones: undefined
     }
   },
   computed: {
@@ -167,7 +173,9 @@ export default {
   },
   watch: {
     currentZonesNetworkConfiguration (value) {
-      const additionalZonesNetworkConfiguration = difference(this.currentZonesNetworkConfiguration, this.zonesNetworkConfiguration)
+      const additionalZonesNetworkConfiguration = filter(this.currentZonesNetworkConfiguration, ({ name }) => {
+        return !includes(this.initialZones, name)
+      })
       this.$emit('additionalZonesNetworkConfiguration', additionalZonesNetworkConfiguration)
     }
   },
@@ -220,6 +228,13 @@ export default {
       }
       this.validateInput()
     },
+    onRemovedZone (removedZone) {
+      // remove zone network configuration from zonesNetworkConfiguration array if already included
+      // this happens if the user navigated to yaml and back to component view
+      this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
+        return name !== removedZone
+      })
+    },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
         return omit(internalWorker, ['id', 'valid', 'isNew'])
@@ -237,6 +252,10 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
+    updateWorkersData ({ workers, zonesNetworkConfiguration }) {
+      this.setInternalWorkers(workers)
+      this.zonesNetworkConfiguration = zonesNetworkConfiguration
+    },
     setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, newShootWorkerCIDR, kubernetesVersion }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
@@ -248,6 +267,7 @@ export default {
       this.existingWorkerCIDR = existingWorkerCIDR
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
+      this.initialZones = uniq(flatMap(workers, 'zones'))
     }
   },
   mounted () {

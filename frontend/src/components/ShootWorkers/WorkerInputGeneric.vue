@@ -213,6 +213,9 @@ export default {
     maxAdditionalZones: {
       type: Number
     },
+    initialZones: {
+      type: Array
+    },
     kubernetesVersion: {
       type: String
     }
@@ -359,7 +362,12 @@ export default {
         })
       },
       set (zoneValues) {
-        this.worker.zones = map(zoneValues, last)
+        const zones = map(zoneValues, last)
+        const removedZone = difference(this.worker.zones, zones)
+        if (removedZone.length) {
+          this.$emit('removed-zone', last(removedZone))
+        }
+        this.worker.zones = zones
       }
     },
     unselectedZones () {
@@ -504,7 +512,7 @@ export default {
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
-    this.immutableZones = this.isNew ? [] : this.worker.zones
+    this.immutableZones = this.isNew ? [] : this.initialZones
   }
 }
 </script>

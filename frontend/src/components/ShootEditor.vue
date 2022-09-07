@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       ></g-message>
     </div>
     <v-divider></v-divider>
-    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
+    <div v-if="showToolbar" :style="toolbarStyles" class="d-flex align-center justify-space-between">
         <div class="d-flex align-center justify-start fill-height">
           <div class="px-2">
             <v-tooltip top>
@@ -174,6 +174,13 @@ export default {
     },
     extraKeys: {
       type: Object
+    },
+    pickShootKeys: {
+      type: Array,
+      default: () => ['kind', 'apiVersion', 'metadata', 'spec', 'status']
+    },
+    hideToolbar: {
+      type: Boolean
     }
   },
   data () {
@@ -217,7 +224,7 @@ export default {
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {
-        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
+        data = pick(data, this.pickShootKeys)
         if (!this.showManagedFields && has(data, 'metadata.managedFields')) {
           delete data.metadata.managedFields
         }
@@ -257,6 +264,9 @@ export default {
     },
     isReadOnly () {
       return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
+    },
+    showToolbar () {
+      return !this.isReadOnly && !this.hideToolbar
     }
   },
   methods: {
