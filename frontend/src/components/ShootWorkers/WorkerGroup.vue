@@ -60,6 +60,7 @@ import VendorIcon from '@/components/VendorIcon'
 import CodeBlock from '@/components/CodeBlock'
 import find from 'lodash/find'
 import join from 'lodash/join'
+import map from 'lodash/map'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 
@@ -107,6 +108,14 @@ export default {
     },
     workerGroupDescriptions () {
       const description = []
+      const machineArchitecture = this.workerGroup.machine.architecture
+      if (machineArchitecture) {
+        description.push({
+          title: 'Machine Architecture',
+          value: machineArchitecture
+        })
+      }
+
       description.push(this.machineTypeDescription)
       const volumeTypeDescription = this.volumeTypeDescription
       if (volumeTypeDescription) {
@@ -117,6 +126,21 @@ export default {
         description.push(volumeSizeDescription)
       }
       description.push(this.machineImageDescription)
+
+      const cri = this.workerGroup.cri
+      if (cri) {
+        let value
+        if (cri.containerRuntimes?.length) {
+          const containerRuntimes = map(cri.containerRuntimes, 'type')
+          value = `${cri.name} (${join(containerRuntimes, ', ')})`
+        } else {
+          value = cri.name
+        }
+        description.push({
+          title: 'Container Runtime',
+          value
+        })
+      }
 
       const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
       if (minimum >= 0 && maximum >= 0) {
@@ -214,8 +238,10 @@ export default {
       const machineImage = this.machineImage
       if (!machineImage) {
         item.description = '(Image is expired)'
-      } else if (machineImage.expirationDate) {
-        item.description = `(Expires: ${machineImage.expirationDateString})`
+      } else {
+        if (machineImage.expirationDate) {
+          item.description = `(Expires: ${machineImage.expirationDateString})`
+        }
       }
 
       return item
