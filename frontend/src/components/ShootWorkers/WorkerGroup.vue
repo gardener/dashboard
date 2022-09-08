@@ -37,14 +37,27 @@ SPDX-License-Identifier: Apache-2.0
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item id="overview">
-        <v-list class="pa-0">
-          <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
-            <v-list-item-content class="pt-1">
-              <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-              <v-list-item-title>{{value}} {{description}}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
+        <v-row class="cols">
+          <v-col v-for="{title, icon, items} in workerGroupData" :key="title" cols="6">
+            <v-card outlined>
+              <v-card-title class="text-subtitle-1 pa-1">
+                <v-icon class="mr-3">{{icon}}</v-icon>
+                <span>{{title}}</span>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+                <v-list class="pa-0">
+                  <v-list-item class="px-0" v-for="{title, value} in items" :key="title">
+                    <v-list-item-content class="pt-1">
+                      <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+                      <v-list-item-title>{{value}}</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-tab-item>
       <v-tab-item id="yaml">
         <code-block lang="yaml" :content="workerGroupYaml"></code-block>
@@ -59,9 +72,9 @@ import GPopper from '@/components/GPopper'
 import VendorIcon from '@/components/VendorIcon'
 import CodeBlock from '@/components/CodeBlock'
 import find from 'lodash/find'
-import join from 'lodash/join'
-import map from 'lodash/map'
 import get from 'lodash/get'
+import map from 'lodash/map'
+import join from 'lodash/join'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -106,145 +119,170 @@ export default {
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version })
     },
-    workerGroupDescriptions () {
-      const description = []
+    workerGroupData () {
+      const data = []
+
+      const machineItem = {
+        title: 'Machine',
+        icon: 'mdi-server',
+        items: [
+          {
+            title: 'Type',
+            value: get(this.workerGroup, 'machine.type')
+          }
+        ]
+      }
       const machineArchitecture = this.workerGroup.machine.architecture
       if (machineArchitecture) {
-        description.push({
-          title: 'Machine Architecture',
-          value: machineArchitecture
-        })
+        machineItem.items.push(
+          {
+            title: 'Architecture',
+            value: machineArchitecture
+          }
+        )
       }
-
-      description.push(this.machineTypeDescription)
-      const volumeTypeDescription = this.volumeTypeDescription
-      if (volumeTypeDescription) {
-        description.push(volumeTypeDescription)
-      }
-      const volumeSizeDescription = this.volumeSizeDescription
-      if (volumeSizeDescription) {
-        description.push(volumeSizeDescription)
-      }
-      description.push(this.machineImageDescription)
-
-      const cri = this.workerGroup.cri
-      if (cri) {
-        let value
-        if (cri.containerRuntimes?.length) {
-          const containerRuntimes = map(cri.containerRuntimes, 'type')
-          value = `${cri.name} (${join(containerRuntimes, ', ')})`
-        } else {
-          value = cri.name
-        }
-        description.push({
-          title: 'Container Runtime',
-          value
-        })
-      }
-
-      const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
-      if (minimum >= 0 && maximum >= 0) {
-        description.push({
-          title: 'Autoscaler',
-          value: `Min. ${minimum} / Max. ${maximum}`
-        })
-      }
-      if (maxSurge >= 0) {
-        description.push({
-          title: 'Max. Surge',
-          value: `${maxSurge}`
-        })
-      }
-      if (zones.length) {
-        description.push({
-          title: zones.length > 1 ? 'Zones' : 'Zone',
-          value: join(zones, ', ')
-        })
-      }
-
-      return description
-    },
-    machineTypeDescription () {
-      const machine = get(this.workerGroup, 'machine', {})
-      const item = {
-        title: 'Machine Type',
-        value: machine.type
-      }
-
       const machineType = this.machineType
       if (machineType) {
-        item.description = `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
+        machineItem.items.push(...[
+          {
+            title: 'CPUs',
+            value: machineType.cpu
+          },
+          {
+            title: 'GPUs',
+            value: machineType.gpu
+          },
+          {
+            title: 'Memory',
+            value: machineType.memory
+          }
+        ])
       }
+      const zones = this.workerGroup.zones
+      if (zones?.length) {
+        machineItem.items.push(
+          {
+            title: 'Zones',
+            value: join(zones, ', ')
+          }
+        )
+      }
+      data.push(machineItem)
 
-      return item
-    },
-    volumeTypeDescription () {
-      // workers with volume type (e.g. aws)
+      const storage = get(this.machineType, 'storage', {})
       const volume = get(this.workerGroup, 'volume', {})
-      if (volume.type) {
-        const item = {
-          title: 'Volume Type',
-          value: volume.type
-        }
 
+      // all infrastructures support volume sizes, but for some they are optional
+      // if no size is defined on the worker itself, check if machine storage defines a default size
+      const volumeSize = volume.size || storage.size
+
+      // workers with volume type (e.g. aws)
+      if (volume.type) {
+        const volumeItem = {
+          title: 'Volume',
+          icon: 'mdi-harddisk',
+          items: [
+            {
+              title: 'Type',
+              value: volume.type
+            }
+          ]
+        }
         const volumeType = this.volumeType
         if (volumeType) {
-          item.description = `(Class: ${volumeType.class})`
+          volumeItem.items.push({
+            title: 'Class',
+            value: volumeType.class
+          })
         }
-
-        return item
+        if (volumeSize) {
+          volumeItem.items.push({
+            title: 'Size',
+            value: volumeSize
+          })
+        }
+        data.push(volumeItem)
       }
 
       // workers with storage in machine type metadata (e.g. openstack)
-      const storage = get(this.machineType, 'storage', {})
       if (storage.type) {
-        return {
-          title: 'Volume Type',
-          value: storage.type,
-          description: `(Class: ${storage.class})`
+        const storageItem = {
+          title: 'Storage',
+          icon: 'mdi-harddisk',
+          items: [
+            {
+              title: 'Type',
+              value: storage.type
+            },
+            {
+              title: 'Class',
+              value: storage.class
+            }
+          ]
         }
+        if (volumeSize) {
+          storageItem.items.push({
+            title: 'Size',
+            value: volumeSize
+          })
+        }
+        data.push(storageItem)
       }
 
-      return undefined
-    },
-    volumeSizeDescription () {
-      // all infrastructures support volume sizes, but for some they are optional
-      const volume = get(this.workerGroup, 'volume', {})
-      if (volume.size) {
-        return {
-          title: 'Volume Size',
-          value: `${volume.size}`
-        }
-      }
-
-      // if no size is defined on the worker itself, check if machine storage defines a default size
-      const storage = get(this.machineType, 'storage', {})
-      if (storage.size) {
-        return {
-          title: 'Volume Size',
-          value: `${storage.size}`
-        }
-      }
-
-      return undefined
-    },
-    machineImageDescription () {
       const { name, version } = get(this.workerGroup, 'machine.image', {})
-      const item = {
-        title: 'Machine Image',
-        value: `${name} | Version: ${version}`
+      const imageItem = {
+        title: 'Image',
+        icon: 'mdi-disc',
+        items: [
+          {
+            title: 'Name',
+            value: name
+          },
+          {
+            title: 'Version',
+            value: version
+          }
+        ]
       }
-
       const machineImage = this.machineImage
       if (!machineImage) {
-        item.description = '(Image is expired)'
+        imageItem.items.push({
+          title: 'Attention',
+          value: 'Image not found in cloud profile'
+        })
       } else {
         if (machineImage.expirationDate) {
-          item.description = `(Expires: ${machineImage.expirationDateString})`
+          imageItem.items.push({
+            title: 'Expires',
+            value: machineImage.expirationDateString
+          })
         }
       }
+      data.push(imageItem)
 
-      return item
+      const cri = this.workerGroup.cri
+      if (cri) {
+        const criItem = {
+          title: 'Container Runtime',
+          icon: 'mdi-oci',
+          items: [
+            {
+              title: 'Name',
+              value: cri.name
+            }
+          ]
+        }
+        if (cri.containerRuntimes?.length) {
+          const containerRuntimes = map(cri.containerRuntimes, 'type')
+          criItem.items.push({
+            title: 'Additional OCI Runtimes',
+            value: join(containerRuntimes, ', ')
+          })
+        }
+        data.push(criItem)
+      }
+
+      return data
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
