@@ -44,7 +44,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-tab-item id="yaml">
           <shoot-editor
             :shoot-item="editorData"
-            :pickShootKeys="['workers', 'infrastructureConfig']"
             ref="workerEditor"
             v-on="$workerEditor.hooks"
             hide-toolbar
@@ -192,13 +191,20 @@ export default {
       return data
     },
     async getWorkerEditorData () {
-      const content = await this.$workerEditor.dispatch('getContent')
-      return this.$yaml.load(content)
+      const yaml = await this.$workerEditor.dispatch('getContent')
+      const content = await this.$yaml.load(yaml)
+      return get(content, 'spec.provider')
     },
     async setEditorData () {
       const editorData = await this.getWorkerComponentData()
       if (editorData) {
-        this.editorData = editorData
+        this.editorData = {
+          spec: {
+            provider: {
+              ...editorData
+            }
+          }
+        }
         this.$workerEditor.dispatch('reload')
       }
     },

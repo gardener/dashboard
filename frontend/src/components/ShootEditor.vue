@@ -175,10 +175,6 @@ export default {
     extraKeys: {
       type: Object
     },
-    pickShootKeys: {
-      type: Array,
-      default: () => ['kind', 'apiVersion', 'metadata', 'spec', 'status']
-    },
     hideToolbar: {
       type: Boolean
     }
@@ -224,7 +220,7 @@ export default {
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {
-        data = pick(data, this.pickShootKeys)
+        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
         if (!this.showManagedFields && has(data, 'metadata.managedFields')) {
           delete data.metadata.managedFields
         }
@@ -372,6 +368,7 @@ export default {
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
+        options.container = this.$refs.container
         if (!this.shootEditorCompletions) {
           return
         }
