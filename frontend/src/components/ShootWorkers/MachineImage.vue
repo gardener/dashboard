@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-select
     color="primary"
     item-color="primary"
-    :items="machineImages"
+    :items="machineImageItems"
     item-value="key"
     return-object
     :error-messages="getErrorMessages('worker.machine.image')"
@@ -46,8 +46,6 @@ import VendorIcon from '@/components/VendorIcon'
 import MultiMessage from '@/components/MultiMessage'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
@@ -97,10 +95,24 @@ export default {
     }
   },
   computed: {
+    machineImageItems () {
+      const machineImages = [...this.machineImages]
+      if (this.notInList) {
+        machineImages.push({
+          ...this.worker.machine.image,
+          key: 'notInList'
+        })
+      }
+      return machineImages
+    },
+    notInList () {
+      // notInList: selected value may have been removed from cloud profile or other worker changes do not support current selection anymore
+      return !find(this.machineImages, this.worker.machine.image)
+    },
     machineImage: {
       get () {
         const { name, version } = this.worker.machine.image || {}
-        return find(this.machineImages, { name, version }) || {}
+        return find(this.machineImageItems, { name, version }) || {}
       },
       set (machineImage) {
         this.worker.machine.image = pick(machineImage, ['name', 'version'])
@@ -133,6 +145,13 @@ export default {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
+          severity: 'warning'
+        })
+      }
+      if (this.notInList) {
+        hints.push({
+          type: 'text',
+          hint: 'This image may not be supported by the selected machine type',
           severity: 'warning'
         })
       }
@@ -183,14 +202,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    machineImages (updatedMachineImages) {
-      if (!includes(map(updatedMachineImages, 'name'), this.worker.machine.image)) {
-        this.worker.machine.image = undefined
-        this.onInputMachineImage()
-      }
-    }
   }
 }
 </script>

@@ -19,6 +19,17 @@ SPDX-License-Identifier: Apache-2.0
           label="Group Name">
         </v-text-field>
       </div>
+      <div class="smallInput">
+        <v-select
+          color="primary"
+          item-color="primary"
+          :items="machineArchitectures"
+          :error-messages="getErrorMessages('machineArchitecture')"
+          @blur="$v.machineArchitecture.$touch()"
+          v-model="machineArchitecture"
+          label="Architecture">
+        </v-select>
+      </div>
       <div class="regularInput">
         <machine-type
         :machine-types="machineTypes"
@@ -31,6 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         <machine-image
         :machine-images="machineImages"
         :worker="worker"
+        :machine-type="selectedMachineType"
         :updateOSMaintenance="updateOSMaintenance"
         @update-machine-image="onUpdateMachineImage"
         @valid="onMachineImageValid">
@@ -57,11 +69,11 @@ SPDX-License-Identifier: Apache-2.0
         <size-input
           :min="minimumVolumeSize"
           color="primary"
-          :error-messages="getErrorMessages('volumeSizeInternal')"
+          :error-messages="getErrorMessages('volumeSize')"
           @input="onInputVolumeSize"
-          @blur="$v.volumeSizeInternal.$touch()"
+          @blur="$v.volumeSize.$touch()"
           label="Volume Size"
-          v-model="volumeSizeInternal"
+          v-model="volumeSize"
         ></size-input>
       </div>
       <div class="smallInput">
@@ -141,6 +153,8 @@ import last from 'lodash/last'
 import difference from 'lodash/difference'
 import get from 'lodash/get'
 import set from 'lodash/set'
+import head from 'lodash/head'
+import pick from 'lodash/pick'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -167,8 +181,11 @@ const validationErrors = {
   selectedZones: {
     required: 'Zone is required'
   },
-  volumeSizeInternal: {
+  volumeSize: {
     minVolumeSize: 'Invalid volume size'
+  },
+  machineArchitecture: {
+    required: 'Machine Architecture is required'
   }
 }
 
@@ -226,7 +243,7 @@ export default {
       machineImageValid: undefined,
       containerRuntimeValid: undefined,
       immutableZones: undefined,
-      volumeSizeInternal: undefined
+      volumeSize: undefined
     }
   },
   validations () {
@@ -234,7 +251,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndRegionAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture',
+      'machineArchitecturesByCloudProfileNameAndRegionAndZones',
       'volumeTypesByCloudProfileNameAndRegionAndZones',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
@@ -264,7 +282,7 @@ export default {
             return this.zonedCluster
           })
         },
-        volumeSizeInternal: {
+        volumeSize: {
           minVolumeSize (value) {
             if (!this.canDefineVolumeSize) {
               return true
@@ -274,14 +292,33 @@ export default {
             }
             return minValue(this.minimumVolumeSize)(parseSize(value))
           }
+        },
+        machineArchitecture: {
+          required
         }
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
+      return this.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+        zones: this.worker.zones,
+        architecture: this.worker.machine.architecture
+      })
+    },
+    machineArchitectures () {
+      return this.machineArchitecturesByCloudProfileNameAndRegionAndZones({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+        zones: this.worker.zones
+      })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
+      return this.volumeTypesByCloudProfileNameAndRegionAndZones({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+        zones: this.worker.zones
+      })
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
@@ -299,9 +336,9 @@ export default {
       return get(this.selectedMachineType, 'storage.type') !== 'fixed'
     },
     machineImages () {
-      return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired }) => {
-        return !isExpired
-      })
+      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const architecture = this.worker.machine.architecture
+      return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, architecture))
     },
     minimumVolumeSize () {
       const minimumVolumeSize = parseSize(this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region }))
@@ -397,6 +434,17 @@ export default {
     },
     machineImageCri () {
       return get(this.selectedMachineImage, 'cri')
+    },
+    machineArchitecture: {
+      get () {
+        return this.worker.machine.architecture
+      },
+      set (architecture) {
+        this.worker.machine.architecture = architecture
+
+        // Reset machine type and image to default as they won't be supported by new architecture
+        this.resetWorkerMachine()
+      }
     }
   },
   methods: {
@@ -417,16 +465,16 @@ export default {
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
-      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSizeInternal) {
+      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSize) {
         // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
         // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
         // to the default storage size defined for this machine type, remove volume object (contains only size information which
         // is redundant / not allowed in this case)
         delete this.worker.volume
       } else {
-        set(this.worker, 'volume.size', this.volumeSizeInternal)
+        set(this.worker, 'volume.size', this.volumeSize)
       }
-      this.$v.volumeSizeInternal.$touch()
+      this.$v.volumeSize.$touch()
       this.validateInput()
     },
     onInputminimum () {
@@ -491,16 +539,21 @@ export default {
       }
       // volume size is not defined on worker (=default storage size)
       if (storage.type !== 'fixed') {
-        // storage can be defined, set volumeSizeInternal (=displayed size in size-input) to default storage size
-        this.volumeSizeInternal = storage.size
+        // storage can be defined, set volumeSize (=displayed size in size-input) to default storage size
+        this.volumeSize = storage.size
       }
+    },
+    resetWorkerMachine () {
+      this.worker.machine.type = get(head(this.machineTypes), 'name')
+      const machineImage = head(this.machineImages)
+      this.worker.machine.image = pick(machineImage, ['name', 'version'])
     }
   },
   mounted () {
     this.validateInput()
     const volumeSize = get(this.worker, 'volume.size')
     if (volumeSize) {
-      this.volumeSizeInternal = volumeSize
+      this.volumeSize = volumeSize
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
