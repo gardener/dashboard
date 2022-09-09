@@ -22,7 +22,9 @@ SPDX-License-Identifier: Apache-2.0
     >
       <template v-slot:item="{ item }">
         <v-list-item-content>
-          <v-list-item-title>{{item.name}}</v-list-item-title>
+          <v-list-item-title>
+            {{item.name}}
+          </v-list-item-title>
           <v-list-item-subtitle>
             <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
             <span v-if="item.gpu">GPU: {{item.gpu}} | </span>
@@ -30,6 +32,9 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="item.storage"> | Volume Type: {{item.storage.type}} | Class: {{item.storage.class}} | Default Size: {{item.storage.size}}</span>
           </v-list-item-subtitle>
         </v-list-item-content>
+      </template>
+      <template v-slot:selection="{ item }">
+         {{item.name}}
       </template>
     </v-select>
   </hint-colorizer>
@@ -83,19 +88,20 @@ export default {
   },
   computed: {
     machineTypeItems () {
-      const machineTypes = this.machineTypes.slice()
-      if (this.notInCloudProfile) {
+      const machineTypes = [...this.machineTypes]
+      if (this.notInList) {
         machineTypes.push({
           name: this.worker.machine.type
         })
       }
       return machineTypes
     },
-    notInCloudProfile () {
+    notInList () {
+      // notInList: selected value may have been removed from cloud profile or other worker changes do not support current selection anymore
       return !find(this.machineTypes, ['name', this.worker.machine.type])
     },
     hint () {
-      if (this.notInCloudProfile) {
+      if (this.notInList) {
         return 'This machine type may not be supported by your worker'
       }
       return undefined
