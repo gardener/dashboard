@@ -212,7 +212,7 @@ export default {
       try {
         const editorData = await this.getWorkerEditorData()
         const workers = get(editorData, 'workers')
-        const zonesNetworkConfiguration = get(editorData, 'infrastructureConfig.networks.zones')
+        const zonesNetworkConfiguration = get(editorData, 'infrastructureConfig.networks.zones', [])
         await this.$manageWorkers.dispatch('updateWorkersData', { workers, zonesNetworkConfiguration })
       } catch (err) {
         const errorMessage = 'Could not update workers with changed yaml'
