@@ -707,6 +707,9 @@ const getters = {
   },
   infrastructureSecretList (state) {
     return filter(state.cloudProviderSecrets.all, secret => {
+      if (secret.metadata.cloudProviderKind === 'openstack') {
+        secret.metadata.cloudProviderKind = 'pluscloudopen'
+      }
       return !!secret.metadata.cloudProviderKind
     })
   },
@@ -742,7 +745,15 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    return intersection(['openstack', 'aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    // Patch: Select openstack first
+    // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+  },
+  // Patch: Don't allow customer to add openstack (pluscloudopen) secrets
+  sortedCloudProviderKindListForSecretCreation (state, getters) {
+    return intersection(['aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    // Patch: Select openstack first
+    // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
   },
   sortedDnsProviderList (state, getters) {
     const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']

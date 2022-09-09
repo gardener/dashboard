@@ -19,8 +19,8 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
           <a href="/">
             <img src="/static/assets/logo.svg" class="logo" alt="gardener logo">
-            <h1 class="main-navigation-title--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2 class="primary--text">Universal Kubernetes at Scale</h2>
+            <h1 class="main-navigation-title--text">PSKE</h1>
+            <h2 class="primary--text">Managed Kubernetes at Scale</h2>
           </a>
         </div>
       </div>

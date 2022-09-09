@@ -154,8 +154,9 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-action>
         </v-list-item>
       </template>
-      <v-divider inset></v-divider>
-      <v-list-item>
+      <!--Patch: Don't display addons in UI-->
+      <!--<v-divider inset></v-divider>-->
+      <v-list-item style="display: none;">
         <v-list-item-icon>
           <v-icon color="primary">mdi-puzzle</v-icon>
         </v-list-item-icon>

@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-list subheader dense>
             <v-subheader>Create Infrastructure Secret</v-subheader>
-            <v-list-item v-for="infrastructure in sortedCloudProviderKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
+            <v-list-item v-for="infrastructure in sortedCloudProviderKindListForSecretCreation" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
               <v-list-item-action>
                  <infra-icon :value="infrastructure" :size="24"></infra-icon>
               </v-list-item-action>
@@ -221,6 +221,7 @@ export default {
       'shootList',
       'canCreateSecrets',
       'sortedCloudProviderKindList',
+      'sortedCloudProviderKindListForSecretCreation',
       'sortedDnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {
@@ -386,6 +387,17 @@ export default {
       const secretData = secret.data || {}
       switch (secret.metadata.cloudProviderKind) {
         case 'openstack':
+          return [
+            {
+              label: 'Domain Name',
+              value: secretData.domainName
+            },
+            {
+              label: 'Tenant Name',
+              value: secretData.tenantName
+            }
+          ]
+        case 'pluscloudopen':
           return [
             {
               label: 'Domain Name',

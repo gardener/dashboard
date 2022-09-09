@@ -9,22 +9,22 @@ import colors from 'vuetify/lib/util/colors'
 const theme = {
   themes: {
     light: {
-      primary: '#0b8062',
-      anchor: '#0b8062',
-      'main-background': colors.grey.darken3,
-      'main-navigation-title': colors.shades.white,
-      'toolbar-background': '#0b8062',
-      'toolbar-title': colors.shades.white,
-      'action-button': colors.grey.darken4
+      primary: '#010869',
+      anchor: '#010869',
+      'main-background': '#efefec',
+      'main-navigation-title': '#172b4d',
+      'toolbar-background': '#010869',
+      'toolbar-title': '#efefec',
+      'action-button': '#818181'
     },
     dark: {
-      primary: '#0b8062',
-      anchor: '#0b8062',
-      'main-background': colors.grey.darken3,
-      'main-navigation-title': colors.shades.white,
-      'toolbar-background': '#0b8062',
-      'toolbar-title': colors.shades.white,
-      'action-button': colors.grey.lighten4,
+      primary: '#818181',
+      anchor: '#efefec',
+      'main-background': '#818181',
+      'main-navigation-title': '#e6e6e6',
+      'toolbar-background': '#010869',
+      'toolbar-title': '#b5b5b5',
+      'action-button': '#a1ecff',
       error: colors.red.darken4,
       warning: colors.orange.darken4
     }

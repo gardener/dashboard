@@ -126,7 +126,8 @@ SPDX-License-Identifier: Apache-2.0
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
+      <!--Patch: Don't allow customer to disable static kubeconfig-->
+      <v-list-item-action class="mx-0" style="display: none;">
         <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
       </v-list-item-action>
     </v-list-item>

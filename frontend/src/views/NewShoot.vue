@@ -75,7 +75,8 @@ SPDX-License-Identifier: Apache-2.0
           ></manage-workers>
        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <!--Patch: Don't display addons in UI-->
+      <v-card flat class="mt-4" style="display: none;">
         <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
@@ -424,7 +425,8 @@ export default {
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
-      const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
+      // Patch: Issue static kubeconfig by default
+      const enableStaticTokenKubeconfig = true
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
       await this.$refs.clusterDetails.setDetailsData({

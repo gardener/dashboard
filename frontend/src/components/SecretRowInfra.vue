@@ -54,7 +54,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip top v-if="canPatchSecrets">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider" icon @click="onUpdate">
+              <!--Patch: Don't display edit icon if provider is not supported (pluscloudopen) or secret isn't owned-->
+              <v-btn v-if="item.isOwnSecret && item.isSupportedCloudProvider" icon @click="onUpdate">
                 <v-icon class="action-button--text">mdi-pencil</v-icon>
               </v-btn>
             </div>
@@ -66,7 +67,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip top v-if="canDeleteSecrets">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="item.relatedShootCount > 0 || !item.isOwnSecret" icon @click="onDelete">
+              <!--Patch: Don't display delete icon if provider is not supported (pluscloudopen)-->
+              <v-btn v-if="item.isSupportedCloudProvider" :disabled="item.relatedShootCount > 0 || !item.isOwnSecret" icon @click="onDelete">
                 <v-icon class="error--text">mdi-delete</v-icon>
               </v-btn>
             </div>

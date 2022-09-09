@@ -1,4 +1,4 @@
 {
   "landingPageUrl": "https://gardener.cloud/",
-  "loginTypes": ["oidc", "token"]
+  "loginTypes": ["token"]
 }

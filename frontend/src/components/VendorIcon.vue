@@ -40,7 +40,9 @@ export default {
         case 'gcp':
           return require('@/assets/gcp.svg')
         case 'openstack':
-          return require('@/assets/openstack.svg')
+          return require('@/assets/pluscloudopen.svg')
+        case 'pluscloudopen':
+          return require('@/assets/pluscloudopen.svg')
         case 'alicloud':
           return require('@/assets/alicloud.svg')
         case 'vsphere':

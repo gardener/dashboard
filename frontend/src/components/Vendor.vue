@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item>
           <v-list-item-content class="pa-0">
             <v-list-item-subtitle>Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex"><infra-icon :value="cloudProviderKind" class="mr-2"></infra-icon>{{ cloudProviderKind }}</v-list-item-title>
+            <v-list-item-title class="d-flex"><infra-icon :value="cloudProviderKindPatched" class="mr-2"></infra-icon>{{ cloudProviderKindPatched }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item v-if="cloudProfileName">
@@ -77,6 +77,13 @@ export default {
     }
   },
   computed: {
+    cloudProviderKindPatched () {
+      if (this.cloudProviderKind === 'openstack') {
+        return 'pluscloudopen'
+      }
+
+      return this.cloudProviderKind
+    },
     zoneText () {
       return join(this.zones, ', ')
     },
@@ -89,7 +96,7 @@ export default {
     description () {
       const description = []
       if (this.extended && this.cloudProviderKind) {
-        description.push(this.cloudProviderKind)
+        description.push(this.cloudProviderKindPatched)
       }
       if (this.cloudProfileName) {
         description.push(this.cloudProfileName)

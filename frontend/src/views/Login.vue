@@ -14,8 +14,8 @@ SPDX-License-Identifier: Apache-2.0
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
-                  <img src="/static/assets/logo.svg" alt="Login to Gardener" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
+                  <img src="/static/assets/logo.svg" alt="Login to PSKE" width="180" height="180">
+                  <span class="flex my-4 primary--text text-h5 font-weight-light">Managed Kubernetes at Scale</span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                       <div class="text-subtitle-1 text-center">Press Login to be redirected to configured<br> OpenID Connect Provider.</div>
                     </v-tab-item >
                     <v-tab-item id="token">
-                      <div class="text-subtitle-1 text-center pt-3">Enter a bearer token trusted by the Kubernetes API server and press Login.</div>
+                      <div class="text-subtitle-1 text-center pt-3">Enter your access token and press Login.</div>
                       <v-text-field
                         ref="token"
                         v-model="token"

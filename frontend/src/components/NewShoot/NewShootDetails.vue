@@ -59,7 +59,8 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row>
       <v-col cols="12">
-        <static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig"></static-token-kubeconfig-switch>
+        <!--Patch: Don't allow customer to disable static kubeconfig-->
+        <static-token-kubeconfig-switch style="display: none;" v-model="enableStaticTokenKubeconfig"></static-token-kubeconfig-switch>
       </v-col>
     </v-row>
     <v-row  v-if="slaDescriptionHtml">
