@@ -1553,7 +1553,6 @@ __metadata:
     eventemitter3: ^4.0.7
     get-contrast: ^3.0.0
     highlight.js: ^11.5.1
-    http-errors: ^2.0.0
     jest: ^27.5.1
     jest-fetch-mock: ^3.0.3
     jest-serializer-vue: ^2.0.2

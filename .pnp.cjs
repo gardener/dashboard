@@ -2803,7 +2803,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eventemitter3", "npm:4.0.7"],\
             ["get-contrast", "npm:3.0.0"],\
             ["highlight.js", "npm:11.5.1"],\
-            ["http-errors", "npm:2.0.0"],\
             ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
             ["jest-fetch-mock", "npm:3.0.3"],\
             ["jest-serializer-vue", "npm:2.0.2"],\
