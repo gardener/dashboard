@@ -94,10 +94,12 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createStoragePlugin(localStorage),
   createEventStreamPlugin(logger),
   createMediaPlugin()
 ]
+if (localStorage) {
+  plugins.push(createStoragePlugin(localStorage))
+}
 if (debug) {
   plugins.push(createLogger())
 }

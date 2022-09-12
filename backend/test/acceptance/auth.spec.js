@@ -351,7 +351,7 @@ describe('auth', function () {
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     const res = await agent
-      .get('/auth/token')
+      .post('/auth/token')
       .set('cookie', await getCookieValue(tokenSet))
       .expect('content-type', /json/)
       .expect(200)
@@ -408,7 +408,8 @@ describe('auth', function () {
       exp: accessTokenPayload.exp,
       aud: accessTokenPayload.aud,
       isAdmin: false,
-      refresh_at: refreshTokenPayload.exp
+      refresh_at: refreshTokenPayload.exp,
+      rti: expect.stringMatching(/^[a-z0-9]{7}$/)
     })
   })
 })
