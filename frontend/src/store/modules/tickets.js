@@ -13,6 +13,7 @@ import head from 'lodash/head'
 import flatMap from 'lodash/flatMap'
 import matches from 'lodash/matches'
 import matchesProperty from 'lodash/matchesProperty'
+import groupBy from 'lodash/groupBy'
 import orderBy from 'lodash/orderBy'
 import uniqBy from 'lodash/uniqBy'
 
@@ -77,40 +78,47 @@ const actions = {
   }
 }
 
-const orderTicketsByUpdatedAt = state => {
-  state.all = orderBy(state.all, ['metadata.updated_at'], ['desc'])
+const orderByUpdatedAt = items => {
+  return orderBy(items, ['metadata.updated_at'], ['desc'])
 }
+
+const orderTicketsByUpdatedAt = state => {
+  state.all = orderByUpdatedAt(state.all)
+}
+
 // mutations
 const mutations = {
-  HANDLE_ISSUES_EVENTS (state, events) {
-    for (const event of events) {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          putItem(state, event.object)
-          break
-        case 'DELETED':
-          deleteItem(state, event.object)
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
+  RECEIVE_ISSUES (state, issues) {
+    state.all = orderByUpdatedAt(issues)
+  },
+  RECEIVE_COMMENTS (state, comments) {
+    state.allComments = groupBy(comments, 'metadata.number')
+  },
+  HANDLE_ISSUES_EVENT (state, { type, object }) {
+    switch (type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        putItem(state, object)
+        break
+      case 'DELETED':
+        deleteItem(state, object)
+        break
+      default:
+        console.error('undhandled event type', type)
     }
     orderTicketsByUpdatedAt(state)
   },
-  HANDLE_COMMENTS_EVENTS (state, events) {
-    for (const event of events) {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          putComment(state, event.object)
-          break
-        case 'DELETED':
-          deleteComment(state, event.object)
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
+  HANDLE_COMMENTS_EVENT (state, { type, object }) {
+    switch (type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        putComment(state, object)
+        break
+      case 'DELETED':
+        deleteComment(state, object)
+        break
+      default:
+        console.error('undhandled event type', type)
     }
     orderTicketsByUpdatedAt(state)
   },
@@ -153,7 +161,7 @@ const commentForIssue = (state, issueNumber) => {
 const putComment = (state, newItem) => {
   const issueNumber = get(newItem, 'metadata.number')
   const commentsList = commentForIssue(state, issueNumber)
-  const matcher = matches({ metadata: { id: newItem.metadata.id } })
+  const matcher = matchesProperty('metadata.id', newItem.metadata.id)
   putToList(commentsList, newItem, 'metadata.updated_at', matcher)
 }
 

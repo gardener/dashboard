@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import findLast from 'lodash/findLast'
 import { mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
 import ShootItemError from '@/views/ShootItemError'
@@ -58,19 +57,19 @@ export default {
       subscribeShoot: 'subscribe',
       unsubscribeShoot: 'unsubscribe'
     }),
-    handleShootEvents (events) {
+    handleShootEvent ({ type, object }) {
+      const metadata = object.metadata
       const { namespace, name } = get(this.$route, 'params', {})
-      const event = findLast(events, { object: { metadata: { namespace, name } } })
-      if (!event) {
+      if (metadata.namespace !== namespace || metadata.name !== name) {
         return
       }
-      if (event.type === 'DELETED') {
+      if (type === 'DELETED') {
         this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
           code: 410,
           reason: 'Cluster is gone'
         })
         this.component = 'shoot-item-error'
-      } else if (event.type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
+      } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
         this.error = undefined
         this.component = 'router-view'
       }
@@ -111,8 +110,8 @@ export default {
   },
   mounted () {
     this.unsubscribe = this.$store.subscribe(({ type, payload }) => {
-      if (type === 'shoots/HANDLE_EVENTS') {
-        this.handleShootEvents(payload.events)
+      if (type === 'shoots/HANDLE_EVENT') {
+        this.handleShootEvent(payload.event)
       }
     })
     this.load(this.$route)

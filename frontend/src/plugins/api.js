@@ -7,29 +7,29 @@
 import Vue from 'vue'
 
 import api, { interceptors } from '@/utils/api'
-import get from 'lodash/get'
+
+function delay (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 const VueApi = {
   registerRequestInterceptor (auth) {
-    let refreshTokenPromise
     this.unregister = interceptors.register({
       requestFulfilled (...args) {
         const url = args[0] ?? ''
-        if (!url.startsWith('/api') || !auth.isRefreshRequired(30)) {
+        if (!url.startsWith('/api')) {
           return Promise.resolve(args)
         }
-        if (!refreshTokenPromise) {
-          refreshTokenPromise = auth.refreshToken()
-          refreshTokenPromise.finally(() => {
-            refreshTokenPromise = undefined
-          })
-        }
-        return refreshTokenPromise
-          .catch(err => {
-            console.error('Token refresh failed: %s - %s', err.name, get(err, 'response.data.message', err.message))
-            auth.signout(new Error('Token refresh failed'))
-          })
+        return auth.ensureValidToken()
           .then(() => args)
+          .catch(() => {
+            // Delay the AbortError by 1 sec to avoid router navigation before redirection to signout URL is finished
+            return delay(1000).then(() => {
+              const err = new Error('Request Aborted')
+              err.name = 'AbortError'
+              throw err
+            })
+          })
       }
     })
   },

@@ -58,19 +58,23 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
-  topic: undefined
+  subscription: null
 }
 
 // actions
 const actions = {
-  /**
-   * Return all shoots in the given namespace.
-   * This ends always in a server/backend call.
-   */
-  clearAll ({ commit }) {
+  unsubscribe ({ commit }) {
+    commit('UNSET_SUBSCRIPTION')
     commit('CLEAR_ALL')
+    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
   },
-  subscribe ({ commit, dispatch, state, getters, rootState, rootGetters }, { namespace, name } = {}) {
+  subscribe ({ commit, dispatch, rootState }, metadata = {}) {
+    const { namespace = rootState.namespace, name } = metadata
+    commit('SET_SUBSCRIPTION', { namespace, name })
+    dispatch('synchronize')
+  },
+  synchronize ({ commit, dispatch, state, rootState, rootGetters }) {
     const fetchShoot = async options => {
       const [
         { data: shoot },
@@ -84,12 +88,13 @@ const actions = {
     }
 
     const fetchShoots = async options => {
+      const { namespace } = options
       const [
         { data: { items } },
         { data: { issues = [] } }
       ] = await Promise.all([
         getShoots(options),
-        getIssues(options)
+        getIssues({ namespace })
       ])
       return { shoots: items, issues, comments: [] }
     }
@@ -107,15 +112,14 @@ const actions = {
       }
     }
 
-    const toEvent = object => ({ type: 'ADDED', object })
-
-    const handleData = async (topics, promise) => {
+    // await and handle response data in the background
+    const handleData = async dataPromise => {
+      commit('SET_SHOOTS_LOADING', true, { root: true })
       try {
-        const { shoots, issues, comments } = await promise
-        commit('SET_TOPICS', topics, { root: true })
-        commit('HANDLE_EVENTS', { rootState, rootGetters, events: shoots.map(toEvent) })
-        commit('tickets/HANDLE_ISSUES_EVENTS', issues.map(toEvent), { root: true })
-        commit('tickets/HANDLE_COMMENTS_EVENTS', comments.map(toEvent), { root: true })
+        const { shoots, issues, comments } = await dataPromise
+        commit('RECEIVE', { rootState, rootGetters, shoots })
+        commit('tickets/RECEIVE_ISSUES', issues, { root: true })
+        commit('tickets/RECEIVE_COMMENTS', comments, { root: true })
       } catch (err) {
         commit('SET_ALERT', {
           type: 'error',
@@ -126,41 +130,22 @@ const actions = {
       }
     }
 
-    let topic = 'shoots'
-    let dataPromise
-    if (namespace && name) {
-      const options = { namespace, name }
-      topic += `;${namespace}/${name}`
-      dataPromise = fetchShoot(options)
+    const metadata = state.subscription
+    if (!metadata) {
+      return
+    }
+    const { namespace = rootState.namespace, name } = metadata
+    if (!namespace) {
+      return
+    }
+    if (name) {
+      handleData(fetchShoot({ namespace, name }))
     } else {
-      namespace ??= rootState.namespace
-      if (namespace) {
-        const options = { namespace }
-        if (options.namespace !== '_all') {
-          topic += `;${options.namespace}`
-        } else if (getters.onlyShootsWithIssues) {
-          options.labelSelector = 'shoot.gardener.cloud/status!=healthy'
-          topic += ':unhealthy'
-        }
-        dataPromise = fetchShoots(options)
-      }
+      const labelSelector = namespace === '_all' && getters.onlyShootsWithIssues
+        ? 'shoot.gardener.cloud/status!=healthy'
+        : undefined
+      handleData(fetchShoots({ namespace, labelSelector }))
     }
-
-    commit('CLEAR_ALL')
-    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
-    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
-
-    if (dataPromise) {
-      commit('SET_SHOOTS_LOADING', true, { root: true })
-      // await and handle response data in the background
-      handleData([topic], dataPromise)
-    }
-  },
-  unsubscribe ({ commit }) {
-    commit('CLEAR_ALL')
-    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
-    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
-    commit('SET_TOPICS', [], { root: true })
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -380,7 +365,7 @@ function onlyAllShootsWithIssues (state, rootState) {
   return rootState.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
 }
 
-function setFilteredItems (state, rootState, rootGetters) {
+function getFilteredItems (state, rootState, rootGetters) {
   let items = Object.values(state.shoots)
   if (onlyAllShootsWithIssues(state, rootState)) {
     if (get(state, 'shootListFilters.progressing', false)) {
@@ -436,7 +421,7 @@ function setFilteredItems (state, rootState, rootGetters) {
     }
   }
 
-  state.filteredShoots = items
+  return items
 }
 
 const putItem = (state, newItem) => {
@@ -460,6 +445,17 @@ const deleteItem = (state, deletedItem) => {
 
 // mutations
 const mutations = {
+  RECEIVE (state, { rootState, rootGetters, shoots: items }) {
+    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
+    const shoots = {}
+    for (const object of items) {
+      if (notOnlyShootsWithIssues || shootHasIssue(object)) {
+        shoots[keyForShoot(object.metadata)] = object
+      }
+    }
+    state.shoots = shoots
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
+  },
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
@@ -478,29 +474,27 @@ const mutations = {
   ITEM_PUT (state, { newItem }) {
     putItem(state, newItem)
   },
-  HANDLE_EVENTS (state, { rootState, rootGetters, events }) {
+  HANDLE_EVENT (state, { rootState, rootGetters, event }) {
+    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
     let setFilteredItemsRequired = false
-    for (const event of events) {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          if (onlyAllShootsWithIssues(state, rootState) && !shootHasIssue(event.object)) {
-            // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
-            continue
-          }
+    switch (event.type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
+        if (notOnlyShootsWithIssues || shootHasIssue(event.object)) {
           putItem(state, event.object)
           setFilteredItemsRequired = true
-          break
-        case 'DELETED':
-          deleteItem(state, event.object)
-          setFilteredItemsRequired = true
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
+        }
+        break
+      case 'DELETED':
+        deleteItem(state, event.object)
+        setFilteredItemsRequired = true
+        break
+      default:
+        console.error('undhandled event type', event.type)
     }
     if (setFilteredItemsRequired) {
-      setFilteredItems(state, rootState, rootGetters)
+      state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
     }
   },
   CLEAR_ALL (state) {
@@ -509,12 +503,12 @@ const mutations = {
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value
-    setFilteredItems(state, rootState, rootGetters)
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
   SET_SHOOT_LIST_FILTER (state, { rootState, rootGetters, filterValue }) {
     const { filter, value } = filterValue
     state.shootListFilters[filter] = value
-    setFilteredItems(state, rootState, rootGetters)
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
   SET_NEW_SHOOT_RESOURCE (state, { data }) {
     state.newShootResource = data
@@ -522,6 +516,12 @@ const mutations = {
   RESET_NEW_SHOOT_RESOURCE (state, shootResource) {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
+  },
+  SET_SUBSCRIPTION (state, value) {
+    state.subscription = value
+  },
+  UNSET_SUBSCRIPTION (state) {
+    state.subscription = null
   }
 }
 

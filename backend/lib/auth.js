@@ -63,7 +63,7 @@ router.route('/callback')
   })
 
 router.route('/token')
-  .get(async (req, res, next) => {
+  .post(async (req, res, next) => {
     try {
       res.send(await refreshToken(req, res))
     } catch (err) {

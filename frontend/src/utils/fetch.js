@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import createError, { isHttpError } from 'http-errors'
-
 const interceptors = []
 
 const registry = {
@@ -84,10 +82,11 @@ function fulfilledFn (request) {
       }
     })
 
-    let promise = Promise.resolve(response)
-
+    let promise
     const contentType = response.headers['content-type']
-    if (contentType) {
+    if (!contentType) {
+      promise = Promise.resolve(response)
+    } else {
       const method = contentType.startsWith('application/json')
         ? 'json'
         : 'text'
@@ -121,4 +120,18 @@ function fulfilledFn (request) {
   }
 }
 
-export { fetchWrapper as default, registry, isHttpError, createError }
+function isUnauthorizedError (err) {
+  return err.name === 'FetchError' && err.statusCode === 401
+}
+
+function createError (status, message, properties = {}) {
+  const err = new Error(message)
+  err.name = 'FetchError'
+  err.status = err.statusCode = status
+  for (const [key, value] of Object.entries(properties)) {
+    Object.defineProperty(err, key, { value })
+  }
+  return err
+}
+
+export { fetchWrapper as default, registry, isUnauthorizedError, createError }
