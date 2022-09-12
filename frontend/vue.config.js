@@ -123,12 +123,22 @@ module.exports = {
     proxy: {
       '/api/stream': {
         target: proxyTarget,
-        onProxyRes: (proxyRes, req, res) => {
-          res.on('close', () => {
-            if (!res.finished) {
-              proxyRes.destroy()
-            }
-          })
+        onProxyRes (proxyRes, req, res) {
+          const cleanup = err => {
+            // cleanup event listeners to allow clean garbage collection
+            proxyRes.removeListener('error', cleanup)
+            proxyRes.removeListener('close', cleanup)
+            res.removeListener('error', cleanup)
+            res.removeListener('close', cleanup)
+            console.log('destroy response and proxy response') // eslint-disable-line
+            // destroy all source streams to propagate the caught event backward
+            req.destroy(err)
+            proxyRes.destroy(err)
+          }
+          proxyRes.once('error', cleanup)
+          proxyRes.once('close', cleanup)
+          res.once('error', cleanup)
+          res.once('close', cleanup)
         }
       },
       '/api': {
