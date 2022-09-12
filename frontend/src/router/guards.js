@@ -8,12 +8,12 @@ import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import { getConfiguration } from '@/utils/api'
 
-export default function createGuards (store, userManager, localStorage) {
+export default function createGuards (store, userManager, localStorage, logger) {
   return {
     beforeEach: [
       setLoading(store, true),
-      ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
-      ensureDataLoaded(store, localStorage)
+      ensureUserAuthenticatedForNonPublicRoutes(store, userManager, logger),
+      ensureDataLoaded(store, localStorage, logger)
     ],
     afterEach: [
       setLoading(store, false)
@@ -33,7 +33,7 @@ function setLoading (store, value) {
   }
 }
 
-function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
+function ensureUserAuthenticatedForNonPublicRoutes (store, userManager, logger) {
   return (to, from, next) => {
     const { meta = {}, path } = to
     if (meta.public) {
@@ -41,7 +41,7 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
     }
     const user = userManager.getUser()
     if (!user) {
-      console.log('No user found --> Redirecting to login page') // eslint-disable-line
+      logger.info('No user found --> Redirecting to login page')
       const query = path !== '/' ? { redirectPath: path } : undefined
       return next({
         name: 'Login',
@@ -49,7 +49,7 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
       })
     }
     if (userManager.isSessionExpired()) {
-      console.log('Session is expired --> Redirecting to logout page') // eslint-disable-line
+      logger.info('Session is expired --> Redirecting to logout page')
       userManager.signout()
       return next(false)
     }
@@ -61,28 +61,33 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
   }
 }
 
-function ensureDataLoaded (store, localStorage) {
+function ensureDataLoaded (store, localStorage, logger) {
   return async (to, from, next) => {
     const meta = to.meta || {}
-    if (meta.public) {
-      return next()
-    }
-    if (to.name === 'Error') {
+    if (meta.public || to.name === 'Error') {
+      store.dispatch('shoots/unsubscribe')
       return next()
     }
     try {
-      const namespace = to.params.namespace || to.query.namespace
-      await Promise.all([
+      const promises = [
         ensureConfigurationLoaded(store),
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
         ensureKubeconfigDataLoaded(store),
-        ensureExtensionInformationLoaded(store),
-        store.dispatch('setNamespace', namespace)
-      ])
+        ensureExtensionInformationLoaded(store)
+      ]
+
+      const namespace = to.params.namespace || to.query.namespace
+      if (namespace && namespace !== store.state.namespace) {
+        store.commit('SET_NAMESPACE', namespace)
+        promises.push(store.dispatch('refreshSubjectRules', namespace))
+      }
+
+      await Promise.all(promises)
 
       if (namespace && namespace !== '_all' && !includes(store.getters.namespaces, namespace)) {
+        logger.error('User %s has no authorization for namespace %s', store.getters.username, namespace)
         store.commit('SET_NAMESPACE', null)
       }
 
@@ -143,6 +148,11 @@ function ensureDataLoaded (store, localStorage) {
             store.dispatch('fetchMembers'),
             store.dispatch('shoots/subscribe')
           ])
+          break
+        }
+        case 'Account':
+        case 'Settings': {
+          store.dispatch('shoots/unsubscribe')
           break
         }
       }
