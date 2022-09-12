@@ -13,6 +13,7 @@ import {
   homeBreadcrumbs,
   newProjectBreadcrumbs,
   accountBreadcrumbs,
+  settingsBreadcrumbs,
   shootListBreadcrumbs,
   shootItemBreadcrumbs,
   shootItemTerminalBreadcrumbs,
@@ -40,6 +41,7 @@ import NewShootEditor from '@/views/NewShootEditor'
 import ShootItemPlaceholder from '@/views/ShootItemPlaceholder'
 import ShootItemEditor from '@/views/ShootItemEditor'
 import Account from '@/views/Account'
+import Settings from '@/views/Settings'
 
 const Members = () => import('@/views/Members')
 const Home = () => import('@/views/Home')
@@ -70,6 +72,7 @@ function defaultHierarchy (context, path) {
   const children = [
     homeRoute(context, ''),
     accountRoute(context, 'account'),
+    settingsRoute(context, 'settings'),
     projectsRoute(context, 'namespace'),
     newProjectRoute(context, 'namespace/+'),
     projectHierarchy(context, 'namespace/:namespace'),
@@ -259,6 +262,29 @@ function accountRoute ({ state, getters }, path) {
       if (!to.query.namespace && namespace) {
         return next({
           name: 'Account',
+          query: { namespace, ...to.query }
+        })
+      }
+      next()
+    }
+  }
+}
+
+function settingsRoute ({ state, getters }, path) {
+  return {
+    path,
+    name: 'Settings',
+    component: Settings,
+    meta: {
+      namespaced: false,
+      projectScope: false,
+      breadcrumbs: settingsBreadcrumbs
+    },
+    beforeEnter (to, from, next) {
+      const namespace = state.namespace || getters.defaultNamespace
+      if (!to.query.namespace && namespace) {
+        return next({
+          name: 'Settings',
           query: { namespace, ...to.query }
         })
       }
