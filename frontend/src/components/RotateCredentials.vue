@@ -14,24 +14,24 @@ SPDX-License-Identifier: Apache-2.0
     :caption="componentTexts.caption"
     :tooltip="tooltip"
     :icon ="icon"
-    width="600"
+    width="700"
     :button-text="componentTexts.buttonText"
     :confirm-required="true"
     :confirm-button-text="confirmButtonText">
     <template v-slot:actionComponent>
       <v-row >
         <v-col>
-          <span class="py-4">{{componentTexts.heading}}</span>
-          <v-alert :type="componentTexts.alert.type" outlined>
-            <ul class="pa-0">
-              <li
-                v-for="message in componentTexts.alert.messages"
-                :class="{'no-bullets' : componentTexts.alert.messages.length === 1}"
-                :key="message">
-                {{message}}
-              </li>
-            </ul>
-          </v-alert>
+          <div class="py-4 text-h5 pt-0 pb-3">{{componentTexts.heading}}</div>
+          <v-alert v-if="mode === 'start'" type="info" outlined dense>Note: This is a two-phase operation. This step will <strong>prepare</strong> the rotation. Please read below which actions will be performed in this phase.</v-alert>
+          <v-alert v-if="mode === 'complete'" type="info" outlined dense>Note: This is a two-phase operation. This step will <strong>complete</strong> the rotation. Please read below which actions will be performed in this phase.</v-alert>
+          <ul :class="{'no-bullets' : componentTexts.messages.length === 1}">
+            <li
+              v-for="message in componentTexts.messages"
+              class="font-weight-bold"
+              :key="message">
+              {{message}}
+            </li>
+          </ul>
           <v-checkbox
             v-model="maintenance"
             label="Perform this operation in the maintenance time window"
@@ -89,19 +89,19 @@ export default {
       if (this.operation === this.completionOperation) {
         return 'complete'
       }
-      return 'init'
+      return 'start'
     },
     operation () {
       if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
         return this.completionOperation
       }
-      return this.initOperation
+      return this.startOperation
     },
-    initOperation () {
+    startOperation () {
       if (rotationTypes[this.type]) {
-        return rotationTypes[this.type].initOperation
+        return rotationTypes[this.type].startOperation
       }
-      return rotationTypes.allCredentials.initOperation
+      return rotationTypes.allCredentials.startOperation
     },
     completionOperation () {
       if (rotationTypes[this.type]) {
@@ -128,7 +128,7 @@ export default {
       return this.shootGardenOperation === this.operation
     },
     isProgressingPhase () {
-      if (this.mode === 'init' && this.phaseType === 'Preparing') {
+      if (this.mode === 'start' && this.phaseType === 'Preparing') {
         return true
       }
       if (this.mode === 'complete' && this.phaseType === 'Completing') {
@@ -196,10 +196,6 @@ export default {
       if (this.isScheduledForMaintenance) {
         return 'mdi-clock-outline'
       }
-      switch (this.mode) {
-        case 'init':
-          return 'mdi-rotate-right'
-      }
       return 'mdi-refresh'
     },
     confirmButtonText () {
@@ -210,8 +206,8 @@ export default {
         return 'Schedule Roatation'
       }
       switch (this.mode) {
-        case 'init':
-          return 'Initiate Roatation'
+        case 'start':
+          return 'Prepare Roatation'
         case 'complete':
           return 'Complete Rotation'
       }
@@ -242,26 +238,20 @@ export default {
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
           successMessage: `Rotation of kubeconfig credentials started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of kubeconfig credentials?',
-          alert: {
-            type: 'warning',
-            messages: [
-              'The current kubeconfig credentials will be revoked.'
-            ]
-          }
+          messages: [
+            'The current kubeconfig credentials will be revoked.'
+          ]
         },
         'rotate-ca-start': {
           caption: this.isLoading
             ? 'Preparing certificate authorities rotation'
-            : 'Initiate Certificate Authorities Rotation',
-          errorMessage: 'Could not initiate the rotation of certificate authorities',
-          successMessage: `Rotation of certificate authorities initiated for ${this.shootName}`,
-          heading: 'Do you want to initiate the rotation of certificate authorities?',
-          alert: {
-            type: 'info',
-            messages: [
-              'New CAs will be created and added to the bundle (together with the old CAs). Client certificates will be re-issued immediately.'
-            ]
-          }
+            : 'Prepare Certificate Authorities Rotation',
+          errorMessage: 'Could not prepare the rotation of certificate authorities',
+          successMessage: `Rotation of certificate authorities prepared for ${this.shootName}`,
+          heading: 'Do you want to prepare the rotation of certificate authorities?',
+          messages: [
+            'New CAs will be created and added to the bundle (together with the old CAs).'
+          ]
         },
         'rotate-ca-complete': {
           caption: this.isLoading
@@ -270,52 +260,40 @@ export default {
           errorMessage: 'Could not complete the rotation of certificate authorities',
           successMessage: `Rotation of certificate authorities completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of certificate authorities?',
-          alert: {
-            type: 'warning',
-            messages: [
-              'Ensure that end-users have updated all cluster API clients that communicate with the control plane. The old CAs will be dropped from the bundle and server certificate will be re-issued.'
-            ]
-          }
+          messages: [
+            'Ensure that all parties (end-users, CD pipelines etc.) have updated their kubeconfig for this Shoot cluster since the CA rotation was last initiated. Otherwise the client requests will fail as the old CAs will be dropped from the bundle.'
+          ]
         },
         'rotate-observability-credentials': {
           caption: this.isLoading ? 'Scheduling observability passwords rotation' : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
           successMessage: `Rotation of observability passwords started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of observability passwords?',
-          alert: {
-            type: 'warning',
-            messages: [
-              this.isAdmin
-                ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually.'
-                : 'The current observability passwords will be invalidated.'
-            ]
-          }
+          messages: [
+            this.isAdmin
+              ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually.'
+              : 'The current observability passwords will be invalidated.'
+          ]
         },
         'rotate-ssh-keypair': {
           caption: this.isLoading ? 'Scheduling ssh key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of ssh key pair',
           successMessage: `Rotation of ssh key pair started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of ssh key pair for worker nodes?',
-          alert: {
-            type: 'warning',
-            messages: [
-              'The current ssh key pair will be revoked.'
-            ]
-          }
+          messages: [
+            'The current ssh key pair will be revoked.'
+          ]
         },
         'rotate-etcd-encryption-key-start': {
           caption: this.isLoading
             ? 'Preparing etcd encryption key rotation'
-            : 'Initiate ETCD Encryption Key Rotation',
-          errorMessage: 'Could not initiate the rotation of etcd encryption key',
-          successMessage: `Rotation of etcd encryption key initiated for ${this.shootName}`,
-          heading: 'Do you want to initiate the rotation of etcd encryption key?',
-          alert: {
-            type: 'info',
-            messages: [
-              'A new encryption key will be created and added to the bundle (together with the old encryption key). All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key.'
-            ]
-          }
+            : 'Prepare ETCD Encryption Key Rotation',
+          errorMessage: 'Could not prepare the rotation of etcd encryption key',
+          successMessage: `Rotation of etcd encryption key prepared for ${this.shootName}`,
+          heading: 'Do you want to prepare the rotation of etcd encryption key?',
+          messages: [
+            'A new encryption key will be created and added to the bundle (together with the old encryption key). All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key.'
+          ]
         },
         'rotate-etcd-encryption-key-complete': {
           caption: this.isLoading
@@ -324,26 +302,20 @@ export default {
           errorMessage: 'Could not complete the rotation of etcd encryption key',
           successMessage: `Rotation of etcd encryption key completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of etcd encryption key?',
-          alert: {
-            type: 'warning',
-            messages: [
-              'The old encryption will be dropped from the bundle.'
-            ]
-          }
+          messages: [
+            'The old encryption will be dropped from the bundle.'
+          ]
         },
         'rotate-serviceaccount-key-start': {
           caption: this.isLoading
             ? 'Preparing ServiceAccount token signing key rotation'
-            : 'Initiate ServiceAccount Token Signing Key Rotation',
-          errorMessage: 'Could not initiate the rotation of ServiceAccount token signing key',
-          successMessage: `Rotation of ServiceAccount token signing key initiated for ${this.shootName}`,
-          heading: 'Do you want to initiate the rotation of ServiceAccount token signing key?',
-          alert: {
-            type: 'info',
-            messages: [
-              'A new signing key will be created and added to the bundle (together with the old signing key)'
-            ]
-          }
+            : 'Prepare ServiceAccount Token Signing Key Rotation',
+          errorMessage: 'Could not prepare the rotation of ServiceAccount token signing key',
+          successMessage: `Rotation of ServiceAccount token signing key prepared for ${this.shootName}`,
+          heading: 'Do you want to prepare the rotation of ServiceAccount token signing key?',
+          messages: [
+            'A new signing key will be created and added to the bundle (together with the old signing key)'
+          ]
         },
         'rotate-serviceaccount-key-complete': {
           caption: this.isLoading
@@ -352,33 +324,27 @@ export default {
           errorMessage: 'Could not complete the rotation of ServiceAccount token signing key',
           successMessage: `Rotation of ServiceAccount token signing key completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of ServiceAccount token signing key?',
-          alert: {
-            type: 'warning',
-            messages: [
-              'Ensure that end-users have updated all out-of-cluster API clients that communicate with the control plane via ServiceAccount tokens. The old signing key will be dropped from the bundle.'
-            ]
-          }
+          messages: [
+            'Ensure that all parties (end-users, CD pipelines etc.) have updated their ServiceAccount kubeconfigs for this Shoot cluster. Otherwise the client requests will fail as the old signing key will be dropped from the bundle.'
+          ]
         }
       }
       componentTexts['rotate-credentials-start'] = {
         caption: this.isLoading
           ? 'Preparing credential rotation'
-          : 'Initiate Rotation of all Credentials',
-        buttonText: this.text ? 'Initiate Rotation of all Credentials' : '',
-        errorMessage: 'Could not initiate credential rotation',
-        successMessage: `Credential rotation initiated for ${this.shootName}`,
-        heading: 'Do you want to initiate the rotation of all credentials?',
-        alert: {
-          type: 'warning',
-          messages: [
-            ...componentTexts['rotate-kubeconfig-credentials'].alert.messages,
-            ...componentTexts['rotate-ca-start'].alert.messages,
-            ...componentTexts['rotate-observability-credentials'].alert.messages,
-            ...componentTexts['rotate-ssh-keypair'].alert.messages,
-            ...componentTexts['rotate-etcd-encryption-key-start'].alert.messages,
-            ...componentTexts['rotate-serviceaccount-key-start'].alert.messages
-          ]
-        }
+          : 'Start Rotation of all Credentials',
+        buttonText: this.text ? 'Prepare Rotation of all Credentials' : '',
+        errorMessage: 'Could not prepare credential rotation',
+        successMessage: `Credential rotation prepared for ${this.shootName}`,
+        heading: 'Do you want to prepare the rotation of all credentials?',
+        messages: [
+          ...componentTexts['rotate-kubeconfig-credentials'].messages,
+          ...componentTexts['rotate-ca-start'].messages,
+          ...componentTexts['rotate-observability-credentials'].messages,
+          ...componentTexts['rotate-ssh-keypair'].messages,
+          ...componentTexts['rotate-etcd-encryption-key-start'].messages,
+          ...componentTexts['rotate-serviceaccount-key-start'].messages
+        ]
       }
       componentTexts['rotate-credentials-complete'] = {
         caption: this.isLoading
@@ -388,14 +354,11 @@ export default {
         errorMessage: 'Could not complete credential rotation',
         successMessage: `Credential rotation completed for ${this.shootName}`,
         heading: 'Do you want to complete the rotation of all credentials?',
-        alert: {
-          type: 'warning',
-          messages: [
-            ...componentTexts['rotate-ca-complete'].alert.messages,
-            ...componentTexts['rotate-etcd-encryption-key-complete'].alert.messages,
-            ...componentTexts['rotate-serviceaccount-key-complete'].alert.messages
-          ]
-        }
+        messages: [
+          ...componentTexts['rotate-ca-complete'].messages,
+          ...componentTexts['rotate-etcd-encryption-key-complete'].messages,
+          ...componentTexts['rotate-serviceaccount-key-complete'].messages
+        ]
       }
       return componentTexts[this.operation]
     }
@@ -459,6 +422,7 @@ export default {
 
 <style lang="scss" scoped>
   .no-bullets {
+    padding: 0px;
     list-style-type: none;
   }
 </style>

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
                 in order to perform this operation
               </strong>
             </div>
-            <div>Please initiate rotation of the followig phases</div>
+            <div>Please prepare rotation of the followig phases</div>
             <ul v-if="phase">
               <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
             </ul>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
             </div>
             <div>
-              Rotation Initiated: <time-string :date-time="lastInitiationTime" mode="past"></time-string>
+              Rotation Prepared: <time-string :date-time="lastInitiationTime" mode="past"></time-string>
             </div>
           </template>
         </v-tooltip>
