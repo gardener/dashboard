@@ -210,6 +210,7 @@ describe('security', function () {
         aud: ['gardener'],
         exp: accessTokenPayload.exp,
         refresh_at: security.decode(tokenSet.id_token).exp,
+        rti: expect.stringMatching(/^[a-z0-9]{7}$/),
         isAdmin: false
       })
 
