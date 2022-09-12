@@ -9,7 +9,7 @@
 const assert = require('assert').strict
 const crypto = require('crypto')
 const { split, join, some, every, includes, head, chain, pick } = require('lodash')
-const { Issuer, custom, generators, TokenSet, errors: { OPError, RPError } } = require('openid-client')
+const { Issuer, custom, generators, TokenSet } = require('openid-client')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
@@ -28,7 +28,13 @@ const {
 } = require('./jose')(sessionSecret)
 
 const now = () => Math.floor(Date.now() / 1000)
-const md5 = data => crypto.createHash('md5').update(data).digest('hex')
+const digest = (data, n = 7) => {
+  return crypto
+    .createHash('sha256')
+    .update(data)
+    .digest('hex')
+    .substring(0, n)
+}
 const { isHttpError } = createError
 
 const {
@@ -363,35 +369,39 @@ async function authorizationCodeExchange (redirectUri, parameters, checks) {
        */
       payload.exp = iat + sessionLifetime
       payload.refresh_at = tokenSet.expires_at
+      payload.rti = digest(tokenSet.refresh_token)
+      logger.debug('Created TokenSet (%s)', payload.rti)
     }
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
   } catch (err) {
-    if (err instanceof RPError || err instanceof OPError) {
-      throw createError(401, err)
-    }
-    throw err
+    throw handleClientError(err)
   }
 }
 
+function handleClientError (err) {
+  if (['RPError', 'OPError'].includes(err.name)) {
+    logger.error('%s: %s', err.name, err.message)
+    err = createError(401, err)
+  }
+  return err
+}
+
 async function refreshTokenSet (tokenSet) {
-  const digest = md5(tokenSet.refresh_token)
+  const payload = pick(decode(tokenSet.access_token), ['iat', 'exp', 'rti'])
   try {
     const client = await exports.getIssuerClient()
-    logger.debug('Refreshing id_token (digest: %s)', digest)
-    const payload = pick(decode(tokenSet.access_token), ['iat', 'exp'])
+    logger.debug('Refreshing TokenSet (%s)', payload.rti)
     tokenSet = await client.refresh(tokenSet.refresh_token)
-    if (tokenSet.refresh_token) {
-      payload.refresh_at = tokenSet.expires_at
-    }
+    const rti = payload.rti
+    payload.rti = digest(tokenSet.refresh_token)
+    logger.debug('Refreshed TokenSet (%s <- %s)', payload.rti, rti)
+    payload.refresh_at = tokenSet.expires_at
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
   } catch (err) {
-    logger.error('Failed to refresh id_token (digest: %s): %s - %s', digest, err.name, err.message)
-    if (err instanceof RPError || err instanceof OPError) {
-      throw createError(401, err)
-    }
-    throw err
+    logger.error('Failed to refresh TokenSet (%s)', payload.rti)
+    throw handleClientError(err)
   }
 }
 
@@ -434,7 +444,6 @@ function authenticate (options = {}) {
       req.user = user
       next()
     } catch (err) {
-      logger.error('Authentication failed: %s - %s', err.name, err.message)
       clearCookies(res)
       next(err)
     }

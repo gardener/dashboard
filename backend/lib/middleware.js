@@ -68,7 +68,7 @@ function errorToLocals (err, req) {
     logger.error(err.message, err.stack)
   }
   if (code === 401) {
-    logger.info('Authentication Failed: %s', err.message)
+    logger.warn('Authentication failed: %s - %s', err.name, err.message)
   }
   return { code, reason, message, status, details }
 }

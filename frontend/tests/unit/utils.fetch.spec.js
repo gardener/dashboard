@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import fetchWrapper, { registry, isHttpError } from '@/utils/fetch'
+import fetchWrapper, { registry, isUnauthorizedError } from '@/utils/fetch'
 
 describe('utils', () => {
   describe('fetch', () => {
@@ -148,7 +148,7 @@ describe('utils', () => {
         expect(registry.size).toBe(0)
         registry.register({
           responseRejected (err) {
-            return isHttpError(err) && err.status === 401
+            return isUnauthorizedError(err)
               ? Promise.resolve(err.response.data)
               : Promise.reject(err)
           }
