@@ -69,6 +69,7 @@ import pick from 'lodash/pick'
 import moment from '@/utils/moment'
 import createEventStreamPlugin from './plugins/eventStreamPlugin'
 import createMediaPlugin from './plugins/mediaPlugin'
+import createStoragePlugin from './plugins/storage'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
@@ -79,10 +80,12 @@ import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
 import shootStaging from './modules/shootStaging'
+import storage from './modules/storage'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
 const localStorage = Vue.localStorage
+const logger = Vue.logger
 
 Vue.use(Vuex)
 
@@ -91,8 +94,9 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createEventStreamPlugin(),
-  createMediaPlugin(window)
+  createStoragePlugin(localStorage),
+  createEventStreamPlugin(logger),
+  createMediaPlugin()
 ]
 if (debug) {
   plugins.push(createLogger())
@@ -158,9 +162,7 @@ const state = {
   },
   darkTheme: false,
   colorScheme: 'auto',
-  subscriptions: {},
-  gardenctlOptions: {},
-  topics: []
+  gardenctlOptions: {}
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1623,9 +1625,6 @@ const mutations = {
   SET_GARDENCTL_OPTIONS (state, value) {
     state.gardenctlOptions = value
     localStorage.setObject('global/gardenctl', value)
-  },
-  SET_TOPICS (state, topics) {
-    state.topics = Array.isArray(topics) ? topics : []
   }
 }
 
@@ -1639,7 +1638,8 @@ const modules = {
   shoots,
   cloudProviderSecrets,
   tickets,
-  shootStaging
+  shootStaging,
+  storage
 }
 
 const store = new Vuex.Store({

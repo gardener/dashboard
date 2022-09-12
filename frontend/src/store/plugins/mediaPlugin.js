@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-export default function (window) {
+export default function () {
   return store => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     mq.addEventListener('change', e => {

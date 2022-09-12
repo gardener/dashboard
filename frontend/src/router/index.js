@@ -14,6 +14,7 @@ Vue.use(Router)
 
 const userManager = Vue.auth
 const localStorage = Vue.localStorage
+const logger = Vue.logger
 
 export default function createRouter (store) {
   const zeroPoint = { x: 0, y: 0 }
@@ -38,11 +39,11 @@ export default function createRouter (store) {
       if (expirationTime > currentTime) {
         const delay = expirationTime - currentTime
         timeoutID = setTimeout(() => {
-          console.log('Session is expiring --> Redirecting to logout page') // eslint-disable-line
+          logger.info('Session is expiring --> Redirecting to logout page')
           userManager.signout()
         }, delay)
       } else {
-        console.error('Expiration time of a new token is not expected to be in the past')
+        logger.error('Expiration time of a new token is not expected to be in the past')
       }
     }
   })
@@ -51,7 +52,7 @@ export default function createRouter (store) {
   const router = new Router(routerOptions)
 
   /* navigation guards */
-  const guards = createGuards(store, userManager, localStorage)
+  const guards = createGuards(store, userManager, localStorage, logger)
   for (const guard of guards.beforeEach) {
     router.beforeEach(guard)
   }
@@ -61,7 +62,7 @@ export default function createRouter (store) {
 
   /* router error */
   router.onError(err => {
-    console.error('Router error:', err)
+    logger.error('Router error:', err)
     store.commit('SET_LOADING', false)
     store.commit('SET_ALERT', { type: 'error', message: err.message })
     router.push({ name: 'Error' })
