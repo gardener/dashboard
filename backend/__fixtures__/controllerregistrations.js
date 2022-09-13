@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, find } = require('lodash')
+const { cloneDeep, find, set } = require('lodash')
 
 function getControllerRegistration ({ uid, name, version, resources }) {
   const metadata = {
@@ -18,15 +18,7 @@ function getControllerRegistration ({ uid, name, version, resources }) {
     spec.resources = resources
   }
   if (version) {
-    spec.deployment = {
-      providerConfig: {
-        values: {
-          image: {
-            tag: version
-          }
-        }
-      }
-    }
+    set(metadata, ['annotations', 'dashboard.gardener.cloud/version'], version)
   }
   return { metadata, spec }
 }

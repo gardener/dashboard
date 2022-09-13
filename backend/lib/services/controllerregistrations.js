@@ -18,7 +18,8 @@ exports.listExtensions = async function ({ user }) {
   for (const { metadata, spec = {} } of controllerregistrations) {
     const name = metadata.name
     if (allowed) {
-      const version = _.get(spec, 'deployment.providerConfig.values.image.tag')
+      const annotations = _.get(metadata, 'annotations', {})
+      const version = _.get(annotations, 'dashboard.gardener.cloud/version')
       const resources = spec.resources
       extensions.push({ name, version, resources })
     } else {
