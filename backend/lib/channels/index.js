@@ -6,6 +6,7 @@
 
 'use strict'
 
+const logger = require('../logger')
 const { createChannel } = require('better-sse')
 
 function matchesMetadataFn (data, eventName) {
@@ -51,15 +52,21 @@ function filterFn (data, eventName) {
   }
 }
 
-function extend (channel) {
+function extend (channel, name) {
   channel.publish = (eventName, data) => channel.broadcast(data, eventName, {
     filter: filterFn(data, eventName)
   })
+  if (name) {
+    const logSessionCount = () => logger.debug('Number of registered sessions on channel %s is %d', name, channel.sessionCount)
+    channel.on('session-registered', logSessionCount)
+    channel.on('session-deregistered', logSessionCount)
+  }
+
   return channel
 }
 
 module.exports = {
-  shoots: extend(createChannel()),
-  unhealthyShoots: extend(createChannel()),
+  shoots: extend(createChannel(), 'shoots'),
+  unhealthyShoots: extend(createChannel(), 'unhealthyShoots'),
   tickets: extend(createChannel())
 }

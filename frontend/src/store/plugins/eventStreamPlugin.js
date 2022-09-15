@@ -5,51 +5,87 @@
 //
 
 function connect (store, logger, topic) {
-  const params = new URLSearchParams({ topic })
+  const keepAlive = 15
+  const connectTimeout = 15000
+  const params = new URLSearchParams({ keepAlive, topic })
   const eventSource = new EventSource('/api/stream?' + params.toString())
 
-  const resync = async () => {
+  const cleanup = () => {
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = undefined
+    }
+    lastHeartbeat = Date.now()
+    eventSource.removeEventListener('connected', onConnected)
+    eventSource.removeEventListener('heartbeat', onHeartbeat)
+    eventSource.removeEventListener('error', onError)
+    eventSource.removeEventListener('reconnect', onReconnect)
+    eventSource.removeEventListener('comments', onComments)
+    eventSource.removeEventListener('issues', onIssues)
+    eventSource.removeEventListener('shoots', onShoots)
     eventSource.close()
+  }
+
+  let connectionCount = 0
+  let lastHeartbeat = Date.now()
+
+  const reconnect = async () => {
+    cleanup()
+    logger.log('EVS reconnect initiated')
     store.dispatch('shoots/synchronize')
   }
 
+  let intervalId = setInterval(() => {
+    if (Date.now() - lastHeartbeat > 2 * keepAlive * 1000) {
+      logger.info('EVS connection is dead')
+      reconnect()
+    }
+  }, Math.floor(keepAlive * 1000 / 3))
+
   let timeoutId = setTimeout(() => {
-    logger.error('SSE connection timeout')
-    resync()
-  }, 5000)
+    logger.error('EVS connect timeout')
+    reconnect()
+  }, connectTimeout)
 
-  /* handle 'open' event */
-  const onOpen = () => {
-    logger.debug('SSE connection open')
-  }
-  eventSource.addEventListener('open', onOpen, { once: true })
-
-  /* handle 'ready' event */
-  const onReady = e => {
+  /* handle 'connected' event */
+  const onConnected = e => {
     if (timeoutId) {
       clearTimeout(timeoutId)
       timeoutId = undefined
     }
-    logger.log('SSE connection ready:', JSON.parse(e.data))
-  }
-  eventSource.addEventListener('ready', onReady, { once: true })
 
-  /* handle 'close' event */
-  const onClose = () => {
-    logger.log('SSE connection closing')
-    resync()
+    connectionCount += 1
+    lastHeartbeat = Date.now()
+    const { statusCode, message, ...data } = JSON.parse(e.data)
+    if (statusCode === 200) {
+      logger.info('EVS connected:', data)
+    } else {
+      logger.error('EVS error: %d - %s', statusCode, message)
+      store.commit('SET_ALERT', { type: 'error', message })
+    }
   }
-  eventSource.addEventListener('close', onClose, { once: true })
+  eventSource.addEventListener('connected', onConnected)
+
+  /* handle 'reconnect' event */
+  const onReconnect = () => {
+    logger.log('EVS reconnecting')
+    reconnect()
+  }
+  eventSource.addEventListener('reconnect', onReconnect)
 
   /* handle 'error' events */
   const onError = e => {
     switch (eventSource.readyState) {
-      case EventSource.CONNECTING:
-        logger.debug('SSE connection opening')
+      case EventSource.CONNECTING: {
+        logger.debug('EVS %s', connectionCount > 1 ? 'reconnecting' : 'connecting')
         break
-      case EventSource.CLOSED:
-        logger.debug('SSE connection closed')
+      }
+      case EventSource.CLOSED: {
+        logger.debug('EVS closed')
+        // TODO reconcile connection state and recoonect when connection is dead or closed but not based on events
+        // reconnect()
         break
+      }
     }
   }
   eventSource.addEventListener('error', onError)
@@ -57,8 +93,8 @@ function connect (store, logger, topic) {
   /* handle 'heartbeat' events */
   const onHeartbeat = e => {
     const data = JSON.parse(e.data)
-    const latency = Date.now() - new Date(data.time).getTime()
-    logger.debug('SSE connection heartbeat:', { ...data, latency })
+    logger.debug('EVS heartbeat:', data, e.lastEventId)
+    lastHeartbeat = Date.now()
   }
   eventSource.addEventListener('heartbeat', onHeartbeat)
 
@@ -101,17 +137,7 @@ function connect (store, logger, topic) {
   }
   eventSource.addEventListener('comments', onComments)
 
-  return () => {
-    eventSource.removeEventListener('comments', onComments)
-    eventSource.removeEventListener('issues', onIssues)
-    eventSource.removeEventListener('shoots', onShoots)
-    eventSource.removeEventListener('heartbeat', onHeartbeat)
-    eventSource.removeEventListener('error', onError)
-    eventSource.removeEventListener('close', onClose)
-    eventSource.removeEventListener('ready', onReady)
-    eventSource.removeEventListener('open', onOpen)
-    eventSource.close()
-  }
+  return () => cleanup()
 }
 
 export default function createPlugin (logger) {

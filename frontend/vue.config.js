@@ -132,7 +132,7 @@ module.exports = {
             res.removeListener('close', cleanup)
             console.log('destroy response and proxy response') // eslint-disable-line
             // destroy all source streams to propagate the caught event backward
-            req.destroy(err)
+            res.destroy(err)
             proxyRes.destroy(err)
           }
           proxyRes.once('error', cleanup)
