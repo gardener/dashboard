@@ -48,6 +48,7 @@ import {
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
 import find from 'lodash/find'
 
+const logger = Vue.logger
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
 // initial state
@@ -72,7 +73,7 @@ const actions = {
   subscribe ({ commit, dispatch, rootState }, metadata = {}) {
     const { namespace = rootState.namespace, name } = metadata
     commit('SET_SUBSCRIPTION', { namespace, name })
-    dispatch('synchronize')
+    return dispatch('synchronize')
   },
   synchronize ({ commit, dispatch, state, rootState, rootGetters }) {
     const fetchShoot = async options => {
@@ -83,7 +84,9 @@ const actions = {
         getShoot(options),
         getIssuesAndComments(options)
       ])
+      // fetch shootInfo and shootSeedInfo in the background (do not await the promise)
       assignInfoAndSeedInfo(shoot)
+      logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
       return { shoots: [shoot], issues, comments }
     }
 
@@ -96,6 +99,7 @@ const actions = {
         getShoots(options),
         getIssues({ namespace })
       ])
+      logger.debug('Fetched shoots and tickets in namespace %s', options.namespace)
       return { shoots: items, issues, comments: [] }
     }
 
@@ -108,7 +112,7 @@ const actions = {
       try {
         await Promise.all(promises)
       } catch (err) {
-        console.error('Failed to fetch shoot or shootSeed info:', err.message)
+        logger.error('Failed to fetch shoot or shootSeed info:', err.message)
       }
     }
 
@@ -121,10 +125,9 @@ const actions = {
         commit('tickets/RECEIVE_ISSUES', issues, { root: true })
         commit('tickets/RECEIVE_COMMENTS', comments, { root: true })
       } catch (err) {
-        commit('SET_ALERT', {
-          type: 'error',
-          message: get(err, 'response.data.message', err.message)
-        }, { root: true })
+        const message = get(err, 'response.data.message', err.message)
+        logger.error('Failed to fetch shoot or tickets:', message)
+        commit('SET_ALERT', { type: 'error', message }, { root: true })
       } finally {
         commit('SET_SHOOTS_LOADING', false, { root: true })
       }

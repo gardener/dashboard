@@ -13,14 +13,21 @@ const { Session } = require('better-sse')
 const { authorization } = require('../services')
 const channels = require('../channels')
 const cache = require('../cache')
+const logger = require('../logger')
 const { projectFilter } = require('../utils')
 
 const router = module.exports = express.Router()
 
-async function createSession (req, res, { keepAlive, ...options }) {
-  const { user, topics } = req
+function randomTime (a, b) {
+  return a + Math.floor(Math.random() * b)
+}
+
+async function createSession (req, res) {
+  const { query, user, topics } = req
+  const keepAlive = Number(query.keepAlive ?? 15) * 1000
+  const retry = randomTime(1000, 500) // wait 1-1.5 sec before attempting to reconnect
+  const clientShutdownTimeout = randomTime(2000, 1000)
   const expiresIn = () => Math.max(0, user.refresh_at * 1000 - Date.now())
-  const clientShutdownTimeout = 2000 + Math.floor(Math.random() * 1000)
 
   let statusCode = 200
   let message
@@ -33,34 +40,30 @@ async function createSession (req, res, { keepAlive, ...options }) {
 
   return new Promise(resolve => {
     const session = new Session(req, res, {
-      keepAlive: null,
-      ...options
+      retry,
+      keepAlive: null // do not send comments to keep the connection alive (we have our own heartbeat implementation)
     })
     let shutdownTimer
     const closeResponse = () => {
-      session.push(null, 'close')
+      session.push(null, 'reconnect')
       shutdownTimer = setTimeout(() => res.end(), clientShutdownTimeout)
     }
-    const pushData = (data, event) => {
+    const sendEvent = (event, data) => {
       session.push({
+        time: new Date().toISOString(),
         rti: user.rti,
         expiresIn: Math.floor(expiresIn() / 1000),
         ...data
       }, event)
     }
-    const heartbeatTimer = setInterval(() => pushData({
-      time: new Date().toISOString()
-    }, 'heartbeat'), keepAlive)
+    const heartbeatTimer = setInterval(() => sendEvent('heartbeat'), keepAlive)
     session.once('disconnected', () => {
       clearInterval(heartbeatTimer)
       clearTimeout(shutdownTimer)
     })
     session.once('connected', () => {
-      pushData({
-        ok: statusCode === 200,
-        statusCode,
-        message
-      }, 'ready')
+      logger.debug('SSE Session connected')
+      sendEvent('connected', { statusCode, message })
       setTimeout(closeResponse, expiresIn())
       resolve(session)
     })
@@ -86,6 +89,7 @@ function parseTopic (topic) {
   }
 }
 
+// TODO extract metadata parsing from args
 async function canSubscribeTopic (user, topic) {
   const { key, args } = topic
   switch (key) {
@@ -166,10 +170,7 @@ async function handleEventStream (req, res) {
       }
     }
   }
-  const session = await createSession(req, res, {
-    keepAlive: 15000, // send a comment every 15 sec to keep the connection alive
-    retry: 1000 + Math.floor(1000 * Math.random()) // wait 1-2 sec before attempting to reconnect
-  })
+  const session = await createSession(req, res)
   if (channelKeys.length) {
     Object.assign(session.state, state)
     for (const key of channelKeys) {

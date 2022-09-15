@@ -97,6 +97,7 @@ const plugins = [
   createEventStreamPlugin(logger),
   createMediaPlugin()
 ]
+// localStorage can be undefined in some unit tests
 if (localStorage) {
   plugins.push(createStoragePlugin(localStorage))
 }
