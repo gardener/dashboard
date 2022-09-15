@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
             hide-toolbar
           >
           </shoot-editor>
-        </v-tab-item >
+        </v-tab-item>
       </v-tabs-items>
     </template>
     <template v-slot:errorMessage>

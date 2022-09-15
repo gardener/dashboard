@@ -20,8 +20,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <v-tabs
-    color="primary"
-    v-model="tab">
+      color="primary"
+      v-model="tab"
+      class="mb-3">
       <v-tab
         key="overview"
         href="#overview"
@@ -37,25 +38,26 @@ SPDX-License-Identifier: Apache-2.0
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item id="overview">
-        <v-row class="cols">
-          <v-col v-for="{title, icon, items} in workerGroupData" :key="title" cols="6">
-            <v-card outlined>
-              <v-card-title class="text-subtitle-1 pa-1">
-                <v-icon class="mr-3">{{icon}}</v-icon>
-                <span>{{title}}</span>
-              </v-card-title>
-              <v-divider></v-divider>
-              <v-card-text>
-                <v-list class="pa-0">
-                  <v-list-item class="px-0" v-for="{title, value} in items" :key="title">
-                    <v-list-item-content class="pt-1">
-                      <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-                      <v-list-item-title>{{value}}</v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
+        <v-row class="ma-0">
+          <v-col cols="6" v-for="data in workerGroupData" :key="data[0].title">
+            <v-row v-for="({title, icon, items}) in data" :key="title" class="pa-1">
+              <v-card outlined class="d-flex flex-column flex-grow-1">
+                <v-system-bar>
+                  <v-icon class="mr-3">{{icon}}</v-icon>
+                  <span>{{title}}</span>
+                </v-system-bar>
+                <v-card-text class="pa-1">
+                  <v-list class="pa-0">
+                    <v-list-item class="px-0" v-for="{title, value} in items" :key="title">
+                      <v-list-item-content class="pa-0">
+                        <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+                        <v-list-item-title>{{value}}</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-row>
           </v-col>
         </v-row>
       </v-tab-item>
@@ -75,6 +77,7 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
+import chunk from 'lodash/chunk'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -169,6 +172,59 @@ export default {
       }
       data.push(machineItem)
 
+      const { name, version } = get(this.workerGroup, 'machine.image', {})
+      const imageItem = {
+        title: 'Image',
+        icon: 'mdi-disc',
+        items: [
+          {
+            title: 'Name',
+            value: name
+          },
+          {
+            title: 'Version',
+            value: version
+          }
+        ]
+      }
+      const machineImage = this.machineImage
+      if (!machineImage) {
+        imageItem.items.push({
+          title: 'Attention',
+          value: 'Image not found in cloud profile'
+        })
+      } else {
+        if (machineImage.expirationDate) {
+          imageItem.items.push({
+            title: 'Expires',
+            value: machineImage.expirationDateString
+          })
+        }
+      }
+      data.push(imageItem)
+
+      const cri = this.workerGroup.cri
+      if (cri) {
+        const criItem = {
+          title: 'Container Runtime',
+          icon: 'mdi-oci',
+          items: [
+            {
+              title: 'Name',
+              value: cri.name
+            }
+          ]
+        }
+        if (cri.containerRuntimes?.length) {
+          const containerRuntimes = map(cri.containerRuntimes, 'type')
+          criItem.items.push({
+            title: 'Additional OCI Runtimes',
+            value: join(containerRuntimes, ', ')
+          })
+        }
+        data.push(criItem)
+      }
+
       const storage = get(this.machineType, 'storage', {})
       const volume = get(this.workerGroup, 'volume', {})
 
@@ -229,60 +285,31 @@ export default {
         data.push(storageItem)
       }
 
-      const { name, version } = get(this.workerGroup, 'machine.image', {})
-      const imageItem = {
-        title: 'Image',
-        icon: 'mdi-disc',
+      const autoscalerItem = {
+        title: 'Autoscaler',
+        icon: 'mdi-chart-line-variant',
         items: [
           {
-            title: 'Name',
-            value: name
+            title: 'Maximum',
+            value: this.workerGroup.maximum
           },
           {
-            title: 'Version',
-            value: version
+            title: 'Minimum',
+            value: this.workerGroup.minimum
+          },
+          {
+            title: 'Max. Surger',
+            value: this.workerGroup.maxSurge
+          },
+          {
+            title: 'Max. Unavailable',
+            value: this.workerGroup.maxUnavailable
           }
         ]
       }
-      const machineImage = this.machineImage
-      if (!machineImage) {
-        imageItem.items.push({
-          title: 'Attention',
-          value: 'Image not found in cloud profile'
-        })
-      } else {
-        if (machineImage.expirationDate) {
-          imageItem.items.push({
-            title: 'Expires',
-            value: machineImage.expirationDateString
-          })
-        }
-      }
-      data.push(imageItem)
 
-      const cri = this.workerGroup.cri
-      if (cri) {
-        const criItem = {
-          title: 'Container Runtime',
-          icon: 'mdi-oci',
-          items: [
-            {
-              title: 'Name',
-              value: cri.name
-            }
-          ]
-        }
-        if (cri.containerRuntimes?.length) {
-          const containerRuntimes = map(cri.containerRuntimes, 'type')
-          criItem.items.push({
-            title: 'Additional OCI Runtimes',
-            value: join(containerRuntimes, ', ')
-          })
-        }
-        data.push(criItem)
-      }
-
-      return data
+      data.push(autoscalerItem)
+      return chunk(data, Math.ceil(data.length / 2))
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
