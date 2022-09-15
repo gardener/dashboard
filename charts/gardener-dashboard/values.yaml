@@ -79,6 +79,8 @@ ingress:
 # sessionSecret is used for signing and encrytion of session data
 sessionSecret: ~
 oidc:
+  #Display the OIDC button on the login screen
+  enabled: false
   # well-known URL for OpenID Provider Issuer Discovery
   issuerUrl: ~
   # clientId is the public identifier of the gardener-dashboard aplication
