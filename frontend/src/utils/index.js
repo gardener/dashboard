@@ -609,3 +609,190 @@ export function mapTableHeader (headers, valueKey) {
 export function isHtmlColorCode (value) {
   return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
 }
+
+export function workerGroupData (machineType, machineImage, volumeType, workerGroup) {
+  const data = []
+
+  const machineItem = {
+    title: 'Machine',
+    icon: 'mdi-server',
+    items: [
+      {
+        title: 'Type',
+        value: get(workerGroup, 'machine.type')
+      }
+    ]
+  }
+  const machineArchitecture = workerGroup.machine.architecture
+  if (machineArchitecture) {
+    machineItem.items.push(
+      {
+        title: 'Architecture',
+        value: machineArchitecture
+      }
+    )
+  }
+  if (machineType) {
+    machineItem.items.push(...[
+      {
+        title: 'CPUs',
+        value: machineType.cpu
+      },
+      {
+        title: 'GPUs',
+        value: machineType.gpu
+      },
+      {
+        title: 'Memory',
+        value: machineType.memory
+      }
+    ])
+  }
+  const zones = workerGroup.zones
+  if (zones?.length) {
+    machineItem.items.push(
+      {
+        title: 'Zones',
+        value: join(zones, ', ')
+      }
+    )
+  }
+  data.push(machineItem)
+
+  const { name, version } = get(workerGroup, 'machine.image', {})
+  const imageItem = {
+    title: 'Image',
+    icon: 'mdi-disc',
+    items: [
+      {
+        title: 'Name',
+        value: name
+      },
+      {
+        title: 'Version',
+        value: version
+      }
+    ]
+  }
+  if (!machineImage) {
+    imageItem.items.push({
+      title: 'Attention',
+      value: 'Image not found in cloud profile'
+    })
+  } else {
+    if (machineImage.expirationDate) {
+      imageItem.items.push({
+        title: 'Expires',
+        value: machineImage.expirationDateString
+      })
+    }
+  }
+  data.push(imageItem)
+
+  const cri = workerGroup.cri
+  if (cri) {
+    const criItem = {
+      title: 'Container Runtime',
+      icon: 'mdi-oci',
+      items: [
+        {
+          title: 'Name',
+          value: cri.name
+        }
+      ]
+    }
+    if (cri.containerRuntimes?.length) {
+      const containerRuntimes = map(cri.containerRuntimes, 'type')
+      criItem.items.push({
+        title: 'Additional OCI Runtimes',
+        value: join(containerRuntimes, ', ')
+      })
+    }
+    data.push(criItem)
+  }
+
+  const storage = get(machineType, 'storage', {})
+  const volume = get(workerGroup, 'volume', {})
+
+  // all infrastructures support volume sizes, but for some they are optional
+  // if no size is defined on the worker itself, check if machine storage defines a default size
+  const volumeSize = volume.size || storage.size
+
+  // workers with volume type (e.g. aws)
+  if (volume.type) {
+    const volumeItem = {
+      title: 'Volume',
+      icon: 'mdi-harddisk',
+      items: [
+        {
+          title: 'Type',
+          value: volume.type
+        }
+      ]
+    }
+    if (volumeType) {
+      volumeItem.items.push({
+        title: 'Class',
+        value: volumeType.class
+      })
+    }
+    if (volumeSize) {
+      volumeItem.items.push({
+        title: 'Size',
+        value: volumeSize
+      })
+    }
+    data.push(volumeItem)
+  }
+
+  // workers with storage in machine type metadata (e.g. openstack)
+  if (storage.type) {
+    const storageItem = {
+      title: 'Storage',
+      icon: 'mdi-harddisk',
+      items: [
+        {
+          title: 'Type',
+          value: storage.type
+        },
+        {
+          title: 'Class',
+          value: storage.class
+        }
+      ]
+    }
+    if (volumeSize) {
+      storageItem.items.push({
+        title: 'Size',
+        value: volumeSize
+      })
+    }
+    data.push(storageItem)
+  }
+
+  const autoscalerItem = {
+    title: 'Autoscaler',
+    icon: 'mdi-chart-line-variant',
+    items: [
+      {
+        title: 'Maximum',
+        value: workerGroup.maximum
+      },
+      {
+        title: 'Minimum',
+        value: workerGroup.minimum
+      },
+      {
+        title: 'Max. Surge',
+        value: workerGroup.maxSurge
+      },
+      {
+        title: 'Max. Unavailable',
+        value: workerGroup.maxUnavailable
+      }
+    ]
+  }
+  data.push(autoscalerItem)
+
+  return data
+}

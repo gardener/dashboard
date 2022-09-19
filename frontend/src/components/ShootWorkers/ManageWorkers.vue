@@ -5,65 +5,81 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <transition-group name="list" class="alternate-row-background">
-    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2 my-0">
-      <worker-input-generic
-        ref="workerInput"
-        :worker="worker"
-        :workers="internalWorkers"
-        :cloud-profile-name="cloudProfileName"
-        :region="region"
-        :all-zones="allZones"
-        :available-zones="availableZones"
-        :zoned-cluster="zonedCluster"
-        :updateOSMaintenance="updateOSMaintenance"
-        :is-new="isNewCluster || worker.isNew"
-        :max-additional-zones="maxAdditionalZones"
-        :initial-zones="initialZones"
-        :kubernetes-version="kubernetesVersion"
-        @valid="onWorkerValid"
-        @removed-zone="onRemovedZone">
-        <template v-slot:action>
-          <v-btn v-show="index > 0 || internalWorkers.length > 1"
-            small
-            outlined
-            icon
-            color="grey"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </template>
-      </worker-input-generic>
-    </v-row>
-    <v-row key="addWorker" class="list-item pt-2">
-      <v-col>
-        <v-btn
-          :disabled="!(allMachineTypes.length > 0)"
-          small
-          @click="addWorker"
-          outlined
-          fab
-          icon
-          class="ml-1"
-          color="primary">
-          <v-icon class="primary--text">mdi-plus</v-icon>
-        </v-btn>
-        <v-btn
-          :disabled="!(allMachineTypes.length > 0)"
-          @click="addWorker"
-          text
-          class="primary--text">
-          Add Worker Group
-        </v-btn>
-      </v-col>
-    </v-row>
-  </transition-group>
+  <v-container class="pa-1">
+    <v-expansion-panels
+      v-for="({ worker, workerData, warning }, index) in workerItems"
+      :key="worker.id"
+      class="list-item pt-2">
+      <v-expansion-panel>
+        <v-expansion-panel-header>
+          <template v-slot:default="{ open }">
+            <template v-if="!open">
+              <v-list v-for="( { title, value } ) in workerData" :key="title">
+                <v-list-item-content>
+                  <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+                  <v-list-item-title>
+                    {{value}}
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list>
+            </template>
+            <span v-else>Change configuration of worker group <strong>{{worker.name}}</strong></span>
+            <v-icon
+            right
+            v-if="warning"
+            color="warning">
+              mdi-alert-circle
+            </v-icon>
+          </template>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <worker-input-generic
+            ref="workerInput"
+            :worker="worker"
+            :workers="internalWorkers"
+            :cloud-profile-name="cloudProfileName"
+            :region="region"
+            :all-zones="allZones"
+            :available-zones="availableZones"
+            :zoned-cluster="zonedCluster"
+            :updateOSMaintenance="updateOSMaintenance"
+            :is-new="isNewCluster || worker.isNew"
+            :max-additional-zones="maxAdditionalZones"
+            :initial-zones="initialZones"
+            :kubernetes-version="kubernetesVersion"
+            @valid="onWorkerValid"
+            @removed-zone="onRemovedZone">
+            <template v-slot:action>
+              <v-btn v-show="index > 0 || internalWorkers.length > 1"
+                small
+                outlined
+                icon
+                color="grey"
+                @click.native.stop="onRemoveWorker(index)">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </template>
+          </worker-input-generic>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-btn
+      :disabled="!(allMachineTypes.length > 0)"
+      @click="addWorker"
+      text
+      class="primary--text mt-3">
+      <v-icon class="mr-1">
+        mdi-plus
+      </v-icon>
+      Add Worker Group
+    </v-btn>
+  </v-container>
 </template>
 
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { isZonedCluster } from '@/utils'
+import { isZonedCluster, workerGroupData } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
@@ -77,6 +93,8 @@ import difference from 'lodash/difference'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
+import join from 'lodash/join'
+import some from 'lodash/some'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -110,8 +128,11 @@ export default {
     ...mapGetters([
       'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion',
+      'machineImagesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
       'cloudProfileByName',
-      'generateWorker'
+      'generateWorker',
+      'expiringWorkerGroupsForShoot'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -169,6 +190,29 @@ export default {
     },
     currentZonesNetworkConfiguration () {
       return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR, this.newShootWorkerCIDR)
+    },
+    expiringWorkerGroups () {
+      return this.expiringWorkerGroupsForShoot(this.internalWorkers, this.cloudProfileName, false)
+    },
+    workerItems () {
+      return map(this.internalWorkers, worker => {
+        return {
+          worker,
+          workerData: [
+            {
+              title: 'Name',
+              value: worker.name
+            },
+            ...map(this.workerData(worker), ({ title, items }) => {
+              return {
+                title,
+                value: join(map(items, 'value'), ', ')
+              }
+            })
+          ],
+          warning: some(this.expiringWorkerGroups, ['workerName', worker.name])
+        }
+      })
     }
   },
   watch: {
@@ -268,6 +312,21 @@ export default {
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
+    },
+    workerData (worker) {
+      const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      let type = get(worker, 'machine.type')
+      const machineType = find(machineTypes, ['name', type])
+
+      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const { name, version } = get(worker, 'machine.image', {})
+      const machineImage = find(machineImages, { name, version })
+
+      const volumeTypes = this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      type = get(worker, 'volume.type')
+      const volumeType = find(volumeTypes, ['name', type])
+
+      return workerGroupData(machineType, machineImage, volumeType, worker)
     }
   },
   mounted () {
