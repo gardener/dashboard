@@ -23,12 +23,14 @@ import get from 'lodash/get'
 import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
+import startsWith from 'lodash/startsWith'
 
 export class ShootEditorCompletions {
-  constructor (shootProperties, editorIndent) {
+  constructor (shootProperties, editorIndent, supportedPaths) {
     this.shootCompletions = shootProperties
     this.indentUnit = editorIndent
     this.arrayBulletIndent = 2 // -[space]
+    this.supportedPaths = supportedPaths
   }
 
   // Callback function for CodeMirror autocomplete plugin
@@ -93,6 +95,19 @@ export class ShootEditorCompletions {
   // Get completions for token, exact match is used for tooltip function
   _getYamlCompletions (token, cur, cm, exactMatch = false) {
     const completionPath = this._getTokenCompletionPath(token, cur, cm)
+    let supportedPath = true
+    if (this.supportedPaths?.length) {
+      supportedPath = false
+      const currentPath = join(completionPath, '.')
+      forEach(this.supportedPaths, path => {
+        if (startsWith(currentPath, path)) {
+          supportedPath = true
+        }
+      })
+    }
+    if (!supportedPath) {
+      return []
+    }
 
     let completions
     if (completionPath.length > 0) {

@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-tab-item id="yaml">
           <shoot-editor
             :shoot-item="editorData"
+            :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
             ref="workerEditor"
             v-on="$workerEditor.hooks"
             hide-toolbar

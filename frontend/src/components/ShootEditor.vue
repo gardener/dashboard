@@ -177,6 +177,9 @@ export default {
     },
     hideToolbar: {
       type: Boolean
+    },
+    completionPaths: {
+      type: Array
     }
   },
   data () {
@@ -462,7 +465,7 @@ export default {
     const shootSchemaDefinition = await getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.$instance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
   },
   watch: {
     canPatchShoots (value) {
