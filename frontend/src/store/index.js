@@ -413,8 +413,14 @@ const getters = {
     return getters['gardenerExtensions/items']
   },
   networkingTypeList (state, getters) {
-    const networkList = getters['gardenerExtensions/networkingTypes']
-    return sortBy(networkList)
+    var networkList = getters['gardenerExtensions/networkingTypes']
+
+    // Patch: Default Cilium
+    if (networkList.includes('cilium')) {
+      networkList = ['cilium', ...networkList.filter(item => item !== 'cilium')]
+    }
+
+    return networkList
   },
   machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
     const machineAndVolumeTypePredicate = unavailableItems => {
