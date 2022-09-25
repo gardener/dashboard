@@ -9,19 +9,25 @@
 const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
+const cache = require('../cache')
 const tickets = require('../services/tickets')
-const channels = require('../channels')
 
-module.exports = (ticketCache, retryOptions = {}) => {
+module.exports = (io, ticketCache, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for tickets feature')
     return
   }
+  const nsp = io.of('/')
   ticketCache.on('issue', event => {
-    channels.tickets.publish('issues', event)
+    nsp.emit('issues', event)
   })
   ticketCache.on('comment', event => {
-    channels.tickets.publish('comments', event)
+    const { projectName, name } = event.object.metadata
+    const namespace = cache.getProjectNamespace(projectName)
+    const rooms = [
+      `shoots;${namespace}/${name}`
+    ]
+    nsp.to(rooms).emit('comments', event)
   })
 
   async function loadAllOpenIssues () {

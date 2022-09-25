@@ -86,6 +86,13 @@ module.exports = {
   getProjects () {
     return cache.getProjects()
   },
+  getProjectNamespace (name) {
+    return _
+      .chain(cache.getProjects())
+      .find(['metadata.name', name])
+      .get('spec.namespace')
+      .value()
+  },
   getShoots () {
     return cache.getShoots()
   },

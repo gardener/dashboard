@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list>
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title class="label">Color Scheme</v-list-item-title>
+                <v-list-item-title class="text--secondary">Color Scheme</v-list-item-title>
                 <v-btn-toggle v-model="colorSchemeIndex" mandatory dense @click.native.stop class="pt-1">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item>
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title class="label">Log Level</v-list-item-title>
+                <v-list-item-title class="text--secondary">Log Level</v-list-item-title>
                 <v-btn-toggle v-model="logLevelIndex" dense class="pt-1">
                   <v-btn v-for="{ value, text, icon, color } in logLevels"
                     :key="value"
@@ -57,6 +57,14 @@ SPDX-License-Identifier: Apache-2.0
                     {{ text }}
                   </v-btn>
                 </v-btn-toggle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-content>
+                <v-switch
+                  v-model="developerMode"
+                  label="Enable developer mode"
+                ></v-switch>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -88,7 +96,8 @@ export default {
   computed: {
     ...mapGetters('storage', [
       'logLevel',
-      'colorScheme'
+      'colorScheme',
+      'isDeveloperModeEnabled'
     ]),
     logLevelIndex: {
       get () {
@@ -111,12 +120,21 @@ export default {
         const colorScheme = this.colorSchemes[index]
         this.setColorScheme(colorScheme)
       }
+    },
+    developerMode: {
+      get () {
+        return this.isDeveloperModeEnabled
+      },
+      set (value) {
+        this.setDeveloperMode(value)
+      }
     }
   },
   methods: {
     ...mapActions('storage', [
       'setLogLevel',
-      'setColorScheme'
+      'setColorScheme',
+      'setDeveloperMode'
     ])
   }
 }

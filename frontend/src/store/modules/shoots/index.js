@@ -75,7 +75,7 @@ const actions = {
     commit('SET_SUBSCRIPTION', { namespace, name })
     return dispatch('synchronize')
   },
-  synchronize ({ commit, dispatch, state, rootState, rootGetters }) {
+  synchronize ({ commit, dispatch, state, getters, rootState, rootGetters }) {
     const fetchShoot = async options => {
       const [
         { data: shoot },
@@ -133,21 +133,12 @@ const actions = {
       }
     }
 
-    const metadata = state.subscription
-    if (!metadata) {
-      return
-    }
-    const { namespace = rootState.namespace, name } = metadata
-    if (!namespace) {
-      return
-    }
-    if (name) {
-      handleData(fetchShoot({ namespace, name }))
-    } else {
-      const labelSelector = namespace === '_all' && getters.onlyShootsWithIssues
-        ? 'shoot.gardener.cloud/status!=healthy'
-        : undefined
-      handleData(fetchShoots({ namespace, labelSelector }))
+    const options = getters.subscription
+    if (options) {
+      handleData(options.name
+        ? fetchShoot(options)
+        : fetchShoots(options)
+      )
     }
   },
   create ({ dispatch, commit, rootState }, data) {

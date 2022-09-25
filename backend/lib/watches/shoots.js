@@ -11,7 +11,6 @@ const { shootHasIssue } = require('../utils')
 const { tickets } = require('../services')
 const { bootstrapper } = require('../services/terminals')
 const cache = require('../cache')
-const channels = require('../channels')
 
 async function deleteTickets ({ namespace, name }) {
   try {
@@ -22,9 +21,17 @@ async function deleteTickets ({ namespace, name }) {
   }
 }
 
-module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
+module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
+  const nsp = io.of('/')
+
   const handleEvent = event => {
-    channels.shoots.publish('shoots', event)
+    const { namespace, name } = event.object.metadata
+    const rooms = [
+      'shoots:admin',
+      `shoots;${namespace}`,
+      `shoots;${namespace}/${name}`
+    ]
+    nsp.to(rooms).emit('shoots', event)
 
     const unhealthyShootsPublish = ({ type, object }) => {
       const { uid } = object.metadata
@@ -40,7 +47,11 @@ module.exports = (informer, { shootsWithIssues = new Set() } = {}) => {
       } else {
         return
       }
-      channels.unhealthyShoots.publish('shoots', { type, object })
+      const rooms = [
+        'shoots:unhealthy:admin',
+        `shoots:unhealthy;${namespace}`
+      ]
+      nsp.to(rooms).emit('shoots', { type, object })
     }
     unhealthyShootsPublish(event)
 

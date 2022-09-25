@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,6 +16,12 @@ const getters = {
   },
   colorScheme (state) {
     return state['global/color-scheme']
+  },
+  socketStateEnabled (state) {
+    return state['global/socket-state'] === 'enabled'
+  },
+  isDeveloperModeEnabled (state) {
+    return state['global/developer-mode'] === 'enabled'
   }
 }
 
@@ -26,6 +32,9 @@ const actions = {
   },
   setColorScheme ({ commit }, value) {
     commit('SET_ITEM', ['global/color-scheme', value])
+  },
+  setDeveloperMode ({ commit }, value) {
+    commit('SET_ITEM', ['global/developer-mode', value ? 'enabled' : 'disabled'])
   }
 }
 

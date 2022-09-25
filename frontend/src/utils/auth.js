@@ -9,6 +9,8 @@ import decode from 'jwt-decode'
 import get from 'lodash/get'
 import { createError, isUnauthorizedError } from './fetch'
 
+const logger = Vue.logger
+
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 
 function createNoUserError (message = 'User not found') {
@@ -145,7 +147,8 @@ export class UserManager {
       return Promise.resolve()
     }
     if (!this.#refreshTokenPromise) {
-      const name = 'token-refresh-request-' + user?.rti
+      const name = 'token-refresh-request-' + user.rti
+      logger.debug('Aquiring refresh token lock (%s)', user.rti)
       this.#refreshTokenPromise = navigator.locks
         .request(name, () => {
           const user = this.getUser()
@@ -155,8 +158,14 @@ export class UserManager {
           if (!isRefreshRequired(user, tolerance)) {
             return Promise.resolve()
           }
+          Vue.logger.debug('Refreshing token (%s)', user.rti)
           return createTokenRefreshRequest()
+            .then(() => {
+              const newUser = this.getUser()
+              Vue.logger.debug('Refreshed token (%s <- %s)', newUser.rti, user.rti)
+            })
             .catch(err => {
+              logger.error('Refresh token failed: %s - %s', err.name, err.message)
               switch (err.name) {
                 case 'UnauthorizedError': {
                   window.requestAnimationFrame(() => this.signout(err))

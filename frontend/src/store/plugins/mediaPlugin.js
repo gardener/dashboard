@@ -8,24 +8,24 @@ export default function () {
   return store => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     mq.addEventListener('change', e => {
-      if (!['dark', 'light'].includes(store.state.colorScheme)) {
+      const value = store.getters['storage/colorScheme']
+      if (!['dark', 'light'].includes(value)) {
         store.commit('SET_DARK_THEME', e.matches)
       }
     })
 
-    store.subscribe((mutation) => {
-      if (mutation.type === 'SET_COLOR_SCHEME') {
-        switch (store.state.colorScheme) {
+    store.subscribeAction(action => {
+      if (action.type === 'storage/setColorScheme') {
+        let value = mq.matches
+        switch (action.payload) {
           case 'dark':
-            store.commit('SET_DARK_THEME', true)
+            value = true
             break
           case 'light':
-            store.commit('SET_DARK_THEME', false)
-            break
-          default:
-            store.commit('SET_DARK_THEME', mq.matches)
+            value = false
             break
         }
+        store.commit('SET_DARK_THEME', value)
       }
     })
   }

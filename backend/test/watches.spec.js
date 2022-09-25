@@ -14,24 +14,37 @@ const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
-const channels = require('../lib/channels')
 
-const uuidPattern = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+const rooms = new Map()
 
-class MockSession extends EventEmitter {
-  push = jest.fn()
-  isConnected = true
-  state = {
-    events: ['shoots', 'issues']
+function getRoom (name) {
+  if (!rooms.has(name)) {
+    rooms.set(name, {
+      emit: jest.fn()
+    })
   }
+  return rooms.get(name)
+}
 
-  constructor (channel, metadata = null) {
-    super()
-    this.state.metadata = metadata
-    if (Reflect.has(metadata, 'name')) {
-      this.state.events.push('comments')
+const nsp = {
+  to: jest.fn().mockImplementation(name => {
+    if (Array.isArray(name)) {
+      return {
+        rooms: name.map(getRoom),
+        emit (...args) {
+          for (const room of this.rooms) {
+            room.emit(...args)
+          }
+        }
+      }
     }
-  }
+    return getRoom(name)
+  }),
+  emit: jest.fn()
+}
+
+const io = {
+  of: jest.fn().mockReturnValue(nsp)
 }
 
 describe('watches', function () {
@@ -58,6 +71,7 @@ describe('watches', function () {
 
   beforeEach(function () {
     informer = new EventEmitter()
+    rooms.clear()
     jest.clearAllMocks()
   })
 
@@ -66,15 +80,17 @@ describe('watches', function () {
 
     it('should watch seeds', async function () {
       const bootstrapStub = jest.spyOn(bootstrapper, 'bootstrapResource')
-      watches.seeds(informer)
+      watches.seeds(io, informer)
       informer.emit('add', foo)
       informer.emit('add', bar)
       informer.emit('update', { kind, ...bar }, bar)
       informer.emit('delete', bar)
       expect(bootstrapStub).toHaveBeenCalledTimes(3)
-      expect(bootstrapStub.mock.calls[0]).toEqual([foo])
-      expect(bootstrapStub.mock.calls[1]).toEqual([bar])
-      expect(bootstrapStub.mock.calls[2]).toEqual([{ kind, ...bar }])
+      expect(bootstrapStub.mock.calls).toEqual([
+        [foo],
+        [bar],
+        [{ kind, ...bar }]
+      ])
     })
   })
 
@@ -92,10 +108,6 @@ describe('watches', function () {
       .value()
 
     let shootsWithIssues
-    let fooSession
-    let fooBarSession
-    let fooBazSession
-    let fooIssuesSession
 
     let deleteTicketsStub
     let bootstrapResourceStub
@@ -103,19 +115,6 @@ describe('watches', function () {
     let findProjectByNamespaceStub
 
     beforeEach(() => {
-      fooSession = new MockSession('shoots', { namespace: 'foo' })
-      channels.tickets.register(fooSession)
-      channels.shoots.register(fooSession)
-      fooBarSession = new MockSession('shoots', { namespace: 'foo', name: 'bar' })
-      channels.tickets.register(fooBarSession)
-      channels.shoots.register(fooBarSession)
-      fooBazSession = new MockSession('shoots', { namespace: 'foo', name: 'baz' })
-      channels.tickets.register(fooBazSession)
-      channels.shoots.register(fooBazSession)
-      fooIssuesSession = new MockSession('unhealthyShoots', { namespace: 'foo' })
-      channels.tickets.register(fooIssuesSession)
-      channels.unhealthyShoots.register(fooIssuesSession)
-
       shootsWithIssues = new Set()
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
@@ -125,38 +124,15 @@ describe('watches', function () {
       })
     })
 
-    afterEach(() => {
-      for (const channel of Object.values(channels)) {
-        for (const session of channel.activeSessions) {
-          channel.deregister(session)
-        }
-      }
-    })
-
     it('should watch shoots without issues', async function () {
-      watches.shoots(informer)
+      watches.shoots(io, informer)
+
+      expect(io.of).toBeCalledTimes(1)
+      expect(io.of.mock.calls).toEqual([['/']])
 
       informer.emit('add', foobar)
       informer.emit('update', foobar)
       informer.emit('delete', foobar)
-
-      const expectedCalls = [
-        [
-          { type: 'ADDED', object: foobar },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'MODIFIED', object: foobar },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'DELETED', object: foobar },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ]
-      ]
 
       expect(logger.error).not.toBeCalled()
       expect(bootstrapResourceStub).toBeCalledTimes(2)
@@ -166,16 +142,32 @@ describe('watches', function () {
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
 
-      expect(fooSession.push).toBeCalledTimes(3)
-      expect(fooSession.push.mock.calls).toEqual(expectedCalls)
-      expect(fooBarSession.push).toBeCalledTimes(3)
-      expect(fooBarSession.push.mock.calls).toEqual(expectedCalls)
-      expect(fooBazSession.push).toBeCalledTimes(0)
-      expect(fooIssuesSession.push).toBeCalledTimes(0)
+      const keys = ['shoots:admin', 'shoots;foo', 'shoots;foo/bar']
+      expect(nsp.to).toBeCalledTimes(3)
+      expect(nsp.to.mock.calls).toEqual([[keys], [keys], [keys]])
+      expect(Array.from(rooms.keys())).toEqual(keys)
+      for (const key of keys) {
+        const room = rooms.get(key)
+        expect(room.emit).toBeCalledTimes(3)
+        expect(room.emit.mock.calls).toEqual([
+          [
+            'shoots',
+            { type: 'ADDED', object: foobar }
+          ],
+          [
+            'shoots',
+            { type: 'MODIFIED', object: foobar }
+          ],
+          [
+            'shoots',
+            { type: 'DELETED', object: foobar }
+          ]
+        ])
+      }
     })
 
     it('should watch shoots with issues', async function () {
-      watches.shoots(informer, { shootsWithIssues })
+      watches.shoots(io, informer, { shootsWithIssues })
 
       expect(shootsWithIssues).toHaveProperty('size', 0)
       informer.emit('add', foobarUnhealthy)
@@ -189,41 +181,37 @@ describe('watches', function () {
       informer.emit('delete', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
-      const expectedCalls = [
-        [
-          { type: 'ADDED', object: foobarUnhealthy },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'DELETED', object: foobar },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'ADDED', object: foobazUnhealthy },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'MODIFIED', object: foobazUnhealthy },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ],
-        [
-          { type: 'DELETED', object: foobazUnhealthy },
-          'shoots',
-          expect.stringMatching(uuidPattern)
-        ]
-      ]
-
       expect(bootstrapResourceStub).toBeCalledTimes(4)
       expect(removeResourceStub).toBeCalledTimes(1)
       expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
-      expect(fooSession.push).toBeCalledTimes(5)
-      expect(fooIssuesSession.push).toBeCalledTimes(5)
-      expect(fooIssuesSession.push.mock.calls).toEqual(expectedCalls)
+
+      const fooRoom = rooms.get('shoots;foo')
+      expect(fooRoom.emit).toBeCalledTimes(5)
+      const fooIssuesRoom = rooms.get('shoots:unhealthy;foo')
+      expect(fooIssuesRoom.emit).toBeCalledTimes(5)
+      expect(fooIssuesRoom.emit.mock.calls).toEqual([
+        [
+          'shoots',
+          { type: 'ADDED', object: foobarUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'DELETED', object: foobar }
+        ],
+        [
+          'shoots',
+          { type: 'ADDED', object: foobazUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'MODIFIED', object: foobazUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'DELETED', object: foobazUnhealthy }
+        ]
+      ])
     })
 
     it('should delete tickets for a deleted shoot', async function () {
@@ -234,7 +222,7 @@ describe('watches', function () {
         }
       })
 
-      watches.shoots(informer)
+      watches.shoots(io, informer)
 
       informer.emit('delete', foobar)
       informer.emit('delete', foobaz)
@@ -285,7 +273,7 @@ describe('watches', function () {
 
     it('should log missing gitHub config', async function () {
       gitHubStub.mockReturnValue(false)
-      watches.tickets(ticketCache)
+      watches.tickets(io, ticketCache)
       expect(logger.warn).toBeCalledTimes(1)
     })
 
@@ -295,7 +283,7 @@ describe('watches', function () {
         status: 503
       }))
 
-      await watches.tickets(ticketCache, { minTimeout: 1 })
+      await watches.tickets(io, ticketCache, { minTimeout: 1 })
       expect(loadOpenIssuesStub).toBeCalledTimes(2)
       expect(logger.info).toBeCalledTimes(2)
     })
@@ -304,7 +292,7 @@ describe('watches', function () {
       gitHubStub.mockReturnValue(true)
       loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
 
-      await watches.tickets(ticketCache)
+      await watches.tickets(io, ticketCache)
       expect(loadOpenIssuesStub).toBeCalledTimes(1)
       expect(logger.error).toBeCalledTimes(1)
     })
