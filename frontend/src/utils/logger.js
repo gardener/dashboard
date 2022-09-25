@@ -31,33 +31,48 @@ export class Logger {
     return levels[this.#level]
   }
 
+  get #ts () {
+    const ts = new Date().toISOString()
+    return ts.substring(0, 10) + ' ' + ts.substring(11, ts.length - 1)
+  }
+
+  #print (key, ...args) {
+    const prefix = this.#ts + ':'
+    if (typeof args[0] === 'string') {
+      args.unshift(prefix + ' ' + args.shift())
+    } else {
+      args.unshift(prefix)
+    }
+    console[key](...args) // eslint-disable-line
+  }
+
   debug (...args) {
     if (this.level <= levels.debug) {
-      console.debug(...args) // eslint-disable-line
+      this.#print('debug', ...args)
     }
   }
 
   log (...args) {
     if (this.level <= levels.info) {
-      console.log(...args) // eslint-disable-line
+      this.#print('log', ...args)
     }
   }
 
   info (...args) {
     if (this.level <= levels.info) {
-      console.info(...args) // eslint-disable-line
+      this.#print('info', ...args)
     }
   }
 
   warn (...args) {
     if (this.level <= levels.warn) {
-      console.warn(...args) // eslint-disable-line
+      this.#print('warn', ...args)
     }
   }
 
   error (...args) {
     if (this.level <= levels.error) {
-      console.error(...args) // eslint-disable-line
+      this.#print('error', ...args)
     }
   }
 }

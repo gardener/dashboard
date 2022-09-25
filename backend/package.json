@@ -42,7 +42,6 @@
     "@octokit/rest": "^18.12.0",
     "base64url": "^3.0.1",
     "better-queue": "^3.8.10",
-    "better-sse": "^0.8.0",
     "body-parser": "^1.20.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -64,6 +63,7 @@
     "sanitize-html": "^2.7.0",
     "semver": "^7.3.7",
     "showdown": "^2.1.0",
+    "socket.io": "^4.5.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -76,13 +76,13 @@
     "eslint-plugin-jest": "^26.4.5",
     "eslint-plugin-n": "^15.2.0",
     "eslint-plugin-promise": "^6.0.0",
-    "eventsource": "^2.0.2",
     "fast-json-patch": "^3.1.1",
     "jest": "^27.5.1",
     "nodemon": "^2.0.16",
     "p-event": "^4.2.0",
     "path-to-regexp": "^6.2.1",
     "set-cookie-parser": "^2.4.8",
+    "socket.io-client": "^4.5.2",
     "supertest": "^6.2.3"
   },
   "eslintConfig": {

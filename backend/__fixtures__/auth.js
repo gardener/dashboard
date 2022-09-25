@@ -48,7 +48,14 @@ const auth = {
       ? 'invalid-secret'
       : undefined
 
-    const bearer = sign({ id, iat, aud, ...rest }, secret, { expiresIn, jwtid })
+    const options = {}
+    if (!rest.exp) {
+      options.expiresIn = expiresIn
+    }
+    if (!rest.jti) {
+      options.jwtid = jwtid
+    }
+    const bearer = sign({ id, iat, aud, ...rest }, secret, options)
     return {
       isAdmin () {
         return /^admin/.test(id)

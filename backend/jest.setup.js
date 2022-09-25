@@ -9,7 +9,8 @@
 require('abort-controller/polyfill')
 const http = require('http')
 const { Test } = require('supertest')
-const EventSource = require('eventsource')
+const pEvent = require('p-event')
+const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
 const { matchers, ...fixtures } = require('./__fixtures__')
 
@@ -33,46 +34,6 @@ function createHttpAgent () {
     server,
     close () {
       server.close()
-    },
-    watch (topic) {
-      const headers = {}
-      return {
-        set (key, value) {
-          headers[key] = value
-          return this
-        },
-        connect () {
-          return new Promise((resolve, reject) => {
-            const connect = ({ port }) => {
-              const url = new URL('/api/stream', `http://127.0.0.1:${port}`)
-              url.searchParams.append('topic', topic)
-              const eventSource = new EventSource(url.toString(), { headers })
-              let settled = false
-              const onOpen = () => {
-                if (!settled) {
-                  settled = true
-                  resolve(eventSource)
-                }
-              }
-              const onError = err => {
-                eventSource.close()
-                if (!settled) {
-                  settled = true
-                  reject(err)
-                }
-              }
-              eventSource.addEventListener('open', onOpen)
-              eventSource.addEventListener('error', onError)
-            }
-            const address = server.address()
-            if (address) {
-              connect(address)
-            } else {
-              server.listen(0, '127.0.0.1', () => connect(server.address()))
-            }
-          })
-        }
-      }
     }
   }
 
@@ -86,8 +47,53 @@ function createHttpAgent () {
   return agent
 }
 
+function createSocketAgent (cache) {
+  const server = http.createServer()
+  const io = require('./lib/io')(server, cache)
+  server.listen(0, '127.0.0.1')
+
+  const agent = {
+    io,
+    server,
+    async close () {
+      await new Promise(resolve => server.close(resolve))
+      await new Promise(resolve => io.close(resolve))
+    },
+    async connect ({ cookie, user, connected = true } = {}) {
+      const { address: hostname, port } = server.address()
+      const origin = `http://[${hostname}]:${port}`
+      const extraHeaders = {}
+      if (cookie) {
+        extraHeaders.cookie = cookie
+      } else if (user) {
+        extraHeaders.cookie = await user.cookie
+      }
+      const socket = ioClient(origin, {
+        path: '/api/events',
+        extraHeaders,
+        reconnectionDelay: 0,
+        forceNew: true,
+        autoConnect: false,
+        transports: ['websocket']
+      })
+      socket.connect()
+      if (connected) {
+        await pEvent(socket, 'connect', {
+          timeout: 1000,
+          rejectionEvents: ['error', 'connect_error']
+        })
+      }
+      return socket
+    }
+  }
+
+  return agent
+}
+
 function createAgent (type = 'http', cache) {
   switch (type) {
+    case 'io':
+      return createSocketAgent(cache)
     default:
       return createHttpAgent()
   }

@@ -67,7 +67,7 @@ import split from 'lodash/split'
 import pick from 'lodash/pick'
 
 import moment from '@/utils/moment'
-import createEventStreamPlugin from './plugins/eventStreamPlugin'
+import createSocketPlugin from './plugins/socketPlugin'
 import createMediaPlugin from './plugins/mediaPlugin'
 import createStoragePlugin from './plugins/storage'
 import shoots from './modules/shoots'
@@ -81,10 +81,12 @@ import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
 import shootStaging from './modules/shootStaging'
 import storage from './modules/storage'
+import socket from './modules/socket'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
 const localStorage = Vue.localStorage
+const userManager = Vue.auth
 const logger = Vue.logger
 
 Vue.use(Vuex)
@@ -94,7 +96,7 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createEventStreamPlugin(logger),
+  createSocketPlugin(userManager, logger),
   createMediaPlugin()
 ]
 // localStorage can be undefined in some unit tests
@@ -164,7 +166,6 @@ const state = {
     }
   },
   darkTheme: false,
-  colorScheme: 'auto',
   gardenctlOptions: {}
 }
 class Shortcut {
@@ -1561,10 +1562,6 @@ const actions = {
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SET_SPLITPANE_RESIZE', value)
     return state.splitpaneResize
-  },
-  setColorScheme ({ commit }, colorScheme) {
-    commit('SET_COLOR_SCHEME', colorScheme)
-    return state.colorScheme
   }
 }
 
@@ -1617,10 +1614,6 @@ const mutations = {
   SET_SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
-  SET_COLOR_SCHEME (state, value) {
-    state.colorScheme = value
-    localStorage.setItem('global/color-scheme', value)
-  },
   SET_DARK_THEME (state, value) {
     state.darkTheme = value
     Vue.vuetify.framework.theme.dark = value
@@ -1642,7 +1635,8 @@ const modules = {
   cloudProviderSecrets,
   tickets,
   shootStaging,
-  storage
+  storage,
+  socket
 }
 
 const store = new Vuex.Store({

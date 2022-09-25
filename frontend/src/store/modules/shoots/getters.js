@@ -147,6 +147,23 @@ export default {
   onlyShootsWithIssues (state) {
     return get(state.shootListFilters, 'onlyShootsWithIssues', true)
   },
+  subscription (state, getters, rootState) {
+    const metadata = state.subscription
+    if (!metadata) {
+      return null
+    }
+    const { namespace = rootState.namespace, name } = metadata
+    if (!namespace) {
+      return null
+    }
+    if (name) {
+      return { namespace, name }
+    }
+    if (namespace === '_all' && getters.onlyShootsWithIssues) {
+      return { namespace, labelSelector: 'shoot.gardener.cloud/status!=healthy' }
+    }
+    return { namespace }
+  },
   newShootResource (state) {
     return state.newShootResource
   },

@@ -9,6 +9,7 @@
 const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
 const cache = require('./cache')
 const watches = require('./watches')
+const io = require('./io')
 
 class LifecycleHooks {
   constructor (client) {
@@ -16,11 +17,20 @@ class LifecycleHooks {
     this.client = client
     // abort controller
     this.ac = new AbortController()
+    // io instance
+    this.io = undefined
   }
 
   cleanup () {
     this.ac.abort()
     abortWatcher()
+    return new Promise(resolve => {
+      if (this.io) {
+        this.io.close(resolve)
+      } else {
+        resolve()
+      }
+    })
   }
 
   beforeListen (server) {
@@ -34,12 +44,14 @@ class LifecycleHooks {
       informer.run(this.ac.signal)
       untilHasSyncedList.push(informer.store.untilHasSynced)
     }
+    // create io instance
+    this.io = io(server, cache)
     // register watches
     for (const [key, watch] of Object.entries(watches)) {
       if (key === 'tickets') {
-        watch(cache.getTicketCache())
+        watch(this.io, cache.getTicketCache())
       } else {
-        watch(informers[key])
+        watch(this.io, informers[key])
       }
     }
     return Promise.all(untilHasSyncedList)
