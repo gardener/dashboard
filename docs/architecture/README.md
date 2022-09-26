@@ -2,7 +2,7 @@
 
 ## Overview
 
-The dashboard `frontend` is a Single Page Application (SPA) built with [Vue.js](https://vuejs.org/). The dashboard `backend` is web server build with [Express](http://expressjs.com) and [Node.js](https://nodejs.org/). The `backend` serves the bundled `frontend` as static content. The dashboard uses [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) to send data changes in real-time from the `backend` to the `frontend`. For the communication from the `backend` to different `kube-apiservers` the http/2 network protocol is used. Authentication at the `apiserver` of the garden cluster is done via JWT tokens. These can either be an ID Token issued by an OpenID Connect Provider or the token of a Kubernetes Service Account. 
+The dashboard `frontend` is a Single Page Application (SPA) built with [Vue.js](https://vuejs.org/). The dashboard `backend` is web server build with [Express](http://expressjs.com) and [Node.js](https://nodejs.org/). The `backend` serves the bundled `frontend` as static content. The dashboard uses [Socket.IO](https://socket.io/) to enable real-time, bidirectional and event-based communication between the `frontend` and the `backend`. For the communication from the `backend` to different `kube-apiservers` the http/2 network protocol is used. Authentication at the `apiserver` of the garden cluster is done via JWT tokens. These can either be an ID Token issued by an OpenID Connect Provider or the token of a Kubernetes Service Account. 
  
 <img src="../images/architecture-1.png">
 
