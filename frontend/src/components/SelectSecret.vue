@@ -30,6 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         {{get(item, 'metadata.name')}}
         <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
       </template>
+      <!--
       <template v-slot:append-item>
         <v-divider class="mb-2"></v-divider>
         <v-btn text @click="openSecretDialog" class="mx-2 primary--text">
@@ -37,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           Add new Secret
         </v-btn>
       </template>
+       -->
     </v-select>
     <secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"

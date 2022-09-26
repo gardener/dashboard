@@ -220,7 +220,7 @@ export default {
       'dnsSecretList',
       'shootList',
       'canCreateSecrets',
-      'sortedCloudProviderKindList',
+      'sortedCloudProviderKindListForSecretEdit',
       'sortedCloudProviderKindListForSecretCreation',
       'sortedDnsProviderList'
     ]),
@@ -294,7 +294,7 @@ export default {
         details: this.getSecretDetailsInfra(secret),
         relatedShootCount: this.relatedShootCountInfra(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
-        isSupportedCloudProvider: includes(this.sortedCloudProviderKindList, secret.metadata.cloudProviderKind),
+        isSupportedCloudProvider: includes(this.sortedCloudProviderKindListForSecretEdit, secret.metadata.cloudProviderKind),
         secret
       }))
     },

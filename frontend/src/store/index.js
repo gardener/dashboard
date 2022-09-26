@@ -748,6 +748,14 @@ const getters = {
     return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
   },
   cloudProviderKindList (state) {
+    return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
+  },
+  sortedCloudProviderKindList (state, getters) {
+    return intersection(['openstack', 'aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    // Patch: Select openstack first
+    // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+  },
+  sortedCloudProviderKindListForSecretEdit (state, getters) {
     const cloudProviderList = uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
 
     // Really dirty hack ahead!!!
@@ -759,12 +767,6 @@ const getters = {
 
     return cloudProviderList
   },
-  sortedCloudProviderKindList (state, getters) {
-    return intersection(['pluscloudopen', 'openstack', 'aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
-    // Patch: Select openstack first
-    // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
-  },
-
   // Patch: Don't allow customer to add openstack (pluscloudopen) secrets
   sortedCloudProviderKindListForSecretCreation (state, getters) {
     // Really dirty hack ahead!!!
