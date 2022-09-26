@@ -748,18 +748,35 @@ const getters = {
     return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
   },
   cloudProviderKindList (state) {
-    return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
+    const cloudProviderList = uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
+
+    // Really dirty hack ahead!!!
+    // We don't want the customer to edit pluscloudopen secrets via the dashboard -> Detect if we run on PROD
+
+    if (!cloudProviderList.includes('pluscloudopen') && !window.location.hostname.includes('prod')) {
+      cloudProviderList.push('pluscloudopen')
+    }
+
+    return cloudProviderList
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['openstack', 'aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    return intersection(['pluscloudopen', 'openstack', 'aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
     // Patch: Select openstack first
     // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
   },
+
   // Patch: Don't allow customer to add openstack (pluscloudopen) secrets
   sortedCloudProviderKindListForSecretCreation (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
-    // Patch: Select openstack first
-    // Original: return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud'], getters.cloudProviderKindList)
+    // Really dirty hack ahead!!!
+    // We don't want the customer to edit pluscloudopen secrets via the dashboard -> Detect if we run on PROD
+
+    const providerList = ['aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud']
+
+    if (!window.location.hostname.includes('prod')) {
+      providerList.push('openstack')
+    }
+
+    return intersection(providerList, getters.cloudProviderKindList)
   },
   sortedDnsProviderList (state, getters) {
     const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']

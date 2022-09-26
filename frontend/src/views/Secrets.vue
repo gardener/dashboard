@@ -375,7 +375,12 @@ export default {
       this.visibleSecretDialog = infrastructureKind
     },
     onUpdateSecret (secret) {
-      const kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
+      let kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
+
+      if (kind === 'pluscloudopen') {
+        kind = 'openstack'
+      }
+
       this.selectedSecret = secret
       this.visibleSecretDialog = kind
     },
