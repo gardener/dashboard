@@ -125,7 +125,6 @@ const state = {
   loading: false,
   alert: null,
   shootsLoading: false,
-  websocketConnectionError: null,
   location: moment.tz.guess(),
   timezone: moment().format('Z'),
   focusedElementId: null,
@@ -972,12 +971,6 @@ const getters = {
   },
   isCurrentNamespace (state, getters) {
     return namespace => includes(getters.currentNamespaces, namespace)
-  },
-  isWebsocketConnectionError (state) {
-    return get(state, 'websocketConnectionError') !== null
-  },
-  websocketConnectAttempt (state) {
-    return get(state, 'websocketConnectionError.reconnectAttempt')
   },
   getShootListFilters (state, getters) {
     return getters['shoots/getShootListFilters']
