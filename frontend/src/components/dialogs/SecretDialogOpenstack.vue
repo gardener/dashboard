@@ -48,79 +48,91 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
       <div>
-        <v-select
-          color="primary"
+        <v-radio-group
           v-model="authenticationMethod"
-          label="Authentication Method"
-          :items="authenticationMethods">
-        </v-select>
+          row
+        >
+          <template v-slot:label>
+            <span class="text-body-1">Authentication Method:</span>
+          </template>
+          <v-radio
+            label="Technical User"
+            value="user"
+          ></v-radio>
+          <v-radio
+            label="Application Credentials"
+            value="appCredentials"
+          ></v-radio>
+        </v-radio-group>
       </div>
-      <template v-if="authenticationMethod === 'user'">
-        <div>
-          <hint-colorizer hint-color="primary">
+      <v-container class="py-0">
+        <template v-if="authenticationMethod === 'user'">
+          <div>
+            <hint-colorizer hint-color="primary">
+              <v-text-field
+              color="primary"
+              v-model="username"
+              label="Technical User"
+              :error-messages="getErrorMessages('username')"
+              @input="$v.username.$touch()"
+              @blur="$v.username.$touch()"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
+          </div>
+          <div>
+            <hint-colorizer hint-color="warning">
+              <v-text-field
+                color="primary"
+                v-model="password"
+                label="Password"
+                :error-messages="getErrorMessages('password')"
+                :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="hideSecret ? 'password' : 'text'"
+                @click:append="() => (hideSecret = !hideSecret)"
+                @input="$v.password.$touch()"
+                @blur="$v.password.$touch()"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
+          </div>
+        </template>
+        <template v-if="authenticationMethod === 'appCredentials'">
+          <div>
             <v-text-field
             color="primary"
-            v-model="username"
-            label="Technical User"
-            :error-messages="getErrorMessages('username')"
-            @input="$v.username.$touch()"
-            @blur="$v.username.$touch()"
-            hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+            v-model="applicationCredentialID"
+            label="ID"
+            :error-messages="getErrorMessages('applicationCredentialID')"
+            @input="$v.applicationCredentialID.$touch()"
+            @blur="$v.applicationCredentialID.$touch()"
             ></v-text-field>
-          </hint-colorizer>
-        </div>
-        <div>
-          <hint-colorizer hint-color="warning">
+          </div>
+          <div>
+            <v-text-field
+            color="primary"
+            v-model="applicationCredentialName"
+            label="Name"
+            :error-messages="getErrorMessages('applicationCredentialName')"
+            @input="$v.applicationCredentialName.$touch()"
+            @blur="$v.applicationCredentialName.$touch()"
+            ></v-text-field>
+          </div>
+          <div>
             <v-text-field
               color="primary"
-              v-model="password"
+              v-model="applicationCredentialSecret"
               label="Password"
-              :error-messages="getErrorMessages('password')"
-              :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="hideSecret ? 'password' : 'text'"
-              @click:append="() => (hideSecret = !hideSecret)"
-              @input="$v.password.$touch()"
-              @blur="$v.password.$touch()"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              :error-messages="getErrorMessages('applicationCredentialSecret')"
+              :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="hideApplicationCredentialSecret ? 'password' : 'text'"
+              @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
+              @input="$v.applicationCredentialSecret.$touch()"
+              @blur="$v.applicationCredentialSecret.$touch()"
             ></v-text-field>
-          </hint-colorizer>
-        </div>
-      </template>
-      <template v-if="authenticationMethod === 'appCredentials'">
-        <div>
-          <v-text-field
-          color="primary"
-          v-model="applicationCredentialID"
-          label="Application credential ID"
-          :error-messages="getErrorMessages('applicationCredentialID')"
-          @input="$v.applicationCredentialID.$touch()"
-          @blur="$v.applicationCredentialID.$touch()"
-          ></v-text-field>
-        </div>
-        <div>
-          <v-text-field
-          color="primary"
-          v-model="applicationCredentialName"
-          label="Application credential name"
-          :error-messages="getErrorMessages('applicationCredentialName')"
-          @input="$v.applicationCredentialName.$touch()"
-          @blur="$v.applicationCredentialName.$touch()"
-          ></v-text-field>
-        </div>
-        <div>
-          <v-text-field
-            color="primary"
-            v-model="applicationCredentialSecret"
-            label="Application credential password"
-            :error-messages="getErrorMessages('applicationCredentialSecret')"
-            :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="hideApplicationCredentialSecret ? 'password' : 'text'"
-            @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
-            @input="$v.applicationCredentialSecret.$touch()"
-            @blur="$v.applicationCredentialSecret.$touch()"
-          ></v-text-field>
-        </div>
-      </template>
+          </div>
+        </template>
+      </v-container>
     </template>
 
     <template v-slot:help-slot>
@@ -156,7 +168,7 @@ import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
 const requiredMessage = 'You can\'t leave this empty.'
-const requiredUserPassMessage = 'Required for username / password authentication'
+const requiredUserPassMessage = 'Required for technical user authentication'
 const requiredAppCredMessage = 'Required for application credential authentication'
 
 const validationErrors = {
@@ -217,17 +229,7 @@ export default {
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       validationErrors,
-      authenticationMethodValue: 'user',
-      authenticationMethods: [
-        {
-          text: 'Username / Password',
-          value: 'user'
-        },
-        {
-          text: 'Application Credentials',
-          value: 'appCredentials'
-        }
-      ]
+      authenticationMethodValue: 'user'
     }
   },
   validations () {
@@ -325,15 +327,11 @@ export default {
       },
       set (value) {
         this.authenticationMethodValue = value
-        if (value === 'user') {
-          this.username = undefined
-          this.password = undefined
-        }
-        if (value === 'appCredentials') {
-          this.applicationCredentialID = undefined
-          this.applicationCredentialName = undefined
-          this.applicationCredentialSecret = undefined
-        }
+        this.username = undefined
+        this.password = undefined
+        this.applicationCredentialID = undefined
+        this.applicationCredentialName = undefined
+        this.applicationCredentialSecret = undefined
       }
     }
   },
