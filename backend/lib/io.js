@@ -173,9 +173,10 @@ function init (httpServer, cache) {
   io.on('connection', socket => {
     const socketId = socket.id
     const timeoutId = socket.data.timeoutId
+    delete socket.data.timeoutId
+
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
-      logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(expiresIn(socket) / 1000))
       const done = args.pop()
       try {
         await subscribe(socket, key, ...args)
@@ -186,9 +187,9 @@ function init (httpServer, cache) {
         done({ statusCode, name, message })
       }
     })
+
     // handle 'unsubscribe' events
     socket.on('unsubscribe', async (key, done) => {
-      logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(expiresIn(socket) / 1000))
       try {
         await unsubscribe(socket, key)
         done({ statusCode: 200 })
@@ -198,6 +199,7 @@ function init (httpServer, cache) {
         done({ statusCode, name, message })
       }
     })
+
     // handle 'disconnect' event
     socket.once('disconnect', reason => {
       clearTimeout(timeoutId)
