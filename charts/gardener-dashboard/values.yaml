@@ -8,7 +8,7 @@
 replicaCount: 1
 
 image:
-  repository: eu.gcr.io/gardener-project/gardener/dashboard
+  repository: ghcr.io/plusserver/gardener-dashboard
   tag: latest
   pullPolicy: IfNotPresent
 
