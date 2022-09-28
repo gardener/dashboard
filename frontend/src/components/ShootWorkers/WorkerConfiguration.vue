@@ -13,25 +13,29 @@ SPDX-License-Identifier: Apache-2.0
     width="1250"
     confirm-required
     caption="Configure Workers"
-    disable-confirm-input-focus>
+    disable-confirm-input-focus
+    disable-content-inset
+    max-height="80vh">
     <template v-slot:actionComponent>
-      <v-tabs
-        color="primary"
-        v-model="tab"
-      >
-        <v-tab
-          key="overview"
-          href="#overview"
+      <v-toolbar tile dense elevation="2" class="mb-1">
+        <v-tabs
+          color="primary"
+          v-model="tab"
         >
-          Overview
-        </v-tab>
-        <v-tab
-          key="yaml"
-          href="#yaml"
-        >
-          Yaml
-        </v-tab>
-      </v-tabs>
+          <v-tab
+            key="overview"
+            href="#overview"
+          >
+            Overview
+          </v-tab>
+          <v-tab
+            key="yaml"
+            href="#yaml"
+          >
+            Yaml
+          </v-tab>
+        </v-tabs>
+      </v-toolbar>
       <v-tabs-items v-model="tab">
         <v-tab-item id="overview">
           <manage-workers

@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard">
+      <v-card-text :class="{ 'pa-3' : !disableContentInset, 'pa-0' : disableContentInset }" :style="{ 'max-height': maxHeight }" ref="contentCard">
         <slot name="message">
           This is a generic dialog template.
         </slot>
@@ -91,6 +91,9 @@ export default {
       default: '50vh'
     },
     disableConfirmInputFocus: {
+      type: Boolean
+    },
+    disableContentInset: {
       type: Boolean
     }
   },

@@ -234,7 +234,6 @@ export default {
     containerStyles () {
       return {
         flex: '1 1 auto',
-        height: `${this.lineHeight * 15}px`,
         minHeight: `${this.lineHeight * 3}px`
       }
     },

@@ -46,9 +46,9 @@ SPDX-License-Identifier: Apache-2.0
                   <v-icon class="mr-3">{{icon}}</v-icon>
                   <span>{{title}}</span>
                 </v-system-bar>
-                <v-card-text class="pa-1">
-                  <v-list class="pa-0">
-                    <v-list-item class="px-0" v-for="{title, value} in items" :key="title">
+                <v-card-text class="pa-2 d-flex">
+                  <v-list class="pa-0 flex-grow-1" v-for="column in items" :key="column.title">
+                    <v-list-item class="px-0" v-for="{title, value} in column" :key="title">
                       <v-list-item-content class="pa-0">
                         <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
                         <v-list-item-title>{{value}}</v-list-item-title>
