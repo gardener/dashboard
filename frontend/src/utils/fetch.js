@@ -103,20 +103,19 @@ function fulfilledFn (request) {
       return promise
     }
 
-    let error
-    if (status < 400) {
-      const responseType = status < 300
-        ? 'informational'
-        : 'redirection'
-      error = new TypeError(`Unexpected ${responseType} response with status code ${status}`)
-    } else {
-      const message = status === 401
-        ? 'Authentication failed'
-        : `Request failed with status code ${status}`
-      error = createError(status, message, { response })
-    }
-
-    return Promise.reject(error)
+    return promise.then(response => {
+      if (status < 400) {
+        const responseType = status < 300
+          ? 'informational'
+          : 'redirection'
+        throw new TypeError(`Unexpected ${responseType} response with status code ${status}`)
+      } else {
+        const message = status === 401
+          ? 'Authentication failed'
+          : `Request failed with status code ${status}`
+        throw createError(status, message, { response })
+      }
+    })
   }
 }
 
