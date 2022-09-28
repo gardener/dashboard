@@ -5,105 +5,63 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="pa-1">
-    <v-expansion-panels
-      class="pt-2"
-      multiple
-      v-model="openPanels">
-      <v-expansion-panel
-        v-for="({ worker, workerData, warning }, index) in workerItems"
-        :key="worker.id">
-        <v-expansion-panel-header disable-icon-rotate class="pa-1">
-          <template v-slot:default="{ open }">
-            <div class="d-flex" v-if="!open">
-              <v-card outlined class="d-flex flex-column flex-grow-1 ma-1" v-for="({title, icon, items}) in workerData" :key="title">
-                <v-system-bar>
-                  <v-icon class="mr-3">{{icon}}</v-icon>
-                  <span>{{title}}</span>
-                </v-system-bar>
-                <v-card-text class="pa-2 d-flex">
-                  <v-list class="pa-0 flex-grow-1" v-for="column in items" :key="column.title">
-                    <v-list-item class="px-0" v-for="{title, value} in column" :key="title">
-                      <v-list-item-content class="pa-0">
-                        <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-                        <v-list-item-title>{{value}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-card-text>
-              </v-card>
-            </div>
-            <span v-else class="ml-3">Change configuration of worker group <strong>{{worker.name}}</strong></span>
-          </template>
-          <template v-slot:actions>
-            <div class="d-flex align-center">
-              <v-icon
-                right
-                v-if="warning"
-                color="warning"
-                size="32"
-                class="mr-1">
-                  mdi-alert-circle
-              </v-icon>
-              <v-btn
-                small
-                outlined
-                icon
-                color="primary"
-                class="mr-1">
-                <v-icon>
-                  {{ isOpenPanel(index) ? 'mdi-pencil-off' : 'mdi-pencil' }}
-                </v-icon>
-              </v-btn>
-              <v-btn v-show="index > 0 || internalWorkers.length > 1"
-                small
-                outlined
-                icon
-                color="grey"
-                @click.native.stop="onRemoveWorker(index)">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </div>
-          </template>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <worker-input-generic
-            ref="workerInput"
-            :worker="worker"
-            :workers="internalWorkers"
-            :cloud-profile-name="cloudProfileName"
-            :region="region"
-            :all-zones="allZones"
-            :available-zones="availableZones"
-            :zoned-cluster="zonedCluster"
-            :updateOSMaintenance="updateOSMaintenance"
-            :is-new="isNewCluster || worker.isNew"
-            :max-additional-zones="maxAdditionalZones"
-            :initial-zones="initialZones"
-            :kubernetes-version="kubernetesVersion"
-            @valid="onWorkerValid"
-            @removed-zone="onRemovedZone">
-          </worker-input-generic>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <v-btn
-      :disabled="!(allMachineTypes.length > 0)"
-      @click="addWorker"
-      text
-      class="primary--text mt-3">
-      <v-icon class="mr-1">
-        mdi-plus
-      </v-icon>
-      Add Worker Group
-    </v-btn>
-  </div>
+  <transition-group name="list" class="alternate-row-background">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2 my-0 mx-1">
+      <worker-input-generic
+        ref="workerInput"
+        :worker="worker"
+        :workers="internalWorkers"
+        :cloud-profile-name="cloudProfileName"
+        :region="region"
+        :all-zones="allZones"
+        :available-zones="availableZones"
+        :zoned-cluster="zonedCluster"
+        :updateOSMaintenance="updateOSMaintenance"
+        :is-new="isNewCluster || worker.isNew"
+        :max-additional-zones="maxAdditionalZones"
+        :kubernetes-version="kubernetesVersion"
+        @valid="onWorkerValid">
+        <template v-slot:action>
+          <v-btn v-show="index > 0 || internalWorkers.length > 1"
+            small
+            outlined
+            icon
+            color="grey"
+            @click.native.stop="onRemoveWorker(index)">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
+      </worker-input-generic>
+    </v-row>
+    <v-row key="addWorker" class="list-item mb-1 mx-1">
+      <v-col>
+        <v-btn
+          :disabled="!(allMachineTypes.length > 0)"
+          small
+          @click="addWorker"
+          outlined
+          fab
+          icon
+          class="ml-1"
+          color="primary">
+          <v-icon class="primary--text">mdi-plus</v-icon>
+        </v-btn>
+        <v-btn
+          :disabled="!(allMachineTypes.length > 0)"
+          @click="addWorker"
+          text
+          class="primary--text">
+          Add Worker Group
+        </v-btn>
+      </v-col>
+    </v-row>
+  </transition-group>
 </template>
 
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { isZonedCluster, workerGroupData } from '@/utils'
+import { isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
@@ -117,7 +75,6 @@ import difference from 'lodash/difference'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
-import some from 'lodash/some'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -144,8 +101,7 @@ export default {
       isNewCluster: false,
       existingWorkerCIDR: undefined,
       kubernetesVersion: undefined,
-      initialZones: undefined,
-      openPanels: []
+      initialZones: undefined
     }
   },
   computed: {
@@ -217,15 +173,6 @@ export default {
     },
     expiringWorkerGroups () {
       return this.expiringWorkerGroupsForShoot(this.internalWorkers, this.cloudProfileName, false)
-    },
-    workerItems () {
-      return map(this.internalWorkers, worker => {
-        return {
-          worker,
-          workerData: this.workerData(worker),
-          warning: some(this.expiringWorkerGroups, ['workerName', worker.name])
-        }
-      })
     }
   },
   watch: {
@@ -251,7 +198,6 @@ export default {
     addWorker () {
       const worker = this.generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
-      this.openPanels.push(this.internalWorkers.length - 1)
       this.validateInput()
     },
     onRemoveWorker (index) {
@@ -326,27 +272,6 @@ export default {
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
-      if (this.isNewCluster) {
-        this.openPanels = [0]
-      }
-    },
-    workerData (worker) {
-      const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
-      let type = get(worker, 'machine.type')
-      const machineType = find(machineTypes, ['name', type])
-
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
-      const { name, version } = get(worker, 'machine.image', {})
-      const machineImage = find(machineImages, { name, version })
-
-      const volumeTypes = this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
-      type = get(worker, 'volume.type')
-      const volumeType = find(volumeTypes, ['name', type])
-
-      return workerGroupData(machineType, machineImage, volumeType, worker)
-    },
-    isOpenPanel (index) {
-      return includes(this.openPanels, index)
     }
   },
   mounted () {
