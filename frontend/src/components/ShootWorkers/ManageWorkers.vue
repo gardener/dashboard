@@ -196,7 +196,9 @@ export default {
       this.validateInput()
     },
     addWorker () {
-      const worker = this.generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
+      // by default propose only zones already used in this cluster
+      const availableZones = this.currentZonesWithNetworkConfigInShoot.length ? this.currentZonesWithNetworkConfigInShoot : this.availableZones
+      const worker = this.generateWorker(availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
     },
