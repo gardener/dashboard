@@ -162,8 +162,11 @@ function init (httpServer, cache) {
       logger.error('Socket %s authentication failed: %s', socket.id, err)
       if (isHttpError(err)) {
         // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
-        const { statusCode, code } = err
-        err.data = { statusCode, code }
+        err.data = {
+          statusCode: err.statusCode,
+          code: err.code,
+          serverTimestamp: Math.floor(Date.now() / 1000)
+        }
       }
       next(err)
     }
@@ -182,7 +185,7 @@ function init (httpServer, cache) {
         await subscribe(socket, key, ...args)
         done({ statusCode: 200 })
       } catch (err) {
-        logger.error('Subscribe error:', err.message)
+        logger.error('Socket %s subscribe error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
         done({ statusCode, name, message })
       }
@@ -194,7 +197,7 @@ function init (httpServer, cache) {
         await unsubscribe(socket, key)
         done({ statusCode: 200 })
       } catch (err) {
-        logger.error('Unsubscribe error:', err.message)
+        logger.error('Socket %s unsubscribe error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
         done({ statusCode, name, message })
       }

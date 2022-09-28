@@ -299,10 +299,16 @@ describe('api', function () {
   })
 
   describe('when user authentication fails', () => {
+    let timestamp
+
+    beforeEach(() => {
+      timestamp = Math.floor(Date.now() / 1000)
+    })
+
     it('should fail with error code ERR_JWT_TOKEN_EXPIRED', async function () {
       const user = fixtures.auth.createUser({
         id: 'baz@example.org',
-        exp: Math.floor(Date.now() / 1000) - 30
+        exp: timestamp - 30
       })
       const cookie = await user.cookie
       await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
@@ -310,7 +316,8 @@ describe('api', function () {
         message: 'jwt expired',
         data: {
           statusCode: 401,
-          code: 'ERR_JWT_TOKEN_EXPIRED'
+          code: 'ERR_JWT_TOKEN_EXPIRED',
+          serverTimestamp: expect.toBeWithinRange(timestamp, timestamp + 5)
         }
       }))
     })
@@ -319,7 +326,7 @@ describe('api', function () {
       const user = fixtures.auth.createUser({
         id: 'baz@example.org',
         rti: 'abcdefg',
-        refresh_at: Math.floor(Date.now() / 1000) - 30
+        refresh_at: timestamp - 30
       })
       const cookie = await user.cookie
       await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
@@ -327,7 +334,8 @@ describe('api', function () {
         message: 'Token refresh required',
         data: {
           statusCode: 401,
-          code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED'
+          code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
+          serverTimestamp: expect.toBeWithinRange(timestamp, timestamp + 5)
         }
       }))
     })
