@@ -158,11 +158,11 @@ export class UserManager {
           if (!isRefreshRequired(user, tolerance)) {
             return Promise.resolve()
           }
-          Vue.logger.debug('Refreshing token (%s)', user.rti)
+          logger.debug('Refreshing token (%s)', user.rti)
           return createTokenRefreshRequest()
             .then(() => {
               const newUser = this.getUser()
-              Vue.logger.debug('Refreshed token (%s <- %s)', newUser.rti, user.rti)
+              logger.debug('Refreshed token (%s <- %s)', newUser.rti, user.rti)
             })
             .catch(err => {
               logger.error('Refresh token failed: %s - %s', err.name, err.message)
