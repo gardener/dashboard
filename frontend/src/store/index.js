@@ -124,7 +124,6 @@ const state = {
   redirectPath: null,
   loading: false,
   alert: null,
-  shootsLoading: false,
   location: moment.tz.guess(),
   timezone: moment().format('Z'),
   focusedElementId: null,
@@ -1586,9 +1585,6 @@ const mutations = {
   },
   SET_LOADING (state, value) {
     state.loading = value
-  },
-  SET_SHOOTS_LOADING (state, value) {
-    state.shootsLoading = value
   },
   SET_ALERT (state, value) {
     state.alert = value

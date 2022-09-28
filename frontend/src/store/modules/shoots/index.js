@@ -59,6 +59,7 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
+  loading: false,
   subscription: null
 }
 
@@ -118,7 +119,7 @@ const actions = {
 
     // await and handle response data in the background
     const handleData = async dataPromise => {
-      commit('SET_SHOOTS_LOADING', true, { root: true })
+      commit('SET_LOADING', true)
       try {
         const { shoots, issues, comments } = await dataPromise
         commit('RECEIVE', { rootState, rootGetters, shoots })
@@ -129,7 +130,7 @@ const actions = {
         logger.error('Failed to fetch shoot or tickets:', message)
         commit('SET_ALERT', { type: 'error', message }, { root: true })
       } finally {
-        commit('SET_SHOOTS_LOADING', false, { root: true })
+        commit('SET_LOADING', false)
       }
     }
 
@@ -510,6 +511,9 @@ const mutations = {
   RESET_NEW_SHOOT_RESOURCE (state, shootResource) {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
+  },
+  SET_LOADING (state, value) {
+    state.loading = value
   },
   SET_SUBSCRIPTION (state, value) {
     state.subscription = value

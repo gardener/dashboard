@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        :loading="shootsLoading"
+        :loading="loading"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
         :custom-filter="searchItems"
@@ -252,12 +252,14 @@ export default {
       'shootCustomFieldList',
       'shootCustomFields'
     ]),
+    ...mapState('shoots', [
+      'loading'
+    ]),
     ...mapGetters('shoots', [
       'sortItems',
       'searchItems'
     ]),
     ...mapState([
-      'shootsLoading',
       'cfg',
       'namespace'
     ]),
