@@ -17,25 +17,23 @@ SPDX-License-Identifier: Apache-2.0
     disable-content-inset
     max-height="80vh">
     <template v-slot:actionComponent>
-      <v-toolbar tile dense elevation="2" class="mb-1">
-        <v-tabs
-          color="primary"
-          v-model="tab"
+      <v-tabs
+        color="primary"
+        v-model="tab"
+      >
+        <v-tab
+          key="overview"
+          href="#overview"
         >
-          <v-tab
-            key="overview"
-            href="#overview"
-          >
-            Overview
-          </v-tab>
-          <v-tab
-            key="yaml"
-            href="#yaml"
-          >
-            Yaml
-          </v-tab>
-        </v-tabs>
-      </v-toolbar>
+          Overview
+        </v-tab>
+        <v-tab
+          key="yaml"
+          href="#yaml"
+        >
+          Yaml
+        </v-tab>
+      </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item id="overview">
           <manage-workers

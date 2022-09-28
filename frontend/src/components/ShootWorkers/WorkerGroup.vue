@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-popper
     :title="workerGroup.name"
     :popper-key="`worker_group_${workerGroup.name}`"
+    disable-content-inset
   >
     <template v-slot:popperRef>
       <v-chip
@@ -38,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item id="overview">
-        <v-row class="ma-0">
+        <v-row class="ma-1">
           <v-col cols="6" v-for="data in workerGroupData" :key="data[0].title">
             <v-row v-for="({title, icon, items}) in data" :key="title" class="pa-1">
               <v-card outlined class="d-flex flex-column flex-grow-1">
@@ -92,11 +93,13 @@ export default {
     },
     cloudProfileName: {
       type: String
+    },
+    value: {
+      type: String
     }
   },
   data () {
     return {
-      tab: 'overview',
       workerGroupYaml: undefined
     }
   },
@@ -127,6 +130,14 @@ export default {
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
+    },
+    tab: {
+      get () {
+        return this.value
+      },
+      set (value) {
+        this.$emit('input', value)
+      }
     }
   },
   methods: {

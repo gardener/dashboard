@@ -120,9 +120,11 @@ export default {
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+    usedZones () {
+      return flatMap(this.internalWorkers, 'zones')
+    },
     unusedZones () {
-      const usedZones = flatMap(this.internalWorkers, 'zones')
-      return difference(this.allZones, usedZones)
+      return difference(this.allZones, this.usedZones)
     },
     currentZonesWithNetworkConfigInShoot () {
       return map(this.currentZonesNetworkConfiguration, 'name')
@@ -197,7 +199,7 @@ export default {
     },
     addWorker () {
       // by default propose only zones already used in this cluster
-      const availableZones = this.currentZonesWithNetworkConfigInShoot.length ? this.currentZonesWithNetworkConfigInShoot : this.availableZones
+      const availableZones = this.usedZones.length ? this.usedZones : this.availableZones
       const worker = this.generateWorker(availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
