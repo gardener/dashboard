@@ -20,7 +20,8 @@ SPDX-License-Identifier: Apache-2.0
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
         :kubernetes-version="kubernetesVersion"
-        @valid="onWorkerValid">
+        @valid="onWorkerValid"
+        @removed-zone="onRemovedZone">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
             small
@@ -68,6 +69,7 @@ import find from 'lodash/find'
 import map from 'lodash/map'
 import uniq from 'lodash/uniq'
 import omit from 'lodash/omit'
+import some from 'lodash/some'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
@@ -96,6 +98,7 @@ export default {
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
+      originalZonesNetworkConfiguration: undefined,
       zonedCluster: undefined,
       updateOSMaintenance: undefined,
       isNewCluster: false,
@@ -237,11 +240,16 @@ export default {
       this.validateInput()
     },
     onRemovedZone (removedZone) {
-      // remove zone network configuration from zonesNetworkConfiguration array if already included
-      // this happens if the user navigated to yaml and back to component view
-      this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
-        return name !== removedZone
-      })
+      // when user switches back from yaml tab, networkConfiguration includes any additional networkconfiguration
+      // if this additional configuration is no longer needed (zone gets removed), this code takes care to clean
+      // it up to avoid creating unnecessary zone network configuration
+      const networkConfigurationForZoneNotYetCreated = !some(this.originalZonesNetworkConfiguration, { name: removedZone })
+      const zoneIsNoLongerUsed = !includes(this.usedZones, removedZone)
+      if (networkConfigurationForZoneNotYetCreated && zoneIsNoLongerUsed) {
+        this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
+          return name !== removedZone
+        })
+      }
     },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
@@ -267,6 +275,7 @@ export default {
     setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, newShootWorkerCIDR, kubernetesVersion }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
+      this.originalZonesNetworkConfiguration = zonesNetworkConfiguration
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)

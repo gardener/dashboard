@@ -401,10 +401,10 @@ export default {
       set (zoneValues) {
         const zones = map(zoneValues, last)
         const removedZone = difference(this.worker.zones, zones)
+        this.worker.zones = zones
         if (removedZone.length) {
           this.$emit('removed-zone', last(removedZone))
         }
-        this.worker.zones = zones
       }
     },
     unselectedZones () {
