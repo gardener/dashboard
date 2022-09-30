@@ -77,7 +77,17 @@ class MemberManager {
     this.setItemRoles(item, roles)
 
     if (item.kind === 'ServiceAccount') {
-      await this.updateServiceAccount(item, { description })
+      if (item?.extensions?.orphaned) {
+        await this.createServiceAccount(item, {
+          createdBy: this.userId,
+          description
+        })
+        item.extend({
+          orphaned: false
+        })
+      } else {
+        await this.updateServiceAccount(item, { description })
+      }
     }
     await this.save()
     return this.subjectList.members
