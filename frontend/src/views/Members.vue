@@ -161,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
     <member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" :orphaned="orphaned" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -242,7 +242,6 @@ export default {
       memberName: undefined,
       memberRoles: undefined,
       serviceAccountDescription: undefined,
-      orphaned: false,
       userFilter: '',
       serviceAccountFilter: '',
       currentServiceAccountName: undefined,
@@ -556,11 +555,10 @@ export default {
       this.memberRoles = roles
       this.openUserUpdateDialog()
     },
-    onEditServiceAccount ({ username, roles, description, orphaned }) {
+    onEditServiceAccount ({ username, roles, description }) {
       this.memberName = username
       this.memberRoles = roles
       this.serviceAccountDescription = description
-      this.orphaned = orphaned
       this.openServiceAccountUpdateDialog()
     },
     sortedRoleDisplayNames (roleNames) {
