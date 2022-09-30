@@ -18,11 +18,13 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-toolbar-title>
       </v-toolbar>
+      <slot name="tabbar"></slot>
       <v-card-text :class="{ 'pa-3' : !disableContentInset, 'pa-0' : disableContentInset }" :style="{ 'max-height': maxHeight }" ref="contentCard">
         <slot name="message">
           This is a generic dialog template.
         </slot>
       </v-card-text>
+
       <slot name="errorMessage"></slot>
       <g-message color="error" class="mt-4" :message.sync="message" :detailed-message.sync="detailedMessage"></g-message>
       <v-divider></v-divider>

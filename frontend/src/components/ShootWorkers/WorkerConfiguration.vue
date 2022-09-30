@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     disable-confirm-input-focus
     disable-content-inset
     max-height="80vh">
-    <template v-slot:actionComponent>
+    <template v-slot:tabbar>
       <v-tabs
         color="primary"
         v-model="tab"
@@ -34,6 +34,8 @@ SPDX-License-Identifier: Apache-2.0
           Yaml
         </v-tab>
       </v-tabs>
+    </template>
+    <template v-slot:actionComponent>
       <v-tabs-items v-model="tab">
         <v-tab-item id="overview">
           <manage-workers
