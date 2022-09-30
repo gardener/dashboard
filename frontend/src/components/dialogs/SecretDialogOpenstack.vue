@@ -57,16 +57,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-radio
             label="Technical User"
-            value="user"
+            :value="AuthenticationMethods.USER"
           ></v-radio>
           <v-radio
             label="Application Credentials"
-            value="appCredentials"
+            :value="AuthenticationMethods.APP_CREDENTIALS"
           ></v-radio>
         </v-radio-group>
       </div>
       <v-container class="py-0">
-        <template v-if="authenticationMethod === 'user'">
+        <template v-if="authenticationMethod === AuthenticationMethods.USER">
           <div>
             <hint-colorizer hint-color="primary">
               <v-text-field
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             </hint-colorizer>
           </div>
         </template>
-        <template v-if="authenticationMethod === 'appCredentials'">
+        <template v-if="authenticationMethod === AuthenticationMethods.APP_CREDENTIALS">
           <div>
             <v-text-field
             color="primary"
@@ -171,6 +171,11 @@ const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserPassMessage = 'Required for technical user authentication'
 const requiredAppCredMessage = 'Required for application credential authentication'
 
+const AuthenticationMethods = {
+  USER: 'user',
+  APP_CREDENTIALS: 'appcredentials'
+}
+
 const validationErrors = {
   domainName: {
     required: requiredMessage
@@ -229,7 +234,8 @@ export default {
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       validationErrors,
-      authenticationMethodValue: 'user'
+      authenticationMethod: AuthenticationMethods.USER,
+      AuthenticationMethods
     }
   },
   validations () {
@@ -278,12 +284,12 @@ export default {
         },
         username: {
           required: requiredIf(function () {
-            return this.authenticationMethod === 'user'
+            return this.authenticationMethod === this.AuthenticationMethods.USER
           })
         },
         password: {
           required: requiredIf(function () {
-            return this.authenticationMethod === 'user'
+            return this.authenticationMethod === this.AuthenticationMethods.USER
           })
         },
         authURL: {
@@ -293,17 +299,17 @@ export default {
         },
         applicationCredentialID: {
           required: requiredIf(function () {
-            return this.authenticationMethod === 'appCredentials'
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
           })
         },
         applicationCredentialName: {
           required: requiredIf(function () {
-            return this.authenticationMethod === 'appCredentials'
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
           })
         },
         applicationCredentialSecret: {
           required: requiredIf(function () {
-            return this.authenticationMethod === 'appCredentials'
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
           })
         }
       }
@@ -320,19 +326,6 @@ export default {
         return 'OpenStack Designate'
       }
       return undefined
-    },
-    authenticationMethod: {
-      get () {
-        return this.authenticationMethodValue
-      },
-      set (value) {
-        this.authenticationMethodValue = value
-        this.username = undefined
-        this.password = undefined
-        this.applicationCredentialID = undefined
-        this.applicationCredentialName = undefined
-        this.applicationCredentialSecret = undefined
-      }
     }
   },
   methods: {
@@ -368,6 +361,14 @@ export default {
       if (value) {
         this.reset()
       }
+    },
+    authenticationMethod: function () {
+      this.username = undefined
+      this.password = undefined
+      this.applicationCredentialID = undefined
+      this.applicationCredentialName = undefined
+      this.applicationCredentialSecret = undefined
+      this.$v.$reset()
     }
   }
 }
