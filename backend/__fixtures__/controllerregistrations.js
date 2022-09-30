@@ -18,7 +18,7 @@ function getControllerRegistration ({ uid, name, version, resources }) {
     spec.resources = resources
   }
   if (version) {
-    set(metadata, ['annotations', 'dashboard.gardener.cloud/version'], version)
+    set(metadata, ['labels', 'app.kubernetes.io/version'], version)
   }
   return { metadata, spec }
 }

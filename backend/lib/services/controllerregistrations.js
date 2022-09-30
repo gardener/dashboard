@@ -18,7 +18,7 @@ exports.listExtensions = async function ({ user }) {
   for (const { metadata, spec = {} } of controllerregistrations) {
     const name = metadata.name
     if (allowed) {
-      const version = _.get(metadata, 'annotations["dashboard.gardener.cloud/version"]')
+      const version = _.get(metadata, ['labels', 'app.kubernetes.io/version'])
       const resources = spec.resources
       extensions.push({ name, version, resources })
     } else {
