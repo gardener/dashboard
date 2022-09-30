@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <template v-else>
             <div>
-              This two-phase oepration is in phase
+              This two-phase operation is in phase
               <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
             </div>
             <div>

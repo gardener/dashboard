@@ -178,7 +178,7 @@ export default {
     },
     maintenanceHint () {
       if (this.isMaintenanceDisabled) {
-        return 'Another operation has already been scheduled. Only one oepration at a time can be scheduled.'
+        return 'Another operation has already been scheduled. Only one operation at a time can be scheduled.'
       }
       return ''
     },
@@ -250,7 +250,7 @@ export default {
           successMessage: `Rotation of certificate authorities prepared for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of certificate authorities?',
           messages: [
-            'New CAs will be created and added to the bundle (together with the old CAs).'
+            'New Certificate Authorities will be created and added to the bundle (together with the old Certificate Authorities).'
           ]
         },
         'rotate-ca-complete': {
@@ -261,7 +261,7 @@ export default {
           successMessage: `Rotation of certificate authorities completed for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of certificate authorities?',
           messages: [
-            'Ensure that all parties (end-users, CD pipelines etc.) have updated their kubeconfig for this Shoot cluster since the CA rotation was last initiated. Otherwise the client requests will fail as the old CAs will be dropped from the bundle.'
+            'Ensure that all parties (end-users, CD pipelines etc.) have updated their kubeconfig for this Shoot cluster since the Certificate Authorities rotation was last initiated. Otherwise the client requests will fail as the old Certificate Authorities will be dropped from the bundle.'
           ]
         },
         'rotate-observability-credentials': {
@@ -276,12 +276,12 @@ export default {
           ]
         },
         'rotate-ssh-keypair': {
-          caption: this.isLoading ? 'Scheduling ssh key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
-          errorMessage: 'Could not start the rotation of ssh key pair',
-          successMessage: `Rotation of ssh key pair started for ${this.shootName}`,
-          heading: 'Do you want to start the rotation of ssh key pair for worker nodes?',
+          caption: this.isLoading ? 'Scheduling SSH key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
+          errorMessage: 'Could not start the rotation of SSH key pair',
+          successMessage: `Rotation of SSH key pair started for ${this.shootName}`,
+          heading: 'Do you want to start the rotation of SSH key pair for worker nodes?',
           messages: [
-            'The current ssh key pair will be revoked.'
+            'The current SSH key pair will be revoked.'
           ]
         },
         'rotate-etcd-encryption-key-start': {
