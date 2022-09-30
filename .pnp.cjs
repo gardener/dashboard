@@ -2719,7 +2719,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["helmet", "npm:5.1.0"],\
             ["http-errors", "npm:2.0.0"],\
             ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
-            ["jose", "npm:4.8.1"],\
+            ["jose", "npm:4.10.0"],\
             ["js-yaml", "npm:4.1.0"],\
             ["jsonwebtoken", "npm:8.5.1"],\
             ["lodash", "npm:4.17.21"],\
@@ -12125,6 +12125,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["jose", [\
+        ["npm:4.10.0", {\
+          "packageLocation": "./.yarn/cache/jose-npm-4.10.0-05c8512ad1-c575bf2519.zip/node_modules/jose/",\
+          "packageDependencies": [\
+            ["jose", "npm:4.10.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:4.8.1", {\
           "packageLocation": "./.yarn/cache/jose-npm-4.8.1-abe5015874-c3e239ccbb.zip/node_modules/jose/",\
           "packageDependencies": [\
