@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             outlined
           >
-            The service account will be created in case it does not exist
+            The service account does not exist anymore and will be re-created if you update the roles.
           </v-alert>
           <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
