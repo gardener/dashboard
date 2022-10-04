@@ -153,7 +153,11 @@ function init (httpServer, cache) {
           socket.data.timeoutId = exports.setDisconnectTimeout(socket, delay)
         } else {
           throw createError(401, 'Token refresh required', {
-            code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED'
+            code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
+            data: {
+              rti: user.rti,
+              exp: user.refresh_at
+            }
           })
         }
       }
@@ -162,11 +166,8 @@ function init (httpServer, cache) {
       logger.error('Socket %s authentication failed: %s', socket.id, err)
       if (isHttpError(err)) {
         // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
-        err.data = {
-          statusCode: err.statusCode,
-          code: err.code,
-          serverTimestamp: Math.floor(Date.now() / 1000)
-        }
+        const { statusCode, code, data } = err
+        err.data = { statusCode, code, ...data }
       }
       next(err)
     }
