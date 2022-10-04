@@ -9,10 +9,6 @@ import Vue from 'vue'
 import api, { interceptors } from '@/utils/api'
 import { createAbortError } from '@/utils/errors'
 
-function delay (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 const VueApi = {
   registerRequestInterceptor (auth) {
     this.unregister = interceptors.register({
