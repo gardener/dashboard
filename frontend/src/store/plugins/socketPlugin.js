@@ -157,6 +157,7 @@ export default function createPlugin (userManager, logger) {
       socket.emit('subscribe', 'shoots', options, ({ statusCode, message }) => {
         if (statusCode === 200) {
           logger.debug('subscribed shoots')
+          store.commit('socket/SET_SUBSCRIBED', true)
         } else {
           logger.debug('failed to subscribe shoots: %s', message)
         }
@@ -167,6 +168,7 @@ export default function createPlugin (userManager, logger) {
       socket.emit('unsubscribe', 'shoots', ({ statusCode, message }) => {
         if (statusCode === 200) {
           logger.debug('unsubscribed shoots')
+          store.commit('socket/SET_SUBSCRIBED', false)
         } else {
           logger.debug('failed to unsubscribe shoots: %s', message)
         }

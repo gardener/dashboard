@@ -9,6 +9,7 @@ const state = {
   readyState: 'closed',
   id: null,
   connected: false,
+  subscribed: false,
   active: false,
   reason: null,
   error: null,
@@ -17,8 +18,8 @@ const state = {
 
 // getters
 const getters = {
-  connected (state) {
-    return state.readyState === 'open'
+  notClosed (state) {
+    return state.readyState !== 'closed'
   }
 }
 
@@ -27,7 +28,7 @@ const actions = {
   setReadyState ({ commit }, value) {
     commit('SET_READY_STATE', value)
   },
-  onConnect ({ commit, dispatch }, [socket]) {
+  onConnect ({ commit }, [socket]) {
     commit('SET_ID', socket.id)
     commit('SET_CONNECTED', socket.connected)
     commit('SET_ACTIVE', socket.active)
@@ -64,7 +65,11 @@ const mutations = {
       state.reason = null
       state.error = null
     }
+    state.subscribed = false
     state.connected = value
+  },
+  SET_SUBSCRIBED (state, value) {
+    state.subscribed = value
   },
   SET_ACTIVE (state, value) {
     state.active = value
