@@ -57,16 +57,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-radio
             label="Technical User"
-            :value="AuthenticationMethods.USER"
+            :value="AuthenticationMethod.USER"
           ></v-radio>
           <v-radio
             label="Application Credentials"
-            :value="AuthenticationMethods.APP_CREDENTIAL"
+            :value="AuthenticationMethod.APP_CREDENTIAL"
           ></v-radio>
         </v-radio-group>
       </div>
       <v-container class="py-0">
-        <template v-if="authenticationMethod === AuthenticationMethods.USER">
+        <template v-if="authenticationMethod === AuthenticationMethod.USER">
           <div>
             <hint-colorizer hint-color="primary">
               <v-text-field
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             </hint-colorizer>
           </div>
         </template>
-        <template v-if="authenticationMethod === AuthenticationMethods.APP_CREDENTIAL">
+        <template v-if="authenticationMethod === AuthenticationMethod.APP_CREDENTIAL">
           <div>
             <v-text-field
             color="primary"
@@ -171,7 +171,7 @@ const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserPassMessage = 'Required for technical user authentication'
 const requiredAppCredentialMessage = 'Required for application credentials authentication'
 
-const AuthenticationMethods = {
+const AuthenticationMethod = {
   USER: 'user',
   APP_CREDENTIAL: 'appcredentials'
 }
@@ -234,8 +234,8 @@ export default {
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       validationErrors,
-      authenticationMethod: AuthenticationMethods.USER,
-      AuthenticationMethods
+      authenticationMethod: AuthenticationMethod.USER,
+      AuthenticationMethod
     }
   },
   validations () {
@@ -284,12 +284,12 @@ export default {
         },
         username: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.USER
+            return this.authenticationMethod === this.AuthenticationMethod.USER
           })
         },
         password: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.USER
+            return this.authenticationMethod === this.AuthenticationMethod.USER
           })
         },
         authURL: {
@@ -299,17 +299,17 @@ export default {
         },
         applicationCredentialID: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
+            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
           })
         },
         applicationCredentialName: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
+            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
           })
         },
         applicationCredentialSecret: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
+            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
           })
         }
       }
