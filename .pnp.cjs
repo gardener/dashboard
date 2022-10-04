@@ -2818,7 +2818,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["semver", "npm:7.3.7"],\
             ["socket.io-client", "npm:4.5.2"],\
             ["splitpanes", "npm:2.4.1"],\
+            ["statuses", "npm:2.0.1"],\
             ["symbol-tree", "npm:3.2.4"],\
+            ["toidentifier", "npm:1.0.1"],\
             ["url-template", "npm:3.0.0"],\
             ["uuid", "npm:8.3.2"],\
             ["vue", "npm:2.6.14"],\

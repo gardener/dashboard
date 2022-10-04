@@ -1568,7 +1568,9 @@ __metadata:
     semver: ^7.3.7
     socket.io-client: ^4.5.2
     splitpanes: ^2.4.1
+    statuses: ^2.0.1
     symbol-tree: ^3.2.4
+    toidentifier: ^1.0.1
     url-template: ^3.0.0
     uuid: ^8.3.2
     vue: ^2.6.14
@@ -12370,7 +12372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"statuses@npm:2.0.1":
+"statuses@npm:2.0.1, statuses@npm:^2.0.1":
   version: 2.0.1
   resolution: "statuses@npm:2.0.1"
   checksum: 18c7623fdb8f646fb213ca4051be4df7efb3484d4ab662937ca6fbef7ced9b9e12842709872eb3020cc3504b93bde88935c9f6417489627a7786f24f8031cbcb
@@ -12847,7 +12849,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toidentifier@npm:1.0.1":
+"toidentifier@npm:1.0.1, toidentifier@npm:^1.0.1":
   version: 1.0.1
   resolution: "toidentifier@npm:1.0.1"
   checksum: 952c29e2a85d7123239b5cfdd889a0dde47ab0497f0913d70588f19c53f7e0b5327c95f4651e413c74b785147f9637b17410ac8c846d5d4a20a5a33eb6dc3a45
