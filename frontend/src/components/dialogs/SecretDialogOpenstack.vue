@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
           ></v-radio>
           <v-radio
             label="Application Credentials"
-            :value="AuthenticationMethods.APP_CREDENTIALS"
+            :value="AuthenticationMethods.APP_CREDENTIAL"
           ></v-radio>
         </v-radio-group>
       </div>
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             </hint-colorizer>
           </div>
         </template>
-        <template v-if="authenticationMethod === AuthenticationMethods.APP_CREDENTIALS">
+        <template v-if="authenticationMethod === AuthenticationMethods.APP_CREDENTIAL">
           <div>
             <v-text-field
             color="primary"
@@ -169,11 +169,11 @@ import ExternalLink from '@/components/ExternalLink'
 
 const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserPassMessage = 'Required for technical user authentication'
-const requiredAppCredMessage = 'Required for application credential authentication'
+const requiredAppCredentialMessage = 'Required for application credentials authentication'
 
 const AuthenticationMethods = {
   USER: 'user',
-  APP_CREDENTIALS: 'appcredentials'
+  APP_CREDENTIAL: 'appcredentials'
 }
 
 const validationErrors = {
@@ -193,13 +193,13 @@ const validationErrors = {
     required: 'Required for Secret Type DNS.'
   },
   applicationCredentialID: {
-    required: requiredAppCredMessage
+    required: requiredAppCredentialMessage
   },
   applicationCredentialName: {
-    required: requiredAppCredMessage
+    required: requiredAppCredentialMessage
   },
   applicationCredentialSecret: {
-    required: requiredAppCredMessage
+    required: requiredAppCredentialMessage
   }
 }
 
@@ -299,17 +299,17 @@ export default {
         },
         applicationCredentialID: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
           })
         },
         applicationCredentialName: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
           })
         },
         applicationCredentialSecret: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIALS
+            return this.authenticationMethod === this.AuthenticationMethods.APP_CREDENTIAL
           })
         }
       }
@@ -362,7 +362,7 @@ export default {
         this.reset()
       }
     },
-    authenticationMethod: function () {
+    authenticationMethod () {
       this.username = undefined
       this.password = undefined
       this.applicationCredentialID = undefined
