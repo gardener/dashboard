@@ -154,7 +154,7 @@ export class UserManager {
     window.location = url
   }
 
-  async #refreshToken (tolerance) {
+  async refreshToken (tolerance) {
     try {
       let user = decodeCookie()
       if (!user) {
@@ -196,7 +196,7 @@ export class UserManager {
 
   ensureValidToken (tolerance) {
     if (!this.#refreshTokenPromise) {
-      this.#refreshTokenPromise = this.#refreshToken(tolerance).finally(() => {
+      this.#refreshTokenPromise = this.refreshToken(tolerance).finally(() => {
         this.#refreshTokenPromise = undefined
       })
     }
