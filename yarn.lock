@@ -1474,7 +1474,7 @@ __metadata:
     helmet: ^5.1.0
     http-errors: ^2.0.0
     jest: ^27.5.1
-    jose: ^4.8.1
+    jose: ^4.9.2
     js-yaml: ^4.1.0
     jsonwebtoken: ^8.5.1
     lodash: 4.17.21
@@ -8907,10 +8907,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.1.4, jose@npm:^4.8.1":
+"jose@npm:^4.1.4":
   version: 4.8.1
   resolution: "jose@npm:4.8.1"
   checksum: c3e239ccbb07863c28250aedea3e734e4a3b26abc1cbf6acf333381db5ef31e5d1eeced791299076f13b24f41b4b463a7a1e4eaa0079ae0febf9bfd60acb555a
+  languageName: node
+  linkType: hard
+
+"jose@npm:^4.9.2":
+  version: 4.10.0
+  resolution: "jose@npm:4.10.0"
+  checksum: c575bf2519b758592b3037cac0da34ff2641e56a050b156fe6ab18c03cd6c22e5338d28d1fe3dd997c9b3c0cc7deda72faca4a93ff41274a587850c6519852d0
   languageName: node
   linkType: hard
 
