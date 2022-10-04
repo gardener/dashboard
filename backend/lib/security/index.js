@@ -388,7 +388,7 @@ function handleClientError (err) {
 }
 
 async function refreshTokenSet (tokenSet) {
-  const payload = pick(decode(tokenSet.access_token), ['iat', 'exp', 'rti'])
+  const payload = pick(decode(tokenSet.access_token), ['exp', 'rti'])
   try {
     const client = await exports.getIssuerClient()
     logger.debug('Refreshing TokenSet (%s)', payload.rti)
