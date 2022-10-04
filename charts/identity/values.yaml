@@ -9,7 +9,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/dexidp/dex
-  tag: v2.35.0-distroless
+  tag: v2.35.1-distroless
   pullPolicy: IfNotPresent
 
 containerPort: 5556
