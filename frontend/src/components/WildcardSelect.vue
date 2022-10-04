@@ -133,7 +133,7 @@ export default {
       if (this.wildcardSelectedValue.customWildcard) {
         return `Specify custom ${this.wildcardSelectLabel}`
       } else {
-        if (this.wildcardVariablePart?.length) {
+        if (this.wildcardVariablePart) {
           return `Floating Pool Name: ${this.internalValue}`
         }
         const label = this.wildcardSelectedValue.startsWithWildcard ? 'prefix' : 'suffix'
