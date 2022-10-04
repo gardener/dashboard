@@ -25,10 +25,13 @@ export function createError (name, message, properties) {
     properties = message
     message = name
     name = 'Error'
-  } else if (typeof name === 'number') {
-    name = toIdentifier(statuses.message[name] ?? 'http')
   }
   const err = new Error(message)
+  if (typeof name === 'number') {
+    const statusCode = name
+    err.statusCode = statusCode
+    name = toIdentifier(statuses.message[statusCode] ?? 'http')
+  }
   name = toIdentifier(name)
   if (!name.endsWith('Error')) {
     name += 'Error'
