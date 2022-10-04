@@ -7,6 +7,7 @@
 import Vue from 'vue'
 
 import api, { interceptors } from '@/utils/api'
+import { createAbortError } from '@/utils/errors'
 
 function delay (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -15,21 +16,16 @@ function delay (ms) {
 const VueApi = {
   registerRequestInterceptor (auth) {
     this.unregister = interceptors.register({
-      requestFulfilled (...args) {
+      async requestFulfilled (...args) {
         const url = args[0] ?? ''
-        if (!url.startsWith('/api')) {
-          return Promise.resolve(args)
+        if (url.startsWith('/api')) {
+          try {
+            await auth.ensureValidToken()
+          } catch (err) {
+            throw createAbortError('Request aborted')
+          }
         }
-        return auth.ensureValidToken()
-          .then(() => args)
-          .catch(() => {
-            // Delay the AbortError by 1 sec to avoid router navigation before redirection to signout URL is finished
-            return delay(1000).then(() => {
-              const err = new Error('Request Aborted')
-              err.name = 'AbortError'
-              throw err
-            })
-          })
+        return args
       }
     })
   },

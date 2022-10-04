@@ -5,6 +5,7 @@
 //
 
 import { io, Manager } from 'socket.io-client'
+import { createClockSkewError } from '@/utils/errors'
 
 function createSocket (store, userManager, logger) {
   const socket = io({
@@ -13,12 +14,22 @@ function createSocket (store, userManager, logger) {
     autoConnect: false
   })
 
-  // handle manager events
   const manager = socket.io
+  const managerOpen = async fn => {
+    try {
+      if (manager.backoff?.attempts === 1) {
+        await userManager.ensureValidToken()
+      }
+    } finally {
+      Manager.prototype.open.call(manager, fn)
+    }
+  }
+
+  // handle manager events
   manager.open = function (fn) {
     logger.debug('manager opening')
     store.commit('socket/SET_READY_STATE', 'opening')
-    userManager.ensureValidToken().finally(() => Manager.prototype.open.call(manager, fn))
+    managerOpen(fn)
   }
 
   manager.on('open', () => {
@@ -80,8 +91,23 @@ function createSocket (store, userManager, logger) {
     if (socket.active) {
       logger.error('manager error: %s', err.message)
     } else {
-      const { statusCode = 500, code } = err.data ?? {}
-      logger.error('socket connect error: %s (%d %s)', err.message, statusCode, code)
+      const {
+        message,
+        data: {
+          statusCode = 500,
+          code = 'ERR_SOCKET_MIDDLEWARE',
+          ...data
+        } = {}
+      } = err
+      logger.error('socket connect error: %s (%d %s)', message, statusCode, code)
+      if (code === 'ERR_JWT_TOKEN_REFRESH_REQUIRED' && typeof data.exp === 'number') {
+        const expiresIn = data.exp - Math.floor(Date.now() / 1000)
+        const tolerance = 5
+        if (expiresIn > tolerance) {
+          const frameRequestCallback = () => userManager.signout(createClockSkewError())
+          window.requestAnimationFrame(frameRequestCallback)
+        }
+      }
     }
     store.dispatch('socket/onError', [socket, err])
   })

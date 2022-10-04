@@ -6,23 +6,21 @@
 
 import Vue from 'vue'
 import decode from 'jwt-decode'
-import get from 'lodash/get'
-import { createError, isUnauthorizedError } from './fetch'
+import {
+  createError,
+  createNoUserError,
+  createClockSkewError,
+  isUnauthorizedError,
+  isNoUserError,
+  isClockSkewError
+} from './errors'
 
 const logger = Vue.logger
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 
-function createNoUserError (message = 'User not found') {
-  const error = new Error('User not found')
-  error.name = 'NoUserError'
-  return error
-}
-
-function createUnauthorizedError (message) {
-  const error = new Error(message)
-  error.name = 'UnauthorizedError'
-  return error
+function delay (duration = 0) {
+  return new Promise(resolve => setTimeout(resolve, duration))
 }
 
 function now () {
@@ -48,8 +46,23 @@ function isSessionExpired (user, tolerance = 1) {
   return typeof t === 'number' && t < tolerance
 }
 
-function createTokenRefreshRequest () {
-  return fetch('/auth/token', {
+function decodeCookie () {
+  try {
+    const value = Vue.cookie.get(COOKIE_HEADER_PAYLOAD)
+    if (value) {
+      return decode(value)
+    }
+  } catch { /* ignore error */ }
+  return null
+}
+
+function deleteCookie () {
+  Vue.cookie.delete(COOKIE_HEADER_PAYLOAD)
+}
+
+async function createTokenRefreshRequest () {
+  const timestamp = Math.floor(Date.now() / 1000)
+  const response = await fetch('/auth/token', {
     method: 'POST',
     cache: 'no-store',
     headers: {
@@ -57,39 +70,47 @@ function createTokenRefreshRequest () {
       'x-requested-with': 'XMLHttpRequest',
       'content-type': 'application/json'
     },
-    body: JSON.stringify({ time: Date.now() })
+    body: JSON.stringify({ timestamp })
   })
-    .then(response => {
-      return response.json()
-        .then(data => Object.assign(response, 'data', { value: data }), () => { /* ignore error */ })
-        .then(() => response)
-    })
-    .then(response => {
-      if (response.status >= 400) {
-        throw createError(response.status, 'Token refresh failed', { response })
-      }
-    })
-    .catch(err => {
-      if (isUnauthorizedError(err)) {
-        let message = get(err, 'response.data.message')
-        if (message) {
-        /*
-         * The OPError message has the following format `${error} (${error_description})`
-         * (see https://github.com/panva/node-openid-client/blob/main/lib/errors.js#L5)
-         * The error and the error_description are values returned in the error response
-         * from the the OpenID Connect Provider (OP). We use the original OP error_description
-         * as error message if possible.
-         */
+
+  const statusCode = response.status
+  if (statusCode >= 200 && statusCode < 300) {
+    const user = decodeCookie()
+    if (!user) {
+      throw createNoUserError()
+    }
+    if (isRefreshRequired(user)) {
+      throw createClockSkewError()
+    }
+    return user
+  }
+
+  if (statusCode >= 400) {
+    let message = `Token refresh failed with status code ${statusCode}`
+    try {
+      const data = await response.json()
+      Object.defineProperty(response, 'data', { value: data })
+      if (data.message) {
+        message = data.message
+        if (statusCode === 401) {
+          /*
+           * The OPError message has the following format `${error} (${error_description})`
+           * (see https://github.com/panva/node-openid-client/blob/main/lib/errors.js#L5)
+           * The error and the error_description are values returned in the error response
+           * from the the OpenID Connect Provider (OP). We use the original OP error_description
+           * as error message if possible.
+           */
           const matches = /^(.+) \((.+)\)$/.exec(message)
           if (matches && matches.length > 2) {
             message = matches[2]
           }
-        } else {
-          message = err.message
         }
-        throw createUnauthorizedError(message)
       }
-    })
+    } catch (err) { /* ignore error */ }
+    throw createError(statusCode, message, { response })
+  }
+
+  throw createError(statusCode, 'Token refresh failed', { response })
 }
 
 export class UserManager {
@@ -100,23 +121,18 @@ export class UserManager {
   }
 
   getUser () {
-    try {
-      const value = Vue.cookie.get(COOKIE_HEADER_PAYLOAD)
-      if (value) {
-        return decode(value)
-      }
-    } catch { /* ignore error */ }
-    return null
+    return decodeCookie()
   }
 
   removeUser () {
-    Vue.cookie.delete(COOKIE_HEADER_PAYLOAD)
+    deleteCookie()
   }
 
   signout (err) {
     this.removeUser()
     const url = new URL('/auth/logout', this.origin)
     if (err) {
+      url.searchParams.set('error[name]', err.name)
       url.searchParams.set('error[message]', err.message)
     }
     this.redirect(url)
@@ -138,50 +154,51 @@ export class UserManager {
     window.location = url
   }
 
+  async #refreshToken (tolerance) {
+    try {
+      let user = decodeCookie()
+      if (!user) {
+        throw createNoUserError()
+      }
+      if (!isRefreshRequired(user, tolerance)) {
+        return
+      }
+      logger.debug('Aquiring token refresh lock (%s)', user.rti)
+      await navigator.locks.request('token-refresh-request', async () => {
+        user = decodeCookie()
+        if (!user) {
+          throw createNoUserError()
+        }
+        if (!isRefreshRequired(user, tolerance)) {
+          return
+        }
+        logger.debug('Refreshing token (%s)', user.rti)
+        const oldUser = user
+        user = await createTokenRefreshRequest()
+        logger.debug('Token has been refreshed (%s <- %s)', user.rti, oldUser.rti)
+      })
+    } catch (err) {
+      logger.error('Token refresh failed: %s - %s', err.name, err.message)
+      let frameRequestCallback
+      if (isNoUserError(err)) {
+        frameRequestCallback = () => this.signin()
+      } else if (isUnauthorizedError(err) || isClockSkewError(err)) {
+        frameRequestCallback = () => this.signout(err)
+      }
+      if (typeof frameRequestCallback === 'function') {
+        window.requestAnimationFrame(frameRequestCallback)
+        // delay the error by 500 ms to avoid rendering or navigation before redirection has started
+        await delay(500)
+      }
+      throw err
+    }
+  }
+
   ensureValidToken (tolerance) {
-    const user = this.getUser()
-    if (!user) {
-      return Promise.reject(createNoUserError())
-    }
-    if (!isRefreshRequired(user, tolerance)) {
-      return Promise.resolve()
-    }
     if (!this.#refreshTokenPromise) {
-      const name = 'token-refresh-request-' + user.rti
-      logger.debug('Aquiring refresh token lock (%s)', user.rti)
-      this.#refreshTokenPromise = navigator.locks
-        .request(name, () => {
-          const user = this.getUser()
-          if (!user) {
-            return Promise.reject(createNoUserError())
-          }
-          if (!isRefreshRequired(user, tolerance)) {
-            return Promise.resolve()
-          }
-          logger.debug('Refreshing token (%s)', user.rti)
-          return createTokenRefreshRequest()
-            .then(() => {
-              const newUser = this.getUser()
-              logger.debug('Refreshed token (%s <- %s)', newUser.rti, user.rti)
-            })
-            .catch(err => {
-              logger.error('Refresh token failed: %s - %s', err.name, err.message)
-              switch (err.name) {
-                case 'UnauthorizedError': {
-                  window.requestAnimationFrame(() => this.signout(err))
-                  break
-                }
-                case 'NoUserError': {
-                  window.requestAnimationFrame(() => this.signin())
-                  break
-                }
-              }
-              throw err
-            })
-        })
-        .finally(() => {
-          this.#refreshTokenPromise = undefined
-        })
+      this.#refreshTokenPromise = this.#refreshToken(tolerance).finally(() => {
+        this.#refreshTokenPromise = undefined
+      })
     }
     return this.#refreshTokenPromise
   }
