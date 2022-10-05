@@ -427,6 +427,23 @@ describe('services', function () {
           expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['viewer']))
           expect(newMemberListItem.roles).toEqual(roles)
         })
+
+        it('should create orphaned service account', async function () {
+          const name = 'system:serviceaccount:garden-foo:robot-orphaned'
+          const roles = ['role1', 'role2']
+
+          await memberManager.update(name, { roles }) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItem = memberSubjects.subjectListItems[name]
+
+          expect(newMemberListItem.subject.name).toEqual('robot-orphaned')
+          expect(newMemberListItem.subject.namespace).toEqual('garden-foo')
+          expect(newMemberListItem.subject.kind).toBe('ServiceAccount')
+          expect(newMemberListItem.subject.role).toBe('role1')
+          expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['role2']))
+          expect(newMemberListItem.roles).toEqual(roles)
+          expect(newMemberListItem.extensions.orphaned).toBe(false)
+        })
       })
 
       describe('#deleteServiceAccount', function () {
