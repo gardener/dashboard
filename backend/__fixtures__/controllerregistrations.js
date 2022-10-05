@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, find, set } = require('lodash')
+const { cloneDeep, find } = require('lodash')
 
 function getControllerRegistration ({ uid, name, version, resources }) {
   const metadata = {
