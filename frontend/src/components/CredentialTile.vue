@@ -19,19 +19,19 @@ SPDX-License-Identifier: Apache-2.0
           <template v-if="phase && phase.incomplete">
             <div>
               <strong>
-                All two-phase credentials rotations need to be in phase
+                All two-step credentials rotations need to be in phase
                 <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
                 in order to perform this operation
               </strong>
             </div>
-            <div>Please prepare rotation of the followig phases</div>
+            <div>Please prepare rotation of the followig credentials</div>
             <ul v-if="phase">
               <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
             </ul>
           </template>
           <template v-else>
             <div>
-              This two-phase operation is in phase
+              This two-step operation is in phase
               <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
             </div>
             <div>
