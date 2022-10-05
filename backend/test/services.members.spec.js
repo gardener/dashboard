@@ -119,12 +119,7 @@ describe('services', function () {
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
-        },
-        secrets: [
-          {
-            name: 'secret-1'
-          }
-        ]
+        }
       },
       {
         metadata: {
@@ -144,18 +139,7 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
-        },
-        secrets: [
-          {
-            name: 'secret-1'
-          },
-          {
-            name: 'secret-2'
-          },
-          {
-            name: 'missing-secret'
-          }
-        ]
+        }
       },
       {
         metadata: {
@@ -173,29 +157,6 @@ describe('services', function () {
           namespace: 'garden-foo',
           creationTimestamp: 'bar-time',
           deletionTimestamp: 'baz-time'
-        }
-      }
-    ]
-
-    const secrets = [
-      {
-        metadata: {
-          namespace: 'garden-foo',
-          name: 'secret-1',
-          creationTimestamp: '2019-03-13T13:11:36Z'
-        },
-        data: {
-          token: Buffer.from('secret-1').toString('base64')
-        }
-      },
-      {
-        metadata: {
-          namespace: 'garden-foo',
-          name: 'secret-2',
-          creationTimestamp: '2021-03-13T13:11:36Z'
-        },
-        data: {
-          token: Buffer.from('secret-2').toString('base64')
         }
       }
     ]
@@ -238,10 +199,6 @@ describe('services', function () {
         }),
         delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockResolvedValue()
-      }
-      client.core.secrets = {
-        delete: jest.fn().mockImplementation(findObjectFn(secrets)),
-        get: jest.fn().mockImplementation(findObjectFn(secrets))
       }
     })
 
