@@ -84,11 +84,13 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="canManageServiceAccountMembers && canDeleteServiceAccounts" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon color="action-button" @click.native.stop="onDelete">
-                <v-icon>{{ foreign ? 'mdi-close' : 'mdi-delete' }}</v-icon>
-              </v-btn>
+               <div v-on="on">
+                <v-btn icon color="action-button" @click.native.stop="onDelete" :disabled="!canDelete">
+                  <v-icon>{{ foreign || orphaned ? 'mdi-close' : 'mdi-delete' }}</v-icon>
+                </v-btn>
+               </div>
             </template>
-            <span>{{ foreign ? 'Remove Foreign Service Account from Project' : 'Delete Service Account' }}</span>
+            <span>{{deleteTooltip}}</span>
           </v-tooltip>
         </div>
       </div>
@@ -138,6 +140,21 @@ export default {
     },
     foreign () {
       return isForeignServiceAccount(this.namespace, this.item.username)
+    },
+    canDelete () {
+      return this.foreign || this.orphaned || !this.item.deletionTimestamp
+    },
+    deleteTooltip () {
+      if (!this.canDelete) {
+        return 'Service Account is already marked for deletion'
+      }
+      if (this.orphaned) {
+        return 'Remove Service Account from Project'
+      }
+      if (this.foreign) {
+        return 'Remove foreign Service Account from Project'
+      }
+      return 'Delete Service Account'
     },
     createdByClasses () {
       return this.item.createdBy ? ['font-weight-bold'] : ['grey--text']

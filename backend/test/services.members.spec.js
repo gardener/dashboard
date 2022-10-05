@@ -166,6 +166,14 @@ describe('services', function () {
           },
           creationTimestamp: 'bar-time'
         }
+      },
+      {
+        metadata: {
+          name: 'robot-deleted',
+          namespace: 'garden-foo',
+          creationTimestamp: 'bar-time',
+          deletionTimestamp: 'baz-time'
+        }
       }
     ]
 
@@ -270,7 +278,7 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).toHaveLength(9)
+          expect(frontendMemberList).toHaveLength(10)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
@@ -297,6 +305,12 @@ describe('services', function () {
             username: 'system:serviceaccount:garden-foo:robot-orphaned',
             roles: ['myrole'],
             orphaned: true
+          })
+          expect(frontendMemberList).toContainEqual({
+            username: 'system:serviceaccount:garden-foo:robot-deleted',
+            roles: [],
+            creationTimestamp: 'bar-time',
+            deletionTimestamp: 'baz-time'
           })
         })
 
