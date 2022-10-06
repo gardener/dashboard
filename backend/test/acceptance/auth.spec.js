@@ -248,8 +248,8 @@ describe('auth', function () {
 
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
-    const { exp: expiresAt } = security.decode(bearer)
     const now = Math.floor(Date.now() / 1000)
+    const expiresAt = now + 86400
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -287,7 +287,7 @@ describe('auth', function () {
       iat: expect.toBeWithinRange(now, now + 3),
       aud: ['gardener'],
       isAdmin: false,
-      exp: expiresAt,
+      exp: expect.toBeWithinRange(expiresAt, expiresAt + 3),
       jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     }))
     expect(idToken).toEqual(bearer)
