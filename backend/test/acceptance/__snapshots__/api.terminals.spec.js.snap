@@ -207,6 +207,7 @@ Array [
               },
             ],
           },
+          "cleanupProjectMembership": false,
           "credentials": Object {
             "shootRef": Object {
               "name": "infra1-seed",
@@ -445,6 +446,7 @@ Array [
               },
             ],
           },
+          "cleanupProjectMembership": false,
           "credentials": Object {
             "serviceAccountRef": Object {
               "name": "dashboard-terminal-admin",
@@ -904,6 +906,7 @@ Array [
               },
             ],
           },
+          "cleanupProjectMembership": false,
           "credentials": Object {
             "shootRef": Object {
               "name": "fooShoot",
