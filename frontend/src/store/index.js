@@ -981,7 +981,7 @@ const getters = {
     return getters['shoots/initialNewShootResource']
   },
   hasGardenTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.canCreateTerminals
+    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.canPatchServiceAccounts && getters.canCreateServiceAccounts
   },
   hasControlPlaneTerminalAccess (state, getters) {
     return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
@@ -1033,6 +1033,9 @@ const getters = {
   },
   canCreateServiceAccounts (state) {
     return canI(state.subjectRules, 'create', '', 'serviceaccounts')
+  },
+  canPatchServiceAccounts (state) {
+    return canI(state.subjectRules, 'patch', '', 'serviceaccounts')
   },
   canDeleteServiceAccounts (state) {
     return canI(state.subjectRules, 'delete', '', 'serviceaccounts')

@@ -45,6 +45,9 @@ const markdown = require('../../markdown')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
+// name of the dashboard webterminal serviceaccount used by non-admins
+const DASHBOARD_WEBTERMINAL_NAME = 'dashboard-webterminal'
+
 const TargetEnum = {
   GARDEN: 'garden',
   CONTROL_PLANE: 'cp',
@@ -191,6 +194,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
     kubeconfigContextNamespace: undefined,
     namespace: undefined, // this is the namespace where the "access" service account will be created
     credentials: undefined,
+    cleanupProjectMembership: false,
     authorization: {
       roleBindings: undefined,
       projectMemberships: undefined
@@ -222,10 +226,13 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       } else {
         const projectName = findProjectByNamespace(namespace).metadata.name
         targetCluster.namespace = namespace
-        const serviceAccountName = 'dashboard-webterminal'
+        const serviceAccountName = DASHBOARD_WEBTERMINAL_NAME
 
-        // test if service account exists
-        await client.core.serviceaccounts.get(namespace, serviceAccountName)
+        // test if service account exists and is not in deletion
+        const serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
+        if (serviceAccount.metadata?.deletionTimestamp) {
+          throw new Error('Can\'t create terminal for ServiceAccount that is marked for deletion')
+        }
 
         targetCluster.credentials = {
           serviceAccountRef: {
@@ -233,6 +240,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
             namespace
           }
         }
+        targetCluster.cleanupProjectMembership = true
         targetCluster.authorization.projectMemberships = [
           {
             projectName,
@@ -523,7 +531,7 @@ function createHost ({ credentials, namespace, container, podLabels, node, hostP
   return host
 }
 
-function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, authorization, namespace }) {
+function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, authorization, namespace, cleanupProjectMembership }) {
   const temporaryNamespace = _.isEmpty(namespace)
   return {
     credentials,
@@ -531,7 +539,8 @@ function createTarget ({ kubeconfigContextNamespace, apiServer, credentials, aut
     apiServer,
     authorization,
     namespace,
-    temporaryNamespace
+    temporaryNamespace,
+    cleanupProjectMembership
   }
 }
 
@@ -557,6 +566,7 @@ async function readTerminalUntilReady ({ user, namespace, name }) {
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {
   const username = user.id
   const client = user.client
+  const isAdmin = user.isAdmin
 
   let [
     terminal,
@@ -600,6 +610,10 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
       .catch(_.noop) // ignore error
   }
 
+  if (target === TargetEnum.GARDEN && !isAdmin) {
+    ensureServiceAccountCleanup(client, { terminal, namespace, name: DASHBOARD_WEBTERMINAL_NAME })
+  }
+
   return {
     metadata: toTerminalMetadata(terminal),
     hostCluster: {
@@ -608,6 +622,49 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     },
     imageHelpText: imageHelpText(terminal)
   }
+}
+
+async function ensureServiceAccountCleanup (client, { terminal, namespace, name }) {
+  const ownerRef = {
+    apiVersion: terminal.apiVersion,
+    kind: terminal.kind,
+    blockOwnerDeletion: false,
+    name: terminal.metadata.name,
+    uid: terminal.metadata.uid
+  }
+
+  const { metadata: { ownerReferences = [], labels = {}, finalizers = [] } } = await client.core.serviceaccounts.get(namespace, name)
+
+  let dirty = false
+
+  if (!_.some(finalizers, 'gardener.cloud/terminal')) {
+    finalizers.push('gardener.cloud/terminal')
+    dirty = true
+  }
+
+  if (!_.some(ownerReferences, { uid: ownerRef.uid })) {
+    ownerReferences.push(ownerRef)
+    dirty = true
+  }
+
+  if (labels['reference.dashboard.gardener.cloud/terminal'] !== 'true') {
+    labels['reference.dashboard.gardener.cloud/terminal'] = 'true'
+    dirty = true
+  }
+
+  if (!dirty) {
+    return
+  }
+
+  const payload = {
+    metadata: {
+      finalizers,
+      ownerReferences,
+      labels
+    }
+  }
+
+  await client.core.serviceaccounts.mergePatch(namespace, name, payload)
 }
 
 async function createHostClient (client, { shootRef, secretRef }) {

@@ -22,12 +22,12 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:message>
       <div key="confirm-message" style="min-height:100px">
         <div>
-          <span v-if="needsUpdate">To access the garden cluster the <span class="font-family-monospace">{{serviceAccountName}}</span> service account requires the <span class="font-family-monospace">admin</span> role.</span>
+          <span v-if="needsUpdate">To access the garden cluster the <span class="font-family-monospace">{{serviceAccountName}}</span> service account requires the <span class="font-family-monospace">admin</span> and <span class="font-family-monospace">serviceaccountmanager</span> role.</span>
           <span v-else>To access the garden cluster a dedicated service account is required.</span>
         </div>
         <div>
-           <span v-if="needsUpdate">Do you want grant the <span class="font-family-monospace">admin</span> role to the service account?</span>
-           <span v-else>Do you want to create the <span class="font-family-monospace">{{serviceAccountName}}</span> service account and add it as member with <span class="font-family-monospace">admin</span> role to this project?</span>
+           <span v-if="needsUpdate">Do you want grant the <span class="font-family-monospace">admin</span> and <span class="font-family-monospace">serviceaccountmanager</span> role to the service account?</span>
+           <span v-else>Do you want to create the <span class="font-family-monospace">{{serviceAccountName}}</span> service account and add it as member with <span class="font-family-monospace">admin</span> and <span class="font-family-monospace">serviceaccountmanager</span> role to this project?</span>
           <v-list>
             <v-list-item>
               <v-list-item-content>
@@ -104,6 +104,7 @@ export default {
     desiredRoles () {
       const roles = [...get(this.member, 'roles', [])]
       roles.push('admin')
+      roles.push('serviceaccountmanager')
       return roles
     }
   },
@@ -126,18 +127,19 @@ export default {
         return false
       }
 
+      const description = 'Service account required to manage temporary service accounts for the webterminal feature of the gardener dashboard'
       try {
         if (this.needsUpdate) {
           await this.updateMember({
             name: this.serviceAccountUsername,
             roles: this.desiredRoles,
-            description: 'Service account required to manage temporary service accounts for the webterminal feature of the gardener dashboard'
+            description
           })
         } else {
           await this.addMember({
             name: this.serviceAccountUsername,
-            roles: ['admin'],
-            description: 'Service account required to manage temporary service accounts for the webterminal feature of the gardener dashboard'
+            roles: this.desiredRoles,
+            description
           })
         }
         return true
