@@ -393,7 +393,7 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
   return hostCluster
 }
 
-async function getShootHostCluster (client, { namespace, name, target, body, shootResource }) {
+async function getShootHostCluster (client, { namespace, name, body, shootResource }) {
   const hostCluster = {}
   hostCluster.config = getConfigFromBody(body)
 
@@ -442,7 +442,7 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
   }
 
   // host cluster is the shoot
-  return getShootHostCluster(client, { namespace, name, target, body, shootResource })
+  return getShootHostCluster(client, { namespace, name, body, shootResource })
 }
 
 async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost }) {
