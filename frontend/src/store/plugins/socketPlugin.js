@@ -175,7 +175,13 @@ export default function createPlugin (userManager, logger) {
       })
     }
 
-    const reconnect = () => userManager.ensureValidToken().finally(() => socket.connect())
+    const reconnect = async () => {
+      try {
+        await userManager.ensureValidToken()
+      } finally {
+        socket.connect()
+      }
+    }
     const randomize = (d, f = 0.5) => d + Math.floor(d * f * (2 * Math.random() - 1))
 
     const handleReconnectAttempt = () => {
