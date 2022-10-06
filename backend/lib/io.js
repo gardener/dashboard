@@ -127,6 +127,7 @@ async function unsubscribe (socket, key) {
 }
 
 function setDisconnectTimeout (socket, delay) {
+  delay = Math.min(2147483647, delay)
   logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(delay / 1000))
   socket.data.timeoutId = setTimeout(() => {
     logger.debug('Socket %s is expired. Forcefully disconnecting client', socket.id)

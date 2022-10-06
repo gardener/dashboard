@@ -37,7 +37,7 @@ export default function createRouter (store) {
     const currentTime = Date.now()
     if (expirationTime) {
       if (expirationTime > currentTime) {
-        const delay = expirationTime - currentTime
+        const delay = Math.max(2147483647, expirationTime - currentTime)
         timeoutID = setTimeout(() => {
           logger.info('Session is expiring --> Redirecting to logout page')
           userManager.signout()

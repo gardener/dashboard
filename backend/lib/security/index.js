@@ -238,7 +238,8 @@ async function createAccessToken (payload, idToken) {
       payload.exp ??= Number(exp)
     }
   }
-  payload.exp ??= now() + sessionLifetime
+  const maxExpiresAt = now() + sessionLifetime
+  payload.exp = Math.min(payload.exp ?? maxExpiresAt, maxExpiresAt)
   return sign(payload)
 }
 
