@@ -761,7 +761,7 @@ const getters = {
     // Really dirty hack ahead!!!
     // We don't want the customer to edit pluscloudopen secrets via the dashboard -> Detect if we run on PROD
 
-    if (!cloudProviderList.includes('pluscloudopen') && !window.location.hostname.includes('prod')) {
+    if (!cloudProviderList.includes('pluscloudopen') && getters.shouldOpenStackSecretsBeEditable) {
       cloudProviderList.push('pluscloudopen')
     }
 
@@ -774,11 +774,22 @@ const getters = {
 
     const providerList = ['aws', 'azure', 'gcp', 'alicloud', 'metal', 'vsphere', 'hcloud']
 
-    if (!window.location.hostname.includes('prod')) {
+    if (getters.shouldOpenStackSecretsBeEditable) {
       providerList.push('openstack')
     }
 
     return intersection(providerList, getters.cloudProviderKindList)
+  },
+  shouldOpenStackSecretsBeEditable () {
+    switch (window.location.hostname) {
+      case 'dashboard.dev.gardener.get-cloud.io':
+      case 'dashboard.stage.gardener.get-cloud.io':
+      case 'dashboard.intern.gardener.get-cloud.io':
+        return true
+
+      default:
+        return false
+    }
   },
   sortedDnsProviderList (state, getters) {
     const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
