@@ -57,16 +57,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <v-radio
             label="Technical User"
-            :value="AuthenticationMethod.USER"
+            value="USER"
           ></v-radio>
           <v-radio
             label="Application Credentials"
-            :value="AuthenticationMethod.APP_CREDENTIAL"
+            value="APPLICATION_CREDENTIALS"
           ></v-radio>
         </v-radio-group>
       </div>
       <v-container class="py-0">
-        <template v-if="authenticationMethod === AuthenticationMethod.USER">
+        <template v-if="authenticationMethod === 'USER'">
           <div>
             <hint-colorizer hint-color="primary">
               <v-text-field
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             </hint-colorizer>
           </div>
         </template>
-        <template v-if="authenticationMethod === AuthenticationMethod.APP_CREDENTIAL">
+        <template v-if="authenticationMethod === 'APPLICATION_CREDENTIALS'">
           <div>
             <v-text-field
             color="primary"
@@ -168,13 +168,8 @@ import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
 const requiredMessage = 'You can\'t leave this empty.'
-const requiredUserPassMessage = 'Required for technical user authentication'
-const requiredAppCredentialMessage = 'Required for application credentials authentication'
-
-const AuthenticationMethod = {
-  USER: 'user',
-  APP_CREDENTIAL: 'appcredentials'
-}
+const requiredUserMessage = 'Required for technical user authentication'
+const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
 
 const validationErrors = {
   domainName: {
@@ -184,22 +179,22 @@ const validationErrors = {
     required: requiredMessage
   },
   username: {
-    required: requiredUserPassMessage
+    required: requiredUserMessage
   },
   password: {
-    required: requiredUserPassMessage
+    required: requiredUserMessage
   },
   authURL: {
     required: 'Required for Secret Type DNS.'
   },
   applicationCredentialID: {
-    required: requiredAppCredentialMessage
+    required: requiredApplicationCredentialsMessage
   },
   applicationCredentialName: {
-    required: requiredAppCredentialMessage
+    required: requiredApplicationCredentialsMessage
   },
   applicationCredentialSecret: {
-    required: requiredAppCredentialMessage
+    required: requiredApplicationCredentialsMessage
   }
 }
 
@@ -234,8 +229,7 @@ export default {
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       validationErrors,
-      authenticationMethod: AuthenticationMethod.USER,
-      AuthenticationMethod
+      authenticationMethod: 'USER'
     }
   },
   validations () {
@@ -252,26 +246,17 @@ export default {
     secretData () {
       const data = {
         domainName: this.domainName,
-        tenantName: this.tenantName
+        tenantName: this.tenantName,
+        applicationCredentialID: this.applicationCredentialID,
+        applicationCredentialName: this.applicationCredentialName,
+        applicationCredentialSecret: this.applicationCredentialSecret,
+        username: this.username,
+        password: this.password
       }
-      if (this.username && this.username.length) {
-        data.username = this.username
-      }
-      if (this.password && this.password.length) {
-        data.password = this.password
-      }
-      if (this.authURL && this.authURL.length) {
+      if (this.authURL) {
         data.OS_AUTH_URL = this.authURL
       }
-      if (this.applicationCredentialID && this.applicationCredentialID.length) {
-        data.applicationCredentialID = this.applicationCredentialID
-      }
-      if (this.applicationCredentialName && this.applicationCredentialName.length) {
-        data.applicationCredentialName = this.applicationCredentialName
-      }
-      if (this.applicationCredentialSecret && this.applicationCredentialSecret.length) {
-        data.applicationCredentialSecret = this.applicationCredentialSecret
-      }
+
       return data
     },
     validators () {
@@ -284,12 +269,12 @@ export default {
         },
         username: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethod.USER
+            return this.authenticationMethod === 'USER'
           })
         },
         password: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethod.USER
+            return this.authenticationMethod === 'USER'
           })
         },
         authURL: {
@@ -299,17 +284,17 @@ export default {
         },
         applicationCredentialID: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
           })
         },
         applicationCredentialName: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
           })
         },
         applicationCredentialSecret: {
           required: requiredIf(function () {
-            return this.authenticationMethod === this.AuthenticationMethod.APP_CREDENTIAL
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
           })
         }
       }

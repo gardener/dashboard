@@ -254,7 +254,7 @@ exports.patch = async function ({ user, namespace, name, body }) {
 
   const secretRef = secretBinding.secretRef
   _.set(body, 'metadata.secretRef', secretRef)
-  const secret = await client.core.secrets.mergePatch(secretRef.namespace, secretRef.name, toSecretResource(body))
+  const secret = await client.core.secrets.update(secretRef.namespace, secretRef.name, toSecretResource(body))
 
   const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   let cloudProviderKind
