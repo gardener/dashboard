@@ -36,13 +36,19 @@ function secondsUntil (val) {
   }
 }
 
-function isRefreshRequired (user, tolerance = 15) {
-  const t = secondsUntil(user?.refresh_at)
+function isRefreshRequired (user = {}, tolerance = 15) {
+  if (!user.rti || !user.refresh_at) {
+    return false
+  }
+  const t = secondsUntil(user.refresh_at)
   return typeof t === 'number' && t < tolerance
 }
 
-function isSessionExpired (user, tolerance = 1) {
-  const t = secondsUntil(user?.exp)
+function isSessionExpired (user = {}, tolerance = 1) {
+  if (!user.exp) {
+    return true
+  }
+  const t = secondsUntil(user.exp)
   return typeof t === 'number' && t < tolerance
 }
 
