@@ -9,7 +9,7 @@ const { cloneDeep, merge, get, set, filter, find, split } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
-const { toHex, parseFieldSelector } = require('./helper')
+const { parseFieldSelector } = require('./helper')
 const { getTokenPayload } = require('./auth')
 
 const serviceAccountList = [
@@ -36,10 +36,7 @@ function getServiceAccount ({
       annotations: {
         'gardener.cloud/created-by': createdBy
       }
-    },
-    secrets: [{
-      name: [name, 'token', toHex(name).substring(0, 5)].join('-')
-    }]
+    }
   }
 }
 
