@@ -17,6 +17,9 @@ const { NotImplemented } = require('http-errors')
 
 const { isHttpError } = require('@gardener-dashboard/request')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const {
+  getManagedSeedOrUndefined
+} = require('./utils')
 
 const {
   getConfigValue,
@@ -295,7 +298,6 @@ function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, 
 
 async function handleSeed (seed) {
   const { metadata: { name, deletionTimestamp } } = seed
-  const namespace = 'garden'
 
   if (deletionTimestamp) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
@@ -308,9 +310,10 @@ async function handleSeed (seed) {
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
+  const managedSeed = await getManagedSeedOrUndefined(dashboardClient, name)
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
-  const shoot = await dashboardClient.getShoot({ namespace, name, throwNotFound: false })
-  if (shoot) {
+  if (managedSeed) {
+    const shoot = await dashboardClient.getShoot({ namespace: managedSeed.metadata.namespace, name: managedSeed.spec.shoot.name })
     const seedName = getSeedNameFromShoot(shoot)
     const seedForShoot = await dashboardClient['core.gardener.cloud'].seeds.get(seedName)
     await ensureTrustedCertForShootApiServer(dashboardClient, shoot, seedForShoot)
@@ -346,9 +349,21 @@ async function ensureTrustedCertForShootApiServer (client, shootResource, seedRe
     return
   }
 
-  if (!seedResource.spec.secretRef) {
-    logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
-    return
+  let seedClient
+
+  const managedSeed = await getManagedSeedOrUndefined(client, seedName)
+  if (managedSeed) {
+    const shootRef = {
+      namespace: managedSeed.metadata.namespace,
+      name: managedSeed.spec.shoot.name
+    }
+    seedClient = await client.createShootAdminKubeconfigClient(shootRef)
+  } else {
+    if (!seedResource.spec.secretRef) {
+      logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing.`)
+      return
+    }
+    seedClient = await client.createKubeconfigClient(seedResource.spec.secretRef)
   }
 
   // calculate ingress domain
@@ -359,9 +374,6 @@ async function ensureTrustedCertForShootApiServer (client, shootResource, seedRe
   if (!seedShootNamespace) {
     throw new Error(`could not get namespace on seed for shoot ${namespace}/${name}`)
   }
-
-  // get seed client
-  const seedClient = await client.createKubeconfigClient(seedResource.spec.secretRef)
 
   const serviceName = 'kube-apiserver'
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')

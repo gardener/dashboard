@@ -18,6 +18,7 @@ const {
 
 const assert = require('assert').strict
 const { getSeed } = require('../../cache')
+const { isHttpError } = require('@gardener-dashboard/request')
 
 const GardenTerminalHostRefType = {
   SECRET_REF: 'secretRef',
@@ -44,7 +45,7 @@ async function getGardenTerminalHostClusterSecretRef (client) {
       const seed = getSeedForGardenTerminalHostCluster()
       return _.get(seed, 'spec.secretRef')
     }
-    case GardenTerminalHostRefType.SHOOT_REF: {
+    case GardenTerminalHostRefType.SHOOT_REF: { // TODO refactor to return shootRef instead. The static kubeconfig might be disabled
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
       return {
         namespace: getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden'),
@@ -74,7 +75,8 @@ async function getGardenHostClusterKubeApiServer (client) {
     }
     case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
-      return getKubeApiServerHostForSeedOrShootedSeed(client, seed)
+      const managedSeed = await getManagedSeedOrUndefined(client, seed.metadata.name)
+      return getKubeApiServerHostForSeedOrManagedSeed(client, seed, managedSeed)
     }
     case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
@@ -87,16 +89,15 @@ async function getGardenHostClusterKubeApiServer (client) {
   }
 }
 
-async function getKubeApiServerHostForSeedOrShootedSeed (client, seed) {
-  const name = seed.metadata.name
-  const namespace = 'garden'
-
-  const shoot = await client.getShoot({ namespace, name, throwNotFound: false })
-  if (shoot) {
+async function getKubeApiServerHostForSeedOrManagedSeed (client, seed, managedSeed) {
+  if (managedSeed) {
+    const name = managedSeed.spec.shoot.name
+    const namespace = managedSeed.metadata.namespace
+    const shoot = await client.getShoot({ namespace, name })
     return getKubeApiServerHostForShoot(shoot)
-  } else {
-    return getKubeApiServerHostForSeed(seed)
   }
+
+  return getKubeApiServerHostForSeed(seed)
 }
 
 function getKubeApiServerHostForShoot (shoot, seed) {
@@ -138,6 +139,17 @@ function getGardenTerminalHostClusterSecrets (client) {
   return client.core.secrets.list(namespace, query)
 }
 
+async function getManagedSeedOrUndefined (client, name) {
+  try {
+    return await client['seedmanagement.gardener.cloud'].managedseeds.get('garden', name) // Currently, managed seeds are restricted to the garden namespace
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return undefined
+    }
+    throw err
+  }
+}
+
 module.exports = {
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
@@ -145,6 +157,7 @@ module.exports = {
   getKubeApiServerHostForSeed,
   getKubeApiServerHostForShoot,
   getWildcardIngressDomainForSeed,
-  getKubeApiServerHostForSeedOrShootedSeed,
+  getKubeApiServerHostForSeedOrManagedSeed,
+  getManagedSeedOrUndefined,
   GardenTerminalHostRefType
 }
