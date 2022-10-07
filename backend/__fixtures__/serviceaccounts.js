@@ -15,6 +15,7 @@ const { getTokenPayload } = require('./auth')
 const serviceAccountList = [
   getServiceAccount({ namespace: 'garden-foo', name: 'robot', createdBy: 'foo@example.org' }),
   getServiceAccount({ namespace: 'garden-foo', name: 'robot-nomember' }),
+  getServiceAccount({ namespace: 'garden-foo', name: 'dashboard-webterminal' }),
   getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' }),
   getServiceAccount({ namespace: 'term-host-1', name: 'term-attach-1' }),
   getServiceAccount({ namespace: 'term-host-2', name: 'term-attach-2' }),

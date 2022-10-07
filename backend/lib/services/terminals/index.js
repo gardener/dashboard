@@ -633,7 +633,13 @@ async function ensureServiceAccountCleanup (client, { terminal, namespace, name 
     uid: terminal.metadata.uid
   }
 
-  const { metadata: { ownerReferences = [], labels = {}, finalizers = [] } } = await client.core.serviceaccounts.get(namespace, name)
+  const {
+    metadata: {
+      ownerReferences = [],
+      labels = {},
+      finalizers = []
+    }
+  } = await client.core.serviceaccounts.get(namespace, name)
 
   let dirty = false
 
