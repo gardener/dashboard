@@ -7,8 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-row">
     <v-select
+      :class="{ 'mt-5' : !wildcardSelectedValue.isWildcard}"
       class="selectClass"
-      :class="selectClass"
+      dense
       color="primary"
       item-color="primary"
       :label="wildcardSelectLabel"
@@ -34,22 +35,43 @@ SPDX-License-Identifier: Apache-2.0
               <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
             </template>
             <template v-else>
-               <span v-if="item.isWildcard">Custom {{wildcardSelectLabel}}</span>
+              Custom {{wildcardSelectLabel}}
             </template>
           </v-list-item-title>
         </v-list-item-content>
       </template>
+      <template v-slot:prepend-inner v-if="wildcardSelectedValue.startsWithWildcard">
+        <v-text-field
+          style="width: 100px"
+          @click.native.stop
+          @input="onInput"
+          outlined
+          dense
+          class="mb-1 mr-1"
+          flat
+          solo
+          color="primary"
+          hide-details
+          v-model="wildcardVariablePartPrefix"
+          ></v-text-field>
+      </template>
+      <template v-slot:append v-if="wildcardSelectedValue.endsWithWildcard || wildcardSelectedValue.customWildcard">
+        <v-icon>mdi-menu-down</v-icon>
+        <v-text-field
+          style="width: 100px"
+          @click.native.stop
+          @input="onInput"
+          outlined
+          dense
+          class="mb-1 ml-1"
+          flat
+          solo
+          color="primary"
+          hide-details
+          v-model="wildcardVariablePartSuffix"
+          ></v-text-field>
+      </template>
     </v-select>
-    <v-text-field
-      v-if="wildcardSelectedValue.isWildcard"
-      :class="textFieldClass"
-      color="primary"
-      :label="wildcardTextFieldLabel"
-      v-model="wildcardVariablePart"
-      :error-messages="getErrorMessages('wildcardVariablePart')"
-      @input="onInput"
-      @blur="$v.wildcardVariablePart.$touch()"
-      ></v-text-field>
   </div>
 </template>
 
@@ -57,19 +79,8 @@ SPDX-License-Identifier: Apache-2.0
 
 import trim from 'lodash/trim'
 import { getValidationErrors } from '@/utils'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { required } from 'vuelidate/lib/validators'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
-
-const validations = {
-  wildcardVariablePart: {
-    required: requiredIf(function () {
-      return this.wildcardSelectedValue.isWildcard
-    })
-  },
-  wildcardSelectedValue: {
-    required
-  }
-}
 
 export default {
   name: 'wildcard-select',
@@ -86,7 +97,8 @@ export default {
   },
   data () {
     return {
-      wildcardVariablePart: undefined,
+      wildcardVariablePartPrefix: undefined,
+      wildcardVariablePartSuffix: undefined,
       wildcardSelectedValue: {},
       valid: undefined
     }
@@ -94,63 +106,46 @@ export default {
   computed: {
     validationErrors () {
       return {
-        wildcardVariablePart: {
-          required: `${this.wildcardTextFieldLabel} is required`
-        },
         wildcardSelectedValue: {
-          required: `${this.wildcardSelectLabel} is required`
+          required: `${this.wildcardSelectLabel} is required`,
+          prefixRequired: 'Prefix is required',
+          suffixRequired: 'Suffix is required'
         }
       }
-    },
-    textFieldClass () {
-      return this.wildcardSelectedValue.startsWithWildcard ? 'textFieldStartClass' : 'textFieldEndClass'
-    },
-    selectClass () {
-      if (this.wildcardSelectedValue.customWildcard) {
-        return 'selectSmallClass'
-      }
-      return undefined
     },
     wildcardSelectItemObjects () {
       return wildcardObjectsFromStrings(this.wildcardSelectItems)
     },
-    wildcardTextFieldLabel () {
-      if (this.wildcardSelectedValue.startsWithWildcard) {
-        return 'Prefix'
-      }
-      if (this.wildcardSelectedValue.endsWithWildcard) {
-        return 'Suffix'
-      }
-      if (this.wildcardSelectedValue.customWildcard) {
-        return `Custom ${this.wildcardSelectLabel}`
-      }
-      return undefined
-    },
     wildcardSelectHint () {
-      if (!this.wildcardSelectedValue.isWildcard) {
-        return undefined
-      }
-      if (this.wildcardSelectedValue.customWildcard) {
-        return `Specify custom ${this.wildcardSelectLabel}`
-      } else {
-        if (this.wildcardVariablePart) {
-          return `Floating Pool Name: ${this.internalValue}`
-        }
-        const label = this.wildcardSelectedValue.startsWithWildcard ? 'prefix' : 'suffix'
-        return `Selected wildcard value requires a ${label} which needs to be specified`
-      }
+      return `Floating Pool Name: ${this.internalValue}`
     },
     internalValue () {
+      if (this.wildcardSelectedValue.startsWithWildcard && this.wildcardSelectedValue.endsWithWildcard) {
+        return `${this.wildcardVariablePartPrefix}${this.wildcardSelectedValue.value}${this.wildcardVariablePartSuffix}`
+      }
       if (this.wildcardSelectedValue.startsWithWildcard) {
-        return `${this.wildcardVariablePart}${this.wildcardSelectedValue.value}`
+        return `${this.wildcardVariablePartPrefix}${this.wildcardSelectedValue.value}`
       }
       if (this.wildcardSelectedValue.endsWithWildcard) {
-        return `${this.wildcardSelectedValue.value}${this.wildcardVariablePart}`
+        return `${this.wildcardSelectedValue.value}${this.wildcardVariablePartSuffix}`
       }
       if (this.wildcardSelectedValue.customWildcard) {
-        return this.wildcardVariablePart
+        return this.wildcardVariablePartSuffix
       }
       return this.wildcardSelectedValue.value
+    },
+    validators () {
+      return {
+        wildcardSelectedValue: {
+          required,
+          prefixRequired: () => {
+            return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
+          },
+          suffixRequired: () => {
+            return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
+          }
+        }
+      }
     }
   },
   methods: {
@@ -158,7 +153,6 @@ export default {
       return getValidationErrors(this, field)
     },
     onInput () {
-      this.$v.wildcardVariablePart.$touch()
       this.$v.wildcardSelectedValue.$touch()
       if (this.valid !== !this.$v.$invalid) {
         this.valid = !this.$v.$invalid
@@ -173,17 +167,26 @@ export default {
       }
 
       this.wildcardSelectedValue = bestMatch
-      if (bestMatch.isWildcard) {
-        const value = trim(newValue, '*')
-        this.wildcardVariablePart = value.replace(bestMatch.value, '')
+      const value = trim(newValue, '*')
+      const index = value.indexOf(bestMatch.value)
+      if (bestMatch.startsWithWildcard) {
+        this.wildcardVariablePartPrefix = value.substring(0, index)
       } else {
-        this.wildcardVariablePart = ''
+        this.wildcardVariablePartPrefix = ''
+      }
+      if (bestMatch.endsWithWildcard || bestMatch.customWildcard) {
+        const value = trim(newValue, '*')
+        this.wildcardVariablePartSuffix = value.substring(index + bestMatch.value.length)
+      } else {
+        this.wildcardVariablePartSuffix = ''
       }
 
       this.onInput()
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   watch: {
     value (value) {
       this.setInternalValue(value)
@@ -194,20 +197,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .textFieldStartClass {
-    order: 1;
-    margin-right: 5px;
-  }
-  .selectClass {
-    order: 2;
-  }
-  .textFieldEndClass {
-    order: 2;
-    margin-left: 5px;
-  }
-  .selectSmallClass {
-    max-width: 120px;
-  }
-</style>
