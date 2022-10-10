@@ -16,6 +16,7 @@ const logger = require('../lib/logger')
 const config = require('../lib/config')
 const { getSeed, cache } = require('../lib/cache')
 const { encodeBase64 } = require('../lib/utils')
+const createError = require('http-errors')
 
 const {
   ensureTerminalAllowed,
@@ -72,6 +73,20 @@ describe('services', function () {
                 { metadata: { namespace, name: firstSecretName } },
                 { metadata: { namespace, name: secondSecretName } }
               ]
+            }
+          }
+        }
+      },
+      'seedmanagement.gardener.cloud': {
+        managedseeds: {
+          async get (namespace, name) {
+            await nextTick()
+            if (namespace === 'garden' && name === soilName) {
+              return
+            }
+            return {
+              metadata: { namespace, name },
+              spec: { shoot: { name } }
             }
           }
         }
@@ -703,6 +718,7 @@ describe('services', function () {
 
       let coreStub
       let coreGardenerCloudStub
+      let seedManagementGardenerCloudStub
       const core = dashboardClient.core
       const coreGardenerCloud = dashboardClient['core.gardener.cloud']
 
@@ -752,8 +768,29 @@ describe('services', function () {
             }
           }
         })
+        seedManagementGardenerCloudStub = jest.fn().mockReturnValue({
+          managedseeds: {
+            async get (namespace, name) {
+              await nextTick()
+              if (name === seedName) {
+                return {
+                  kind: 'ManagedSeed',
+                  metadata: { namespace, name },
+                  spec: {
+                    shoot: {
+                      name
+                    }
+                  },
+                  status: {}
+                }
+              }
+              throw createError(404, `ManagedSeed ${namespace}/${name} not found`)
+            }
+          }
+        })
         Object.defineProperty(dashboardClient, 'core', { get: coreStub })
         Object.defineProperty(dashboardClient, 'core.gardener.cloud', { get: coreGardenerCloudStub })
+        Object.defineProperty(dashboardClient, 'seedmanagement.gardener.cloud', { get: seedManagementGardenerCloudStub })
 
         jest.spyOn(dashboardClient, 'createKubeconfigClient').mockImplementation(async ({ name }) => {
           await nextTick()
@@ -763,7 +800,10 @@ describe('services', function () {
           if (name === `seedsecret-${soilName}`) {
             return soilClient
           }
-          if (name === `seedsecret-${seedName}`) {
+        })
+        jest.spyOn(dashboardClient, 'createShootAdminKubeconfigClient').mockImplementation(async ({ name }) => {
+          await nextTick()
+          if (name === seedName) {
             return seedClient
           }
         })
@@ -936,7 +976,7 @@ describe('services', function () {
         expect(getStates(bootstrapper, [shoot])).toEqual([BootstrapStatusEnum.BOOTSTRAPPED])
         expect(stats.total).toBe(1)
         expect(stats.successRate).toBe(1)
-        expect(logger.info).toBeCalledWith(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
+        expect(logger.info).toBeCalledWith(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing.`)
       })
 
       it('should not bootstrap unreachable shoot cluster', async function () {
