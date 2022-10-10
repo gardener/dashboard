@@ -18,15 +18,7 @@ function getControllerRegistration ({ uid, name, version, resources }) {
     spec.resources = resources
   }
   if (version) {
-    spec.deployment = {
-      providerConfig: {
-        values: {
-          image: {
-            tag: version
-          }
-        }
-      }
-    }
+    metadata.labels = { 'app.kubernetes.io/version': version }
   }
   return { metadata, spec }
 }

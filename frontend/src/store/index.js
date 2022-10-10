@@ -1054,6 +1054,9 @@ const getters = {
   canCreateSecrets (state) {
     return canI(state.subjectRules, 'create', '', 'secrets')
   },
+  canCreateShootsAdminkubeconfig (state) {
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots/adminkubeconfig')
+  },
   canPatchSecrets (state) {
     return canI(state.subjectRules, 'patch', '', 'secrets')
   },

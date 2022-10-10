@@ -96,6 +96,7 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
+      'isAdmin',
       'projectFromProjectList',
       'gardenctlOptions'
     ]),
@@ -111,13 +112,7 @@ export default {
       }
 
       const gardenctlVersion = this.legacyCommands ? 'Legacy gardenctl' : 'Gardenctl-v2'
-      return [
-        {
-          title: 'Target Control Plane',
-          subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster`,
-          value: this.targetControlPlaneCommand,
-          displayValue: displayValue(this.targetControlPlaneCommand)
-        },
+      const cmds = [
         {
           title: 'Target Cluster',
           subtitle: `${gardenctlVersion} command to target the shoot cluster`,
@@ -125,6 +120,16 @@ export default {
           displayValue: displayValue(this.targetShootCommand)
         }
       ]
+
+      if (this.isAdmin) {
+        cmds.unshift({
+          title: 'Target Control Plane',
+          subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster`,
+          value: this.targetControlPlaneCommand,
+          displayValue: displayValue(this.targetControlPlaneCommand)
+        })
+      }
+      return cmds
     },
     legacyCommands () {
       return get(this.gardenctlOptions, 'legacyCommands', false)
