@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-tabs
       color="primary"
       v-model="tab"
-      class="mb-3">
+      class="mb-0">
       <v-tab
         key="overview"
         href="#overview"
@@ -39,9 +39,9 @@ SPDX-License-Identifier: Apache-2.0
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item id="overview">
-        <v-row class="d-flex ma-1">
+        <v-row class="d-flex ma-0">
           <v-col cols="6" class="pa-0">
-            <v-card outlined class="d-flex flex-column flex-grow-1 ma-1">
+            <v-card outlined class="d-flex flex-column flex-grow-1 mx-1 my-2">
               <v-system-bar>
                 <v-icon class="mr-3">mdi-server</v-icon>
                 <span>Machine</span>
@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list>
               </v-card-text>
             </v-card>
-            <v-card outlined class="d-flex flex-column flex-grow-1 ma-1">
+            <v-card outlined class="d-flex flex-column flex-grow-1 mx-1 my-2">
               <v-system-bar>
                 <v-icon class="mr-3">mdi-harddisk</v-icon>
                 <span>Volume</span>
@@ -121,7 +121,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-card>
           </v-col>
           <v-col cols="6" class="pa-0">
-            <v-card outlined class="d-flex flex-column flex-grow-1 ma-1">
+            <v-card outlined class="d-flex flex-column flex-grow-1 mx-1 my-2">
               <v-system-bar>
                 <v-icon class="mr-3">mdi-disc</v-icon>
                 <span>Image</span>
@@ -155,7 +155,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list>
               </v-card-text>
             </v-card>
-            <v-card outlined class="d-flex flex-column flex-grow-1 ma-1">
+            <v-card outlined class="d-flex flex-column flex-grow-1 mx-1 my-2">
               <v-system-bar>
                 <v-icon class="mr-3">mdi-chart-line-variant</v-icon>
                 <span>Autoscaler</span>
@@ -191,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list>
               </v-card-text>
             </v-card>
-            <v-card outlined class="d-flex flex-column flex-grow-1 ma-1">
+            <v-card outlined class="d-flex flex-column flex-grow-1 mx-1 my-2">
               <v-system-bar>
                 <v-icon class="mr-3">mdi-oci</v-icon>
                 <span>Container Runtime</span>
@@ -230,9 +230,7 @@ import VendorIcon from '@/components/VendorIcon'
 import CodeBlock from '@/components/CodeBlock'
 import find from 'lodash/find'
 import get from 'lodash/get'
-import chunk from 'lodash/chunk'
 import { mapGetters } from 'vuex'
-import { workerGroupData } from '@/utils'
 
 export default {
   name: 'worker-group',
@@ -304,10 +302,6 @@ export default {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version })
-    },
-    workerGroupData () {
-      const data = workerGroupData(this.machineType, this.machineImage, this.volumeType, this.workerGroup)
-      return chunk(data, Math.ceil(data.length / 2))
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
