@@ -281,7 +281,7 @@ export default {
       if (state.freezeSorting) {
         const searchStringChanged = state.freezeSorting && differenceBy(items, sortedItemsAtFreeze, 'metadata.uid').length > 0
         if (sortByArrAtFreeze === sortByArr && sortDescArrAtFreeze === sortDescArr && !searchStringChanged) {
-          // If freezed, the list is static items are not added and removed and the order is defined by the cached array
+          // If freezed, the list is static - items are not added and removed and the order is defined by the cached array
           return sortedStaticList(items)
         }
 

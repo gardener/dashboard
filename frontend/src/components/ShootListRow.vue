@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             </auto-hide>
           </v-col>
           <v-col class="shrink" >
-            <shoot-messages :shoot-item="shootItem" />
+            <shoot-messages :shoot-item="shootItem" :class="{ 'no-pointer-events': isStale }" />
           </v-col>
         </v-row>
       </template>
@@ -256,8 +256,12 @@ export default {
         if (isObject(value)) { // only allow primitive types
           value = undefined
         }
+
         return {
-          header,
+          header: {
+            ...header,
+            class: this.isStale && !header.stalePointerEvents ? `${header.class} no-pointer-events` : header.class
+          },
           value // currently only applicable for header.customField === true
         }
       })
@@ -279,7 +283,9 @@ export default {
     line-height: 10px;
   }
   .stale {
-    pointer-events: none;
     opacity: 0.3;
+  }
+  .no-pointer-events {
+    pointer-events: none
   }
 </style>

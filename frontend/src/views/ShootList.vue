@@ -350,14 +350,16 @@ export default {
           value: 'project',
           align: 'start',
           defaultSelected: true,
-          hidden: !!this.projectScope
+          hidden: !!this.projectScope,
+          stalePointerEvents: true
         },
         {
           text: 'NAME',
           value: 'name',
           align: 'start',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
+          stalePointerEvents: true
         },
         {
           text: 'INFRASTRUCTURE',
@@ -624,6 +626,7 @@ export default {
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
     this.shootSearch = null
+    this.freezeSorting = false
     next()
   }
 }
