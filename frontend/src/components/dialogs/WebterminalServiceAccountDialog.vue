@@ -127,7 +127,7 @@ export default {
         return false
       }
 
-      const description = 'Service account required to manage temporary service accounts for the webterminal feature of the gardener dashboard'
+      const description = 'Service account required to manage temporary service accounts for the webterminal feature of the gardener dashboard. Will be cleaned up automatically if not referenced anymore by a webterminal'
       try {
         if (this.needsUpdate) {
           await this.updateMember({
