@@ -336,10 +336,23 @@ export default {
       return regionItems
     },
     regionHint () {
-      if (includes(this.regionsWithSeed, this.region)) {
-        return 'API servers in same region as your workers (optimal if you require a low latency)'
+      if (this.infrastructureKind === 'openstack') {
+        switch (this.region) {
+          case 'intern1':
+          case 'prod1':
+          case 'RegionOne':
+            return 'Cluster running in DE-WEST - Cologne'
+          case 'prod2':
+            return 'Cluster running in DE-NORTH - Hamburg'
+        }
+      } else {
+        if (includes(this.regionsWithSeed, this.region)) {
+          return 'API servers in same region as your workers (optimal if you require a low latency)'
+        }
+        return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
       }
-      return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
+
+      return ''
     },
     allLoadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
