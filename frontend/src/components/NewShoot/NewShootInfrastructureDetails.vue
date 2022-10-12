@@ -53,30 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="$v.networkingType.$touch()"
           ></v-select>
       </v-col>
-      <template v-if="infrastructureKind === 'openstack'">
-        <v-col cols="3">
-          <wildcard-select
-            v-model="floatingPoolName"
-            :wildcard-select-items="allFloatingPoolNames"
-            wildcard-select-label="Floating Pool"
-            @valid="onFloatingPoolWildcardValid"
-            ></wildcard-select>
-        </v-col>
-        <v-col cols="3">
-          <v-select
-          color="primary"
-          item-color="primary"
-          label="Load Balancer Provider"
-          :items="allLoadBalancerProviderNames"
-          v-model="loadBalancerProviderName"
-          :error-messages="getErrorMessages('loadBalancerProviderName')"
-          @input="onInputLoadBalancerProviderName"
-          @blur="$v.loadBalancerProviderName.$touch()"
-          persistent-hint
-          ></v-select>
-        </v-col>
-      </template>
-      <template v-else-if="infrastructureKind === 'metal'">
+      <template v-if="infrastructureKind === 'metal'">
         <v-col cols="3">
           <v-text-field
             color="primary"
@@ -179,7 +156,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import CloudProfile from '@/components/CloudProfile'
-import WildcardSelect from '@/components/WildcardSelect'
 import SelectSecret from '@/components/SelectSecret'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
@@ -244,7 +220,6 @@ export default {
   name: 'new-shoot-infrastructure',
   components: {
     CloudProfile,
-    WildcardSelect,
     SelectSecret
   },
   props: {

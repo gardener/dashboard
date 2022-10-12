@@ -32,7 +32,7 @@ module.exports = {
         : 'src/main.js',
       template: 'public/index.html',
       filename: 'index.html',
-      title: 'Kubernetes Gardener'
+      title: 'PSKE'
     }
   },
   css: {
