@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             </auto-hide>
           </v-col>
           <v-col class="shrink" >
-            <shoot-messages :shoot-item="shootItem" :class="{ 'no-pointer-events': isStale }" />
+            <shoot-messages :shoot-item="shootItem" v-if="!isStale" />
           </v-col>
         </v-row>
       </template>

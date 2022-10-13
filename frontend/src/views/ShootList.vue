@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -194,8 +194,8 @@ export default {
       'setShootListFilter',
       'subscribeShoots'
     ]),
-    ...mapMutations({
-      setFreezeSorting: 'shoots/SET_FREEZE_SORTING'
+    ...mapActions({
+      setFreezeSorting: 'shoots/setFreezeSorting'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -521,42 +521,43 @@ export default {
           text: 'Show only clusters with issues',
           value: 'onlyShootsWithIssues',
           selected: this.onlyShootsWithIssues,
-          hidden: this.projectScope
+          hidden: this.projectScope,
+          disabled: this.disableChangeFilters
         },
         {
           text: 'Hide progressing clusters',
           value: 'progressing',
           selected: this.isFilterActive('progressing'),
-          hidden: this.projectScope || !this.isAdmin,
-          disabled: this.filtersDisabled
+          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
+          disabled: this.disableChangeFilters
         },
         {
           text: 'Hide no operator action required issues',
           value: 'noOperatorAction',
           selected: this.isFilterActive('noOperatorAction'),
-          hidden: this.projectScope || !this.isAdmin,
+          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
             '- Clusters with temporary issues that will be retried automatically',
             '- Clusters with annotation dashboard.gardener.cloud/ignore-issues'
           ],
-          disabled: this.filtersDisabled
+          disabled: this.disableChangeFilters
         },
         {
           text: 'Hide clusters with deactivated reconciliation',
           value: 'deactivatedReconciliation',
           selected: this.isFilterActive('deactivatedReconciliation'),
-          hidden: this.projectScope || !this.isAdmin,
-          disabled: this.filtersDisabled
+          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
+          disabled: this.disableChangeFilters
         },
         {
           text: 'Hide clusters with configured ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
-          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length,
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.hideFiltersForOnlyShootsWithIssues,
           helpTooltip: this.hideTicketsWithLabelTooltip,
-          disabled: this.filtersDisabled
+          disabled: this.disableChangeFilters
         }
       ]
     },
@@ -581,10 +582,12 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    filtersDisabled () {
+    disableChangeFilters () {
+      return this.freezeSorting
+    },
+    hideFiltersForOnlyShootsWithIssues () {
       return !this.showOnlyShootsWithIssues
     },
-
     headlineSubtitle () {
       const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {

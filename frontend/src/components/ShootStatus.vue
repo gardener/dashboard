@@ -32,8 +32,8 @@ SPDX-License-Identifier: Apache-2.0
                     <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
                     <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle status-icon" :color="color">mdi-plus</v-icon>
                     <v-icon v-else-if="isError" class="vertical-align-middle status-icon" :color="color">mdi-alert-outline</v-icon>
-                    <v-progress-circular v-else-if="isPending" class="vertical-align-middle" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-                    <v-icon v-else class="vertical-align-middle status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+                    <v-progress-circular v-else-if="isPending && !shootItem.stale" class="vertical-align-middle" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+                    <v-icon v-else-if="!shootItem.stale" class="vertical-align-middle status-icon-check" color="success">mdi-check-circle-outline</v-icon>
                   </div>
                 </div>
               </template>

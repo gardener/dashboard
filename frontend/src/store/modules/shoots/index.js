@@ -20,7 +20,6 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import clone from 'lodash/clone'
 import getters from './getters'
 import { keyForShoot, findItem } from './helper'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -46,7 +45,7 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 const state = {
   shoots: {},
   filteredShoots: [],
-  freezedShoots: [],
+  freezedShootSkeletons: [], // cache basic properties (like name, namespace) to keep stale seleton in UI
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
@@ -274,6 +273,34 @@ const actions = {
 
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
     return state.newShootResource
+  },
+  setFreezeSorting ({ commit }, value) {
+    commit('SET_FREEZE_SORTING', value)
+
+    if (value) {
+      const freezedShootSkeletons = map(state.filteredShoots, shoot => {
+        return {
+          ...pick(shoot, [
+            'metadata.creationTimestamp',
+            'metadata.name',
+            'metadata.namespace',
+            'metadata.uid',
+            'metadata.annotations[\'gardener.cloud/created-by\']',
+            'spec.provider.type',
+            'spec.region',
+            'spec.seedName',
+            'spec.purpose',
+            'status.technicalID',
+            'spec.kubernetes.version'
+          ]),
+          stale: true // Flag them so that the UI can render them accordingly
+        }
+      })
+
+      commit('SET_FREEZED_SHOOT_SKELETONS', freezedShootSkeletons)
+    }
+
+    return state.freezeSorting
   }
 }
 
@@ -421,10 +448,10 @@ const mutations = {
     state.initialNewShootResource = cloneDeep(shootResource)
   },
   SET_FREEZE_SORTING (state, value) {
-    if (value) {
-      state.freezedShoots = clone(state.filteredShoots)
-    }
     state.freezeSorting = value
+  },
+  SET_FREEZED_SHOOT_SKELETONS (state, value) {
+    state.freezedShootSkeletons = value
   }
 }
 
