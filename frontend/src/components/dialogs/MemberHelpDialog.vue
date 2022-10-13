@@ -31,19 +31,19 @@ SPDX-License-Identifier: Apache-2.0
             Add roles to your members to gain access to resources of this project. Currently supported built-in roles are:
             <ul>
               <li>
-                <code>Owner</code> - Access to all resources and ability to manage members. Currently there can only be one owner per project. You can change the owner on the project administration page.
+                <code>Owner</code> - Combines the <code>Admin</code>, <code>UAM</code> and <code>Service Account Manager</code> roles. There can only be one owner per project. You can change the owner on the project administration page.
               </li>
               <li>
-                <code>Admin</code> - Access to all resources of this project, except for member management. Also the delete/modify permissions for `ServiceAccount`s are now deprecated for this role and will be removed in a future version of Gardener, use the <code>Service Account Manager</code> role instead.
+                <code>Admin</code> - This allows to manage resources inside the project (e.g. secrets, shoots, configmaps and similar) and to manage permissions for service accounts. Note that the <code>Admin</code> role has read-only access to service accounts.
               </li>
               <li>
                 <code>Viewer</code> - Read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read cloud provider secrets.
               </li>
               <li>
-                <code>UAM</code> - Give the member User Access Management rights. Members with this role can manage members, should be used in combination with admin role to extend rights. In case an external UAM system is connected via a service account, only this account should get the <code>UAM</code> role.
+                <code>UAM</code> - This allows to add/modify/remove human users, service accounts or groups to/from the project member list. In case an external UAM system is connected via a service account, only this account should get the <code>UAM</code> role.
               </li>
               <li>
-                <code>Service Account Manager</code> - Manage service accounts inside the project namespace and request tokens for them. For security reasons this role should not be assigned to service accounts, especially it should be prevented that a service account can refresh tokens for itself.
+                <code>Service Account Manager</code> - Manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the <code>Admin</code> role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens for ever.
               </li>
             </ul>
           </p>
