@@ -9,7 +9,11 @@ import {
 } from '@/store'
 
 import getters from '@/store/modules/shoots/getters'
+import shootModule from '@/store/modules/shoots'
+
 import { parseSearch } from '@/store/modules/shoots/helper'
+
+import assign from 'lodash/assign'
 
 describe('store.shoots.getters', () => {
   let shootItems
@@ -25,16 +29,15 @@ describe('store.shoots.getters', () => {
   }
   let state
   let sortItems
+  let setFreezeSorting
 
   beforeEach(() => {
-    state = {}
-    sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
-
     shootItems = [
       {
         metadata: {
           name: 'shoot2',
-          namespace: 'foo'
+          namespace: 'foo',
+          uid: 'shoot2'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -63,7 +66,8 @@ describe('store.shoots.getters', () => {
       {
         metadata: {
           name: 'shoot1',
-          namespace: 'foo'
+          namespace: 'foo',
+          uid: 'shoot1'
         },
         spec: {
           creationTimestamp: '2020-02-01T20:00:00Z',
@@ -92,7 +96,8 @@ describe('store.shoots.getters', () => {
       {
         metadata: {
           name: 'shoot3',
-          namespace: 'bar'
+          namespace: 'bar',
+          uid: 'shoot3'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -124,6 +129,12 @@ describe('store.shoots.getters', () => {
         }
       }
     ]
+
+    state = { filteredShoots: shootItems, freezeSorting: false, freezedShootSkeletons: [] }
+    assign(shootModule.state, state)
+
+    setFreezeSorting = (value) => shootModule.actions.setFreezeSorting({ commit: (f, v) => shootModule.mutations[f](state, v) }, value)
+    sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
   })
 
   it('should sort shoots by name', () => {
@@ -222,7 +233,7 @@ describe('store.shoots.getters', () => {
     let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
 
-    state.freezeSorting = true
+    setFreezeSorting(true)
     sortedShoots[0].metadata.name = 'shoot4'
     sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots[0].metadata.name).toBe('shoot4')
@@ -234,31 +245,35 @@ describe('store.shoots.getters', () => {
     let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots[0].stale).toBe(undefined)
 
-    state.freezeSorting = true
+    setFreezeSorting(true)
     shootItems.splice(0, 1)
     expect(shootItems.length).toBe(2)
 
     sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots.length).toBe(3)
-    expect(sortedShoots[0].stale).toBe(true)
+    expect(sortedShoots[1].stale).toBe(true)
   })
 
   it('should not add new shoots to list when shoot list is freezed', () => {
-    const sortBy = ['issueSince']
-    const sortDesc = [false]
-    let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-    expect(sortedShoots.length).toBe(3)
-
-    state.freezeSorting = true
+    setFreezeSorting(true)
     const newShoot = {
-      ...shootItems[0]
+      metadata: {
+        name: 'shoot4',
+        namespace: 'foo',
+        uid: 'shoot4'
+      }
     }
     shootItems.push(newShoot)
-    newShoot.name = 'shoot4'
-    expect(shootItems.length).toBe(4)
+    expect(state.filteredShoots.length).toBe(4)
+    expect(state.freezedShootSkeletons.length).toBe(3)
 
-    sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-    expect(sortedShoots.length).toBe(3)
+    expect(getters.filteredItems(state).length).toBe(3)
+
+    setFreezeSorting(false)
+    expect(getters.filteredItems(state).length).toBe(4)
+
+    setFreezeSorting(true)
+    expect(getters.filteredItems(state).length).toBe(4)
   })
 })
 
