@@ -56,13 +56,16 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        :loading="loading"
+        :loading="loading || !connected"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
         :custom-filter="searchItems"
         must-sort
         :custom-sort="sortItems"
       >
+        <template v-slot:progress>
+          <shoot-list-progress></shoot-list-progress>
+        </template>
         <template v-slot:item="{ item }">
           <shoot-list-row
             :shoot-item="item"
@@ -102,6 +105,7 @@ import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import debounce from 'lodash/debounce'
 import ShootListRow from '@/components/ShootListRow'
+import ShootListProgress from '@/components/ShootListProgress'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
@@ -112,6 +116,7 @@ export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
+    ShootListProgress,
     ShootAccessCard,
     IconBase,
     CertifiedKubernetes,
@@ -252,8 +257,11 @@ export default {
       'shootCustomFieldList',
       'shootCustomFields'
     ]),
-    ...mapState('shoots', [
+    ...mapGetters('shoots', [
       'loading'
+    ]),
+    ...mapState('socket', [
+      'connected'
     ]),
     ...mapGetters('shoots', [
       'sortItems',

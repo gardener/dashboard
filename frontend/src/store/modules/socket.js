@@ -9,17 +9,30 @@ const state = {
   readyState: 'closed',
   id: null,
   connected: false,
-  subscribed: false,
   active: false,
   reason: null,
   error: null,
-  reconnectAttempt: 0
+  backoff: {
+    min: 1000,
+    max: 5000,
+    factor: 2,
+    jitter: 0.5,
+    attempts: 0
+  }
 }
 
 // getters
 const getters = {
-  notClosed (state) {
-    return state.readyState !== 'closed'
+  active (state) {
+    return state.active || state.backoff.attempts > 0
+  },
+  backoffDuration (state) {
+    const { min, max, factor, jitter, attempts } = state.backoff
+    const duration = min * Math.pow(factor, attempts)
+    const rand = Math.random()
+    const sign = Math.sign(rand - 0.5)
+    const deviation = Math.floor(rand * jitter * duration)
+    return Math.min(duration + sign * deviation, max)
   }
 }
 
@@ -37,17 +50,11 @@ const actions = {
     commit('SET_CONNECTED', socket.connected)
     commit('SET_ACTIVE', socket.active)
     commit('SET_REASON', reason)
-    if (['io server disconnect'].includes(reason)) {
-      commit('RECONNECT_ATTEMPT')
-    }
   },
   onError ({ commit }, [socket, err]) {
     commit('SET_CONNECTED', socket.connected)
     commit('SET_ACTIVE', socket.active)
     commit('SET_ERROR', err)
-    if (!socket.active) {
-      commit('RECONNECT_ATTEMPT')
-    }
   }
 }
 
@@ -61,15 +68,11 @@ const mutations = {
   },
   SET_CONNECTED (state, value) {
     if (value) {
-      state.reconnectAttempt = 0
+      state.backoff.attempts = 0
       state.reason = null
       state.error = null
     }
-    state.subscribed = false
     state.connected = value
-  },
-  SET_SUBSCRIBED (state, value) {
-    state.subscribed = value
   },
   SET_ACTIVE (state, value) {
     state.active = value
@@ -80,13 +83,14 @@ const mutations = {
   SET_ERROR (state, error) {
     state.error = error
   },
-  RECONNECT_ATTEMPT (state) {
-    // give up after 10 manual reconnection attempts
-    if (state.reconnectAttempt < 10) {
-      state.reconnectAttempt += 1
-    } else {
-      state.reconnectAttempt = 0
-    }
+  BACKOFF_RESET (state) {
+    state.backoff.attempts = 0
+  },
+  BACKOFF_INCREASE_ATTEMPTS (state) {
+    state.backoff.attempts++
+  },
+  CONNECT () {
+    // only used to trigger `socket.connect()`
   }
 }
 

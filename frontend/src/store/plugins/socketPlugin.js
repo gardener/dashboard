@@ -5,6 +5,7 @@
 //
 
 import { io, Manager } from 'socket.io-client'
+import { constants } from '@/store/modules/shoots/helper'
 import { createClockSkewError } from '@/utils/errors'
 
 function createSocket (store, userManager, logger) {
@@ -17,9 +18,7 @@ function createSocket (store, userManager, logger) {
   const manager = socket.io
   const managerOpen = async fn => {
     try {
-      if (manager.backoff?.attempts === 1) {
-        await userManager.ensureValidToken()
-      }
+      await userManager.ensureValidToken()
     } finally {
       Manager.prototype.open.call(manager, fn)
     }
@@ -63,6 +62,24 @@ function createSocket (store, userManager, logger) {
   })
 
   // handle socket event
+  const connect = async () => {
+    try {
+      await userManager.ensureValidToken()
+    } finally {
+      socket.connect()
+    }
+  }
+  const reconnect = () => {
+    const attempts = store.state.socket.backoff.attempts
+    if (attempts < 10) {
+      store.commit('socket/BACKOFF_INCREASE_ATTEMPTS')
+      const delay = store.getters['socket/backoffDuration']
+      setTimeout(connect, delay)
+    } else {
+      store.commit('socket/BACKOFF_RESET')
+    }
+  }
+
   socket.on('connect', () => {
     logger.info('socket connected')
     store.dispatch('socket/onConnect', [socket])
@@ -73,6 +90,7 @@ function createSocket (store, userManager, logger) {
     switch (reason) {
       case 'io server disconnect': {
         logger.debug('socket was forcefully disconnected by the server')
+        reconnect()
         break
       }
       case 'io client disconnect': {
@@ -87,27 +105,47 @@ function createSocket (store, userManager, logger) {
     store.dispatch('socket/onDisconnect', [socket, reason])
   })
 
+  const handleManagerError = err => {
+    logger.error('manager error: %s', err.message)
+  }
+  const handleMiddlewareError = err => {
+    let frameRequestCallback
+    const {
+      message,
+      data: {
+        statusCode = 500,
+        code = 'ERR_SOCKET_MIDDLEWARE',
+        ...data
+      } = {}
+    } = err
+    logger.error('socket connect error: %s (%d %s)', message, statusCode, code)
+    switch (code) {
+      case 'ERR_JWT_TOKEN_REFRESH_REQUIRED': {
+        if (typeof data.exp === 'number') {
+          const expiresIn = data.exp - Math.floor(Date.now() / 1000)
+          const tolerance = 5
+          if (expiresIn > tolerance) {
+            frameRequestCallback = () => userManager.signout(createClockSkewError())
+          }
+        }
+        break
+      }
+      case 'ERR_JWT_TOKEN_EXPIRED': {
+        frameRequestCallback = () => userManager.signout()
+        break
+      }
+    }
+    if (frameRequestCallback) {
+      window.requestAnimationFrame(frameRequestCallback)
+    } else {
+      reconnect()
+    }
+  }
   socket.on('connect_error', err => {
     if (socket.active) {
-      logger.error('manager error: %s', err.message)
+      handleManagerError(err)
     } else {
-      const {
-        message,
-        data: {
-          statusCode = 500,
-          code = 'ERR_SOCKET_MIDDLEWARE',
-          ...data
-        } = {}
-      } = err
-      logger.error('socket connect error: %s (%d %s)', message, statusCode, code)
-      if (code === 'ERR_JWT_TOKEN_REFRESH_REQUIRED' && typeof data.exp === 'number') {
-        const expiresIn = data.exp - Math.floor(Date.now() / 1000)
-        const tolerance = 5
-        if (expiresIn > tolerance) {
-          const frameRequestCallback = () => userManager.signout(createClockSkewError())
-          window.requestAnimationFrame(frameRequestCallback)
-        }
-      }
+      handleMiddlewareError(err)
     }
     store.dispatch('socket/onError', [socket, err])
   })
@@ -146,52 +184,34 @@ export default function createPlugin (userManager, logger) {
       }
     }
 
-    const handleReceive = () => {
+    const emitSubscribe = options => {
       if (socket.connected) {
-        emitSubscribe()
+        socket.emit('subscribe', 'shoots', options, ({ statusCode, message }) => {
+          if (statusCode === 200) {
+            logger.debug('subscribed shoots')
+            store.commit('shoots/SET_SUBSCRIPTION_STATE', constants.OPEN)
+          } else {
+            const err = new Error(message)
+            err.name = 'SubscribeError'
+            logger.debug('failed to subscribe shoots: %s', err.message)
+            store.commit('shoots/SET_SUBSCRIPTION_ERROR', err)
+          }
+        })
       }
-    }
-
-    const emitSubscribe = () => {
-      const options = store.getters['shoots/subscription']
-      socket.emit('subscribe', 'shoots', options, ({ statusCode, message }) => {
-        if (statusCode === 200) {
-          logger.debug('subscribed shoots')
-          store.commit('socket/SET_SUBSCRIBED', true)
-        } else {
-          logger.debug('failed to subscribe shoots: %s', message)
-        }
-      })
     }
 
     const emitUnsubscribe = () => {
       socket.emit('unsubscribe', 'shoots', ({ statusCode, message }) => {
         if (statusCode === 200) {
           logger.debug('unsubscribed shoots')
-          store.commit('socket/SET_SUBSCRIBED', false)
+          store.commit('shoots/SET_SUBSCRIPTION_STATE', constants.CLOSED)
         } else {
-          logger.debug('failed to unsubscribe shoots: %s', message)
+          const err = new Error(message)
+          err.name = 'UnsubscribeError'
+          logger.debug('failed to unsubscribe shoots: %s', err.message)
+          store.commit('shoots/SET_SUBSCRIPTION_ERROR', err)
         }
       })
-    }
-
-    const reconnect = async () => {
-      try {
-        await userManager.ensureValidToken()
-      } finally {
-        socket.connect()
-      }
-    }
-    const randomize = (d, f = 0.5) => d + Math.floor(d * f * (2 * Math.random() - 1))
-
-    const handleReconnectAttempt = () => {
-      const attempt = store.state.socket.reconnectAttempt
-      if (attempt > 0) {
-        const delay = attempt < 5
-          ? attempt * 1000
-          : 5000
-        setTimeout(reconnect, randomize(delay, 0.25))
-      }
     }
 
     store.subscribe((mutation) => {
@@ -200,16 +220,18 @@ export default function createPlugin (userManager, logger) {
           handleSetUser(mutation.payload)
           break
         }
-        case 'shoots/RECEIVE': {
-          handleReceive()
+        case 'shoots/SUBSCRIBE': {
+          emitSubscribe(mutation.payload)
           break
         }
-        case 'shoots/UNSET_SUBSCRIPTION': {
+        case 'shoots/UNSUBSCRIBE': {
           emitUnsubscribe()
           break
         }
-        case 'socket/RECONNECT_ATTEMPT': {
-          handleReconnectAttempt()
+        case 'socket/CONNECT': {
+          if (!socket.connected) {
+            socket.connect()
+          }
           break
         }
       }

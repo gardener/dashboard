@@ -9,12 +9,9 @@ SPDX-License-Identifier: Apache-2.0
     <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
-    <template v-if="isDeveloperModeEnabled">
-      <div class="mr-6">
-        <socket-state/>
-      </div>
-      <v-divider vertical class="mr-2"/>
-    </template>
+    <div class="text-center mr-2">
+      <shoot-subscription-status></shoot-subscription-status>
+    </div>
     <div class="text-center mr-6" v-if="helpMenuItems.length">
       <v-menu
         v-model="help"
@@ -165,14 +162,14 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
 import Breadcrumb from '@/components/Breadcrumb'
 import InfoDialog from '@/components/dialogs/InfoDialog'
-import SocketState from '@/components/SocketState'
+import ShootSubscriptionStatus from '@/components/ShootSubscriptionStatus'
 
 export default {
   name: 'toolbar-background',
   components: {
     Breadcrumb,
     InfoDialog,
-    SocketState
+    ShootSubscriptionStatus
   },
   data () {
     return {

@@ -21,7 +21,7 @@ import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import getters from './getters'
-import { keyForShoot, findItem } from './helper'
+import { keyForShoot, findItem, constants } from './helper'
 import {
   getShoots,
   getShoot,
@@ -59,14 +59,18 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
-  loading: false,
-  subscription: null
+  subscription: null,
+  subscriptionState: constants.CLOSED,
+  subscriptionError: null
 }
 
 // actions
 const actions = {
-  unsubscribe ({ commit }) {
-    commit('UNSET_SUBSCRIPTION')
+  unsubscribe ({ commit, dispatch }) {
+    commit('UNSUBSCRIBE')
+    return dispatch('clear')
+  },
+  clear ({ commit }) {
     commit('CLEAR_ALL')
     commit('tickets/CLEAR_ISSUES', undefined, { root: true })
     commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
@@ -76,7 +80,7 @@ const actions = {
     commit('SET_SUBSCRIPTION', { namespace, name })
     return dispatch('synchronize')
   },
-  synchronize ({ commit, dispatch, state, getters, rootState, rootGetters }) {
+  synchronize ({ commit, dispatch, getters, rootState, rootGetters }) {
     const fetchShoot = async options => {
       const [
         { data: shoot },
@@ -107,7 +111,7 @@ const actions = {
     const assignInfoAndSeedInfo = async ({ metadata, spec }) => {
       const promises = [dispatch('getInfo', metadata)]
       const seedName = spec.seedName
-      if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
+      if (rootGetters.isAdmin && !rootGetters.isSeedUnreachableByName(seedName)) {
         promises.push(dispatch('getSeedInfo', metadata))
       }
       try {
@@ -118,28 +122,26 @@ const actions = {
     }
 
     // await and handle response data in the background
-    const handleData = async dataPromise => {
-      commit('SET_LOADING', true)
+    const fetchData = async options => {
       try {
-        const { shoots, issues, comments } = await dataPromise
+        commit('SET_SUBSCRIPTION_STATE', constants.LOADING)
+        const { shoots, issues, comments } = await (options.name ? fetchShoot(options) : fetchShoots(options))
         commit('RECEIVE', { rootState, rootGetters, shoots })
         commit('tickets/RECEIVE_ISSUES', issues, { root: true })
         commit('tickets/RECEIVE_COMMENTS', comments, { root: true })
+        commit('SUBSCRIBE', options)
       } catch (err) {
         const message = get(err, 'response.data.message', err.message)
-        logger.error('Failed to fetch shoot or tickets:', message)
+        logger.error('Failed to fetch shoots or tickets: %s', message)
         commit('SET_ALERT', { type: 'error', message }, { root: true })
-      } finally {
-        commit('SET_LOADING', false)
+        commit('SET_SUBSCRIPTION_ERROR', err)
+        return dispatch('clear')
       }
     }
 
     const options = getters.subscription
     if (options) {
-      handleData(options.name
-        ? fetchShoot(options)
-        : fetchShoots(options)
-      )
+      fetchData(options)
     }
   },
   create ({ dispatch, commit, rootState }, data) {
@@ -512,14 +514,36 @@ const mutations = {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
   },
-  SET_LOADING (state, value) {
-    state.loading = value
-  },
   SET_SUBSCRIPTION (state, value) {
     state.subscription = value
+    state.subscriptionState = constants.DEFINED
+    state.subscriptionError = null
   },
-  UNSET_SUBSCRIPTION (state) {
+  SUBSCRIBE (state) {
+    state.subscriptionState = constants.OPENING
+    state.subscriptionError = null
+  },
+  UNSUBSCRIBE (state) {
+    state.subscriptionState = constants.CLOSING
+    state.subscriptionError = null
     state.subscription = null
+  },
+  SET_SUBSCRIPTION_STATE (state, value) {
+    if (Object.values(constants).includes(value)) {
+      state.subscriptionState = value
+    } else if (Object.keys(constants).includes(value)) {
+      state.subscriptionState = constants[value]
+    }
+  },
+  SET_SUBSCRIPTION_ERROR (state, err) {
+    if (err) {
+      const name = err.name
+      const message = get(err, 'response.data.message', err.message)
+      const statusCode = get(err, 'response.status', 500)
+      state.subscriptionError = { name, message, statusCode }
+    } else {
+      state.subscriptionError = null
+    }
   }
 }
 

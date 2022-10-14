@@ -20,7 +20,7 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated
 } from '@/utils'
-import { findItem, parseSearch } from './helper'
+import { findItem, parseSearch, constants } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
@@ -146,6 +146,9 @@ export default {
   },
   onlyShootsWithIssues (state) {
     return get(state.shootListFilters, 'onlyShootsWithIssues', true)
+  },
+  loading (state) {
+    return state.subscriptionState > constants.DEFINED && state.subscriptionState < constants.OPEN
   },
   subscription (state, getters, rootState) {
     const metadata = state.subscription
