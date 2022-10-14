@@ -227,11 +227,11 @@ describe('ShootCredentialRotation.vue', () => {
     })
 
     it('should compute mode', () => {
-      expect(allRotationWrapper.vm.mode).toEqual('complete')
-      expect(certificateAuthoritiesRotationWrapper.vm.mode).toEqual('complete')
-      expect(observabilityRotationWrapper.vm.mode).toEqual('rotate')
-      expect(etcdEncryptionKeyRotationWrapper.vm.mode).toEqual('complete')
-      expect(serviceAccountKeyRotationWrapper.vm.mode).toEqual('start')
+      expect(allRotationWrapper.vm.mode).toEqual('COMPLETE')
+      expect(certificateAuthoritiesRotationWrapper.vm.mode).toEqual('COMPLETE')
+      expect(observabilityRotationWrapper.vm.mode).toEqual('ROTATE')
+      expect(etcdEncryptionKeyRotationWrapper.vm.mode).toEqual('COMPLETE')
+      expect(serviceAccountKeyRotationWrapper.vm.mode).toEqual('START')
     })
   })
 })

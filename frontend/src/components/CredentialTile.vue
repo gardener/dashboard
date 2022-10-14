@@ -102,14 +102,14 @@ export default {
       if (this.type !== 'allCredentials') {
         return this.rotationStatus.lastCompletionTime
       }
-      const allCompletionTimes = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimes = Object.keys(rotationTypes).length - 1 // There is no "all credentials" rotation type in the rotation status
+      const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
+      let requiredNumberOfRotationTimestamps = Object.keys(rotationTypes).length - 1 // There is no "all credentials" rotation type in the rotation status
       if (!this.shootEnableStaticTokenKubeconfig) {
-        requiredNumberOfRotationTimes = requiredNumberOfRotationTimes - 1
+        requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
       }
 
-      if (requiredNumberOfRotationTimes === allCompletionTimes.length) {
-        return head(allCompletionTimes)
+      if (requiredNumberOfRotationTimestamps === allCompletionTimestamps.length) {
+        return head(allCompletionTimestamps)
       }
       return undefined
     },

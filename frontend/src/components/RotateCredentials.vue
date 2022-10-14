@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-row >
         <v-col>
           <div class="py-4 text-h5 pt-0 pb-3">{{componentTexts.heading}}</div>
-          <v-alert v-if="mode === 'start'" type="info" outlined dense>Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.</v-alert>
-          <v-alert v-if="mode === 'complete'" type="info" outlined dense>Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.</v-alert>
+          <v-alert v-if="mode === 'START'" type="info" outlined dense>Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.</v-alert>
+          <v-alert v-if="mode === 'COMPLETE'" type="info" outlined dense>Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.</v-alert>
           <strong>Actions performed in this step</strong>
           <ul>
             <li
@@ -85,12 +85,12 @@ export default {
     ]),
     mode () {
       if (!this.completionOperation) {
-        return 'rotate'
+        return 'ROTATE'
       }
       if (this.operation === this.completionOperation) {
-        return 'complete'
+        return 'COMPLETE'
       }
-      return 'start'
+      return 'START'
     },
     operation () {
       if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
@@ -129,10 +129,10 @@ export default {
       return this.shootGardenOperation === this.operation
     },
     isProgressingPhase () {
-      if (this.mode === 'start' && this.phaseType === 'Preparing') {
+      if (this.mode === 'START' && this.phaseType === 'Preparing') {
         return true
       }
-      if (this.mode === 'complete' && this.phaseType === 'Completing') {
+      if (this.mode === 'COMPLETE' && this.phaseType === 'Completing') {
         return true
       }
       return false
@@ -207,9 +207,9 @@ export default {
         return 'Schedule Roatation'
       }
       switch (this.mode) {
-        case 'start':
+        case 'START':
           return 'Prepare Roatation'
-        case 'complete':
+        case 'COMPLETE':
           return 'Complete Rotation'
       }
       return 'Rotate'
@@ -411,7 +411,7 @@ export default {
       }
       this.actionTriggered = false
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
       const config = {

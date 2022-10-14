@@ -133,7 +133,7 @@ export default {
       }
       this.hibernationChanged = false
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
       const config = {

@@ -282,15 +282,15 @@ export const shootItem = {
             completedPhasesCount++
             // fallthrough
           default:
-            if (rotationType.twoPhase) {
+            if (rotationType.twoStep) {
               unpreparedRotations.push(rotationType)
             }
         }
       }
 
-      const numberOfTwoPhaseOperations = filter(rotationTypes, { twoPhase: true }).length
+      const numberOfTwoStepOperations = filter(rotationTypes, { twoStep: true }).length
       if (preparedRotationsCount > 0) {
-        if (preparedRotationsCount === numberOfTwoPhaseOperations) {
+        if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'
           return {
             type,
@@ -299,14 +299,14 @@ export const shootItem = {
         }
 
         return {
-          caption: `Prepared ${preparedRotationsCount}/${numberOfTwoPhaseOperations}`,
+          caption: `Prepared ${preparedRotationsCount}/${numberOfTwoStepOperations}`,
           type: 'Prepared',
           incomplete: true,
           unpreparedRotations
         }
       }
 
-      if (completedPhasesCount === numberOfTwoPhaseOperations) {
+      if (completedPhasesCount === numberOfTwoStepOperations) {
         const type = 'Completed'
         return {
           type,

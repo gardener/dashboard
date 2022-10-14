@@ -573,7 +573,7 @@ class Bootstrapper extends Queue {
       }
     }
 
-    // do not bootstrap if resource is beeing deleted
+    // do not bootstrap if resource is being deleted
     if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
       return {
         required: false,

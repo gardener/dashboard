@@ -14,7 +14,7 @@ export const rotationTypes = {
   certificateAuthorities: {
     startOperation: 'rotate-ca-start',
     completionOperation: 'rotate-ca-complete',
-    twoPhase: true,
+    twoStep: true,
     title: 'Certificate Authorities'
   },
   observability: {
@@ -28,13 +28,13 @@ export const rotationTypes = {
   etcdEncryptionKey: {
     startOperation: 'rotate-etcd-encryption-key-start',
     completionOperation: 'rotate-etcd-encryption-key-complete',
-    twoPhase: true,
+    twoStep: true,
     title: 'ETCD Encryption Key'
   },
   serviceAccountKey: {
     startOperation: 'rotate-serviceaccount-key-start',
     completionOperation: 'rotate-serviceaccount-key-complete',
-    twoPhase: true,
+    twoStep: true,
     title: 'ServiceAccount Token Signing Key'
   },
   allCredentials: {

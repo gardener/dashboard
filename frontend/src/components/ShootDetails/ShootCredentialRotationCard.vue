@@ -12,19 +12,19 @@ SPDX-License-Identifier: Apache-2.0
     <v-list>
       <credential-tile
         :shoot-item="shootItem"
-        ></credential-tile>
+      ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile
         v-if="shootEnableStaticTokenKubeconfig"
         :shoot-item="shootItem"
         type="kubeconfig"
         dense
-        ></credential-tile>
+      ></credential-tile>
       <credential-tile
         :shoot-item="shootItem"
         type="certificateAuthorities"
         dense
-        ></credential-tile>
+      ></credential-tile>
         <template v-if="!isTestingCluster">
           <credential-tile
             icon="mdi-developer-board"
@@ -34,19 +34,19 @@ SPDX-License-Identifier: Apache-2.0
           ></credential-tile>
         </template>
           <credential-tile
-          :shoot-item="shootItem"
-          type="sshKeypair"
-          dense
+            :shoot-item="shootItem"
+            type="sshKeypair"
+            dense
           ></credential-tile>
           <credential-tile
-          :shoot-item="shootItem"
-          type="etcdEncryptionKey"
-          dense
+            :shoot-item="shootItem"
+            type="etcdEncryptionKey"
+            dense
           ></credential-tile>
           <credential-tile
-          :shoot-item="shootItem"
-          type="serviceAccountKey"
-          dense
+            :shoot-item="shootItem"
+            type="serviceAccountKey"
+            dense
           ></credential-tile>
     </v-list>
   </v-card>

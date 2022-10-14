@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <div class="text-caption">
       <span v-if="projectDetails.phase === 'Terminating'">Gardener is currently cleaning up BackupEntries related to this project. The project will be removed when all cleanup activity has been finished.</span>
-      <span v-else-if="projectDetails.phase === 'Pending'">The project is currently beeing created and may not yet be ready to be used.</span>
+      <span v-else-if="projectDetails.phase === 'Pending'">The project is currently being created and may not yet be ready to be used.</span>
       <span v-else>The project is in an unready state. The project might not be functional.</span>
     </div>
   </v-tooltip>
