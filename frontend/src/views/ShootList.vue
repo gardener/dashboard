@@ -83,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
+          :filterTooltip="filterTooltip"
           @set-selected-header="setSelectedHeader"
           @reset="resetTableSettings"
           @toggle-filter="toggleFilter"
@@ -587,6 +588,12 @@ export default {
     },
     hideFiltersForOnlyShootsWithIssues () {
       return !this.showOnlyShootsWithIssues
+    },
+    filterTooltip () {
+      if (this.freezeSorting) {
+        return 'Filters cannot be changed when focus mode is active'
+      }
+      return undefined
     },
     headlineSubtitle () {
       const subtitle = []
