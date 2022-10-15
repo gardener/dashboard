@@ -77,18 +77,14 @@ describe('services', function () {
           }
         }
       },
-      'seedmanagement.gardener.cloud': {
-        managedseeds: {
-          async get (namespace, name) {
-            await nextTick()
-            if (namespace === 'garden' && name === soilName) {
-              return
-            }
-            return {
-              metadata: { namespace, name },
-              spec: { shoot: { name } }
-            }
-          }
+      async getManagedSeed ({ namespace, name }) {
+        await nextTick()
+        if (namespace === 'garden' && name === soilName) {
+          return
+        }
+        return {
+          metadata: { namespace, name },
+          spec: { shoot: { name } }
         }
       },
       async getShoot ({ namespace, name }) {

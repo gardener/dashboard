@@ -32,7 +32,7 @@ const {
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer,
-  getManagedSeedOrUndefined
+  getShootRef
 } = require('./utils')
 
 const {
@@ -284,19 +284,15 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
         shootResource = await client.getShoot({ namespace, name })
       }
       const seedName = getSeedNameFromShoot(shootResource)
-      const managedSeed = await getManagedSeedOrUndefined(client, seedName)
+      const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
 
       let credentials
       let caData
       if (managedSeed) {
-        const shootName = managedSeed.spec.shoot.name
-        const shootRef = {
-          name: shootName,
-          namespace: 'garden'
-        }
+        const shootRef = getShootRef(managedSeed)
         credentials = { shootRef }
 
-        const caCluster = await client.core.secrets.get(managedSeed.metadata.namespace, `${shootName}.ca-cluster`)
+        const caCluster = await client.core.secrets.get(managedSeed.metadata.namespace, `${managedSeed.spec.shoot.name}.ca-cluster`)
         caData = caCluster.data['ca.crt']
       } else {
         const seed = getSeed(seedName)
@@ -370,16 +366,13 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
 
   const seedShootNamespace = getSeedShootNamespace(shootResource)
   const seedName = getSeedNameFromShoot(shootResource)
-  const managedSeed = await getManagedSeedOrUndefined(client, seedName)
+  const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
+
   const seed = getSeed(seedName)
 
   let credentials
   if (managedSeed) {
-    const shootName = managedSeed.spec.shoot.name
-    const shootRef = {
-      name: shootName,
-      namespace: 'garden'
-    }
+    const shootRef = getShootRef(managedSeed)
     credentials = { shootRef }
   } else {
     credentials = {

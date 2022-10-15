@@ -18,7 +18,7 @@ const { NotImplemented } = require('http-errors')
 const { isHttpError } = require('@gardener-dashboard/request')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const {
-  getManagedSeedOrUndefined
+  getShootRef
 } = require('./utils')
 
 const {
@@ -310,10 +310,11 @@ async function handleSeed (seed) {
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
-  const managedSeed = await getManagedSeedOrUndefined(dashboardClient, name)
+  const managedSeed = await dashboardClient.getManagedSeed({ namespace: 'garden', name, throwNotFound: false })
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
   if (managedSeed) {
-    const shoot = await dashboardClient.getShoot({ namespace: managedSeed.metadata.namespace, name: managedSeed.spec.shoot.name })
+    const shootRef = getShootRef(managedSeed)
+    const shoot = await dashboardClient.getShoot(shootRef)
     const seedName = getSeedNameFromShoot(shoot)
     const seedForShoot = await dashboardClient['core.gardener.cloud'].seeds.get(seedName)
     await ensureTrustedCertForShootApiServer(dashboardClient, shoot, seedForShoot)
@@ -351,12 +352,9 @@ async function ensureTrustedCertForShootApiServer (client, shootResource, seedRe
 
   let seedClient
 
-  const managedSeed = await getManagedSeedOrUndefined(client, seedName)
+  const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
   if (managedSeed) {
-    const shootRef = {
-      namespace: managedSeed.metadata.namespace,
-      name: managedSeed.spec.shoot.name
-    }
+    const shootRef = getShootRef(managedSeed)
     seedClient = await client.createShootAdminKubeconfigClient(shootRef)
   } else {
     if (!seedResource.spec.secretRef) {
