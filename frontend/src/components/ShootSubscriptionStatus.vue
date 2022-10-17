@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card>
-      <v-alert dense text border="top" :color="color" class="pr-1 ma-0">
+      <v-alert dense text border="top" min-width="360" :color="color" class="pr-1 ma-0">
         <v-row no-gutters>
           <v-col align-self="center" class="grow mr-3">
             <div class="text-body-2">
