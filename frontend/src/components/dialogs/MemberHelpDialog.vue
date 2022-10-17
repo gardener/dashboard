@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                 <code>UAM</code> - This allows to add/modify/remove human users, service accounts or groups to/from the project member list. In case an external UAM system is connected via a service account, only this account should get the <code>UAM</code> role.
               </li>
               <li>
-                <code>Service Account Manager</code> - Manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the <code>Admin</code> role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens for ever.
+                <code>Service Account Manager</code> - Manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the <code>Admin</code> role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens forever.
               </li>
             </ul>
           </p>
