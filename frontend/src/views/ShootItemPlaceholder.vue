@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
 import ShootItemError from '@/views/ShootItemError'
 
@@ -28,6 +28,10 @@ export default {
     }
   },
   computed: {
+    ...mapState('shoots', [
+      'subscriptionState',
+      'subscriptionError'
+    ]),
     ...mapGetters([
       'canGetSecrets',
       'canUseProjectTerminalShortcuts'
@@ -90,7 +94,17 @@ export default {
         await Promise.all(promises)
         this.component = 'router-view'
       } catch (err) {
-        this.error = err
+        let { statusCode, code = statusCode, reason, message } = err
+        if (code === 404) {
+          reason = 'Cluster not found'
+          message = 'The cluster you are looking for doesn\'t exist'
+        } else if (code === 403) {
+          reason = 'Access to cluster denied'
+        } else if (code >= 500) {
+          reason = 'Oops, something went wrong'
+          message = 'An unexpected error occurred. Please try again later'
+        }
+        this.error = Object.assign(new Error(message), { code, reason })
         this.component = 'shoot-item-error'
       }
     }

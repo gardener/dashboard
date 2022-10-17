@@ -64,11 +64,17 @@ const state = {
   subscriptionError: null
 }
 
+function clearAll ({ commit }) {
+  commit('CLEAR_ALL')
+  commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+  commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
+}
+
 // actions
 const actions = {
   unsubscribe ({ commit, dispatch }) {
     commit('UNSUBSCRIBE')
-    return dispatch('clear')
+    clearAll({ commit })
   },
   clear ({ commit }) {
     commit('CLEAR_ALL')
@@ -125,7 +131,10 @@ const actions = {
     const fetchData = async options => {
       try {
         commit('SET_SUBSCRIPTION_STATE', constants.LOADING)
-        const { shoots, issues, comments } = await (options.name ? fetchShoot(options) : fetchShoots(options))
+        const promise = options.name
+          ? fetchShoot(options)
+          : fetchShoots(options)
+        const { shoots, issues, comments } = await promise
         commit('RECEIVE', { rootState, rootGetters, shoots })
         commit('tickets/RECEIVE_ISSUES', issues, { root: true })
         commit('tickets/RECEIVE_COMMENTS', comments, { root: true })
@@ -133,15 +142,15 @@ const actions = {
       } catch (err) {
         const message = get(err, 'response.data.message', err.message)
         logger.error('Failed to fetch shoots or tickets: %s', message)
-        commit('SET_ALERT', { type: 'error', message }, { root: true })
         commit('SET_SUBSCRIPTION_ERROR', err)
-        return dispatch('clear')
+        clearAll({ commit })
+        throw err
       }
     }
 
     const options = getters.subscription
     if (options) {
-      fetchData(options)
+      return fetchData(options)
     }
   },
   create ({ dispatch, commit, rootState }, data) {
@@ -538,9 +547,11 @@ const mutations = {
   SET_SUBSCRIPTION_ERROR (state, err) {
     if (err) {
       const name = err.name
-      const message = get(err, 'response.data.message', err.message)
       const statusCode = get(err, 'response.status', 500)
-      state.subscriptionError = { name, message, statusCode }
+      const message = get(err, 'response.data.message', err.message)
+      const reason = get(err, 'response.data.reason')
+      const code = get(err, 'response.data.code', 500)
+      state.subscriptionError = { name, statusCode, message, code, reason }
     } else {
       state.subscriptionError = null
     }

@@ -162,9 +162,9 @@ export default {
       'setSelectedShoot',
       'setShootListFilter'
     ]),
-    ...mapActions('shoots', {
-      subscribeShoots: 'subscribe'
-    }),
+    ...mapActions([
+      'subscribeShoots'
+    ]),
     async showDialog (args) {
       switch (args.action) {
         case 'access':

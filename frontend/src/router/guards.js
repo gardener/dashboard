@@ -65,7 +65,7 @@ function ensureDataLoaded (store, localStorage, logger) {
   return async (to, from, next) => {
     const meta = to.meta || {}
     if (meta.public || to.name === 'Error') {
-      store.dispatch('shoots/unsubscribe')
+      store.dispatch('unsubscribeShoots')
       return next()
     }
     try {
@@ -96,14 +96,14 @@ function ensureDataLoaded (store, localStorage, logger) {
         case 'Secret': {
           await Promise.all([
             store.dispatch('fetchcloudProviderSecrets'),
-            store.dispatch('shoots/subscribe')
+            store.dispatch('subscribeShoots')
           ])
           break
         }
         case 'NewShoot':
         case 'NewShootEditor': {
           const promises = [
-            store.dispatch('shoots/subscribe')
+            store.dispatch('subscribeShoots')
           ]
           if (store.getters.canGetSecrets) {
             promises.push(store.dispatch('fetchcloudProviderSecrets'))
@@ -133,7 +133,7 @@ function ensureDataLoaded (store, localStorage, logger) {
           await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
 
           const promises = [
-            store.dispatch('shoots/subscribe')
+            store.dispatch('subscribeShoots')
           ]
 
           if (store.getters.canUseProjectTerminalShortcuts) {
@@ -146,13 +146,13 @@ function ensureDataLoaded (store, localStorage, logger) {
         case 'Administration': {
           await Promise.all([
             store.dispatch('fetchMembers'),
-            store.dispatch('shoots/subscribe')
+            store.dispatch('subscribeShoots')
           ])
           break
         }
         case 'Account':
         case 'Settings': {
-          store.dispatch('shoots/unsubscribe')
+          store.dispatch('unsubscribeShoots')
           break
         }
       }

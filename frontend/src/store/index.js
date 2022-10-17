@@ -1448,6 +1448,24 @@ const actions = {
         return res
       })
   },
+  subscribeShoots ({ dispatch, commit }) {
+    (async () => {
+      try {
+        await dispatch('shoots/subscribe')
+      } catch (err) {
+        commit('SET_ALERT', { message: err.message, type: 'error' })
+      }
+    })()
+  },
+  unsubscribeShoots ({ dispatch, commit }) {
+    (async () => {
+      try {
+        await dispatch('shoots/unsubscribe')
+      } catch (err) {
+        commit('SET_ALERT', { message: err.message, type: 'error' })
+      }
+    })()
+  },
   async addMember ({ dispatch, commit }, payload) {
     const result = await dispatch('members/add', payload)
     await dispatch('setAlert', { message: 'Member added', type: 'success' })
