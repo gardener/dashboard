@@ -57,6 +57,7 @@ import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
 import compact from 'lodash/compact'
+import find from 'lodash/find'
 
 export default {
   name: 'rotate-credentials',
@@ -93,46 +94,40 @@ export default {
       return 'START'
     },
     operation () {
-      if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
+      if (this.phase.type === 'Prepared' || this.phase.type === 'Completing') {
         return this.completionOperation
       }
       return this.startOperation
     },
+    rotationType () {
+      return find(rotationTypes, t => { return t.type === this.type })
+    },
     startOperation () {
-      if (rotationTypes[this.type]) {
-        return rotationTypes[this.type].startOperation
-      }
-      return rotationTypes.allCredentials.startOperation
+      return this.rotationType.startOperation
     },
     completionOperation () {
-      if (rotationTypes[this.type]) {
-        return rotationTypes[this.type].completionOperation
-      }
-      return rotationTypes.allCredentials.completionOperation
+      return this.rotationType.completionOperation
     },
     rotationStatus () {
       return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     phase () {
-      if (this.type === 'allCredentials') {
+      if (!this.type) {
         return this.shootStatusCredentialsRotationAggregatedPhase
       }
-      return this.rotationStatus.phase
-    },
-    phaseType () {
-      if (typeof this.phase === 'object') {
-        return get(this.phase, 'type')
+      const type = this.rotationStatus.phase
+      return {
+        type
       }
-      return this.phase
     },
     isActionToBeScheduled () {
       return this.shootGardenOperation === this.operation
     },
     isProgressingPhase () {
-      if (this.mode === 'START' && this.phaseType === 'Preparing') {
+      if (this.mode === 'START' && this.phase.type === 'Preparing') {
         return true
       }
-      if (this.mode === 'COMPLETE' && this.phaseType === 'Completing') {
+      if (this.mode === 'COMPLETE' && this.phase.type === 'Completing') {
         return true
       }
       return false
@@ -144,7 +139,7 @@ export default {
       if (this.isScheduled) {
         return true
       }
-      if (this.isProgressingPhase && this.type !== 'allCredentials') {
+      if (this.isProgressingPhase && this.type) {
         // Only show the loading indicator for the rotation that is actually running, not for the overall trigger button
         return true
       }
@@ -227,7 +222,7 @@ export default {
       if (this.isScheduledOperation) {
         return 'There is alread an operation scheduled for this cluster'
       }
-      if (this.isProgressingPhase && this.type === 'allCredentials') {
+      if (this.isProgressingPhase && !this.type) {
         return 'A rotation operation is currently running'
       }
       return undefined
@@ -249,7 +244,7 @@ export default {
             ? 'Preparing certificate authorities rotation'
             : 'Prepare Certificate Authorities Rotation',
           errorMessage: 'Could not prepare the rotation of certificate authorities',
-          successMessage: `Rotation of certificate authorities prepared for ${this.shootName}`,
+          successMessage: `Preparing rotation of certificate authorities for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of certificate authorities?',
           actions: [
             'New Certificate Authorities will be created and added to the bundle (old Certificate Authorities will remain in the bundle)'
@@ -260,7 +255,7 @@ export default {
             ? 'Completing certificate authorities rotation'
             : 'Complete Certificate Authorities Rotation',
           errorMessage: 'Could not complete the rotation of certificate authorities',
-          successMessage: `Rotation of certificate authorities completed for ${this.shootName}`,
+          successMessage: `Completing rotation of certificate authorities for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of certificate authorities?',
           actions: [
             'Old Certificate Authorities will be dropped from the bundle',
@@ -295,7 +290,7 @@ export default {
             ? 'Preparing etcd encryption key rotation'
             : 'Prepare ETCD Encryption Key Rotation',
           errorMessage: 'Could not prepare the rotation of etcd encryption key',
-          successMessage: `Rotation of etcd encryption key prepared for ${this.shootName}`,
+          successMessage: `Preparing rotation of etcd encryption key for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of etcd encryption key?',
           actions: [
             'A new encryption key will be created and added to the bundle (old encryption key will remain in the bundle).',
@@ -307,7 +302,7 @@ export default {
             ? 'Completing etcd encryption key rotation'
             : 'Complete ETCD Encryption Key Rotation',
           errorMessage: 'Could not complete the rotation of etcd encryption key',
-          successMessage: `Rotation of etcd encryption key completed for ${this.shootName}`,
+          successMessage: `Completing rotation of etcd encryption key for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of etcd encryption key?',
           actions: [
             'The old encryption will be dropped from the bundle.'
@@ -318,7 +313,7 @@ export default {
             ? 'Preparing ServiceAccount token signing key rotation'
             : 'Prepare ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not prepare the rotation of ServiceAccount token signing key',
-          successMessage: `Rotation of ServiceAccount token signing key prepared for ${this.shootName}`,
+          successMessage: `Preparing rotation of ServiceAccount token signing key for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of ServiceAccount token signing key?',
           actions: [
             'A new signing key will be created and added to the bundle (old signing key will remain in the bundle)'
@@ -329,7 +324,7 @@ export default {
             ? 'Completing ServiceAccount token signing key rotation'
             : 'Complete ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not complete the rotation of ServiceAccount token signing key',
-          successMessage: `Rotation of ServiceAccount token signing key completed for ${this.shootName}`,
+          successMessage: `Completing rotation of ServiceAccount token signing key for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of ServiceAccount token signing key?',
           actions: [
             'Old signing key will be dropped from the bundle',
@@ -343,7 +338,7 @@ export default {
           : 'Start Rotation of all Credentials',
         buttonText: this.text ? 'Prepare Rotation of all Credentials' : '',
         errorMessage: 'Could not prepare credential rotation',
-        successMessage: `Credential rotation prepared for ${this.shootName}`,
+        successMessage: `Preparing credential rotation for ${this.shootName}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
           ...componentTexts['rotate-kubeconfig-credentials'].actions,
@@ -360,7 +355,7 @@ export default {
           : 'Complete Rotation of all Credentials',
         buttonText: this.text ? 'Complete Rotation of all Credentials' : '',
         errorMessage: 'Could not complete credential rotation',
-        successMessage: `Credential rotation completed for ${this.shootName}`,
+        successMessage: `Completing credential rotation for ${this.shootName}`,
         heading: 'Do you want to complete the rotation of all credentials?',
         actions: [
           ...componentTexts['rotate-ca-complete'].actions,

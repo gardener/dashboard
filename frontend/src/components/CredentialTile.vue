@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
         {{title}}
-        <v-tooltip top :disabled="phaseType !== 'Prepared'">
+        <v-tooltip top :disabled="phase.type !== 'Prepared'">
           <template v-slot:activator="{ on }">
             <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
@@ -66,6 +66,8 @@ import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import head from 'lodash/head'
 import compact from 'lodash/compact'
+import filter from 'lodash/filter'
+import find from 'lodash/find'
 import { rotationTypes } from '@/utils/credentialsRotation'
 
 export default {
@@ -78,7 +80,6 @@ export default {
   props: {
     type: {
       type: String,
-      default: 'allCredentials',
       required: false
     },
     dense: {
@@ -92,18 +93,18 @@ export default {
       return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     lastInitiationTime () {
-      if (this.type !== 'allCredentials') {
+      if (this.type) {
         return this.rotationStatus.lastInitiationTime
       }
       // Do not show aggregated initiation time
       return undefined
     },
     lastCompletionTime () {
-      if (this.type !== 'allCredentials') {
+      if (this.type) {
         return this.rotationStatus.lastCompletionTime
       }
       const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimestamps = Object.keys(rotationTypes).length - 1 // There is no "all credentials" rotation type in the rotation status
+      let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'type').length // only consider rotations that have an rotation status type
       if (!this.shootEnableStaticTokenKubeconfig) {
         requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
       }
@@ -114,25 +115,19 @@ export default {
       return undefined
     },
     phase () {
-      if (this.type === 'allCredentials') {
+      if (!this.type) {
         return this.shootStatusCredentialsRotationAggregatedPhase
       }
-      return this.rotationStatus.phase
-    },
-    phaseType () {
-      if (typeof this.phase === 'object') {
-        return get(this.phase, 'type')
+      const type = this.rotationStatus.phase
+      return {
+        type
       }
-      return this.phase
     },
     phaseCaption () {
-      if (typeof this.phase === 'object') {
-        return get(this.phase, 'caption')
-      }
-      return this.phase
+      return get(this.phase, 'caption', this.phase.type)
     },
     phaseColor () {
-      switch (this.phaseType) {
+      switch (this.phase.type) {
         case 'Prepared':
         case 'Completed':
           return 'primary'
@@ -147,7 +142,7 @@ export default {
       return 'primary'
     },
     showChip () {
-      return this.phaseType && this.phaseType !== 'Completed'
+      return this.phase.type && this.phase.type !== 'Completed'
     },
     title () {
       return this.getRotationTitle(this.type)
@@ -155,7 +150,7 @@ export default {
   },
   methods: {
     getRotationTitle (type) {
-      return get(rotationTypes, [type, 'title'])
+      return get(find(rotationTypes, t => { return t.type === this.type }), 'title')
     }
   }
 }

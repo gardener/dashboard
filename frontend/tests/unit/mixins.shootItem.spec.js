@@ -8,6 +8,8 @@ import { shootItem } from '@/mixins/shootItem'
 import { rotationTypes } from '@/utils/credentialsRotation'
 import { shallowMount } from '@vue/test-utils'
 
+import find from 'lodash/find'
+
 describe('shootItem', () => {
   const Component = {
     render () {},
@@ -81,7 +83,7 @@ describe('shootItem', () => {
         }
       })
       const unpreparedRotations = [
-        rotationTypes.serviceAccountKey
+        find(rotationTypes, ['type', 'serviceAccountKey'])
       ]
 
       expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true, unpreparedRotations })

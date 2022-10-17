@@ -263,7 +263,7 @@ export const shootItem = {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
         const rotationKey = keys[i]
         const rotationStatus = this.shootStatusCredentialsRotation[rotationKey]
-        const rotationType = get(rotationTypes, rotationKey)
+        const rotationType = find(rotationTypes, ['type', rotationKey])
         if (!rotationType) {
           // If gardener introduces a new rotation type, ignore it to avoid breaking our logic
           continue
@@ -288,7 +288,7 @@ export const shootItem = {
         }
       }
 
-      const numberOfTwoStepOperations = filter(rotationTypes, { twoStep: true }).length
+      const numberOfTwoStepOperations = filter(rotationTypes, ['twoStep', true]).length
       if (preparedRotationsCount > 0) {
         if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'

@@ -6,40 +6,47 @@
 
 'use strict'
 
-export const rotationTypes = {
-  kubeconfig: {
+export const rotationTypes = [
+  {
+    type: 'kubeconfig',
     startOperation: 'rotate-kubeconfig-credentials',
     title: 'Kubeconfig'
   },
-  certificateAuthorities: {
+  {
+    type: 'certificateAuthorities',
     startOperation: 'rotate-ca-start',
     completionOperation: 'rotate-ca-complete',
     twoStep: true,
     title: 'Certificate Authorities'
   },
-  observability: {
+  {
+    type: 'observability',
     startOperation: 'rotate-observability-credentials',
     title: 'Observability Passwords'
   },
-  sshKeypair: {
+  {
+    type: 'sshKeypair',
     startOperation: 'rotate-ssh-keypair',
     title: 'SSH Key Pair for Worker Nodes'
   },
-  etcdEncryptionKey: {
+  {
+    type: 'etcdEncryptionKey',
     startOperation: 'rotate-etcd-encryption-key-start',
     completionOperation: 'rotate-etcd-encryption-key-complete',
     twoStep: true,
     title: 'ETCD Encryption Key'
   },
-  serviceAccountKey: {
+  {
+    type: 'serviceAccountKey',
     startOperation: 'rotate-serviceaccount-key-start',
     completionOperation: 'rotate-serviceaccount-key-complete',
     twoStep: true,
     title: 'ServiceAccount Token Signing Key'
   },
-  allCredentials: {
+  {
+    // no type as this rotation is the 'all credential rotatiom trigger', which as no dedicated key in the rotation status
     startOperation: 'rotate-credentials-start',
     completionOperation: 'rotate-credentials-complete',
     title: 'Rotate All Credentials'
   }
-}
+]
