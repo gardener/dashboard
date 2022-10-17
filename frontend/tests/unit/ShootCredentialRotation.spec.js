@@ -116,17 +116,16 @@ describe('ShootCredentialRotation.vue', () => {
       const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
       const [allWrapper, , certificateAuthoritiesWrapper, , , etcdEncryptionKeyWrapper, serviceAccountKeyWrapper] = credentialWrappers.wrappers
 
-      expect(certificateAuthoritiesWrapper.vm.phase).toBe('Prepared')
+      expect(certificateAuthoritiesWrapper.vm.phase).toEqual({ type: 'Prepared' })
       expect(certificateAuthoritiesWrapper.vm.phaseColor).toBe('primary')
 
-      expect(etcdEncryptionKeyWrapper.vm.phase).toBe('Completing')
+      expect(etcdEncryptionKeyWrapper.vm.phase).toEqual({ type: 'Completing' })
       expect(etcdEncryptionKeyWrapper.vm.phaseColor).toBe('info')
 
-      expect(serviceAccountKeyWrapper.vm.phase).toBe('Completed')
+      expect(serviceAccountKeyWrapper.vm.phase).toEqual({ type: 'Completed' })
       expect(serviceAccountKeyWrapper.vm.phaseColor).toBe('primary')
 
       expect(allWrapper.vm.phase).toEqual({ caption: 'Completing', type: 'Completing' })
-      expect(allWrapper.vm.phaseType).toBe('Completing')
       expect(allWrapper.vm.phaseCaption).toBe('Completing')
       expect(allWrapper.vm.phaseColor).toBe('info')
     })
