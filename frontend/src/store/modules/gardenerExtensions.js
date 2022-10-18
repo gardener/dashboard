@@ -10,7 +10,6 @@ import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
 import some from 'lodash/some'
-import compact from 'lodash/compact'
 import get from 'lodash/get'
 import find from 'lodash/find'
 
@@ -44,12 +43,9 @@ const getters = {
     const dnsServiceExtensionDeployed = some(state.all, ['name', 'extension-shoot-dns-service'])
     if (dnsServiceExtensionDeployed) {
       return dnsProviderList
-    } else {
-      // return only DNS Providers backed by DNSRecord resource in sorted order
-      return compact(map(dnsProvidersFromDnsRecords, poviderType => {
-        return filter(dnsProviderList, ['primary', true])
-      }))
     }
+    // return only primary DNS Providers backed by DNSRecord
+    return filter(dnsProviderList, 'primary')
   }
 }
 

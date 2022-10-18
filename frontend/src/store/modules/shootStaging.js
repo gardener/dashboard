@@ -53,7 +53,7 @@ const getters = {
     return map(rootGetters['gardenerExtensions/sortedDnsProviderList'], 'type')
   },
   dnsProviderTypesWithPrimarySupport (state, getters, rootState, rootGetters) {
-    return map(filter(rootGetters['gardenerExtensions/sortedDnsProviderList'], ['primary', true]), 'type')
+    return map(filter(rootGetters['gardenerExtensions/sortedDnsProviderList'], 'primary'), 'type')
   },
   getDnsProviderSecrets (state, getters, rootState, rootGetters) {
     return type => rootGetters.dnsSecretsByProviderKind(type)
