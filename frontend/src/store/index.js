@@ -1291,8 +1291,9 @@ const getters = {
     return (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) => {
       const allMachineImages = getters.machineImagesByCloudProfileName(shootCloudProfileName)
       const workerGroups = map(shootWorkerGroups, worker => {
-        const workerImage = get(worker, 'machine.image')
-        const workerImageDetails = find(allMachineImages, workerImage)
+        const workerImage = get(worker, 'machine.image', {})
+        const { name, version } = workerImage
+        const workerImageDetails = find(allMachineImages, { name, version })
         if (!workerImageDetails) {
           return {
             ...workerImage,
