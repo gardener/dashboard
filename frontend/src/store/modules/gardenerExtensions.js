@@ -9,6 +9,9 @@ import { getGardenerExtensions } from '@/utils/api'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
+import some from 'lodash/some'
+import get from 'lodash/get'
+import find from 'lodash/find'
 
 // initial state
 const state = {
@@ -25,9 +28,24 @@ const getters = {
     const networkingResources = filter(resources, ['kind', 'Network'])
     return map(networkingResources, 'type')
   },
-  dnsProviderList (state) {
+  sortedDnsProviderList (state) {
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
     const resources = flatMap(state.all, 'resources')
-    return filter(resources, ['kind', 'DNSProvider'])
+    const dnsProvidersFromDnsRecords = filter(resources, ['kind', 'DNSRecord'])
+
+    const dnsProviderList = map(supportedProviderTypes, type => {
+      return {
+        type,
+        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false)
+      }
+    })
+
+    const dnsServiceExtensionDeployed = some(state.all, ['name', 'extension-shoot-dns-service'])
+    if (dnsServiceExtensionDeployed) {
+      return dnsProviderList
+    }
+    // return only primary DNS Providers backed by DNSRecord
+    return filter(dnsProviderList, 'primary')
   }
 }
 
