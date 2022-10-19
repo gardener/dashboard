@@ -15,7 +15,8 @@ export const shootSubscription = {
       'subscriptionError'
     ]),
     ...mapGetters('shoots', [
-      'loading'
+      'loading',
+      'subscribed'
     ]),
     ...mapState('socket', [
       'readyState',
@@ -68,7 +69,9 @@ export const shootSubscription = {
         case 'progress':
           return `Subscribing ${name} ...`
         default:
-          return `Successfully loaded and subscribed ${name}`
+          return this.subscribed
+            ? `Successfully loaded and subscribed ${name}`
+            : 'Successfully unsubscribed shoot(s)'
       }
     },
     hint () {

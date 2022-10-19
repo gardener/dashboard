@@ -150,6 +150,9 @@ export default {
   loading (state) {
     return state.subscriptionState > constants.DEFINED && state.subscriptionState < constants.OPEN
   },
+  subscribed (state) {
+    return state.subscriptionState === constants.OPEN
+  },
   subscription (state, getters, rootState) {
     const metadata = state.subscription
     if (!metadata) {
