@@ -72,7 +72,7 @@ class SessionPool {
     // ensure there are no already destroyed sessions in the pool
     for (const session of this.sessions) {
       if (session.closed || session.destroyed) {
-        this.deleteSession()
+        this.deleteSession(session)
       }
     }
     const sessionList = Array.from(this.sessions)
