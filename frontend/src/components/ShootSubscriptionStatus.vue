@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         class="ma-2"
       >
         <icon-base :width="16" :icon-color="color">
-          <component :is="subscribed ? 'connected' : 'disconnected'"/>
+          <component :is="iconName"/>
         </icon-base>
       </v-progress-circular>
       <v-btn
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           :color="color"
       >
         <icon-base :width="16" :icon-color="color">
-          <component :is="subscribed ? 'connected' : 'disconnected'"/>
+          <component :is="iconName"/>
         </icon-base>
       </v-btn>
       </div>
@@ -86,6 +86,11 @@ export default {
     }
   },
   computed: {
+    iconName () {
+      return this.subscribed && this.connected
+        ? 'connected'
+        : 'disconnected'
+    },
     btnLoading () {
       return this.kind.startsWith('progress')
     }
