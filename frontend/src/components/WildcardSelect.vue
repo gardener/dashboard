@@ -23,8 +23,34 @@ SPDX-License-Identifier: Apache-2.0
       persistent-hint
     >
       <template v-slot:selection="{ item }">
-        <span v-if="item.customWildcard">&lt;Custom&gt;</span>
-        <span v-else>{{item.value}}</span>
+        <v-text-field
+          v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
+          @click.native.stop
+          outlined
+          dense
+          class="mb-1 mr-1 text-field"
+          flat
+          solo
+          color="primary"
+          hide-details
+          v-model="wildcardVariablePartPrefix"
+          >
+        </v-text-field>
+        <span>{{item.value}}</span>
+        <v-text-field
+          v-if="wildcardSelectedValue.endsWithWildcard"
+          @click.native.stop
+          @input="onInput"
+          outlined
+          dense
+          class="mb-1 ml-1 text-field"
+          flat
+          solo
+          color="primary"
+          hide-details
+          v-model="wildcardVariablePartSuffix"
+          >
+        </v-text-field>
       </template>
       <template v-slot:item="{ item }">
         <v-list-item-content>
@@ -39,37 +65,6 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </v-list-item-title>
         </v-list-item-content>
-      </template>
-      <template v-slot:prepend-inner v-if="wildcardSelectedValue.startsWithWildcard">
-        <v-text-field
-          style="width: 100px"
-          @click.native.stop
-          @input="onInput"
-          outlined
-          dense
-          class="mb-1 mr-1"
-          flat
-          solo
-          color="primary"
-          hide-details
-          v-model="wildcardVariablePartPrefix"
-          ></v-text-field>
-      </template>
-      <template v-slot:append v-if="wildcardSelectedValue.endsWithWildcard || wildcardSelectedValue.customWildcard">
-        <v-icon>mdi-menu-down</v-icon>
-        <v-text-field
-          style="width: 100px"
-          @click.native.stop
-          @input="onInput"
-          outlined
-          dense
-          class="mb-1 ml-1"
-          flat
-          solo
-          color="primary"
-          hide-details
-          v-model="wildcardVariablePartSuffix"
-          ></v-text-field>
       </template>
     </v-select>
   </div>
@@ -109,7 +104,8 @@ export default {
         wildcardSelectedValue: {
           required: `${this.wildcardSelectLabel} is required`,
           prefixRequired: 'Prefix is required',
-          suffixRequired: 'Suffix is required'
+          suffixRequired: 'Suffix is required',
+          customRequired: 'Custom value is required'
         }
       }
     },
@@ -117,7 +113,7 @@ export default {
       return wildcardObjectsFromStrings(this.wildcardSelectItems)
     },
     wildcardSelectHint () {
-      return `Floating Pool Name: ${this.internalValue}`
+      return `Selected ${this.wildcardSelectLabel}: ${this.internalValue}`
     },
     internalValue () {
       if (this.wildcardSelectedValue.startsWithWildcard && this.wildcardSelectedValue.endsWithWildcard) {
@@ -130,7 +126,7 @@ export default {
         return `${this.wildcardSelectedValue.value}${this.wildcardVariablePartSuffix}`
       }
       if (this.wildcardSelectedValue.customWildcard) {
-        return this.wildcardVariablePartSuffix
+        return this.wildcardVariablePartPrefix
       }
       return this.wildcardSelectedValue.value
     },
@@ -143,6 +139,9 @@ export default {
           },
           suffixRequired: () => {
             return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
+          },
+          customRequired: () => {
+            return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
           }
         }
       }
@@ -197,3 +196,10 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.text-field {
+  width: 100px;
+}
+
+</style>
