@@ -205,9 +205,10 @@ async function authorizeToken (req, res) {
 }
 
 async function createAccessToken (payload, idToken) {
+  const user = { auth: { bearer: idToken } }
   const results = await Promise.allSettled([
     authentication.isAuthenticated({ token: idToken }),
-    authorization.isAdmin({ auth: { bearer: idToken } })
+    authorization.isAdmin(user)
   ])
   // throw an error if any promise has been rejected
   for (const { status, reason: err } of results) {
