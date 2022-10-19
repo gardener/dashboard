@@ -87,7 +87,7 @@ export default {
   },
   computed: {
     iconName () {
-      return this.subscribed && this.connected
+      return this.connected && (!this.subscription || this.subscribed)
         ? 'connected'
         : 'disconnected'
     },

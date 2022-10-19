@@ -16,7 +16,9 @@ export const shootSubscription = {
     ]),
     ...mapGetters('shoots', [
       'loading',
-      'subscribed'
+      'subscription',
+      'subscribed',
+      'unsubscribed'
     ]),
     ...mapState('socket', [
       'readyState',
@@ -54,7 +56,7 @@ export const shootSubscription = {
       }
     },
     message () {
-      const name = this.$route.params?.name
+      const name = this.subscription?.name
         ? 'shoot'
         : 'shoots'
       switch (this.kind) {
@@ -71,7 +73,7 @@ export const shootSubscription = {
         default:
           return this.subscribed
             ? `Successfully loaded and subscribed ${name}`
-            : 'Successfully unsubscribed shoot(s)'
+            : 'Real-time server connected'
       }
     },
     hint () {

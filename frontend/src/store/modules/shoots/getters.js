@@ -153,6 +153,9 @@ export default {
   subscribed (state) {
     return state.subscriptionState === constants.OPEN
   },
+  unsubscribed (state) {
+    return state.subscriptionState === constants.CLOSED
+  },
   subscription (state, getters, rootState) {
     const metadata = state.subscription
     if (!metadata) {
