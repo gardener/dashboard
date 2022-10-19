@@ -69,6 +69,12 @@ class SessionPool {
   }
 
   getSession () {
+    // ensure there are no already destroyed sessions in the pool
+    for (const session of this.sessions) {
+      if (session.closed || session.destroyed) {
+        this.deleteSession()
+      }
+    }
     const sessionList = Array.from(this.sessions)
     let session = sessionList
       // consider free sessions only
