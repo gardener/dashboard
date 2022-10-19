@@ -127,7 +127,7 @@ async function unsubscribe (socket, key) {
 }
 
 function setDisconnectTimeout (socket, delay) {
-  delay = Math.min(2147483647, delay)
+  delay = Math.min(2147483647, delay) // setTimeout delay must not exceed 32-bit signed integer
   logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(delay / 1000))
   socket.data.timeoutId = setTimeout(() => {
     logger.debug('Socket %s is expired. Forcefully disconnecting client', socket.id)
@@ -151,7 +151,7 @@ function init (httpServer, cache) {
       if (user.rti) {
         const delay = expiresIn(socket)
         if (delay > 0) {
-          socket.data.timeoutId = exports.setDisconnectTimeout(socket, delay)
+          exports.setDisconnectTimeout(socket, delay)
         } else {
           throw createError(401, 'Token refresh required', {
             code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',

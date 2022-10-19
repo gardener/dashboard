@@ -6,13 +6,13 @@
 
 'use strict'
 
-const { Resources, createClient } = require('@gardener-dashboard/kube-client')
+const { Resources } = require('@gardener-dashboard/kube-client')
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {
     return false
   }
-  const client = user.client ?? createClient({ auth: user.auth })
+  const client = user.client
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
   const body = {
     kind,
