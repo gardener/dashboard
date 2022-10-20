@@ -12,10 +12,30 @@ SPDX-License-Identifier: Apache-2.0
           <v-toolbar flat dense class="toolbar-background toolbar-title--text">
             <v-toolbar-title>Global</v-toolbar-title>
           </v-toolbar>
-          <v-list>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="text--secondary">Color Scheme</v-list-item-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <v-radio-group
+                  v-model="legacyCommands"
+                  label="Gardenctl Version"
+                  hint="Choose for which version the commands should be displayed on the cluster details page"
+                  persistent-hint
+                  class="mt-0"
+                >
+                  <v-radio
+                    label="Gardenctl-v2"
+                    :value="false"
+                    color="primary"
+                  ></v-radio>
+                  <v-radio
+                    label="Legacy Gardenctl"
+                    :value="true"
+                    color="primary"
+                  ></v-radio>
+                </v-radio-group>
+              </v-col>
+              <v-col cols="12">
+                <legend class="text-body-2 text--secondary">Color Scheme</legend>
                 <v-btn-toggle v-model="colorSchemeIndex" mandatory dense @click.native.stop class="pt-1">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -42,12 +62,10 @@ SPDX-License-Identifier: Apache-2.0
                     <span>Automatically choose theme based on your system settings</span>
                   </v-tooltip>
                 </v-btn-toggle>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="text--secondary">Log Level</v-list-item-title>
-                <v-btn-toggle v-model="logLevelIndex" dense class="pt-1">
+              </v-col>
+              <v-col cols="12">
+                <legend class="text-body-2 text--secondary">Log Level</legend>
+                <v-btn-toggle lebel="Log Level" v-model="logLevelIndex" dense class="pt-1">
                   <v-btn v-for="{ value, text, icon, color } in logLevels"
                     :key="value"
                     small
@@ -57,17 +75,9 @@ SPDX-License-Identifier: Apache-2.0
                     {{ text }}
                   </v-btn>
                 </v-btn-toggle>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-switch
-                  v-model="developerMode"
-                  label="Enable developer mode"
-                ></v-switch>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" md="6">
@@ -97,14 +107,12 @@ export default {
     ...mapGetters('storage', [
       'logLevel',
       'colorScheme',
-      'isDeveloperModeEnabled'
+      'gardenctlOptions'
     ]),
     logLevelIndex: {
       get () {
         const index = this.logLevels.findIndex(({ value }) => value === this.logLevel)
-        return index !== -1
-          ? index
-          : this.logLevels.length - 1
+        return index !== -1 ? index : 0
       },
       set (index) {
         const { value } = this.logLevels[index]
@@ -121,12 +129,15 @@ export default {
         this.setColorScheme(colorScheme)
       }
     },
-    developerMode: {
+    legacyCommands: {
       get () {
-        return this.isDeveloperModeEnabled
+        return this.gardenctlOptions.legacyCommands
       },
       set (value) {
-        this.setDeveloperMode(value)
+        this.setGardenctlOptions({
+          ...this.gardenctlOptions,
+          legacyCommands: value
+        })
       }
     }
   },
@@ -134,7 +145,7 @@ export default {
     ...mapActions('storage', [
       'setLogLevel',
       'setColorScheme',
-      'setDeveloperMode'
+      'setGardenctlOptions'
     ])
   }
 }

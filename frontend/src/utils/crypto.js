@@ -10,14 +10,6 @@ import md5 from 'md5'
 
 export { md5 }
 
-export function randomBytes (bytes = 32) {
-  return crypto.getRandomValues(new Uint8Array(bytes))
-}
-
-export function sha256 (text) {
-  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
-}
-
 export function normalizeObject (obj) {
   if (!obj) {
     return null

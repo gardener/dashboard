@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :close-on-content-click="false"
     :close-on-click="true"
     offset-y
-    nudge-bottom="4"
+    nudge-bottom="8"
   >
     <template v-slot:activator="{ on, attrs }">
       <div v-bind="attrs" v-on="on">
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card>
-      <v-alert dense text border="top" min-width="360" :color="color" class="pr-1 ma-0">
+      <v-alert dense text border="left" min-width="360" :color="color" class="pr-1 ma-0">
         <v-row no-gutters>
           <v-col align-self="center" class="grow mr-3">
             <div class="text-body-2">

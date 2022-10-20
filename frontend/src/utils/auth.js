@@ -101,7 +101,7 @@ async function createTokenRefreshRequest () {
         if (statusCode === 401) {
           /*
            * The OPError message has the following format `${error} (${error_description})`
-           * (see https://github.com/panva/node-openid-client/blob/main/lib/errors.js#L5)
+           * (see https://github.com/panva/node-openid-client/blob/1e3892e6222fdd1956735f97584ebc722fcebdd3/lib/errors.js#L5)
            * The error and the error_description are values returned in the error response
            * from the the OpenID Connect Provider (OP). We use the original OP error_description
            * as error message if possible.
@@ -169,7 +169,7 @@ export class UserManager {
       if (!isRefreshRequired(user, tolerance)) {
         return
       }
-      logger.debug('Aquiring token refresh lock (%s)', user.rti)
+      logger.debug('Acquiring token refresh lock (%s)', user.rti)
       await navigator.locks.request('token-refresh-request', async () => {
         user = decodeCookie()
         if (!user) {

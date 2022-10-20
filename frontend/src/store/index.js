@@ -163,8 +163,7 @@ const state = {
       description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
-  darkTheme: false,
-  gardenctlOptions: {}
+  darkTheme: false
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1294,18 +1293,6 @@ const getters = {
       return filter(workerGroups, 'expirationDate')
     }
   },
-  defaultGardenctlOptions (state) {
-    return {
-      legacyCommands: false,
-      ...get(state, 'cfg.gardenctl')
-    }
-  },
-  gardenctlOptions (state, getters) {
-    return {
-      ...getters.defaultGardenctlOptions,
-      ...state.gardenctlOptions
-    }
-  },
   nodesCIDR (state) {
     return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
   }
@@ -1624,10 +1611,6 @@ const mutations = {
   SET_DARK_THEME (state, value) {
     state.darkTheme = value
     Vue.vuetify.framework.theme.dark = value
-  },
-  SET_GARDENCTL_OPTIONS (state, value) {
-    state.gardenctlOptions = value
-    localStorage.setObject('global/gardenctl', value)
   }
 }
 

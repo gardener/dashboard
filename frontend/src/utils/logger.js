@@ -82,7 +82,7 @@ export default function createLogger (storage) {
   logger.setLevel(storage.getItem('global/log-level'))
   storage.on('change', (key, value) => {
     if (key === null) {
-      logger.setLevel('silent')
+      logger.setLevel('debug')
     } else if (key === 'global/log-level') {
       logger.setLevel(value)
     }

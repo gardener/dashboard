@@ -76,6 +76,7 @@ function createSocket (store, userManager, logger) {
       const delay = store.getters['socket/backoffDuration']
       setTimeout(connect, delay)
     } else {
+      logger.error('maximum number of reconnection attempts has been reached')
       store.commit('socket/BACKOFF_RESET')
     }
   }

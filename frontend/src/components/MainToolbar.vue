@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-avatar>
               </v-badge>
               <v-avatar v-else v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
-                <img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`" @click.meta.exact.stop="toogleDeveloperMode"/>
+                <img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`"/>
               </v-avatar>
             </template>
             <span v-if="isAdmin">
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
               My Account
             </v-btn>
           </v-card-actions>
-          <v-card-actions v-if="isDeveloperModeEnabled" class="px-3 pt-1">
+          <v-card-actions class="px-3 pt-1">
             <v-btn block text color="secondary" class="justify-start" :to="settingsLink" title="Setting">
               <v-icon class="mr-3">mdi-cog</v-icon>
               Settings
@@ -184,14 +184,10 @@ export default {
       'setError'
     ]),
     ...mapActions('storage', [
-      'setColorScheme',
-      'setDeveloperMode'
+      'setColorScheme'
     ]),
     handleLogout () {
       this.$auth.signout()
-    },
-    toogleDeveloperMode () {
-      this.setDeveloperMode(!this.isDeveloperModeEnabled)
     },
     targetRoute (name) {
       let query
@@ -216,8 +212,7 @@ export default {
       'isAdmin'
     ]),
     ...mapGetters('storage', [
-      'colorScheme',
-      'isDeveloperModeEnabled'
+      'colorScheme'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
