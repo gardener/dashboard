@@ -27,7 +27,6 @@ const App = Vue.extend({
 })
 
 function createApp (vuetify) {
-  Object.defineProperty(Vue, 'vuetify', { value: vuetify })
   return new Vue({
     vuetify,
     store,
