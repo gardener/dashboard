@@ -18,6 +18,7 @@ import {
 const logger = Vue.logger
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+const CLOCK_TOLERANCE = 15
 
 function delay (duration = 0) {
   return new Promise(resolve => setTimeout(resolve, duration))
@@ -36,20 +37,20 @@ function secondsUntil (val) {
   }
 }
 
-function isRefreshRequired (user = {}, tolerance = 15) {
+function isRefreshRequired (user = {}) {
   if (!user.rti || !user.refresh_at) {
     return false
   }
   const t = secondsUntil(user.refresh_at)
-  return typeof t === 'number' && t < tolerance
+  return typeof t === 'number' && t < CLOCK_TOLERANCE
 }
 
-function isSessionExpired (user = {}, tolerance = 1) {
+function isSessionExpired (user = {}) {
   if (!user.exp) {
     return true
   }
   const t = secondsUntil(user.exp)
-  return typeof t === 'number' && t < tolerance
+  return typeof t === 'number' && t < CLOCK_TOLERANCE
 }
 
 function decodeCookie () {
@@ -160,13 +161,13 @@ export class UserManager {
     window.location = url
   }
 
-  async refreshToken (tolerance) {
+  async refreshToken () {
     try {
       let user = decodeCookie()
       if (!user) {
         throw createNoUserError()
       }
-      if (!isRefreshRequired(user, tolerance)) {
+      if (!isRefreshRequired(user)) {
         return
       }
       logger.debug('Acquiring token refresh lock (%s)', user.rti)
@@ -175,7 +176,7 @@ export class UserManager {
         if (!user) {
           throw createNoUserError()
         }
-        if (!isRefreshRequired(user, tolerance)) {
+        if (!isRefreshRequired(user)) {
           return
         }
         logger.debug('Refreshing token (%s)', user.rti)
@@ -200,20 +201,16 @@ export class UserManager {
     }
   }
 
-  ensureValidToken (tolerance) {
+  ensureValidToken () {
     if (!this.#refreshTokenPromise) {
-      this.#refreshTokenPromise = this.refreshToken(tolerance).finally(() => {
+      this.#refreshTokenPromise = this.refreshToken().finally(() => {
         this.#refreshTokenPromise = undefined
       })
     }
     return this.#refreshTokenPromise
   }
 
-  isRefreshRequired (tolerance) {
-    return isRefreshRequired(this.getUser(), tolerance)
-  }
-
-  isSessionExpired (tolerance) {
-    return isSessionExpired(this.getUser(), tolerance)
+  isSessionExpired () {
+    return isSessionExpired(this.getUser())
   }
 }
