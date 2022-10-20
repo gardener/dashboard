@@ -61,10 +61,7 @@ function projectFilter (user, isAdmin = false) {
     if (isPending(project)) {
       return false
     }
-    if (!isAdmin && !isMemberOf(project)) {
-      return false
-    }
-    return true
+    return isAdmin || isMemberOf(project)
   }
 }
 
