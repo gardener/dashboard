@@ -88,6 +88,7 @@ import colors from 'vuetify/lib/util/colors'
 const localStorage = Vue.localStorage
 const userManager = Vue.auth
 const logger = Vue.logger
+const vuetify = Vue.vuetify
 
 Vue.use(Vuex)
 
@@ -97,7 +98,7 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 // plugins
 const plugins = [
   createSocketPlugin(userManager, logger),
-  createMediaPlugin()
+  createMediaPlugin(vuetify)
 ]
 // localStorage can be undefined in some unit tests
 if (localStorage) {
@@ -163,7 +164,7 @@ const state = {
       description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
-  darkTheme: false
+  prefersColorScheme: 'light'
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -1295,6 +1296,12 @@ const getters = {
   },
   nodesCIDR (state) {
     return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
+  },
+  colorScheme (state, getters) {
+    const colorScheme = getters['storage/colorScheme']
+    return ['dark', 'light'].includes(colorScheme)
+      ? colorScheme
+      : state.prefersColorScheme
   }
 }
 
@@ -1608,9 +1615,8 @@ const mutations = {
   SET_SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
-  SET_DARK_THEME (state, value) {
-    state.darkTheme = value
-    Vue.vuetify.framework.theme.dark = value
+  SET_PREFERS_COLOR_SCHEME (state, value) {
+    state.prefersColorScheme = value
   }
 }
 
