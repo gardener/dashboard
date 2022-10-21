@@ -252,9 +252,21 @@ exports.patch = async function ({ user, namespace, name, body }) {
     throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
 
+  let { data } = body
+  try {
+    data = _.mapValues(data, encodeBase64)
+  } catch (err) {
+    throw new UnprocessableEntity('Failed to encode "base64" secret data')
+  }
+
+  const patchOperations = [{
+    op: 'replace',
+    path: '/data',
+    value: data
+  }]
+
   const secretRef = secretBinding.secretRef
-  _.set(body, 'metadata.secretRef', secretRef)
-  const secret = await client.core.secrets.update(secretRef.namespace, secretRef.name, toSecretResource(body))
+  const secret = client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
 
   const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   let cloudProviderKind
