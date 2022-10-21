@@ -80,7 +80,8 @@ describe('Agent', () => {
         expect.objectContaining({
           protocol: 'https:',
           host,
-          pathname: expect.stringMatching(/^\/[a-f0-9]{32}\/id$/)
+          pathname: '/id',
+          hash: expect.stringMatching(/^#[a-f0-9]{7}$/)
         })
       ])
       const pool = SessionPool.mock.instances[0]
