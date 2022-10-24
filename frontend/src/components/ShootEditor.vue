@@ -30,87 +30,87 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <v-divider></v-divider>
     <div v-if="showToolbar" :style="toolbarStyles" class="d-flex align-center justify-space-between">
-        <div class="d-flex align-center justify-start fill-height">
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="untouched" @click="reload">
-                    <v-icon small>mdi-reload</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Discard and Reload</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="!historySize.undo" @click="undo">
-                    <v-icon small>mdi-undo</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Undo</span>
-            </v-tooltip>
-          </div>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="!historySize.redo" @click="redo">
-                    <v-icon small>mdi-redo</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Redo</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon @click="downloadContent">
-                    <v-icon small>mdi-download</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Download</span>
-            </v-tooltip>
-          </div>
-          <div class="px-2">
-            <copy-btn
-              :clipboard-text="getContent()"
-              @click.native.stop="focus"
-              tooltip-text='Copy'
-              :user-feedback="false"
-              @copy="onCopy"
-              @copy-failed="onCopyFailed"
-            >
-            </copy-btn>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
-                    <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
+      <div class="d-flex align-center justify-start fill-height">
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="untouched" @click="reload">
+                  <v-icon small>mdi-reload</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Discard and Reload</span>
+          </v-tooltip>
         </div>
-        <div class="d-flex fill-height align-center justify-end">
-          <v-divider vertical></v-divider>
-          <slot name="toolbarItemsRight"></slot>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="!historySize.undo" @click="undo">
+                  <v-icon small>mdi-undo</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Undo</span>
+          </v-tooltip>
         </div>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="!historySize.redo" @click="redo">
+                  <v-icon small>mdi-redo</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Redo</span>
+          </v-tooltip>
+        </div>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon @click="downloadContent">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
+        </div>
+        <div class="px-2">
+          <copy-btn
+            :clipboard-text="getContent()"
+            @click.native.stop="focus"
+            tooltip-text='Copy'
+            :user-feedback="false"
+            @copy="onCopy"
+            @copy-failed="onCopyFailed"
+          >
+          </copy-btn>
+        </div>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
+                  <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+          </v-tooltip>
+        </div>
+        <v-divider vertical></v-divider>
+      </div>
+      <div class="d-flex fill-height align-center justify-end">
+        <v-divider vertical></v-divider>
+        <slot name="toolbarItemsRight"></slot>
+      </div>
     </div>
     <v-tooltip
       right
