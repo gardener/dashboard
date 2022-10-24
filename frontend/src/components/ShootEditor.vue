@@ -207,10 +207,10 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapState([
-      'namespace',
-      'darkTheme'
+      'namespace'
     ]),
     ...mapGetters([
+      'colorScheme',
       'canPatchShoots',
       'projectNameByNamespace'
     ]),
@@ -257,6 +257,11 @@ export default {
     },
     isReadOnly () {
       return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
+    },
+    theme () {
+      return this.colorScheme === 'dark'
+        ? 'seti'
+        : 'default'
     }
   },
   methods: {
@@ -347,7 +352,7 @@ export default {
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
         extraKeys,
-        theme: this.darkTheme ? 'seti' : 'default'
+        theme: this.theme
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -480,8 +485,8 @@ export default {
         }
       }
     },
-    darkTheme (value) {
-      this.$instance.setOption('theme', value ? 'seti' : 'default')
+    theme (value) {
+      this.$instance.setOption('theme', value)
     }
   },
   beforeDestroy () {

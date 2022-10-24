@@ -192,12 +192,13 @@ exports.list = async function ({ user, namespace }) {
   const client = user.client
 
   try {
-    const cloudProfileList = await cloudprofiles.list({ user })
     const [
+      cloudProfileList,
       { items: secretList },
       { items: secretBindings }
     ] = await Promise.all([
-      client.core.secrets.list(namespace),
+      cloudprofiles.list({ user }),
+      client.core.secrets.list(namespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
 

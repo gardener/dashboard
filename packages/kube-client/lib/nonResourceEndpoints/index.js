@@ -9,7 +9,7 @@
 const _ = require('lodash')
 const { http } = require('../symbols')
 
-const endpoints = {
+const endpoints = exports.endpoints = {
   api: {
     Ctor: require('./API'),
     responseType: 'json'

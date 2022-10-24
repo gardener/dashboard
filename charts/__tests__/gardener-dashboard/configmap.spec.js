@@ -39,21 +39,90 @@ describe('gardener-dashboard', function () {
     })
 
     describe('kubeconfig download', function () {
-      it('should render the template w/ `oidc.public`', async function () {
-        const values = {
-          apiServerCa: getCertificate('apiServerCa'),
-          oidc: {
-            public: {
-              clientId: 'kube-kubectl',
-              clientSecret: 'kube-kubectl-secret'
-            }
-          }
-        }
+      let values
+
+      const assertTemplate = async () => {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(omit(config, ['frontend', 'terminal'])).toMatchSnapshot()
+        expect(pick(config, ['apiServerCaData', 'oidc'])).toMatchSnapshot()
+      }
+
+      beforeEach(() => {
+        values = {
+          apiServerCa: getCertificate('apiServerCa'),
+          oidc: {
+            public: {
+              clientId: 'kube-kubectl'
+            }
+          }
+        }
+      })
+
+      it('should render the template w/ `public.client_secret`', async function () {
+        Object.assign(values.oidc.public, {
+          clientSecret: 'kube-kubectl-secret'
+        })
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template w/o `public.client_secret`', async function () {
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template with PKCE flow for the public client', async function () {
+        Object.assign(values.oidc.public, {
+          clientSecret: 'kube-kubectl-secret',
+          usePKCE: true
+        })
+        expect.assertions(2)
+        await assertTemplate()
+      })
+    })
+
+    describe('oidc', () => {
+      let values
+
+      const assertTemplate = async () => {
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['oidc'])).toMatchSnapshot()
+      }
+
+      beforeEach(() => {
+        values = {
+          oidc: {}
+        }
+      })
+
+      it('should render the template with default scope', async function () {
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template with scope containing offline_access', async function () {
+        Object.assign(values.oidc, {
+          scope: 'openid email groups offline_access',
+          sessionLifetime: 30 * 24 * 60 * 60
+        })
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template with PKCE flow for the internal client', async function () {
+        Object.assign(values.oidc, {
+          usePKCE: true
+        })
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['oidc'])).toMatchSnapshot()
       })
     })
 

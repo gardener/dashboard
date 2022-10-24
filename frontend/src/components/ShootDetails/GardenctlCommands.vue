@@ -49,7 +49,13 @@ SPDX-License-Identifier: Apache-2.0
                   <v-icon>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                  <span>Go to <router-link :to="{ name: 'Account', query: { namespace: shootNamespace } }">My Account</router-link> to customize the <span class="font-family-monospace">gardenctl</span> command</span>
+                  <span>
+                    Go to
+                    <router-link :to="{ name: 'Settings', query: { namespace: shootNamespace } }">Settings</router-link>
+                    to customize the
+                    <span class="font-family-monospace">gardenctl</span>
+                    command
+                  </span>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -97,7 +103,9 @@ export default {
     ]),
     ...mapGetters([
       'isAdmin',
-      'projectFromProjectList',
+      'projectFromProjectList'
+    ]),
+    ...mapGetters('storage', [
       'gardenctlOptions'
     ]),
     projectName () {

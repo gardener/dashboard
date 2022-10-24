@@ -1,244 +1,382 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const assert = require('assert').strict
+const { mockRequest } = require('@gardener-dashboard/request')
+const { Store } = require('@gardener-dashboard/kube-client')
+const { mockListIssues, mockListComments } = require('@octokit/rest')
 const pEvent = require('p-event')
-const { filter, map, pick, groupBy, find, includes } = require('lodash')
-const kubeClient = require('@gardener-dashboard/kube-client')
+const tickets = require('../../lib/services/tickets')
 const cache = require('../../lib/cache')
-const { projects, shoots, authorization, tickets } = require('../../lib/services')
+const io = require('../../lib/io')
 
-describe('socket.io', function () {
-  const id = 'foo@example.org'
-  const user = fixtures.auth.createUser({ id })
+function publishEvent (socket, room, eventName, metadata) {
+  const data = { object: { metadata } }
+  const promise = new Promise(resolve => {
+    const timeoutId = setTimeout(() => {
+      socket.off(eventName)
+      resolve()
+    }, 10)
+    const listener = e => {
+      clearTimeout(timeoutId)
+      resolve(e.object.metadata)
+    }
+    socket.once(eventName, listener)
+  })
+  room.emit(eventName, data)
+  return promise
+}
 
+function getRooms (socket, nsp) {
+  return nsp.sockets.get(socket.id).rooms
+}
+
+function emit (socket, eventName, ...args) {
+  return new Promise((resolve, reject) => {
+    socket.emit(eventName, ...args, err => {
+      if (err.statusCode === 200) {
+        resolve()
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+
+function subscribe (socket, ...args) {
+  return emit(socket, 'subscribe', ...args)
+}
+
+function unsubscribe (socket, ...args) {
+  return emit(socket, 'unsubscribe', ...args)
+}
+
+describe('api', function () {
   let agent
   let socket
+  let nsp
 
-  const client = {}
-  let createClientStub
-  let isAdminStub
-
-  beforeAll(function () {
+  beforeAll(() => {
     cache.cache.resetTicketCache()
+    const store = new Store()
+    store.replace(fixtures.projects.list())
+    cache.initialize({
+      projects: { store }
+    })
     agent = createAgent('io', cache)
+    nsp = agent.io.sockets
   })
 
-  afterAll(function () {
-    (async () => {
-      try {
-        await agent.close()
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to close socket server', err.message)
-      }
-    })()
+  afterAll(() => {
+    return agent.close()
   })
 
-  beforeEach(async function () {
-    createClientStub = jest.spyOn(kubeClient, 'createClient').mockReturnValue(client)
-    isAdminStub = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
+  beforeEach(async () => {
+    mockListIssues.mockReturnValue([
+      fixtures.github.createIssue(1, 'foo'),
+      fixtures.github.createIssue(2, 'bar', { comments: 1 }),
+      fixtures.github.createIssue(3, 'foobar'),
+      fixtures.github.createIssue(4, 'foo', { comments: 1, state: 'closed' })
+    ])
+    mockListComments.mockReturnValue([
+      fixtures.github.createComment(1, 2),
+      fixtures.github.createComment(2, 4)
+    ])
+    await tickets.loadOpenIssues()
   })
 
   afterEach(function () {
-    if (socket && socket.connected) {
-      socket.destroy()
-    }
+    socket?.destroy()
+    jest.clearAllMocks()
   })
 
-  const projectList = [
-    { metadata: { namespace: 'foo', name: 'foo' } },
-    { metadata: { namespace: 'bar', name: 'bar' } }
-  ]
-
-  describe('shoots', function () {
-    const shootList = [
-      { metadata: { namespace: 'foo', name: 'foo' } },
-      { metadata: { namespace: 'foo', name: 'bar' } },
-      { metadata: { namespace: 'foo', name: 'baz' } },
-      { metadata: { namespace: 'bar', name: 'foo' } }
-    ]
-
-    function listShootsImplementation ({ namespace }) {
-      const items = !namespace
-        ? shootList
-        : filter(shootList, ['metadata.namespace', namespace])
-      return Promise.resolve({ items })
-    }
-
-    function readShootImplementation ({ namespace, name }) {
-      const item = find(shootList, { metadata: { namespace, name } })
-      return Promise.resolve(item)
-    }
-
-    function subscribeShoot (metadata) {
-      return new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
-    }
-
-    async function subscribeShoots (options = {}) {
-      const asyncIterator = pEvent.iterator(socket, 'shoots', {
-        timeout: 1000,
-        resolutionEvents: ['subscription_done'],
-        rejectionEvents: ['error', 'subscription_error']
+  describe('events', function () {
+    describe('when user is "foo"', () => {
+      const user = fixtures.auth.createUser({
+        id: 'foo@example.org'
       })
-      const event = !options.namespace
-        ? 'subscribeAllShoots'
-        : 'subscribeShoots'
-      socket.emit(event, options)
-      const shootsByNamespace = {}
-      for await (const namespacedEvent of asyncIterator) {
-        for (const [key, items] of Object.entries(namespacedEvent.namespaces)) {
-          shootsByNamespace[key] = (shootsByNamespace[key] || []).concat(map(items, 'object'))
+      let args
+
+      beforeEach(async () => {
+        socket = await agent.connect({
+          cookie: await user.cookie
+        })
+      })
+
+      it('should subscribe shoots for a single cluster', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: 'garden-foo', name: 'fooShoot' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots;garden-foo/fooShoot'
+        ]))
+
+        args = [
+          socket,
+          nsp.to('shoots;garden-foo/fooShoot'),
+          'shoots',
+          { namespace: 'garden-foo', name: 'fooShoot' }
+        ]
+        await expect(publishEvent(...args)).resolves.toEqual(args[3])
+
+        args = [
+          socket,
+          nsp.to('shoots;garden-foo/barShoot'),
+          'shoots',
+          { namespace: 'garden-foo', name: 'barShoot' }
+        ]
+        await expect(publishEvent(...args)).resolves.toBeUndefined()
+      })
+
+      it('should subscribe shoots for a single namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots;garden-foo'
+        ]))
+
+        await unsubscribe(socket, 'shoots')
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id
+        ]))
+      })
+
+      it('should subscribe shoots for all namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: '_all' })
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots;garden-foo',
+          'shoots;garden-bar'
+        ]))
+      })
+
+      it('should subscribe unhealthy shoots for all namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots:unhealthy;garden-foo',
+          'shoots:unhealthy;garden-bar'
+        ]))
+      })
+
+      it('should fail to subscribe shoots for a single namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+
+        await expect(subscribe(socket, 'shoots', { namespace: 'garden-baz' })).rejects.toEqual(expect.objectContaining({
+          name: 'ForbiddenError',
+          statusCode: 403,
+          message: 'Insufficient authorization for shoot subscription'
+        }))
+      })
+
+      it('should fail to subscribe shoots for all namespaces', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+
+        await expect(subscribe(socket, 'shoots', { namespace: '_all' })).rejects.toEqual(expect.objectContaining({
+          name: 'ForbiddenError',
+          statusCode: 403,
+          message: 'Insufficient authorization for shoot subscription'
+        }))
+      })
+
+      it('should reject an invalid subscription', async function () {
+        await expect(subscribe(socket, 'baz')).rejects.toEqual(expect.objectContaining({
+          name: 'TypeError',
+          statusCode: 500,
+          message: 'Invalid subscription type - baz'
+        }))
+      })
+
+      it('should reject an invalid unsubscription', async function () {
+        await expect(unsubscribe(socket, 'baz')).rejects.toEqual(expect.objectContaining({
+          name: 'TypeError',
+          statusCode: 500,
+          message: 'Invalid subscription type - baz'
+        }))
+      })
+    })
+
+    describe('when user is "admin"', () => {
+      const user = fixtures.auth.createUser({
+        id: 'admin@example.org'
+      })
+
+      beforeEach(async () => {
+        socket = await agent.connect({
+          cookie: await user.cookie
+        })
+      })
+
+      it('should subscribe shoots for a single cluster', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: 'garden-foo', name: 'fooShoot' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots;garden-foo/fooShoot'
+        ]))
+      })
+
+      it('should subscribe shoots for a single namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots;garden-foo'
+        ]))
+      })
+
+      it('should subscribe shoots for all namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: '_all' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots:admin'
+        ]))
+      })
+
+      it('should subscribe unhealthy shoots for all namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          socket.id,
+          'shoots:unhealthy:admin'
+        ]))
+      })
+    })
+  })
+
+  describe('when user authentication fails', () => {
+    let timestamp
+
+    beforeEach(() => {
+      timestamp = Math.floor(Date.now() / 1000)
+    })
+
+    it('should fail with error code ERR_JWT_TOKEN_EXPIRED', async function () {
+      const exp = timestamp - 30
+      const user = fixtures.auth.createUser({
+        id: 'baz@example.org',
+        exp
+      })
+      const cookie = await user.cookie
+      await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
+        name: 'Error',
+        message: 'jwt expired',
+        data: {
+          statusCode: 401,
+          code: 'ERR_JWT_TOKEN_EXPIRED'
         }
+      }))
+    })
+
+    it('should fail with error code ERR_JWT_TOKEN_REFRESH_REQUIRED', async function () {
+      const rti = 'abcdefg'
+      const refreshAt = timestamp - 30
+      const user = fixtures.auth.createUser({
+        id: 'baz@example.org',
+        rti,
+        refresh_at: refreshAt
+      })
+      const cookie = await user.cookie
+      await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
+        name: 'Error',
+        message: 'Token refresh required',
+        data: {
+          statusCode: 401,
+          code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
+          rti,
+          exp: refreshAt
+        }
+      }))
+    })
+  })
+
+  describe('when the token will expire soon', () => {
+    const setDisconnectTimeout = io.setDisconnectTimeout
+    let mockSetDisconnectTimeout
+
+    beforeEach(() => {
+      mockSetDisconnectTimeout = jest.spyOn(io, 'setDisconnectTimeout')
+        .mockImplementation(socket => setDisconnectTimeout(socket, 500))
+    })
+
+    afterEach(() => {
+      mockSetDisconnectTimeout.mockRestore()
+    })
+
+    it('should close the underlying connection', async function () {
+      const options = {
+        id: 'baz@example.org',
+        rti: 'abcdefg',
+        refresh_at: Math.ceil(Date.now() / 1000) + 4
       }
-      return shootsByNamespace
-    }
-
-    let listProjectsStub
-    let listShootsStub
-    let readShootStub
-    let rooms
-
-    beforeEach(async function () {
-      listProjectsStub = jest.spyOn(projects, 'list').mockResolvedValue(projectList)
-      listShootsStub = jest.spyOn(shoots, 'list').mockImplementation(listShootsImplementation)
-      readShootStub = jest.spyOn(shoots, 'read').mockImplementation(readShootImplementation)
+      const user = fixtures.auth.createUser(options)
       socket = await agent.connect({
         cookie: await user.cookie
       })
-      assert.strictEqual(socket.connected, true)
-      assert.strictEqual(createClientStub.mock.calls.length, 1)
-      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
-        auth: {
-          bearer: await user.bearer
-        }
-      })
-      const nsp = agent.io.sockets
-      rooms = nsp.sockets.get(socket.id).rooms
-    })
-
-    it('should subscribe shoots for a namespace', async function () {
-      const shootsByNamespace = await subscribeShoots({ namespace: 'foo' })
-      expect(isAdminStub).toBeCalledTimes(0)
-      expect(listProjectsStub).toBeCalledTimes(1)
-      expect(listShootsStub).toBeCalledTimes(1)
-      expect(shootsByNamespace).toEqual(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
-      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo']))
-    })
-
-    it('should subscribe shoots for all namespaces', async function () {
-      isAdminStub.mockResolvedValueOnce(false)
-      const shootsByNamespace = await subscribeShoots({})
-      expect(isAdminStub).toBeCalledTimes(1)
-      expect(listProjectsStub).toBeCalledTimes(1)
-      expect(listShootsStub).toBeCalledTimes(2)
-      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
-      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo', 'shoots_bar']))
-    })
-
-    it('should subscribe shoots for all namespaces as admin', async function () {
-      isAdminStub.mockResolvedValueOnce(true)
-      const shootsByNamespace = await subscribeShoots({})
-      expect(isAdminStub).toBeCalledTimes(1)
-      expect(listProjectsStub).toBeCalledTimes(1)
-      expect(listShootsStub).toBeCalledTimes(1)
-      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
-      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo', 'shoots_bar']))
-    })
-
-    it('should subscribe shoots with issues', async function () {
-      isAdminStub.mockResolvedValueOnce(true)
-      const shootsByNamespace = await subscribeShoots({ filter: 'issues' })
-      expect(isAdminStub).toBeCalledTimes(1)
-      expect(listProjectsStub).toBeCalledTimes(1)
-      expect(listShootsStub).toBeCalledTimes(1)
-      expect(shootsByNamespace).toEqual(groupBy(shootList, 'metadata.namespace'))
-      expect(rooms).toEqual(new Set([socket.id, 'shoots_foo_issues', 'shoots_bar_issues']))
-      await subscribeShoot({
-        namespace: 'foo',
-        name: 'bar'
-      })
-      expect(rooms).toEqual(new Set([socket.id, 'shoot_foo_bar']))
-    })
-
-    it('should subscribe single shoot', async function () {
-      const metadata = {
-        namespace: 'foo',
-        name: 'bar'
-      }
-      const event = await subscribeShoot(metadata)
-      expect(isAdminStub).toBeCalledTimes(0)
-      expect(readShootStub).toBeCalledTimes(1)
-      expect(listShootsStub).toBeCalledTimes(0)
-      expect(event).toEqual(find(shootList, { metadata }))
-      expect(rooms).toEqual(new Set([socket.id, 'shoot_foo_bar']))
-    })
-  })
-
-  describe('tickets', function () {
-    const commentList = fixtures.github.comments.list()
-    let ticketCache
-    let rooms
-
-    async function emitSubscribe (...args) {
-      const eventName = args[0].substring(9).toLowerCase()
-      const asyncIterator = pEvent.iterator(socket, eventName, {
-        timeout: 1000,
-        resolutionEvents: ['subscription_done'],
-        rejectionEvents: ['error', 'subscription_error']
-      })
-      socket.emit(...args)
-      let items = []
-      for await (const { events } of asyncIterator) {
-        items = items.concat(map(events, 'object'))
-      }
-      return items
-    }
-
-    beforeEach(async function () {
-      ticketCache = cache.getTicketCache()
-      socket = await agent.connect({
-        cookie: await user.cookie
-      })
-      assert.strictEqual(socket.connected, true)
-      assert.strictEqual(createClientStub.mock.calls.length, 1)
-      assert.deepStrictEqual(createClientStub.mock.calls[0][0], {
-        auth: {
-          bearer: await user.bearer
-        }
-      })
-      const nsp = agent.io.sockets
-      rooms = nsp.sockets.get(socket.id).rooms
-    })
-
-    it('should subscribe tickets', async function () {
-      const issues = ticketCache.getIssues()
-
-      const actualIssues = await emitSubscribe('subscribeIssues')
-      expect(actualIssues).toEqual(issues)
-      expect(rooms).toEqual(new Set([socket.id, 'issues']))
-    })
-
-    it('should subscribe ticket comments', async function () {
-      const namespace = 'garden-test'
-      const name = 'test'
-      const projectName = 'garden-test'
-      const project = { metadata: { name: projectName } }
-      const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
-      const comments = filter(commentList, ({ number }) => includes(numbers, number))
-      const expectedComments = map(comments, comment => tickets.fromComment(comment.number, name, projectName, comment))
-
-      const findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockReturnValue(project)
-
-      const actualComments = await emitSubscribe('subscribeComments', { namespace, name })
-      expect(findProjectByNamespaceStub).toBeCalledTimes(1)
-      expect(actualComments).toEqual(expectedComments)
-      expect(rooms).toEqual(new Set([socket.id, 'comments_garden-test/test']))
+      expect(mockSetDisconnectTimeout).toBeCalledTimes(1)
+      expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
+        expect.objectContaining({
+          data: {
+            user: expect.objectContaining(options)
+          }
+        }),
+        expect.toBeWithinRange(0, 5000)
+      ])
+      await expect(pEvent(socket, 'disconnect')).resolves.toEqual('io server disconnect')
     })
   })
 })

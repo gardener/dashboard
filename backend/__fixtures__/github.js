@@ -24,11 +24,13 @@ const scheme = server.protocol.replace(/:$/, '')
 const authority = server.host
 const authorization = `Token ${authentication.bearer}`
 const repo = `${org}/${repository}`
+const NUMBER_TEXT = ['zeroth', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
 
 function getIssue ({
   number,
   title = 'title',
   namespace = 'garden-test',
+  projectName,
   name = 'test',
   body,
   comments = 0,
@@ -37,7 +39,7 @@ function getIssue ({
   updated_at
 }) {
   const issueId = 327883526 + number
-  title = `[${namespace}/${name}] ${title}`
+  title = `[${projectName ?? namespace}/${name}] ${title}`
   body = body || `This is bug #${number}`
   const time = (1530562712 + number * 60) * 1000
   created_at = created_at || formatTime(time)
@@ -128,6 +130,12 @@ module.exports = {
   authorization,
   repo,
   issues,
-  comments
-
+  comments,
+  createIssue (number, projectName, options) {
+    const body = `The ${NUMBER_TEXT[number]} bug`
+    return getIssue({ number, projectName, body, ...options })
+  },
+  createComment (id, number) {
+    return getComment({ id, number })
+  }
 }

@@ -31,6 +31,14 @@ export function accountBreadcrumbs () {
   ]
 }
 
+export function settingsBreadcrumbs () {
+  return [
+    {
+      text: 'Settings'
+    }
+  ]
+}
+
 export function membersBreadcrumbs () {
   return [
     {
