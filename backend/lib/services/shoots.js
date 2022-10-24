@@ -10,22 +10,39 @@ const { isHttpError } = require('@gardener-dashboard/request')
 const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const utils = require('../utils')
-const { getSeed } = require('../cache')
+const cache = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const semver = require('semver')
 
-const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain } = utils
+const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
+const { getSeed } = cache
 
-exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
+exports.list = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
   const client = user.client
   const query = {}
-  if (shootsWithIssuesOnly) {
+  if (labelSelector) {
+    query.labelSelector = labelSelector
+  } else if (shootsWithIssuesOnly) {
     query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
   }
-  if (!namespace) {
-    return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
+  if (namespace === '_all') {
+    if (await authorization.isAdmin(user)) {
+      return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
+    } else {
+      const promises = _
+        .chain(cache.getProjects())
+        .filter(projectFilter(user, false))
+        .map(project => client['core.gardener.cloud'].shoots.list(project.spec.namespace, query))
+        .value()
+      const shootLists = await Promise.all(promises)
+      return {
+        apiVersion: 'v1',
+        kind: 'List',
+        items: _.flatMap(shootLists, 'items')
+      }
+    }
   }
   return client['core.gardener.cloud'].shoots.list(namespace, query)
 }

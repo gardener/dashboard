@@ -14,6 +14,7 @@ const { homedir } = require('os')
 const { join } = require('path')
 
 const environmentVariableDefinitions = {
+  VUE_APP_VERSION: 'frontend.appVersion',
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
   API_SERVER_URL: 'apiServerUrl',
   OIDC_ISSUER: 'oidc.issuer',

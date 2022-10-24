@@ -25,21 +25,6 @@ describe('api', function () {
   describe('user', function () {
     const user = fixtures.auth.createUser({ id: 'bar@example.org' })
 
-    it('should return information about the user', async function () {
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-      const res = await agent
-        .get('/api/user/privileges')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
     it('should return the bearer token of the user', async function () {
       const res = await agent
         .get('/api/user/token')
@@ -56,7 +41,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectRules())
 
       const res = await agent
-        .post('/api/user/subjectrules/')
+        .post('/api/user/subjectrules')
         .set('cookie', await user.cookie)
         .send({
           namespace: 'garden-foo'

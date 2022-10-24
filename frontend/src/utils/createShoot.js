@@ -177,8 +177,7 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
         },
         controlPlaneConfig: {
           apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-          loadBalancerProvider: 'provider'
+          kind: 'ControlPlaneConfig'
         }
       }
   }

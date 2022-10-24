@@ -61,10 +61,11 @@ Array [
     ],
   },
   Object {
-    "name": "DNS Registration",
+    "name": "Provider-Foo",
     "resources": Array [
       Object {
-        "kind": "DNSProvider",
+        "kind": "DNSRecord",
+        "primary": true,
         "type": "gardenland",
       },
     ],
@@ -115,15 +116,6 @@ Array [
       Object {
         "kind": "Network",
         "type": "foobium",
-      },
-    ],
-  },
-  Object {
-    "name": "DNS Registration",
-    "resources": Array [
-      Object {
-        "kind": "DNSProvider",
-        "type": "gardenland",
       },
     ],
   },

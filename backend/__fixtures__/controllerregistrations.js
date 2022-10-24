@@ -18,15 +18,7 @@ function getControllerRegistration ({ uid, name, version, resources }) {
     spec.resources = resources
   }
   if (version) {
-    spec.deployment = {
-      providerConfig: {
-        values: {
-          image: {
-            tag: version
-          }
-        }
-      }
-    }
+    metadata.labels = { 'app.kubernetes.io/version': version }
   }
   return { metadata, spec }
 }
@@ -63,10 +55,11 @@ const controllerRegistrationList = [
   }),
   getControllerRegistration({
     uid: 2,
-    name: 'DNS Registration',
+    name: 'Provider-Foo',
     resources: [{
-      kind: 'DNSProvider',
-      type: 'gardenland'
+      kind: 'DNSRecord',
+      type: 'gardenland',
+      primary: true
     }]
   })
 ]

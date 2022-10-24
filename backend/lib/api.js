@@ -6,20 +6,24 @@
 
 'use strict'
 
-const morgan = require('morgan')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const logger = require('./logger')
+const zlib = require('zlib')
+const compression = require('compression')
 const routes = require('./routes')
 const hooks = require('./hooks')()
 const { authenticate } = require('./security')
 const { createClient } = require('@gardener-dashboard/kube-client')
-const { notFound, sendError } = require('./middleware')
+const { notFound, sendError, requestLogger } = require('./middleware')
 // configure router
 const router = express.Router()
 
-router.use(morgan('common', logger))
+router.use(compression({
+  threshold: 8192,
+  level: zlib.constants.Z_DEFAULT_COMPRESSION
+}))
+router.use(requestLogger)
 router.use(cookieParser())
 router.use(bodyParser.json())
 router.use(authenticate({ createClient }))
