@@ -50,17 +50,19 @@ describe('gardener-dashboard', function () {
 
       beforeEach(() => {
         values = {
-          apiServerCa: getCertificate('apiServerCa'),
-          oidc: {
-            public: {
-              clientId: 'kube-kubectl'
+          global: {
+            apiServerCa: getCertificate('apiServerCa'),
+            oidc: {
+              public: {
+                clientId: 'kube-kubectl'
+              }
             }
           }
         }
       })
 
       it('should render the template w/ `public.client_secret`', async function () {
-        Object.assign(values.oidc.public, {
+        Object.assign(values.global.oidc.public, {
           clientSecret: 'kube-kubectl-secret'
         })
         expect.assertions(2)
@@ -73,7 +75,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with PKCE flow for the public client', async function () {
-        Object.assign(values.oidc.public, {
+        Object.assign(values.global.oidc.public, {
           clientSecret: 'kube-kubectl-secret',
           usePKCE: true
         })
@@ -95,7 +97,9 @@ describe('gardener-dashboard', function () {
 
       beforeEach(() => {
         values = {
-          oidc: {}
+          global: {
+            oidc: {}
+          }
         }
       })
 
@@ -105,7 +109,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with scope containing offline_access', async function () {
-        Object.assign(values.oidc, {
+        Object.assign(values.global.oidc, {
           scope: 'openid email groups offline_access',
           sessionLifetime: 30 * 24 * 60 * 60
         })
@@ -114,7 +118,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with PKCE flow for the internal client', async function () {
-        Object.assign(values.oidc, {
+        Object.assign(values.global.oidc, {
           usePKCE: true
         })
         const documents = await renderTemplates(templates, values)
