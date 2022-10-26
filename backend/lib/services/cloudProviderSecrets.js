@@ -15,8 +15,6 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
-const { UnprocessableEntity } = createError
-
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const labels = _.get(secretBinding, 'metadata.labels', {})
   const cloudProfileName = labels['cloudprofile.garden.sapcloud.io/name']
