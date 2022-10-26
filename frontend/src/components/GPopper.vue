@@ -24,7 +24,8 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon color="toolbar-title" class="text-subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
-        <v-card-text :class="{ 'pa-0' : disableContentInset }">
+        <slot name="card"></slot>
+        <v-card-text>
           <slot></slot>
         </v-card-text>
       </v-card>
@@ -67,9 +68,6 @@ export default {
     boundariesSelector: {
       type: String,
       default: '.v-main__wrap'
-    },
-    disableContentInset: {
-      type: Boolean
     }
   },
   computed: {

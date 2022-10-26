@@ -40,12 +40,12 @@ SPDX-License-Identifier: Apache-2.0
       :max-height="maxHeight"
       :confirm-value="confirmValue"
       :disable-confirm-input-focus="disableConfirmInputFocus"
-      :disableContentInset="disableContentInset"
       ref="gDialog"
     >
       <template v-slot:caption>{{caption}}</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
-      <template v-slot:tabbar><slot name="tabbar"></slot></template>
+      <template v-slot:top><slot name="top"></slot></template>
+      <template v-slot:card><slot name="card"></slot></template>
       <template v-slot:message><slot name="actionComponent"></slot></template>
       <template v-slot:errorMessage><slot name="errorMessage"></slot></template>
     </g-dialog>
@@ -119,9 +119,6 @@ export default {
     },
     buttonText: {
       type: String
-    },
-    disableContentInset: {
-      type: Boolean
     }
   },
   mixins: [shootItem],

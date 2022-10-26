@@ -23,7 +23,6 @@ import get from 'lodash/get'
 import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
-import startsWith from 'lodash/startsWith'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {
@@ -95,18 +94,11 @@ export class ShootEditorCompletions {
   // Get completions for token, exact match is used for tooltip function
   _getYamlCompletions (token, cur, cm, exactMatch = false) {
     const completionPath = this._getTokenCompletionPath(token, cur, cm)
-    let supportedPath = true
     if (this.supportedPaths?.length) {
-      supportedPath = false
-      const currentPath = join(completionPath, '.')
-      forEach(this.supportedPaths, path => {
-        if (startsWith(currentPath, path)) {
-          supportedPath = true
-        }
-      })
-    }
-    if (!supportedPath) {
-      return []
+      const currentPath = completionPath.join('.')
+      if (!this.supportedPaths.some(path => currentPath.startsWith(path))) {
+        return []
+      }
     }
 
     let completions

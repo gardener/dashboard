@@ -15,13 +15,14 @@ SPDX-License-Identifier: Apache-2.0
         :region="region"
         :all-zones="allZones"
         :available-zones="availableZones"
+        :initialZones="initialZones"
         :zoned-cluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
         :kubernetes-version="kubernetesVersion"
         @valid="onWorkerValid"
-        @removed-zone="onRemovedZone">
+        @removed-zones="onRemovedZones">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
             small
@@ -239,17 +240,19 @@ export default {
       }
       this.validateInput()
     },
-    onRemovedZone (removedZone) {
+    onRemovedZones (removedZones) {
       // when user switches back from yaml tab, networkConfiguration includes any additional networkconfiguration
       // if this additional configuration is no longer needed (zone gets removed), this code takes care to clean
       // it up to avoid creating unnecessary zone network configuration
-      const networkConfigurationForZoneNotYetCreated = !some(this.originalZonesNetworkConfiguration, { name: removedZone })
-      const zoneIsNoLongerUsed = !includes(this.usedZones, removedZone)
-      if (networkConfigurationForZoneNotYetCreated && zoneIsNoLongerUsed) {
-        this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
-          return name !== removedZone
-        })
-      }
+      forEach(removedZones, removedZone => {
+        const networkConfigurationForZoneNotYetCreated = !some(this.originalZonesNetworkConfiguration, { name: removedZone })
+        const zoneIsNoLongerUsed = !includes(this.usedZones, removedZone)
+        if (networkConfigurationForZoneNotYetCreated && zoneIsNoLongerUsed) {
+          this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
+            return name !== removedZone
+          })
+        }
+      })
     },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
