@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card>
         <shoot-monitoring-card :shoot-item="shootItem"></shoot-monitoring-card>
         <shoot-credential-rotation-card :shoot-item="shootItem" class="mt-4"></shoot-credential-rotation-card>
-        <tickets-card :tickets="tickets" :shoot-item="shootItem" class="mt-4"></tickets-card>
+        <tickets-card :shoot-item="shootItem" class="mt-4"></tickets-card>
       </v-col>
     </v-row>
   </v-container>
@@ -63,21 +63,9 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'ticketsByNamespaceAndName',
       'canGetSecrets',
       'shootCustomFieldList'
     ]),
-    info () {
-      return get(this, 'shootItem.info', {})
-    },
-    seedInfo () {
-      return get(this, 'shootItem.seedInfo', {})
-    },
-    tickets () {
-      const namespace = this.shootNamespace
-      const name = this.shootName
-      return this.ticketsByNamespaceAndName({ name, namespace })
-    },
     customFields () {
       const customFields = filter(this.shootCustomFieldList, ['showDetails', true])
       return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({

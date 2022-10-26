@@ -13,18 +13,10 @@ import { mapGetters, mapActions } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 
 export default {
-  data () {
-    return {
-      websocketConnectionNotification: undefined,
-      websocketConnectionNotificationMessage: 'The content on this page might be outdated'
-    }
-  },
   computed: {
     ...mapGetters([
       'alertMessage',
-      'alertType',
-      'isWebsocketConnectionError',
-      'websocketConnectAttempt'
+      'alertType'
     ])
   },
   watch: {
@@ -32,22 +24,6 @@ export default {
       if (value) {
         this.showSnotifyToast(value, this.alertType)
         this.setAlert(null)
-      }
-    },
-    isWebsocketConnectionError (value) {
-      if (value === true) {
-        this.showWebsocketConnectionError()
-      } else {
-        this.removeWebsocketConnectionError()
-      }
-    },
-    websocketConnectAttempt (value) {
-      if (this.websocketConnectionNotification) {
-        if (value > 0) {
-          this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
-        } else {
-          this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
-        }
       }
     }
   },
@@ -75,21 +51,6 @@ export default {
         default:
           this.$snotify.error(message, config)
       }
-    },
-    showWebsocketConnectionError () {
-      if (!this.websocketConnectionNotification) {
-        this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, 'No Connection', {
-          timeout: 0,
-          closeOnClick: false,
-          position: SnotifyPosition.rightTop
-        })
-      }
-    },
-    removeWebsocketConnectionError () {
-      if (this.websocketConnectionNotification) {
-        this.$snotify.remove(this.websocketConnectionNotification.id)
-      }
-      this.websocketConnectionNotification = undefined
     }
   }
 }
