@@ -10,6 +10,7 @@ const http2 = require('http2')
 const zlib = require('zlib')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { Client, extend } = require('../lib')
+const exp = require('constants')
 const {
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
@@ -37,39 +38,42 @@ describe('Client', () => {
   let stream
 
   beforeEach(() => {
+    const mockBody = jest.fn().mockReturnValue({
+      foo: 'bar',
+      bar: 'foo'
+    })
+    const mockHeaders = jest.fn().mockReturnValue({
+      [HTTP2_HEADER_STATUS]: statusCode,
+      [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+      [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
+    })
+    const asyncIterator = function * () {
+      yield Buffer.from('{')
+      let separator
+      for (const [key, value] of Object.entries(this.mockBody())) {
+        if (!separator) {
+          separator = ','
+        } else {
+          yield Buffer.from(separator)
+        }
+        yield Buffer.from(JSON.stringify(key))
+        yield Buffer.from(':')
+        yield Buffer.from(JSON.stringify(value))
+      }
+      yield Buffer.from('}')
+    }
     stream = {
       close: jest.fn(),
       destroy: jest.fn(),
       end: jest.fn(),
       once: jest.fn(),
-      mockBody: jest.fn().mockReturnValue({
-        foo: 'bar',
-        bar: 'foo'
-      }),
-      mockHeaders: jest.fn().mockReturnValue({
-        [HTTP2_HEADER_STATUS]: statusCode,
-        [HTTP2_HEADER_CONTENT_TYPE]: contentType,
-        [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
-      }),
-      async getHeaders () {
-        return this.mockHeaders()
+      mockBody,
+      mockHeaders,
+      getHeaders () {
+        return Promise.resolve(mockHeaders())
       },
       setEncoding: jest.fn(),
-      async * [Symbol.asyncIterator] () {
-        yield Buffer.from('{')
-        let separator
-        for (const [key, value] of Object.entries(this.mockBody())) {
-          if (!separator) {
-            separator = ','
-          } else {
-            yield Buffer.from(separator)
-          }
-          yield Buffer.from(JSON.stringify(key))
-          yield Buffer.from(':')
-          yield Buffer.from(JSON.stringify(value))
-        }
-        yield Buffer.from('}')
-      }
+      [Symbol.asyncIterator]: asyncIterator
     }
     agent = {
       request: jest.fn().mockResolvedValue(stream)
@@ -222,6 +226,24 @@ describe('Client', () => {
       })
       const body = await response.body()
       expect(body).toEqual(stream.mockBody())
+    })
+
+    it('should return a text response for invalid json', async () => {
+      stream.mockHeaders.mockReturnValue({
+        [HTTP2_HEADER_STATUS]: statusCode,
+        [HTTP2_HEADER_CONTENT_TYPE]: 'text/plain'
+      })
+      const chunks = ['foo', '-', 'bar']
+      stream[Symbol.asyncIterator] = function * () {
+        for (const chunk of chunks) {
+          yield chunk
+        }
+      }
+      client.responseType = 'json'
+      const response = await client.fetch()
+      expect(response.contentType).toBe('text/plain')
+      const body = await response.body()
+      expect(body).toEqual(chunks.join(''))
     })
 
     it('should return a response with responseType "text"', async () => {

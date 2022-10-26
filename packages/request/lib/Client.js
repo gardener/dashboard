@@ -213,13 +213,18 @@ class Client {
         const streams = [
           stream,
           async source => {
+            const text = await concat(source)
             switch (this.type) {
               case 'text':
-                return concat(source)
+                return text
               case 'json':
-                return JSON.parse(await concat(source))
+                try {
+                  return JSON.parse(text)
+                } catch (err) {
+                  return text
+                }
               default:
-                return Buffer.from(concat(source), 'utf8')
+                return Buffer.from(text, 'utf8')
             }
           }
         ]
