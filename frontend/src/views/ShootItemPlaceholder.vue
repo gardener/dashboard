@@ -10,8 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import findLast from 'lodash/findLast'
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
 import ShootItemError from '@/views/ShootItemError'
 
@@ -29,6 +28,10 @@ export default {
     }
   },
   computed: {
+    ...mapState('shoots', [
+      'subscriptionState',
+      'subscriptionError'
+    ]),
     ...mapGetters([
       'canGetSecrets',
       'canUseProjectTerminalShortcuts'
@@ -51,25 +54,26 @@ export default {
   },
   methods: {
     ...mapActions([
-      'subscribeShoot',
-      'subscribeComments',
-      'unsubscribeComments',
       'fetchcloudProviderSecrets',
       'ensureProjectTerminalShortcutsLoaded'
     ]),
-    handleShootEvents (events) {
+    ...mapActions('shoots', {
+      subscribeShoot: 'subscribe',
+      unsubscribeShoot: 'unsubscribe'
+    }),
+    handleShootEvent ({ type, object }) {
+      const metadata = object.metadata
       const { namespace, name } = get(this.$route, 'params', {})
-      const event = findLast(events, { object: { metadata: { namespace, name } } })
-      if (!event) {
+      if (metadata.namespace !== namespace || metadata.name !== name) {
         return
       }
-      if (event.type === 'DELETED') {
+      if (type === 'DELETED') {
         this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
           code: 410,
           reason: 'Cluster is gone'
         })
         this.component = 'shoot-item-error'
-      } else if (event.type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
+      } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
         this.error = undefined
         this.component = 'router-view'
       }
@@ -79,8 +83,7 @@ export default {
       this.component = 'shoot-item-loading'
       try {
         const promises = [
-          this.subscribeShoot(params),
-          this.subscribeComments(params)
+          this.subscribeShoot(params)
         ]
         if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
           promises.push(this.fetchcloudProviderSecrets()) // Required for purpose configuration
@@ -91,14 +94,25 @@ export default {
         await Promise.all(promises)
         this.component = 'router-view'
       } catch (err) {
-        this.error = err
+        let { statusCode, code = statusCode, reason, message } = err
+        if (code === 404) {
+          reason = 'Cluster not found'
+          message = 'The cluster you are looking for doesn\'t exist'
+        } else if (code === 403) {
+          reason = 'Access to cluster denied'
+        } else if (code >= 500) {
+          reason = 'Oops, something went wrong'
+          message = 'An unexpected error occurred. Please try again later'
+        }
+        this.error = Object.assign(new Error(message), { code, reason })
         this.component = 'shoot-item-error'
       }
     }
   },
   async beforeRouteLeave (to, from, next) {
     try {
-      await this.unsubscribeComments()
+      this.component = 'div'
+      await this.unsubscribeShoot()
     } finally {
       next()
     }
@@ -110,8 +124,8 @@ export default {
   },
   mounted () {
     this.unsubscribe = this.$store.subscribe(({ type, payload }) => {
-      if (type === 'shoots/HANDLE_EVENTS') {
-        this.handleShootEvents(payload.events)
+      if (type === 'shoots/HANDLE_EVENT') {
+        this.handleShootEvent(payload.event)
       }
     })
     this.load(this.$route)

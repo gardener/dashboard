@@ -6,13 +6,13 @@
 
 'use strict'
 
-const { Resources } = require('@gardener-dashboard/kube-client')
+const { Resources, createClient } = require('@gardener-dashboard/kube-client')
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {
     return false
   }
-  const client = user.client
+  const client = user.client ?? createClient(user)
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
   const body = {
     kind,
@@ -46,6 +46,17 @@ exports.canGetOpenAPI = function (user) {
     nonResourceAttributes: {
       verb: 'get',
       path: '/openapi/v2'
+    }
+  })
+}
+
+exports.canListShoots = function (user, namespace) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace
     }
   })
 }

@@ -1,326 +1,221 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const assert = require('assert').strict
-const _ = require('lodash')
+const { promisify } = require('util')
 const createServer = require('socket.io')
-const logger = require('./logger')
-const security = require('./security')
-const { isHttpError, Unauthorized } = require('http-errors')
-const { STATUS_CODES } = require('http')
-
+const cookieParser = require('cookie-parser')
+const createError = require('http-errors')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
+const cache = require('./cache')
+const logger = require('./logger')
+const { projectFilter } = require('./utils')
+const { authenticate } = require('./security')
+const { authorization } = require('./services')
 
-const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
-const { projects, shoots, tickets, authorization } = require('./services')
+const { isHttpError } = createError
 
-function socketAuthentication (nsp) {
-  const authenticate = security.authenticateSocket(kubernetesClient)
-  nsp.use(async (socket, next) => {
-    logger.debug('Socket %s authenticating', socket.id)
-    try {
-      const user = await authenticate(socket)
-      logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
-      next()
-    } catch (err) {
-      logger.error('Socket %s authentication failed: %s', socket.id, err)
-      if (isHttpError(err)) {
-        err.data = _.pick(err, ['statusCode', 'code'])
-      }
-      next(err)
-    }
-  })
+function expiresIn (socket) {
+  const user = getUserFromSocket(socket)
+  const refreshAt = user?.refresh_at ?? 0
+  return Math.max(0, refreshAt * 1000 - Date.now())
 }
 
-function onDisconnect (reason) {
-  logger.debug('Socket %s disconnected. Reason: %s', this.id, reason)
+function authenticateFn (options) {
+  const cookieParserAsync = promisify(cookieParser())
+  const authenticateAsync = promisify(authenticate(options))
+  const noop = () => {}
+  const res = {
+    clearCookie: noop,
+    cookie: noop
+  }
+
+  return async req => {
+    await cookieParserAsync(req, res)
+    await authenticateAsync(req, res)
+    return req.user
+  }
 }
 
 function getUserFromSocket (socket) {
-  const user = _.get(socket, 'client.user')
+  const user = socket.data?.user
   if (!user) {
-    logger.error('Could not get client.user from socket', socket.id)
+    logger.error('Could not get "data.user" from socket', socket.id)
   }
   return user
 }
 
-function joinRoom (socket, room) {
-  socket.join(room)
-  logger.debug('Socket %s subscribed to room %s', socket.id, room)
-}
-
-function leaveRooms (socket, prefix) {
-  logger.debug('Socket %s leaving all %s rooms', socket.id, prefix)
-  for (const room of socket.rooms) {
-    if (room !== socket.id && room.startsWith(prefix)) {
-      socket.leave(room)
+async function canListAllShoots (user, namespaces) {
+  const canListShoots = async namespace => [namespace, await authorization.canListShoots(user, namespace)]
+  const results = await Promise.all(namespaces.map(canListShoots))
+  for (const [namespace, allowed] of results) {
+    if (!allowed) {
+      logger.error('User %s has no authorization to subscribe shoots in namespace %s', user.id, namespace)
+      return false
     }
   }
+  return true
 }
 
-function leaveShootsAndShootRoom (socket) {
-  leaveRooms(socket, 'shoot')
+function getAllNamespaces (user) {
+  return cache.getProjects()
+    .filter(projectFilter(user, false))
+    .map(project => project.spec.namespace)
 }
 
-function leaveIssuesRoom (socket) {
-  leaveRooms(socket, 'issues')
-}
-
-function leaveCommentsRooms (socket) {
-  leaveRooms(socket, 'comments')
-}
-
-async function subscribeShoots (socket, { namespace, namespaces, filter, user }) {
-  leaveShootsAndShootRoom(socket)
-
-  // subscribe for all namespaces or a single namespace
-  assert.ok(Array.isArray(namespaces) || namespace, 'Either namespaces or namespace is required')
-  if (!namespace) {
-    namespace = '_all'
-  } else {
-    namespaces = [namespace]
-  }
-
-  /* join current rooms */
-  const kind = 'shoots'
-  const eventName = 'shoots'
-  const objectKeyPath = 'metadata.uid'
-  const batchEmitter = new NamespacedBatchEmitter({ eventName, kind, socket, objectKeyPath })
-
-  await Promise.all(namespaces.map(async namespace => {
-    // join room
-    const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-    joinRoom(socket, room)
-    try {
-      // fetch shoots for namespace
-      const shootsWithIssuesOnly = !!filter
-      const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
-      batchEmitter.batchEmitObjects(shootList.items, namespace)
-    } catch (error) {
-      logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
-      socket.emit('subscription_error', {
-        kind,
-        code: 500,
-        message: `Failed to fetch clusters for namespace ${namespace}`
-      })
-    }
-  }))
-  batchEmitter.flush()
-  socket.emit('subscription_done', {
-    kind,
-    namespace
-  })
-}
-
-async function subscribeShootsAdmin (socket, { namespaces, filter, user }) {
-  leaveShootsAndShootRoom(socket)
-
-  const kind = 'shoots'
-  const eventName = 'shoots'
-  const objectKeyPath = 'metadata.uid'
-  const batchEmitter = new NamespacedBatchEmitter({ eventName, kind, socket, objectKeyPath })
-  const shootsWithIssuesOnly = !!filter
-
-  try {
-    // join rooms
-    for (const namespace of namespaces) {
-      const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-      socket.join(room)
-    }
-    logger.debug('Socket %s subscribed to shoot rooms for all namespaces', socket.id)
-
-    // fetch shoots
-    const shootList = await shoots.list({ user, shootsWithIssuesOnly })
-    _
-      .chain(shootList)
-      .get('items')
-      .groupBy('metadata.namespace')
-      .forEach((objects, namespace) => batchEmitter.batchEmitObjects(objects, namespace))
-      .commit()
-  } catch (error) {
-    logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
-    socket.emit('subscription_error', {
-      kind,
-      code: 500,
-      message: 'Failed to fetch clusters'
-    })
-  }
-  batchEmitter.flush()
-  socket.emit('subscription_done', {
-    kind,
-    namespace: '_all'
-  })
-}
-
-async function subscribeShoot (socket, { namespace, name }) {
-  leaveShootsAndShootRoom(socket)
-
+async function subscribeShoots (socket, { namespace, name, labelSelector }) {
   const user = getUserFromSocket(socket)
-  const room = `shoot_${namespace}_${name}`
 
-  try {
-    const object = await shoots.read({ user, namespace, name })
-    joinRoom(socket, room)
-    return object
-  } catch (err) {
-    let {
-      code = 500,
-      reason = 'InternalServerError',
-      status = 'Failure',
-      message = 'Failed to fetch cluster'
-    } = err
-    if (isHttpError(err)) {
-      code = err.statusCode
-      reason = STATUS_CODES[code]
-      if (code === 404) {
-        try {
-          const allowed = await authorization.canGetShoot(user, namespace, name)
-          if (allowed) {
-            status = 'Success'
-            joinRoom(socket, room)
-          }
-        } catch (err) {
-          logger.error('Socket %s: get permission to read shoot failed:  %s', socket.id, err)
-        }
-      }
+  const joinRoom = room => {
+    logger.debug('User %s joined rooms [%s]', user.id, room)
+    return socket.join(room)
+  }
+
+  if (namespace && name) {
+    if (await authorization.canGetShoot(user, namespace, name)) {
+      return joinRoom(`shoots;${namespace}/${name}`)
     }
-    return {
-      kind: 'Status',
-      apiVersion: 'v1',
-      status,
-      message,
-      code,
-      reason
+  } else if (namespace !== '_all') {
+    if (await authorization.canListShoots(user, namespace)) {
+      return joinRoom(`shoots;${namespace}`)
     }
+  } else {
+    let room = 'shoots'
+    if (labelSelector === 'shoot.gardener.cloud/status!=healthy') {
+      room += ':unhealthy'
+    }
+    if (await authorization.isAdmin(user)) {
+      return joinRoom(room + ':admin')
+    }
+    const namespaces = getAllNamespaces(user)
+    if (await canListAllShoots(user, namespaces)) {
+      const rooms = namespaces.map(namespace => room + `;${namespace}`)
+      return joinRoom(rooms)
+    }
+  }
+  throw createError(403, 'Insufficient authorization for shoot subscription')
+}
+
+async function subscribe (socket, key, options = {}) {
+  switch (key) {
+    case 'shoots':
+      await unsubscribeShoots(socket)
+      return subscribeShoots(socket, options)
+    default:
+      throw new TypeError(`Invalid subscription type - ${key}`)
   }
 }
 
-function registerShootHandlers (socket) {
-  socket.on('subscribeAllShoots', async ({ filter }) => {
-    const kind = 'shoots'
-    try {
-      const user = getUserFromSocket(socket)
-      const projectList = await projects.list({ user })
-      const namespaces = _.map(projectList, 'metadata.namespace')
-
-      if (await authorization.isAdmin(user)) {
-        subscribeShootsAdmin(socket, { namespaces, filter, user })
-      } else {
-        subscribeShoots(socket, { namespaces, filter, user })
-      }
-    } catch (err) {
-      logger.error('Socket %s: failed to subscribe to all shoots: %s', socket.id, err)
-      socket.emit('subscription_error', {
-        kind,
-        code: 500,
-        message: 'Failed to fetch clusters'
-      })
-    }
-  })
-  socket.on('subscribeShoots', async ({ namespace, filter }) => {
-    const kind = 'shoots'
-    try {
-      const user = getUserFromSocket(socket)
-      const projectList = await projects.list({ user })
-      if (!_.find(projectList, ['metadata.namespace', namespace])) {
-        throw new Unauthorized(`Not authorized to subscribe for shoots in namepsace ${namespace}`)
-      }
-
-      subscribeShoots(socket, { namespace, filter, user })
-    } catch (err) {
-      logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
-      socket.emit('subscription_error', {
-        kind,
-        code: 500,
-        message: 'Failed to fetch clusters'
-      })
-    }
-  })
-  socket.on('subscribeShoot', async ({ name, namespace }, done) => {
-    const object = await subscribeShoot(socket, { name, namespace })
-    if (object.kind === 'Status' && object.status === 'Failure') {
-      const { code, message } = object
-      logger.error('Socket %s: failed to subscribe to shoot: (%d) %s', socket.id, code, message)
-    }
-    done(object)
-  })
+function unsubscribeShoots (socket) {
+  const promises = Array.from(socket.rooms)
+    .filter(room => room !== socket.id && room.startsWith('shoots'))
+    .map(room => socket.leave(room))
+  return Promise.all(promises)
 }
 
-function registerTicketHandlers (socket, cache, ticketCache) {
-  socket.on('subscribeIssues', async () => {
-    leaveIssuesRoom(socket)
-
-    const kind = 'issues'
-    const eventName = 'issues'
-
-    try {
-      joinRoom(socket, 'issues')
-
-      const batchEmitter = new EventsEmitter({ eventName, kind, socket })
-      batchEmitter.batchEmitObjectsAndFlush(ticketCache.getIssues())
-    } catch (error) {
-      logger.error('Socket %s: failed to fetch issues: %s', socket.id, error)
-      socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch issues' })
-    }
-    socket.emit('subscription_done', { kind })
-  })
-  socket.on('subscribeComments', async ({ name, namespace }) => {
-    leaveCommentsRooms(socket)
-
-    const kind = 'comments'
-    const eventName = 'comments'
-
-    try {
-      const projectName = cache.findProjectByNamespace(namespace).metadata.name
-      const room = `comments_${projectName}/${name}`
-      joinRoom(socket, room)
-
-      const batchEmitter = new EventsEmitter({ eventName, kind, socket })
-      const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
-      for (const number of numbers) {
-        try {
-          const comments = await tickets.getIssueComments({ number })
-          batchEmitter.batchEmitObjects(comments)
-        } catch (err) {
-          logger.error('Socket %s: failed to fetch comments for %s/%s issue %s: %s', socket.id, namespace, name, number, err)
-          socket.emit('subscription_error', { kind, code: 500, message: `Failed to fetch comments for issue ${number}` })
-        }
-      }
-      batchEmitter.flush()
-    } catch (error) {
-      logger.error('Socket %s: failed to fetch comments for %s/%s: %s', socket.id, namespace, name, error)
-      socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch comments' })
-    }
-    socket.emit('subscription_done', { kind, namespace, name })
-  })
-  socket.on('unsubscribeComments', () => {
-    leaveCommentsRooms(socket)
-  })
+async function unsubscribe (socket, key) {
+  switch (key) {
+    case 'shoots':
+      return unsubscribeShoots(socket)
+    default:
+      throw new TypeError(`Invalid subscription type - ${key}`)
+  }
 }
 
-function initializeServer (httpServer, cache) {
-  const ticketCache = cache.getTicketCache()
+function setDisconnectTimeout (socket, delay) {
+  delay = Math.min(2147483647, delay) // setTimeout delay must not exceed 32-bit signed integer
+  logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(delay / 1000))
+  socket.data.timeoutId = setTimeout(() => {
+    logger.debug('Socket %s is expired. Forcefully disconnecting client', socket.id)
+    socket.disconnect(true)
+  }, delay)
+}
+
+function init (httpServer, cache) {
   const io = createServer(httpServer, {
     path: '/api/events',
     serveClient: false
   })
+
   // middleware
-  socketAuthentication(io)
-  // handle connections (see https://socket.io/docs/v3/server-application-structure/#each-file-registers-its-own-event-handlers)
+  const authenticate = authenticateFn(kubernetesClient)
+  io.use(async (socket, next) => {
+    logger.debug('Socket %s authenticating', socket.id)
+    try {
+      const user = socket.data.user = await authenticate(socket.request)
+      logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
+      if (user.rti) {
+        const delay = expiresIn(socket)
+        if (delay > 0) {
+          exports.setDisconnectTimeout(socket, delay)
+        } else {
+          throw createError(401, 'Token refresh required', {
+            code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
+            data: {
+              rti: user.rti,
+              exp: user.refresh_at
+            }
+          })
+        }
+      }
+      next()
+    } catch (err) {
+      logger.error('Socket %s authentication failed: %s', socket.id, err)
+      if (isHttpError(err)) {
+        // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
+        const { statusCode, code, data } = err
+        err.data = { statusCode, code, ...data }
+      }
+      next(err)
+    }
+  })
+
+  // handle connections (see https://socket.io/docs/v4/server-application-structure)
   io.on('connection', socket => {
-    logger.debug('Socket %s connected', socket.id)
-    registerShootHandlers(socket)
-    registerTicketHandlers(socket, cache, ticketCache)
-    socket.on('disconnect', onDisconnect)
+    const socketId = socket.id
+    const timeoutId = socket.data.timeoutId
+    delete socket.data.timeoutId
+
+    // handle 'subscribe' events
+    socket.on('subscribe', async (key, ...args) => {
+      const done = args.pop()
+      try {
+        await subscribe(socket, key, ...args)
+        done({ statusCode: 200 })
+      } catch (err) {
+        logger.error('Socket %s subscribe error: %s', socket.id, err.message)
+        const { statusCode = 500, name, message } = err
+        done({ statusCode, name, message })
+      }
+    })
+
+    // handle 'unsubscribe' events
+    socket.on('unsubscribe', async (key, done) => {
+      try {
+        await unsubscribe(socket, key)
+        done({ statusCode: 200 })
+      } catch (err) {
+        logger.error('Socket %s unsubscribe error: %s', socket.id, err.message)
+        const { statusCode = 500, name, message } = err
+        done({ statusCode, name, message })
+      }
+    })
+
+    // handle 'disconnect' event
+    socket.once('disconnect', reason => {
+      clearTimeout(timeoutId)
+      logger.debug('Socket %s disconnected. Reason: %s', socketId, reason)
+    })
   })
 
   // return io instance
   return io
 }
 
-module.exports = initializeServer
+exports = module.exports = init
+
+exports.setDisconnectTimeout = setDisconnectTimeout

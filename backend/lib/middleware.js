@@ -8,8 +8,12 @@
 
 const _ = require('lodash')
 const logger = require('./logger')
+const morgan = require('morgan')
+
 const { NotFound, InternalServerError, isHttpError } = require('http-errors')
 const { STATUS_CODES } = require('http')
+
+const requestLogger = morgan('common', logger)
 
 function noCache (staticPaths = []) {
   const isStatic = path => {
@@ -63,6 +67,9 @@ function errorToLocals (err, req) {
   if (code >= 500) {
     logger.error(err.message, err.stack)
   }
+  if (code === 401) {
+    logger.warn('Authentication failed: %s - %s', err.name, err.message)
+  }
   return { code, reason, message, status, details }
 }
 
@@ -109,6 +116,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 module.exports = {
   noCache,
   historyFallback,
+  requestLogger,
   notFound,
   sendError,
   renderError,

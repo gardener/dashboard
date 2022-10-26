@@ -8,6 +8,7 @@
 
 import startsWith from 'lodash/startsWith'
 import endsWith from 'lodash/endsWith'
+import includes from 'lodash/includes'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import head from 'lodash/head'
@@ -47,20 +48,15 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
         if (this.customWildcard) {
           return true
         }
-        const index = value.indexOf(this.value)
-        const lengthDifference = value.length - this.value.length
 
         if (this.startsWithWildcard && this.endsWithWildcard) {
-          // included but does not start or end with
-          return index > 0 && index < lengthDifference
+          return includes(value, this.value)
         }
         if (this.startsWithWildcard) {
-          // ends with and not equal
-          return index === lengthDifference && lengthDifference > 0
+          return endsWith(value, this.value)
         }
         if (this.endsWithWildcard) {
-          // starts with and not equal
-          return index === 0 && lengthDifference > 0
+          return startsWith(value, this.value)
         }
 
         return false
@@ -73,6 +69,7 @@ export function bestMatchForString (wildCardObjects, wildCardString) {
   const matches = filter(wildCardObjects, (item) => {
     return item.test(wildCardString)
   })
+
   matches.sort(function (a, b) {
     return b.value.length - a.value.length
   })

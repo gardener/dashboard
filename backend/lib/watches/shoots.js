@@ -21,47 +21,45 @@ async function deleteTickets ({ namespace, name }) {
   }
 }
 
-function toNamespacedEvents ({ type, object }) {
-  const { namespace, uid } = object.metadata
-  return {
-    kind: 'shoots',
-    namespaces: {
-      [namespace]: [{
-        type,
-        object,
-        objectKey: uid // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
-      }]
-    }
-  }
-}
-
 module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
   const nsp = io.of('/')
+
   const handleEvent = event => {
-    const { type, object } = event
-    const { namespace, name, uid } = object.metadata
+    const { namespace, name } = event.object.metadata
+    const rooms = [
+      'shoots:admin',
+      `shoots;${namespace}`,
+      `shoots;${namespace}/${name}`
+    ]
+    nsp.to(rooms).emit('shoots', event)
 
-    const namespacedEvents = toNamespacedEvents(event)
-    nsp.to(`shoots_${namespace}`).emit('shoots', namespacedEvents)
-    nsp.to(`shoot_${namespace}_${name}`).emit('shoots', { ...namespacedEvents, kind: 'shoot' })
-
-    if (shootHasIssue(object)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('shoots', namespacedEvents)
-      if (!shootsWithIssues.has(uid)) {
-        shootsWithIssues.add(uid)
-      } else if (type === 'DELETED') {
+    const unhealthyShootsPublish = ({ type, object }) => {
+      const { uid } = object.metadata
+      if (shootHasIssue(object)) {
+        if (!shootsWithIssues.has(uid)) {
+          shootsWithIssues.add(uid)
+        } else if (type === 'DELETED') {
+          shootsWithIssues.delete(uid)
+        }
+      } else if (shootsWithIssues.has(uid)) {
+        type = 'DELETED'
         shootsWithIssues.delete(uid)
+      } else {
+        return
       }
-    } else if (shootsWithIssues.has(uid)) {
-      nsp.to(`shoots_${namespace}_issues`).emit('shoots', toNamespacedEvents({ type: 'DELETED', object }))
-      shootsWithIssues.delete(uid)
+      const rooms = [
+        'shoots:unhealthy:admin',
+        `shoots:unhealthy;${namespace}`
+      ]
+      nsp.to(rooms).emit('shoots', { type, object })
     }
+    unhealthyShootsPublish(event)
 
     bootstrapper.handleResourceEvent(event)
 
-    switch (type) {
+    switch (event.type) {
       case 'DELETED':
-        deleteTickets(object.metadata)
+        deleteTickets(event.object.metadata)
         break
     }
   }

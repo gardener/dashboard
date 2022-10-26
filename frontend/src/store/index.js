@@ -46,7 +46,6 @@ import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import camelCase from 'lodash/camelCase'
 import compact from 'lodash/compact'
-import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
@@ -68,8 +67,9 @@ import split from 'lodash/split'
 import pick from 'lodash/pick'
 
 import moment from '@/utils/moment'
-import { createIoPlugin } from '@/utils/Emitter'
+import createSocketPlugin from './plugins/socketPlugin'
 import createMediaPlugin from './plugins/mediaPlugin'
+import createStoragePlugin from './plugins/storagePlugin'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
@@ -80,10 +80,15 @@ import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
 import tickets from './modules/tickets'
 import shootStaging from './modules/shootStaging'
+import storage from './modules/storage'
+import socket from './modules/socket'
 import semver from 'semver'
 import colors from 'vuetify/lib/util/colors'
 
 const localStorage = Vue.localStorage
+const userManager = Vue.auth
+const logger = Vue.logger
+const vuetify = Vue.vuetify
 
 Vue.use(Vuex)
 
@@ -92,9 +97,13 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createIoPlugin(Vue.auth),
-  createMediaPlugin(window)
+  createSocketPlugin(userManager, logger),
+  createMediaPlugin(vuetify)
 ]
+// localStorage can be undefined in some unit tests
+if (localStorage) {
+  plugins.push(createStoragePlugin(localStorage))
+}
 if (debug) {
   plugins.push(createLogger())
 }
@@ -116,8 +125,6 @@ const state = {
   redirectPath: null,
   loading: false,
   alert: null,
-  shootsLoading: false,
-  websocketConnectionError: null,
   location: moment.tz.guess(),
   timezone: moment().format('Z'),
   focusedElementId: null,
@@ -157,10 +164,7 @@ const state = {
       description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
-  darkTheme: false,
-  colorScheme: 'auto',
-  subscriptions: {},
-  gardenctlOptions: {}
+  prefersColorScheme: 'light'
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
@@ -172,13 +176,6 @@ class Shortcut {
       value: unverified
     })
   }
-}
-
-function getFilterValue (state, getters) {
-  if (state.namespace === '_all' && getters.onlyShootsWithIssues) {
-    return 'issues'
-  }
-  return null
 }
 
 const vendorNameFromImageName = imageName => {
@@ -456,12 +453,36 @@ const getters = {
   },
   machineTypesByCloudProfileName (state, getters) {
     return ({ cloudProfileName }) => {
-      return getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName })
     }
   },
-  machineTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+  machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture (state, getters) {
+    return ({ cloudProfileName, region, zones, architecture }) => {
+      let machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      machineTypes = map(machineTypes, item => {
+        const machineType = { ...item }
+        machineType.architecture ??= 'amd64' // default if not maintained
+        return machineType
+      })
+
+      return filter(machineTypes, { architecture })
+    }
+  },
+  machineArchitecturesByCloudProfileNameAndRegionAndZones (state, getters) {
     return ({ cloudProfileName, region, zones }) => {
-      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
+      const machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({
+        type: 'machineTypes',
+        cloudProfileName,
+        region,
+        zones
+      })
+      const architectures = uniq(map(machineTypes, 'architecture'))
+      return architectures.sort()
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
@@ -495,7 +516,10 @@ const getters = {
         const vendorName = vendorNameFromImageName(machineImage.name)
         const vendorHint = findVendorHint(state.cfg.vendorHints, vendorName)
 
-        return map(versions, ({ version, expirationDate, cri, classification }) => {
+        return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
+          if (isEmpty(architectures)) {
+            architectures = ['amd64'] // default if not maintained
+          }
           return decorateClassificationObject({
             key: name + '/' + version,
             name,
@@ -505,7 +529,8 @@ const getters = {
             expirationDate,
             vendorName,
             icon: vendorName,
-            vendorHint
+            vendorHint,
+            architectures
           })
         })
       }
@@ -582,9 +607,10 @@ const getters = {
       return {}
     }
   },
-  defaultMachineImageForCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+  defaultMachineImageForCloudProfileNameAndMachineType (state, getters) {
+    return (cloudProfileName, machineType) => {
+      const allMachineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+      const machineImages = filter(allMachineImages, ({ architectures }) => includes(architectures, machineType.architecture))
       return firstItemMatchingVersionClassification(machineImages)
     }
   },
@@ -860,29 +886,6 @@ const getters = {
       return getters['shoots/itemByNameAndNamespace']({ namespace, name })
     }
   },
-  ticketsByNamespaceAndName (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/issues']({ projectName, name })
-    }
-  },
-  ticketCommentsByIssueNumber (state, getters) {
-    return ({ issueNumber }) => {
-      return getters['tickets/comments']({ issueNumber })
-    }
-  },
-  latestUpdatedTicketByNameAndNamespace (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/latestUpdated']({ projectName, name })
-    }
-  },
-  ticketsLabels (state, getters) {
-    return ({ namespace, name }) => {
-      const projectName = getters.projectNameByNamespace({ namespace })
-      return getters['tickets/labels']({ projectName, name })
-    }
-  },
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
@@ -914,9 +917,6 @@ const getters = {
   },
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
-  },
-  ticketList (state) {
-    return state.tickets.all
   },
   username (state) {
     const user = state.user
@@ -971,12 +971,6 @@ const getters = {
   isCurrentNamespace (state, getters) {
     return namespace => includes(getters.currentNamespaces, namespace)
   },
-  isWebsocketConnectionError (state) {
-    return get(state, 'websocketConnectionError') !== null
-  },
-  websocketConnectAttempt (state) {
-    return get(state, 'websocketConnectionError.reconnectAttempt')
-  },
   getShootListFilters (state, getters) {
     return getters['shoots/getShootListFilters']
   },
@@ -1024,6 +1018,9 @@ const getters = {
   },
   canCreateSecrets (state) {
     return canI(state.subjectRules, 'create', '', 'secrets')
+  },
+  canCreateShootsAdminkubeconfig (state) {
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots/adminkubeconfig')
   },
   canPatchSecrets (state) {
     return canI(state.subjectRules, 'patch', '', 'secrets')
@@ -1093,7 +1090,8 @@ const getters = {
     }
   },
   isKubeconfigEnabled (state) {
-    return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
+    const { clientId, clientSecret, usePKCE = false } = get(state, 'kubeconfigData.oidc', {})
+    return !!(clientId && (clientSecret || usePKCE))
   },
   onlyShootsWithIssues (state, getters) {
     return getters['shoots/onlyShootsWithIssues']
@@ -1134,11 +1132,12 @@ const getters = {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
       const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      const architecture = head(getters.machineArchitecturesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones }))
+      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({ cloudProfileName, region, zones, architecture })
       const machineType = head(machineTypesForZone) || {}
       const volumeTypesForZone = getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
       const volumeType = head(volumeTypesForZone) || {}
-      const machineImage = getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+      const machineImage = getters.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
       const minVolumeSize = getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
       const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
       const worker = {
@@ -1149,7 +1148,8 @@ const getters = {
         maxSurge: 1,
         machine: {
           type: machineType.name,
-          image: pick(machineImage, ['name', 'version'])
+          image: pick(machineImage, ['name', 'version']),
+          architecture
         },
         zones,
         cri: {
@@ -1260,8 +1260,9 @@ const getters = {
     return (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) => {
       const allMachineImages = getters.machineImagesByCloudProfileName(shootCloudProfileName)
       const workerGroups = map(shootWorkerGroups, worker => {
-        const workerImage = get(worker, 'machine.image')
-        const workerImageDetails = find(allMachineImages, workerImage)
+        const workerImage = get(worker, 'machine.image', {})
+        const { name, version } = workerImage
+        const workerImageDetails = find(allMachineImages, { name, version })
         if (!workerImageDetails) {
           return {
             ...workerImage,
@@ -1293,36 +1294,22 @@ const getters = {
       return filter(workerGroups, 'expirationDate')
     }
   },
-  defaultGardenctlOptions (state) {
-    return {
-      legacyCommands: false,
-      ...get(state, 'cfg.gardenctl')
-    }
-  },
-  gardenctlOptions (state, getters) {
-    return {
-      ...getters.defaultGardenctlOptions,
-      ...state.gardenctlOptions
-    }
-  },
   nodesCIDR (state) {
     return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
   },
   resourceQuotaHelpText (state) {
     return get(state, 'cfg.resourceQuotaHelp.text')
+  },
+  colorScheme (state, getters) {
+    const colorScheme = getters['storage/colorScheme']
+    return ['dark', 'light'].includes(colorScheme)
+      ? colorScheme
+      : state.prefersColorScheme
   }
 }
 
 // actions
 const actions = {
-  fetchAll ({ dispatch, commit }, resources) {
-    const iteratee = (value, key) => dispatch(key, value)
-    return Promise
-      .all(map(resources, iteratee))
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   fetchCloudProfiles ({ dispatch }) {
     return dispatch('cloudProfiles/getAll')
       .catch(err => {
@@ -1361,93 +1348,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  clearShoots ({ dispatch, commit }) {
-    return dispatch('shoots/clearAll')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  clearIssues ({ dispatch, commit }) {
-    return dispatch('tickets/clearIssues')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  clearComments ({ dispatch, commit }) {
-    return dispatch('tickets/clearComments')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  async subscribeShoot ({ commit, dispatch, getters }, { name, namespace }) {
-    await dispatch('shoots/clearAll')
-    return new Promise((resolve, reject) => {
-      const done = err => {
-        unsubscribe()
-        clearTimeout(timeoutId)
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      }
-      const handleSubscriptionTimeout = () => {
-        done(Object.assign(new Error('Cluster subscription timed out'), {
-          code: 504,
-          reason: 'Timeout'
-        }))
-      }
-      const handleSubscriptionAcknowledgement = object => {
-        if (object.kind === 'Status') {
-          let { code, reason, message } = object
-          if (code === 404) {
-            reason = 'Cluster not found'
-            message = 'The cluster you are looking for doesn\'t exist'
-          } else if (code === 403) {
-            reason = 'Access to cluster denied'
-          } else if (code >= 500) {
-            reason = 'Oops, something went wrong'
-            message = 'An unexpected error occurred. Please try again later'
-          }
-          done(Object.assign(new Error(message), { code, reason }))
-        } else {
-          done()
-        }
-      }
-      const unsubscribe = store.subscribeAction(({ type, payload }, state) => {
-        if (type === 'subscribeShootAcknowledgement') {
-          handleSubscriptionAcknowledgement(payload)
-        }
-      })
-      const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
-      commit('SUBSCRIBE', ['shoot', { name, namespace }])
-    })
-  },
-  subscribeShootAcknowledgement ({ commit, dispatch, state, getters }, object) {
-    if (object.kind === 'Shoot') {
-      commit('shoots/HANDLE_EVENTS', {
-        rootState: state,
-        rootGetters: getters,
-        events: [{
-          type: 'ADDED',
-          object
-        }]
-      })
-      const fetchShootAndShootSeedInfo = async ({ metadata, spec }) => {
-        const promises = [dispatch('getShootInfo', metadata)]
-        const seedName = spec.seedName
-        if (getters.isAdmin && !getters.isSeedUnreachableByName(seedName)) {
-          promises.push(dispatch('getShootSeedInfo', metadata))
-        }
-        try {
-          await Promise.all(promises)
-        } catch (err) {
-          console.error('Failed to fetch shoot or shootSeed info:', err.message)
-        }
-      }
-      fetchShootAndShootSeedInfo(object)
-    }
-  },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
       .catch(err => {
@@ -1459,23 +1359,6 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
-  },
-  async subscribeShoots ({ dispatch, commit, state, getters }) {
-    try {
-      const namespace = state.namespace
-      const filter = getFilterValue(state, getters)
-      commit('SUBSCRIBE', ['shoots', { namespace, filter }])
-    } catch (err) { /* ignore error */ }
-  },
-  async subscribeComments ({ dispatch, commit }, { name, namespace }) {
-    try {
-      commit('SUBSCRIBE', ['comments', { name, namespace }])
-    } catch (err) { /* ignore error */ }
-  },
-  async unsubscribeComments ({ dispatch, commit }) {
-    try {
-      commit('UNSUBSCRIBE', 'comments')
-    } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
@@ -1562,6 +1445,24 @@ const actions = {
         return res
       })
   },
+  subscribeShoots ({ dispatch, commit }) {
+    (async () => {
+      try {
+        await dispatch('shoots/subscribe')
+      } catch (err) {
+        commit('SET_ALERT', { message: err.message, type: 'error' })
+      }
+    })()
+  },
+  unsubscribeShoots ({ dispatch, commit }) {
+    (async () => {
+      try {
+        await dispatch('shoots/unsubscribe')
+      } catch (err) {
+        commit('SET_ALERT', { message: err.message, type: 'error' })
+      }
+    })()
+  },
   async addMember ({ dispatch, commit }, payload) {
     const result = await dispatch('members/add', payload)
     await dispatch('setAlert', { message: 'Member added', type: 'success' })
@@ -1606,9 +1507,11 @@ const actions = {
 
     return state.cfg
   },
-  async setNamespace ({ dispatch, commit }, namespace) {
-    commit('SET_NAMESPACE', namespace)
-    await dispatch('refreshSubjectRules', namespace)
+  async setNamespace ({ dispatch, commit, state }, namespace) {
+    if (namespace && state.namespace !== namespace) {
+      commit('SET_NAMESPACE', namespace)
+      await dispatch('refreshSubjectRules', namespace)
+    }
     return state.namespace
   },
   async refreshSubjectRules ({ commit }, namespace) {
@@ -1640,13 +1543,6 @@ const actions = {
       }
     }
   },
-  setUser ({ dispatch, commit }, value) {
-    commit('SET_USER', value)
-    return state.user
-  },
-  unsetUser ({ dispatch, commit }) {
-    commit('SET_USER', null)
-  },
   setSidebar ({ commit }, value) {
     commit('SET_SIDEBAR', value)
     return state.sidebar
@@ -1658,14 +1554,6 @@ const actions = {
   unsetLoading ({ commit }) {
     commit('SET_LOADING', false)
     return state.loading
-  },
-  setWebsocketConnectionError ({ commit }, { reason, reconnectAttempt }) {
-    commit('SET_WEBSOCKET_CONNECTION_ERROR', { reason, reconnectAttempt })
-    return state.websocketConnectionError
-  },
-  unsetWebsocketConnectionError ({ commit }) {
-    commit('SET_WEBSOCKET_CONNECTION_ERROR', null)
-    return state.websocketConnectionError
   },
   setError ({ commit }, value) {
     commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
@@ -1681,10 +1569,6 @@ const actions = {
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SET_SPLITPANE_RESIZE', value)
     return state.splitpaneResize
-  },
-  setColorScheme ({ commit }, colorScheme) {
-    commit('SET_COLOR_SCHEME', colorScheme)
-    return state.colorScheme
   }
 }
 
@@ -1697,10 +1581,7 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    if (value !== state.namespace) {
-      state.namespace = value
-      // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
-    }
+    state.namespace = value
   },
   SET_SUBJECT_RULES (state, value) {
     state.subjectRules = value
@@ -1720,16 +1601,6 @@ const mutations = {
   SET_LOADING (state, value) {
     state.loading = value
   },
-  SET_SHOOTS_LOADING (state, value) {
-    state.shootsLoading = value
-  },
-  SET_WEBSOCKET_CONNECTION_ERROR (state, value) {
-    if (value) {
-      state.websocketConnectionError = merge({}, state.websocketConnectionError, value)
-    } else {
-      state.websocketConnectionError = null
-    }
-  },
   SET_ALERT (state, value) {
     state.alert = value
   },
@@ -1747,23 +1618,8 @@ const mutations = {
   SET_SPLITPANE_RESIZE (state, value) {
     state.splitpaneResize = value
   },
-  SET_COLOR_SCHEME (state, value) {
-    state.colorScheme = value
-    localStorage.setItem('global/color-scheme', value)
-  },
-  SET_DARK_THEME (state, value) {
-    state.darkTheme = value
-    Vue.vuetify.framework.theme.dark = value
-  },
-  SUBSCRIBE (state, [key, value]) {
-    Vue.set(state.subscriptions, key, value)
-  },
-  UNSUBSCRIBE (state, key) {
-    Vue.delete(state.subscriptions, key)
-  },
-  SET_GARDENCTL_OPTIONS (state, value) {
-    state.gardenctlOptions = value
-    localStorage.setObject('global/gardenctl', value)
+  SET_PREFERS_COLOR_SCHEME (state, value) {
+    state.prefersColorScheme = value
   }
 }
 
@@ -1777,7 +1633,9 @@ const modules = {
   shoots,
   cloudProviderSecrets,
   tickets,
-  shootStaging
+  shootStaging,
+  storage,
+  socket
 }
 
 const store = new Vuex.Store({

@@ -160,6 +160,15 @@ const projectList = [
     uid: 6,
     name: 'secret',
     createdBy: 'admin@example.org',
+    members: [
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'ServiceAccount',
+        namespace: 'garden-bar',
+        name: 'robot',
+        roles: ['viewer']
+      }
+    ],
     description: 'secret-description',
     purpose: 'secret-purpose'
   }),

@@ -15,8 +15,8 @@ const {
 const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
+const { projectFilter } = require('../utils')
 const cache = require('../cache')
-const Member = require('./members/Member')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function fromResource ({ metadata, spec = {}, status = {} }) {
@@ -118,47 +118,10 @@ function getProjectName (namespace) {
 }
 
 exports.list = async function ({ user }) {
-  const projects = cache.getProjects()
   const isAdmin = await authorization.isAdmin(user)
-  const isMemberOf = project => {
-    const hasGroupMembership = _
-      .chain(project)
-      .get('spec.members')
-      .filter(['kind', 'Group'])
-      .map('name')
-      .intersection(user.groups)
-      .size()
-      .gt(0)
-      .value()
-
-    const hasUserMembership = _
-      .chain(project)
-      .get('spec.members')
-      .filter(['kind', 'User'])
-      .map('name')
-      .includes(user.id)
-      .value()
-
-    const member = Member.parseUsername(user.id)
-    const hasServiceAccountMembership = _
-      .chain(project)
-      .get('spec.members')
-      .filter(['kind', 'ServiceAccount'])
-      .find(member)
-      .value()
-
-    return hasGroupMembership || hasUserMembership || hasServiceAccountMembership
-  }
-
   return _
-    .chain(projects)
-    .filter(project => {
-      if (!isAdmin && !isMemberOf(project)) {
-        return false
-      }
-      const phase = _.get(project, 'status.phase', 'Pending')
-      return phase !== 'Pending'
-    })
+    .chain(cache.getProjects())
+    .filter(projectFilter(user, isAdmin))
     .map(fromResource)
     .value()
 }

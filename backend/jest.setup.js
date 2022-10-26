@@ -12,7 +12,9 @@ const { Test } = require('supertest')
 const pEvent = require('p-event')
 const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
-const fixtures = require('./__fixtures__')
+const { matchers, ...fixtures } = require('./__fixtures__')
+
+expect.extend(matchers)
 
 function createHttpAgent () {
   const app = require('./lib/app')
@@ -57,7 +59,7 @@ function createSocketAgent (cache) {
       await new Promise(resolve => server.close(resolve))
       await new Promise(resolve => io.close(resolve))
     },
-    async connect ({ cookie, user } = {}) {
+    async connect ({ cookie, user, connected = true } = {}) {
       const { address: hostname, port } = server.address()
       const origin = `http://[${hostname}]:${port}`
       const extraHeaders = {}
@@ -75,10 +77,12 @@ function createSocketAgent (cache) {
         transports: ['websocket']
       })
       socket.connect()
-      await pEvent(socket, 'connect', {
-        timeout: 1000,
-        rejectionEvents: ['error', 'connect_error']
-      })
+      if (connected) {
+        await pEvent(socket, 'connect', {
+          timeout: 1000,
+          rejectionEvents: ['error', 'connect_error']
+        })
+      }
       return socket
     }
   }
