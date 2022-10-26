@@ -81,7 +81,7 @@ function toSecretResource ({ metadata, data }) {
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
-    throw new UnprocessableEntity('Failed to encode "base64" secret data')
+    throw createError(422, 'Failed to encode "base64" secret data')
   }
   return { apiVersion, kind, metadata, type, data }
 }
@@ -256,7 +256,7 @@ exports.patch = async function ({ user, namespace, name, body }) {
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
-    throw new UnprocessableEntity('Failed to encode "base64" secret data')
+    throw createError(422, 'Failed to encode "base64" secret data')
   }
 
   const patchOperations = [{

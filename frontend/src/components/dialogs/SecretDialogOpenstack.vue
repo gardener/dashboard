@@ -66,37 +66,6 @@ SPDX-License-Identifier: Apache-2.0
         </v-radio-group>
       </div>
       <v-container class="py-0">
-        <template v-if="authenticationMethod === 'USER'">
-          <div>
-            <hint-colorizer hint-color="primary">
-              <v-text-field
-              color="primary"
-              v-model="username"
-              label="Technical User"
-              :error-messages="getErrorMessages('username')"
-              @input="$v.username.$touch()"
-              @blur="$v.username.$touch()"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              ></v-text-field>
-            </hint-colorizer>
-          </div>
-          <div>
-            <hint-colorizer hint-color="warning">
-              <v-text-field
-                color="primary"
-                v-model="password"
-                label="Password"
-                :error-messages="getErrorMessages('password')"
-                :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="hideSecret ? 'password' : 'text'"
-                @click:append="() => (hideSecret = !hideSecret)"
-                @input="$v.password.$touch()"
-                @blur="$v.password.$touch()"
-                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              ></v-text-field>
-            </hint-colorizer>
-          </div>
-        </template>
         <template v-if="authenticationMethod === 'APPLICATION_CREDENTIALS'">
           <div>
             <v-text-field
@@ -130,6 +99,37 @@ SPDX-License-Identifier: Apache-2.0
               @input="$v.applicationCredentialSecret.$touch()"
               @blur="$v.applicationCredentialSecret.$touch()"
             ></v-text-field>
+          </div>
+        </template>
+        <template v-else>
+          <div>
+            <hint-colorizer hint-color="primary">
+              <v-text-field
+              color="primary"
+              v-model="username"
+              label="Technical User"
+              :error-messages="getErrorMessages('username')"
+              @input="$v.username.$touch()"
+              @blur="$v.username.$touch()"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
+          </div>
+          <div>
+            <hint-colorizer hint-color="warning">
+              <v-text-field
+                color="primary"
+                v-model="password"
+                label="Password"
+                :error-messages="getErrorMessages('password')"
+                :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="hideSecret ? 'password' : 'text'"
+                @click:append="() => (hideSecret = !hideSecret)"
+                @input="$v.password.$touch()"
+                @blur="$v.password.$touch()"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
           </div>
         </template>
       </v-container>
