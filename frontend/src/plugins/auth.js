@@ -5,9 +5,10 @@
 //
 
 import Vue from 'vue'
+
 import { UserManager } from '@/utils/auth'
 
-const VueBus = {
+const VueAuth = {
   install (Vue) {
     const auth = new UserManager()
     Object.defineProperty(Vue, 'auth', { value: auth })
@@ -15,4 +16,4 @@ const VueBus = {
   }
 }
 
-Vue.use(VueBus)
+Vue.use(VueAuth)

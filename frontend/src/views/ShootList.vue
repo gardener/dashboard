@@ -56,13 +56,16 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
-        :loading="shootsLoading"
+        :loading="loading || !connected"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
         :custom-filter="searchItems"
         must-sort
         :custom-sort="sortItems"
       >
+        <template v-slot:progress>
+          <shoot-list-progress></shoot-list-progress>
+        </template>
         <template v-slot:item="{ item }">
           <shoot-list-row
             :shoot-item="item"
@@ -102,6 +105,7 @@ import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import debounce from 'lodash/debounce'
 import ShootListRow from '@/components/ShootListRow'
+import ShootListProgress from '@/components/ShootListProgress'
 import IconBase from '@/components/icons/IconBase'
 import CertifiedKubernetes from '@/components/icons/CertifiedKubernetes'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
@@ -112,6 +116,7 @@ export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
+    ShootListProgress,
     ShootAccessCard,
     IconBase,
     CertifiedKubernetes,
@@ -155,7 +160,9 @@ export default {
   methods: {
     ...mapActions([
       'setSelectedShoot',
-      'setShootListFilter',
+      'setShootListFilter'
+    ]),
+    ...mapActions([
       'subscribeShoots'
     ]),
     async showDialog (args) {
@@ -221,7 +228,7 @@ export default {
       ]))
 
       if (key === 'onlyShootsWithIssues') {
-        this.subscribeShoots()
+        await this.subscribeShoots()
       }
     },
     isFilterActive (key) {
@@ -235,25 +242,32 @@ export default {
   computed: {
     ...mapGetters({
       mappedItems: 'shootList',
-      selectedItem: 'selectedShoot',
-      isAdmin: 'isAdmin',
-      getShootListFilters: 'getShootListFilters',
-      canPatchShoots: 'canPatchShoots',
-      canDeleteShoots: 'canDeleteShoots',
-      canCreateShoots: 'canCreateShoots',
-      canGetSecrets: 'canGetSecrets',
-      onlyShootsWithIssues: 'onlyShootsWithIssues',
-      projectFromProjectList: 'projectFromProjectList',
-      projectName: 'projectName',
-      shootCustomFieldList: 'shootCustomFieldList',
-      shootCustomFields: 'shootCustomFields',
-      ticketsLabels: 'ticketsLabels',
-      latestUpdatedTicketByNameAndNamespace: 'latestUpdatedTicketByNameAndNamespace',
-      sortItems: 'shoots/sortItems',
-      searchItems: 'shoots/searchItems'
+      selectedItem: 'selectedShoot'
     }),
+    ...mapGetters([
+      'isAdmin',
+      'getShootListFilters',
+      'canPatchShoots',
+      'canDeleteShoots',
+      'canCreateShoots',
+      'canGetSecrets',
+      'onlyShootsWithIssues',
+      'projectFromProjectList',
+      'projectName',
+      'shootCustomFieldList',
+      'shootCustomFields'
+    ]),
+    ...mapGetters('shoots', [
+      'loading'
+    ]),
+    ...mapState('socket', [
+      'connected'
+    ]),
+    ...mapGetters('shoots', [
+      'sortItems',
+      'searchItems'
+    ]),
     ...mapState([
-      'shootsLoading',
       'cfg',
       'namespace'
     ]),
