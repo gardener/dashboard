@@ -189,8 +189,7 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin',
-      'projectFromProjectList'
+      'isAdmin'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}

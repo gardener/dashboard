@@ -114,7 +114,14 @@ jest.mock('./lib/cache', () => {
   const originalCache = jest.requireActual('./lib/cache')
   const createTicketCache = jest.requireActual('./lib/cache/tickets')
   const { cache } = originalCache
-  const keys = ['core.gardener.cloud/cloudprofiles', 'core.gardener.cloud/seeds', 'core.gardener.cloud/quotas', 'core.gardener.cloud/projects', 'core.gardener.cloud/controllerregistrations', 'core/resourcequotas']
+  const keys = [
+    'core.gardener.cloud/cloudprofiles',
+    'core.gardener.cloud/seeds',
+    'core.gardener.cloud/quotas',
+    'core.gardener.cloud/projects',
+    'core.gardener.cloud/controllerregistrations',
+    'core/resourcequotas'
+  ]
   for (const key of keys) {
     const [, fixtureName] = split(key, '/')
     cache.set(key, {
