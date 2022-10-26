@@ -230,7 +230,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
 
         // test if service account exists and is not in deletion
         const serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
-        if (serviceAccount.metadata?.deletionTimestamp) {
+        if (serviceAccount.metadata.deletionTimestamp) {
           throw new Error('Can\'t create terminal for ServiceAccount that is marked for deletion')
         }
 
@@ -611,7 +611,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   }
 
   if (target === TargetEnum.GARDEN && !isAdmin) {
-    ensureServiceAccountCleanup(client, { terminal, namespace, name: DASHBOARD_WEBTERMINAL_NAME })
+    await ensureServiceAccountCleanup(client, { terminal, namespace, name: DASHBOARD_WEBTERMINAL_NAME })
   }
 
   return {
@@ -643,12 +643,12 @@ async function ensureServiceAccountCleanup (client, { terminal, namespace, name 
 
   let dirty = false
 
-  if (!_.some(finalizers, 'gardener.cloud/terminal')) {
+  if (!finalizers.includes('gardener.cloud/terminal')) {
     finalizers.push('gardener.cloud/terminal')
     dirty = true
   }
 
-  if (!_.some(ownerReferences, { uid: ownerRef.uid })) {
+  if (!_.some(ownerReferences, ['uid', ownerRef.uid])) {
     ownerReferences.push(ownerRef)
     dirty = true
   }
