@@ -69,7 +69,7 @@ class Agent {
     if (!sessionPool) {
       sessionPool = new SessionPool(sid)
       this.sessionPools.set(key, sessionPool)
-      logger.debug('Agent - map size is %d (pool %s added)', this.sessionPools.size, sid.origin)
+      logger.debug('Agent - map size is %d (pool %s added)', this.sessionPools.size, sid)
     }
     return sessionPool
   }

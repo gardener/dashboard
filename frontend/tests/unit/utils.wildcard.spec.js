@@ -28,7 +28,7 @@ describe('utils', () => {
         expect(wildcardObject.customWildcard).toBe(false)
         expect(wildcardObject.test('Foo__')).toBe(true)
         expect(wildcardObject.test('__Foo__')).toBe(false)
-        expect(wildcardObject.test('Foo')).toBe(false)
+        expect(wildcardObject.test('Foo')).toBe(true)
         expect(wildcardObject.test('x')).toBe(false)
       })
 
@@ -41,7 +41,7 @@ describe('utils', () => {
         expect(wildcardObject.customWildcard).toBe(false)
         expect(wildcardObject.test('__Bar')).toBe(true)
         expect(wildcardObject.test('__Bar__')).toBe(false)
-        expect(wildcardObject.test('Bar')).toBe(false)
+        expect(wildcardObject.test('Bar')).toBe(true)
         expect(wildcardObject.test('x')).toBe(false)
       })
 
@@ -52,10 +52,10 @@ describe('utils', () => {
         expect(wildcardObject.startsWithWildcard).toBe(true)
         expect(wildcardObject.endsWithWildcard).toBe(true)
         expect(wildcardObject.customWildcard).toBe(false)
-        expect(wildcardObject.test('__Barz')).toBe(false)
-        expect(wildcardObject.test('Barz__')).toBe(false)
+        expect(wildcardObject.test('__Barz')).toBe(true)
+        expect(wildcardObject.test('Barz__')).toBe(true)
         expect(wildcardObject.test('__Barz__')).toBe(true)
-        expect(wildcardObject.test('Barz')).toBe(false)
+        expect(wildcardObject.test('Barz')).toBe(true)
         expect(wildcardObject.test('x')).toBe(false)
       })
 
@@ -88,12 +88,37 @@ describe('utils', () => {
 
     describe('bestMatchForString', () => {
       it('should prefer exact match', () => {
-        const match = bestMatchForString(wildcardObjects, 'FooBar')
+        let match = bestMatchForString(wildcardObjects, 'FooBar')
         expect(match).toEqual(wildcardObjects[5])
+
+        match = bestMatchForString(wildcardObjects, 'Bar')
+        expect(match).toEqual(wildcardObjects[4])
       })
-      it('should match wildcard', () => {
-        const match = bestMatchForString(wildcardObjects, 'FooFoo')
+      it('should match wildcard with variable part', () => {
+        let match = bestMatchForString(wildcardObjects, 'FooFoo')
         expect(match).toEqual(wildcardObjects[0])
+
+        match = bestMatchForString(wildcardObjects, 'Fooa')
+        expect(match).toEqual(wildcardObjects[0])
+      })
+      it('should match wildcard without variable part', () => {
+        let match = bestMatchForString(wildcardObjects, 'Foo')
+        expect(match).toEqual(wildcardObjects[0])
+
+        match = bestMatchForString(wildcardObjects, 'FooB')
+        expect(match).toEqual(wildcardObjects[6])
+      })
+      it('should match wildcard start', () => {
+        const match = bestMatchForString(wildcardObjects, 'aBar')
+        expect(match).toEqual(wildcardObjects[1])
+      })
+      it('should match wildcard both', () => {
+        const match = bestMatchForString(wildcardObjects, 'aBarza')
+        expect(match).toEqual(wildcardObjects[2])
+      })
+      it('should match custom wildcard', () => {
+        const match = bestMatchForString(wildcardObjects, 'a')
+        expect(match).toEqual(wildcardObjects[3])
       })
       it('should prefer longest match', () => {
         const match = bestMatchForString(wildcardObjects, 'FooBaz')

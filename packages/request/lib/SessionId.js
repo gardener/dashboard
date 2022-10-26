@@ -12,7 +12,7 @@ const kOptions = Symbol('options')
 
 class SessionId extends URL {
   constructor (authority, options = {}) {
-    super(createPathname(options), authority)
+    super(createPath(options), authority)
     this[kOptions] = options
   }
 
@@ -45,17 +45,19 @@ function normalizeObject (object) {
 
 function createObjectHash (object) {
   return crypto
-    .createHash('md5')
+    .createHash('sha1')
     .update(JSON.stringify(normalizeObject(object)))
     .digest('hex')
+    .substring(0, 7)
 }
 
-function createPathname ({ id, ...options }) {
-  let pathname = '/' + createObjectHash(options)
+function createPath ({ id, ...options }) {
+  let path = ''
   if (id) {
-    pathname += '/' + id
+    path += '/' + id
   }
-  return pathname
+  path += '#' + createObjectHash(options)
+  return path
 }
 
 module.exports = SessionId

@@ -31,7 +31,18 @@ class SelfSubjectRulesReview extends mix(Authorization).with(ClusterScoped, Crea
   }
 }
 
+class SubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatable) {
+  static get names () {
+    return {
+      plural: 'subjectaccessreviews',
+      singular: 'subjectaccessreview',
+      kind: 'SubjectAccessReview'
+    }
+  }
+}
+
 module.exports = {
   SelfSubjectAccessReview,
-  SelfSubjectRulesReview
+  SelfSubjectRulesReview,
+  SubjectAccessReview
 }

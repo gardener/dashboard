@@ -19,19 +19,6 @@ function getToken ({ auth = {} } = {}) {
   return auth.bearer
 }
 
-router.route('/privileges')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user || {}
-      const isAdmin = await authorization.isAdmin(user)
-      res.send({
-        isAdmin
-      })
-    } catch (err) {
-      next(err)
-    }
-  })
-
 router.route('/subjectrules')
   .post(async (req, res, next) => {
     try {
@@ -62,7 +49,11 @@ router.route('/kubeconfig')
     } = config
     const {
       issuer: issuerUrl,
-      public: { clientId, clientSecret } = {}
+      public: {
+        clientId = oidc.client_id,
+        clientSecret,
+        usePKCE
+      } = {}
     } = oidc
     const body = {
       server,
@@ -70,9 +61,14 @@ router.route('/kubeconfig')
       insecureSkipTlsVerify,
       oidc: {
         issuerUrl,
-        clientId,
-        clientSecret
+        clientId
       }
+    }
+    if (clientSecret) {
+      body.oidc.clientSecret = clientSecret
+    }
+    if (usePKCE || !clientSecret) {
+      body.oidc.usePKCE = true
     }
     if (oidc.scope) {
       const extraScopes = []

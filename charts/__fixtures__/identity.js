@@ -6,7 +6,6 @@
 
 'use strict'
 
-const releaseName = 'identity'
 const defaults = {
   dashboardOrigins: [
     'https://dashboard.garden.example.org',
@@ -15,7 +14,4 @@ const defaults = {
   ]
 }
 
-module.exports = {
-  releaseName,
-  defaults
-}
+module.exports = defaults

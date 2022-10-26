@@ -11,8 +11,7 @@ const { omit } = require('lodash')
 const { basename } = require('path')
 const { helm } = fixtures
 
-const chart = basename(__dirname)
-const renderTemplates = (templates, values) => helm.renderChartTemplates(chart, templates, values)
+const renderTemplates = helm.renderTemplatesFn(basename(__dirname))
 
 describe('identity', function () {
   describe('configmap', function () {

@@ -11,6 +11,18 @@ const { createClient, createDashboardClient } = require('../lib')
 const { extend } = require('@gardener-dashboard/request')
 const { mockLoadResult } = require('@gardener-dashboard/kube-config')
 
+function resourceEndpoints () {
+  let endpoints = []
+  for (const name of Object.keys(require('../lib/groups'))) {
+    endpoints = endpoints.concat(Object.keys(require(`../lib/resources/${name}`)))
+  }
+  return endpoints
+}
+
+function nonResourceEndpoints () {
+  return Object.keys(require('../lib/nonResourceEndpoints').endpoints)
+}
+
 describe('kube-client', () => {
   describe('#createClient', () => {
     const bearer = 'bearer'
@@ -101,6 +113,9 @@ describe('kube-client', () => {
   })
 
   describe('#createDashboardClient', () => {
+    const resourceEndpointNames = resourceEndpoints()
+    const nonResourceEndpointNames = nonResourceEndpoints()
+
     const { url, auth } = mockLoadResult
     const server = new URL(url)
     let testClient
@@ -113,7 +128,8 @@ describe('kube-client', () => {
     it('should create a dashboard client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server).toEqual(server)
-      expect(extend).toHaveBeenCalledTimes(24)
+      const expectedNumberOfCalls = resourceEndpointNames.length + nonResourceEndpointNames.length
+      expect(extend).toHaveBeenCalledTimes(expectedNumberOfCalls)
       for (let i = 0; i < extend.mock.calls.length; i++) {
         const call = extend.mock.calls[i]
         expect(call).toHaveLength(1)
@@ -122,7 +138,8 @@ describe('kube-client', () => {
         expect(clientConfig.url).toBe(url)
         expect(clientConfig.auth).toBe(auth)
         // all endpoints except healthz have json responseType
-        const responseType = i !== 22 ? 'json' : undefined
+        const healthzEnpointIndex = resourceEndpointNames.length + nonResourceEndpointNames.indexOf('healthz')
+        const responseType = i !== healthzEnpointIndex ? 'json' : undefined
         expect(clientConfig.responseType).toBe(responseType)
       }
     })
