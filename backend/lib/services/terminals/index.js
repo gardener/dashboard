@@ -292,11 +292,11 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
         const shootRef = getShootRef(managedSeed)
         credentials = { shootRef }
 
-        const caCluster = await client.core.secrets.get(managedSeed.metadata.namespace, `${managedSeed.spec.shoot.name}.ca-cluster`)
+        const caCluster = await client.core.secrets.get(shootRef.namespace, `${shootRef.name}.ca-cluster`)
         caData = caCluster.data['ca.crt']
       } else {
         const seed = getSeed(seedName)
-        const secretRef = _.get(seed, 'spec.secretRef')
+        const secretRef = seed.spec?.secretRef
         credentials = { secretRef }
 
         const {
@@ -375,9 +375,8 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
     const shootRef = getShootRef(managedSeed)
     credentials = { shootRef }
   } else {
-    credentials = {
-      secretRef: _.get(seed, 'spec.secretRef')
-    }
+    const secretRef = seed.spec?.secretRef
+    credentials = { secretRef }
   }
 
   hostCluster.namespace = seedShootNamespace
