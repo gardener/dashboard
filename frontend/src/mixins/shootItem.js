@@ -258,33 +258,25 @@ export const shootItem = {
       let preparedRotationsCount = 0
       let completedPhasesCount = 0
       const unpreparedRotations = []
-      const keys = Object.keys(this.shootStatusCredentialsRotation)
-      for (let i = 0; i < keys.length; i++) {
+      for (const [rotationKey, rotationStatus] of Object.entries(this.shootStatusCredentialsRotation)) {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
-        const rotationKey = keys[i]
-        const rotationStatus = this.shootStatusCredentialsRotation[rotationKey]
         const rotationType = find(rotationTypes, ['type', rotationKey])
-        if (!rotationType) {
+        if (rotationType) {
           // If gardener introduces a new rotation type, ignore it to avoid breaking our logic
-          continue
-        }
-        switch (rotationStatus.phase) {
-          case 'Preparing':
-          case 'Completing':
+          if (['Preparing', 'Completing'].includes(rotationStatus.phase)) {
             return {
               type: rotationStatus.phase,
               caption: rotationStatus.phase
             }
-          case 'Prepared':
-            preparedRotationsCount++
-            break
-          case 'Completed':
+          }
+          if (rotationStatus.phase === 'Completed') {
             completedPhasesCount++
-            // fallthrough
-          default:
-            if (rotationType.twoStep) {
-              unpreparedRotations.push(rotationType)
-            }
+          }
+          if (rotationStatus.phase === 'Prepared') {
+            preparedRotationsCount++
+          } else if (rotationType.twoStep) {
+            unpreparedRotations.push(rotationType)
+          }
         }
       }
 

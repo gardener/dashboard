@@ -115,9 +115,8 @@ export default {
       if (!this.type) {
         return this.shootStatusCredentialsRotationAggregatedPhase
       }
-      const type = this.rotationStatus.phase
       return {
-        type
+        type: this.rotationStatus.phase
       }
     },
     isActionToBeScheduled () {
@@ -230,7 +229,9 @@ export default {
     componentTexts () {
       const componentTexts = {
         'rotate-kubeconfig-credentials': {
-          caption: this.isLoading ? 'Scheduling kubeconfig credentials rotation' : 'Start Kubeconfig Rotation',
+          caption: this.isLoading
+            ? 'Scheduling kubeconfig credentials rotation'
+            : 'Start Kubeconfig Rotation',
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
           successMessage: `Rotation of kubeconfig credentials started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of kubeconfig credentials?',
@@ -263,7 +264,9 @@ export default {
           ]
         },
         'rotate-observability-credentials': {
-          caption: this.isLoading ? 'Scheduling observability passwords rotation' : 'Start Observability Passwords Rotation',
+          caption: this.isLoading
+            ? 'Scheduling observability passwords rotation'
+            : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
           successMessage: `Rotation of observability passwords started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of observability passwords?',
@@ -276,7 +279,9 @@ export default {
           ])
         },
         'rotate-ssh-keypair': {
-          caption: this.isLoading ? 'Scheduling SSH key pair rotation' : 'Start Worker Nodes SSH Key Pair Rotation',
+          caption: this.isLoading
+            ? 'Scheduling SSH key pair rotation'
+            : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of SSH key pair',
           successMessage: `Rotation of SSH key pair started for ${this.shootName}`,
           heading: 'Do you want to start the rotation of SSH key pair for worker nodes?',
@@ -353,7 +358,9 @@ export default {
         caption: this.isLoading
           ? 'Completing credential rotation'
           : 'Complete Rotation of all Credentials',
-        buttonText: this.text ? 'Complete Rotation of all Credentials' : '',
+        buttonText: this.text
+          ? 'Complete Rotation of all Credentials'
+          : '',
         errorMessage: 'Could not complete credential rotation',
         successMessage: `Completing credential rotation for ${this.shootName}`,
         heading: 'Do you want to complete the rotation of all credentials?',

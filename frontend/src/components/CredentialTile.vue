@@ -118,9 +118,9 @@ export default {
       if (!this.type) {
         return this.shootStatusCredentialsRotationAggregatedPhase
       }
-      const type = this.rotationStatus.phase
+
       return {
-        type
+        type: this.rotationStatus.phase
       }
     },
     phaseCaption () {
@@ -145,12 +145,8 @@ export default {
       return this.phase.type && this.phase.type !== 'Completed'
     },
     title () {
-      return this.getRotationTitle(this.type)
-    }
-  },
-  methods: {
-    getRotationTitle (type) {
-      return get(find(rotationTypes, t => { return t.type === this.type }), 'title')
+      const rotationType = find(rotationTypes, t => { return t.type === this.type })
+      return rotationType?.title
     }
   }
 }
