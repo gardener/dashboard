@@ -184,7 +184,6 @@ export default {
   },
   data () {
     return {
-      version: process.env.VUE_APP_VERSION,
       projectDialog: false,
       projectFilter: '',
       projectMenu: false,
@@ -203,6 +202,9 @@ export default {
       'canCreateProject',
       'projectList'
     ]),
+    version () {
+      return get(this.cfg, 'appVersion', process.env.VUE_APP_VERSION)
+    },
     isActive: {
       get () {
         return this.sidebar

@@ -18,7 +18,8 @@ router.route('/')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      res.send(await shoots.list({ user, namespace }))
+      const labelSelector = req.query.labelSelector
+      res.send(await shoots.list({ user, namespace, labelSelector }))
     } catch (err) {
       next(err)
     }

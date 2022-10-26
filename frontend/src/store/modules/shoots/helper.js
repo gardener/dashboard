@@ -64,3 +64,12 @@ export function parseSearch (text) {
   }
   return new SearchQuery(terms)
 }
+
+export const constants = Object.freeze({
+  DEFINED: 0,
+  LOADING: 1,
+  OPENING: 2,
+  OPEN: 3,
+  CLOSING: 4,
+  CLOSED: 5
+})

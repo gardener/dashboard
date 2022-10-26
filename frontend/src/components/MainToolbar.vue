@@ -9,6 +9,9 @@ SPDX-License-Identifier: Apache-2.0
     <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
+    <div class="text-center mr-2">
+      <shoot-subscription-status></shoot-subscription-status>
+    </div>
     <div class="text-center mr-6" v-if="helpMenuItems.length">
       <v-menu
         v-model="help"
@@ -92,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
               <div class="text-h6">{{displayName}}</div>
               <div class="text-caption">{{username}}</div>
               <div class="text-caption" v-if="isAdmin">Operator</div>
-              <v-btn-toggle v-model="colorScheme" borderless mandatory @click.native.stop class="mt-3">
+              <v-btn-toggle v-model="colorSchemeIndex" borderless mandatory @click.native.stop class="mt-3">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn small v-on="on">
@@ -127,6 +130,12 @@ SPDX-License-Identifier: Apache-2.0
               My Account
             </v-btn>
           </v-card-actions>
+          <v-card-actions class="px-3 pt-1">
+            <v-btn block text color="secondary" class="justify-start" :to="settingsLink" title="Setting">
+              <v-icon class="mr-3">mdi-cog</v-icon>
+              Settings
+            </v-btn>
+          </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
             <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
@@ -153,12 +162,14 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
 import Breadcrumb from '@/components/Breadcrumb'
 import InfoDialog from '@/components/dialogs/InfoDialog'
+import ShootSubscriptionStatus from '@/components/ShootSubscriptionStatus'
 
 export default {
   name: 'toolbar-background',
   components: {
     Breadcrumb,
-    InfoDialog
+    InfoDialog,
+    ShootSubscriptionStatus
   },
   data () {
     return {
@@ -170,11 +181,20 @@ export default {
   methods: {
     ...mapActions([
       'setSidebar',
-      'setError',
+      'setError'
+    ]),
+    ...mapActions('storage', [
       'setColorScheme'
     ]),
     handleLogout () {
       this.$auth.signout()
+    },
+    targetRoute (name) {
+      let query
+      if (this.namespace) {
+        query = { namespace: this.namespace }
+      }
+      return { name, query }
     }
   },
   computed: {
@@ -190,6 +210,9 @@ export default {
       'displayName',
       'avatarUrl',
       'isAdmin'
+    ]),
+    ...mapGetters('storage', [
+      'colorScheme'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
@@ -210,18 +233,14 @@ export default {
       }
     },
     accountLink () {
-      let query
-      if (this.namespace) {
-        query = { namespace: this.namespace }
-      }
-      return {
-        name: 'Account',
-        query
-      }
+      return this.targetRoute('Account')
     },
-    colorScheme: {
+    settingsLink () {
+      return this.targetRoute('Settings')
+    },
+    colorSchemeIndex: {
       get () {
-        switch (this.$store.state.colorScheme) {
+        switch (this.colorScheme) {
           case 'light':
             return 0
           case 'dark':

@@ -65,6 +65,15 @@ SPDX-License-Identifier: Apache-2.0
               ></v-text-field>
             </v-col>
           </v-row>
+          <v-alert
+            v-if="isUpdateDialog && orphaned"
+            :value="true"
+            type="info"
+            color="primary"
+            outlined
+          >
+            The service account does not exist anymore and will be re-created if you update the roles.
+          </v-alert>
           <g-message color="error" :message.sync="errorMessage" :detailed-message.sync="detailedErrorMessage"></g-message>
         </v-container>
       </v-card-text>
@@ -122,6 +131,9 @@ export default {
       type: Array
     },
     isCurrentUser: {
+      type: Boolean
+    },
+    orphaned: {
       type: Boolean
     }
   },

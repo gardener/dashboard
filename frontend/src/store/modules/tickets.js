@@ -8,14 +8,14 @@ import Vue from 'vue'
 import assign from 'lodash/assign'
 import filter from 'lodash/filter'
 import findIndex from 'lodash/findIndex'
-import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import flatMap from 'lodash/flatMap'
 import matches from 'lodash/matches'
 import matchesProperty from 'lodash/matchesProperty'
+import groupBy from 'lodash/groupBy'
 import orderBy from 'lodash/orderBy'
-import unionBy from 'lodash/unionBy'
+import uniqBy from 'lodash/uniqBy'
 
 const eql = ({ projectName, name, state = undefined }) => {
   const source = { metadata: { projectName } }
@@ -43,21 +43,26 @@ const getOpenIssues = ({ state, name, projectName }) => {
 }
 // getters
 const getters = {
-  items: state => state.all,
-  issues: (state) => ({ name, projectName }) => {
-    return getOpenIssues({ state, name, projectName })
+  items (state) {
+    return state.all
   },
-  comments: (state) => ({ issueNumber }) => {
-    return state.allComments[issueNumber]
+  issues (state) {
+    return ({ name, projectName }) => getOpenIssues({ state, name, projectName })
   },
-  latestUpdated: (state) => ({ name, projectName }) => {
-    const latestUpdatedIssue = head(getOpenIssues({ state, name, projectName }))
-    return latestUpdatedIssue
+  comments (state) {
+    return ({ issueNumber }) => state.allComments[issueNumber]
   },
-  labels: (state) => ({ name, projectName }) => {
-    const issues = getOpenIssues({ state, name, projectName })
-    const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
-    return labels
+  latestUpdated (state, getters) {
+    return ({ name, projectName }) => {
+      const issues = getters.issues({ name, projectName })
+      return head(issues)
+    }
+  },
+  labels (state, getters) {
+    return ({ name, projectName }) => {
+      const issues = getters.issues({ name, projectName })
+      return uniqBy(flatMap(issues, 'data.labels'), 'id')
+    }
   }
 }
 
@@ -73,41 +78,48 @@ const actions = {
   }
 }
 
-const orderTicketsByUpdatedAt = state => {
-  state.all = orderBy(state.all, ['metadata.updated_at'], ['desc'])
+const orderByUpdatedAt = items => {
+  return orderBy(items, ['metadata.updated_at'], ['desc'])
 }
+
+const orderTicketsByUpdatedAt = state => {
+  state.all = orderByUpdatedAt(state.all)
+}
+
 // mutations
 const mutations = {
-  HANDLE_ISSUE_EVENTS (state, events) {
-    forEach(events, event => {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          putItem(state, event.object)
-          break
-        case 'DELETED':
-          deleteItem(state, event.object)
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
-    })
+  RECEIVE_ISSUES (state, issues) {
+    state.all = orderByUpdatedAt(issues)
+  },
+  RECEIVE_COMMENTS (state, comments) {
+    state.allComments = groupBy(comments, 'metadata.number')
+  },
+  HANDLE_ISSUES_EVENT (state, { type, object }) {
+    switch (type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        putItem(state, object)
+        break
+      case 'DELETED':
+        deleteItem(state, object)
+        break
+      default:
+        console.error('undhandled event type', type)
+    }
     orderTicketsByUpdatedAt(state)
   },
-  HANDLE_COMMENTS_EVENTS (state, events) {
-    forEach(events, event => {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          putComment(state, event.object)
-          break
-        case 'DELETED':
-          deleteComment(state, event.object)
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
-    })
+  HANDLE_COMMENTS_EVENT (state, { type, object }) {
+    switch (type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        putComment(state, object)
+        break
+      case 'DELETED':
+        deleteComment(state, object)
+        break
+      default:
+        console.error('undhandled event type', type)
+    }
     orderTicketsByUpdatedAt(state)
   },
   CLEAR_ISSUES (state) {
@@ -149,7 +161,7 @@ const commentForIssue = (state, issueNumber) => {
 const putComment = (state, newItem) => {
   const issueNumber = get(newItem, 'metadata.number')
   const commentsList = commentForIssue(state, issueNumber)
-  const matcher = matches({ metadata: { id: newItem.metadata.id } })
+  const matcher = matchesProperty('metadata.id', newItem.metadata.id)
   putToList(commentsList, newItem, 'metadata.updated_at', matcher)
 }
 

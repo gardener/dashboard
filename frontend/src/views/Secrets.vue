@@ -220,7 +220,9 @@ export default {
       'dnsSecretList',
       'shootList',
       'canCreateSecrets',
-      'sortedCloudProviderKindList',
+      'sortedCloudProviderKindList'
+    ]),
+    ...mapGetters('gardenerExtensions', [
       'sortedDnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {
