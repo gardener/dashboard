@@ -12,6 +12,7 @@ const auth = require('./auth')
 const kube = require('./kube')
 const shoots = require('./shoots')
 const seeds = require('./seeds')
+const managedseeds = require('./managedseeds')
 const secrets = require('./secrets')
 const secretbindings = require('./secretbindings')
 const quotas = require('./quotas')
@@ -41,6 +42,7 @@ const fixtures = {
   kube,
   shoots,
   seeds,
+  managedseeds,
   secrets,
   secretbindings,
   projects,
