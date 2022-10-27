@@ -44,7 +44,7 @@ async function getGardenTerminalHostClusterSecretRef (client) {
       const seed = getSeedForGardenTerminalHostCluster()
       return _.get(seed, 'spec.secretRef')
     }
-    case GardenTerminalHostRefType.SHOOT_REF: {
+    case GardenTerminalHostRefType.SHOOT_REF: { // TODO refactor to return shootRef instead. The static kubeconfig might be disabled
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
       return {
         namespace: getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden'),
@@ -74,7 +74,8 @@ async function getGardenHostClusterKubeApiServer (client) {
     }
     case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
-      return getKubeApiServerHostForSeedOrShootedSeed(client, seed)
+      const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seed.metadata.name, throwNotFound: false })
+      return getKubeApiServerHostForSeedOrManagedSeed(client, seed, managedSeed)
     }
     case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
@@ -87,16 +88,14 @@ async function getGardenHostClusterKubeApiServer (client) {
   }
 }
 
-async function getKubeApiServerHostForSeedOrShootedSeed (client, seed) {
-  const name = seed.metadata.name
-  const namespace = 'garden'
-
-  const shoot = await client.getShoot({ namespace, name, throwNotFound: false })
-  if (shoot) {
+async function getKubeApiServerHostForSeedOrManagedSeed (client, seed, managedSeed) {
+  if (managedSeed) {
+    const shootRef = getShootRef(managedSeed)
+    const shoot = await client.getShoot(shootRef)
     return getKubeApiServerHostForShoot(shoot)
-  } else {
-    return getKubeApiServerHostForSeed(seed)
   }
+
+  return getKubeApiServerHostForSeed(seed)
 }
 
 function getKubeApiServerHostForShoot (shoot, seed) {
@@ -138,6 +137,13 @@ function getGardenTerminalHostClusterSecrets (client) {
   return client.core.secrets.list(namespace, query)
 }
 
+function getShootRef (managedSeed) {
+  return {
+    namespace: managedSeed.metadata.namespace,
+    name: managedSeed.spec.shoot.name
+  }
+}
+
 module.exports = {
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
@@ -145,6 +151,7 @@ module.exports = {
   getKubeApiServerHostForSeed,
   getKubeApiServerHostForShoot,
   getWildcardIngressDomainForSeed,
-  getKubeApiServerHostForSeedOrShootedSeed,
+  getKubeApiServerHostForSeedOrManagedSeed,
+  getShootRef,
   GardenTerminalHostRefType
 }
