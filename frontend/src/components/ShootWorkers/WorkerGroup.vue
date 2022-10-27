@@ -23,150 +23,153 @@ SPDX-License-Identifier: Apache-2.0
       <v-tabs
         height="32"
         color="primary"
-        v-model="tab">
+        v-model="tab"
+      >
         <v-tab
           key="overview"
           href="#overview"
+          class="text-caption"
         >
           Overview
         </v-tab>
         <v-tab
           key="yaml"
           href="#yaml"
+          class="text-caption"
         >
           Yaml
         </v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item id="overview">
-          <v-container>
-          <v-row>
-            <v-col cols="6" class="pa-1">
-              <v-card outlined>
-                <v-system-bar>
-                  <v-icon class="mr-2">mdi-server</v-icon>Machine
-                </v-system-bar>
-                <v-card-text>
-                  <v-row dense>
-                    <v-col v-if="workerGroup.machine.architecture">
-                      <legend class="text-caption">Architecture</legend>
-                      <span class="text--primary">{{workerGroup.machine.architecture}}</span>
-                    </v-col>
-                    <v-col>
-                      <legend class="text-caption">Type</legend>
-                      <span class="text--primary">{{workerGroup.machine.type}}</span>
-                    </v-col>
-                    <v-col cols="12" v-if="workerGroup.zones && workerGroup.zones.length">
-                      <legend class="text-caption">Zones</legend>
-                      <v-chip small label outlined class="px-1 mr-1" v-for="zone in workerGroup.zones" :key="zone">{{zone}}</v-chip>
-                    </v-col>
-                    <template v-if="machineType">
-                      <v-col>
-                        <legend class="text-caption">CPUs</legend>
-                        <span class="text--primary">{{machineType.cpu}}</span>
+          <v-container class="pa-2">
+            <v-row dense>
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-server</v-icon>Machine
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col v-if="workerGroup.machine.architecture">
+                        <legend class="text-caption">Architecture</legend>
+                        <span class="text--primary">{{workerGroup.machine.architecture}}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption">GPUs</legend>
-                        <span class="text--primary">{{machineType.gpu}}</span>
+                        <legend class="text-caption">Type</legend>
+                        <span class="text--primary">{{workerGroup.machine.type}}</span>
+                      </v-col>
+                      <v-col cols="12" v-if="workerGroup.zones && workerGroup.zones.length">
+                        <legend class="text-caption">Zones</legend>
+                        <v-chip small label outlined class="px-1 mr-1" v-for="zone in workerGroup.zones" :key="zone">{{zone}}</v-chip>
+                      </v-col>
+                      <template v-if="machineType">
+                        <v-col>
+                          <legend class="text-caption">CPUs</legend>
+                          <span class="text--primary">{{machineType.cpu}}</span>
+                        </v-col>
+                        <v-col>
+                          <legend class="text-caption">GPUs</legend>
+                          <span class="text--primary">{{machineType.gpu}}</span>
+                        </v-col>
+                        <v-col>
+                          <legend class="text-caption">Memory</legend>
+                          <span class="text--primary">{{machineType.memory}}</span>
+                        </v-col>
+                      </template>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-harddisk</v-icon>Volume
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row>
+                      <v-col v-if="volumeCardData.type">
+                        <legend class="text-caption">Type</legend>
+                        <span class="text--primary">{{volumeCardData.type}}</span>
+                      </v-col>
+                      <v-col v-if="volumeCardData.class">
+                        <legend class="text-caption">Class</legend>
+                        <span class="text--primary">{{volumeCardData.class}}</span>
+                      </v-col>
+                      <v-col v-if="volumeCardData.size">
+                        <legend class="text-caption">Size</legend>
+                        <span class="text--primary">{{volumeCardData.size}}</span>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-disc</v-icon>Image
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col>
+                        <legend class="text-caption">Name</legend>
+                        <span class="text--primary">{{workerGroup.machine.image.name}}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption">Memory</legend>
-                        <span class="text--primary">{{machineType.memory}}</span>
+                        <legend class="text-caption">Version</legend>
+                        <span class="text--primary">{{workerGroup.machine.image.version}}</span>
                       </v-col>
-                    </template>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-              <v-card outlined class="mt-4">
-                <v-system-bar>
-                  <v-icon class="mr-2">mdi-harddisk</v-icon>Volume
-                </v-system-bar>
-                <v-card-text>
-                  <v-row>
-                    <v-col v-if="volumeCardData.type">
-                      <legend class="text-caption">Type</legend>
-                      <span class="text--primary">{{volumeCardData.type}}</span>
-                    </v-col>
-                    <v-col v-if="volumeCardData.class">
-                      <legend class="text-caption">Class</legend>
-                      <span class="text--primary">{{volumeCardData.class}}</span>
-                    </v-col>
-                    <v-col v-if="volumeCardData.size">
-                      <legend class="text-caption">Size</legend>
-                      <span class="text--primary">{{volumeCardData.size}}</span>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            <v-col cols="6" class="pa-1">
-              <v-card outlined>
-                <v-system-bar>
-                  <v-icon class="mr-2">mdi-disc</v-icon>Image
-                </v-system-bar>
-                <v-card-text>
-                  <v-row dense>
-                    <v-col>
-                      <legend class="text-caption">Name</legend>
-                      <span class="text--primary">{{workerGroup.machine.image.name}}</span>
-                    </v-col>
-                    <v-col>
-                      <legend class="text-caption">Version</legend>
-                      <span class="text--primary">{{workerGroup.machine.image.version}}</span>
-                    </v-col>
-                    <v-col cols="12" v-if="!machineImage">
-                      <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image not found in cloud profile
-                    </v-col>
-                    <v-col cols="12" v-else-if="machineImage.expirationDate">
-                      <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image expires on {{machineImage.expirationDateString}}
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-              <v-card outlined class="mt-4">
-                <v-system-bar>
-                  <v-icon class="mr-2">mdi-chart-line-variant</v-icon>Autoscaler
-                </v-system-bar>
-                <v-card-text>
-                  <v-row dense>
-                    <v-col cols="6">
-                      <legend class="text-caption">Maximum</legend>
-                      <span class="text--primary">{{workerGroup.maximum}}</span>
-                    </v-col>
-                    <v-col cols="6">
-                      <legend class="text-caption">Minimum</legend>
-                      <span class="text--primary">{{workerGroup.minimum}}</span>
-                    </v-col>
-                    <v-col cols="6">
-                      <legend class="text-caption">Max. Surge</legend>
-                      <span class="text--primary">{{workerGroup.maxSurge}}</span>
-                    </v-col>
-                    <v-col cols="6">
-                      <legend class="text-caption">Max. Unavailable</legend>
-                      <span class="text--primary">{{workerGroup.maxUnavailable}}</span>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-              <v-card outlined class="mt-4">
-                <v-system-bar>
-                  <v-icon class="mr-2">mdi-oci</v-icon>Container Runtime
-                </v-system-bar>
-                <v-card-text>
-                  <v-row dense>
-                    <v-col>
-                      <legend class="text-caption">Name</legend>
-                      <span class="text--primary">{{workerGroup.cri.name}}</span>
-                    </v-col>
-                    <v-col cols="12" v-if="workerGroup.cri.containerRuntimes && workerGroup.cri.containerRuntimes.length">
-                      <legend class="text-caption">Additional OCI Runtimes</legend>
-                      <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in workerGroup.cri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
+                      <v-col cols="12" v-if="!machineImage">
+                        <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image not found in cloud profile
+                      </v-col>
+                      <v-col cols="12" v-else-if="machineImage.expirationDate">
+                        <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image expires on {{machineImage.expirationDateString}}
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-chart-line-variant</v-icon>Autoscaler
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col cols="6">
+                        <legend class="text-caption">Maximum</legend>
+                        <span class="text--primary">{{workerGroup.maximum}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Minimum</legend>
+                        <span class="text--primary">{{workerGroup.minimum}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Max. Surge</legend>
+                        <span class="text--primary">{{workerGroup.maxSurge}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Max. Unavailable</legend>
+                        <span class="text--primary">{{workerGroup.maxUnavailable}}</span>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-oci</v-icon>Container Runtime
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col>
+                        <legend class="text-caption">Name</legend>
+                        <span class="text--primary">{{workerGroup.cri.name}}</span>
+                      </v-col>
+                      <v-col cols="12" v-if="workerGroup.cri.containerRuntimes && workerGroup.cri.containerRuntimes.length">
+                        <legend class="text-caption">Additional OCI Runtimes</legend>
+                        <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in workerGroup.cri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-container>
         </v-tab-item>
         <v-tab-item id="yaml">
