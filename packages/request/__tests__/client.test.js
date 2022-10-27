@@ -10,7 +10,7 @@ const http2 = require('http2')
 const zlib = require('zlib')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { Client, extend } = require('../lib')
-const exp = require('constants')
+
 const {
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
