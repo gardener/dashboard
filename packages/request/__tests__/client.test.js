@@ -228,22 +228,53 @@ describe('Client', () => {
       expect(body).toEqual(stream.mockBody())
     })
 
-    it('should return a text response for invalid json', async () => {
-      stream.mockHeaders.mockReturnValue({
-        [HTTP2_HEADER_STATUS]: statusCode,
-        [HTTP2_HEADER_CONTENT_TYPE]: 'text/plain'
-      })
+    describe('when the server returns plain text for a JSON endpoint', () => {
+      const contentType = 'text/plain'
       const chunks = ['foo', '-', 'bar']
-      stream[Symbol.asyncIterator] = function * () {
-        for (const chunk of chunks) {
-          yield chunk
+      const rawBody = chunks.join('')
+      const parseErrorMessage = () => {
+        try {
+          JSON.parse(rawBody)
+        } catch (err) {
+          return err.message
         }
       }
-      client.responseType = 'json'
-      const response = await client.fetch()
-      expect(response.contentType).toBe('text/plain')
-      const body = await response.body()
-      expect(body).toEqual(chunks.join(''))
+
+      let statusCode
+
+      beforeEach(() => {
+        statusCode = 200
+        stream.mockHeaders.mockImplementation(() => {
+          return {
+            [HTTP2_HEADER_STATUS]: statusCode,
+            [HTTP2_HEADER_CONTENT_TYPE]: contentType
+          }
+        })
+        stream[Symbol.asyncIterator] = function * () {
+          for (const chunk of chunks) {
+            yield chunk
+          }
+        }
+        client.responseType = 'json'
+      })
+
+      it('should throw a ParseError for invalid json on success', async () => {
+        statusCode = 200
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).rejects.toMatchObject({
+          name: 'ParseError',
+          message: parseErrorMessage(),
+          rawBody
+        })
+      })
+
+      it('should return a response with plain text body on failure', async () => {
+        statusCode = 500
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).resolves.toBe(rawBody)
+      })
     })
 
     it('should return a response with responseType "text"', async () => {

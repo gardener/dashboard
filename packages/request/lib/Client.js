@@ -14,7 +14,7 @@ const zlib = require('zlib')
 const typeis = require('type-is')
 const { pick, omit } = require('lodash')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { createHttpError } = require('./errors')
+const { createHttpError, ParseError } = require('./errors')
 const { globalAgent } = require('./Agent')
 const { pipeline } = require('stream')
 
@@ -221,6 +221,13 @@ class Client {
                 try {
                   return JSON.parse(text)
                 } catch (err) {
+                  logger.error('Failed to parse response body: %s', text)
+                  if (this.ok) {
+                    throw new ParseError(err.message, {
+                      headers,
+                      rawBody: text
+                    })
+                  }
                   return text
                 }
               default:
