@@ -47,6 +47,7 @@ export const rotationTypes = [
     // no type as this rotation is the 'all credential rotatiom trigger', which as no dedicated key in the rotation status
     startOperation: 'rotate-credentials-start',
     completionOperation: 'rotate-credentials-complete',
-    title: 'Rotate All Credentials'
+    title: 'Rotate All Credentials',
+    twoStep: true
   }
 ]

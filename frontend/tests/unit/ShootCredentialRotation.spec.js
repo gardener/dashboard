@@ -190,6 +190,50 @@ describe('ShootCredentialRotation.vue', () => {
       expect(shootMessagesWrapper.exists()).toBe(true)
       expect(certificateAuthoritiesWrapper.vm.iconColor).toBe('warning')
     })
+
+    it('should compute phaseType', () => {
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [, , certificateAuthoritiesWrapper, observabilityRotationWrapper, sshKeyWrapper] = credentialWrappers.wrappers
+
+      expect(certificateAuthoritiesWrapper.vm.phaseType).toEqual('Prepared')
+      expect(certificateAuthoritiesWrapper.vm.isProgressing).toBe(false)
+
+      expect(observabilityRotationWrapper.vm.phaseType).toEqual(undefined)
+      expect(observabilityRotationWrapper.vm.isProgressing).toBe(false)
+
+      expect(sshKeyWrapper.vm.phaseType).toEqual(undefined)
+      expect(sshKeyWrapper.vm.isProgressing).toBe(false)
+    })
+
+    it('should compute progressing phaseType for one-step rotations', () => {
+      delete shootItem.status.credentials.rotation.sshKeypair.lastCompletionTime
+      shootItem.status.credentials.rotation.observability.lastInitiationTime = '2022-08-05T10:01:42Z'
+
+      const cardWrapper = mount(ShootCredentialRotationCard, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          shootItem
+        }
+      })
+      const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
+      const [, , , observabilityRotationWrapper, sshKeyWrapper] = credentialWrappers.wrappers
+
+      expect(observabilityRotationWrapper.vm.phaseType).toEqual('Rotating')
+      expect(observabilityRotationWrapper.vm.isProgressing).toBe(true)
+
+      expect(sshKeyWrapper.vm.phaseType).toEqual('Rotating')
+      expect(sshKeyWrapper.vm.isProgressing).toBe(true)
+    })
   })
 
   describe('RotateCredentials.vue', () => {

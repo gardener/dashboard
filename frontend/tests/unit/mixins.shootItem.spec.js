@@ -76,17 +76,20 @@ describe('shootItem', () => {
     })
 
     it('should return incomplete prepared phase', () => {
-      shootItemProp.status.credentials.rotation.etcdEncryptionKey.phase = 'Prepared'
+      // treat unrotated credentials as unprepared
+      delete shootItemProp.status.credentials.rotation.etcdEncryptionKey
+
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem: shootItemProp
         }
       })
       const unpreparedRotations = [
+        find(rotationTypes, ['type', 'etcdEncryptionKey']),
         find(rotationTypes, ['type', 'serviceAccountKey'])
       ]
 
-      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 2/3', incomplete: true, unpreparedRotations })
+      expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 1/3', incomplete: true, unpreparedRotations })
     })
   })
 })

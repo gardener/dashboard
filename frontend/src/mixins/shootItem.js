@@ -258,29 +258,27 @@ export const shootItem = {
       let preparedRotationsCount = 0
       let completedPhasesCount = 0
       const unpreparedRotations = []
-      for (const [rotationKey, rotationStatus] of Object.entries(this.shootStatusCredentialsRotation)) {
+      for (const rotationType of filter(rotationTypes, t => { return t.type && t.twoStep })) {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
-        const rotationType = find(rotationTypes, ['type', rotationKey])
-        if (rotationType) {
-          // If gardener introduces a new rotation type, ignore it to avoid breaking our logic
-          if (['Preparing', 'Completing'].includes(rotationStatus.phase)) {
-            return {
-              type: rotationStatus.phase,
-              caption: rotationStatus.phase
-            }
+        const rotationStatus = this.shootStatusCredentialsRotation[rotationType.type]
+        if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
+          return {
+            type: rotationStatus.phase,
+            caption: rotationStatus.phase
           }
-          if (rotationStatus.phase === 'Completed') {
-            completedPhasesCount++
-          }
-          if (rotationStatus.phase === 'Prepared') {
-            preparedRotationsCount++
-          } else if (rotationType.twoStep) {
-            unpreparedRotations.push(rotationType)
-          }
+        }
+        if (!rotationStatus || rotationStatus?.phase === 'Completed') {
+          // count not yet rotated rotation types as completed as they are technically ready for step 1 (preparing)
+          completedPhasesCount++
+        }
+        if (rotationStatus?.phase === 'Prepared') {
+          preparedRotationsCount++
+        } else if (rotationType.twoStep) {
+          unpreparedRotations.push(rotationType)
         }
       }
 
-      const numberOfTwoStepOperations = filter(rotationTypes, ['twoStep', true]).length
+      const numberOfTwoStepOperations = filter(rotationTypes, t => { return t.type && t.twoStep }).length
       if (preparedRotationsCount > 0) {
         if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'

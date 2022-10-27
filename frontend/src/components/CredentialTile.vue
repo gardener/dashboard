@@ -11,33 +11,45 @@ SPDX-License-Identifier: Apache-2.0
     </v-list-item-icon>
     <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
-        {{title}}
-        <v-tooltip top :disabled="phase.type !== 'Prepared'">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{title}}</span>
+          </template>
+          {{titleTooltip}}
+        </v-tooltip>
+        <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
-          <template v-if="phase && phase.incomplete">
-            <div>
-              <strong>
-                All two-step credentials rotations need to be in phase
+          <template v-if="phaseType === 'Prepared'">
+            <template v-if="phase && phase.incomplete">
+              <div>
+                <strong>
+                  All two-step credentials rotations need to be in phase
+                  <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
+                  in order to perform this operation
+                </strong>
+              </div>
+              <div>Please prepare rotation of the following credentials</div>
+              <ul v-if="phase">
+                <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
+              </ul>
+            </template>
+            <template v-else>
+              <div>
+                This two-step operation is in phase
                 <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
-                in order to perform this operation
-              </strong>
-            </div>
-            <div>Please prepare rotation of the followig credentials</div>
-            <ul v-if="phase">
-              <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
-            </ul>
+              </div>
+              <div>
+                Rotation Prepared: <time-string :date-time="lastInitiationTime" mode="past" no-tooltip></time-string>
+              </div>
+            </template>
           </template>
-          <template v-else>
-            <div>
-              This two-step operation is in phase
-              <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
-            </div>
-            <div>
-              Rotation Prepared: <time-string :date-time="lastInitiationTime" mode="past"></time-string>
-            </div>
-          </template>
+          <span v-else-if="isProgressing">
+            {{phaseCaption}}
+            <span v-if="lastInitiationTime">since <time-string :date-time="lastInitiationTime" mode="past" without-prefix-or-suffix no-tooltip></time-string></span>
+          </span>
+          <span v-else>{{phaseCaption}}</span>
         </v-tooltip>
       </v-list-item-title>
       <v-list-item-subtitle class="d-flex align-center">
@@ -116,18 +128,34 @@ export default {
     },
     phase () {
       if (!this.type) {
-        return this.shootStatusCredentialsRotationAggregatedPhase
+        return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
       }
 
       return {
         type: this.rotationStatus.phase
       }
     },
+    phaseType () {
+      if (!this.phase) {
+        return undefined
+      }
+      if (this.phase.type) {
+        return this.phase.type
+      }
+      if (this.rotationStatus.lastInitiationTime > (this.rotationStatus.lastCompletionTime ?? '0')) {
+        // Show 'Rotating' phase for one step rotations
+        return 'Rotating'
+      }
+      return undefined
+    },
+    isProgressing () {
+      return this.phaseType === 'Preparing' || this.phaseType === 'Completing' || this.phaseType === 'Rotating'
+    },
     phaseCaption () {
-      return get(this.phase, 'caption', this.phase.type)
+      return get(this.phase, 'caption', this.phaseType)
     },
     phaseColor () {
-      switch (this.phase.type) {
+      switch (this.phaseType) {
         case 'Prepared':
         case 'Completed':
           return 'primary'
@@ -142,11 +170,16 @@ export default {
       return 'primary'
     },
     showChip () {
-      return this.phase.type && this.phase.type !== 'Completed'
+      return this.phaseType && this.phaseType !== 'Completed'
+    },
+    rotationType () {
+      return find(rotationTypes, t => { return t.type === this.type })
     },
     title () {
-      const rotationType = find(rotationTypes, t => { return t.type === this.type })
-      return rotationType?.title
+      return this.rotationType?.title
+    },
+    titleTooltip () {
+      return this.rotationType?.twoStep ? 'Two-step rotation' : 'One-step rotation'
     }
   }
 }
