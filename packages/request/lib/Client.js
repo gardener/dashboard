@@ -85,9 +85,26 @@ class Client {
     const { hostname } = new URL(this.baseUrl)
     // use empty string '' to disable sending the SNI extension
     const servername = isIP(hostname) !== 0 ? '' : hostname
+    const keys = [
+      'ca',
+      'rejectUnauthorized',
+      'key',
+      'cert',
+      'servername',
+      'id',
+      'keepAliveTimeout',
+      'connectTimeout',
+      'pingInterval',
+      'maxOutstandingPings',
+      'maxSessionMemory',
+      'maxHeaderListPairs',
+      'maxReservedRemoteStreams',
+      'peerMaxConcurrentStreams',
+      'settings'
+    ]
     return {
       servername,
-      ...pick(this.#options, ['ca', 'rejectUnauthorized', 'key', 'cert', 'servername', 'id'])
+      ...pick(this.#options, keys)
     }
   }
 

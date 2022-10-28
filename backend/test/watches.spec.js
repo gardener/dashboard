@@ -6,7 +6,6 @@
 
 'use strict'
 
-const assert = require('assert').strict
 const EventEmitter = require('events')
 const _ = require('lodash')
 const logger = require('../lib/logger')
@@ -16,8 +15,39 @@ const cache = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
 
+const rooms = new Map()
+
+function getRoom (name) {
+  if (!rooms.has(name)) {
+    rooms.set(name, {
+      emit: jest.fn()
+    })
+  }
+  return rooms.get(name)
+}
+
+const nsp = {
+  to: jest.fn().mockImplementation(name => {
+    if (Array.isArray(name)) {
+      return {
+        rooms: name.map(getRoom),
+        emit (...args) {
+          for (const room of this.rooms) {
+            room.emit(...args)
+          }
+        }
+      }
+    }
+    return getRoom(name)
+  }),
+  emit: jest.fn()
+}
+
+const io = {
+  of: jest.fn().mockReturnValue(nsp)
+}
+
 describe('watches', function () {
-  const io = {}
   const foo = { metadata: { name: 'foo', uid: 1 }, spec: { namespace: 'foo' } }
   const bar = { metadata: { name: 'bar', uid: 2 } }
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
@@ -41,6 +71,7 @@ describe('watches', function () {
 
   beforeEach(function () {
     informer = new EventEmitter()
+    rooms.clear()
     jest.clearAllMocks()
   })
 
@@ -55,34 +86,15 @@ describe('watches', function () {
       informer.emit('update', { kind, ...bar }, bar)
       informer.emit('delete', bar)
       expect(bootstrapStub).toHaveBeenCalledTimes(3)
-      expect(bootstrapStub.mock.calls[0]).toEqual([foo])
-      expect(bootstrapStub.mock.calls[1]).toEqual([bar])
-      expect(bootstrapStub.mock.calls[2]).toEqual([{ kind, ...bar }])
+      expect(bootstrapStub.mock.calls).toEqual([
+        [foo],
+        [bar],
+        [{ kind, ...bar }]
+      ])
     })
   })
 
   describe('shoots', function () {
-    class Room {
-      constructor (namespace, events, kind = 'shoots', eventName = 'shoots') {
-        this.kind = kind
-        this.eventName = eventName
-        this.namespace = namespace
-        this.events = events
-      }
-
-      emit (name, { kind, namespaces }) {
-        assert.strictEqual(name, this.eventName)
-        assert.strictEqual(kind, this.kind)
-        assert.strictEqual(namespaces[this.namespace].length, 1)
-        const { objectKey, ...actualEvent } = namespaces[this.namespace][0]
-        assert.strictEqual(objectKey, actualEvent.object.metadata.uid)
-        assert.notStrictEqual(this.events.length, 0)
-        const expectedEvent = this.events[0]
-        assert.deepStrictEqual(actualEvent, expectedEvent)
-        this.events.shift()
-      }
-    }
-
     const foobarUnhealthy = _
       .chain(foobar)
       .cloneDeep()
@@ -96,41 +108,13 @@ describe('watches', function () {
       .value()
 
     let shootsWithIssues
-    let fooRoom
-    let fooBazRoom
-    let fooBarRoom
-    let fooIssuesRoom
-
-    const nsp = {
-      to (room) {
-        switch (room) {
-          case 'shoots_foo':
-            return fooRoom
-          case 'shoot_foo_bar':
-            return fooBarRoom
-          case 'shoot_foo_baz':
-            return fooBazRoom
-          case 'shoots_foo_issues':
-            return fooIssuesRoom
-          default:
-            assert.fail(`Unexpect room ${room}`)
-        }
-      }
-    }
-
-    const io = {
-      of (namespace) {
-        assert.strictEqual(namespace, '/')
-        return nsp
-      }
-    }
 
     let deleteTicketsStub
     let bootstrapResourceStub
     let removeResourceStub
     let findProjectByNamespaceStub
 
-    beforeEach(function () {
+    beforeEach(() => {
       shootsWithIssues = new Set()
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
       bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
@@ -143,21 +127,8 @@ describe('watches', function () {
     it('should watch shoots without issues', async function () {
       watches.shoots(io, informer)
 
-      fooRoom = new Room('foo', [
-        { type: 'ADDED', object: foobar },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'DELETED', object: foobar }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'ADDED', object: foobar },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'DELETED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [])
+      expect(io.of).toBeCalledTimes(1)
+      expect(io.of.mock.calls).toEqual([['/']])
 
       informer.emit('add', foobar)
       informer.emit('update', foobar)
@@ -171,41 +142,32 @@ describe('watches', function () {
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
 
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
+      const keys = ['shoots:admin', 'shoots;foo', 'shoots;foo/bar']
+      expect(nsp.to).toBeCalledTimes(3)
+      expect(nsp.to.mock.calls).toEqual([[keys], [keys], [keys]])
+      expect(Array.from(rooms.keys())).toEqual(keys)
+      for (const key of keys) {
+        const room = rooms.get(key)
+        expect(room.emit).toBeCalledTimes(3)
+        expect(room.emit.mock.calls).toEqual([
+          [
+            'shoots',
+            { type: 'ADDED', object: foobar }
+          ],
+          [
+            'shoots',
+            { type: 'MODIFIED', object: foobar }
+          ],
+          [
+            'shoots',
+            { type: 'DELETED', object: foobar }
+          ]
+        ])
+      }
     })
 
     it('should watch shoots with issues', async function () {
       watches.shoots(io, informer, { shootsWithIssues })
-
-      fooRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'MODIFIED', object: foobar },
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'MODIFIED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [
-        { type: 'ADDED', object: foobarUnhealthy },
-        { type: 'DELETED', object: foobar },
-        { type: 'ADDED', object: foobazUnhealthy },
-        { type: 'MODIFIED', object: foobazUnhealthy },
-        { type: 'DELETED', object: foobazUnhealthy }
-      ])
 
       expect(shootsWithIssues).toHaveProperty('size', 0)
       informer.emit('add', foobarUnhealthy)
@@ -224,10 +186,32 @@ describe('watches', function () {
       expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
 
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
+      const fooRoom = rooms.get('shoots;foo')
+      expect(fooRoom.emit).toBeCalledTimes(5)
+      const fooIssuesRoom = rooms.get('shoots:unhealthy;foo')
+      expect(fooIssuesRoom.emit).toBeCalledTimes(5)
+      expect(fooIssuesRoom.emit.mock.calls).toEqual([
+        [
+          'shoots',
+          { type: 'ADDED', object: foobarUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'DELETED', object: foobar }
+        ],
+        [
+          'shoots',
+          { type: 'ADDED', object: foobazUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'MODIFIED', object: foobazUnhealthy }
+        ],
+        [
+          'shoots',
+          { type: 'DELETED', object: foobazUnhealthy }
+        ]
+      ])
     })
 
     it('should delete tickets for a deleted shoot', async function () {
@@ -240,21 +224,6 @@ describe('watches', function () {
 
       watches.shoots(io, informer)
 
-      fooRoom = new Room('foo', [
-        { type: 'DELETED', object: foobar },
-        { type: 'DELETED', object: foobaz }
-      ])
-
-      fooBarRoom = new Room('foo', [
-        { type: 'DELETED', object: foobar }
-      ], 'shoot')
-
-      fooBazRoom = new Room('foo', [
-        { type: 'DELETED', object: foobaz }
-      ], 'shoot')
-
-      fooIssuesRoom = new Room('foo', [])
-
       informer.emit('delete', foobar)
       informer.emit('delete', foobaz)
 
@@ -262,61 +231,16 @@ describe('watches', function () {
       expect(removeResourceStub).toBeCalledTimes(2)
       expect(removeResourceStub.mock.calls).toEqual([[foobar], [foobaz]])
       expect(deleteTicketsStub).toBeCalledTimes(2)
-
-      expect(fooRoom.events).toHaveLength(0)
-      expect(fooBarRoom.events).toHaveLength(0)
-      expect(fooBazRoom.events).toHaveLength(0)
-      expect(fooIssuesRoom.events).toHaveLength(0)
     })
   })
 
   describe('tickets', function () {
-    const issueEvent = {}
-    const issuesRoom = {
-      emit (name, payload) {
-        assert.strictEqual(name, 'issues')
-        assert.deepStrictEqual(payload, {
-          kind: 'issues',
-          events: [issueEvent]
-        })
-      }
+    const metadata = {
+      projectName: 'foo',
+      name: 'bar'
     }
-
-    const commentEvent = {
-      object: {
-        metadata: {
-          projectName: 'foo',
-          name: 'bar'
-        }
-      }
-    }
-    const commentsRoom = {
-      emit (name, payload) {
-        assert.strictEqual(name, 'comments')
-        assert.deepStrictEqual(payload, {
-          kind: 'comments',
-          events: [commentEvent]
-        })
-      }
-    }
-
-    const nsp = {
-      to (room) {
-        switch (room) {
-          case 'issues':
-            return issuesRoom
-          case 'comments_foo/bar':
-            return commentsRoom
-        }
-      }
-    }
-
-    const io = {
-      of (namespace) {
-        assert.strictEqual(namespace, '/')
-        return nsp
-      }
-    }
+    const issueEvent = { object: { metadata } }
+    const commentEvent = { object: { metadata } }
 
     const ticketCache = {
       on (eventName, handler) {

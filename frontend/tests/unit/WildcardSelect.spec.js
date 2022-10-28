@@ -26,7 +26,8 @@ describe('WildcardSelect.vue', () => {
     'Foo',
     '*',
     'Bar*',
-    'BarBla'
+    'BarBla',
+    '*both*'
   ]
 
   const shallowMountWildcardSelect = value => {
@@ -47,59 +48,71 @@ describe('WildcardSelect.vue', () => {
 
   it('should prefer non wildcard value', () => {
     const wrapper = shallowMountWildcardSelect('Foo')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartPrefix, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('Foo')
     expect(wildcardSelectedValue.isWildcard).toBe(false)
-    expect(wildcardVariablePart).toBe('')
+    expect(wildcardVariablePartPrefix).toBe('')
+    expect(wildcardVariablePartSuffix).toBe('')
   })
 
   it('should select start wildcard', () => {
     const wrapper = shallowMountWildcardSelect('TestFoo')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartPrefix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('Foo')
     expect(wildcardSelectedValue.isWildcard).toBe(true)
     expect(wildcardSelectedValue.startsWithWildcard).toBe(true)
-    expect(wildcardVariablePart).toBe('Test')
+    expect(wildcardVariablePartPrefix).toBe('Test')
   })
 
   it('should select end wildcard', () => {
     const wrapper = shallowMountWildcardSelect('BarTest')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('Bar')
     expect(wildcardSelectedValue.isWildcard).toBe(true)
     expect(wildcardSelectedValue.endsWithWildcard).toBe(true)
-    expect(wildcardVariablePart).toBe('Test')
+    expect(wildcardVariablePartSuffix).toBe('Test')
+  })
+
+  it('should select both start+end wildcard', () => {
+    const wrapper = shallowMountWildcardSelect('BarbothFoo')
+    const { wildcardSelectedValue, wildcardVariablePartPrefix, wildcardVariablePartSuffix } = wrapper.vm
+    expect(wildcardSelectedValue.value).toBe('both')
+    expect(wildcardSelectedValue.isWildcard).toBe(true)
+    expect(wildcardSelectedValue.startsWithWildcard).toBe(true)
+    expect(wildcardSelectedValue.endsWithWildcard).toBe(true)
+    expect(wildcardVariablePartPrefix).toBe('Bar')
+    expect(wildcardVariablePartSuffix).toBe('Foo')
   })
 
   it('should select longest match', () => {
     const wrapper = shallowMountWildcardSelect('BarBla')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('BarBla')
     expect(wildcardSelectedValue.isWildcard).toBe(false)
-    expect(wildcardVariablePart).toBe('')
+    expect(wildcardVariablePartSuffix).toBe('')
   })
 
   it('should select wildcard if inital value is wildcard', () => {
     const wrapper = shallowMountWildcardSelect('Bar*')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('Bar')
     expect(wildcardSelectedValue.endsWithWildcard).toBe(true)
-    expect(wildcardVariablePart).toBe('')
+    expect(wildcardVariablePartSuffix).toBe('')
   })
 
   it('Should select initial custom wildcard value', () => {
     const wrapper = shallowMountWildcardSelect('*')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('')
     expect(wildcardSelectedValue.customWildcard).toBe(true)
-    expect(wildcardVariablePart).toBe('')
+    expect(wildcardVariablePartSuffix).toBe('')
   })
 
   it('Should select custom wildcard', () => {
     const wrapper = shallowMountWildcardSelect('RandomValue')
-    const { wildcardSelectedValue, wildcardVariablePart } = wrapper.vm
+    const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
     expect(wildcardSelectedValue.value).toBe('')
     expect(wildcardSelectedValue.customWildcard).toBe(true)
-    expect(wildcardVariablePart).toBe('RandomValue')
+    expect(wildcardVariablePartSuffix).toBe('RandomValue')
   })
 })

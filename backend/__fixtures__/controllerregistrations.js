@@ -55,10 +55,11 @@ const controllerRegistrationList = [
   }),
   getControllerRegistration({
     uid: 2,
-    name: 'DNS Registration',
+    name: 'Provider-Foo',
     resources: [{
-      kind: 'DNSProvider',
-      type: 'gardenland'
+      kind: 'DNSRecord',
+      type: 'gardenland',
+      primary: true
     }]
   })
 ]

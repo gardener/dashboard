@@ -18,14 +18,12 @@ import assign from 'lodash/assign'
 describe('store.shoots.getters', () => {
   let shootItems
   const rootGetters = {
-    ticketsLabels: undefined,
     shootCustomFields: {
       Z_Foo: {
         path: 'metadata.namespace'
       }
     },
-    shootCustomFieldList: undefined,
-    latestUpdatedTicketByNameAndNamespace: undefined
+    shootCustomFieldList: undefined
   }
   let state
   let sortItems

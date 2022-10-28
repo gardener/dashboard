@@ -14,7 +14,6 @@ const { toBase64, createUrl, parseLabelSelector } = require('./helper')
 const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
-const caCrt = toBase64('ca.crt')
 const clientCertificateData = toBase64('client-certificate-data')
 const clientKeyData = toBase64('client-key-data')
 
@@ -176,7 +175,7 @@ const secrets = {
         'gardener.cloud/role': 'ca-cluster'
       },
       data: {
-        'ca.crt': caCrt
+        'ca.crt': 'ca.crt'
       }
     })
   },

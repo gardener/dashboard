@@ -96,6 +96,10 @@ class Client {
   getSecret (...args) {
     return getResource(this.core.secrets, ...args)
   }
+
+  getManagedSeed (...args) {
+    return getResource(this['seedmanagement.gardener.cloud'].managedseeds, ...args)
+  }
 }
 
 async function getResource (resource, { namespace, name, throwNotFound = true }) {

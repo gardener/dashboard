@@ -21,8 +21,17 @@ import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import getters from './getters'
-import { keyForShoot, findItem } from './helper'
-import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot } from '@/utils/api'
+import { keyForShoot, findItem, constants } from './helper'
+import {
+  getShoots,
+  getShoot,
+  getIssues,
+  getIssuesAndComments,
+  getShootInfo,
+  getShootSeedInfo,
+  createShoot,
+  deleteShoot
+} from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import {
@@ -39,6 +48,7 @@ import {
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
 import find from 'lodash/find'
 
+const logger = Vue.logger
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
 // initial state
@@ -50,17 +60,100 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
-  freezeSorting: false
+  freezeSorting: false,
+  subscription: null,
+  subscriptionState: constants.CLOSED,
+  subscriptionError: null
+}
+
+function clearAll ({ commit }) {
+  commit('CLEAR_ALL')
+  commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+  commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
 }
 
 // actions
 const actions = {
-  /**
-   * Return all shoots in the given namespace.
-   * This ends always in a server/backend call.
-   */
-  clearAll ({ commit }) {
+  unsubscribe ({ commit, dispatch }) {
+    commit('UNSUBSCRIBE')
+    clearAll({ commit })
+  },
+  clear ({ commit }) {
     commit('CLEAR_ALL')
+    commit('tickets/CLEAR_ISSUES', undefined, { root: true })
+    commit('tickets/CLEAR_COMMENTS', undefined, { root: true })
+  },
+  subscribe ({ commit, dispatch, rootState }, metadata = {}) {
+    const { namespace = rootState.namespace, name } = metadata
+    commit('SET_SUBSCRIPTION', { namespace, name })
+    return dispatch('synchronize')
+  },
+  synchronize ({ commit, dispatch, getters, rootState, rootGetters }) {
+    const fetchShoot = async options => {
+      const [
+        { data: shoot },
+        { data: { issues = [], comments = [] } }
+      ] = await Promise.all([
+        getShoot(options),
+        getIssuesAndComments(options)
+      ])
+      // fetch shootInfo and shootSeedInfo in the background (do not await the promise)
+      assignInfoAndSeedInfo(shoot)
+      logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
+      return { shoots: [shoot], issues, comments }
+    }
+
+    const fetchShoots = async options => {
+      const { namespace } = options
+      const [
+        { data: { items } },
+        { data: { issues = [] } }
+      ] = await Promise.all([
+        getShoots(options),
+        getIssues({ namespace })
+      ])
+      logger.debug('Fetched shoots and tickets in namespace %s', options.namespace)
+      return { shoots: items, issues, comments: [] }
+    }
+
+    const assignInfoAndSeedInfo = async ({ metadata, spec }) => {
+      const promises = [dispatch('getInfo', metadata)]
+      const seedName = spec.seedName
+      if (rootGetters.isAdmin && !rootGetters.isSeedUnreachableByName(seedName)) {
+        promises.push(dispatch('getSeedInfo', metadata))
+      }
+      try {
+        await Promise.all(promises)
+      } catch (err) {
+        logger.error('Failed to fetch shoot or shootSeed info:', err.message)
+      }
+    }
+
+    // await and handle response data in the background
+    const fetchData = async options => {
+      try {
+        commit('SET_SUBSCRIPTION_STATE', constants.LOADING)
+        const promise = options.name
+          ? fetchShoot(options)
+          : fetchShoots(options)
+        const { shoots, issues, comments } = await promise
+        commit('RECEIVE', { rootState, rootGetters, shoots })
+        commit('tickets/RECEIVE_ISSUES', issues, { root: true })
+        commit('tickets/RECEIVE_COMMENTS', comments, { root: true })
+        commit('SUBSCRIBE', options)
+      } catch (err) {
+        const message = get(err, 'response.data.message', err.message)
+        logger.error('Failed to fetch shoots or tickets: %s', message)
+        commit('SET_SUBSCRIPTION_ERROR', err)
+        clearAll({ commit })
+        throw err
+      }
+    }
+
+    const options = getters.subscription
+    if (options) {
+      return fetchData(options)
+    }
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -304,9 +397,13 @@ const actions = {
   }
 }
 
-function setFilteredItems (state, rootState, rootGetters) {
+function onlyAllShootsWithIssues (state, rootState) {
+  return rootState.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
+}
+
+function getFilteredItems (state, rootState, rootGetters) {
   let items = Object.values(state.shoots)
-  if (rootState.namespace === '_all' && get(state, 'shootListFilters.onlyShootsWithIssues', true)) {
+  if (onlyAllShootsWithIssues(state, rootState)) {
     if (get(state, 'shootListFilters.progressing', false)) {
       const predicate = item => {
         return !isStatusProgressing(get(item, 'metadata', {}))
@@ -342,7 +439,9 @@ function setFilteredItems (state, rootState, rootGetters) {
         if (!hideClustersWithLabels) {
           return true
         }
-        const ticketsForCluster = rootGetters.ticketsByNamespaceAndName(get(item, 'metadata', {}))
+        const metadata = get(item, 'metadata', {})
+        metadata.projectName = rootGetters.projectNameByNamespace(metadata)
+        const ticketsForCluster = rootGetters['tickets/issues'](metadata)
         if (!ticketsForCluster.length) {
           return true
         }
@@ -358,7 +457,7 @@ function setFilteredItems (state, rootState, rootGetters) {
     }
   }
 
-  state.filteredShoots = items
+  return items
 }
 
 const putItem = (state, newItem) => {
@@ -382,6 +481,17 @@ const deleteItem = (state, deletedItem) => {
 
 // mutations
 const mutations = {
+  RECEIVE (state, { rootState, rootGetters, shoots: items }) {
+    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
+    const shoots = {}
+    for (const object of items) {
+      if (notOnlyShootsWithIssues || shootHasIssue(object)) {
+        shoots[keyForShoot(object.metadata)] = object
+      }
+    }
+    state.shoots = shoots
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
+  },
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
@@ -400,31 +510,27 @@ const mutations = {
   ITEM_PUT (state, { newItem }) {
     putItem(state, newItem)
   },
-  HANDLE_EVENTS (state, { rootState, rootGetters, events }) {
-    const onlyShootsWithIssues = get(state, 'shootListFilters.onlyShootsWithIssues', true)
+  HANDLE_EVENT (state, { rootState, rootGetters, event }) {
+    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
     let setFilteredItemsRequired = false
-    forEach(events, event => {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          if (rootState.namespace !== '_all' ||
-            !onlyShootsWithIssues ||
-            onlyShootsWithIssues === shootHasIssue(event.object)) {
-            // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
-            putItem(state, event.object)
-            setFilteredItemsRequired = true
-          }
-          break
-        case 'DELETED':
-          deleteItem(state, event.object)
+    switch (event.type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
+        if (notOnlyShootsWithIssues || shootHasIssue(event.object)) {
+          putItem(state, event.object)
           setFilteredItemsRequired = true
-          break
-        default:
-          console.error('undhandled event type', event.type)
-      }
-    })
+        }
+        break
+      case 'DELETED':
+        deleteItem(state, event.object)
+        setFilteredItemsRequired = true
+        break
+      default:
+        console.error('undhandled event type', event.type)
+    }
     if (setFilteredItemsRequired) {
-      setFilteredItems(state, rootState, rootGetters)
+      state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
     }
   },
   CLEAR_ALL (state) {
@@ -433,12 +539,12 @@ const mutations = {
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value
-    setFilteredItems(state, rootState, rootGetters)
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
   SET_SHOOT_LIST_FILTER (state, { rootState, rootGetters, filterValue }) {
     const { filter, value } = filterValue
     state.shootListFilters[filter] = value
-    setFilteredItems(state, rootState, rootGetters)
+    state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
   SET_NEW_SHOOT_RESOURCE (state, { data }) {
     state.newShootResource = data
@@ -452,6 +558,39 @@ const mutations = {
   },
   SET_FREEZED_SHOOT_SKELETONS (state, value) {
     state.freezedShootSkeletons = value
+  },
+  SET_SUBSCRIPTION (state, value) {
+    state.subscription = value
+    state.subscriptionState = constants.DEFINED
+    state.subscriptionError = null
+  },
+  SUBSCRIBE (state) {
+    state.subscriptionState = constants.OPENING
+    state.subscriptionError = null
+  },
+  UNSUBSCRIBE (state) {
+    state.subscriptionState = constants.CLOSING
+    state.subscriptionError = null
+    state.subscription = null
+  },
+  SET_SUBSCRIPTION_STATE (state, value) {
+    if (Object.values(constants).includes(value)) {
+      state.subscriptionState = value
+    } else if (Object.keys(constants).includes(value)) {
+      state.subscriptionState = constants[value]
+    }
+  },
+  SET_SUBSCRIPTION_ERROR (state, err) {
+    if (err) {
+      const name = err.name
+      const statusCode = get(err, 'response.status', 500)
+      const message = get(err, 'response.data.message', err.message)
+      const reason = get(err, 'response.data.reason')
+      const code = get(err, 'response.data.code', 500)
+      state.subscriptionError = { name, statusCode, message, code, reason }
+    } else {
+      state.subscriptionError = null
+    }
   }
 }
 

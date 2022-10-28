@@ -45,6 +45,12 @@ class GardenerCore extends V1Beta1(NamedGroup(HttpClient)) {
   }
 }
 
+class GardenerSeedManagement extends V1Alpha1(NamedGroup(HttpClient)) {
+  static get group () {
+    return 'seedmanagement.gardener.cloud'
+  }
+}
+
 class GardenerDashboard extends V1Alpha1(NamedGroup(HttpClient)) {
   static get group () {
     return 'dashboard.gardener.cloud'
@@ -58,5 +64,6 @@ module.exports = {
   Core,
   Networking,
   GardenerCore,
+  GardenerSeedManagement,
   GardenerDashboard
 }

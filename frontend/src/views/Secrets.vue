@@ -84,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <v-card class="ma-3 mt-6">
+    <v-card class="ma-3 mt-6" v-if="dnsProviderTypes.length">
       <v-toolbar flat color="toolbar-background toolbar-title--text">
         <v-icon class="pr-2" color="toolbar-title">mdi-key</v-icon>
         <v-toolbar-title class="text-subtitle-1">
@@ -220,7 +220,9 @@ export default {
       'dnsSecretList',
       'shootList',
       'canCreateSecrets',
-      'sortedCloudProviderKindList',
+      'sortedCloudProviderKindList'
+    ]),
+    ...mapGetters('gardenerExtensions', [
       'sortedDnsProviderList'
     ]),
     hasCloudProfileForCloudProviderKind () {

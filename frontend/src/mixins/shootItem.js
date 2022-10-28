@@ -144,7 +144,7 @@ export const shootItem = {
       return get(this.shootSpec, 'dns.domain')
     },
     isCustomShootDomain () {
-      return some(this.shootDnsProviders, ['primary', true])
+      return some(this.shootDnsProviders, 'primary')
     },
     shootDnsProviders () {
       return get(this.shootSpec, 'dns.providers')
