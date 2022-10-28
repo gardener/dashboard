@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.enter="resolveAction(true)"
           ref="deleteDialogInput"
           :label="hint"
-          :error="hasError && userInput.length > 0"
+          :error="notConfirmed && userInput.length > 0"
           hide-details
           v-model="userInput"
           type="text"
@@ -45,7 +45,15 @@ SPDX-License-Identifier: Apache-2.0
           dense>
         </v-text-field>
         <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
-        <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+        <v-tooltip top :disabled="valid">
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+            </div>
+          </template>
+          <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
+          <span v-else-if="notConfirmed">You need to confirm your changes by typing this cluster's name</span>
+        </v-tooltip>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -104,7 +112,7 @@ export default {
     }
   },
   computed: {
-    hasError () {
+    notConfirmed () {
       return this.confirmValue && this.confirmValue !== this.userInput
     },
     hint () {
@@ -132,7 +140,7 @@ export default {
       }
     },
     valid () {
-      return !this.confirmDisabled && !this.hasError
+      return !this.confirmDisabled && !this.notConfirmed
     }
   },
   methods: {
