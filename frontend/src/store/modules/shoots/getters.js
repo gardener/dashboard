@@ -317,8 +317,6 @@ export default {
         const searchStringChanged = state.freezeSorting && items.length > sortedUIDsAtFreeze.length
 
         if (sortByArrAtFreeze !== sortByArr || sortDescArrAtFreeze !== sortDescArr || searchStringChanged) {
-          console.log('SORT REQUIRED!')
-
           // If the sorting or search has changed, the list needs to be re-sorted
           // this will rebuild sortedUIDsAtFreeze accoring to current items order
           sortItems(items, sortByArr, sortDescArr)

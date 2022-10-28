@@ -62,6 +62,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'lastOperation'">
         <div class="d-flex align-center justify-center">
           <shoot-status
+          v-if="!isStale"
           :popper-key="`${shootNamespace}/${shootName}`"
           :shoot-item="shootItem">
           </shoot-status>
@@ -74,11 +75,11 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.value === 'readiness'">
         <div class="d-flex">
-          <status-tags :shoot-item="shootItem"></status-tags>
+          <status-tags :shoot-item="shootItem" v-if="!isStale"></status-tags>
         </div>
       </template>
       <template v-if="cell.header.value === 'issueSince'">
-        <v-tooltip top>
+        <v-tooltip top v-if="!isStale">
           <template v-slot:activator="{ on }">
             <div v-on="on">
               <time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix></time-string>

@@ -384,7 +384,8 @@ const actions = {
             'spec.seedName',
             'spec.purpose',
             'status.technicalID',
-            'spec.kubernetes.version'
+            'spec.kubernetes.version',
+            'status' // need to include not only values that we want to display, also need data for sorting
           ]),
           stale: true // Flag them so that the UI can render them accordingly
         }
