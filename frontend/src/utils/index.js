@@ -320,12 +320,12 @@ export function getProjectDetails (project) {
   }
 }
 
-export function getProjectQuotaStatus (project) {
-  if (!project.quotaStatus) {
+export function getProjectQuotaStatus (projectQuota) {
+  if (!projectQuota) {
     return undefined
   }
 
-  const { hard, used } = project.quotaStatus
+  const { hard, used } = projectQuota
   const quotaStatus = map(hard, (limitValue, key) => {
     const usedValue = used[key] || 0
     const percentage = round((usedValue / limitValue) * 100, 2)

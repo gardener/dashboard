@@ -293,12 +293,12 @@ SPDX-License-Identifier: Apache-2.0
                 <resource-quota-help></resource-quota-help>
               </v-toolbar>
               <v-skeleton-loader
-                v-show="!projectQuotaStatus"
+                v-if="!projectQuotaStatus"
                 height="400"
                 type="table: table-heading, table-thead, table-tbody"
                 :types="{ 'table-thead': 'heading@3', 'table-row': 'table-cell@3' }"
               ></v-skeleton-loader>
-              <v-simple-table v-show="projectQuotaStatus">
+              <v-simple-table v-else-if="projectQuotaStatus.length">
                 <template v-slot:default>
                   <thead>
                     <tr>
@@ -339,6 +339,16 @@ SPDX-License-Identifier: Apache-2.0
                   </tbody>
                 </template>
               </v-simple-table>
+              <v-list v-else>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">mdi-information-outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>No resource quotas defined for this project.</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
             </v-card>
           </v-col>
         </v-row>
@@ -437,14 +447,20 @@ export default {
       'isKubeconfigEnabled',
       'shootCustomFieldList'
     ]),
+    ...mapGetters('projectQuota', [
+      'quotaByNamespace'
+    ]),
     project () {
       return this.projectFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
     },
+    projectQuota () {
+      return this.quotaByNamespace(this.project.metadata.namespace)
+    },
     projectQuotaStatus () {
-      return getProjectQuotaStatus(this.project)
+      return getProjectQuotaStatus(this.projectQuota)
     },
     userList () {
       const members = new Set()
@@ -529,8 +545,8 @@ export default {
       'patchProject',
       'deleteProject'
     ]),
-    ...mapActions('projects', [
-      'getProjectQuota'
+    ...mapActions('projectQuota', [
+      'fetchProjectQuota'
     ]),
     onEditOwner () {
       this.editOwner = !this.editOwner
@@ -613,14 +629,12 @@ export default {
     }
   },
   created () {
-    // watch the params of the route to fetch the data again
+    // see https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-after-navigation
     this.$watch(
       () => this.$route.params,
       () => {
-        this.getProjectQuota(this.project.metadata)
+        this.fetchProjectQuota(this.project.metadata.namespace)
       },
-      // fetch the data when the view is created and the data is
-      // already being observed
       { immediate: true }
     )
   }

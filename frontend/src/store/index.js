@@ -75,6 +75,7 @@ import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
+import projectQuota from './modules/projectQuota'
 import draggable from './modules/draggable'
 import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
@@ -1625,6 +1626,7 @@ const mutations = {
 
 const modules = {
   projects,
+  projectQuota,
   members,
   draggable,
   cloudProfiles,

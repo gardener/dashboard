@@ -4,14 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import Vue from 'vue'
 import findIndex from 'lodash/findIndex'
-import find from 'lodash/find'
 import assign from 'lodash/assign'
-import map from 'lodash/map'
-import { getProjects, createProject, patchProject, updateProject, deleteProject, getResourceQuotas } from '@/utils/api'
-import { isNotFound } from '@/utils/error'
-import { aggregateResourceQuotaStatus } from '@/utils'
+import { getProjects, createProject, patchProject, updateProject, deleteProject } from '@/utils/api'
 
 // initial state
 const state = {
@@ -54,21 +49,6 @@ const actions = {
     const namespace = metadata.namespace
     await deleteProject({ namespace })
     // do not remove project from store as it will stay in termininating phase for a while
-  },
-  async getProjectQuota ({ commit, rootState }, { namespace, name }) {
-    try {
-      const { data } = await getResourceQuotas({ namespace })
-      const quotaStatuses = map(data, 'status')
-      const aggregatedQuotaStatus = aggregateResourceQuotaStatus(quotaStatuses)
-
-      commit('RECEIVE_PROJECT_QUOTA', { name, aggregatedQuotaStatus })
-    } catch (error) {
-      // ignore if no quota found
-      if (isNotFound(error)) {
-        return
-      }
-      throw error
-    }
   }
 }
 
@@ -85,13 +65,6 @@ const mutations = {
       state.all.splice(index, 1, assign({}, item, newItem))
     } else {
       state.all.push(newItem)
-    }
-  },
-  RECEIVE_PROJECT_QUOTA (state, { name, aggregatedQuotaStatus }) {
-    const predicate = item => item.metadata.name === name
-    const item = find(state.all, predicate)
-    if (item !== undefined) {
-      Vue.set(item, 'quotaStatus', aggregatedQuotaStatus)
     }
   }
 }

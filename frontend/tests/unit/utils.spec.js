@@ -530,20 +530,18 @@ describe('utils', () => {
   })
 
   describe('getProjectQuotaStatus', () => {
-    const project = {
-      quotaStatus: {
-        hard: {
-          'count/shoots.core.gardener.cloud': 25,
-          'count/configmaps': 22
-        },
-        used: {
-          'count/shoots.core.gardener.cloud': 20
-        }
+    const projectQuota = {
+      hard: {
+        'count/shoots.core.gardener.cloud': 25,
+        'count/configmaps': 22
+      },
+      used: {
+        'count/shoots.core.gardener.cloud': 20
       }
     }
 
     it('should return ProjectQuotaStatus object', () => {
-      const projectQuotaStatus = getProjectQuotaStatus(project)
+      const projectQuotaStatus = getProjectQuotaStatus(projectQuota)
 
       const projectQuotaStatusConfigmaps = projectQuotaStatus[0]
       const projectQuotaStatusShoots = projectQuotaStatus[1]
