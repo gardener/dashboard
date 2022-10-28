@@ -15,8 +15,6 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
-const { UnprocessableEntity } = createError
-
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const labels = _.get(secretBinding, 'metadata.labels', {})
   const cloudProfileName = labels['cloudprofile.garden.sapcloud.io/name']
@@ -81,7 +79,7 @@ function toSecretResource ({ metadata, data }) {
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
-    throw new UnprocessableEntity('Failed to encode "base64" secret data')
+    throw createError(422, 'Failed to encode "base64" secret data')
   }
   return { apiVersion, kind, metadata, type, data }
 }
@@ -253,9 +251,21 @@ exports.patch = async function ({ user, namespace, name, body }) {
     throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
 
+  let { data } = body
+  try {
+    data = _.mapValues(data, encodeBase64)
+  } catch (err) {
+    throw createError(422, 'Failed to encode "base64" secret data')
+  }
+
+  const patchOperations = [{
+    op: 'replace',
+    path: '/data',
+    value: data
+  }]
+
   const secretRef = secretBinding.secretRef
-  _.set(body, 'metadata.secretRef', secretRef)
-  const secret = await client.core.secrets.mergePatch(secretRef.namespace, secretRef.name, toSecretResource(body))
+  const secret = client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
 
   const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   let cloudProviderKind

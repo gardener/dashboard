@@ -74,3 +74,15 @@ rules:
   - shoots
   verbs:
   - get
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - shoots/adminkubeconfig
+  verbs:
+  - create
+- apiGroups:
+  - seedmanagement.gardener.cloud
+  resources:
+  - managedseeds
+  verbs:
+  - get
