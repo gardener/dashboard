@@ -9,11 +9,13 @@
 export const rotationTypes = [
   {
     type: 'kubeconfig',
+    hasRotationStatus: true,
     startOperation: 'rotate-kubeconfig-credentials',
     title: 'Kubeconfig'
   },
   {
     type: 'certificateAuthorities',
+    hasRotationStatus: true,
     startOperation: 'rotate-ca-start',
     completionOperation: 'rotate-ca-complete',
     twoStep: true,
@@ -21,16 +23,19 @@ export const rotationTypes = [
   },
   {
     type: 'observability',
+    hasRotationStatus: true,
     startOperation: 'rotate-observability-credentials',
     title: 'Observability Passwords'
   },
   {
     type: 'sshKeypair',
+    hasRotationStatus: true,
     startOperation: 'rotate-ssh-keypair',
     title: 'SSH Key Pair for Worker Nodes'
   },
   {
     type: 'etcdEncryptionKey',
+    hasRotationStatus: true,
     startOperation: 'rotate-etcd-encryption-key-start',
     completionOperation: 'rotate-etcd-encryption-key-complete',
     twoStep: true,
@@ -38,13 +43,14 @@ export const rotationTypes = [
   },
   {
     type: 'serviceAccountKey',
+    hasRotationStatus: true,
     startOperation: 'rotate-serviceaccount-key-start',
     completionOperation: 'rotate-serviceaccount-key-complete',
     twoStep: true,
     title: 'ServiceAccount Token Signing Key'
   },
   {
-    // no type as this rotation is the 'all credential rotatiom trigger', which as no dedicated key in the rotation status
+    type: 'ALL_CREDENTIALS',
     startOperation: 'rotate-credentials-start',
     completionOperation: 'rotate-credentials-complete',
     title: 'Rotate All Credentials',

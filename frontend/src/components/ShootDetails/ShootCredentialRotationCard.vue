@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-list>
       <credential-tile
         :shoot-item="shootItem"
+        type="ALL_CREDENTIALS"
       ></credential-tile>
       <v-divider inset></v-divider>
       <credential-tile

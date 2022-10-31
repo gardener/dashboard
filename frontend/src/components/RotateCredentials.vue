@@ -100,7 +100,7 @@ export default {
       return this.startOperation
     },
     rotationType () {
-      return find(rotationTypes, t => { return t.type === this.type })
+      return find(rotationTypes, ['type', this.type])
     },
     startOperation () {
       return this.rotationType.startOperation
@@ -112,7 +112,7 @@ export default {
       return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     phase () {
-      if (!this.type) {
+      if (this.type === 'ALL_CREDENTIALS') {
         return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
       }
       return {
@@ -141,7 +141,7 @@ export default {
       if (this.isScheduled) {
         return true
       }
-      if (this.isProgressing && this.type) {
+      if (this.isProgressing && this.type !== 'ALL_CREDENTIALS') {
         // Only show the loading indicator for the rotation that is actually running, not for the overall trigger button
         return true
       }
@@ -224,7 +224,7 @@ export default {
       if (this.isScheduledOperation) {
         return 'There is alread an operation scheduled for this cluster'
       }
-      if (this.isProgressing && !this.type) {
+      if (this.isProgressing && this.type === 'ALL_CREDENTIALS') {
         return 'A rotation operation is currently running'
       }
       return undefined

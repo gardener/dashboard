@@ -105,18 +105,18 @@ export default {
       return get(this.shootStatusCredentialsRotation, this.type, {})
     },
     lastInitiationTime () {
-      if (this.type) {
+      if (this.type !== 'ALL_CREDENTIALS') {
         return this.rotationStatus.lastInitiationTime
       }
       // Do not show aggregated initiation time
       return undefined
     },
     lastCompletionTime () {
-      if (this.type) {
+      if (this.type !== 'ALL_CREDENTIALS') {
         return this.rotationStatus.lastCompletionTime
       }
       const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'type').length // only consider rotations that have an rotation status type
+      let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
       if (!this.shootEnableStaticTokenKubeconfig) {
         requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
       }
@@ -127,7 +127,7 @@ export default {
       return undefined
     },
     phase () {
-      if (!this.type) {
+      if (this.type === 'ALL_CREDENTIALS') {
         return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
       }
 
@@ -173,7 +173,7 @@ export default {
       return this.phaseType && this.phaseType !== 'Completed'
     },
     rotationType () {
-      return find(rotationTypes, t => { return t.type === this.type })
+      return find(rotationTypes, ['type', this.type])
     },
     title () {
       return this.rotationType?.title

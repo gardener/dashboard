@@ -258,7 +258,7 @@ export const shootItem = {
       let preparedRotationsCount = 0
       let completedPhasesCount = 0
       const unpreparedRotations = []
-      for (const rotationType of filter(rotationTypes, t => { return t.type && t.twoStep })) {
+      for (const rotationType of filter(rotationTypes, { hasRotationStatus: true, twoStep: true })) {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
         const rotationStatus = this.shootStatusCredentialsRotation[rotationType.type]
         if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
@@ -278,7 +278,7 @@ export const shootItem = {
         }
       }
 
-      const numberOfTwoStepOperations = filter(rotationTypes, t => { return t.type && t.twoStep }).length
+      const numberOfTwoStepOperations = filter(rotationTypes, { hasRotationStatus: true, twoStep: true }).length
       if (preparedRotationsCount > 0) {
         if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'
