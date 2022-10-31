@@ -159,11 +159,11 @@ SPDX-License-Identifier: Apache-2.0
                     <v-row dense>
                       <v-col>
                         <legend class="text-caption">Name</legend>
-                        <span class="text--primary">{{workerGroup.cri.name}}</span>
+                        <span class="text--primary">{{machineCri.name}}</span>
                       </v-col>
-                      <v-col cols="12" v-if="workerGroup.cri.containerRuntimes && workerGroup.cri.containerRuntimes.length">
+                      <v-col cols="12" v-if="machineCri.containerRuntimes && machineCri.containerRuntimes.length">
                         <legend class="text-caption">Additional OCI Runtimes</legend>
-                        <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in workerGroup.cri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
+                        <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in machineCri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -259,6 +259,9 @@ export default {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version })
+    },
+    machineCri () {
+      return this.workerGroup.cri ?? {}
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')

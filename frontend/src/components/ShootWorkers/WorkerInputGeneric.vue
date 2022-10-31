@@ -473,11 +473,13 @@ export default {
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
-      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSize) {
+      if (!this.canDefineVolumeSize ||
+        (!this.worker.volume?.type && this.volumeSize && get(machineType, 'storage.size') === this.volumeSize)) {
         // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
         // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
         // to the default storage size defined for this machine type, remove volume object (contains only size information which
         // is redundant / not allowed in this case)
+        // also the empty volume object defined by the worker skeleton gets deleted in this case
         delete this.worker.volume
       } else {
         set(this.worker, 'volume.size', this.volumeSize)

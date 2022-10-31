@@ -195,7 +195,8 @@ export default {
       if (workers) {
         forEach(workers, worker => {
           const id = uuidv4()
-          const internalWorker = assign({}, worker, { id })
+          const internalWorker = { cri: {}, machine: { architecture: undefined, type: undefined, image: { type: undefined } }, volume: {}, zones: [] }
+          assign(internalWorker, worker, { id })
           this.internalWorkers.push(internalWorker)
         })
       }
