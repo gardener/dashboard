@@ -167,6 +167,7 @@ export default {
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
       await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      this.tabValue = 'overview'
     },
     onWorkersValid (value) {
       this.workersValid = value
