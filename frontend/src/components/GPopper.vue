@@ -24,7 +24,8 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon color="toolbar-title" class="text-subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
-        <v-card-text>
+        <slot name="card"></slot>
+        <v-card-text v-if="$slots.default">
           <slot></slot>
         </v-card-text>
       </v-card>

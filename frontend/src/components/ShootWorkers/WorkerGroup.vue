@@ -19,16 +19,164 @@ SPDX-License-Identifier: Apache-2.0
           {{workerGroup.name}}
       </v-chip>
     </template>
-    <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description}) in workerGroupDescriptions" :key="title" class="px-0">
-        <v-list-item-content class="pt-1">
-          <v-list-item-subtitle>
-            {{title}}
-          </v-list-item-subtitle>
-          <v-list-item-title>{{value}} {{description}}</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
+    <template v-slot:card>
+      <v-tabs
+        height="32"
+        color="primary"
+        v-model="tab"
+      >
+        <v-tab
+          key="overview"
+          href="#overview"
+          class="text-caption"
+        >
+          Overview
+        </v-tab>
+        <v-tab
+          key="yaml"
+          href="#yaml"
+          class="text-caption"
+        >
+          Yaml
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tab">
+        <v-tab-item id="overview">
+          <v-container class="pa-2">
+            <v-row dense>
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-server</v-icon>Machine
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col v-if="workerGroup.machine.architecture">
+                        <legend class="text-caption">Architecture</legend>
+                        <span class="text--primary">{{workerGroup.machine.architecture}}</span>
+                      </v-col>
+                      <v-col>
+                        <legend class="text-caption">Type</legend>
+                        <span class="text--primary">{{workerGroup.machine.type}}</span>
+                      </v-col>
+                      <v-col cols="12" v-if="workerGroup.zones && workerGroup.zones.length">
+                        <legend class="text-caption">Zones</legend>
+                        <v-chip small label outlined class="px-1 mr-1" v-for="zone in workerGroup.zones" :key="zone">{{zone}}</v-chip>
+                      </v-col>
+                      <template v-if="machineType">
+                        <v-col>
+                          <legend class="text-caption">CPUs</legend>
+                          <span class="text--primary">{{machineType.cpu}}</span>
+                        </v-col>
+                        <v-col>
+                          <legend class="text-caption">GPUs</legend>
+                          <span class="text--primary">{{machineType.gpu}}</span>
+                        </v-col>
+                        <v-col>
+                          <legend class="text-caption">Memory</legend>
+                          <span class="text--primary">{{machineType.memory}}</span>
+                        </v-col>
+                      </template>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-harddisk</v-icon>Volume
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row>
+                      <v-col v-if="volumeCardData.type">
+                        <legend class="text-caption">Type</legend>
+                        <span class="text--primary">{{volumeCardData.type}}</span>
+                      </v-col>
+                      <v-col v-if="volumeCardData.class">
+                        <legend class="text-caption">Class</legend>
+                        <span class="text--primary">{{volumeCardData.class}}</span>
+                      </v-col>
+                      <v-col v-if="volumeCardData.size">
+                        <legend class="text-caption">Size</legend>
+                        <span class="text--primary">{{volumeCardData.size}}</span>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-disc</v-icon>Image
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col>
+                        <legend class="text-caption">Name</legend>
+                        <span class="text--primary">{{workerGroup.machine.image.name}}</span>
+                      </v-col>
+                      <v-col>
+                        <legend class="text-caption">Version</legend>
+                        <span class="text--primary">{{workerGroup.machine.image.version}}</span>
+                      </v-col>
+                      <v-col cols="12" v-if="!machineImage">
+                        <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image not found in cloud profile
+                      </v-col>
+                      <v-col cols="12" v-else-if="machineImage.expirationDate">
+                        <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image expires on {{machineImage.expirationDateString}}
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-chart-line-variant</v-icon>Autoscaler
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col cols="6">
+                        <legend class="text-caption">Maximum</legend>
+                        <span class="text--primary">{{workerGroup.maximum}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Minimum</legend>
+                        <span class="text--primary">{{workerGroup.minimum}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Max. Surge</legend>
+                        <span class="text--primary">{{workerGroup.maxSurge}}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <legend class="text-caption">Max. Unavailable</legend>
+                        <span class="text--primary">{{workerGroup.maxUnavailable}}</span>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+                <v-card outlined class="mt-2">
+                  <v-system-bar>
+                    <v-icon class="mr-2">mdi-oci</v-icon>Container Runtime
+                  </v-system-bar>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col>
+                        <legend class="text-caption">Name</legend>
+                        <span class="text--primary">{{machineCri.name}}</span>
+                      </v-col>
+                      <v-col cols="12" v-if="machineCri.containerRuntimes && machineCri.containerRuntimes.length">
+                        <legend class="text-caption">Additional OCI Runtimes</legend>
+                        <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in machineCri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-tab-item>
+        <v-tab-item id="yaml">
+          <code-block lang="yaml" :content="workerGroupYaml"></code-block>
+        </v-tab-item>
+      </v-tabs-items>
+    </template>
   </g-popper>
 </template>
 
@@ -36,9 +184,8 @@ SPDX-License-Identifier: Apache-2.0
 
 import GPopper from '@/components/GPopper'
 import VendorIcon from '@/components/VendorIcon'
+import CodeBlock from '@/components/CodeBlock'
 import find from 'lodash/find'
-import join from 'lodash/join'
-import map from 'lodash/map'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 
@@ -46,7 +193,8 @@ export default {
   name: 'worker-group',
   components: {
     GPopper,
-    VendorIcon
+    VendorIcon,
+    CodeBlock
   },
   props: {
     workerGroup: {
@@ -54,6 +202,14 @@ export default {
     },
     cloudProfileName: {
       type: String
+    },
+    value: {
+      type: String
+    }
+  },
+  data () {
+    return {
+      workerGroupYaml: undefined
     }
   },
   computed: {
@@ -72,154 +228,60 @@ export default {
       const type = get(this.workerGroup, 'volume.type')
       return find(volumeTypes, ['name', type])
     },
+    volumeCardData () {
+      const storage = get(this.machineType, 'storage', {})
+      const volume = get(this.workerGroup, 'volume', {})
+
+      // all infrastructures support volume sizes, but for some they are optional
+      // if no size is defined on the worker itself, check if machine storage defines a default size
+      const volumeSize = volume.size || storage.size
+
+      // workers with volume type (e.g. aws)
+      if (volume.type) {
+        return {
+          type: volume.type,
+          class: this.volumeType?.class,
+          size: volumeSize
+        }
+      }
+
+      // workers with storage in machine type metadata (e.g. openstack)
+      if (storage.type) {
+        return {
+          type: storage.type,
+          class: storage.class,
+          size: volumeSize
+        }
+      }
+      return {}
+    },
     machineImage () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version })
     },
-    workerGroupDescriptions () {
-      const description = []
-      const machineArchitecture = this.workerGroup.machine.architecture
-      if (machineArchitecture) {
-        description.push({
-          title: 'Machine Architecture',
-          value: machineArchitecture
-        })
-      }
-
-      description.push(this.machineTypeDescription)
-      const volumeTypeDescription = this.volumeTypeDescription
-      if (volumeTypeDescription) {
-        description.push(volumeTypeDescription)
-      }
-      const volumeSizeDescription = this.volumeSizeDescription
-      if (volumeSizeDescription) {
-        description.push(volumeSizeDescription)
-      }
-      description.push(this.machineImageDescription)
-
-      const cri = this.workerGroup.cri
-      if (cri) {
-        let value
-        if (cri.containerRuntimes?.length) {
-          const containerRuntimes = map(cri.containerRuntimes, 'type')
-          value = `${cri.name} (${join(containerRuntimes, ', ')})`
-        } else {
-          value = cri.name
-        }
-        description.push({
-          title: 'Container Runtime',
-          value
-        })
-      }
-
-      const { minimum, maximum, maxSurge, zones = [] } = this.workerGroup
-      if (minimum >= 0 && maximum >= 0) {
-        description.push({
-          title: 'Autoscaler',
-          value: `Min. ${minimum} / Max. ${maximum}`
-        })
-      }
-      if (maxSurge >= 0) {
-        description.push({
-          title: 'Max. Surge',
-          value: `${maxSurge}`
-        })
-      }
-      if (zones.length) {
-        description.push({
-          title: zones.length > 1 ? 'Zones' : 'Zone',
-          value: join(zones, ', ')
-        })
-      }
-
-      return description
-    },
-    machineTypeDescription () {
-      const machine = get(this.workerGroup, 'machine', {})
-      const item = {
-        title: 'Machine Type',
-        value: machine.type
-      }
-
-      const machineType = this.machineType
-      if (machineType) {
-        item.description = `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
-      }
-
-      return item
-    },
-    volumeTypeDescription () {
-      // workers with volume type (e.g. aws)
-      const volume = get(this.workerGroup, 'volume', {})
-      if (volume.type) {
-        const item = {
-          title: 'Volume Type',
-          value: volume.type
-        }
-
-        const volumeType = this.volumeType
-        if (volumeType) {
-          item.description = `(Class: ${volumeType.class})`
-        }
-
-        return item
-      }
-
-      // workers with storage in machine type metadata (e.g. openstack)
-      const storage = get(this.machineType, 'storage', {})
-      if (storage.type) {
-        return {
-          title: 'Volume Type',
-          value: storage.type,
-          description: `(Class: ${storage.class})`
-        }
-      }
-
-      return undefined
-    },
-    volumeSizeDescription () {
-      // all infrastructures support volume sizes, but for some they are optional
-      const volume = get(this.workerGroup, 'volume', {})
-      if (volume.size) {
-        return {
-          title: 'Volume Size',
-          value: `${volume.size}`
-        }
-      }
-
-      // if no size is defined on the worker itself, check if machine storage defines a default size
-      const storage = get(this.machineType, 'storage', {})
-      if (storage.size) {
-        return {
-          title: 'Volume Size',
-          value: `${storage.size}`
-        }
-      }
-
-      return undefined
-    },
-    machineImageDescription () {
-      const { name, version } = get(this.workerGroup, 'machine.image', {})
-      const item = {
-        title: 'Machine Image',
-        value: `${name} | Version: ${version}`
-      }
-
-      const machineImage = this.machineImage
-      if (!machineImage) {
-        item.description = '(Image is expired)'
-      } else {
-        if (machineImage.expirationDate) {
-          item.description = `(Expires: ${machineImage.expirationDateString})`
-        }
-      }
-
-      return item
+    machineCri () {
+      return this.workerGroup.cri ?? {}
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
+    },
+    tab: {
+      get () {
+        return this.value
+      },
+      set (value) {
+        this.$emit('input', value)
+      }
     }
+  },
+  methods: {
+    async updateWorkerGroupYaml (value) {
+      this.workerGroupYaml = await this.$yaml.dump(value)
+    }
+  },
+  created () {
+    this.updateWorkerGroupYaml(this.workerGroup)
   }
 }
 </script>
@@ -227,5 +289,6 @@ export default {
 <style lang="scss" scoped>
   ::v-deep .popper {
     text-align: initial;
+    width: 600px;
   }
 </style>
