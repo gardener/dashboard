@@ -228,6 +228,7 @@ class Client {
                       rawBody: text
                     })
                   }
+                  // return the raw body text if the response status is not ok (keep the original http error in this case)
                   return text
                 }
               default:
