@@ -25,10 +25,11 @@ import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
 
 export class ShootEditorCompletions {
-  constructor (shootProperties, editorIndent) {
+  constructor (shootProperties, editorIndent, supportedPaths) {
     this.shootCompletions = shootProperties
     this.indentUnit = editorIndent
     this.arrayBulletIndent = 2 // -[space]
+    this.supportedPaths = supportedPaths
   }
 
   // Callback function for CodeMirror autocomplete plugin
@@ -93,6 +94,12 @@ export class ShootEditorCompletions {
   // Get completions for token, exact match is used for tooltip function
   _getYamlCompletions (token, cur, cm, exactMatch = false) {
     const completionPath = this._getTokenCompletionPath(token, cur, cm)
+    if (this.supportedPaths?.length) {
+      const currentPath = completionPath.join('.')
+      if (!this.supportedPaths.some(path => currentPath.startsWith(path))) {
+        return []
+      }
+    }
 
     let completions
     if (completionPath.length > 0) {

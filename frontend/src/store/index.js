@@ -97,13 +97,13 @@ const debug = includes(split(process.env.VUE_APP_DEBUG, ','), 'vuex')
 
 // plugins
 const plugins = [
-  createSocketPlugin(userManager, logger),
-  createMediaPlugin(vuetify)
+  createSocketPlugin(userManager, logger)
 ]
 // localStorage can be undefined in some unit tests
 if (localStorage) {
   plugins.push(createStoragePlugin(localStorage))
 }
+plugins.push(createMediaPlugin(vuetify))
 if (debug) {
   plugins.push(createLogger())
 }
@@ -164,7 +164,7 @@ const state = {
       description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
   },
-  prefersColorScheme: 'light'
+  prefersColorScheme: null
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
