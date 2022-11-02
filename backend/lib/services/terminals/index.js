@@ -28,10 +28,11 @@ const {
 } = require('./terminalResources')
 
 const {
-  getKubeApiServerHostForSeedOrShootedSeed,
+  getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
-  getGardenHostClusterKubeApiServer
+  getGardenHostClusterKubeApiServer,
+  getShootRef
 } = require('./utils')
 
 const {
@@ -282,22 +283,39 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       if (!shootResource) {
         shootResource = await client.getShoot({ namespace, name })
       }
-      const seedShootNamespace = getSeedShootNamespace(shootResource)
       const seedName = getSeedNameFromShoot(shootResource)
-      const seed = getSeed(seedName)
-      const secretRef = _.get(seed, 'spec.secretRef')
-      const {
-        namespace: secretRefNamespace,
-        name: secretRefName
-      } = secretRef || {}
-      const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
-      const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
-      const kubeconfigObject = cleanKubeconfig(rawConfig)
+      const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
 
-      targetCluster.apiServer.caData = kubeconfigObject.currentCluster['certificate-authority-data']
+      let credentials
+      let caData
+      if (managedSeed) {
+        const shootRef = getShootRef(managedSeed)
+        credentials = { shootRef }
+
+        const caCluster = await client.core.secrets.get(shootRef.namespace, `${shootRef.name}.ca-cluster`)
+        caData = caCluster.data['ca.crt']
+      } else {
+        const seed = getSeed(seedName)
+        const secretRef = seed.spec?.secretRef
+        credentials = { secretRef }
+
+        const {
+          namespace: secretRefNamespace,
+          name: secretRefName
+        } = secretRef || {}
+
+        const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
+        const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
+        const kubeconfigObject = cleanKubeconfig(rawConfig)
+        caData = kubeconfigObject.currentCluster['certificate-authority-data']
+      }
+
+      const seedShootNamespace = getSeedShootNamespace(shootResource)
+
+      targetCluster.apiServer.caData = caData
+      targetCluster.credentials = credentials
       targetCluster.kubeconfigContextNamespace = seedShootNamespace
       targetCluster.namespace = seedShootNamespace
-      targetCluster.credentials = { secretRef }
       targetCluster.authorization.roleBindings = [
         {
           roleRef: {
@@ -348,14 +366,22 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
 
   const seedShootNamespace = getSeedShootNamespace(shootResource)
   const seedName = getSeedNameFromShoot(shootResource)
+  const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
 
   const seed = getSeed(seedName)
 
-  hostCluster.namespace = seedShootNamespace
-  hostCluster.credentials = {
-    secretRef: _.get(seed, 'spec.secretRef')
+  let credentials
+  if (managedSeed) {
+    const shootRef = getShootRef(managedSeed)
+    credentials = { shootRef }
+  } else {
+    const secretRef = seed.spec?.secretRef
+    credentials = { secretRef }
   }
-  hostCluster.kubeApiServer = await getKubeApiServerHostForSeedOrShootedSeed(client, seed)
+
+  hostCluster.namespace = seedShootNamespace
+  hostCluster.credentials = credentials
+  hostCluster.kubeApiServer = await getKubeApiServerHostForSeedOrManagedSeed(client, seed, managedSeed)
   return hostCluster
 }
 

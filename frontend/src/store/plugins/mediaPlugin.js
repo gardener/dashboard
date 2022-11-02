@@ -10,13 +10,14 @@ export default function (vuetify) {
       store.commit('SET_PREFERS_COLOR_SCHEME', dark ? 'dark' : 'light')
     }
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    mq.addEventListener('change', e => setPrefersColorScheme(e.matches))
     setPrefersColorScheme(mq.matches)
+    mq.addEventListener('change', e => setPrefersColorScheme(e.matches))
 
     const colorScheme = (state, getters) => getters.colorScheme
     const setDarkTheme = value => {
       vuetify.framework.theme.dark = value === 'dark'
     }
+    setDarkTheme(store.getters.colorScheme)
     store.watch(colorScheme, setDarkTheme)
   }
 }
