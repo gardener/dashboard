@@ -1581,7 +1581,7 @@ __metadata:
     vue-snotify: ^3.2.1
     vue-template-compiler: ^2.6.14
     vuelidate: ^0.7.7
-    vuetify: ^2.6.6
+    vuetify: ^2.6.12
     vuetify-loader: ^1.7.3
     vuex: ^3.6.2
     webpack: ^5.72.1
@@ -13414,12 +13414,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:^2.6.6":
-  version: 2.6.6
-  resolution: "vuetify@npm:2.6.6"
+"vuetify@npm:^2.6.12":
+  version: 2.6.12
+  resolution: "vuetify@npm:2.6.12"
   peerDependencies:
     vue: ^2.6.4
-  checksum: 6e3ee89d13132ad085fa1a7209d019b94c022019de41d457e82a8ff26520c8d5f1047ffaf78ec5988a016432b27387e70f8235206defc21f809c0729681fcf5d
+  checksum: 29b4b0c2af278bd8e8c455b30da635305fbe1327e6337f5c3dadc5272a2f50e3447eb653b298330f34e5b00614f34d0ef70bf74d63c35a428017beaad3a73a5c
   languageName: node
   linkType: hard
 
