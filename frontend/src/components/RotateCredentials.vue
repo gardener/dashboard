@@ -157,7 +157,7 @@ export default {
       if (this.isScheduledOperation) {
         return true
       }
-      if (this.isProgressing) {
+      if (this.isLoading) {
         return true
       }
       return false
@@ -221,10 +221,10 @@ export default {
       if (this.phase && this.phase.incomplete) {
         return 'Operation is disabled because all two-step operations need to be in the same phase'
       }
-      if (this.isScheduledOperation) {
-        return 'There is alread an operation scheduled for this cluster'
+      if (!this.isLoading && this.isScheduledOperation) {
+        return 'There is already an operation scheduled for this cluster'
       }
-      if (this.isProgressing && this.type === 'ALL_CREDENTIALS') {
+      if (this.isLoading && this.type === 'ALL_CREDENTIALS') {
         return 'A rotation operation is currently running'
       }
       return undefined
@@ -233,7 +233,7 @@ export default {
       const componentTexts = {
         'rotate-kubeconfig-credentials': {
           caption: this.isLoading
-            ? 'Scheduling kubeconfig credentials rotation'
+            ? 'Rotating kubeconfig credentials'
             : 'Start Kubeconfig Rotation',
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
           successMessage: `Rotation of kubeconfig credentials started for ${this.shootName}`,
@@ -268,7 +268,7 @@ export default {
         },
         'rotate-observability-credentials': {
           caption: this.isLoading
-            ? 'Scheduling observability passwords rotation'
+            ? 'Rotating observability passwords'
             : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
           successMessage: `Rotation of observability passwords started for ${this.shootName}`,
@@ -283,7 +283,7 @@ export default {
         },
         'rotate-ssh-keypair': {
           caption: this.isLoading
-            ? 'Scheduling SSH key pair rotation'
+            ? 'Rotating SSH key pair'
             : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of SSH key pair',
           successMessage: `Rotation of SSH key pair started for ${this.shootName}`,
