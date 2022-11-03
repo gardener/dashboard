@@ -3,12 +3,20 @@
 This section demonstrates how to use the standard Kubernetes tool for cluster operation `kubectl` for common cluster operations with emphasis on Gardener resources. For more information on `kubectl`, see [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) on _kubernetes.io_.
 
 
-* [Prerequisites](#prerequisites)
-* [Downloading `kubeconfig` for remote project operations](#downloading-kubeconfig-for-remote-project-operations)
-* [List Gardener API resources](#list-gardener-api-resources)
-* [Check your permissions](#check-your-permissions)
-* [Working with projects](#working-with-projects)
-* [Working with clusters](#working-with-clusters)
+- [Project Operations](#project-operations)
+  - [Prerequisites](#prerequisites)
+  - [Downloading `kubeconfig` for remote project operations](#downloading-kubeconfig-for-remote-project-operations)
+    - [Download `kubeconfig` for a user](#download-kubeconfig-for-a-user)
+    - [Download `kubeconfig` for a Service Account](#download-kubeconfig-for-a-service-account)
+  - [List Gardener API resources](#list-gardener-api-resources)
+  - [Check your permissions](#check-your-permissions)
+  - [Working with projects](#working-with-projects)
+  - [Working with clusters](#working-with-clusters)
+    - [List project clusters](#list-project-clusters)
+    - [Create a new cluster](#create-a-new-cluster)
+    - [Delete cluster](#delete-cluster)
+    - [Get `kubeconfig` for a cluster](#get-kubeconfig-for-a-cluster)
+  - [Related Links](#related-links)
 
 
 ## Prerequisites
@@ -365,6 +373,6 @@ The name of the Secret containing the kubeconfig is in the form `<cluster-name>.
 
 ## Related Links
 
-[Working with Service Accounts](./working-with-service-accounts.md)
+[Accessing the Gardener API Through the Dashboard](./gardener-api.md)
 
 [Authenticating with an Identity Provider](https://github.com/gardener/documentation/blob/master/website/documentation/tutorials/oidc-login/_index.md).
