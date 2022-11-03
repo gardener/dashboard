@@ -8,9 +8,7 @@ title: Accessing the Gardener API
 
 The cluster operations that are performed manually in the dashboard or via `kubectl` can be automated using the [**Gardener API**](https://github.com/gardener/gardener/blob/master/docs/api-reference/README.md) and a **Service Account** authorized to perform them.
 
-{{% alert color="info"  title="Note" %}}
-A project **Service Account** has access to all Kubernetes resources in the project. Treat with care.
-{{% /alert %}}
+> Note: A project **Service Account** has access to all Kubernetes resources in the project. Treat with care.
 
 ## Create a Service Account
 
