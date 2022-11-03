@@ -457,7 +457,7 @@ export default {
       return getProjectDetails(this.project)
     },
     projectQuota () {
-      return this.quotaByNamespace(this.project.metadata.namespace)
+      return this.quotaByNamespace(this.project.metadata?.namespace)
     },
     projectQuotaStatus () {
       return getProjectQuotaStatus(this.projectQuota)

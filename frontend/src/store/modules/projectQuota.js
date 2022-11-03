@@ -10,14 +10,12 @@ import map from 'lodash/map'
 import { aggregateResourceQuotaStatus } from '@/utils'
 
 // initial state
-const state = {
-  all: {}
-}
+const state = {}
 
 // getters
 const getters = {
   quotaByNamespace (state) {
-    return namespace => state.all[namespace]
+    return namespace => state[namespace]
   }
 }
 
@@ -29,14 +27,14 @@ const actions = {
     const quotaStatuses = map(data, 'status')
     const aggregatedQuotaStatus = aggregateResourceQuotaStatus(quotaStatuses)
 
-    commit('RECEIVE_PROJECT_QUOTA', { namespace, aggregatedQuotaStatus })
+    commit('SET_AGGREGATED_QUOTA', [namespace, aggregatedQuotaStatus])
   }
 }
 
 // mutations
 const mutations = {
-  RECEIVE_PROJECT_QUOTA (state, { namespace, aggregatedQuotaStatus }) {
-    Vue.set(state.all, namespace, aggregatedQuotaStatus)
+  SET_AGGREGATED_QUOTA (state, args) {
+    Vue.set(state, ...args)
   }
 }
 
