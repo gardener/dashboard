@@ -20,9 +20,8 @@ To work with clusters, first you need to create a project that they will belong 
 
     <img class="gs-image" style="max-width:65%" src="../images/01-provide-project-details.png">
 
-    {{% alert color="warning"  title="Warning" %}}
-    You will **not** be able to change the project name later. The rest of the details will be editable.
-    {{% /alert %}}
+
+  > :warning: You will **not** be able to change the project name later. The rest of the details will be editable.
 
 ### Result
 
