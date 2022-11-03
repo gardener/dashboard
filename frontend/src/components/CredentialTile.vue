@@ -46,8 +46,7 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </template>
           <span v-else-if="isProgressing">
-            {{phaseCaption}}
-            <span v-if="lastInitiationTime">since <time-string :date-time="lastInitiationTime" mode="past" without-prefix-or-suffix no-tooltip></time-string></span>
+            This operation is currently running
           </span>
           <span v-else>{{phaseCaption}}</span>
         </v-tooltip>
@@ -136,9 +135,6 @@ export default {
       }
     },
     phaseType () {
-      if (!this.phase) {
-        return undefined
-      }
       if (this.phase.type) {
         return this.phase.type
       }
