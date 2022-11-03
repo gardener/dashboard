@@ -168,8 +168,13 @@ class ClientConfig {
       const watcher = new Watcher(Array.from(files.keys()), options)
       watcher.run((path, value) => {
         const key = files.get(path)
-        const obj = key === 'certificateAuthority' ? cluster : user
-        obj[key] = value
+        if (key) {
+          if (['certificateAuthority'].includes(key)) {
+            cluster[key] = value
+          } else if (['clientKey', 'clientCert', 'token'].includes(key)) {
+            user[key] = value
+          }
+        }
         watcher.emit(`update:${key}`)
       })
       properties.watcher = { value: watcher }
