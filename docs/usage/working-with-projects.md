@@ -16,10 +16,6 @@ To work with clusters, first you need to create a project that they will belong 
   
     <img class="gs-image" src="../images/00-create-project.png">
 
-    {{% alert color="info"  title="Note" %}}
-    The link to the Gardener Dashboard for Trial, Canary and Live landscapes can be found in the [Service Plans](https://pages.github.tools.sap/kubernetes/gardener/serviceplans/) page.
-    {{% /alert %}}
-
 2. Provide a project **Name**, and optionally a **Description**, **Cost Center** and a **Purpose**, and choose **CREATE**.
 
     <img class="gs-image" style="max-width:65%" src="../images/01-provide-project-details.png">
