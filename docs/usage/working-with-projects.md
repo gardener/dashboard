@@ -8,7 +8,7 @@ To work with clusters, first you need to create a project that they will belong 
 ## Creating Your First Project
 
 ### Prerequisites
-- You have access to the [Gardener Dashboard](https://dashboard.garden.dev.canary.ondemand.com/) and have permissions to create projects
+- You have access to the Gardener Dashboard and have permissions to create projects
 
 ### Steps
 
