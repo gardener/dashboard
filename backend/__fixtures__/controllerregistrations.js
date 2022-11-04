@@ -50,7 +50,7 @@ const controllerRegistrationList = [
     }]
   }),
   getControllerRegistration({
-    uid: 2,
+    uid: 3,
     name: 'Network Registration 2',
     resources: [{
       kind: 'Network',
@@ -62,12 +62,20 @@ const controllerRegistrationList = [
     }]
   }),
   getControllerRegistration({
-    uid: 2,
+    uid: 4,
     name: 'Provider-Foo',
     resources: [{
       kind: 'DNSRecord',
       type: 'gardenland',
       primary: true
+    }]
+  }),
+  getControllerRegistration({
+    uid: 5,
+    name: 'extension-shoot-dns-service',
+    resources: [{
+      kind: 'Foo',
+      type: 'bar'
     }]
   })
 ]
