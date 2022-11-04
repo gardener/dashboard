@@ -8,8 +8,6 @@ title: Accessing the Gardener API
 
 The cluster operations that are performed manually in the dashboard or via `kubectl` can be automated using the [**Gardener API**](https://github.com/gardener/gardener/blob/master/docs/api-reference/README.md) and a **Service Account** authorized to perform them.
 
-> Note: A project **Service Account** has access to all Kubernetes resources in the project. Treat with care.
-
 ## Create a Service Account
 
 ### Prerequisites
@@ -33,10 +31,11 @@ The cluster operations that are performed manually in the dashboard or via `kube
 
    | Role | Granted Permissions |
    |:---|:---|
-   | *Admin* | Fully manage resources inside the project, except for member management. Also the delete/modify permissions for `ServiceAccount`s are now deprecated for this role and will be removed in a future version of Gardener, use the `Service Account Manager` role instead. |
-   | *Viewer* | Read all resources inside the project except secrets. |
-   | *UAM* | Manage human users or groups in the project member list. Service accounts can only be managed admins. |
-   | *[Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/service-account-manager.md)* | This allows to fully manage service accounts inside the project namespace and request tokens for them. For security reasons this role should not be assigned to service accounts, especially since a service account should not be able to refresh tokens for itself. |
+   | *Owner* | Combines the *Admin*, *UAM* and *Service Account Manager* roles. There can only be one owner per project. You can change the owner on the project administration page. |
+   | *Admin* | Allows to manage resources inside the project (e.g. secrets, shoots, configmaps and similar) and to manage permissions for service accounts. Note that the *Admin* role has read-only access to service accounts. |
+   | *Viewer* | Provides read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read cloud provider secrets. |
+   | *UAM* | Allows to add/modify/remove human users, service accounts or groups to/from the project member list. In case an external UAM system is connected via a service account, only this account should get the *UAM* role. |
+   | *[Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/service-account-manager.md)* | Allows to manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the *Admin* role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens forever. |
 
 4. Choose *CREATE*.
 
@@ -45,6 +44,8 @@ The cluster operations that are performed manually in the dashboard or via `kube
 To use the service account, download or copy its `kubeconfig`. With it you can connect to the API endpoint of your Gardener project.
 
 ![Download service account kubeconfig](../images/03-download-service-account-kubeconfig.png)
+
+> Note: The downloaded `kubeconfig` contains the service account credentials. Treat with care.
 
 ## Delete the Service Account
 

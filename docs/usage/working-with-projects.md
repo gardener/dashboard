@@ -16,9 +16,9 @@ To work with clusters, first you need to create a project that they will belong 
   
     <img class="gs-image" src="../images/00-create-project.png">
 
-2. Provide a project **Name**, and optionally a **Description**, **Cost Center** and a **Purpose**, and choose **CREATE**.
+2. Provide a project **Name**, and optionally a **Description** and a **Purpose**, and choose **CREATE**.
 
-    <img class="gs-image" style="max-width:65%" src="../images/01-provide-project-details.png">
+    <img class="gs-image" style="max-width:65%" src="../images/01-provide-project-details-public.png">
 
 
   > :warning: You will **not** be able to change the project name later. The rest of the details will be editable.
