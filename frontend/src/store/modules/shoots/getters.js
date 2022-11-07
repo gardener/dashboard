@@ -233,9 +233,9 @@ export default {
     let sortByArrAtFreeze
     let sortDescArrAtFreeze
 
-    const orderFreezedItemsBySortedUIDsAtFreeze = (itemsToSort) => {
+    const orderFreezedItemsBySortedUIDsAtFreeze = (items) => {
       return compact(map(sortedUIDsAtFreeze, freezedUID => {
-        const tableContainsItem = some(itemsToSort, item => { // check that item shall still be visible in table
+        const tableContainsItem = some(items, item => { // check that item shall still be visible in table
           return item.metadata.uid === freezedUID
         })
         if (!tableContainsItem) {
@@ -247,11 +247,11 @@ export default {
       }))
     }
 
-    const sortItems = (itemsToSort, sortByArr, sortDescArr) => {
+    const sortItems = (items, sortByArr, sortDescArr) => {
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
-        return itemsToSort
+        return items
       }
       const sortbyNameAsc = (a, b) => {
         if (getRawVal(rootGetters, a, 'name') > getRawVal(rootGetters, b, 'name')) {
@@ -264,7 +264,7 @@ export default {
       const inverse = sortOrder === 'desc' ? -1 : 1
       switch (sortBy) {
         case 'k8sVersion': {
-          itemsToSort.sort((a, b) => {
+          items.sort((a, b) => {
             const versionA = getRawVal(rootGetters, a, sortBy)
             const versionB = getRawVal(rootGetters, b, sortBy)
 
@@ -279,7 +279,7 @@ export default {
           break
         }
         case 'readiness': {
-          itemsToSort.sort((a, b) => {
+          items.sort((a, b) => {
             const readinessA = getSortVal(rootGetters, a, sortBy)
             const readinessB = getSortVal(rootGetters, b, sortBy)
 
@@ -298,11 +298,11 @@ export default {
           break
         }
         default: {
-          itemsToSort = orderBy(itemsToSort, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
 
-      return itemsToSort
+      return items
     }
 
     return (items, sortByArr, sortDescArr) => {
