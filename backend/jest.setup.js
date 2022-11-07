@@ -127,9 +127,9 @@ jest.mock('./lib/cache', () => {
     'core/resourcequotas'
   ]
   for (const key of keys) {
-    const [, fixtureName] = split(key, '/')
+    const [, resourceName] = key.split('/')
     cache.set(key, {
-      items: fixtures[fixtureName].list(),
+      items: fixtures[resourceName].list(),
       list () {
         return this.items
       },
