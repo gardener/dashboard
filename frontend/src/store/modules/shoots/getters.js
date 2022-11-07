@@ -315,10 +315,11 @@ export default {
         return sortItems(items, sortByArr, sortDescArr)
       }
 
-      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
       // if filter was active when freeze activated, need to reset sortedUIDsAtFreeze to include missing items
       const searchStringChanged = items.length > sortedUIDsAtFreeze?.length
 
+      // If freezed, do not alter the order of the items
+      // except if the user explicitly changes the sorting or when the filter changes
       if (!isEqual(sortByArrAtFreeze, sortByArr) || !isEqual(sortDescArrAtFreeze, sortDescArr) || searchStringChanged) {
         // If the sorting or search has changed, sortedUIDsAtFreeze needs to be re-sorted according to the items order
         const sortedItems = sortItems(items, sortByArr, sortDescArr)
