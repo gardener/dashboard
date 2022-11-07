@@ -384,14 +384,15 @@ const actions = {
             'spec.seedName',
             'spec.purpose',
             'status.technicalID',
-            'spec.kubernetes.version',
-            'status' // need to include not only values that we want to display, also need data for sorting
+            'spec.kubernetes.version'
           ]),
           stale: true // Flag them so that the UI can render them accordingly
         }
       })
 
       commit('SET_FREEZED_SHOOT_SKELETONS', freezedShootSkeletons)
+    } else {
+      commit('SET_FREEZED_SHOOT_SKELETONS', undefined)
     }
 
     return state.freezeSorting

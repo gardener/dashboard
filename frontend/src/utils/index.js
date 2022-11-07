@@ -302,10 +302,7 @@ export function getIssueSince (shootStatus) {
   forEach(get(shootStatus, 'lastErrors'), lastError => {
     issueTimestamps.push(lastError.lastUpdateTime)
   })
-  if (issueTimestamps.length) {
-    return head(issueTimestamps.sort())
-  }
-  return undefined
+  return head(issueTimestamps.sort())
 }
 
 export function getProjectDetails (project) {

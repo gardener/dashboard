@@ -15,9 +15,10 @@ import map from 'lodash/map'
 import padStart from 'lodash/padStart'
 import semver from 'semver'
 import find from 'lodash/find'
-import some from 'lodash/some'
 import compact from 'lodash/compact'
+import some from 'lodash/some'
 import differenceBy from 'lodash/differenceBy'
+import isEqual from 'lodash/isEqual'
 
 import {
   getCreatedBy,
@@ -140,7 +141,15 @@ export default {
   filteredItems (state) {
     if (state.freezeSorting) {
       // When state is freezed, do not include new items
-      return state.freezedShootSkeletons
+      return compact(map(state.freezedShootSkeletons, skeletonItem => {
+        const storeItem = find(state.filteredShoots, item => {
+          return item.metadata.uid === skeletonItem.metadata.uid
+        })
+        if (storeItem) {
+          return storeItem
+        }
+        return skeletonItem // only basic properties (like name, namespace) will be available, item flagged as stale for UI
+      }))
     }
     return state.filteredShoots
   },
@@ -224,25 +233,17 @@ export default {
     let sortByArrAtFreeze
     let sortDescArrAtFreeze
 
-    const sortFreezedItems = (itemsToSort) => {
+    const orderFreezedItemsBySortedUIDsAtFreeze = (itemsToSort) => {
       return compact(map(sortedUIDsAtFreeze, freezedUID => {
-        const storeItem = find(state.filteredShoots, item => {
+        const tableContainsItem = some(itemsToSort, item => { // check that item shall still be visible in table
           return item.metadata.uid === freezedUID
         })
-        if (storeItem) { // check that item is still in store (not removed from socket.io room)
-          const tableContainsItem = some(itemsToSort, item => { // check that item shall still be visible in table
-            return item.metadata.uid === freezedUID
-          })
-          if (!tableContainsItem) {
-            return undefined // item not in table (filtered via table search)
-          }
-          return storeItem
+        if (!tableContainsItem) {
+          return undefined // item not in table (filtered via table search)
         }
-        // Keep Items that are no longer in the store as stale items, to keep the list static
-        const freezedItem = find(state.freezedShootSkeletons, item => {
+        return find(state.filteredShoots, item => {
           return item.metadata.uid === freezedUID
         })
-        return freezedItem // only basic properties (like name, namespace) will be available, item flagged as stale for UI
       }))
     }
 
@@ -301,33 +302,36 @@ export default {
         }
       }
 
-      sortedUIDsAtFreeze = map(itemsToSort, ({ metadata }) => {
-        return metadata.uid
-      })
-      sortByArrAtFreeze = sortByArr
-      sortDescArrAtFreeze = sortDescArr
-
       return itemsToSort
     }
 
     return (items, sortByArr, sortDescArr) => {
-      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
-      if (state.freezeSorting) {
-        // if filter was active when freeze activated, need to reset sortedUIDsAtFreeze to include missing items
-        const searchStringChanged = state.freezeSorting && items.length > sortedUIDsAtFreeze.length
+      if (!state.freezeSorting) {
+        sortedUIDsAtFreeze = undefined
+        sortByArrAtFreeze = undefined
+        sortDescArrAtFreeze = undefined
 
-        if (sortByArrAtFreeze !== sortByArr || sortDescArrAtFreeze !== sortDescArr || searchStringChanged) {
-          // If the sorting or search has changed, the list needs to be re-sorted
-          // this will rebuild sortedUIDsAtFreeze accoring to current items order
-          sortItems(items, sortByArr, sortDescArr)
-        }
-
-        // If freezed, the list is static - items are not added and removed and the order is defined by the cached array
-        return sortFreezedItems(items)
+        // Regular sorting logic
+        return sortItems(items, sortByArr, sortDescArr)
       }
 
-      // Regular sorting logic
-      return sortItems(items, sortByArr, sortDescArr)
+      // If the list is freezed, do not alter the order of the items, except if the user explicitly changes the sorting or when the filter changes
+      // if filter was active when freeze activated, need to reset sortedUIDsAtFreeze to include missing items
+      const searchStringChanged = items.length > sortedUIDsAtFreeze?.length
+
+      if (!isEqual(sortByArrAtFreeze, sortByArr) || !isEqual(sortDescArrAtFreeze, sortDescArr) || searchStringChanged) {
+        // If the sorting or search has changed, sortedUIDsAtFreeze needs to be re-sorted according to the items order
+        const sortedItems = sortItems(items, sortByArr, sortDescArr)
+        sortedUIDsAtFreeze = map(sortedItems, ({ metadata }) => {
+          return metadata.uid
+        })
+
+        sortByArrAtFreeze = [...sortByArr]
+        sortDescArrAtFreeze = [...sortDescArr]
+      }
+
+      // If freezed, the list is static - items are not added and removed and the order is defined by the cached array
+      return orderFreezedItemsBySortedUIDsAtFreeze(items)
     }
   },
   numberOfNewItemsSinceFreeze (state) {
