@@ -60,9 +60,9 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    ...mapGetters([
-      'ticketCommentsByIssueNumber'
-    ]),
+    ...mapGetters('tickets', {
+      ticketCommentsByIssueNumber: 'comments'
+    }),
     ticketTitle () {
       const title = get(this.ticket, 'data.ticketTitle')
       return title ? ` - ${title}` : ''

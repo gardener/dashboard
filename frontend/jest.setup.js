@@ -8,6 +8,7 @@ import Vuetify from 'vuetify'
 import fetchMock from 'jest-fetch-mock'
 
 Vue.use(Vuetify)
+Object.defineProperty(Vue, 'vuetify', { value: new Vuetify() })
 
 fetchMock.enableMocks()
 

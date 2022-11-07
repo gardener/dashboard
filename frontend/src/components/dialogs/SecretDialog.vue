@@ -156,7 +156,9 @@ export default {
       'infrastructureSecretList',
       'cloudProfilesByCloudProviderKind',
       'shootList',
-      'sortedCloudProviderKindList',
+      'sortedCloudProviderKindList'
+    ]),
+    ...mapGetters('gardenerExtensions', [
       'sortedDnsProviderList'
     ]),
     dnsProviderTypes () {

@@ -106,6 +106,24 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
@@ -115,16 +133,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
-    },
-  ],
-  Array [
-    Object {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed",
+      ":path": "/api/v1/namespaces/garden/secrets/infra1-seed.ca-cluster",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -157,8 +166,8 @@ Array [
       "spec": Object {
         "host": Object {
           "credentials": Object {
-            "secretRef": Object {
-              "name": "seedsecret-infra1-seed",
+            "shootRef": Object {
+              "name": "infra1-seed",
               "namespace": "garden",
             },
           },
@@ -183,7 +192,7 @@ Array [
         },
         "target": Object {
           "apiServer": Object {
-            "caData": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
+            "caData": "Y2EuY3J0",
           },
           "authorization": Object {
             "projectMemberships": undefined,
@@ -199,8 +208,8 @@ Array [
             ],
           },
           "credentials": Object {
-            "secretRef": Object {
-              "name": "seedsecret-infra1-seed",
+            "shootRef": Object {
+              "name": "infra1-seed",
               "namespace": "garden",
             },
           },
@@ -357,7 +366,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -722,7 +731,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -876,7 +885,7 @@ Array [
         },
         "target": Object {
           "apiServer": Object {
-            "caData": "WTJFdVkzSjA=",
+            "caData": "Y2EuY3J0",
             "serviceRef": Object {
               "name": "kubernetes",
               "namespace": "default",

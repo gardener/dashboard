@@ -9,6 +9,7 @@
 const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
+const cache = require('../cache')
 const tickets = require('../services/tickets')
 
 module.exports = (io, ticketCache, retryOptions = {}) => {
@@ -18,19 +19,15 @@ module.exports = (io, ticketCache, retryOptions = {}) => {
   }
   const nsp = io.of('/')
   ticketCache.on('issue', event => {
-    const room = 'issues'
-    nsp.to(room).emit('issues', {
-      kind: 'issues',
-      events: [event]
-    })
+    nsp.emit('issues', event)
   })
   ticketCache.on('comment', event => {
     const { projectName, name } = event.object.metadata
-    const room = `comments_${projectName}/${name}`
-    nsp.to(room).emit('comments', {
-      kind: 'comments',
-      events: [event]
-    })
+    const namespace = cache.getProjectNamespace(projectName)
+    const rooms = [
+      `shoots;${namespace}/${name}`
+    ]
+    nsp.to(rooms).emit('comments', event)
   })
 
   async function loadAllOpenIssues () {
