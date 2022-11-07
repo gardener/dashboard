@@ -7,6 +7,7 @@
 'use strict'
 
 const EventEmitter = require('events')
+const { basename } = require('path')
 const chokidar = require('chokidar')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const Watcher = require('../lib/Watcher')
@@ -14,8 +15,8 @@ const { onceEvent } = fixtures.helper
 
 describe('watcher', () => {
   const paths = [
-    '/path/to/certificate-authority.pem',
-    '/path/to/token/file'
+    '/path/to/ca.crt',
+    '/path/to/token'
   ]
   let mockWatch
   let emitter
@@ -30,7 +31,7 @@ describe('watcher', () => {
         persistent: true,
         awaitWriteFinish: true,
         ignoreInitial: true,
-        followSymlinks: false,
+        followSymlinks: true,
         disableGlobbing: true
       }
     ])
@@ -47,8 +48,12 @@ describe('watcher', () => {
   })
 
   afterEach(() => {
-    mockWatch.mockRestore()
+    logger.error.mockReset()
     ac.abort()
+  })
+
+  afterAll(() => {
+    mockWatch.mockRestore()
   })
 
   it('should create a watcher with defaults', async () => {
@@ -60,23 +65,23 @@ describe('watcher', () => {
   it('should run a watcher and log errors', async () => {
     const watcher = await createWatcher({
       signal: ac.signal,
-      readFile: path => Promise.resolve(path)
+      readFile: path => Promise.resolve(basename(path))
     })
-    const results = []
-    watcher.run((...args) => {
-      results.push(args)
-      if (results.length >= 2) {
+    const mockHandler = jest.fn((key, value) => {
+      if (value === 'ca.crt') {
         watcher.destroy()
       }
     })
-    emitter.emit('change', 'foo')
+    watcher.run(mockHandler)
+    emitter.emit('change', '/path/to/token')
     emitter.emit('error', new Error('foo'))
-    emitter.emit('change', 'bar')
+    emitter.emit('change', '/path/to/ca.crt')
     emitter.emit('error', new Error('bar'))
     await onceEvent(watcher, 'close')
-    expect(results).toEqual([
-      ['foo', 'foo'],
-      ['bar', 'bar']
+    expect(mockHandler).toBeCalledTimes(2)
+    expect(mockHandler.mock.calls).toEqual([
+      ['/path/to/token', 'token'],
+      ['/path/to/ca.crt', 'ca.crt']
     ])
     expect(logger.error).toBeCalledTimes(2)
     expect(logger.error.mock.calls).toEqual([
@@ -105,20 +110,28 @@ describe('watcher', () => {
     expect(err).toBe(closeError)
   })
 
-  it('should throw a read file error when running a watcher', async () => {
+  it('should log a read file error when running a watcher', async () => {
     const readFileError = new Error('read file error')
+    readFileError.code = 'EREADFILE'
     const watcher = await createWatcher({
       signal: ac.signal,
-      readFile: () => Promise.reject(readFileError)
+      readFile: path => path === '/path/to/token'
+        ? Promise.resolve(basename(path))
+        : Promise.reject(readFileError)
     })
-    const fn = jest.fn()
-    watcher.run(fn)
-    emitter.emit('change', 'foo')
-    const [err] = await Promise.all([
-      onceEvent(watcher, 'error'),
-      onceEvent(watcher, 'close')
+    const mockHandler = jest.fn(() => watcher.destroy())
+    watcher.run(mockHandler)
+    emitter.emit('change', '/path/to/ca.crt')
+    emitter.emit('change', '/path/to/..data')
+    emitter.emit('change', '/path/to/token')
+    await onceEvent(watcher, 'close')
+    expect(mockHandler).toBeCalledTimes(1)
+    expect(mockHandler.mock.calls).toEqual([
+      ['/path/to/token', 'token']
     ])
-    expect(fn).not.toBeCalled()
-    expect(err).toBe(readFileError)
+    expect(logger.error).toBeCalledTimes(1)
+    expect(logger.error.mock.calls).toEqual([
+      ['[kube-config] read file error %s: %s', 'EREADFILE', 'read file error']
+    ])
   })
 })
