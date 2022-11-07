@@ -7,12 +7,6 @@
 # Declare variables to be passed into your templates.
 global:
   replicaCount: 1
-
-image:
-  repository: ghcr.io/plusserver/gardener-dashboard
-  tag: latest
-  pullPolicy: IfNotPresent
-
   # virtualGarden defines deployment related configuration
   virtualGarden:
     # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
@@ -36,50 +30,56 @@ image:
   #   maxAllowedCpu: 500m
   #   maxAllowedMemory: 500Mi
 
-# sessionSecret is used for signing and encrytion of session data
-sessionSecret: ~
-oidc:
-  #Display the OIDC button on the login screen
-  enabled: false
-  # well-known URL for OpenID Provider Issuer Discovery
-  issuerUrl: ~
-  # clientId is the public identifier of the gardener-dashboard aplication
-  clientId: dashboard
-  # clientSecret is the private secret of the gardener-dashboard aplication
-  clientSecret: ~
-  # # certificate authority of the OpenID provider
-  # ca: |
-  logLevel: debug
-  # # the external url of the apiServer
-  # apiServerUrl: https://api.example.org
-  # # the certificateAuthorityData of the kube apiserver
-  # apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
-  # # or the certificateAuthority of the kube apiserver
-  # apiServerCa: |
-  #   -----BEGIN CERTIFICATE-----
-  #   Li4u
-  #   -----END CERTIFICATE-----
-  # # or skip tls verify (insecure)
-  # apiServerSkipTlsVerify: true
-  # # Optional list of the intended audiences of the service account token (garden cluster)
-  # tokenRequestAudiences:
-  # - foo
-  # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
-  # clusterIdentity: my-landscape-dev
-  containerPort: 8080
-  servicePort: 8080
-  resources:
-    limits:
-      cpu: 250m
-      memory: 300Mi
-    requests:
-      cpu: 100m
-      memory: 120Mi
+  image:
+    repository: ghcr.io/plusserver/gardener-dashboard
+    tag: latest
+    pullPolicy: IfNotPresent
 
-  # If dashboard is running in an environment with less than 1.5GB of available memory
-  # you should cap the maximum available "old space". In a Docker-512MB-Container,
-  # the value should not be greater than 90% of the available memory.
-  # nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
+
+  # sessionSecret is used for signing and encrytion of session data
+  sessionSecret: ~
+  oidc:
+    #Display the OIDC button on the login screen
+    enabled: false
+    # well-known URL for OpenID Provider Issuer Discovery
+    issuerUrl: ~
+    # clientId is the public identifier of the gardener-dashboard aplication
+    clientId: dashboard
+    # clientSecret is the private secret of the gardener-dashboard aplication
+    clientSecret: ~
+    # # certificate authority of the OpenID provider
+    # ca: |
+    logLevel: debug
+    # # the external url of the apiServer
+    # apiServerUrl: https://api.example.org
+    # # the certificateAuthorityData of the kube apiserver
+    # apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
+    # # or the certificateAuthority of the kube apiserver
+    # apiServerCa: |
+    #   -----BEGIN CERTIFICATE-----
+    #   Li4u
+    #   -----END CERTIFICATE-----
+    # # or skip tls verify (insecure)
+    # apiServerSkipTlsVerify: true
+    # # Optional list of the intended audiences of the service account token (garden cluster)
+    # tokenRequestAudiences:
+    # - foo
+    # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
+    # clusterIdentity: my-landscape-dev
+    containerPort: 8080
+    servicePort: 8080
+    resources:
+      limits:
+        cpu: 250m
+        memory: 300Mi
+      requests:
+        cpu: 100m
+        memory: 120Mi
+
+    # If dashboard is running in an environment with less than 1.5GB of available memory
+    # you should cap the maximum available "old space". In a Docker-512MB-Container,
+    # the value should not be greater than 90% of the available memory.
+    # nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
 
   ingress:
     annotations:
@@ -103,37 +103,6 @@ oidc:
       #   -----BEGIN RSA PRIVATE KEY-----
       #   Li4u
       #   -----END RSA PRIVATE KEY-----
-
-  # sessionSecret is used for signing and encrytion of session data
-  sessionSecret: ~
-  oidc:
-    # well-known URL for OpenID Provider Issuer Discovery
-    issuerUrl: ~
-    # clientId is the public identifier of the gardener-dashboard aplication
-    clientId: dashboard
-    # clientSecret is the private secret of the gardener-dashboard aplication
-    clientSecret: ~
-    # # force PKCE usage
-    # usePKCE: true
-    # # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
-    # sessionLifetime: 86400
-    # # certificate authority of the OpenID provider
-    # ca: |
-    #   -----BEGIN CERTIFICATE-----
-    #   Li4u
-    #   -----END CERTIFICATE-----
-    # # secretKey reference to the certificate authority
-    # caSecretKeyRef:
-    #   name: oidc-ca-secret-name
-    #   key: ca.crt
-    # # configuration for kubeconfig download required by kubelogin
-    # public:
-    #   # clientId is the identifier of the public oidc client use by kubelogin
-    #   clientId: kube-kubectl
-    #   # clientSecret is the public client secret use by kubelogin and all users
-    #   clientSecret: ~
-    #   # force PKCE usage (automatically enabled if no clientSecret is given)
-    #   usePKCE: true
 
   frontendConfig:
     landingPageUrl: https://github.com/gardener
