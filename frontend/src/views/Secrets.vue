@@ -222,7 +222,6 @@ export default {
       'canCreateSecrets',
       'sortedCloudProviderKindListForSecretEdit',
       'sortedCloudProviderKindListForSecretCreation',
-      'sortedCloudProviderKindList'
     ]),
     ...mapGetters('gardenerExtensions', [
       'sortedDnsProviderList'
