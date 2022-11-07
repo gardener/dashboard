@@ -142,9 +142,7 @@ export default {
     if (state.freezeSorting) {
       // When state is freezed, do not include new items
       return compact(map(state.freezedShootSkeletons, skeletonItem => {
-        const storeItem = find(state.filteredShoots, item => {
-          return item.metadata.uid === skeletonItem.metadata.uid
-        })
+        const storeItem = find(state.filteredShoots, ['metadata.uid', skeletonItem.metadata.uid])
         if (storeItem) {
           return storeItem
         }
@@ -235,15 +233,11 @@ export default {
 
     const orderFreezedItemsBySortedUIDsAtFreeze = (items) => {
       return compact(map(sortedUIDsAtFreeze, freezedUID => {
-        const tableContainsItem = some(items, item => { // check that item shall still be visible in table
-          return item.metadata.uid === freezedUID
-        })
+        const tableContainsItem = some(items, ['metadata.uid', freezedUID])
         if (!tableContainsItem) {
           return undefined // item not in table (filtered via table search)
         }
-        return find(state.filteredShoots, item => {
-          return item.metadata.uid === freezedUID
-        })
+        return find(state.filteredShoots, ['metadata.uid', freezedUID])
       }))
     }
 
@@ -323,9 +317,7 @@ export default {
       if (!isEqual(sortByArrAtFreeze, sortByArr) || !isEqual(sortDescArrAtFreeze, sortDescArr) || searchStringChanged) {
         // If the sorting or search has changed, sortedUIDsAtFreeze needs to be re-sorted according to the items order
         const sortedItems = sortItems(items, sortByArr, sortDescArr)
-        sortedUIDsAtFreeze = map(sortedItems, ({ metadata }) => {
-          return metadata.uid
-        })
+        sortedUIDsAtFreeze = map(sortedItems, 'metadata.uid')
 
         sortByArrAtFreeze = [...sortByArr]
         sortDescArrAtFreeze = [...sortDescArr]
