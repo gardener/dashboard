@@ -16,39 +16,42 @@ const yaml = require('js-yaml')
 const { flatMap, defaultsDeep } = require('lodash')
 const { randomNumber } = require('./helper')
 
-async function renderChartTemplates (chart, templates, values) {
-  let name
+function renderTemplatesFn (...paths) {
+  const cwd = path.resolve(__dirname, '..', ...paths)
+  let name, defaults
   try {
-    const { defaults, releaseName } = require('./' + chart)
-    name = releaseName
-    defaultsDeep(values, defaults)
+    defaults = require('./' + paths[0])
+    const data = fs.readFileSync(path.join(cwd, 'Chart.yaml'), 'utf8')
+    name = yaml.load(data).name
   } catch (err) {
-    assert.fail(`Invalid chart "${chart}"`)
+    assert.fail(`Invalid chart "${path.join(paths)}"`)
   }
-  const dirname = process.env.HELM_VALUES_DIRNAME
-  assert.ok(fs.statSync(dirname).isDirectory(), `Invalid helm values directory "${dirname}"`)
-  const filename = path.join(dirname, `values-${randomNumber()}.yaml`)
-  try {
-    fs.writeFileSync(filename, yaml.dump(values, { skipInvalid: true }))
-    const cmd = [
-      'helm',
-      'template',
-      name,
-      '-n',
-      'garden',
-      ...flatMap(templates, template => ['-s', `templates/${template}.yaml`]),
-      '.',
-      '-f',
-      filename
-    ]
-    const cwd = path.resolve(__dirname, '..', chart)
-    const { stdout } = await exec(cmd.join(' '), { cwd })
-    return yaml.loadAll(stdout)
-  } finally {
-    fs.unlinkSync(filename)
+  return async (templates, values) => {
+    defaultsDeep(values, defaults)
+    const dirname = process.env.HELM_VALUES_DIRNAME
+    assert.ok(fs.statSync(dirname).isDirectory(), `Invalid helm values directory "${dirname}"`)
+    const filename = path.join(dirname, `values-${randomNumber()}.yaml`)
+    try {
+      fs.writeFileSync(filename, yaml.dump(values, { skipInvalid: true }))
+      const cmd = [
+        'helm',
+        'template',
+        name,
+        '-n',
+        'garden',
+        ...flatMap(templates, template => ['-s', `templates/${template}.yaml`]),
+        '.',
+        '-f',
+        filename
+      ]
+      const { stdout } = await exec(cmd.join(' '), { cwd })
+      return yaml.loadAll(stdout)
+    } finally {
+      fs.unlinkSync(filename)
+    }
   }
 }
 
 module.exports = {
-  renderChartTemplates
+  renderTemplatesFn
 }

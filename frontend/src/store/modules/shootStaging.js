@@ -50,10 +50,10 @@ const getters = {
     return notYetCreated(state)
   },
   dnsProviderTypes (state, getters, rootState, rootGetters) {
-    return map(rootGetters.sortedDnsProviderList, 'type')
+    return map(rootGetters['gardenerExtensions/sortedDnsProviderList'], 'type')
   },
   dnsProviderTypesWithPrimarySupport (state, getters, rootState, rootGetters) {
-    return map(filter(rootGetters.sortedDnsProviderList, 'primary'), 'type')
+    return map(filter(rootGetters['gardenerExtensions/sortedDnsProviderList'], 'primary'), 'type')
   },
   getDnsProviderSecrets (state, getters, rootState, rootGetters) {
     return type => rootGetters.dnsSecretsByProviderKind(type)

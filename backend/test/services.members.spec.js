@@ -119,12 +119,7 @@ describe('services', function () {
             'dashboard.gardener.cloud/description': 'description'
           },
           creationTimestamp: 'bar-time'
-        },
-        secrets: [
-          {
-            name: 'secret-1'
-          }
-        ]
+        }
       },
       {
         metadata: {
@@ -144,18 +139,7 @@ describe('services', function () {
             'dashboard.gardener.cloud/created-by': 'foo'
           },
           creationTimestamp: 'bar-time'
-        },
-        secrets: [
-          {
-            name: 'secret-1'
-          },
-          {
-            name: 'secret-2'
-          },
-          {
-            name: 'missing-secret'
-          }
-        ]
+        }
       },
       {
         metadata: {
@@ -166,28 +150,13 @@ describe('services', function () {
           },
           creationTimestamp: 'bar-time'
         }
-      }
-    ]
-
-    const secrets = [
-      {
-        metadata: {
-          namespace: 'garden-foo',
-          name: 'secret-1',
-          creationTimestamp: '2019-03-13T13:11:36Z'
-        },
-        data: {
-          token: Buffer.from('secret-1').toString('base64')
-        }
       },
       {
         metadata: {
+          name: 'robot-deleted',
           namespace: 'garden-foo',
-          name: 'secret-2',
-          creationTimestamp: '2021-03-13T13:11:36Z'
-        },
-        data: {
-          token: Buffer.from('secret-2').toString('base64')
+          creationTimestamp: 'bar-time',
+          deletionTimestamp: 'baz-time'
         }
       }
     ]
@@ -231,10 +200,6 @@ describe('services', function () {
         delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockResolvedValue()
       }
-      client.core.secrets = {
-        delete: jest.fn().mockImplementation(findObjectFn(secrets)),
-        get: jest.fn().mockImplementation(findObjectFn(secrets))
-      }
     })
 
     describe('SubjectList', function () {
@@ -270,7 +235,7 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).toHaveLength(9)
+          expect(frontendMemberList).toHaveLength(10)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
@@ -297,6 +262,12 @@ describe('services', function () {
             username: 'system:serviceaccount:garden-foo:robot-orphaned',
             roles: ['myrole'],
             orphaned: true
+          })
+          expect(frontendMemberList).toContainEqual({
+            username: 'system:serviceaccount:garden-foo:robot-deleted',
+            roles: [],
+            creationTimestamp: 'bar-time',
+            deletionTimestamp: 'baz-time'
           })
         })
 
@@ -426,6 +397,23 @@ describe('services', function () {
           expect(newMemberListItem.subject.role).toBe('admin')
           expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['viewer']))
           expect(newMemberListItem.roles).toEqual(roles)
+        })
+
+        it('should create orphaned service account', async function () {
+          const name = 'system:serviceaccount:garden-foo:robot-orphaned'
+          const roles = ['role1', 'role2']
+
+          await memberManager.update(name, { roles }) // assign user to project
+          const memberSubjects = memberManager.subjectList
+          const newMemberListItem = memberSubjects.subjectListItems[name]
+
+          expect(newMemberListItem.subject.name).toEqual('robot-orphaned')
+          expect(newMemberListItem.subject.namespace).toEqual('garden-foo')
+          expect(newMemberListItem.subject.kind).toBe('ServiceAccount')
+          expect(newMemberListItem.subject.role).toBe('role1')
+          expect(newMemberListItem.subject.roles).toEqual(expect.arrayContaining(['role2']))
+          expect(newMemberListItem.roles).toEqual(roles)
+          expect(newMemberListItem.extensions.orphaned).toBe(false)
         })
       })
 

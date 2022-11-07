@@ -13,14 +13,48 @@ SPDX-License-Identifier: Apache-2.0
     width="1250"
     confirm-required
     caption="Configure Workers"
-    disable-confirm-input-focus>
-    <template v-slot:actionComponent>
-      <manage-workers
-        @valid="onWorkersValid"
-        @additionalZonesNetworkConfiguration="setNetworkConfiguration"
-        ref="manageWorkers"
-        v-on="$manageWorkers.hooks"
-      ></manage-workers>
+    disable-confirm-input-focus
+    max-height="80vh">
+    <template v-slot:top>
+      <v-tabs
+        color="primary"
+        v-model="tab"
+      >
+        <v-tab
+          key="overview"
+          href="#overview"
+        >
+          Overview
+        </v-tab>
+        <v-tab
+          key="yaml"
+          href="#yaml"
+        >
+          Yaml
+        </v-tab>
+      </v-tabs>
+    </template>
+    <template v-slot:card>
+      <v-tabs-items v-model="tab">
+        <v-tab-item id="overview">
+          <manage-workers
+            @valid="onWorkersValid"
+            @additionalZonesNetworkConfiguration="setNetworkConfiguration"
+            ref="manageWorkers"
+            v-on="$manageWorkers.hooks"
+          ></manage-workers>
+        </v-tab-item>
+        <v-tab-item id="yaml">
+          <shoot-editor
+            :shoot-item="editorData"
+            :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
+            ref="workerEditor"
+            v-on="$workerEditor.hooks"
+            hide-toolbar
+          >
+          </shoot-editor>
+        </v-tab-item>
+      </v-tabs-items>
     </template>
     <template v-slot:errorMessage>
       <v-alert
@@ -34,11 +68,12 @@ SPDX-License-Identifier: Apache-2.0
         class="mx-1">
         <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
         <code-block
-          lang="code"
+          lang="yaml"
           :content="networkConfigurationYaml"
           :show-copy-button="false"
           ></code-block>
-        <span class="font-weight-bold">This change cannot be undone.</span>
+        <div class="font-weight-bold">This change cannot be undone.</div>
+        <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
       </v-alert>
     </template>
   </action-button-dialog>
@@ -55,26 +90,47 @@ import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
+const ShootEditor = () => import('@/components/ShootEditor')
 
 export default {
   name: 'worker-configuration',
   components: {
     ActionButtonDialog,
     ManageWorkers,
-    CodeBlock
+    CodeBlock,
+    ShootEditor
   },
   data () {
     return {
       workersValid: false,
       workers: undefined,
       networkConfiguration: [],
-      networkConfigurationYaml: undefined
+      networkConfigurationYaml: undefined,
+      tabValue: 'overview',
+      editorData: {}
     }
   },
   mixins: [
     shootItem,
-    asyncRef('manageWorkers')
+    asyncRef('manageWorkers'),
+    asyncRef('workerEditor')
   ],
+  computed: {
+    tab: {
+      get () {
+        return this.tabValue
+      },
+      set (value) {
+        this.tabValue = value
+        if (value === 'overview') {
+          this.setOverviewData()
+        }
+        if (value === 'yaml') {
+          this.setEditorData()
+        }
+      }
+    }
+  },
   methods: {
     async onConfigurationDialogOpened () {
       await this.reset()
@@ -85,16 +141,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const vm = await this.$manageWorkers.vm()
-        const workers = vm.getWorkers()
-        const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
-        const data = { workers }
-        if (zonesNetworkConfiguration) {
-          data.infrastructureConfig = {
-            networks: {
-              zones: zonesNetworkConfiguration
-            }
-          }
+        let data
+        if (this.tab === 'overview') {
+          data = await this.getWorkerComponentData()
+        } else if (this.tab === 'yaml') {
+          data = await this.getWorkerEditorData()
         }
         await patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
@@ -116,6 +167,7 @@ export default {
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
       await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      this.tabValue = 'overview'
     },
     onWorkersValid (value) {
       this.workersValid = value
@@ -127,6 +179,50 @@ export default {
       } else {
         this.networkConfiguration = []
         this.networkConfigurationYaml = undefined
+      }
+    },
+    async getWorkerComponentData () {
+      const vm = await this.$manageWorkers.vm()
+      const workers = vm.getWorkers()
+      const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
+      const data = { workers }
+      if (zonesNetworkConfiguration) {
+        data.infrastructureConfig = {
+          networks: {
+            zones: zonesNetworkConfiguration
+          }
+        }
+      }
+      return data
+    },
+    async getWorkerEditorData () {
+      const yaml = await this.$workerEditor.dispatch('getContent')
+      const content = await this.$yaml.load(yaml)
+      return get(content, 'spec.provider')
+    },
+    async setEditorData () {
+      const editorData = await this.getWorkerComponentData()
+      if (editorData) {
+        this.editorData = {
+          spec: {
+            provider: {
+              ...editorData
+            }
+          }
+        }
+        this.$workerEditor.dispatch('reload')
+      }
+    },
+    async setOverviewData () {
+      try {
+        const editorData = await this.getWorkerEditorData()
+        const workers = get(editorData, 'workers')
+        const zonesNetworkConfiguration = get(editorData, 'infrastructureConfig.networks.zones', [])
+        await this.$manageWorkers.dispatch('updateWorkersData', { workers, zonesNetworkConfiguration })
+      } catch (err) {
+        const errorMessage = 'Could not update workers with changed yaml'
+        const detailedErrorMessage = err.message
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
       }
     }
   }

@@ -29,88 +29,88 @@ SPDX-License-Identifier: Apache-2.0
       ></g-message>
     </div>
     <v-divider></v-divider>
-    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
-        <div class="d-flex align-center justify-start fill-height">
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="untouched" @click="reload">
-                    <v-icon small>mdi-reload</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Discard and Reload</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="!historySize.undo" @click="undo">
-                    <v-icon small>mdi-undo</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Undo</span>
-            </v-tooltip>
-          </div>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon :disabled="!historySize.redo" @click="redo">
-                    <v-icon small>mdi-redo</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Redo</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon @click="downloadContent">
-                    <v-icon small>mdi-download</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Download</span>
-            </v-tooltip>
-          </div>
-          <div class="px-2">
-            <copy-btn
-              :clipboard-text="getContent()"
-              @click.native.stop="focus"
-              tooltip-text='Copy'
-              :user-feedback="false"
-              @copy="onCopy"
-              @copy-failed="onCopyFailed"
-            >
-            </copy-btn>
-          </div>
-          <v-divider vertical></v-divider>
-          <div class="px-2">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
-                    <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
-            </v-tooltip>
-          </div>
-          <v-divider vertical></v-divider>
+    <div v-if="showToolbar" :style="toolbarStyles" class="d-flex align-center justify-space-between">
+      <div class="d-flex align-center justify-start fill-height">
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="untouched" @click="reload">
+                  <v-icon small>mdi-reload</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Discard and Reload</span>
+          </v-tooltip>
         </div>
-        <div class="d-flex fill-height align-center justify-end">
-          <v-divider vertical></v-divider>
-          <slot name="toolbarItemsRight"></slot>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="!historySize.undo" @click="undo">
+                  <v-icon small>mdi-undo</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Undo</span>
+          </v-tooltip>
         </div>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon :disabled="!historySize.redo" @click="redo">
+                  <v-icon small>mdi-redo</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Redo</span>
+          </v-tooltip>
+        </div>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon @click="downloadContent">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Download</span>
+          </v-tooltip>
+        </div>
+        <div class="px-2">
+          <copy-btn
+            :clipboard-text="getContent()"
+            @click.native.stop="focus"
+            tooltip-text='Copy'
+            :user-feedback="false"
+            @copy="onCopy"
+            @copy-failed="onCopyFailed"
+          >
+          </copy-btn>
+        </div>
+        <v-divider vertical></v-divider>
+        <div class="px-2">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
+                  <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+          </v-tooltip>
+        </div>
+        <v-divider vertical></v-divider>
+      </div>
+      <div class="d-flex fill-height align-center justify-end">
+        <v-divider vertical></v-divider>
+        <slot name="toolbarItemsRight"></slot>
+      </div>
     </div>
     <v-tooltip
       right
@@ -174,6 +174,12 @@ export default {
     },
     extraKeys: {
       type: Object
+    },
+    hideToolbar: {
+      type: Boolean
+    },
+    completionPaths: {
+      type: Array
     }
   },
   data () {
@@ -207,10 +213,10 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapState([
-      'namespace',
-      'darkTheme'
+      'namespace'
     ]),
     ...mapGetters([
+      'colorScheme',
       'canPatchShoots',
       'projectNameByNamespace'
     ]),
@@ -228,7 +234,6 @@ export default {
     containerStyles () {
       return {
         flex: '1 1 auto',
-        height: `${this.lineHeight * 15}px`,
         minHeight: `${this.lineHeight * 3}px`
       }
     },
@@ -257,6 +262,14 @@ export default {
     },
     isReadOnly () {
       return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
+    },
+    showToolbar () {
+      return !this.isReadOnly && !this.hideToolbar
+    },
+    theme () {
+      return this.colorScheme === 'dark'
+        ? 'seti'
+        : 'default'
     }
   },
   methods: {
@@ -347,7 +360,7 @@ export default {
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
         extraKeys,
-        theme: this.darkTheme ? 'seti' : 'default'
+        theme: this.theme
       }
       this.$instance = CodeMirror(element, options)
       this.$instance.setSize('100%', '100%')
@@ -362,6 +375,7 @@ export default {
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
+        options.container = this.$refs.container
         if (!this.shootEditorCompletions) {
           return
         }
@@ -455,7 +469,7 @@ export default {
     const shootSchemaDefinition = await getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.$instance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
   },
   watch: {
     canPatchShoots (value) {
@@ -480,8 +494,8 @@ export default {
         }
       }
     },
-    darkTheme (value) {
-      this.$instance.setOption('theme', value ? 'seti' : 'default')
+    theme (value) {
+      this.$instance.setOption('theme', value)
     }
   },
   beforeDestroy () {

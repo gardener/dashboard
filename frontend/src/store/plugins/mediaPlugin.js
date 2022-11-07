@@ -4,29 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-export default function (window) {
+export default function (vuetify) {
   return store => {
+    const setPrefersColorScheme = dark => {
+      store.commit('SET_PREFERS_COLOR_SCHEME', dark ? 'dark' : 'light')
+    }
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    mq.addEventListener('change', e => {
-      if (!['dark', 'light'].includes(store.state.colorScheme)) {
-        store.commit('SET_DARK_THEME', e.matches)
-      }
-    })
+    setPrefersColorScheme(mq.matches)
+    mq.addEventListener('change', e => setPrefersColorScheme(e.matches))
 
-    store.subscribe((mutation) => {
-      if (mutation.type === 'SET_COLOR_SCHEME') {
-        switch (store.state.colorScheme) {
-          case 'dark':
-            store.commit('SET_DARK_THEME', true)
-            break
-          case 'light':
-            store.commit('SET_DARK_THEME', false)
-            break
-          default:
-            store.commit('SET_DARK_THEME', mq.matches)
-            break
-        }
-      }
-    })
+    const colorScheme = (state, getters) => getters.colorScheme
+    const setDarkTheme = value => {
+      vuetify.framework.theme.dark = value === 'dark'
+    }
+    setDarkTheme(store.getters.colorScheme)
+    store.watch(colorScheme, setDarkTheme)
   }
 }

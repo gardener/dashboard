@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw" @keydown.esc="resolveAction(false)">
+  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw">
     <v-card>
       <v-toolbar flat class="toolbar-background toolbar-title--text">
         <v-toolbar-title class="dialog-title align-center justify-start">
@@ -18,11 +18,13 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard">
-        <slot name="message">
-          This is a generic dialog template.
-        </slot>
-      </v-card-text>
+      <slot name="top"></slot>
+      <div :style="{ 'max-height': maxHeight }" ref="cardContent" class="card-content">
+        <slot name="card"></slot>
+        <v-card-text v-if="$slots.message">
+          <slot name="message"></slot>
+        </v-card-text>
+      </div>
       <slot name="errorMessage"></slot>
       <g-message color="error" class="mt-4" :message.sync="message" :detailed-message.sync="detailedMessage"></g-message>
       <v-divider></v-divider>
@@ -34,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.enter="resolveAction(true)"
           ref="deleteDialogInput"
           :label="hint"
-          :error="hasError && userInput.length > 0"
+          :error="notConfirmed && userInput.length > 0"
           hide-details
           v-model="userInput"
           type="text"
@@ -43,7 +45,15 @@ SPDX-License-Identifier: Apache-2.0
           dense>
         </v-text-field>
         <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
-        <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+        <v-tooltip top :disabled="valid">
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+            </div>
+          </template>
+          <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
+          <span v-else-if="notConfirmed">You need to confirm your changes by typing this cluster's name</span>
+        </v-tooltip>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -102,7 +112,7 @@ export default {
     }
   },
   computed: {
-    hasError () {
+    notConfirmed () {
       return this.confirmValue && this.confirmValue !== this.userInput
     },
     hint () {
@@ -130,7 +140,7 @@ export default {
       }
     },
     valid () {
-      return !this.confirmDisabled && !this.hasError
+      return !this.confirmDisabled && !this.notConfirmed
     }
   },
   methods: {
@@ -182,14 +192,14 @@ export default {
         // circuit breaker
         return
       }
-      const contentCardRef = this.$refs.contentCard
-      if (!contentCardRef || !contentCardRef.clientHeight) {
+      const cardContentRef = this.$refs.cardContent
+      if (!cardContentRef || !cardContentRef.clientHeight) {
         this.$nextTick(() => this.showScrollBar(retryCount + 1))
         return
       }
-      const scrollTopVal = contentCardRef.scrollTop
-      contentCardRef.scrollTop = scrollTopVal + 10
-      contentCardRef.scrollTop = scrollTopVal - 10
+      const scrollTopVal = cardContentRef.scrollTop
+      cardContentRef.scrollTop = scrollTopVal + 10
+      cardContentRef.scrollTop = scrollTopVal - 10
     }
   },
   watch: {
@@ -205,5 +215,9 @@ export default {
 <style lang="scss" scoped>
   .confirm-input {
     width: 18em;
+  }
+
+  .card-content {
+    overflow: scroll;
   }
 </style>

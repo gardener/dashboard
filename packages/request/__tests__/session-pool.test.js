@@ -51,8 +51,14 @@ class MockHttp2Session extends MockEmitter {
       maxConcurrentStreams: peerMaxConcurrentStreams
     }
     this.socket = new MockTLSSocket()
-    this.destroy = jest.fn()
+    this.destroyed = false
+    this.destroy = jest.fn().mockImplementation(() => {
+      this.destroyed = true
+      this.emit('close')
+    })
+    this.closed = false
     this.close = jest.fn().mockImplementation(() => {
+      this.closed = true
       this.emit('close')
     })
     this.pong = jest.fn()
@@ -173,6 +179,16 @@ describe('SessionPool', () => {
       const session = pool.getSession()
       session.emit('connect')
       expect(pool.getSession()).toBe(session)
+    })
+
+    it('should delete an existing destroyed sessions and return a new one', () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      expect(pool.getSession()).toBe(session)
+      session.destroyed = true
+      pool.createSession = jest.fn()
+      pool.getSession()
+      expect(pool.createSession).toBeCalledTimes(1)
     })
 
     it('should return the session with the highest load', async () => {
