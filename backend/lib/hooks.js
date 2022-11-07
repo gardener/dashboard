@@ -82,7 +82,7 @@ class LifecycleHooks {
 
 module.exports = () => {
   const client = createDashboardClient({
-    id: 'informer',
+    id: 'watch',
     pingInterval: 30000,
     maxOutstandingPings: 2
   })

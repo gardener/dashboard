@@ -6,14 +6,14 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { getPrivileges, getConfiguration } from '@/utils/api'
+import { getConfiguration } from '@/utils/api'
 
-export default function createGuards (store, userManager, localStorage) {
+export default function createGuards (store, userManager, localStorage, logger) {
   return {
     beforeEach: [
       setLoading(store, true),
-      ensureUserAuthenticatedForNonPublicRoutes(store, userManager),
-      ensureDataLoaded(store, localStorage)
+      ensureUserAuthenticatedForNonPublicRoutes(store, userManager, logger),
+      ensureDataLoaded(store, localStorage, logger)
     ],
     afterEach: [
       setLoading(store, false)
@@ -33,58 +33,63 @@ function setLoading (store, value) {
   }
 }
 
-function ensureUserAuthenticatedForNonPublicRoutes (store, userManager) {
-  return async (to, from, next) => {
-    try {
-      const { meta = {}, path } = to
-      if (meta.public) {
-        return next()
-      }
-      if (userManager.isUserLoggedIn()) {
-        const user = userManager.getUser()
-        const storedUser = store.state.user
-        if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin } } = await getPrivileges()
-
-          await store.dispatch('setUser', { ...user, isAdmin })
-        }
-        return next()
-      }
+function ensureUserAuthenticatedForNonPublicRoutes (store, userManager, logger) {
+  return (to, from, next) => {
+    const { meta = {}, path } = to
+    if (meta.public) {
+      return next()
+    }
+    const user = userManager.getUser()
+    if (!user) {
+      logger.info('No user found --> Redirecting to login page')
       const query = path !== '/' ? { redirectPath: path } : undefined
       return next({
         name: 'Login',
         query
       })
-    } catch (err) {
-      const { response: { status, data = {} } = {} } = err
-      if (status === 401) {
-        return userManager.signout(new Error(data.message))
-      }
-      next(err)
     }
+    if (userManager.isSessionExpired()) {
+      logger.info('Session is expired --> Redirecting to logout page')
+      userManager.signout()
+      return next(false)
+    }
+    const storedUser = store.state.user
+    if (!storedUser || storedUser.jti !== user.jti) {
+      store.commit('SET_USER', user)
+    }
+    return next()
   }
 }
 
-function ensureDataLoaded (store, localStorage) {
+function ensureDataLoaded (store, localStorage, logger) {
   return async (to, from, next) => {
     const meta = to.meta || {}
-    if (meta.public) {
-      return next()
-    }
-    if (to.name === 'Error') {
+    if (meta.public || to.name === 'Error') {
+      store.dispatch('unsubscribeShoots')
       return next()
     }
     try {
-      await Promise.all([
+      const promises = [
         ensureConfigurationLoaded(store),
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
         ensureSeedsLoaded(store),
         ensureKubeconfigDataLoaded(store),
         ensureExtensionInformationLoaded(store)
-      ])
+      ]
 
-      await setNamespace(store, to.params.namespace || to.query.namespace)
+      const namespace = to.params.namespace || to.query.namespace
+      if (namespace && namespace !== store.state.namespace) {
+        store.commit('SET_NAMESPACE', namespace)
+        promises.push(store.dispatch('refreshSubjectRules', namespace))
+      }
+
+      await Promise.all(promises)
+
+      if (namespace && namespace !== '_all' && !includes(store.getters.namespaces, namespace)) {
+        logger.error('User %s has no authorization for namespace %s', store.getters.username, namespace)
+        store.commit('SET_NAMESPACE', null)
+      }
 
       switch (to.name) {
         case 'Secrets':
@@ -145,18 +150,16 @@ function ensureDataLoaded (store, localStorage) {
           ])
           break
         }
+        case 'Account':
+        case 'Settings': {
+          store.dispatch('unsubscribeShoots')
+          break
+        }
       }
       next()
     } catch (err) {
       next(err)
     }
-  }
-}
-
-function setNamespace (store, namespace) {
-  const namespaces = store.getters.namespaces
-  if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
-    return store.dispatch('setNamespace', namespace)
   }
 }
 

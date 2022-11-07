@@ -72,6 +72,7 @@ SPDX-License-Identifier: Apache-2.0
             :cloud-profile-name="shootCloudProfileName"
             :shoot-item="shootItem"
             :key="workerGroup.name"
+            v-model="workerGroupTab"
             ></worker-group>
           </v-list-item-title>
         </v-list-item-content>
@@ -224,6 +225,11 @@ export default {
     ShootVersion,
     ShootMessages,
     CopyBtn
+  },
+  data () {
+    return {
+      workerGroupTab: 'overview'
+    }
   },
   mixins: [shootItem],
   computed: {

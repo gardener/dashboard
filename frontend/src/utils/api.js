@@ -4,58 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
+import fetch from './fetch'
+export { registry as interceptors } from './fetch'
 
-/* General Purpose */
-async function toPlainResponseObject (response) {
-  const { status, statusText } = response
-  const contentType = response.headers.get('Content-Type')
-  const headers = {}
-  for (const [key, value] of response.headers.entries()) {
-    headers[key] = value
-  }
-  let data
-  if (contentType && typeof contentType === 'string') {
-    const [mediaType] = contentType.split(';')
-    switch (mediaType.trim()) {
-      case 'application/json':
-        data = await response.json()
-        break
-      default:
-        data = await response.text()
-        break
-    }
-  }
-  return {
-    status,
-    statusText,
-    headers,
-    data
-  }
-}
-
-async function request (method, url, data) {
-  const options = {
-    method,
-    cache: 'no-cache',
-    headers: {
-      Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  }
-  if (data) {
-    options.headers['Content-Type'] = 'application/json'
-    options.body = JSON.stringify(data)
-  }
-  let response = await fetch(url, options)
-  response = await toPlainResponseObject(response)
-  const { status } = response
-  if (status >= 200 && status < 300) {
-    return response
-  }
-  const error = new Error(`Request failed with status code ${status}`)
-  error.response = response
-  throw error
+function request (method, url, data) {
+  return fetch(url, { method, body: data })
 }
 
 function getResource (url) {
@@ -116,7 +69,34 @@ export function deleteCloudProviderSecret ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
 }
 
+/* Tickets */
+
+export function getIssues ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
+  return getResource(`/api/namespaces/${namespace}/tickets`)
+}
+
+export function getIssuesAndComments ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/tickets/${name}`)
+}
+
 /* Shoot Clusters */
+
+export function getShoots ({ namespace, labelSelector }) {
+  const search = labelSelector
+    ? '?' + new URLSearchParams({ labelSelector }).toString()
+    : ''
+  namespace = encodeURIComponent(namespace)
+  return getResource(`/api/namespaces/${namespace}/shoots` + search)
+}
+
+export function getShoot ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}`)
+}
 
 export function createShoot ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
@@ -202,8 +182,8 @@ export function updateShootDns ({ namespace, name, data }) {
 }
 
 export async function getShootSchemaDefinition () {
-  const definitions = await getResource('/api/openapi')
-  return get(definitions, ['data', 'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'])
+  const { data = {} } = await getResource('/api/openapi')
+  return data['com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot']
 }
 
 export function updateShootPurpose ({ namespace, name, data }) {
@@ -290,12 +270,8 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
-export function getPrivileges () {
-  return getResource('/api/user/privileges')
-}
-
 export function getSubjectRules ({ namespace = 'default' }) {
-  return callResourceMethod('/api/user/subjectrules/', {
+  return callResourceMethod('/api/user/subjectrules', {
     namespace
   })
 }
@@ -386,4 +362,59 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 
 export function getGardenerExtensions () {
   return getResource('/api/gardener-extensions')
+}
+
+export default {
+  getConfiguration,
+  getLoginConfiguration,
+  getCloudProviderSecrets,
+  updateCloudProviderSecret,
+  createCloudProviderSecret,
+  deleteCloudProviderSecret,
+  getIssues,
+  getIssuesAndComments,
+  getShoots,
+  getShoot,
+  createShoot,
+  deleteShoot,
+  replaceShoot,
+  addShootAnnotation,
+  getShootInfo,
+  getShootSeedInfo,
+  updateShootVersion,
+  updateShootEnableStaticTokenKubeconfig,
+  updateShootMaintenance,
+  updateShootHibernationSchedules,
+  updateShootHibernation,
+  patchShootProvider,
+  updateShootAddons,
+  updateShootDns,
+  getShootSchemaDefinition,
+  updateShootPurpose,
+  updateShootSeedName,
+  getCloudprofiles,
+  getSeeds,
+  getProjects,
+  createProject,
+  patchProject,
+  updateProject,
+  deleteProject,
+  getMembers,
+  addMember,
+  updateMember,
+  getMember,
+  deleteMember,
+  createTokenReview,
+  getSubjectRules,
+  getToken,
+  getKubeconfigData,
+  getInfo,
+  createTerminal,
+  fetchTerminalSession,
+  listTerminalSessions,
+  deleteTerminal,
+  heartbeat,
+  terminalConfig,
+  listProjectTerminalShortcuts,
+  getGardenerExtensions
 }

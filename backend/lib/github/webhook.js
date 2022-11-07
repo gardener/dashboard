@@ -7,19 +7,19 @@
 'use strict'
 
 const _ = require('lodash')
-const morgan = require('morgan')
 const express = require('express')
 const bodyParser = require('body-parser')
 const { createHmac, timingSafeEqual } = require('crypto')
 const config = require('../config')
 const logger = require('../logger')
+const { requestLogger } = require('../middleware')
 const { InternalServerError, Forbidden } = require('http-errors')
 const { fromIssue, fromComment, loadIssueComments } = require('../services/tickets')
 const { getTicketCache } = require('../cache')
 
 // router
 const router = exports.router = express.Router()
-router.use(morgan('common', logger))
+router.use(requestLogger)
 router.post('/', bodyParser.json({ verify: verifyHubSignature }), handleGithubEvent)
 
 // security

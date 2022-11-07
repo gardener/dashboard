@@ -186,6 +186,7 @@ export default {
     ...mapGetters([
       'hasShootTerminalAccess',
       'isAdmin',
+      'canCreateShootsAdminkubeconfig',
       'hasControlPlaneTerminalAccess',
       'isTerminalShortcutsFeatureEnabled',
       'canPatchShoots'
@@ -266,7 +267,7 @@ export default {
       return this.isKubeconfigAvailable || this.canPatchShoots
     },
     isGardenctlTileVisible () {
-      return this.isAdmin
+      return this.canCreateShootsAdminkubeconfig
     },
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable

@@ -230,6 +230,9 @@ export default {
     maxAdditionalZones: {
       type: Number
     },
+    initialZones: {
+      type: Array
+    },
     kubernetesVersion: {
       type: String
     }
@@ -396,7 +399,12 @@ export default {
         })
       },
       set (zoneValues) {
-        this.worker.zones = map(zoneValues, last)
+        const zones = map(zoneValues, last)
+        const removedZones = difference(this.worker.zones, zones)
+        this.worker.zones = zones
+        if (removedZones.length) {
+          this.$emit('removed-zones', removedZones)
+        }
       }
     },
     unselectedZones () {
@@ -465,11 +473,13 @@ export default {
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
-      if (!this.canDefineVolumeSize || get(machineType, 'storage.size') === this.volumeSize) {
+      if (!this.canDefineVolumeSize ||
+        (!this.worker.volume?.type && this.volumeSize && get(machineType, 'storage.size') === this.volumeSize)) {
         // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
         // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
         // to the default storage size defined for this machine type, remove volume object (contains only size information which
         // is redundant / not allowed in this case)
+        // also the empty volume object defined by the worker skeleton gets deleted in this case
         delete this.worker.volume
       } else {
         set(this.worker, 'volume.size', this.volumeSize)
@@ -557,7 +567,7 @@ export default {
     }
     this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
-    this.immutableZones = this.isNew ? [] : this.worker.zones
+    this.immutableZones = this.isNew ? [] : this.initialZones
   }
 }
 </script>

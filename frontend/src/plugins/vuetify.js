@@ -10,9 +10,12 @@ import theme from './vuetify.theme.js'
 
 Vue.use(Vuetify)
 
-export default new Vuetify({
+const vuetify = new Vuetify({
   icons: {
     iconfont: 'mdi'
   },
   theme
 })
+Object.defineProperty(Vue, 'vuetify', { value: vuetify })
+
+export default vuetify

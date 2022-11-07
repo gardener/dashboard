@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <transition-group name="list" class="alternate-row-background">
-    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2 my-0">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2 my-0 mx-1">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"
@@ -15,12 +15,14 @@ SPDX-License-Identifier: Apache-2.0
         :region="region"
         :all-zones="allZones"
         :available-zones="availableZones"
+        :initialZones="initialZones"
         :zoned-cluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
         :is-new="isNewCluster || worker.isNew"
         :max-additional-zones="maxAdditionalZones"
         :kubernetes-version="kubernetesVersion"
-        @valid="onWorkerValid">
+        @valid="onWorkerValid"
+        @removed-zones="onRemovedZones">
         <template v-slot:action>
           <v-btn v-show="index > 0 || internalWorkers.length > 1"
             small
@@ -33,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </worker-input-generic>
     </v-row>
-    <v-row key="addWorker" class="list-item pt-2">
+    <v-row key="addWorker" class="list-item mb-1 mx-1">
       <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
@@ -66,12 +68,16 @@ import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createSh
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import map from 'lodash/map'
+import uniq from 'lodash/uniq'
 import omit from 'lodash/omit'
+import some from 'lodash/some'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import difference from 'lodash/difference'
 import get from 'lodash/get'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 const NO_LIMIT = -1
@@ -93,19 +99,24 @@ export default {
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
+      originalZonesNetworkConfiguration: undefined,
       zonedCluster: undefined,
       updateOSMaintenance: undefined,
       isNewCluster: false,
       existingWorkerCIDR: undefined,
-      kubernetesVersion: undefined
+      kubernetesVersion: undefined,
+      initialZones: undefined
     }
   },
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion',
+      'machineImagesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
       'cloudProfileByName',
-      'generateWorker'
+      'generateWorker',
+      'expiringWorkerGroupsForShoot'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -113,9 +124,11 @@ export default {
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+    usedZones () {
+      return flatMap(this.internalWorkers, 'zones')
+    },
     unusedZones () {
-      const usedZones = flatMap(this.internalWorkers, 'zones')
-      return difference(this.allZones, usedZones)
+      return difference(this.allZones, this.usedZones)
     },
     currentZonesWithNetworkConfigInShoot () {
       return map(this.currentZonesNetworkConfiguration, 'name')
@@ -163,11 +176,16 @@ export default {
     },
     currentZonesNetworkConfiguration () {
       return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR, this.newShootWorkerCIDR)
+    },
+    expiringWorkerGroups () {
+      return this.expiringWorkerGroupsForShoot(this.internalWorkers, this.cloudProfileName, false)
     }
   },
   watch: {
     currentZonesNetworkConfiguration (value) {
-      const additionalZonesNetworkConfiguration = difference(this.currentZonesNetworkConfiguration, this.zonesNetworkConfiguration)
+      const additionalZonesNetworkConfiguration = filter(this.currentZonesNetworkConfiguration, ({ name }) => {
+        return !includes(this.initialZones, name)
+      })
       this.$emit('additionalZonesNetworkConfiguration', additionalZonesNetworkConfiguration)
     }
   },
@@ -177,14 +195,28 @@ export default {
       if (workers) {
         forEach(workers, worker => {
           const id = uuidv4()
-          const internalWorker = assign({}, worker, { id })
+          const internalWorker = {
+            cri: {},
+            machine: {
+              architecture: undefined,
+              type: undefined,
+              image: {
+                type: undefined
+              }
+            },
+            volume: {},
+            zones: []
+          }
+          assign(internalWorker, worker, { id })
           this.internalWorkers.push(internalWorker)
         })
       }
       this.validateInput()
     },
     addWorker () {
-      const worker = this.generateWorker(this.availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
+      // by default propose only zones already used in this cluster
+      const availableZones = this.usedZones.length ? this.usedZones : this.availableZones
+      const worker = this.generateWorker(availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
     },
@@ -220,6 +252,20 @@ export default {
       }
       this.validateInput()
     },
+    onRemovedZones (removedZones) {
+      // when user switches back from yaml tab, networkConfiguration includes any additional networkconfiguration
+      // if this additional configuration is no longer needed (zone gets removed), this code takes care to clean
+      // it up to avoid creating unnecessary zone network configuration
+      forEach(removedZones, removedZone => {
+        const networkConfigurationForZoneNotYetCreated = !some(this.originalZonesNetworkConfiguration, { name: removedZone })
+        const zoneIsNoLongerUsed = !includes(this.usedZones, removedZone)
+        if (networkConfigurationForZoneNotYetCreated && zoneIsNoLongerUsed) {
+          this.zonesNetworkConfiguration = filter(this.zonesNetworkConfiguration, ({ name }) => {
+            return name !== removedZone
+          })
+        }
+      })
+    },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
         return omit(internalWorker, ['id', 'valid', 'isNew'])
@@ -237,9 +283,14 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
+    updateWorkersData ({ workers, zonesNetworkConfiguration }) {
+      this.setInternalWorkers(workers)
+      this.zonesNetworkConfiguration = zonesNetworkConfiguration
+    },
     setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, newShootWorkerCIDR, kubernetesVersion }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
+      this.originalZonesNetworkConfiguration = zonesNetworkConfiguration
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
@@ -248,6 +299,7 @@ export default {
       this.existingWorkerCIDR = existingWorkerCIDR
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
+      this.initialZones = uniq(flatMap(workers, 'zones'))
     }
   },
   mounted () {

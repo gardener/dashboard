@@ -61,11 +61,21 @@ Array [
     ],
   },
   Object {
-    "name": "DNS Registration",
+    "name": "Provider-Foo",
     "resources": Array [
       Object {
-        "kind": "DNSProvider",
+        "kind": "DNSRecord",
+        "primary": true,
         "type": "gardenland",
+      },
+    ],
+  },
+  Object {
+    "name": "extension-shoot-dns-service",
+    "resources": Array [
+      Object {
+        "kind": "Foo",
+        "type": "bar",
       },
     ],
   },
@@ -119,13 +129,18 @@ Array [
     ],
   },
   Object {
-    "name": "DNS Registration",
+    "name": "Provider-Foo",
     "resources": Array [
       Object {
-        "kind": "DNSProvider",
+        "kind": "DNSRecord",
+        "primary": true,
         "type": "gardenland",
       },
     ],
+  },
+  Object {
+    "name": "extension-shoot-dns-service",
+    "resources": Array [],
   },
 ]
 `;

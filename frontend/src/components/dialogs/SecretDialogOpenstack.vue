@@ -48,67 +48,91 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
       <div>
-        <hint-colorizer hint-color="primary">
-          <v-text-field
-          color="primary"
-          v-model="username"
-          label="Technical User"
-          :error-messages="getErrorMessages('username')"
-          @input="$v.username.$touch()"
-          @blur="$v.username.$touch()"
-          hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-          ></v-text-field>
-        </hint-colorizer>
+        <v-radio-group
+          v-model="authenticationMethod"
+          row
+        >
+          <template v-slot:label>
+            <span class="text-body-1">Authentication Method:</span>
+          </template>
+          <v-radio
+            label="Technical User"
+            value="USER"
+          ></v-radio>
+          <v-radio
+            label="Application Credentials"
+            value="APPLICATION_CREDENTIALS"
+          ></v-radio>
+        </v-radio-group>
       </div>
-      <div>
-        <hint-colorizer hint-color="warning">
-          <v-text-field
+      <v-container class="py-0">
+        <template v-if="authenticationMethod === 'APPLICATION_CREDENTIALS'">
+          <div>
+            <v-text-field
             color="primary"
-            v-model="password"
-            label="Password"
-            :error-messages="getErrorMessages('password')"
-            :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="hideSecret ? 'password' : 'text'"
-            @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.password.$touch()"
-            @blur="$v.password.$touch()"
-            hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-          ></v-text-field>
-        </hint-colorizer>
-      </div>
-      <div>
-        <v-text-field
-        color="primary"
-        v-model="applicationCredentialID"
-        label="Application credential ID"
-        :error-messages="getErrorMessages('applicationCredentialID')"
-        @input="$v.applicationCredentialID.$touch()"
-        @blur="$v.applicationCredentialID.$touch()"
-        ></v-text-field>
-      </div>
-      <div>
-        <v-text-field
-        color="primary"
-        v-model="applicationCredentialName"
-        label="Application credential name"
-        :error-messages="getErrorMessages('applicationCredentialName')"
-        @input="$v.applicationCredentialName.$touch()"
-        @blur="$v.applicationCredentialName.$touch()"
-        ></v-text-field>
-      </div>
-      <div>
-        <v-text-field
-          color="primary"
-          v-model="applicationCredentialSecret"
-          label="Application credential password"
-          :error-messages="getErrorMessages('applicationCredentialSecret')"
-          :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="hideApplicationCredentialSecret ? 'password' : 'text'"
-          @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
-          @input="$v.applicationCredentialSecret.$touch()"
-          @blur="$v.applicationCredentialSecret.$touch()"
-        ></v-text-field>
-      </div>
+            v-model="applicationCredentialID"
+            label="ID"
+            :error-messages="getErrorMessages('applicationCredentialID')"
+            @input="$v.applicationCredentialID.$touch()"
+            @blur="$v.applicationCredentialID.$touch()"
+            ></v-text-field>
+          </div>
+          <div>
+            <v-text-field
+            color="primary"
+            v-model="applicationCredentialName"
+            label="Name"
+            :error-messages="getErrorMessages('applicationCredentialName')"
+            @input="$v.applicationCredentialName.$touch()"
+            @blur="$v.applicationCredentialName.$touch()"
+            ></v-text-field>
+          </div>
+          <div>
+            <v-text-field
+              color="primary"
+              v-model="applicationCredentialSecret"
+              label="Password"
+              :error-messages="getErrorMessages('applicationCredentialSecret')"
+              :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="hideApplicationCredentialSecret ? 'password' : 'text'"
+              @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
+              @input="$v.applicationCredentialSecret.$touch()"
+              @blur="$v.applicationCredentialSecret.$touch()"
+            ></v-text-field>
+          </div>
+        </template>
+        <template v-else>
+          <div>
+            <hint-colorizer hint-color="primary">
+              <v-text-field
+              color="primary"
+              v-model="username"
+              label="Technical User"
+              :error-messages="getErrorMessages('username')"
+              @input="$v.username.$touch()"
+              @blur="$v.username.$touch()"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
+          </div>
+          <div>
+            <hint-colorizer hint-color="warning">
+              <v-text-field
+                color="primary"
+                v-model="password"
+                label="Password"
+                :error-messages="getErrorMessages('password')"
+                :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="hideSecret ? 'password' : 'text'"
+                @click:append="() => (hideSecret = !hideSecret)"
+                @input="$v.password.$touch()"
+                @blur="$v.password.$touch()"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              ></v-text-field>
+            </hint-colorizer>
+          </div>
+        </template>
+      </v-container>
     </template>
 
     <template v-slot:help-slot>
@@ -138,16 +162,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'vuex'
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required, requiredIf, requiredUnless, and } from 'vuelidate/lib/validators'
-import { nilIf } from '@/utils/validators'
+import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
 const requiredMessage = 'You can\'t leave this empty.'
-const requiredUserPassMessage = 'You can\'t leave this empty unless application credentials are used.'
-const requiredAppCredMessage = 'Required for application credentials.'
-const authOrAppCredentialsMessage = 'Application credentials are used only if no authentication credentials are given.'
+const requiredUserMessage = 'Required for technical user authentication'
+const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
 
 const validationErrors = {
   domainName: {
@@ -157,25 +179,22 @@ const validationErrors = {
     required: requiredMessage
   },
   username: {
-    required: requiredUserPassMessage
+    required: requiredUserMessage
   },
   password: {
-    required: requiredUserPassMessage
+    required: requiredUserMessage
   },
   authURL: {
     required: 'Required for Secret Type DNS.'
   },
   applicationCredentialID: {
-    required: requiredAppCredMessage,
-    authOrAppCredentials: authOrAppCredentialsMessage
+    required: requiredApplicationCredentialsMessage
   },
   applicationCredentialName: {
-    required: requiredAppCredMessage,
-    authOrAppCredentials: authOrAppCredentialsMessage
+    required: requiredApplicationCredentialsMessage
   },
   applicationCredentialSecret: {
-    required: requiredAppCredMessage,
-    authOrAppCredentials: authOrAppCredentialsMessage
+    required: requiredApplicationCredentialsMessage
   }
 }
 
@@ -209,7 +228,8 @@ export default {
       applicationCredentialName: undefined,
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
-      validationErrors
+      validationErrors,
+      authenticationMethod: 'USER'
     }
   },
   validations () {
@@ -226,26 +246,17 @@ export default {
     secretData () {
       const data = {
         domainName: this.domainName,
-        tenantName: this.tenantName
+        tenantName: this.tenantName,
+        applicationCredentialID: this.applicationCredentialID,
+        applicationCredentialName: this.applicationCredentialName,
+        applicationCredentialSecret: this.applicationCredentialSecret,
+        username: this.username,
+        password: this.password
       }
-      if (this.username && this.username.length) {
-        data.username = this.username
-      }
-      if (this.password && this.password.length) {
-        data.password = this.password
-      }
-      if (this.authURL && this.authURL.length) {
+      if (this.authURL) {
         data.OS_AUTH_URL = this.authURL
       }
-      if (this.applicationCredentialID && this.applicationCredentialID.length) {
-        data.applicationCredentialID = this.applicationCredentialID
-      }
-      if (this.applicationCredentialName && this.applicationCredentialName.length) {
-        data.applicationCredentialName = this.applicationCredentialName
-      }
-      if (this.applicationCredentialSecret && this.applicationCredentialSecret.length) {
-        data.applicationCredentialSecret = this.applicationCredentialSecret
-      }
+
       return data
     },
     validators () {
@@ -257,10 +268,14 @@ export default {
           required
         },
         username: {
-          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
+          required: requiredIf(function () {
+            return this.authenticationMethod === 'USER'
+          })
         },
         password: {
-          required: and(requiredUnless('applicationCredentialID'), requiredUnless('applicationCredentialName'), requiredUnless('applicationCredentialSecret'))
+          required: requiredIf(function () {
+            return this.authenticationMethod === 'USER'
+          })
         },
         authURL: {
           required: requiredIf(function () {
@@ -268,16 +283,19 @@ export default {
           })
         },
         applicationCredentialID: {
-          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
-          required: and(requiredUnless('username'), requiredUnless('password'))
+          required: requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          })
         },
         applicationCredentialName: {
-          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
-          required: and(requiredUnless('username'), requiredUnless('password'))
+          required: requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          })
         },
         applicationCredentialSecret: {
-          authOrAppCredentials: and(nilIf('username'), nilIf('password')),
-          required: and(requiredUnless('username'), requiredUnless('password'))
+          required: requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          })
         }
       }
       return validators
@@ -328,6 +346,14 @@ export default {
       if (value) {
         this.reset()
       }
+    },
+    authenticationMethod () {
+      this.username = undefined
+      this.password = undefined
+      this.applicationCredentialID = undefined
+      this.applicationCredentialName = undefined
+      this.applicationCredentialSecret = undefined
+      this.$v.$reset()
     }
   }
 }

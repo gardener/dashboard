@@ -23,6 +23,7 @@ class Watcher extends Readable {
       ...options,
       objectMode: true
     })
+    logger.debug('[kube-config] creating watcher for', paths)
     this.#paths = paths
     this.#timeout = readyTimeout
     this.#readFile = readFile
@@ -31,17 +32,20 @@ class Watcher extends Readable {
       persistent: true,
       awaitWriteFinish: true,
       ignoreInitial: true,
-      followSymlinks: false,
+      followSymlinks: true,
       disableGlobbing: true
     })
   }
 
   _construct (callback) {
     const timeoutID = setTimeout(() => {
-      callback(new Error(`FSWatcher timed out after ${this.#timeout} milliseconds`))
+      const err = new Error(`FSWatcher timed out after ${this.#timeout} milliseconds`)
+      logger.error('[kube-config] creating watcher timed out: %s', err.message)
+      callback(err)
     }, this.#timeout)
     this.#fsWatcher
       .once('ready', () => {
+        logger.debug('[kube-config] watcher ready')
         this.emit('ready')
         clearTimeout(timeoutID)
         callback()
@@ -55,12 +59,14 @@ class Watcher extends Readable {
     if (this.#watching !== true) {
       this.#watching = true
       this.#fsWatcher.on('change', async path => {
-        try {
-          const value = await this.#readFile(path, 'utf8')
-          logger.debug('[kube-config] file watcher received change event for %s', path)
-          this.push([path, value])
-        } catch (err) {
-          this.destroy(err)
+        logger.debug('[kube-config] file watcher received change event for %s', path)
+        if (this.#paths.includes(path)) {
+          try {
+            const value = await this.#readFile(path, 'utf8')
+            this.push([path, value])
+          } catch (err) {
+            logger.error('[kube-config] read file error %s: %s', err.code, err.message)
+          }
         }
       })
     }

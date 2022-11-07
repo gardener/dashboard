@@ -12,13 +12,16 @@ const cookieParser = require('cookie-parser')
 const {
   authorizationUrl,
   authorizationCallback,
+  refreshToken,
   authorizeToken,
   clearCookies
 } = require('./security')
+const { requestLogger } = require('./middleware')
 
 // configure router
 const router = exports.router = express.Router()
 
+router.use(requestLogger)
 router.use(cookieParser())
 router.use(bodyParser.json())
 router.route('/')
@@ -56,5 +59,14 @@ router.route('/callback')
       res.redirect(redirectPath)
     } catch (err) {
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
+    }
+  })
+
+router.route('/token')
+  .post(async (req, res, next) => {
+    try {
+      res.send(await refreshToken(req, res))
+    } catch (err) {
+      next(err)
     }
   })
