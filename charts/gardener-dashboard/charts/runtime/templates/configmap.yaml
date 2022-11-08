@@ -16,7 +16,7 @@ data:
   login-config.json: |
     {
        "landingPageUrl": {{ quote .Values.global.frontendConfig.landingPageUrl }},
-       {{- if .Values.global.oidc }}
+       {{- if .Values.global.oidc.enabled }}
        "loginTypes": ["oidc", "token"]
        {{- else }}
        "loginTypes": ["token"]
