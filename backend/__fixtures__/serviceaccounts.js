@@ -9,12 +9,13 @@ const { cloneDeep, merge, get, set, filter, find, split } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
-const { toHex, parseFieldSelector } = require('./helper')
+const { parseFieldSelector } = require('./helper')
 const { getTokenPayload } = require('./auth')
 
 const serviceAccountList = [
   getServiceAccount({ namespace: 'garden-foo', name: 'robot', createdBy: 'foo@example.org' }),
   getServiceAccount({ namespace: 'garden-foo', name: 'robot-nomember' }),
+  getServiceAccount({ namespace: 'garden-foo', name: 'dashboard-webterminal' }),
   getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' }),
   getServiceAccount({ namespace: 'term-host-1', name: 'term-attach-1' }),
   getServiceAccount({ namespace: 'term-host-2', name: 'term-attach-2' }),
@@ -35,10 +36,7 @@ function getServiceAccount ({
       annotations: {
         'gardener.cloud/created-by': createdBy
       }
-    },
-    secrets: [{
-      name: [name, 'token', toHex(name).substring(0, 5)].join('-')
-    }]
+    }
   }
 }
 
