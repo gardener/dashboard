@@ -2787,7 +2787,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["babel-jest", "virtual:8ced82824b3c6d1287273ca6740e37a0be3a82fa1688f6f98a7232a4a2a8d7212d41bbb283817ed96542530a6e7e382811c2eee872d28f2b280125bce4e53808#npm:27.5.1"],\
             ["buffer", "npm:6.0.3"],\
             ["circular-dependency-plugin", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
-            ["clipboard", "npm:2.0.11"],\
             ["codemirror", "npm:5.65.4"],\
             ["compression-webpack-plugin", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.0.0"],\
             ["core-js", "npm:3.22.7"],\
@@ -6792,18 +6791,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["clipboard", [\
-        ["npm:2.0.11", {\
-          "packageLocation": "./.yarn/cache/clipboard-npm-2.0.11-45358b5ae8-413055a603.zip/node_modules/clipboard/",\
-          "packageDependencies": [\
-            ["clipboard", "npm:2.0.11"],\
-            ["good-listener", "npm:1.2.2"],\
-            ["select", "npm:1.1.2"],\
-            ["tiny-emitter", "npm:2.1.0"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["clipboardy", [\
         ["npm:2.3.0", {\
           "packageLocation": "./.yarn/unplugged/clipboardy-npm-2.3.0-9566d5e797/node_modules/clipboardy/",\
@@ -8137,15 +8124,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/delayed-stream-npm-1.0.0-c5a4c4cc02-46fe6e83e2.zip/node_modules/delayed-stream/",\
           "packageDependencies": [\
             ["delayed-stream", "npm:1.0.0"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["delegate", [\
-        ["npm:3.2.0", {\
-          "packageLocation": "./.yarn/cache/delegate-npm-3.2.0-d3f849ea99-d943058fe0.zip/node_modules/delegate/",\
-          "packageDependencies": [\
-            ["delegate", "npm:3.2.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -10209,16 +10187,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ignore", "npm:5.2.0"],\
             ["merge2", "npm:1.4.1"],\
             ["slash", "npm:3.0.0"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["good-listener", [\
-        ["npm:1.2.2", {\
-          "packageLocation": "./.yarn/cache/good-listener-npm-1.2.2-e7865da849-f39fb82c4e.zip/node_modules/good-listener/",\
-          "packageDependencies": [\
-            ["good-listener", "npm:1.2.2"],\
-            ["delegate", "npm:3.2.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -15783,15 +15751,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["select", [\
-        ["npm:1.1.2", {\
-          "packageLocation": "./.yarn/cache/select-npm-1.1.2-13cd366fa2-4346151e94.zip/node_modules/select/",\
-          "packageDependencies": [\
-            ["select", "npm:1.1.2"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["select-hose", [\
         ["npm:2.0.0", {\
           "packageLocation": "./.yarn/cache/select-hose-npm-2.0.0-8ce63adb52-d7e5fcc695.zip/node_modules/select-hose/",\
@@ -16875,15 +16834,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/tiny-cookie-npm-1.0.1-11f3312ab1-b96796365b.zip/node_modules/tiny-cookie/",\
           "packageDependencies": [\
             ["tiny-cookie", "npm:1.0.1"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["tiny-emitter", [\
-        ["npm:2.1.0", {\
-          "packageLocation": "./.yarn/cache/tiny-emitter-npm-2.1.0-2a4d94f487-fbcfb51457.zip/node_modules/tiny-emitter/",\
-          "packageDependencies": [\
-            ["tiny-emitter", "npm:2.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\
