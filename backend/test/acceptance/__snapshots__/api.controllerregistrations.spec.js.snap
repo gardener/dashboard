@@ -70,6 +70,15 @@ Array [
       },
     ],
   },
+  Object {
+    "name": "extension-shoot-dns-service",
+    "resources": Array [
+      Object {
+        "kind": "Foo",
+        "type": "bar",
+      },
+    ],
+  },
 ]
 `;
 
@@ -118,6 +127,20 @@ Array [
         "type": "foobium",
       },
     ],
+  },
+  Object {
+    "name": "Provider-Foo",
+    "resources": Array [
+      Object {
+        "kind": "DNSRecord",
+        "primary": true,
+        "type": "gardenland",
+      },
+    ],
+  },
+  Object {
+    "name": "extension-shoot-dns-service",
+    "resources": Array [],
   },
 ]
 `;

@@ -10,6 +10,7 @@ const http2 = require('http2')
 const zlib = require('zlib')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { Client, extend } = require('../lib')
+
 const {
   HTTP2_HEADER_METHOD,
   HTTP2_HEADER_AUTHORITY,
@@ -37,39 +38,42 @@ describe('Client', () => {
   let stream
 
   beforeEach(() => {
+    const mockBody = jest.fn().mockReturnValue({
+      foo: 'bar',
+      bar: 'foo'
+    })
+    const mockHeaders = jest.fn().mockReturnValue({
+      [HTTP2_HEADER_STATUS]: statusCode,
+      [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+      [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
+    })
+    const asyncIterator = function * () {
+      yield Buffer.from('{')
+      let separator
+      for (const [key, value] of Object.entries(this.mockBody())) {
+        if (!separator) {
+          separator = ','
+        } else {
+          yield Buffer.from(separator)
+        }
+        yield Buffer.from(JSON.stringify(key))
+        yield Buffer.from(':')
+        yield Buffer.from(JSON.stringify(value))
+      }
+      yield Buffer.from('}')
+    }
     stream = {
       close: jest.fn(),
       destroy: jest.fn(),
       end: jest.fn(),
       once: jest.fn(),
-      mockBody: jest.fn().mockReturnValue({
-        foo: 'bar',
-        bar: 'foo'
-      }),
-      mockHeaders: jest.fn().mockReturnValue({
-        [HTTP2_HEADER_STATUS]: statusCode,
-        [HTTP2_HEADER_CONTENT_TYPE]: contentType,
-        [HTTP2_HEADER_CONTENT_LENGTH]: contentLength
-      }),
-      async getHeaders () {
-        return this.mockHeaders()
+      mockBody,
+      mockHeaders,
+      getHeaders () {
+        return Promise.resolve(mockHeaders())
       },
       setEncoding: jest.fn(),
-      async * [Symbol.asyncIterator] () {
-        yield Buffer.from('{')
-        let separator
-        for (const [key, value] of Object.entries(this.mockBody())) {
-          if (!separator) {
-            separator = ','
-          } else {
-            yield Buffer.from(separator)
-          }
-          yield Buffer.from(JSON.stringify(key))
-          yield Buffer.from(':')
-          yield Buffer.from(JSON.stringify(value))
-        }
-        yield Buffer.from('}')
-      }
+      [Symbol.asyncIterator]: asyncIterator
     }
     agent = {
       request: jest.fn().mockResolvedValue(stream)
@@ -222,6 +226,55 @@ describe('Client', () => {
       })
       const body = await response.body()
       expect(body).toEqual(stream.mockBody())
+    })
+
+    describe('when the server returns plain text for a JSON endpoint', () => {
+      const contentType = 'text/plain'
+      const chunks = ['foo', '-', 'bar']
+      const rawBody = chunks.join('')
+      const parseErrorMessage = () => {
+        try {
+          JSON.parse(rawBody)
+        } catch (err) {
+          return err.message
+        }
+      }
+
+      let statusCode
+
+      beforeEach(() => {
+        statusCode = 200
+        stream.mockHeaders.mockImplementation(() => {
+          return {
+            [HTTP2_HEADER_STATUS]: statusCode,
+            [HTTP2_HEADER_CONTENT_TYPE]: contentType
+          }
+        })
+        stream[Symbol.asyncIterator] = function * () {
+          for (const chunk of chunks) {
+            yield chunk
+          }
+        }
+        client.responseType = 'json'
+      })
+
+      it('should throw a ParseError for invalid json on success', async () => {
+        statusCode = 200
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).rejects.toMatchObject({
+          name: 'ParseError',
+          message: parseErrorMessage(),
+          rawBody
+        })
+      })
+
+      it('should return a response with plain text body on failure', async () => {
+        statusCode = 500
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).resolves.toBe(rawBody)
+      })
     })
 
     it('should return a response with responseType "text"', async () => {

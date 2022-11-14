@@ -79,7 +79,10 @@ function ensureDataLoaded (store, localStorage, logger) {
       ]
 
       const namespace = to.params.namespace || to.query.namespace
-      if (namespace && namespace !== store.state.namespace) {
+      if (!namespace) {
+        // fetch cluster scoped roles only (e.g can create projects)
+        promises.push(store.dispatch('refreshSubjectRules', undefined))
+      } else if (namespace !== store.state.namespace) {
         store.commit('SET_NAMESPACE', namespace)
         promises.push(store.dispatch('refreshSubjectRules', namespace))
       }

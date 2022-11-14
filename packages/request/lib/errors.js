@@ -27,6 +27,18 @@ class StreamError extends Error {
   }
 }
 
+class ParseError extends Error {
+  constructor (message, properties) {
+    super(message)
+    Object.assign(this, {
+      name: this.constructor.name,
+      code: 'ERR_BODY_PARSE_FAILURE',
+      ...properties
+    })
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
+
 function isAbortError (err = {}) {
   return err.code === 'ABORT_ERR'
 }
@@ -64,6 +76,7 @@ function isHttpError (err, expectedStatusCode) {
 module.exports = {
   TimeoutError,
   StreamError,
+  ParseError,
   createHttpError,
   isHttpError,
   isAbortError

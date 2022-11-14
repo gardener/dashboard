@@ -7,7 +7,14 @@
 'use strict'
 
 const createError = require('http-errors')
-const { TimeoutError, StreamError, isAbortError, createHttpError, isHttpError } = require('../lib/errors')
+const {
+  TimeoutError,
+  StreamError,
+  ParseError,
+  isAbortError,
+  createHttpError,
+  isHttpError
+} = require('../lib/errors')
 
 describe('errors', () => {
   it('#isAbortError', () => {
@@ -24,6 +31,18 @@ describe('errors', () => {
       expect(error.name).toBe('TimeoutError')
       expect(error.message).toBe(message)
       expect(error.code).toBe('ETIMEDOUT')
+    })
+  })
+
+  describe('ParseError', () => {
+    it('#constructor', () => {
+      const message = 'parsing failed'
+      const foo = 'bar'
+      const error = new ParseError(message, { foo })
+      expect(error.name).toBe('ParseError')
+      expect(error.message).toBe(message)
+      expect(error.code).toBe('ERR_BODY_PARSE_FAILURE')
+      expect(error.foo).toBe(foo)
     })
   })
 

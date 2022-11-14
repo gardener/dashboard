@@ -166,6 +166,47 @@ describe('api', function () {
         expect(res.body).toMatchSnapshot()
       })
 
+      describe('as enduser', function () {
+        const shootName = 'fooShoot'
+        const user = fixtures.auth.createUser({ id: 'foo@example.org' })
+
+        it('should create a terminal resource', async function () {
+          const identifier = '21'
+
+          mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
+          mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+          mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.get()) // ensure service account exists
+          mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
+          mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.get()) // ensure cleanup of service account
+
+          const res = await agent
+            .post('/api/terminals')
+            .set('cookie', await user.cookie)
+            .send({
+              method: 'create',
+              params: {
+                identifier,
+                coordinate: {
+                  namespace,
+                  name: shootName,
+                  target
+                }
+              }
+            })
+            .expect('content-type', /json/)
+            .expect(200)
+
+          expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+          expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
+
+          expect(mockRequest).toBeCalledTimes(7)
+          expect(mockRequest.mock.calls).toMatchSnapshot()
+
+          expect(res.body).toMatchSnapshot()
+        })
+      })
+
       it('should reuse a terminal session', async function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
