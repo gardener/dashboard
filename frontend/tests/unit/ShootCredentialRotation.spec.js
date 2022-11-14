@@ -263,18 +263,18 @@ describe('ShootCredentialRotation.vue', () => {
     })
 
     it('should compute operation', () => {
-      expect(allRotationWrapper.vm.operation).toEqual(allRotationWrapper.vm.completionOperation)
-      expect(certificateAuthoritiesRotationWrapper.vm.operation).toEqual(certificateAuthoritiesRotationWrapper.vm.completionOperation)
-      expect(etcdEncryptionKeyRotationWrapper.vm.operation).toEqual(etcdEncryptionKeyRotationWrapper.vm.completionOperation)
-      expect(serviceAccountKeyRotationWrapper.vm.operation).toEqual(serviceAccountKeyRotationWrapper.vm.startOperation)
+      expect(allRotationWrapper.vm.operation).toBe(allRotationWrapper.vm.completionOperation)
+      expect(certificateAuthoritiesRotationWrapper.vm.operation).toBe(certificateAuthoritiesRotationWrapper.vm.completionOperation)
+      expect(etcdEncryptionKeyRotationWrapper.vm.operation).toBe(etcdEncryptionKeyRotationWrapper.vm.completionOperation)
+      expect(serviceAccountKeyRotationWrapper.vm.operation).toBe(serviceAccountKeyRotationWrapper.vm.startOperation)
     })
 
     it('should compute mode', () => {
-      expect(allRotationWrapper.vm.mode).toEqual('COMPLETE')
-      expect(certificateAuthoritiesRotationWrapper.vm.mode).toEqual('COMPLETE')
-      expect(observabilityRotationWrapper.vm.mode).toEqual('ROTATE')
-      expect(etcdEncryptionKeyRotationWrapper.vm.mode).toEqual('COMPLETE')
-      expect(serviceAccountKeyRotationWrapper.vm.mode).toEqual('START')
+      expect(allRotationWrapper.vm.mode).toBe('COMPLETE')
+      expect(certificateAuthoritiesRotationWrapper.vm.mode).toBe('COMPLETE')
+      expect(observabilityRotationWrapper.vm.mode).toBe('ROTATE')
+      expect(etcdEncryptionKeyRotationWrapper.vm.mode).toBe('COMPLETE')
+      expect(serviceAccountKeyRotationWrapper.vm.mode).toBe('START')
     })
   })
 })

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <action-button-dialog
     :shoot-item="shootItem"
-    :loading="isLoading"
+    :loading="showLoadingIndicator"
     :disabled="isDisabled"
     @dialog-opened="startDialogOpened"
     ref="actionDialog"
@@ -91,7 +91,7 @@ export default {
       return 'START'
     },
     operation () {
-      if (this.phase.type === 'Prepared' || this.phase.type === 'Completing') {
+      if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
         return this.completionOperation
       }
       return this.startOperation
@@ -106,18 +106,18 @@ export default {
       return this.shootGardenOperation === this.operation
     },
     isProgressing () {
-      if (this.mode === 'START' && this.phase.type === 'Preparing') {
+      if (this.mode === 'START' && this.phaseType === 'Preparing') {
         return true
       }
-      if (this.mode === 'COMPLETE' && this.phase.type === 'Completing') {
+      if (this.mode === 'COMPLETE' && this.phaseType === 'Completing') {
         return true
       }
-      if (!this.rotationType.twoStep) {
-        return this.rotationStatus.lastInitiationTime > (this.rotationStatus.lastCompletionTime ?? '0')
+      if (!this.rotationType.twoStep && this.phaseType === 'Rotating') {
+        return true
       }
       return false
     },
-    isLoading () {
+    showLoadingIndicator () {
       if (this.isActionToBeScheduled) {
         return true
       }
@@ -140,7 +140,7 @@ export default {
       if (this.isScheduledOperation) {
         return true
       }
-      if (this.isLoading) {
+      if (this.isProgressing) {
         return true
       }
       return false
@@ -204,10 +204,10 @@ export default {
       if (this.phase && this.phase.incomplete) {
         return 'Operation is disabled because all two-step operations need to be in the same phase'
       }
-      if (!this.isLoading && this.isScheduledOperation) {
+      if (!this.showLoadingIndicator && this.isScheduledOperation) {
         return 'There is already an operation scheduled for this cluster'
       }
-      if (this.isLoading && this.type === 'ALL_CREDENTIALS') {
+      if (this.showLoadingIndicator && this.type === 'ALL_CREDENTIALS') {
         return 'A rotation operation is currently running'
       }
       return undefined
@@ -215,7 +215,7 @@ export default {
     componentTexts () {
       const componentTexts = {
         'rotate-kubeconfig-credentials': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Rotating kubeconfig credentials'
             : 'Start Kubeconfig Rotation',
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
@@ -227,7 +227,7 @@ export default {
           ]
         },
         'rotate-ca-start': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Preparing certificate authorities rotation'
             : 'Prepare Certificate Authorities Rotation',
           errorMessage: 'Could not prepare the rotation of certificate authorities',
@@ -238,7 +238,7 @@ export default {
           ]
         },
         'rotate-ca-complete': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Completing certificate authorities rotation'
             : 'Complete Certificate Authorities Rotation',
           errorMessage: 'Could not complete the rotation of certificate authorities',
@@ -250,7 +250,7 @@ export default {
           ]
         },
         'rotate-observability-credentials': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Rotating observability passwords'
             : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
@@ -265,7 +265,7 @@ export default {
           ])
         },
         'rotate-ssh-keypair': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Rotating SSH key pair'
             : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of SSH key pair',
@@ -277,7 +277,7 @@ export default {
           ]
         },
         'rotate-etcd-encryption-key-start': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Preparing etcd encryption key rotation'
             : 'Prepare ETCD Encryption Key Rotation',
           errorMessage: 'Could not prepare the rotation of etcd encryption key',
@@ -289,7 +289,7 @@ export default {
           ]
         },
         'rotate-etcd-encryption-key-complete': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Completing etcd encryption key rotation'
             : 'Complete ETCD Encryption Key Rotation',
           errorMessage: 'Could not complete the rotation of etcd encryption key',
@@ -300,7 +300,7 @@ export default {
           ]
         },
         'rotate-serviceaccount-key-start': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Preparing ServiceAccount token signing key rotation'
             : 'Prepare ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not prepare the rotation of ServiceAccount token signing key',
@@ -311,7 +311,7 @@ export default {
           ]
         },
         'rotate-serviceaccount-key-complete': {
-          caption: this.isLoading
+          caption: this.showLoadingIndicator
             ? 'Completing ServiceAccount token signing key rotation'
             : 'Complete ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not complete the rotation of ServiceAccount token signing key',
@@ -324,7 +324,7 @@ export default {
         }
       }
       componentTexts['rotate-credentials-start'] = {
-        caption: this.isLoading
+        caption: this.showLoadingIndicator
           ? 'Preparing credential rotation'
           : 'Start Rotation of all Credentials',
         buttonText: this.text ? 'Prepare Rotation of all Credentials' : '',
@@ -341,7 +341,7 @@ export default {
         ]
       }
       componentTexts['rotate-credentials-complete'] = {
-        caption: this.isLoading
+        caption: this.showLoadingIndicator
           ? 'Completing credential rotation'
           : 'Complete Rotation of all Credentials',
         buttonText: this.text

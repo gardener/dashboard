@@ -80,6 +80,17 @@ export const shootStatusCredentialRotation = {
         type: this.rotationStatus.phase
       }
     },
+    phaseType () {
+      if (this.phase.type) {
+        return this.phase.type
+      }
+      if ((this.rotationStatus.lastInitiationTime && !this.rotationStatus.lastCompletionTime) ||
+          this.rotationStatus.lastInitiationTime > this.rotationStatus.lastCompletionTime) {
+        // Show 'Rotating' phase for one step rotations
+        return 'Rotating'
+      }
+      return undefined
+    },
     rotationType () {
       return find(rotationTypes, ['type', this.type])
     }
