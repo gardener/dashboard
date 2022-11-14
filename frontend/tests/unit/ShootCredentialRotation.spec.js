@@ -214,8 +214,8 @@ describe('ShootCredentialRotation.vue', () => {
     })
 
     it('should compute progressing phaseType for one-step rotations', () => {
-      delete shootItem.status.credentials.rotation.sshKeypair.lastCompletionTime
-      shootItem.status.credentials.rotation.observability.lastInitiationTime = '2022-08-05T10:01:42Z'
+      delete shootItem.status.credentials.rotation.sshKeypair.lastCompletionTime // only lastInitiationTime timestamp
+      shootItem.status.credentials.rotation.observability.lastInitiationTime = '2022-08-05T10:01:42Z' // lastInitiationTime > lastCompletionTime
 
       const cardWrapper = mount(ShootCredentialRotationCard, {
         localVue,

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { shootItem } from '@/mixins/shootItem'
+import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
 import { rotationTypes } from '@/utils/credentialsRotation'
 import { shallowMount } from '@vue/test-utils'
 
@@ -13,7 +13,7 @@ import find from 'lodash/find'
 describe('shootItem', () => {
   const Component = {
     render () {},
-    mixins: [shootItem]
+    mixins: [shootStatusCredentialRotation]
   }
 
   describe('shootStatusCredentialsRotationAggregatedPhase', () => {
