@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
                 This two-step operation is in phase
                 <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
               </div>
-              <div>
+              <div v-if="!!lastInitiationTime">
                 Rotation Prepared: <time-string :date-time="lastInitiationTime" mode="past" no-tooltip></time-string>
               </div>
             </template>

@@ -26,29 +26,29 @@ SPDX-License-Identifier: Apache-2.0
         type="certificateAuthorities"
         dense
       ></credential-tile>
-        <template v-if="!isTestingCluster">
-          <credential-tile
-            icon="mdi-developer-board"
-            :shoot-item="shootItem"
-            type="observability"
-            dense
-          ></credential-tile>
-        </template>
-          <credential-tile
-            :shoot-item="shootItem"
-            type="sshKeypair"
-            dense
-          ></credential-tile>
-          <credential-tile
-            :shoot-item="shootItem"
-            type="etcdEncryptionKey"
-            dense
-          ></credential-tile>
-          <credential-tile
-            :shoot-item="shootItem"
-            type="serviceAccountKey"
-            dense
-          ></credential-tile>
+      <template v-if="!isTestingCluster">
+        <credential-tile
+          icon="mdi-developer-board"
+          :shoot-item="shootItem"
+          type="observability"
+          dense
+        ></credential-tile>
+      </template>
+      <credential-tile
+        :shoot-item="shootItem"
+        type="sshKeypair"
+        dense
+      ></credential-tile>
+      <credential-tile
+        :shoot-item="shootItem"
+        type="etcdEncryptionKey"
+        dense
+      ></credential-tile>
+      <credential-tile
+        :shoot-item="shootItem"
+        type="serviceAccountKey"
+        dense
+      ></credential-tile>
     </v-list>
   </v-card>
 </template>

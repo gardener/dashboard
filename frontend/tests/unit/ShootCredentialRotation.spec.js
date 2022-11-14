@@ -146,17 +146,17 @@ describe('ShootCredentialRotation.vue', () => {
       expect(certificateAuthoritiesWrapper.vm.lastCompletionTime).toBe('2022-07-05T08:39:03Z')
 
       // no lastInitiationTime for overall tile
-      expect(allWrapper.vm.lastInitiationTime).toBe(undefined)
+      expect(allWrapper.vm.lastInitiationTime).toBeUndefined()
 
       // no lastCompletionTime if enableStaticTokenKubeconfig is true and kubeconfig value is not set
-      expect(allWrapper.vm.lastCompletionTime).toBe(undefined)
+      expect(allWrapper.vm.lastCompletionTime).toBeUndefined()
 
       shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
       expect(allWrapper.vm.lastCompletionTime).toBe('2022-06-27T08:25:58Z')
 
       // no lastCompletionTime if lastCompletionTime is not set for all items
       shootItem.status.credentials.rotation.observability.lastCompletionTime = undefined
-      expect(allWrapper.vm.lastCompletionTime).toBe(undefined)
+      expect(allWrapper.vm.lastCompletionTime).toBeUndefined()
     })
 
     it('should show warning in case CACertificateValiditiesAcceptable constraint is false', async () => {
@@ -203,13 +203,13 @@ describe('ShootCredentialRotation.vue', () => {
       const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
       const [, , certificateAuthoritiesWrapper, observabilityRotationWrapper, sshKeyWrapper] = credentialWrappers.wrappers
 
-      expect(certificateAuthoritiesWrapper.vm.phaseType).toEqual('Prepared')
+      expect(certificateAuthoritiesWrapper.vm.phaseType).toBe('Prepared')
       expect(certificateAuthoritiesWrapper.vm.isProgressing).toBe(false)
 
-      expect(observabilityRotationWrapper.vm.phaseType).toEqual(undefined)
+      expect(observabilityRotationWrapper.vm.phaseType).toBeUndefined()
       expect(observabilityRotationWrapper.vm.isProgressing).toBe(false)
 
-      expect(sshKeyWrapper.vm.phaseType).toEqual(undefined)
+      expect(sshKeyWrapper.vm.phaseType).toBeUndefined()
       expect(sshKeyWrapper.vm.isProgressing).toBe(false)
     })
 
@@ -228,10 +228,10 @@ describe('ShootCredentialRotation.vue', () => {
       const credentialWrappers = cardWrapper.findAllComponents({ name: 'credential-tile' })
       const [, , , observabilityRotationWrapper, sshKeyWrapper] = credentialWrappers.wrappers
 
-      expect(observabilityRotationWrapper.vm.phaseType).toEqual('Rotating')
+      expect(observabilityRotationWrapper.vm.phaseType).toBe('Rotating')
       expect(observabilityRotationWrapper.vm.isProgressing).toBe(true)
 
-      expect(sshKeyWrapper.vm.phaseType).toEqual('Rotating')
+      expect(sshKeyWrapper.vm.phaseType).toBe('Rotating')
       expect(sshKeyWrapper.vm.isProgressing).toBe(true)
     })
   })
