@@ -72,13 +72,12 @@ SPDX-License-Identifier: Apache-2.0
 import RotateCredentials from '@/components/RotateCredentials'
 import TimeString from '@/components/TimeString'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
-import { shootItem } from '@/mixins/shootItem'
+import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
 import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import head from 'lodash/head'
 import compact from 'lodash/compact'
 import filter from 'lodash/filter'
-import find from 'lodash/find'
 import { rotationTypes } from '@/utils/credentialsRotation'
 
 export default {
@@ -98,11 +97,8 @@ export default {
       required: false
     }
   },
-  mixins: [shootItem],
+  mixins: [shootStatusCredentialRotation],
   computed: {
-    rotationStatus () {
-      return get(this.shootStatusCredentialsRotation, this.type, {})
-    },
     lastInitiationTime () {
       if (this.type !== 'ALL_CREDENTIALS') {
         return this.rotationStatus.lastInitiationTime
@@ -124,15 +120,6 @@ export default {
         return head(allCompletionTimestamps)
       }
       return undefined
-    },
-    phase () {
-      if (this.type === 'ALL_CREDENTIALS') {
-        return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
-      }
-
-      return {
-        type: this.rotationStatus.phase
-      }
     },
     phaseType () {
       if (this.phase.type) {
@@ -167,9 +154,6 @@ export default {
     },
     showChip () {
       return this.phaseType && this.phaseType !== 'Completed'
-    },
-    rotationType () {
-      return find(rotationTypes, ['type', this.type])
     },
     title () {
       return this.rotationType?.title

@@ -21,7 +21,6 @@ import {
   isTypeDelete,
   isTruthyValue
 } from '@/utils'
-import { rotationTypes } from '@/utils/credentialsRotation'
 
 export const shootItem = {
   props: {
@@ -250,61 +249,6 @@ export const shootItem = {
     },
     shootStatus () {
       return get(this.shootItem, 'status', {})
-    },
-    shootStatusCredentialsRotation () {
-      return get(this.shootStatus, 'credentials.rotation', {})
-    },
-    shootStatusCredentialsRotationAggregatedPhase () {
-      let preparedRotationsCount = 0
-      let completedPhasesCount = 0
-      const unpreparedRotations = []
-      for (const rotationType of filter(rotationTypes, { hasRotationStatus: true, twoStep: true })) {
-        // use simple for loop to support early exit (immediately return in case of progressing phase)
-        const rotationStatus = this.shootStatusCredentialsRotation[rotationType.type]
-        if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
-          return {
-            type: rotationStatus.phase,
-            caption: rotationStatus.phase
-          }
-        }
-        if (!rotationStatus || rotationStatus?.phase === 'Completed') {
-          // count not yet rotated rotation types as completed as they are technically ready for step 1 (preparing)
-          completedPhasesCount++
-        }
-        if (rotationStatus?.phase === 'Prepared') {
-          preparedRotationsCount++
-        } else if (rotationType.twoStep) {
-          unpreparedRotations.push(rotationType)
-        }
-      }
-
-      const numberOfTwoStepOperations = filter(rotationTypes, { hasRotationStatus: true, twoStep: true }).length
-      if (preparedRotationsCount > 0) {
-        if (preparedRotationsCount === numberOfTwoStepOperations) {
-          const type = 'Prepared'
-          return {
-            type,
-            caption: type
-          }
-        }
-
-        return {
-          caption: `Prepared ${preparedRotationsCount}/${numberOfTwoStepOperations}`,
-          type: 'Prepared',
-          incomplete: true,
-          unpreparedRotations
-        }
-      }
-
-      if (completedPhasesCount === numberOfTwoStepOperations) {
-        const type = 'Completed'
-        return {
-          type,
-          caption: type
-        }
-      }
-
-      return undefined
     }
   },
   methods: {

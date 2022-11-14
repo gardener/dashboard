@@ -49,15 +49,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
-import { rotationTypes } from '@/utils/credentialsRotation'
 import { SnotifyPosition } from 'vue-snotify'
-import { shootItem } from '@/mixins/shootItem'
+import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
-import get from 'lodash/get'
 import compact from 'lodash/compact'
-import find from 'lodash/find'
 
 export default {
   name: 'rotate-credentials',
@@ -79,7 +76,7 @@ export default {
       maintenance: false
     }
   },
-  mixins: [shootItem],
+  mixins: [shootStatusCredentialRotation],
   computed: {
     ...mapGetters([
       'isAdmin'
@@ -99,25 +96,11 @@ export default {
       }
       return this.startOperation
     },
-    rotationType () {
-      return find(rotationTypes, ['type', this.type])
-    },
     startOperation () {
       return this.rotationType.startOperation
     },
     completionOperation () {
       return this.rotationType.completionOperation
-    },
-    rotationStatus () {
-      return get(this.shootStatusCredentialsRotation, this.type, {})
-    },
-    phase () {
-      if (this.type === 'ALL_CREDENTIALS') {
-        return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
-      }
-      return {
-        type: this.rotationStatus.phase
-      }
     },
     isActionToBeScheduled () {
       return this.shootGardenOperation === this.operation
