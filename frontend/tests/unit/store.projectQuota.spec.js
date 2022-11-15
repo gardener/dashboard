@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { getProjectQuotaStatus, aggregateResourceQuotaStatus } from '@/store/modules/projectQuota'
+import projectQuota from '@/store/modules/projectQuota'
 
 describe('store.projectQuota.getters', () => {
   describe('getProjectQuotaStatus', () => {
-    const projectQuota = {
+    const quota = {
       hard: {
         'count/shoots.core.gardener.cloud': 25,
         'count/configmaps': 22
@@ -18,8 +18,13 @@ describe('store.projectQuota.getters', () => {
       }
     }
 
+    function getProjectQuotaStatus (quota) {
+      const namespace = 'default'
+      return projectQuota.getters.status({ [namespace]: quota }, null, { namespace })
+    }
+
     it('should return ProjectQuotaStatus object', () => {
-      const projectQuotaStatus = getProjectQuotaStatus(projectQuota)
+      const projectQuotaStatus = getProjectQuotaStatus(quota)
 
       const projectQuotaStatusConfigmaps = projectQuotaStatus[0]
       const projectQuotaStatusShoots = projectQuotaStatus[1]
@@ -71,6 +76,14 @@ describe('store.projectQuota.getters', () => {
         }
       }
     ]
+
+    function aggregateResourceQuotaStatus (statuses) {
+      const namespace = 'default'
+      const state = {}
+      const quotas = statuses.map(status => ({ status }))
+      projectQuota.mutations.SET_RESOURCE_QUOTAS(state, [namespace, quotas])
+      return state[namespace]
+    }
 
     it('should return aggregated resource quota status', () => {
       const aggregatedQuotaStatus = aggregateResourceQuotaStatus(resourceQuotaStatuses)

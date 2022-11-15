@@ -18,7 +18,7 @@ import split from 'lodash/split'
 // initial state
 const state = {}
 
-export function getProjectQuotaStatus (projectQuota) {
+function getProjectQuotaStatus (projectQuota) {
   if (!projectQuota) {
     return undefined
   }
@@ -51,7 +51,7 @@ export function getProjectQuotaStatus (projectQuota) {
   return sortBy(quotaStatus, 'caption')
 }
 
-export function aggregateResourceQuotaStatus (quotaResourceStatus) {
+function aggregateResourceQuotaStatus (quotaResourceStatus) {
   const aggregatedQuotaHard = {}
   assignWith(aggregatedQuotaHard, ...map(quotaResourceStatus, 'hard'), (valA, valB) => {
     if (parseInt(valB) < parseInt(valA)) {
@@ -83,18 +83,15 @@ const getters = {
 const actions = {
   async fetchProjectQuota ({ commit }, namespace) {
     const { data } = await getResourceQuotas({ namespace })
-
-    const quotaStatuses = map(data, 'status')
-    const aggregatedQuotaStatus = aggregateResourceQuotaStatus(quotaStatuses)
-
-    commit('SET_AGGREGATED_QUOTA', [namespace, aggregatedQuotaStatus])
+    commit('SET_RESOURCE_QUOTAS', [namespace, data])
   }
 }
 
 // mutations
 const mutations = {
-  SET_AGGREGATED_QUOTA (state, args) {
-    Vue.set(state, ...args)
+  SET_RESOURCE_QUOTAS (state, [key, quotas]) {
+    const value = aggregateResourceQuotaStatus(map(quotas, 'status'))
+    Vue.set(state, key, value)
   }
 }
 
