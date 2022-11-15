@@ -16,13 +16,13 @@ module.exports = {
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/seeds': require('./seeds'),
-  '/gardener-extensions': require('./gardenerExtensions'),
+  '/gardenerextensions': require('./gardenerExtensions'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/tickets': require('./tickets'),
-  '/namespaces/:namespace/cloud-provider-secrets': require('./cloudProviderSecrets'),
+  '/namespaces/:namespace/cloudprovidersecrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members'),
-  '/namespaces/:namespace/resource-quotas': require('./resourceQuotas')
+  '/namespaces/:namespace/resourcequotas': require('./resourceQuotas')
 }
 
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {

@@ -113,23 +113,22 @@ jest.mock('./lib/config/gardener', () => {
 })
 
 jest.mock('./lib/cache', () => {
-  const { find, split } = require('lodash')
+  const { find } = require('lodash')
   const fixtures = require('./__fixtures__')
   const originalCache = jest.requireActual('./lib/cache')
   const createTicketCache = jest.requireActual('./lib/cache/tickets')
   const { cache } = originalCache
   const keys = [
-    'core.gardener.cloud/cloudprofiles',
-    'core.gardener.cloud/seeds',
-    'core.gardener.cloud/quotas',
-    'core.gardener.cloud/projects',
-    'core.gardener.cloud/controllerregistrations',
-    'core/resourcequotas'
+    'cloudprofiles',
+    'seeds',
+    'quotas',
+    'projects',
+    'controllerregistrations',
+    'resourcequotas'
   ]
   for (const key of keys) {
-    const [, resourceName] = key.split('/')
     cache.set(key, {
-      items: fixtures[resourceName].list(),
+      items: fixtures[key].list(),
       list () {
         return this.items
       },

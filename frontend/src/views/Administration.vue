@@ -384,11 +384,12 @@ import TimeString from '@/components/TimeString'
 import ShootCustomField from '@/components/ShootCustomField'
 import ResourceQuotaHelp from '@/components/ResourceQuotaHelp'
 import { errorDetailsFromError } from '@/utils/error'
-import { transformHtml, getProjectDetails, getProjectQuotaStatus, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
+import { transformHtml, getProjectDetails, isServiceAccountUsername, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
+import { SnotifyPosition } from 'vue-snotify'
 
 export default {
   name: 'administration',
@@ -447,20 +448,14 @@ export default {
       'isKubeconfigEnabled',
       'shootCustomFieldList'
     ]),
-    ...mapGetters('projectQuota', [
-      'quotaByNamespace'
-    ]),
+    ...mapGetters('projectQuota', {
+      projectQuotaStatus: 'status'
+    }),
     project () {
       return this.projectFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
-    },
-    projectQuota () {
-      return this.quotaByNamespace(this.project.metadata?.namespace)
-    },
-    projectQuotaStatus () {
-      return getProjectQuotaStatus(this.projectQuota)
     },
     userList () {
       const members = new Set()
@@ -632,8 +627,17 @@ export default {
     // see https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-after-navigation
     this.$watch(
       () => this.$route.params,
-      () => {
-        this.fetchProjectQuota(this.project.metadata.namespace)
+      async () => {
+        try {
+          await this.fetchProjectQuota(this.project.metadata.namespace)
+        } catch (err) {
+          const config = {
+            position: SnotifyPosition.rightBottom,
+            timeout: 5000,
+            showProgressBar: false
+          }
+          this.$snotify.error(`Failed to fetch project quota: ${err.message}`, config)
+        }
       },
       { immediate: true }
     )

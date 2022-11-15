@@ -24,9 +24,6 @@ import split from 'lodash/split'
 import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
-import upperFirst from 'lodash/upperFirst'
-import round from 'lodash/round'
-import assignWith from 'lodash/assignWith'
 import moment from './moment'
 import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
@@ -318,57 +315,6 @@ export function getProjectDetails (project) {
     staleAutoDeleteTimestamp,
     phase
   }
-}
-
-export function getProjectQuotaStatus (projectQuota) {
-  if (!projectQuota) {
-    return undefined
-  }
-
-  const { hard, used } = projectQuota
-  const quotaStatus = map(hard, (limitValue, key) => {
-    const usedValue = used[key] || 0
-    const percentage = round((usedValue / limitValue) * 100, 2)
-    const resourceName = replace(key, 'count/', '')
-    const caption = upperFirst(head(split(resourceName, '.')))
-    let progressColor = 'primary'
-
-    if (percentage >= 80) {
-      progressColor = 'warning'
-    }
-    if (percentage >= 100) {
-      progressColor = 'error'
-    }
-    return {
-      key,
-      resourceName,
-      caption,
-      limitValue,
-      usedValue,
-      percentage,
-      progressColor
-    }
-  })
-
-  return sortBy(quotaStatus, 'caption')
-}
-
-export function aggregateResourceQuotaStatus (quotaResourceStatus) {
-  const aggregatedQuotaHard = {}
-  assignWith(aggregatedQuotaHard, ...map(quotaResourceStatus, 'hard'), (valA, valB) => {
-    if (parseInt(valB) < parseInt(valA)) {
-      return valB
-    }
-    return valA
-  })
-  const aggregatedQuotaUsed = {}
-  assignWith(aggregatedQuotaUsed, ...map(quotaResourceStatus, 'used'), (valA, valB) => {
-    if (parseInt(valB) > parseInt(valA)) {
-      return valB
-    }
-    return valA
-  })
-  return { hard: aggregatedQuotaHard, used: aggregatedQuotaUsed }
 }
 
 export function isShootStatusHibernated (status) {

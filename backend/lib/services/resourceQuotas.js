@@ -9,7 +9,7 @@
 const _ = require('lodash')
 const { Forbidden } = require('http-errors')
 const authorization = require('./authorization')
-const { findResourceQuotasByNamespace } = require('../cache')
+const { getResourceQuotas } = require('../cache')
 
 function fromResource (resourceQuotas) {
   return _.map(resourceQuotas, ({ status }) => {
@@ -27,6 +27,6 @@ exports.list = async function ({ user, namespace }) {
     throw new Forbidden(`You are not allowed to list resource quotas in namespace ${namespace}`)
   }
 
-  const resourceQuotas = findResourceQuotasByNamespace(namespace)
+  const resourceQuotas = _.filter(getResourceQuotas(), ['metadata.namespace', namespace])
   return fromResource(resourceQuotas)
 }

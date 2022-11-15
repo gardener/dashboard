@@ -11,7 +11,6 @@ const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
 const assert = require('assert').strict
-const _ = require('lodash')
 
 class LifecycleHooks {
   constructor (client) {
@@ -61,30 +60,35 @@ class LifecycleHooks {
 
   static createInformers (client) {
     const informers = {}
-    for (const key of this.resources) {
-      const [apiGroup, name] = _.split(key, '/')
-      if (!apiGroup || !name) {
-        assert.fail('Invalid resource key. Need to have format apiGroup/resourceName.')
-      }
+    for (const [apiGroup, names] of Object.entries(this.resources)) {
+      for (const name of names) {
+        if (!apiGroup || !name) {
+          assert.fail('Invalid resource key. Need to have format apiGroup/resourceName.')
+        }
 
-      const observable = client[apiGroup][name]
-      informers[key] = observable.constructor.scope === 'Namespaced'
-        ? observable.informerAllNamespaces()
-        : observable.informer()
+        const observable = client[apiGroup][name]
+        informers[name] = observable.constructor.scope === 'Namespaced'
+          ? observable.informerAllNamespaces()
+          : observable.informer()
+      }
     }
     return informers
   }
 
   static get resources () {
-    return [
-      'core.gardener.cloud/cloudprofiles',
-      'core.gardener.cloud/quotas',
-      'core.gardener.cloud/seeds',
-      'core.gardener.cloud/shoots',
-      'core.gardener.cloud/projects',
-      'core.gardener.cloud/controllerregistrations',
-      'core/resourcequotas'
-    ]
+    return {
+      'core.gardener.cloud': [
+        'cloudprofiles',
+        'quotas',
+        'seeds',
+        'shoots',
+        'projects',
+        'controllerregistrations'
+      ],
+      core: [
+        'resourcequotas'
+      ]
+    }
   }
 }
 

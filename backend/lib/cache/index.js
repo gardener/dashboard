@@ -21,19 +21,19 @@ class Cache extends Map {
   }
 
   getCloudProfiles () {
-    return this.get('core.gardener.cloud/cloudprofiles').list()
+    return this.get('cloudprofiles').list()
   }
 
   getQuotas () {
-    return this.get('core.gardener.cloud/quotas').list()
+    return this.get('quotas').list()
   }
 
   getSeeds () {
-    return this.get('core.gardener.cloud/seeds').list()
+    return this.get('seeds').list()
   }
 
   getProjects () {
-    return this.get('core.gardener.cloud/projects').list()
+    return this.get('projects').list()
   }
 
   getShoots () {
@@ -41,11 +41,11 @@ class Cache extends Map {
   }
 
   getControllerRegistrations () {
-    return this.get('core.gardener.cloud/controllerregistrations').list()
+    return this.get('controllerregistrations').list()
   }
 
   getResourceQuotas () {
-    return this.get('core/resourcequotas').list()
+    return this.get('resourcequotas').list()
   }
 
   getTicketCache () {
@@ -110,15 +110,11 @@ module.exports = {
     return cache.getResourceQuotas()
   },
   findProjectByNamespace (namespace) {
-    const project = cache.get('core.gardener.cloud/projects').find(['spec.namespace', namespace])
+    const project = cache.get('projects').find(['spec.namespace', namespace])
     if (!project) {
       throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
     }
     return project
-  },
-  findResourceQuotasByNamespace (namespace) {
-    const resourceQuotas = cache.getResourceQuotas()
-    return _.filter(resourceQuotas, { metadata: { namespace } })
   },
   getTicketCache () {
     return cache.getTicketCache()
