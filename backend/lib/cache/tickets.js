@@ -49,6 +49,10 @@ function init () {
     return issues[number]
   }
 
+  function getIssueNumbers () {
+    return _.map(getIssues(), 'metadata.number')
+  }
+
   function getIssueNumbersForNameAndProjectName ({ name, projectName }) {
     return _
       .chain(getIssues())
@@ -129,6 +133,7 @@ function init () {
     getIssue,
     getIssues,
     getCommentsForIssue,
+    getIssueNumbers,
     getIssueNumbersForNameAndProjectName,
     addOrUpdateIssues,
     addOrUpdateIssue,
