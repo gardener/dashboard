@@ -50,7 +50,7 @@ function init () {
   }
 
   function getIssueNumbers () {
-    return _.map(getIssues(), 'metadata.number')
+    return _.map(getIssues(), 'metadata.number') // dummy
   }
 
   function getIssueNumbersForNameAndProjectName ({ name, projectName }) {
