@@ -212,7 +212,7 @@ export default {
           const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
-          if (includes(roles, 'admin')) {
+          if (includes(roles, 'admin') && includes(roles, 'serviceaccountmanager')) {
             return true
           }
 
