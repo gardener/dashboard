@@ -75,14 +75,14 @@ describe('cache', function () {
   it('should dispatch "getControllerRegistrations" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
-    expect(cache.getControllerRegistrations()).toEqual(list)
+    expect(cache.getControllerRegistrations()).toBe(list)
     expect(stub).toBeCalledTimes(1)
   })
 
   it('should dispatch "getResourceQuotas" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getResourceQuotas').mockReturnValue(list)
-    expect(cache.getResourceQuotas()).toEqual(list)
+    expect(cache.getResourceQuotas()).toBe(list)
     expect(stub).toBeCalledTimes(1)
   })
 

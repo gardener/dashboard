@@ -9,12 +9,12 @@ module.exports = {
   seeds: require('./seeds'),
   projects: require('./projects'),
   shoots: require('./shoots'),
-  cloudProviderSecrets: require('./cloudprovidersecrets'),
+  cloudProviderSecrets: require('./cloudProviderSecrets'),
   members: require('./members'),
   authorization: require('./authorization'),
   authentication: require('./authentication'),
   tickets: require('./tickets'),
   terminals: require('./terminals'),
   controllerregistrations: require('./controllerregistrations'),
-  resourceQuotas: require('./resourcequotas')
+  resourceQuotas: require('./resourceQuotas')
 }
