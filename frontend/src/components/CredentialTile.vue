@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="phase && phase.incomplete">
               <div>
                 <strong>
-                  All two-step credentials rotations need to be in phase
+                  All two-step credential rotations need to be in phase
                   <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
                   in order to perform this operation
                 </strong>
