@@ -60,6 +60,13 @@ rules:
   - get
   resourceNames:
   - cluster-identity
+- apiGroups:
+  - ""
+  resources:
+  - resourcequotas
+  verbs:
+  - list
+  - watch
 # required for terminal bootstrapping and gardener/dashboard#943
 - apiGroups:
   - ""

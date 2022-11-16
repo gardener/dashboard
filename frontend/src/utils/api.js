@@ -49,24 +49,24 @@ export function getLoginConfiguration () {
 
 export function getCloudProviderSecrets ({ namespace }) {
   namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/cloud-provider-secrets`)
+  return getResource(`/api/namespaces/${namespace}/cloudprovidersecrets`)
 }
 
 export function updateCloudProviderSecret ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`, data)
+  return updateResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`, data)
 }
 
 export function createCloudProviderSecret ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/cloud-provider-secrets`, data)
+  return createResource(`/api/namespaces/${namespace}/cloudprovidersecrets`, data)
 }
 
 export function deleteCloudProviderSecret ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
+  return deleteResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
 }
 
 /* Tickets */
@@ -361,7 +361,11 @@ export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
 /* Controller Registrations */
 
 export function getGardenerExtensions () {
-  return getResource('/api/gardener-extensions')
+  return getResource('/api/gardenerextensions')
+}
+
+export function getResourceQuotas ({ namespace }) {
+  return getResource(`/api/namespaces/${namespace}/resourcequotas`)
 }
 
 export default {

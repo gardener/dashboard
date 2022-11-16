@@ -8,7 +8,13 @@ import map from 'lodash/map'
 import pick from 'lodash/pick'
 
 import { getters } from '@/store'
-import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion, getIssueSince } from '@/utils'
+import {
+  canI,
+  selectedImageIsNotLatest,
+  isHtmlColorCode,
+  defaultCriNameByKubernetesVersion,
+  getIssueSince
+} from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {

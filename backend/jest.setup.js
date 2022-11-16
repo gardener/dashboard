@@ -118,7 +118,14 @@ jest.mock('./lib/cache', () => {
   const originalCache = jest.requireActual('./lib/cache')
   const createTicketCache = jest.requireActual('./lib/cache/tickets')
   const { cache } = originalCache
-  const keys = ['cloudprofiles', 'seeds', 'quotas', 'projects', 'controllerregistrations']
+  const keys = [
+    'cloudprofiles',
+    'seeds',
+    'quotas',
+    'projects',
+    'controllerregistrations',
+    'resourcequotas'
+  ]
   for (const key of keys) {
     cache.set(key, {
       items: fixtures[key].list(),
