@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <rotate-kubeconfig-start :shoot-item="shootItem" text></rotate-kubeconfig-start>
+          <rotate-credentials :shoot-item="shootItem" text></rotate-credentials>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
@@ -54,16 +54,18 @@ import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
 import DeleteCluster from '@/components/DeleteCluster'
 import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import ReconcileStart from '@/components/ReconcileStart'
-import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
+import RotateCredentials from '@/components/RotateCredentials'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     ChangeHibernation,
     MaintenanceStart,
     ReconcileStart,
-    RotateKubeconfigStart,
+    RotateCredentials,
     DeleteCluster
   },
+  mixins: [shootItem],
   props: {
     shootItem: {
       type: Object
