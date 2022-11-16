@@ -322,7 +322,6 @@ export default {
         sortByArrAtFreeze = [...sortByArr]
         sortDescArrAtFreeze = [...sortDescArr]
       }
-
       // If freezed, the list is static - items are not added and removed and the order is defined by the cached array
       return orderFreezedItemsBySortedUIDsAtFreeze(items)
     }

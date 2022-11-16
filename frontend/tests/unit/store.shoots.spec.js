@@ -131,8 +131,8 @@ describe('store.shoots.getters', () => {
     state = { filteredShoots: shootItems, freezeSorting: false, freezedShootSkeletons: [] }
     assign(shootModule.state, state)
 
-    setFreezeSorting = (value) => shootModule.actions.setFreezeSorting({ commit: (f, v) => shootModule.mutations[f](state, v) }, value)
-    sortItems = getters.sortItems(state, undefined, undefined, rootGetters)
+    setFreezeSorting = (value) => shootModule.actions.setFreezeSorting({ commit: (f, v) => shootModule.mutations[f](shootModule.state, v) }, value)
+    sortItems = getters.sortItems(shootModule.state, undefined, undefined, rootGetters)
   })
 
   it('should sort shoots by name', () => {
@@ -232,24 +232,26 @@ describe('store.shoots.getters', () => {
     expect(sortedShoots[0].metadata.name).toBe('shoot1')
 
     setFreezeSorting(true)
+    // need to trigger sort one time since freeze to build sortedUIDsAtFreeze
+    sortItems(shootItems, sortBy, sortDesc)
+
     sortedShoots[0].metadata.name = 'shoot4'
     sortedShoots = sortItems(shootItems, sortBy, sortDesc)
     expect(sortedShoots[0].metadata.name).toBe('shoot4')
   })
 
   it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
-    const sortBy = ['name']
-    const sortDesc = [false]
-    let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-    expect(sortedShoots[0].stale).toBe(undefined)
-
+    shootModule.state.filteredShoots.splice(0, 1)
+    expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
+    expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
     setFreezeSorting(true)
-    shootItems.splice(0, 1)
-    expect(shootItems.length).toBe(2)
 
-    sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-    expect(sortedShoots.length).toBe(3)
-    expect(sortedShoots[1].stale).toBe(true)
+    expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
+    shootModule.state.filteredShoots.splice(0, 1)
+    expect(shootModule.state.filteredShoots.length).toBe(1)
+
+    expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
+    expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(true)
   })
 
   it('should not add new shoots to list when shoot list is freezed', () => {
@@ -261,17 +263,17 @@ describe('store.shoots.getters', () => {
         uid: 'shoot4'
       }
     }
-    shootItems.push(newShoot)
-    expect(state.filteredShoots.length).toBe(4)
-    expect(state.freezedShootSkeletons.length).toBe(3)
+    shootModule.state.filteredShoots.push(newShoot)
+    expect(shootModule.state.filteredShoots.length).toBe(4)
+    expect(shootModule.state.freezedShootSkeletons.length).toBe(3)
 
-    expect(getters.filteredItems(state).length).toBe(3)
+    expect(getters.filteredItems(shootModule.state).length).toBe(3)
 
     setFreezeSorting(false)
-    expect(getters.filteredItems(state).length).toBe(4)
+    expect(getters.filteredItems(shootModule.state).length).toBe(4)
 
     setFreezeSorting(true)
-    expect(getters.filteredItems(state).length).toBe(4)
+    expect(getters.filteredItems(shootModule.state).length).toBe(4)
   })
 })
 
