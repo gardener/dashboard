@@ -30,7 +30,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .get('/api/gardener-extensions')
+        .get('/api/gardenerextensions')
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
@@ -45,7 +45,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
       const res = await agent
-        .get('/api/gardener-extensions')
+        .get('/api/gardenerextensions')
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)

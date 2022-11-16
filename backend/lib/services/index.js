@@ -15,5 +15,6 @@ module.exports = {
   authentication: require('./authentication'),
   tickets: require('./tickets'),
   terminals: require('./terminals'),
-  controllerregistrations: require('./controllerregistrations')
+  controllerregistrations: require('./controllerregistrations'),
+  resourceQuotas: require('./resourceQuotas')
 }

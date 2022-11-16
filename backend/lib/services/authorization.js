@@ -104,6 +104,17 @@ exports.canGetCloudProfiles = function (user, name) {
   })
 }
 
+exports.canListResourceQuotas = function (user, namespace) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: '',
+      resource: 'resourcequotas',
+      namespace
+    }
+  })
+}
+
 exports.canListControllerRegistrations = function (user) {
   return hasAuthorization(user, {
     resourceAttributes: {

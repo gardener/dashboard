@@ -37,21 +37,24 @@ describe('hooks', () => {
     })
 
     it('#createInformers', async function () {
-      for (const key of LifecycleHooks.resources) {
-        const observable = dashboardClient['core.gardener.cloud'][key]
-        const informer = {
-          names: {
-            plural: key
+      for (const [apiGroup, names] of Object.entries(LifecycleHooks.resources)) {
+        for (const name of names) {
+          const observable = dashboardClient[apiGroup][name]
+
+          const informer = {
+            names: {
+              plural: name
+            }
           }
-        }
-        if (observable.constructor.scope === 'Namespaced') {
-          informer.mockFn = observable.informerAllNamespaces = jest.fn(() => informer)
-        } else {
-          informer.mockFn = observable.informer = jest.fn(() => informer)
+          if (observable.constructor.scope === 'Namespaced') {
+            informer.mockFn = observable.informerAllNamespaces = jest.fn(() => informer)
+          } else {
+            informer.mockFn = observable.informer = jest.fn(() => informer)
+          }
         }
       }
       const informers = LifecycleHooks.createInformers(dashboardClient)
-      for (const key of LifecycleHooks.resources) {
+      for (const key of Object.keys(informers)) {
         const { mockFn, names } = informers[key]
         expect(names.plural).toBe(key)
         expect(mockFn).toBeCalledTimes(1)

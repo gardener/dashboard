@@ -103,6 +103,18 @@ Object {
         "",
       ],
       "resources": Array [
+        "resourcequotas",
+      ],
+      "verbs": Array [
+        "list",
+        "watch",
+      ],
+    },
+    Object {
+      "apiGroups": Array [
+        "",
+      ],
+      "resources": Array [
         "secrets",
       ],
       "verbs": Array [
