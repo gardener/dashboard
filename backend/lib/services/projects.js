@@ -24,6 +24,7 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
   const { name, resourceVersion, creationTimestamp, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
   const { staleSinceTimestamp, staleAutoDeleteTimestamp, phase } = status
+
   return {
     metadata: {
       name,

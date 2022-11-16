@@ -75,6 +75,7 @@ import cloudProfiles from './modules/cloudProfiles'
 import gardenerExtensions from './modules/gardenerExtensions'
 import seeds from './modules/seeds'
 import projects from './modules/projects'
+import projectQuota from './modules/projectQuota'
 import draggable from './modules/draggable'
 import members from './modules/members'
 import cloudProviderSecrets from './modules/cloudProviderSecrets'
@@ -1303,6 +1304,9 @@ const getters = {
   nodesCIDR (state) {
     return get(state, 'cfg.defaultNodesCIDR', '10.250.0.0/16')
   },
+  resourceQuotaHelpText (state) {
+    return get(state, 'cfg.resourceQuotaHelp.text')
+  },
   colorScheme (state, getters) {
     const colorScheme = getters['storage/colorScheme']
     return ['dark', 'light'].includes(colorScheme)
@@ -1628,6 +1632,7 @@ const mutations = {
 
 const modules = {
   projects,
+  projectQuota,
   members,
   draggable,
   cloudProfiles,

@@ -42,7 +42,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/cloud-provider-secrets`)
+        .get(`/api/namespaces/${namespace}/cloudprovidersecrets`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
@@ -61,7 +61,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/cloud-provider-secrets`)
+        .get(`/api/namespaces/${namespace}/cloudprovidersecrets`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
@@ -88,7 +88,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/cloud-provider-secrets`)
+        .post(`/api/namespaces/${namespace}/cloudprovidersecrets`)
         .set('cookie', await user.cookie)
         .send({ metadata, data })
         .expect('content-type', /json/)
@@ -114,7 +114,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/cloud-provider-secrets`)
+        .post(`/api/namespaces/${namespace}/cloudprovidersecrets`)
         .set('cookie', await user.cookie)
         .send({ metadata, data })
         .expect('content-type', /json/)
@@ -137,7 +137,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .put(`/api/namespaces/${namespace}/cloud-provider-secrets/${infraName}`)
+        .put(`/api/namespaces/${namespace}/cloudprovidersecrets/${infraName}`)
         .set('cookie', await user.cookie)
         .send({ data })
         .expect('content-type', /json/)
@@ -155,7 +155,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
 
       const res = await agent
-        .put(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
+        .put(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
         .set('cookie', await user.cookie)
         .send({ data: {} })
         .expect('content-type', /json/)
@@ -176,7 +176,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
       const res = await agent
-        .delete(`/api/namespaces/${namespace}/cloud-provider-secrets/${infraName}`)
+        .delete(`/api/namespaces/${namespace}/cloudprovidersecrets/${infraName}`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
@@ -193,7 +193,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
 
       const res = await agent
-        .delete(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
+        .delete(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(422)
@@ -213,7 +213,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
 
       const res = await agent
-        .delete(`/api/namespaces/${namespace}/cloud-provider-secrets/${name}`)
+        .delete(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(422)
