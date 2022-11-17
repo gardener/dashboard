@@ -424,7 +424,8 @@ export default {
           align: 'center',
           cellClass: 'pl-4',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
+          stalePointerEvents: true
         },
         {
           text: 'VERSION',
@@ -439,7 +440,8 @@ export default {
           sortable: true,
           align: 'start',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
+          stalePointerEvents: true
         },
         {
           text: 'ISSUE SINCE',

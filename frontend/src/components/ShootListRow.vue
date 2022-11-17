@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr :class="{ 'stale': isStale }">
-    <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
+    <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class" class="position-relative">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
           {{ shootProjectName }}
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             </auto-hide>
           </v-col>
           <v-col class="shrink" >
-            <shoot-messages :shoot-item="shootItem" v-if="!isStale" />
+            <shoot-messages :shoot-item="shootItem" />
           </v-col>
         </v-row>
       </template>
@@ -62,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.value === 'lastOperation'">
         <div class="d-flex align-center justify-center">
           <shoot-status
-          v-if="!isStale"
           :popper-key="`${shootNamespace}/${shootName}`"
           :shoot-item="shootItem">
           </shoot-status>
@@ -75,11 +74,11 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.value === 'readiness'">
         <div class="d-flex">
-          <status-tags :shoot-item="shootItem" v-if="!isStale"></status-tags>
+          <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
       <template v-if="cell.header.value === 'issueSince'">
-        <v-tooltip top v-if="!isStale">
+        <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
               <time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix></time-string>
@@ -133,6 +132,7 @@ SPDX-License-Identifier: Apache-2.0
           <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
+      <div class="stale-overlay"></div>
     </td>
   </tr>
 </template>
@@ -266,10 +266,15 @@ export default {
           value = undefined
         }
 
+        let className = header.class
+        if (this.isStale && !header.stalePointerEvents) {
+          className = `${header.class} no-stale-pointer-events`
+        }
+
         return {
           header: {
             ...header,
-            class: this.isStale && !header.stalePointerEvents ? `${header.class} no-pointer-events` : header.class
+            class: className
           },
           value // currently only applicable for header.customField === true
         }
@@ -291,10 +296,30 @@ export default {
   .labels {
     line-height: 10px;
   }
-  .stale {
-    opacity: 0.3;
+
+  .position-relative {
+    position: relative;
   }
-  .no-pointer-events {
-    pointer-events: none
+
+  .stale-overlay {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .theme--light .stale .stale-overlay {
+    background-color: rgba(255,255,255,0.8)
+  }
+  .theme--dark .stale .stale-overlay {
+    background-color: rgba(0,0,0,0.8)
+  }
+
+  .no-stale-pointer-events {
+    .stale-overlay {
+      pointer-events: auto !important;
+    }
   }
 </style>
