@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <hint-colorizer hint-color="warning">
-    <v-select
+    <v-autocomplete
       color="primary"
       item-color="primary"
       :items="machineTypeItems"
@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       @input="onInputMachineType"
       @blur="$v.worker.machine.type.$touch()"
       v-model="worker.machine.type"
+      :filter="machineTypeFilter"
       label="Machine Type"
       :hint="hint"
       persistent-hint
@@ -36,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:selection="{ item }">
          {{item.name}}
       </template>
-    </v-select>
+    </v-autocomplete>
   </hint-colorizer>
 </template>
 
@@ -122,6 +123,17 @@ export default {
         this.valid = !this.$v.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
+    },
+    machineTypeFilter (item, query) {
+      if (!item) {
+        return false
+      }
+      if (typeof query !== 'string') {
+        return true
+      }
+      const { name, cpu, gpu, memory } = item
+      const terms = query.split(/\s+/)
+      return terms.every(term => name?.includes(term) || [cpu, gpu, memory].includes(term))
     }
   },
   mounted () {
