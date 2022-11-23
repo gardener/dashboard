@@ -67,4 +67,23 @@ describe('MachineType.vue', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('input')).toEqual([['bar']])
   })
+
+  it('should emit valid events', async () => {
+    const wrapper = mount(MachineType, {
+      localVue,
+      vuetify,
+      propsData: {
+        value: '',
+        machineTypes
+      }
+    })
+    expect(wrapper.vm.notInList).toBe(true)
+    expect(wrapper.emitted('update:valid')).toEqual([[false]])
+    await wrapper.setProps({ value: 'foo' })
+    expect(wrapper.vm.notInList).toBe(false)
+    expect(wrapper.emitted('update:valid')).toEqual([[false], [true]])
+    await wrapper.setProps({ value: '' })
+    expect(wrapper.vm.notInList).toBe(true)
+    expect(wrapper.emitted('update:valid')).toEqual([[false], [true], [false]])
+  })
 })
