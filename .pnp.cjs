@@ -2737,8 +2737,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["semver", "npm:7.3.7"],\
             ["set-cookie-parser", "npm:2.4.8"],\
             ["showdown", "npm:2.1.0"],\
-            ["socket.io", "npm:4.5.3"],\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io", "npm:4.5.4"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["supertest", "npm:6.2.3"],\
             ["uuid", "npm:8.3.2"]\
           ],\
@@ -2815,7 +2815,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["sass", "npm:1.52.1"],\
             ["sass-loader", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:12.6.0"],\
             ["semver", "npm:7.3.7"],\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["splitpanes", "npm:2.4.1"],\
             ["statuses", "npm:2.0.1"],\
             ["symbol-tree", "npm:3.2.4"],\
@@ -16046,10 +16046,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["socket.io", [\
-        ["npm:4.5.3", {\
-          "packageLocation": "./.yarn/cache/socket.io-npm-4.5.3-30385c9144-2a7e4c64bb.zip/node_modules/socket.io/",\
+        ["npm:4.5.4", {\
+          "packageLocation": "./.yarn/cache/socket.io-npm-4.5.4-888fc15f6d-b5456d361b.zip/node_modules/socket.io/",\
           "packageDependencies": [\
-            ["socket.io", "npm:4.5.3"],\
+            ["socket.io", "npm:4.5.4"],\
             ["accepts", "npm:1.3.8"],\
             ["base64id", "npm:2.0.0"],\
             ["debug", "virtual:1f3c51be25fef20e854261431be23d317093b3b463e81e911f4f45a636ff582620db066c9d2a5922a428e07e10fe4788eee8196c796ce2c9bd49d22743fec207#npm:4.3.4"],\
@@ -16070,10 +16070,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["socket.io-client", [\
-        ["npm:4.5.3", {\
-          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.5.3-4804f67d3a-ebd2dbddec.zip/node_modules/socket.io-client/",\
+        ["npm:4.5.4", {\
+          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.5.4-201041b748-8320ce4a96.zip/node_modules/socket.io-client/",\
           "packageDependencies": [\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["@socket.io/component-emitter", "npm:3.1.0"],\
             ["debug", "virtual:1f3c51be25fef20e854261431be23d317093b3b463e81e911f4f45a636ff582620db066c9d2a5922a428e07e10fe4788eee8196c796ce2c9bd49d22743fec207#npm:4.3.4"],\
             ["engine.io-client", "npm:6.2.3"],\
