@@ -135,14 +135,23 @@ export default {
       if (typeof query !== 'string') {
         return true
       }
-      const { name, cpu, gpu, memory, storage } = item
-      const terms = query.split(/\s+/)
-      const properties = [cpu, gpu, memory]
-      if (storage) {
-        properties.push(storage.type)
-        properties.push(storage.class)
-        properties.push(storage.size)
+      const name = item.name?.toLowerCase()
+      const terms = query.trim().split(/ +/).map(term => term.toLowerCase())
+      const properties = []
+      const addProperty = value => {
+        if (value) {
+          properties.push(value.toString().toLowerCase())
+        }
       }
+      addProperty(item.cpu)
+      addProperty(item.gpu)
+      addProperty(item.memory)
+      if (item.storage) {
+        addProperty(item.storage.type)
+        addProperty(item.storage.class)
+        addProperty(item.storage.size)
+      }
+
       return terms.every(term => name?.includes(term) || properties.includes(term))
     }
   },
