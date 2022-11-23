@@ -12507,10 +12507,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["loader-utils", [\
-        ["npm:1.4.1", {\
-          "packageLocation": "./.yarn/cache/loader-utils-npm-1.4.1-91a9c6b986-ea0b648cba.zip/node_modules/loader-utils/",\
+        ["npm:1.4.2", {\
+          "packageLocation": "./.yarn/cache/loader-utils-npm-1.4.2-b4537b2f88-eb6fb622ef.zip/node_modules/loader-utils/",\
           "packageDependencies": [\
-            ["loader-utils", "npm:1.4.1"],\
+            ["loader-utils", "npm:1.4.2"],\
             ["big.js", "npm:5.2.2"],\
             ["emojis-list", "npm:3.0.0"],\
             ["json5", "npm:1.0.1"]\
@@ -17465,7 +17465,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cache-loader", null],\
             ["css-loader", "virtual:fdfbd333867413f715b35354abf458273d21196984ec09b7211c184716b763e6eadc1546484aba6e8d5a55521ed7654f99227b1eeea09c3f9f7d18c5b1548dc8#npm:6.7.1"],\
             ["hash-sum", "npm:1.0.2"],\
-            ["loader-utils", "npm:1.4.1"],\
+            ["loader-utils", "npm:1.4.2"],\
             ["vue-hot-reload-api", "npm:2.3.4"],\
             ["vue-style-loader", "npm:4.1.3"],\
             ["vue-template-compiler", "npm:2.6.14"],\
@@ -17561,7 +17561,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["vue-style-loader", "npm:4.1.3"],\
             ["hash-sum", "npm:1.0.2"],\
-            ["loader-utils", "npm:1.4.1"]\
+            ["loader-utils", "npm:1.4.2"]\
           ],\
           "linkType": "HARD"\
         }]\
