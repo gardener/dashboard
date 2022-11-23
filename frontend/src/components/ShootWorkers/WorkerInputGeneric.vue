@@ -32,11 +32,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regularInput">
         <machine-type
-        :machine-types="machineTypes"
-        :worker="worker"
-        @update-machine-type="onUpdateMachineType"
-        @valid="onMachineTypeValid">
-        </machine-type>
+          :machine-types="machineTypes"
+          v-model="machineTypeValue"
+          :valid.sync="internalMachineTypeValid"
+        ></machine-type>
       </div>
       <div class="regularInput">
         <machine-image
@@ -453,6 +452,28 @@ export default {
         // Reset machine type and image to default as they won't be supported by new architecture
         this.resetWorkerMachine()
       }
+    },
+    machineTypeValue: {
+      get () {
+        return this.worker.machine.type
+      },
+      set (value) {
+        this.worker.machine.type = value
+        this.setVolumeDependingOnMachineType()
+        this.onInputVolumeSize()
+        this.validateInput()
+      }
+    },
+    internalMachineTypeValid: {
+      get () {
+        return this.machineTypeValid
+      },
+      set (value) {
+        if (this.machineTypeValid !== value) {
+          this.machineTypeValid = value
+          this.validateInput()
+        }
+      }
     }
   },
   methods: {
@@ -461,11 +482,6 @@ export default {
     },
     onInputName () {
       this.$v.worker.name.$touch()
-      this.validateInput()
-    },
-    onUpdateMachineType () {
-      this.setVolumeDependingOnMachineType()
-      this.onInputVolumeSize()
       this.validateInput()
     },
     onUpdateVolumeType () {
@@ -506,12 +522,6 @@ export default {
     onInputZones () {
       this.$v.selectedZones.$touch()
       this.validateInput()
-    },
-    onMachineTypeValid ({ valid }) {
-      if (this.machineTypeValid !== valid) {
-        this.machineTypeValid = valid
-        this.validateInput()
-      }
     },
     onVolumeTypeValid ({ valid }) {
       if (this.volumeTypeValid !== valid) {
