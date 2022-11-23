@@ -49,7 +49,7 @@
     "p-timeout": "^4.1.0",
     "regenerator-runtime": "^0.13.9",
     "semver": "^7.3.7",
-    "socket.io-client": "^4.5.3",
+    "socket.io-client": "^4.5.4",
     "splitpanes": "^2.4.1",
     "statuses": "^2.0.1",
     "symbol-tree": "^3.2.4",
