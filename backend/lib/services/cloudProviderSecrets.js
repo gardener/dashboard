@@ -220,7 +220,15 @@ exports.create = async function ({ user, namespace, body }) {
   metadata.secretRef = { namespace, name: metadata.name }
   const secret = await client.core.secrets.create(namespace, toSecretResource(body))
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
+  let secretBinding
+  try {
+    secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
+  } catch (err) {
+    logger.error('failed to create SecretBinding, cleaning up secret %s/%s', namespace, secret.metadata.name)
+    await client.core.secrets.delete(namespace, secret.metadata.name)
+
+    throw err
+  }
 
   const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
   let cloudProviderKind
