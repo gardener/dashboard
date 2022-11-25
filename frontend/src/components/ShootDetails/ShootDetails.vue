@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           <shoot-access-card :shoot-item="shootItem" @add-terminal-shortcut="onAddTerminalShortcut"></shoot-access-card>
         </v-card>
         <shoot-monitoring-card :shoot-item="shootItem"></shoot-monitoring-card>
+        <shoot-credential-rotation-card :shoot-item="shootItem" class="mt-4"></shoot-credential-rotation-card>
         <tickets-card :shoot-item="shootItem" class="mt-4"></tickets-card>
       </v-col>
     </v-row>
@@ -39,6 +40,7 @@ import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalTools
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
+import ShootCredentialRotationCard from '@/components/ShootDetails/ShootCredentialRotationCard'
 import TicketsCard from '@/components/TicketsCard'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -55,6 +57,7 @@ export default {
     ShootAccessCard,
     TicketsCard,
     ShootMonitoringCard,
+    ShootCredentialRotationCard,
     ShootExternalToolsCard
   },
   mixins: [shootItem],

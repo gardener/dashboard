@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-snackbar>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" icon ref="copy" :color="btnColor">
+        <v-btn v-on="on" icon :color="btnColor" @click="copyText">
           <v-icon :small="true">{{icon}}</v-icon>
         </v-btn>
       </template>
@@ -29,8 +29,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import Clipboard from 'clipboard'
-
 export default {
   props: {
     clipboardText: {
@@ -68,20 +66,6 @@ export default {
     snackbarColor () {
       return 'error'
     },
-    clipboardOptions () {
-      const options = {
-        text: () => this.clipboardText
-      }
-      let vm = this.$parent
-      while (vm && vm !== this.$root) {
-        if (vm.$options.name === 'v-dialog') {
-          options.container = vm.$refs.content
-          break
-        }
-        vm = vm.$parent
-      }
-      return options
-    },
     icon () {
       if (this.copySucceeded) {
         return 'mdi-check'
@@ -99,29 +83,22 @@ export default {
     }
   },
   methods: {
-    enableCopy () {
-      if (this.clipboard) {
-        this.clipboard.destroy()
-      }
-      this.clipboard = new Clipboard(this.$refs.copy.$el, this.clipboardOptions)
-      this.clipboard.on('success', (event) => {
+    async copyText () {
+      try {
+        await navigator.clipboard.writeText(this.clipboardText)
         this.copySucceeded = true
         clearTimeout(this.timeoutId)
         this.timeoutId = setTimeout(() => {
           this.copySucceeded = false
         }, 1000)
         this.$emit('copy')
-      })
-      this.clipboard.on('error', err => {
+      } catch (err) {
         console.error('error', err)
         this.snackbar = true
         this.copySucceeded = false
         this.$emit('copy-failed')
-      })
+      }
     }
-  },
-  mounted () {
-    this.enableCopy()
   }
 }
 </script>

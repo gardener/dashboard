@@ -340,6 +340,10 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.global.frontendConfig.resourceQuotaHelp }}
+      resourceQuotaHelp:
+        text: {{ required ".Values.global.frontendConfig.resourceQuotaHelp.text is required" .Values.global.frontendConfig.resourceQuotaHelp.text | quote }}
+      {{- end }}
       {{- if .Values.global.frontendConfig.gardenctl }}
       gardenctl:
         legacyCommands: {{ .Values.global.frontendConfig.gardenctl.legacyCommands | default false }}

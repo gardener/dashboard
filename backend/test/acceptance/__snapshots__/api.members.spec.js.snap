@@ -112,6 +112,11 @@ Array [
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
   Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  Object {
     "roles": Array [
       "myrole",
     ],
@@ -233,6 +238,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
   Object {
     "roles": Array [
@@ -375,6 +385,11 @@ Array [
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
   Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  Object {
     "createdBy": "bar@example.org",
     "creationTimestamp": "now",
     "description": "description",
@@ -499,6 +514,11 @@ Array [
     ],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 
@@ -577,6 +597,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
   Object {
     "createdBy": "bar@example.org",
@@ -676,6 +701,11 @@ Array [
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 
@@ -767,6 +797,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
 ]
 `;
@@ -871,6 +906,11 @@ Array [
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 
@@ -930,6 +970,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
 ]
 `;
@@ -1057,6 +1102,11 @@ Array [
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 
@@ -1165,6 +1215,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
 ]
 `;
@@ -1299,6 +1354,11 @@ Array [
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
   },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 
@@ -1402,6 +1462,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
 ]
 `;
@@ -1527,6 +1592,11 @@ Array [
     "creationTimestamp": "2020-01-01T00:00:00Z",
     "roles": Array [],
     "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
   },
 ]
 `;

@@ -447,7 +447,8 @@ describe('services', function () {
         it('should not update a serviceaccount from a different namespace', async function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
-          await expect(memberManager.updateServiceAccount(item, {})).rejects.toThrow(UnprocessableEntity)
+          await expect(memberManager.updateServiceAccount(item, { description: 'foo' })).resolves.toBeUndefined()
+          expect(item.member.description).toBeUndefined()
         })
       })
 

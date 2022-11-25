@@ -95,6 +95,16 @@ class ServiceAccount extends mix(Core).with(NamespaceScoped, Readable, Observabl
   }
 }
 
+class ResourceQuota extends mix(Core).with(NamespaceScoped, Readable, Observable) {
+  static get names () {
+    return {
+      plural: 'resourcequotas',
+      singular: 'resourcequota',
+      kind: 'ResourceQuota'
+    }
+  }
+}
+
 module.exports = {
   Endpoints,
   Namespace,
@@ -103,5 +113,6 @@ module.exports = {
   ConfigMap,
   Secret,
   Service,
-  ServiceAccount
+  ServiceAccount,
+  ResourceQuota
 }

@@ -108,7 +108,7 @@ export default {
       this.reconcileTriggered = false
       this.currentGeneration = null
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
 

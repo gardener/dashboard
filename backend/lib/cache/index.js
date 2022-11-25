@@ -44,6 +44,10 @@ class Cache extends Map {
     return this.get('controllerregistrations').list()
   }
 
+  getResourceQuotas () {
+    return this.get('resourcequotas').list()
+  }
+
   getTicketCache () {
     return this.ticketCache
   }
@@ -101,6 +105,9 @@ module.exports = {
   },
   getControllerRegistrations () {
     return cache.getControllerRegistrations()
+  },
+  getResourceQuotas () {
+    return cache.getResourceQuotas()
   },
   findProjectByNamespace (namespace) {
     const project = cache.get('projects').find(['spec.namespace', namespace])

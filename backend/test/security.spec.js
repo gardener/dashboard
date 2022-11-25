@@ -203,7 +203,7 @@ describe('security', function () {
         auth: { bearer: tokenSet.id_token }
       }])
       expect(user).toEqual({
-        iat: accessTokenPayload.iat,
+        iat: expect.toBeWithinRange(iat, iat + 5),
         jti: expect.stringMatching(/^[a-z0-9-]+$/),
         id: sub,
         groups: [],
