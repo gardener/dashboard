@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
-import { rotationTypes } from '@/utils/credentialsRotation'
+import { shootStatusCredentialRotation, rotationTypes } from '@/mixins/shootStatusCredentialRotation'
 import { shallowMount } from '@vue/test-utils'
 
 import find from 'lodash/find'

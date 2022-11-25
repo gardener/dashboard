@@ -9,7 +9,58 @@ import filter from 'lodash/filter'
 import find from 'lodash/find'
 
 import { shootItem } from '@/mixins/shootItem'
-import { rotationTypes } from '@/utils/credentialsRotation'
+
+export const rotationTypes = [
+  {
+    type: 'kubeconfig',
+    hasRotationStatus: true,
+    startOperation: 'rotate-kubeconfig-credentials',
+    title: 'Kubeconfig'
+  },
+  {
+    type: 'certificateAuthorities',
+    hasRotationStatus: true,
+    startOperation: 'rotate-ca-start',
+    completionOperation: 'rotate-ca-complete',
+    twoStep: true,
+    title: 'Certificate Authorities'
+  },
+  {
+    type: 'observability',
+    hasRotationStatus: true,
+    startOperation: 'rotate-observability-credentials',
+    title: 'Observability Passwords'
+  },
+  {
+    type: 'sshKeypair',
+    hasRotationStatus: true,
+    startOperation: 'rotate-ssh-keypair',
+    title: 'SSH Key Pair for Worker Nodes'
+  },
+  {
+    type: 'etcdEncryptionKey',
+    hasRotationStatus: true,
+    startOperation: 'rotate-etcd-encryption-key-start',
+    completionOperation: 'rotate-etcd-encryption-key-complete',
+    twoStep: true,
+    title: 'ETCD Encryption Key'
+  },
+  {
+    type: 'serviceAccountKey',
+    hasRotationStatus: true,
+    startOperation: 'rotate-serviceaccount-key-start',
+    completionOperation: 'rotate-serviceaccount-key-complete',
+    twoStep: true,
+    title: 'ServiceAccount Token Signing Key'
+  },
+  {
+    type: 'ALL_CREDENTIALS',
+    startOperation: 'rotate-credentials-start',
+    completionOperation: 'rotate-credentials-complete',
+    title: 'Rotate All Credentials',
+    twoStep: true
+  }
+]
 
 export const shootStatusCredentialRotation = {
   mixins: [shootItem],
@@ -21,7 +72,7 @@ export const shootStatusCredentialRotation = {
       let preparedRotationsCount = 0
       let completedPhasesCount = 0
       const unpreparedRotations = []
-      for (const rotationType of filter(rotationTypes, { hasRotationStatus: true, twoStep: true })) {
+      for (const rotationType of filter(this.rotationTypes, { hasRotationStatus: true, twoStep: true })) {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
         const rotationStatus = this.shootStatusCredentialsRotation[rotationType.type]
         if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
@@ -41,7 +92,7 @@ export const shootStatusCredentialRotation = {
         }
       }
 
-      const numberOfTwoStepOperations = filter(rotationTypes, { hasRotationStatus: true, twoStep: true }).length
+      const numberOfTwoStepOperations = filter(this.rotationTypes, { hasRotationStatus: true, twoStep: true }).length
       if (preparedRotationsCount > 0) {
         if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'
@@ -94,7 +145,12 @@ export const shootStatusCredentialRotation = {
       return undefined
     },
     rotationType () {
-      return find(rotationTypes, ['type', this.type])
+      return find(this.rotationTypes, ['type', this.type])
+    }
+  },
+  data () {
+    return {
+      rotationTypes
     }
   }
 }

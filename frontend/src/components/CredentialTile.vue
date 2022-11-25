@@ -72,13 +72,13 @@ SPDX-License-Identifier: Apache-2.0
 import RotateCredentials from '@/components/RotateCredentials'
 import TimeString from '@/components/TimeString'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
-import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
+import { shootStatusCredentialRotation, rotationTypes } from '@/mixins/shootStatusCredentialRotation'
 import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import head from 'lodash/head'
 import compact from 'lodash/compact'
 import filter from 'lodash/filter'
-import { rotationTypes } from '@/utils/credentialsRotation'
+import map from 'lodash/map'
 
 export default {
   name: 'credential-tile',
@@ -90,7 +90,10 @@ export default {
   props: {
     type: {
       type: String,
-      required: false
+      required: true,
+      validator: function (value) {
+        return map(rotationTypes, 'type').includes(value)
+      }
     },
     dense: {
       type: Boolean,
@@ -111,7 +114,7 @@ export default {
         return this.rotationStatus.lastCompletionTime
       }
       const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
+      let requiredNumberOfRotationTimestamps = filter(this.rotationTypes, 'hasRotationStatus').length
       if (!this.shootEnableStaticTokenKubeconfig) {
         requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
       }

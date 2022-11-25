@@ -50,11 +50,12 @@ SPDX-License-Identifier: Apache-2.0
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
-import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
+import { shootStatusCredentialRotation, rotationTypes } from '@/mixins/shootStatusCredentialRotation'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
 import compact from 'lodash/compact'
+import map from 'lodash/map'
 
 export default {
   name: 'rotate-credentials',
@@ -67,7 +68,10 @@ export default {
     },
     type: {
       type: String,
-      required: false
+      required: true,
+      validator: function (value) {
+        return map(rotationTypes, 'type').includes(value)
+      }
     }
   },
   data () {
@@ -389,6 +393,9 @@ export default {
 
         this.actionTriggered = false
       }
+    },
+    bla () {
+      return true
     }
   },
   watch: {
