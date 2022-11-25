@@ -1224,6 +1224,57 @@ Array [
 ]
 `;
 
+exports[`api members should reset a service account 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "delete",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    Object {
+      "metadata": Object {
+        "annotations": Object {
+          "dashboard.gardener.cloud/created-by": undefined,
+          "dashboard.gardener.cloud/description": undefined,
+        },
+        "name": "robot",
+        "namespace": "garden-foo",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api members should return a service account 1`] = `
 Array [
   Array [

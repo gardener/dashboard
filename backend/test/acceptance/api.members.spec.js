@@ -78,6 +78,28 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should reset a service account', async function () {
+      const name = 'system:serviceaccount:garden-foo:robot'
+
+      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.create())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/members/${name}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'resetServiceAccount'
+        })
+        .expect(204)
+
+      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.noContent).toBe(true)
+    })
+
     it('should add a project member', async function () {
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.list())

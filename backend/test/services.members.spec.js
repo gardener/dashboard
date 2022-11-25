@@ -112,6 +112,17 @@ describe('services', function () {
     const serviceAccounts = [
       {
         metadata: {
+          name: 'default',
+          namespace: 'garden-foo',
+          creationTimestamp: 'bar-time',
+          annotations: {
+            'dashboard.gardener.cloud/created-by': 'k8s',
+            'dashboard.gardener.cloud/description': 'description'
+          }
+        }
+      },
+      {
+        metadata: {
           name: 'robot-sa',
           namespace: 'garden-foo',
           annotations: {
@@ -192,13 +203,18 @@ describe('services', function () {
       }
       client.core.serviceaccounts = {
         create: jest.fn().mockImplementation((namespace, body) => {
+          if (body.metadata.name === 'default') {
+            throw createError(409)
+          }
           return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
         }),
         createTokenRequest: jest.fn().mockImplementation((namespace, name, body) => {
           return Promise.resolve(_.set(body, 'status.token', 'secret'))
         }),
         delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
-        mergePatch: jest.fn().mockResolvedValue()
+        mergePatch: jest.fn().mockImplementation((namespace, name, body) => {
+          return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'bar-time'))
+        })
       }
     })
 
@@ -235,7 +251,7 @@ describe('services', function () {
         it('should merge multiple occurences of same user in members list', async function () {
           const frontendMemberList = memberManager.list()
 
-          expect(frontendMemberList).toHaveLength(10)
+          expect(frontendMemberList).toHaveLength(11)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
             roles: ['admin', 'viewer']
@@ -469,6 +485,49 @@ describe('services', function () {
             }
           }
           expect(client.core.serviceaccounts.create).toBeCalledWith('garden-foo', body)
+        })
+
+        it('should throw an error for foreign service accounts', async function () {
+          const id = 'system:serviceaccount:garden-other-foreign:robot-other-foreign-namespace'
+          await expect(memberManager.resetServiceAccount(id)).rejects.toThrow(UnprocessableEntity)
+        })
+
+        it('should throw an error for non-ServiceAccounts', async function () {
+          const id = 'foo@bar.com'
+          await expect(memberManager.resetServiceAccount(id)).rejects.toThrow(UnprocessableEntity)
+        })
+
+        it('should skip service accounts that are no members', async function () {
+          const id = 'system:serviceaccount:garden-foo:no-member'
+          await memberManager.resetServiceAccount(id)
+          expect(client.core.serviceaccounts.delete).toBeCalledTimes(0)
+          expect(client.core.serviceaccounts.create).toBeCalledTimes(0)
+        })
+
+        it('should patch the default service account', async function () {
+          const id = 'system:serviceaccount:garden-foo:default'
+          await memberManager.resetServiceAccount(id)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'default')
+          const body = {
+            metadata: {
+              annotations: {
+                'dashboard.gardener.cloud/created-by': 'k8s',
+                'dashboard.gardener.cloud/description': 'description'
+              },
+              name: 'default',
+              namespace: 'garden-foo'
+            }
+          }
+          expect(client.core.serviceaccounts.create).toBeCalledWith('garden-foo', body)
+          const patch = {
+            metadata: {
+              annotations: {
+                'dashboard.gardener.cloud/created-by': 'k8s',
+                'dashboard.gardener.cloud/description': 'description'
+              }
+            }
+          }
+          expect(client.core.serviceaccounts.mergePatch).toBeCalledWith('garden-foo', 'default', patch)
         })
       })
 
