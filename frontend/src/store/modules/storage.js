@@ -23,9 +23,6 @@ const getters = {
   autoLoginEnabled (state) {
     return state['global/auto-login'] === 'enabled'
   },
-  isDeveloperModeEnabled (state) {
-    return state['global/developer-mode'] === 'enabled'
-  },
   gardenctlOptions (state, getters, rootState) {
     const options = {
       legacyCommands: false,
@@ -48,9 +45,6 @@ const actions = {
   },
   setAutoLogin ({ commit }, value) {
     commit('SET_ITEM', ['global/auto-login', value ? 'enabled' : 'disabled'])
-  },
-  setDeveloperMode ({ commit }, value) {
-    commit('SET_ITEM', ['global/developer-mode', value ? 'enabled' : 'disabled'])
   },
   setGardenctlOptions ({ commit }, options) {
     const value = JSON.stringify(options)
