@@ -452,6 +452,26 @@ describe('services', function () {
         })
       })
 
+      describe('#resetServiceAccount', function () {
+        it('should delete and create a serviceaccount', async function () {
+          const id = 'system:serviceaccount:garden-foo:robot-sa'
+          await memberManager.resetServiceAccount(id)
+          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          const body = {
+            metadata: {
+              annotations: {
+                'dashboard.gardener.cloud/created-by': 'foo',
+                'dashboard.gardener.cloud/description': 'description'
+              },
+              creationTimestamp: 'now',
+              name: 'robot-sa',
+              namespace: 'garden-foo'
+            }
+          }
+          expect(client.core.serviceaccounts.create).toBeCalledWith('garden-foo', body)
+        })
+      })
+
       describe('#getKubeconfig', function () {
         it('should return kubeconfig with token of newest secret', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-user'

@@ -8,6 +8,7 @@
 
 const express = require('express')
 const { members } = require('../services')
+const { UnprocessableEntity } = require('http-errors')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -52,6 +53,24 @@ router.route('/:name')
       const name = req.params.name
       const body = req.body
       res.send(await members.update({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const { namespace, name } = req.params
+      const { method } = req.body
+
+      switch (method) {
+        case 'resetServiceAccount':
+          await members.resetServiceAccount({ user, namespace, name })
+          res.status(204).end()
+          break
+        default:
+          throw new UnprocessableEntity(`${method} not allowed for members`)
+      }
     } catch (err) {
       next(err)
     }
