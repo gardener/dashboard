@@ -6,16 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <hint-colorizer hint-color="warning">
-    <v-select
+    <v-autocomplete
+      ref="autocomplete"
       color="primary"
       item-color="primary"
       :items="machineTypeItems"
       item-text="name"
       item-value="name"
-      :error-messages="getErrorMessages('worker.machine.type')"
-      @input="onInputMachineType"
-      @blur="$v.worker.machine.type.$touch()"
-      v-model="worker.machine.type"
+      :error-messages="getErrorMessages('internalValue')"
+      @input="$v.internalValue.$touch()"
+      @blur="$v.internalValue.$touch()"
+      v-model="internalValue"
+      :search-input.sync="internalSearch"
+      :filter="filter"
       label="Machine Type"
       :hint="hint"
       persistent-hint
@@ -33,10 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
       </template>
-      <template v-slot:selection="{ item }">
-         {{item.name}}
-      </template>
-    </v-select>
+    </v-autocomplete>
   </hint-colorizer>
 </template>
 
@@ -47,22 +47,14 @@ import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
 
 const validationErrors = {
-  worker: {
-    machine: {
-      type: {
-        required: 'Machine Type is required'
-      }
-    }
+  internalValue: {
+    required: 'Machine Type is required'
   }
 }
 
 const validations = {
-  worker: {
-    machine: {
-      type: {
-        required
-      }
-    }
+  internalValue: {
+    required
   }
 }
 
@@ -71,9 +63,15 @@ export default {
     HintColorizer
   },
   props: {
-    worker: {
-      type: Object,
+    value: {
+      type: String,
       required: true
+    },
+    searchInput: {
+      type: String
+    },
+    valid: {
+      type: Boolean
     },
     machineTypes: {
       type: Array,
@@ -82,29 +80,47 @@ export default {
   },
   data () {
     return {
-      validationErrors,
-      valid: undefined
+      lazyValue: this.value,
+      lazySearch: this.searchInput,
+      validationErrors
     }
   },
   computed: {
+    internalValue: {
+      get () {
+        return this.lazyValue
+      },
+      set (value) {
+        this.lazyValue = value ?? ''
+        this.$emit('input', this.lazyValue)
+      }
+    },
+    internalSearch: {
+      get () {
+        return this.lazySearch
+      },
+      set (value) {
+        if (this.lazySearch !== value) {
+          this.lazySearch = value
+          this.$emit('update:search-input', value)
+        }
+      }
+    },
     machineTypeItems () {
       const machineTypes = [...this.machineTypes]
-      if (this.notInList) {
+      if (this.notInList && this.internalValue) {
         machineTypes.push({
-          name: this.worker.machine.type
+          name: this.internalValue
         })
       }
       return machineTypes
     },
     notInList () {
       // notInList: selected value may have been removed from cloud profile or other worker changes do not support current selection anymore
-      return !find(this.machineTypes, ['name', this.worker.machine.type])
+      return !find(this.machineTypes, ['name', this.internalValue])
     },
     hint () {
-      if (this.notInList) {
-        return 'This machine type may not be supported by your worker'
-      }
-      return undefined
+      return this.notInList ? 'This machine type may not be supported by your worker' : ''
     }
   },
   validations,
@@ -112,21 +128,54 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    onInputMachineType () {
-      this.$v.worker.machine.type.$touch()
-      this.$emit('update-machine-type', this.worker.machine.type)
-      this.validateInput()
-    },
-    validateInput () {
-      if (this.valid !== !this.$v.$invalid) {
-        this.valid = !this.$v.$invalid
-        this.$emit('valid', { id: this.worker.id, valid: this.valid })
+    filter (item, query) {
+      if (!item) {
+        return false
       }
+      if (typeof query !== 'string') {
+        return true
+      }
+      const name = item.name?.toLowerCase()
+      const terms = query.trim().split(/ +/).map(term => term.toLowerCase())
+      const properties = []
+      const addProperty = value => {
+        if (value) {
+          properties.push(value.toString().toLowerCase())
+        }
+      }
+      addProperty(item.cpu)
+      addProperty(item.gpu)
+      addProperty(item.memory)
+      if (item.storage) {
+        addProperty(item.storage.type)
+        addProperty(item.storage.class)
+        addProperty(item.storage.size)
+      }
+
+      return terms.every(term => name?.includes(term) || properties.includes(term))
     }
   },
   mounted () {
-    this.$v.$touch()
-    this.validateInput()
+    this.$v.internalValue.$touch()
+    const input = this.$refs.autocomplete?.$refs.input
+    if (input) {
+      input.spellcheck = false
+    }
+  },
+  watch: {
+    value (value) {
+      this.lazyValue = value
+    },
+    searchInput (value) {
+      this.lazySearch = value
+    },
+    '$v.internalValue.$invalid': {
+      handler (value) {
+        this.$emit('update:valid', !value)
+      },
+      // force eager callback execution https://vuejs.org/guide/essentials/watchers.html#eager-watchers
+      immediate: true
+    }
   }
 }
 </script>

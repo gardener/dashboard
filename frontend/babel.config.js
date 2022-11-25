@@ -6,8 +6,6 @@ module.exports = {
   presets: [
     ['@vue/cli-plugin-babel/preset', {
       useBuiltIns: 'entry',
-      corejs: '3.22',
-      proposals: true,
       modules: 'auto'
     }]
   ]

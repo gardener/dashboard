@@ -98,7 +98,7 @@ export const shootItem = {
       return get(this.shootSpec, 'hibernation.enabled', false)
     },
     isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem, 'status'))
+      return isShootStatusHibernated(this.shootStatus)
     },
     isShootStatusHibernationProgressing () {
       return this.isShootSettingHibernated !== this.isShootStatusHibernated
@@ -155,7 +155,6 @@ export const shootItem = {
     shootMaintenance () {
       return get(this.shootSpec, 'maintenance', [])
     },
-
     shootInfo () {
       return get(this.shootItem, 'info', {})
     },
@@ -236,6 +235,20 @@ export const shootItem = {
     },
     maintenancePreconditionSatisfiedMessage () {
       return get(this.maintenancePreconditionSatisfiedConstraint, 'message', 'It may not be safe to trigger maintenance for this cluster')
+    },
+    caCertificateValiditiesAcceptableConstraint () {
+      const constraints = this.shootConstraints
+      return find(constraints, ['type', 'CACertificateValiditiesAcceptable'])
+    },
+    isCACertificateValiditiesAcceptable () {
+      const status = get(this.caCertificateValiditiesAcceptableConstraint, 'status', 'True')
+      return status !== 'False'
+    },
+    caCertificateValiditiesAcceptableMessage () {
+      return get(this.caCertificateValiditiesAcceptableConstraint, 'message', 'There is at least one CA certificate which expires in less than 1y. Consider schduling a Certificate Authorities Rotation for this cluster')
+    },
+    shootStatus () {
+      return get(this.shootItem, 'status', {})
     }
   },
   methods: {

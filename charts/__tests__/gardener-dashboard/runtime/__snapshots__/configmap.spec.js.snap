@@ -213,6 +213,16 @@ Li4u
 }
 `;
 
+exports[`gardener-dashboard configmap resourceQuotaHelp should render the template with resourceQuotaHelp markdown 1`] = `
+Object {
+  "frontend": Object {
+    "resourceQuotaHelp": Object {
+      "text": "[foo](https://bar.baz)",
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap should render the template w/ defaults values 1`] = `
 Object {
   "apiVersion": "v1",

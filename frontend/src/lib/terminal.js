@@ -417,37 +417,37 @@ export class Spinner {
   start () {
     const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     let i = 0
-    this.#clearTerminal()
-    this.#hideCursor()
+    this._clearTerminal()
+    this._hideCursor()
     this.#intervalId = setInterval(() => {
       i = ++i % frames.length
-      this.#eraseLine()
+      this._eraseLine()
       this.#term.write(frames[i] + ' ' + this.#text)
     }, 125)
   }
 
   stop () {
     clearInterval(this.#intervalId)
-    this.#eraseLine()
-    this.#showCursor()
+    this._eraseLine()
+    this._showCursor()
   }
 
-  #eraseLine () {
+  _eraseLine () {
     this.#term.write([
       CSI + '2K', // Erase complete line
       CSI + 'H' // Set cursor to home position
     ].join(''))
   }
 
-  #showCursor () {
+  _showCursor () {
     this.#term.write(CSI + '?25h')
   }
 
-  #hideCursor () {
+  _hideCursor () {
     this.#term.write(CSI + '?25l')
   }
 
-  #clearTerminal () {
+  _clearTerminal () {
     this.#term.write(ESC + 'c')
   }
 }

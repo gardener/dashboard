@@ -101,7 +101,7 @@ const errorCodes = {
   },
   ERR_PROBLEMATIC_WEBHOOK: {
     shortDescription: 'Misconfigured Webhook',
-    description: 'A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not beeing performed which will eventually turn the cluster into an error state.',
+    description: 'A misconfigured webhook prevents Gardener from performing operations. Please resolve this as this can lead to required actions not being performed which will eventually turn the cluster into an error state.',
     link: {
       text: 'Best practices',
       url: 'https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#best-practices-and-warnings'

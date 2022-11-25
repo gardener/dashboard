@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.62.0",
+  "version": "1.64.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -63,7 +63,7 @@
     "sanitize-html": "^2.7.0",
     "semver": "^7.3.7",
     "showdown": "^2.1.0",
-    "socket.io": "^4.5.3",
+    "socket.io": "^4.5.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -82,7 +82,7 @@
     "p-event": "^4.2.0",
     "path-to-regexp": "^6.2.1",
     "set-cookie-parser": "^2.4.8",
-    "socket.io-client": "^4.5.3",
+    "socket.io-client": "^4.5.4",
     "supertest": "^6.2.3"
   },
   "eslintConfig": {

@@ -52,13 +52,15 @@ function sanitizeFrontendConfig (frontendConfig) {
     accessRestriction: {
       items = []
     } = {},
-    vendorHints = []
+    vendorHints = [],
+    resourceQuotaHelp = ''
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
   convertAndSanitize(costObject, 'description')
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
+  convertAndSanitize(resourceQuotaHelp, 'text')
 
   for (const item of items) {
     const {

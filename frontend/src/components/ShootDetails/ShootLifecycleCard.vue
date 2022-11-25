@@ -66,20 +66,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-icon color="primary">mdi-file-refresh</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>
-              Rotate Kubeconfig
-            </v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-action>
-            <rotate-kubeconfig-start :shoot-item="shootItem"></rotate-kubeconfig-start>
-          </v-list-item-action>
-        </v-list-item>
-        <v-divider inset></v-divider>
-        <v-list-item>
-          <v-list-item-icon>
             <v-icon color="primary">mdi-delete-circle-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
@@ -105,7 +91,6 @@ import HibernationConfiguration from '@/components/ShootHibernation/HibernationC
 import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
-import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
 
 import TimeWithOffset from '@/utils/TimeWithOffset'
@@ -120,7 +105,6 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    RotateKubeconfigStart,
     ShootMessages
   },
   mixins: [shootItem],

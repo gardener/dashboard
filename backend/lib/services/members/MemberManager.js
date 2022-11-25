@@ -154,7 +154,7 @@ class MemberManager {
   async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
+      return // foreign service account => early exit, nothing to update
     }
 
     const isDirty = item.extend({ description })

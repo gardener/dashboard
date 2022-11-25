@@ -10,6 +10,7 @@ const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kub
 const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
+const assert = require('assert').strict
 
 class LifecycleHooks {
   constructor (client) {
@@ -59,24 +60,35 @@ class LifecycleHooks {
 
   static createInformers (client) {
     const informers = {}
-    for (const key of this.resources) {
-      const observable = client['core.gardener.cloud'][key]
-      informers[key] = observable.constructor.scope === 'Namespaced'
-        ? observable.informerAllNamespaces()
-        : observable.informer()
+    for (const [apiGroup, names] of Object.entries(this.resources)) {
+      for (const name of names) {
+        if (!apiGroup || !name) {
+          assert.fail('Invalid resource key. Need to have format apiGroup/resourceName.')
+        }
+
+        const observable = client[apiGroup][name]
+        informers[name] = observable.constructor.scope === 'Namespaced'
+          ? observable.informerAllNamespaces()
+          : observable.informer()
+      }
     }
     return informers
   }
 
   static get resources () {
-    return [
-      'cloudprofiles',
-      'quotas',
-      'seeds',
-      'shoots',
-      'projects',
-      'controllerregistrations'
-    ]
+    return {
+      'core.gardener.cloud': [
+        'cloudprofiles',
+        'quotas',
+        'seeds',
+        'shoots',
+        'projects',
+        'controllerregistrations'
+      ],
+      core: [
+        'resourcequotas'
+      ]
+    }
   }
 }
 

@@ -7,7 +7,12 @@
 import map from 'lodash/map'
 
 import { getters } from '@/store'
-import { canI, selectedImageIsNotLatest, isHtmlColorCode, defaultCriNameByKubernetesVersion } from '@/utils'
+import {
+  canI,
+  selectedImageIsNotLatest,
+  isHtmlColorCode,
+  defaultCriNameByKubernetesVersion
+} from '@/utils'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -505,21 +510,20 @@ describe('utils', () => {
         expect(defaultCriNameByKubernetesVersion(['cri1', 'cri2'], '1.22.0')).toBe('cri1')
       })
     })
+  })
+  describe('html color code', () => {
+    it('should not fail when zero', () => {
+      expect(isHtmlColorCode(undefined)).toBe(false)
+      expect(isHtmlColorCode(null)).toBe(false)
+    })
 
-    describe('html color code', () => {
-      it('should not fail when zero', () => {
-        expect(isHtmlColorCode(undefined)).toBe(false)
-        expect(isHtmlColorCode(null)).toBe(false)
-      })
+    it('should return true on html color code', () => {
+      expect(isHtmlColorCode('#0b8062')).toBe(true)
+      expect(isHtmlColorCode('#FfFfFf')).toBe(true)
+    })
 
-      it('should return true on html color code', () => {
-        expect(isHtmlColorCode('#0b8062')).toBe(true)
-        expect(isHtmlColorCode('#FfFfFf')).toBe(true)
-      })
-
-      it('should return false on non-html color code', () => {
-        expect(isHtmlColorCode('foo')).toBe(false)
-      })
+    it('should return false on non-html color code', () => {
+      expect(isHtmlColorCode('foo')).toBe(false)
     })
   })
 })
