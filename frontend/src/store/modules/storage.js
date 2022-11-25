@@ -20,6 +20,9 @@ const getters = {
   socketStateEnabled (state) {
     return state['global/socket-state'] === 'enabled'
   },
+  autoLoginEnabled (state) {
+    return state['global/auto-login'] === 'enabled'
+  },
   isDeveloperModeEnabled (state) {
     return state['global/developer-mode'] === 'enabled'
   },
@@ -42,6 +45,9 @@ const actions = {
   },
   setColorScheme ({ commit }, value) {
     commit('SET_ITEM', ['global/color-scheme', value])
+  },
+  setAutoLogin ({ commit }, value) {
+    commit('SET_ITEM', ['global/auto-login', value ? 'enabled' : 'disabled'])
   },
   setDeveloperMode ({ commit }, value) {
     commit('SET_ITEM', ['global/developer-mode', value ? 'enabled' : 'disabled'])

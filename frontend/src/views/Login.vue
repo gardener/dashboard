@@ -76,6 +76,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
@@ -101,6 +102,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('storage', [
+      'autoLoginEnabled'
+    ]),
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
     },
@@ -189,6 +193,9 @@ export default {
   },
   mounted () {
     this.loginType = this.primaryLoginType
+    if (this.loginType === 'oidc' && this.autoLoginEnabled) {
+      this.oidcLogin()
+    }
   },
   watch: {
     loginType (value) {
