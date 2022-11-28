@@ -438,7 +438,8 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-sa'])
           expect(memberManager.subjectList.has(id)).toBe(false)
         })
 
@@ -454,7 +455,8 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-orphaned'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-orphaned')
+          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-orphaned'])
           expect(memberManager.subjectList.has(id)).toBe(false)
         })
       })
@@ -472,7 +474,8 @@ describe('services', function () {
         it('should delete and create a serviceaccount', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           await memberManager.resetServiceAccount(id)
-          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'robot-sa')
+          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-sa'])
           const body = {
             metadata: {
               annotations: {
@@ -484,7 +487,8 @@ describe('services', function () {
               namespace: 'garden-foo'
             }
           }
-          expect(client.core.serviceaccounts.create).toBeCalledWith('garden-foo', body)
+          expect(client.core.serviceaccounts.create).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.create.mock.calls[0]).toEqual(['garden-foo', body])
         })
 
         it('should throw an error for foreign service accounts', async function () {
@@ -507,7 +511,8 @@ describe('services', function () {
         it('should patch the default service account', async function () {
           const id = 'system:serviceaccount:garden-foo:default'
           await memberManager.resetServiceAccount(id)
-          expect(client.core.serviceaccounts.delete).toBeCalledWith('garden-foo', 'default')
+          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'default'])
           const body = {
             metadata: {
               annotations: {
@@ -518,16 +523,19 @@ describe('services', function () {
               namespace: 'garden-foo'
             }
           }
-          expect(client.core.serviceaccounts.create).toBeCalledWith('garden-foo', body)
+          expect(client.core.serviceaccounts.create).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.create.mock.calls[0]).toEqual(['garden-foo', body])
           const patch = {
             metadata: {
               annotations: {
                 'dashboard.gardener.cloud/created-by': 'k8s',
                 'dashboard.gardener.cloud/description': 'description'
-              }
+              },
+              creationTimestamp: 'bar-time'
             }
           }
-          expect(client.core.serviceaccounts.mergePatch).toBeCalledWith('garden-foo', 'default', patch)
+          expect(client.core.serviceaccounts.mergePatch).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.mergePatch.mock.calls[0]).toEqual(['garden-foo', 'default', patch])
         })
       })
 
@@ -536,8 +544,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-user'
           const item = memberManager.subjectList.get(id)
           const kubeConfig = parseKubeconfig(await memberManager.getKubeconfig(item))
-
-          expect(client.core.serviceaccounts.createTokenRequest).toHaveBeenNthCalledWith(1, 'garden-foo', 'robot-user', {
+          const body = {
             apiVersion: 'authentication.k8s.io/v1',
             kind: 'TokenRequest',
             spec: {
@@ -547,7 +554,9 @@ describe('services', function () {
             status: {
               token: 'secret'
             }
-          })
+          }
+          expect(client.core.serviceaccounts.createTokenRequest).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.createTokenRequest.mock.calls[0]).toEqual(['garden-foo', 'robot-user', body])
           expect(kubeConfig.users[0].user.token).toContain('secret')
         })
       })
