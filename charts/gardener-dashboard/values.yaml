@@ -272,10 +272,6 @@ global:
     #     error: 'red.darken4'
     #     warning: 'orange.darken4'
 
-    # gardenctl - configure the default settings for the gardenctl commands
-    gardenctl:
-      legacyCommands: true # false to show gardenctl-v2 commands by default, true to show the legacy gardenctl commands. Can be overwritten by the user.
-
     defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
 
     # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
