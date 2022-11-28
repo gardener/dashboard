@@ -110,7 +110,7 @@ class MemberManager {
   async resetServiceAccount (id) {
     const item = this.subjectList.get(id)
     if (!item) {
-      return
+      return this.subjectList.members
     }
 
     if (item.kind !== 'ServiceAccount') {
@@ -130,11 +130,11 @@ class MemberManager {
       }
     }
 
-    const createdBy = item.extensions?.createdBy
+    const createdBy = item.extensions?.createdBy ?? this.userId // restore original creator, fallback to current user
     const description = item.extensions?.description
 
     const annotations = {
-      'dashboard.gardener.cloud/created-by': createdBy, // restore original creator
+      'dashboard.gardener.cloud/created-by': createdBy,
       'dashboard.gardener.cloud/description': description
     }
 
@@ -170,9 +170,12 @@ class MemberManager {
     item.extend({
       createdBy,
       creationTimestamp,
-      description
+      description,
+      orphaned: false
     })
     this.subjectList.set(item.id, item)
+
+    return this.subjectList.members
   }
 
   setItemRoles (item, roles) {

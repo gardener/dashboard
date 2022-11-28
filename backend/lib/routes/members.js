@@ -65,8 +65,7 @@ router.route('/:name')
 
       switch (method) {
         case 'resetServiceAccount':
-          await members.resetServiceAccount({ user, namespace, name })
-          res.status(204).end()
+          res.send(await members.resetServiceAccount({ user, namespace, name }))
           break
         default:
           throw new UnprocessableEntity(`${method} not allowed for members`)

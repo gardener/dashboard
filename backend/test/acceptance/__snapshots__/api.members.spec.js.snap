@@ -1264,7 +1264,7 @@ Array [
     Object {
       "metadata": Object {
         "annotations": Object {
-          "dashboard.gardener.cloud/created-by": undefined,
+          "dashboard.gardener.cloud/created-by": "bar@example.org",
           "dashboard.gardener.cloud/description": undefined,
         },
         "name": "robot",
@@ -1272,6 +1272,50 @@ Array [
       },
     },
   ],
+]
+`;
+
+exports[`api members should reset a service account 2`] = `
+Array [
+  Object {
+    "roles": Array [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  Object {
+    "roles": Array [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  Object {
+    "createdBy": "bar@example.org",
+    "creationTimestamp": "now",
+    "orphaned": false,
+    "roles": Array [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  Object {
+    "roles": Array [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  Object {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": Array [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
 ]
 `;
 

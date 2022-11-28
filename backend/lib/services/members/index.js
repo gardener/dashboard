@@ -35,5 +35,5 @@ exports.remove = async function ({ user, namespace, name }) {
 
 exports.resetServiceAccount = async function ({ user, namespace, name }) {
   const memberManager = await MemberManager.create(user, namespace)
-  await memberManager.resetServiceAccount(name)
+  return memberManager.resetServiceAccount(name)
 }

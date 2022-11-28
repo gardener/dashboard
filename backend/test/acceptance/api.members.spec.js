@@ -92,12 +92,12 @@ describe('api', function () {
         .send({
           method: 'resetServiceAccount'
         })
-        .expect(204)
+        .expect(200)
 
       expect(mockRequest).toBeCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.noContent).toBe(true)
+      expect(res.body).toMatchSnapshot()
     })
 
     it('should add a project member', async function () {

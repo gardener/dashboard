@@ -44,7 +44,8 @@ const actions = {
   },
   async resetServiceAccount ({ commit, rootState }, name) {
     const namespace = rootState.namespace
-    await resetServiceAccount({ namespace, name })
+    const res = await resetServiceAccount({ namespace, name })
+    commit('RECEIVE', res.data)
   }
 }
 

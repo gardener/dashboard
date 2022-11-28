@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
         <div v-if="!foreign && canDeleteServiceAccounts && canCreateServiceAccounts" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="action-button"  icon @click="onResetServiceAccount" :disabled="orphaned">
+              <v-btn v-on="on" color="action-button"  icon @click="onResetServiceAccount">
                 <v-icon>mdi-refresh</v-icon>
               </v-btn>
             </template>
