@@ -40,18 +40,13 @@ function ensureUserAuthenticatedForNonPublicRoutes (store, userManager, logger) 
       return next()
     }
     const user = userManager.getUser()
-    if (!user) {
-      logger.info('No user found --> Redirecting to login page')
+    if (!user || userManager.isSessionExpired()) {
+      logger.info('User not found or session has expired --> Redirecting to login page')
       const query = path !== '/' ? { redirectPath: path } : undefined
       return next({
         name: 'Login',
         query
       })
-    }
-    if (userManager.isSessionExpired()) {
-      logger.info('Session is expired --> Redirecting to logout page')
-      userManager.signout()
-      return next(false)
     }
     const storedUser = store.state.user
     if (!storedUser || storedUser.jti !== user.jti) {
