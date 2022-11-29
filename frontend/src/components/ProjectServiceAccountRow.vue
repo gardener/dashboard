@@ -71,6 +71,16 @@ SPDX-License-Identifier: Apache-2.0
             <span>Show Kubeconfig</span>
           </v-tooltip>
         </div>
+        <div v-if="!foreign && canDeleteServiceAccounts && canCreateServiceAccounts" class="ml-1">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" color="action-button"  icon @click="onResetServiceAccount">
+                <v-icon>mdi-refresh</v-icon>
+              </v-btn>
+            </template>
+            <span>Reset Service Account</span>
+          </v-tooltip>
+        </div>
         <div v-if="canManageServiceAccountMembers" class="ml-1">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
@@ -132,6 +142,7 @@ export default {
     ]),
     ...mapGetters([
       'canManageServiceAccountMembers',
+      'canCreateServiceAccounts',
       'canDeleteServiceAccounts',
       'canCreateTokenRequest'
     ]),
@@ -173,6 +184,9 @@ export default {
     },
     onKubeconfig () {
       this.$emit('kubeconfig', this.item)
+    },
+    onResetServiceAccount () {
+      this.$emit('reset-serviceaccount', this.item)
     },
     onEdit () {
       this.$emit('edit', this.item)
