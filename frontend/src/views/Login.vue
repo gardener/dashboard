@@ -124,7 +124,7 @@ export default {
     }
   },
   beforeRouteEnter (to, from, next) {
-    const guard = async ({ api, auth, localStorage }) => {
+    const guard = async ({ api, auth, localStorage, logger }) => {
       let err
       if (/^#.+/.test(to.hash)) {
         const searchParams = new URLSearchParams(to.hash.substring(1))
@@ -137,11 +137,12 @@ export default {
         const { data } = await api.getLoginConfiguration()
         cfg = data
       } catch (err) {
+        logger.error('Failed to fetch login configuration: %s', err.message)
         cfg = {
           loginTypes: ['token'] // at least allow the token login
         }
       }
-      const primaryLoginType = head(cfg.loginTypes) || 'oidc'
+      const primaryLoginType = getPrimaryLoginType(cfg)
       const autoLoginEnabled = localStorage.getItem('global/auto-login') === 'enabled'
       if (!err && primaryLoginType === 'oidc' && autoLoginEnabled) {
         const redirectPath = get(to.query, 'redirectPath', '/')
