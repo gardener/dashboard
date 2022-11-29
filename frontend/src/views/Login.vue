@@ -152,7 +152,9 @@ export default {
       next(vm => {
         Object.assign(vm.cfg, cfg)
         if (err) {
-          vm.showSnotifyLoginError(err.message)
+          if (err.message !== 'NoAutoLogin') {
+            vm.showSnotifyLoginError(err.message)
+          }
           vm.$router.replace('/login')
         }
       })
