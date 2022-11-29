@@ -56,6 +56,14 @@ SPDX-License-Identifier: Apache-2.0
                   </v-btn>
                 </v-btn-toggle>
               </v-col>
+              <v-col cols="12">
+                <v-switch
+                  v-model="autoLogin"
+                  label="Automatic Login"
+                  persistent-hint
+                  hint="Skip the login screen if no user input is required"
+                ></v-switch>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -85,9 +93,18 @@ export default {
   },
   computed: {
     ...mapGetters('storage', [
+      'autoLoginEnabled',
       'logLevel',
       'colorScheme'
     ]),
+    autoLogin: {
+      get () {
+        return this.autoLoginEnabled
+      },
+      set (value) {
+        this.setAutoLogin(value)
+      }
+    },
     logLevelIndex: {
       get () {
         const index = this.logLevels.findIndex(({ value }) => value === this.logLevel)
@@ -111,6 +128,7 @@ export default {
   },
   methods: {
     ...mapActions('storage', [
+      'setAutoLogin',
       'setLogLevel',
       'setColorScheme'
     ])

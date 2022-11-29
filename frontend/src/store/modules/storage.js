@@ -20,8 +20,18 @@ const getters = {
   socketStateEnabled (state) {
     return state['global/socket-state'] === 'enabled'
   },
-  isDeveloperModeEnabled (state) {
-    return state['global/developer-mode'] === 'enabled'
+  autoLoginEnabled (state) {
+    return state['global/auto-login'] === 'enabled'
+  },
+  gardenctlOptions (state, getters, rootState) {
+    const options = {
+      legacyCommands: false,
+      ...rootState.cfg?.gardenctl
+    }
+    try {
+      Object.assign(options, JSON.parse(state['global/gardenctl']))
+    } catch (err) { /* ignore error */ }
+    return options
   }
 }
 
@@ -33,8 +43,12 @@ const actions = {
   setColorScheme ({ commit }, value) {
     commit('SET_ITEM', ['global/color-scheme', value])
   },
-  setDeveloperMode ({ commit }, value) {
-    commit('SET_ITEM', ['global/developer-mode', value ? 'enabled' : 'disabled'])
+  setAutoLogin ({ commit }, value) {
+    commit('SET_ITEM', ['global/auto-login', value ? 'enabled' : 'disabled'])
+  },
+  setGardenctlOptions ({ commit }, options) {
+    const value = JSON.stringify(options)
+    commit('SET_ITEM', ['global/gardenctl', value])
   }
 }
 
