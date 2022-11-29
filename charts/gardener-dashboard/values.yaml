@@ -93,34 +93,35 @@ global:
 
   # sessionSecret is used for signing and encrytion of session data
   sessionSecret: ~
-  oidc:
-    # well-known URL for OpenID Provider Issuer Discovery
-    issuerUrl: ~
-    # clientId is the public identifier of the gardener-dashboard aplication
-    clientId: dashboard
-    # clientSecret is the private secret of the gardener-dashboard aplication
-    clientSecret: ~
-    # # force PKCE usage
-    # usePKCE: true
-    # # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
-    # sessionLifetime: 86400
-    # # certificate authority of the OpenID provider
-    # ca: |
-    #   -----BEGIN CERTIFICATE-----
-    #   Li4u
-    #   -----END CERTIFICATE-----
-    # # secretKey reference to the certificate authority
-    # caSecretKeyRef:
-    #   name: oidc-ca-secret-name
-    #   key: ca.crt
-    # # configuration for kubeconfig download required by kubelogin
-    # public:
-    #   # clientId is the identifier of the public oidc client use by kubelogin
-    #   clientId: kube-kubectl
-    #   # clientSecret is the public client secret use by kubelogin and all users
-    #   clientSecret: ~
-    #   # force PKCE usage (automatically enabled if no clientSecret is given)
-    #   usePKCE: true
+
+  # oidc:
+  #   # well-known URL for OpenID Provider Issuer Discovery
+  #   issuerUrl: ~
+  #   # clientId is the public identifier of the gardener-dashboard aplication
+  #   clientId: dashboard
+  #   # clientSecret is the private secret of the gardener-dashboard aplication
+  #   clientSecret: ~
+  #   # force PKCE usage
+  #   usePKCE: true
+  #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
+  #   sessionLifetime: 86400
+  #   # certificate authority of the OpenID provider
+  #   ca: |
+  #     -----BEGIN CERTIFICATE-----
+  #     Li4u
+  #     -----END CERTIFICATE-----
+  #   # secretKey reference to the certificate authority
+  #   caSecretKeyRef:
+  #     name: oidc-ca-secret-name
+  #     key: ca.crt
+  #   # configuration for kubeconfig download required by kubelogin
+  #   public:
+  #     # clientId is the identifier of the public oidc client use by kubelogin
+  #     clientId: kube-kubectl
+  #     # clientSecret is the public client secret use by kubelogin and all users
+  #     clientSecret: ~
+  #     # force PKCE usage (automatically enabled if no clientSecret is given)
+  #     usePKCE: true
 
   frontendConfig:
     landingPageUrl: https://github.com/gardener
