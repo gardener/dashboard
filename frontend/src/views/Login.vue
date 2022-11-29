@@ -76,13 +76,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import { setDelayedInputFocus } from '@/utils'
-import { createTokenReview, getLoginConfiguration } from '@/utils/api'
 import GSnotify from '@/components/GSnotify.vue'
+
+function getPrimaryLoginType (cfg) {
+  return head(cfg?.loginTypes) || 'oidc'
+}
+
+function getRedirectPath (route) {
+  return get(route.query, 'redirectPath', '/')
+}
 
 export default {
   components: {
@@ -106,38 +114,51 @@ export default {
       'autoLoginEnabled'
     ]),
     redirectPath () {
-      return get(this.$route.query, 'redirectPath', '/')
+      return getRedirectPath(this.$route)
     },
     primaryLoginType () {
-      return head(this.cfg.loginTypes) || 'oidc'
-    },
-    showTokenLoginLink () {
-      return this.primaryLoginType === 'oidc'
+      return getPrimaryLoginType(this.cfg)
     },
     landingPageUrl () {
       return this.cfg.landingPageUrl
     }
   },
   beforeRouteEnter (to, from, next) {
-    let err
-    if (/^#.+/.test(to.hash)) {
-      const searchParams = new URLSearchParams(to.hash.substring(1))
-      if (searchParams.has('error')) {
-        err = new Error(searchParams.get('error'))
+    const guard = async ({ api, auth, localStorage }) => {
+      let err
+      if (/^#.+/.test(to.hash)) {
+        const searchParams = new URLSearchParams(to.hash.substring(1))
+        if (searchParams.has('error')) {
+          err = new Error(searchParams.get('error'))
+        }
       }
+      let cfg
+      try {
+        const { data } = await api.getLoginConfiguration()
+        cfg = data
+      } catch (err) {
+        cfg = {
+          loginTypes: ['token'] // at least allow the token login
+        }
+      }
+      const primaryLoginType = head(cfg.loginTypes) || 'oidc'
+      const autoLoginEnabled = localStorage.getItem('global/auto-login') === 'enabled'
+      if (!err && primaryLoginType === 'oidc' && autoLoginEnabled) {
+        const redirectPath = get(to.query, 'redirectPath', '/')
+        auth.signinWithOidc(redirectPath)
+        return next(false)
+      }
+      next(vm => {
+        Object.assign(vm.cfg, cfg)
+        if (err) {
+          vm.showSnotifyLoginError(err.message)
+          vm.$router.replace('/login')
+        }
+      })
     }
-    next(vm => {
-      if (err) {
-        vm.showSnotifyLoginError(err.message)
-        vm.$router.replace('/login')
-      }
-    })
+    guard(Vue)
   },
   methods: {
-    async getLoginConfiguration () {
-      const { data: cfg } = await getLoginConfiguration()
-      Object.assign(this.cfg, cfg)
-    },
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -159,7 +180,7 @@ export default {
       try {
         const token = this.token
         this.token = undefined
-        await createTokenReview({ token })
+        await this.$api.createTokenReview({ token })
         this.dialog = false
         try {
           await this.$router.push(this.redirectPath)
@@ -180,22 +201,8 @@ export default {
       this.$snotify.error(message, 'Login Error', config)
     }
   },
-  async created () {
-    try {
-      this.loading = true
-      await this.getLoginConfiguration()
-    } catch (err) {
-      console.error(err.message)
-      this.cfg.loginTypes = ['token'] // at least allow the token login
-    } finally {
-      this.loading = false
-    }
-  },
   mounted () {
     this.loginType = this.primaryLoginType
-    if (this.loginType === 'oidc' && this.autoLoginEnabled) {
-      this.oidcLogin()
-    }
   },
   watch: {
     loginType (value) {
