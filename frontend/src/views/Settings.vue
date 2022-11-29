@@ -15,26 +15,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <v-radio-group
-                  v-model="legacyCommands"
-                  label="Gardenctl Version"
-                  hint="Choose for which version the commands should be displayed on the cluster details page"
-                  persistent-hint
-                  class="mt-0"
-                >
-                  <v-radio
-                    label="Gardenctl-v2"
-                    :value="false"
-                    color="primary"
-                  ></v-radio>
-                  <v-radio
-                    label="Legacy Gardenctl"
-                    :value="true"
-                    color="primary"
-                  ></v-radio>
-                </v-radio-group>
-              </v-col>
-              <v-col cols="12">
                 <legend class="text-body-2 text--secondary">Color Scheme</legend>
                 <v-btn-toggle v-model="colorSchemeIndex" mandatory dense @click.native.stop class="pt-1">
                   <v-tooltip top>
@@ -106,8 +86,7 @@ export default {
   computed: {
     ...mapGetters('storage', [
       'logLevel',
-      'colorScheme',
-      'gardenctlOptions'
+      'colorScheme'
     ]),
     logLevelIndex: {
       get () {
@@ -128,24 +107,12 @@ export default {
         const colorScheme = this.colorSchemes[index]
         this.setColorScheme(colorScheme)
       }
-    },
-    legacyCommands: {
-      get () {
-        return this.gardenctlOptions.legacyCommands
-      },
-      set (value) {
-        this.setGardenctlOptions({
-          ...this.gardenctlOptions,
-          legacyCommands: value
-        })
-      }
     }
   },
   methods: {
     ...mapActions('storage', [
       'setLogLevel',
-      'setColorScheme',
-      'setGardenctlOptions'
+      'setColorScheme'
     ])
   }
 }
