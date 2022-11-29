@@ -120,6 +120,10 @@ spec:
             successThreshold: {{ .Values.global.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.global.readinessProbe.failureThreshold }}
           {{- end }}
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            readOnlyRootFilesystem: true
           env:
           - name: SESSION_SECRET
             valueFrom:
