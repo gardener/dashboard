@@ -393,9 +393,6 @@ export default {
 
         this.actionTriggered = false
       }
-    },
-    bla () {
-      return true
     }
   },
   watch: {
