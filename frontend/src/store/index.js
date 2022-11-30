@@ -1489,6 +1489,15 @@ const actions = {
       await dispatch('setError', { message: `Delete member failed. ${err.message}` })
     }
   },
+  async resetServiceAccount ({ dispatch, commit }, payload) {
+    try {
+      const result = await dispatch('members/resetServiceAccount', payload)
+      await dispatch('setAlert', { message: 'Service Account Reset', type: 'success' })
+      return result
+    } catch (err) {
+      await dispatch('setError', { message: `Failed to Reset Service Account ${err.message}` })
+    }
+  },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
 

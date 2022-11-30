@@ -31,13 +31,9 @@ export class Logger {
     return levels[this.#level]
   }
 
-  get #ts () {
+  _print (key, ...args) {
     const ts = new Date().toISOString()
-    return ts.substring(0, 10) + ' ' + ts.substring(11, ts.length - 1)
-  }
-
-  #print (key, ...args) {
-    const prefix = this.#ts + ':'
+    const prefix = ts.substring(0, 10) + ' ' + ts.substring(11, ts.length - 1) + ':'
     if (typeof args[0] === 'string') {
       args.unshift(prefix + ' ' + args.shift())
     } else {
@@ -48,31 +44,31 @@ export class Logger {
 
   debug (...args) {
     if (this.level <= levels.debug) {
-      this.#print('debug', ...args)
+      this._print('debug', ...args)
     }
   }
 
   log (...args) {
     if (this.level <= levels.info) {
-      this.#print('log', ...args)
+      this._print('log', ...args)
     }
   }
 
   info (...args) {
     if (this.level <= levels.info) {
-      this.#print('info', ...args)
+      this._print('info', ...args)
     }
   }
 
   warn (...args) {
     if (this.level <= levels.warn) {
-      this.#print('warn', ...args)
+      this._print('warn', ...args)
     }
   }
 
   error (...args) {
     if (this.level <= levels.error) {
-      this.#print('error', ...args)
+      this._print('error', ...args)
     }
   }
 }

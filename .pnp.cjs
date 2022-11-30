@@ -2737,8 +2737,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["semver", "npm:7.3.7"],\
             ["set-cookie-parser", "npm:2.4.8"],\
             ["showdown", "npm:2.1.0"],\
-            ["socket.io", "npm:4.5.3"],\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io", "npm:4.5.4"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["supertest", "npm:6.2.3"],\
             ["uuid", "npm:8.3.2"]\
           ],\
@@ -2815,7 +2815,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["sass", "npm:1.52.1"],\
             ["sass-loader", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:12.6.0"],\
             ["semver", "npm:7.3.7"],\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["splitpanes", "npm:2.4.1"],\
             ["statuses", "npm:2.0.1"],\
             ["symbol-tree", "npm:3.2.4"],\
@@ -5855,7 +5855,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["autoprefixer", "virtual:fdfbd333867413f715b35354abf458273d21196984ec09b7211c184716b763e6eadc1546484aba6e8d5a55521ed7654f99227b1eeea09c3f9f7d18c5b1548dc8#npm:10.4.7"],\
             ["@types/postcss", null],\
             ["browserslist", "npm:4.20.3"],\
-            ["caniuse-lite", "npm:1.0.30001342"],\
+            ["caniuse-lite", "npm:1.0.30001431"],\
             ["fraction.js", "npm:4.2.0"],\
             ["normalize-range", "npm:0.1.2"],\
             ["picocolors", "npm:1.0.0"],\
@@ -6346,7 +6346,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/browserslist-npm-4.20.3-d7ff9d00b4-1e4b719ac2.zip/node_modules/browserslist/",\
           "packageDependencies": [\
             ["browserslist", "npm:4.20.3"],\
-            ["caniuse-lite", "npm:1.0.30001342"],\
+            ["caniuse-lite", "npm:1.0.30001431"],\
             ["electron-to-chromium", "npm:1.4.137"],\
             ["escalade", "npm:3.1.1"],\
             ["node-releases", "npm:2.0.5"],\
@@ -6543,7 +6543,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["caniuse-api", "npm:3.0.0"],\
             ["browserslist", "npm:4.20.3"],\
-            ["caniuse-lite", "npm:1.0.30001342"],\
+            ["caniuse-lite", "npm:1.0.30001431"],\
             ["lodash.memoize", "npm:4.1.2"],\
             ["lodash.uniq", "npm:4.5.0"]\
           ],\
@@ -6551,10 +6551,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["caniuse-lite", [\
-        ["npm:1.0.30001342", {\
-          "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001342-50542dd564-9ad47aec82.zip/node_modules/caniuse-lite/",\
+        ["npm:1.0.30001431", {\
+          "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001431-6d607db8ef-bc8ab55cd1.zip/node_modules/caniuse-lite/",\
           "packageDependencies": [\
-            ["caniuse-lite", "npm:1.0.30001342"]\
+            ["caniuse-lite", "npm:1.0.30001431"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -8528,10 +8528,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["engine.io", [\
-        ["npm:6.2.0", {\
-          "packageLocation": "./.yarn/cache/engine.io-npm-6.2.0-a0c0d83e66-cc485c5ba2.zip/node_modules/engine.io/",\
+        ["npm:6.2.1", {\
+          "packageLocation": "./.yarn/cache/engine.io-npm-6.2.1-1486b58c4b-626d7a77f2.zip/node_modules/engine.io/",\
           "packageDependencies": [\
-            ["engine.io", "npm:6.2.0"],\
+            ["engine.io", "npm:6.2.1"],\
             ["@types/cookie", "npm:0.4.1"],\
             ["@types/cors", "npm:2.8.12"],\
             ["@types/node", "npm:18.7.18"],\
@@ -12507,10 +12507,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["loader-utils", [\
-        ["npm:1.4.1", {\
-          "packageLocation": "./.yarn/cache/loader-utils-npm-1.4.1-91a9c6b986-ea0b648cba.zip/node_modules/loader-utils/",\
+        ["npm:1.4.2", {\
+          "packageLocation": "./.yarn/cache/loader-utils-npm-1.4.2-b4537b2f88-eb6fb622ef.zip/node_modules/loader-utils/",\
           "packageDependencies": [\
-            ["loader-utils", "npm:1.4.1"],\
+            ["loader-utils", "npm:1.4.2"],\
             ["big.js", "npm:5.2.2"],\
             ["emojis-list", "npm:3.0.0"],\
             ["json5", "npm:1.0.1"]\
@@ -16046,14 +16046,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["socket.io", [\
-        ["npm:4.5.3", {\
-          "packageLocation": "./.yarn/cache/socket.io-npm-4.5.3-30385c9144-2a7e4c64bb.zip/node_modules/socket.io/",\
+        ["npm:4.5.4", {\
+          "packageLocation": "./.yarn/cache/socket.io-npm-4.5.4-888fc15f6d-b5456d361b.zip/node_modules/socket.io/",\
           "packageDependencies": [\
-            ["socket.io", "npm:4.5.3"],\
+            ["socket.io", "npm:4.5.4"],\
             ["accepts", "npm:1.3.8"],\
             ["base64id", "npm:2.0.0"],\
             ["debug", "virtual:1f3c51be25fef20e854261431be23d317093b3b463e81e911f4f45a636ff582620db066c9d2a5922a428e07e10fe4788eee8196c796ce2c9bd49d22743fec207#npm:4.3.4"],\
-            ["engine.io", "npm:6.2.0"],\
+            ["engine.io", "npm:6.2.1"],\
             ["socket.io-adapter", "npm:2.4.0"],\
             ["socket.io-parser", "npm:4.2.1"]\
           ],\
@@ -16070,10 +16070,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["socket.io-client", [\
-        ["npm:4.5.3", {\
-          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.5.3-4804f67d3a-ebd2dbddec.zip/node_modules/socket.io-client/",\
+        ["npm:4.5.4", {\
+          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.5.4-201041b748-8320ce4a96.zip/node_modules/socket.io-client/",\
           "packageDependencies": [\
-            ["socket.io-client", "npm:4.5.3"],\
+            ["socket.io-client", "npm:4.5.4"],\
             ["@socket.io/component-emitter", "npm:3.1.0"],\
             ["debug", "virtual:1f3c51be25fef20e854261431be23d317093b3b463e81e911f4f45a636ff582620db066c9d2a5922a428e07e10fe4788eee8196c796ce2c9bd49d22743fec207#npm:4.3.4"],\
             ["engine.io-client", "npm:6.2.3"],\
@@ -17465,7 +17465,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cache-loader", null],\
             ["css-loader", "virtual:fdfbd333867413f715b35354abf458273d21196984ec09b7211c184716b763e6eadc1546484aba6e8d5a55521ed7654f99227b1eeea09c3f9f7d18c5b1548dc8#npm:6.7.1"],\
             ["hash-sum", "npm:1.0.2"],\
-            ["loader-utils", "npm:1.4.1"],\
+            ["loader-utils", "npm:1.4.2"],\
             ["vue-hot-reload-api", "npm:2.3.4"],\
             ["vue-style-loader", "npm:4.1.3"],\
             ["vue-template-compiler", "npm:2.6.14"],\
@@ -17561,7 +17561,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["vue-style-loader", "npm:4.1.3"],\
             ["hash-sum", "npm:1.0.2"],\
-            ["loader-utils", "npm:1.4.1"]\
+            ["loader-utils", "npm:1.4.2"]\
           ],\
           "linkType": "HARD"\
         }]\

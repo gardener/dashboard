@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-select>
             </v-col>
           </v-row>
-          <v-row v-if="isServiceDialog">
+          <v-row v-if="isServiceDialog && !isForeignServiceAccount">
             <v-col cols="12">
               <v-text-field
                 color="primary"
@@ -189,7 +189,7 @@ export default {
         } else if (this.isServiceDialog) {
           validators.internalRoles = {
             required: requiredIf(function () {
-              return isForeignServiceAccount(this.namespace, this.internalName)
+              return this.isForeignServiceAccount
             })
           }
           validators.internalName = {
@@ -240,7 +240,7 @@ export default {
         return `Change Roles of ${this.nameLabel}`
       }
       if (this.isServiceDialog) {
-        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+        if (this.isForeignServiceAccount) {
           return 'Invite Service Account'
         }
         return 'Create Service Account'
@@ -249,6 +249,9 @@ export default {
         return 'Add User to Project'
       }
       return undefined
+    },
+    isForeignServiceAccount () {
+      return isForeignServiceAccount(this.namespace, this.internalName)
     },
     isUserDialog () {
       return this.type === 'adduser' || this.type === 'updateuser'
@@ -310,7 +313,7 @@ export default {
     },
     addMemberButtonText () {
       if (this.isServiceDialog) {
-        if (isForeignServiceAccount(this.namespace, this.internalName)) {
+        if (this.isForeignServiceAccount) {
           return 'Invite'
         }
         return 'Create'
@@ -390,7 +393,10 @@ export default {
         }
       } else if (this.isServiceDialog) {
         if (this.name) {
-          this.internalName = get(parseServiceAccountUsername(this.name), 'name')
+          this.internalName = this.name
+          if (!this.isForeignServiceAccount) {
+            this.internalName = get(parseServiceAccountUsername(this.name), 'name')
+          }
         } else {
           this.internalName = this.defaultServiceName()
         }

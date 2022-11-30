@@ -107,6 +107,77 @@ class MemberManager {
     return this.subjectList.members
   }
 
+  async resetServiceAccount (id) {
+    const item = this.subjectList.get(id)
+    if (!item) {
+      return this.subjectList.members
+    }
+
+    if (item.kind !== 'ServiceAccount') {
+      throw new UnprocessableEntity('Member is not a ServiceAccount')
+    }
+
+    const { namespace, name } = Member.parseUsername(item.id)
+    if (namespace !== this.namespace) {
+      throw new UnprocessableEntity('It is not possible to reset a ServiceAccount from another namespace')
+    }
+
+    try {
+      await this.client.core.serviceaccounts.delete(namespace, name)
+    } catch (err) {
+      if (!isHttpError(err) || err.statusCode !== 404) {
+        throw err
+      }
+    }
+
+    const createdBy = item.extensions?.createdBy ?? this.userId // restore original creator, fallback to current user
+    const description = item.extensions?.description
+
+    const annotations = {
+      'dashboard.gardener.cloud/created-by': createdBy,
+      'dashboard.gardener.cloud/description': description
+    }
+
+    let serviceAccount
+    try {
+      serviceAccount = await this.client.core.serviceaccounts.create(namespace, {
+        metadata: {
+          name,
+          namespace,
+          annotations
+        }
+      })
+    } catch (err) {
+      if (!isHttpError(err) || err.statusCode !== 409) {
+        throw err
+      }
+
+      // the create usually will fail for the "default" service account as it will be automatically created after it was deleted
+      // in this case we just want to restore the annotations
+      serviceAccount = await this.client.core.serviceaccounts.mergePatch(namespace, name, {
+        metadata: {
+          annotations
+        }
+      })
+    }
+
+    const {
+      metadata: {
+        creationTimestamp
+      }
+    } = serviceAccount
+
+    item.extend({
+      createdBy,
+      creationTimestamp,
+      description,
+      orphaned: false
+    })
+    this.subjectList.set(item.id, item)
+
+    return this.subjectList.members
+  }
+
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
@@ -154,7 +225,7 @@ class MemberManager {
   async updateServiceAccount (item, { description }) {
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new UnprocessableEntity('It is not possible to modify ServiceAccount from another namespace')
+      return // foreign service account => early exit, nothing to update
     }
 
     const isDirty = item.extend({ description })

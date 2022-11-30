@@ -151,6 +151,7 @@ SPDX-License-Identifier: Apache-2.0
             :key="`${item.namespace}_${item.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
+            @reset-serviceaccount="onResetServiceAccount"
             @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
@@ -203,6 +204,7 @@ import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import RemoveProjectMember from '@/components/messages/RemoveProjectMember'
 import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount'
+import ResetServiceAccount from '@/components/messages/ResetServiceAccount.vue'
 import TableColumnSelection from '@/components/TableColumnSelection.vue'
 
 import {
@@ -422,6 +424,7 @@ export default {
     ...mapActions([
       'addMember',
       'deleteMember',
+      'resetServiceAccount',
       'setError'
     ]),
     openUserAddDialog () {
@@ -524,6 +527,12 @@ export default {
         return this.deleteMember(username)
       }
     },
+    async onResetServiceAccount ({ username }) {
+      const resetConfirmed = await this.confirmResetServiceAccount(username)
+      if (resetConfirmed) {
+        return this.resetServiceAccount(username)
+      }
+    },
     confirmRemoveForeignServiceAccount (serviceAccountName) {
       const { projectName } = this.projectDetails
       const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
@@ -549,6 +558,18 @@ export default {
         messageHtml: message.innerHTML,
         confirmValue: name,
         width: '550'
+      })
+    },
+    confirmResetServiceAccount (name) {
+      name = displayName(name)
+      const message = this.$renderComponent(ResetServiceAccount, {
+        name
+      })
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Reset',
+        captionText: 'Confirm Service Account Reset',
+        messageHtml: message.innerHTML,
+        confirmValue: name
       })
     },
     onEditUser ({ username, roles }) {
