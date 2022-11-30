@@ -75,7 +75,7 @@ export const shootStatusCredentialRotation = {
     type: {
       type: String,
       required: true,
-      validator: function (value) {
+      validator (value) {
         return map(rotationTypes, 'type').includes(value)
       }
     }
