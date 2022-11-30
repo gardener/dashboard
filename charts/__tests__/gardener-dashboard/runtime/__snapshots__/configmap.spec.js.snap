@@ -278,9 +278,6 @@ Object {
       "projectTerminalShortcutsEnabled": false,
       "terminalEnabled": false,
     },
-    "gardenctl": Object {
-      "legacyCommands": true,
-    },
     "helpMenuItems": Array [
       Object {
         "icon": "description",
