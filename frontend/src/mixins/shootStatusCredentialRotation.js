@@ -7,10 +7,14 @@
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 import find from 'lodash/find'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import head from 'lodash/head'
+import compact from 'lodash/compact'
 
 import { shootItem } from '@/mixins/shootItem'
 
-export const rotationTypes = [
+const rotationTypes = [
   {
     type: 'kubeconfig',
     hasRotationStatus: true,
@@ -61,8 +65,21 @@ export const rotationTypes = [
     twoStep: true
   }
 ]
+const twoStepRotationTypes = filter(rotationTypes, {
+  hasRotationStatus: true,
+  twoStep: true
+})
 
 export const shootStatusCredentialRotation = {
+  props: {
+    type: {
+      type: String,
+      required: true,
+      validator: function (value) {
+        return map(rotationTypes, 'type').includes(value)
+      }
+    }
+  },
   mixins: [shootItem],
   computed: {
     shootStatusCredentialsRotation () {
@@ -72,7 +89,7 @@ export const shootStatusCredentialRotation = {
       let preparedRotationsCount = 0
       let completedPhasesCount = 0
       const unpreparedRotations = []
-      for (const rotationType of filter(this.rotationTypes, { hasRotationStatus: true, twoStep: true })) {
+      for (const rotationType of twoStepRotationTypes) {
         // use simple for loop to support early exit (immediately return in case of progressing phase)
         const rotationStatus = this.shootStatusCredentialsRotation[rotationType.type]
         if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
@@ -92,7 +109,7 @@ export const shootStatusCredentialRotation = {
         }
       }
 
-      const numberOfTwoStepOperations = filter(this.rotationTypes, { hasRotationStatus: true, twoStep: true }).length
+      const numberOfTwoStepOperations = twoStepRotationTypes.length
       if (preparedRotationsCount > 0) {
         if (preparedRotationsCount === numberOfTwoStepOperations) {
           const type = 'Prepared'
@@ -145,14 +162,32 @@ export const shootStatusCredentialRotation = {
       return undefined
     },
     rotationType () {
-      return find(this.rotationTypes, ['type', this.type])
+      return find(rotationTypes, ['type', this.type])
+    },
+    lastInitiationTime () {
+      if (this.type !== 'ALL_CREDENTIALS') {
+        return this.rotationStatus.lastInitiationTime
+      }
+      // Do not show aggregated initiation time
+      return undefined
+    },
+    lastCompletionTime () {
+      if (this.type !== 'ALL_CREDENTIALS') {
+        return this.rotationStatus.lastCompletionTime
+      }
+      const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
+      let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
+      if (!this.shootEnableStaticTokenKubeconfig) {
+        requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
+      }
+
+      if (requiredNumberOfRotationTimestamps === allCompletionTimestamps.length) {
+        return head(allCompletionTimestamps)
+      }
+      return undefined
     }
   },
-  data () {
-    return {
-      rotationTypes
-    }
-  }
+  rotationTypes
 }
 
 export default shootStatusCredentialRotation

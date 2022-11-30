@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { shootStatusCredentialRotation, rotationTypes } from '@/mixins/shootStatusCredentialRotation'
+import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import { shallowMount } from '@vue/test-utils'
 
 import find from 'lodash/find'
@@ -84,8 +84,8 @@ describe('shootItem', () => {
         }
       })
       const unpreparedRotations = [
-        find(rotationTypes, ['type', 'etcdEncryptionKey']),
-        find(rotationTypes, ['type', 'serviceAccountKey'])
+        find(shootStatusCredentialRotation.rotationTypes, ['type', 'etcdEncryptionKey']),
+        find(shootStatusCredentialRotation.rotationTypes, ['type', 'serviceAccountKey'])
       ]
 
       expect(wrapper.vm.shootStatusCredentialsRotationAggregatedPhase).toEqual({ type: 'Prepared', caption: 'Prepared 1/3', incomplete: true, unpreparedRotations })

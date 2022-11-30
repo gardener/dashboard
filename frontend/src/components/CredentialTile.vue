@@ -72,13 +72,8 @@ SPDX-License-Identifier: Apache-2.0
 import RotateCredentials from '@/components/RotateCredentials'
 import TimeString from '@/components/TimeString'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
-import { shootStatusCredentialRotation, rotationTypes } from '@/mixins/shootStatusCredentialRotation'
+import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import get from 'lodash/get'
-import flatMap from 'lodash/flatMap'
-import head from 'lodash/head'
-import compact from 'lodash/compact'
-import filter from 'lodash/filter'
-import map from 'lodash/map'
 
 export default {
   name: 'credential-tile',
@@ -88,13 +83,6 @@ export default {
     ShootMessages
   },
   props: {
-    type: {
-      type: String,
-      required: true,
-      validator: function (value) {
-        return map(rotationTypes, 'type').includes(value)
-      }
-    },
     dense: {
       type: Boolean,
       required: false
@@ -102,28 +90,6 @@ export default {
   },
   mixins: [shootStatusCredentialRotation],
   computed: {
-    lastInitiationTime () {
-      if (this.type !== 'ALL_CREDENTIALS') {
-        return this.rotationStatus.lastInitiationTime
-      }
-      // Do not show aggregated initiation time
-      return undefined
-    },
-    lastCompletionTime () {
-      if (this.type !== 'ALL_CREDENTIALS') {
-        return this.rotationStatus.lastCompletionTime
-      }
-      const allCompletionTimestamps = compact(flatMap(this.shootStatusCredentialsRotation, 'lastCompletionTime')).sort()
-      let requiredNumberOfRotationTimestamps = filter(this.rotationTypes, 'hasRotationStatus').length
-      if (!this.shootEnableStaticTokenKubeconfig) {
-        requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
-      }
-
-      if (requiredNumberOfRotationTimestamps === allCompletionTimestamps.length) {
-        return head(allCompletionTimestamps)
-      }
-      return undefined
-    },
     isProgressing () {
       return this.phaseType === 'Preparing' || this.phaseType === 'Completing' || this.phaseType === 'Rotating'
     },
