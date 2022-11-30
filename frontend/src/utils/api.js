@@ -265,6 +265,14 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
+export function resetServiceAccount ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return callResourceMethod(`/api/namespaces/${namespace}/members/${name}`, {
+    method: 'resetServiceAccount'
+  })
+}
+
 /* User */
 export function createTokenReview (data) {
   return createResource('/auth', data)
