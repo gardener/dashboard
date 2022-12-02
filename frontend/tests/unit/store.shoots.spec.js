@@ -11,7 +11,7 @@ import {
 import getters from '@/store/modules/shoots/getters'
 import shootModule from '@/store/modules/shoots'
 
-import { parseSearch, deleteItem, putItem, keyForShoot } from '@/store/modules/shoots/helper'
+import { parseSearch, deleteItem, keyForShoot } from '@/store/modules/shoots/helper'
 
 import assign from 'lodash/assign'
 import fromPairs from 'lodash/fromPairs'
