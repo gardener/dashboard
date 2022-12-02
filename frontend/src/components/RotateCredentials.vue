@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
-import { shootStatusCredentialRotation } from '@/mixins/shootStatusCredentialRotation'
+import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
 import includes from 'lodash/includes'
@@ -64,10 +64,6 @@ export default {
   props: {
     text: {
       type: Boolean
-    },
-    type: {
-      type: String,
-      required: false
     }
   },
   data () {
