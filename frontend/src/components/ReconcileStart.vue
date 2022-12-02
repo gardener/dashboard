@@ -17,11 +17,11 @@ SPDX-License-Identifier: Apache-2.0
     confirm-button-text="Trigger now"
     :disabled="isShootReconciliationDeactivated">
     <template v-slot:actionComponent>
-      <v-row >
-        <v-col>
-          <div class="text-subtitle-1 pt-4">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
-          </div>
-        </v-col>
+      <v-row>
+        <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
+      </v-row>
+      <v-row v-if="lastOperationFailed">
+        <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
       </v-row>
     </template>
   </action-button-dialog>
@@ -71,6 +71,9 @@ export default {
         return
       }
       return this.buttonTitle
+    },
+    lastOperationFailed () {
+      return get(this.shootLastOperation, 'state') === 'Failed'
     }
   },
   methods: {
@@ -84,9 +87,10 @@ export default {
       this.reconcileTriggered = true
       this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
-      const reconcile = { 'gardener.cloud/operation': 'reconcile' }
+      const operation = this.lastOperationFailed ? 'retry' : 'reconcile'
+      const annotation = { 'gardener.cloud/operation': operation }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: annotation })
       } catch (err) {
         const errorMessage = 'Could not trigger reconcile'
         const errorDetails = errorDetailsFromError(err)
