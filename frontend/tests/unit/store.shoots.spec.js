@@ -11,9 +11,11 @@ import {
 import getters from '@/store/modules/shoots/getters'
 import shootModule from '@/store/modules/shoots'
 
-import { parseSearch } from '@/store/modules/shoots/helper'
+import { parseSearch, deleteItem, putItem, keyForShoot } from '@/store/modules/shoots/helper'
 
 import assign from 'lodash/assign'
+import fromPairs from 'lodash/fromPairs'
+import map from 'lodash/map'
 
 describe('store.shoots.getters', () => {
   let shootItems
@@ -128,7 +130,7 @@ describe('store.shoots.getters', () => {
       }
     ]
 
-    state = { filteredShoots: shootItems, freezeSorting: false, freezedShootSkeletons: [] }
+    state = { shoots: fromPairs(map(shootItems, shootItem => [keyForShoot(shootItem.metadata), shootItem])), filteredShoots: shootItems, freezeSorting: false, freezedStaleShoots: [] }
     assign(shootModule.state, state)
 
     setFreezeSorting = (value) => shootModule.actions.setFreezeSorting({ commit: (f, v) => shootModule.mutations[f](shootModule.state, v) }, value)
@@ -241,13 +243,16 @@ describe('store.shoots.getters', () => {
   })
 
   it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
-    shootModule.state.filteredShoots.splice(0, 1)
+    deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
+    shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
+    expect(shootModule.state.filteredShoots.length).toBe(2)
     expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
     expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
     setFreezeSorting(true)
 
     expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
-    shootModule.state.filteredShoots.splice(0, 1)
+    deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
+    shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
     expect(shootModule.state.filteredShoots.length).toBe(1)
 
     expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
@@ -263,9 +268,10 @@ describe('store.shoots.getters', () => {
         uid: 'shoot4'
       }
     }
-    shootModule.state.filteredShoots.push(newShoot)
+    shootModule.state.shoots[keyForShoot(newShoot.metadata)] = newShoot
+    shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
     expect(shootModule.state.filteredShoots.length).toBe(4)
-    expect(shootModule.state.freezedShootSkeletons.length).toBe(3)
+    expect(shootModule.state.uidsAtFreeze.length).toBe(3)
 
     expect(getters.filteredItems(shootModule.state).length).toBe(3)
 

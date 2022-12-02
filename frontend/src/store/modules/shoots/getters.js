@@ -16,8 +16,7 @@ import padStart from 'lodash/padStart'
 import semver from 'semver'
 import find from 'lodash/find'
 import compact from 'lodash/compact'
-import some from 'lodash/some'
-import differenceBy from 'lodash/differenceBy'
+import differenceWith from 'lodash/differenceWith'
 import isEqual from 'lodash/isEqual'
 
 import {
@@ -141,12 +140,12 @@ export default {
   filteredItems (state) {
     if (state.freezeSorting) {
       // When state is freezed, do not include new items
-      return compact(map(state.freezedShootSkeletons, skeletonItem => {
-        const storeItem = find(state.filteredShoots, ['metadata.uid', skeletonItem.metadata.uid])
+      return compact(map(state.uidsAtFreeze, freezedUID => {
+        const storeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
         if (storeItem) {
           return storeItem
         }
-        return skeletonItem // only basic properties (like name, namespace) will be available, item flagged as stale for UI
+        return state.freezedStaleShoots[freezedUID]
       }))
     }
     return state.filteredShoots
@@ -231,16 +230,6 @@ export default {
     let sortByArrAtFreeze
     let sortDescArrAtFreeze
 
-    const orderFreezedItemsBySortedUIDsAtFreeze = (items) => {
-      return compact(map(sortedUIDsAtFreeze, freezedUID => {
-        const tableContainsItem = some(items, ['metadata.uid', freezedUID])
-        if (!tableContainsItem) {
-          return undefined // item not in table (filtered via table search)
-        }
-        return find(state.filteredShoots, ['metadata.uid', freezedUID])
-      }))
-    }
-
     const sortItems = (items, sortByArr, sortDescArr) => {
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
@@ -322,15 +311,19 @@ export default {
         sortByArrAtFreeze = [...sortByArr]
         sortDescArrAtFreeze = [...sortDescArr]
       }
-      // If freezed, the list is static - items are not added and removed and the order is defined by the cached array
-      return orderFreezedItemsBySortedUIDsAtFreeze(items)
+      // If freezed, the list is static - order is defined by the cached array
+      return compact(map(sortedUIDsAtFreeze, freezedUID => {
+        return find(items, ['metadata.uid', freezedUID])
+      }))
     }
   },
   numberOfNewItemsSinceFreeze (state) {
     if (!state.freezeSorting) {
       return 0
     }
-    return differenceBy(state.filteredShoots, state.freezedShootSkeletons, 'metadata.uid').length
+    return differenceWith(state.filteredShoots, state.uidsAtFreeze, (filteredShoot, uid) => {
+      return filteredShoot.metadata.uid === uid
+    }).length
   },
   topic (state, getters, rootState) {
     const metadata = state.subscription

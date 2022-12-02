@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="d-flex align-center">
-      <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
+      <g-popper :title="toolbarTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
         <template v-slot:popperRef>
           <div>
             <v-tooltip top>
@@ -32,8 +32,8 @@ SPDX-License-Identifier: Apache-2.0
                     <v-icon v-else-if="isAborted && isShootMarkedForDeletion" class="vertical-align-middle progress-icon" :color="color">mdi-delete-clock</v-icon>
                     <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle status-icon" :color="color">mdi-plus</v-icon>
                     <v-icon v-else-if="isError" class="vertical-align-middle status-icon" :color="color">mdi-alert-outline</v-icon>
-                    <v-progress-circular v-else-if="isPending && !shootItem.stale" class="vertical-align-middle" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-                    <v-icon v-else-if="!shootItem.stale" class="vertical-align-middle status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+                    <v-progress-circular v-else-if="isPending" class="vertical-align-middle" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+                    <v-icon v-else class="vertical-align-middle status-icon-check" color="success">mdi-check-circle-outline</v-icon>
                   </div>
                 </div>
               </template>
@@ -137,6 +137,12 @@ export default {
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
     },
+    toolbarTitle () {
+      if (this.shootItem?.stale) {
+        return 'Last Status'
+      }
+      return this.statusTitle
+    },
     statusTitle () {
       const statusTitle = []
       if (this.isShootStatusHibernationProgressing) {
@@ -174,8 +180,8 @@ export default {
       return this.shootLastOperation.state || 'Pending'
     },
     color () {
-      if (this.isAborted) {
-        return 'grey darken-1'
+      if (this.isAborted || this.shootItem?.stale) {
+        return 'grey'
       } else if (this.isError) {
         return 'error'
       } else {

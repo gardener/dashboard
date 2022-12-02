@@ -132,7 +132,12 @@ SPDX-License-Identifier: Apache-2.0
           <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
-      <div class="stale-overlay"></div>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <div class="stale-overlay" v-on="on"></div>
+        </template>
+        This cluster is no longer part of the list and kept as stale item
+      </v-tooltip>
     </td>
   </tr>
 </template>

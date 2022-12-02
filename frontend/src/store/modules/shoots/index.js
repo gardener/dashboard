@@ -5,7 +5,6 @@
 //
 
 import Vue from 'vue'
-import assign from 'lodash/assign'
 import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
 import omit from 'lodash/omit'
@@ -20,8 +19,10 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import find from 'lodash/find'
+import difference from 'lodash/difference'
 import getters from './getters'
-import { keyForShoot, findItem, constants } from './helper'
+import { keyForShoot, findItem, constants, putItem, deleteItem } from './helper'
 import {
   getShoots,
   getShoot,
@@ -46,7 +47,6 @@ import {
   isTruthyValue
 } from '@/utils'
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
-import find from 'lodash/find'
 
 const logger = Vue.logger
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -54,8 +54,9 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 // initial state
 const state = {
   shoots: {},
-  filteredShoots: [],
-  freezedShootSkeletons: [], // cache basic properties (like name, namespace) to keep stale seleton in UI
+  freezedStaleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
+  uidsAtFreeze: [],
+  filteredShoots: [], // TODO fill
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
@@ -369,32 +370,13 @@ const actions = {
   },
   setFreezeSorting ({ commit }, value) {
     commit('SET_FREEZE_SORTING', value)
-
     if (value) {
-      const freezedShootSkeletons = map(state.filteredShoots, shoot => {
-        return {
-          ...pick(shoot, [
-            'metadata.creationTimestamp',
-            'metadata.name',
-            'metadata.namespace',
-            'metadata.uid',
-            'metadata.annotations[\'gardener.cloud/created-by\']',
-            'spec.provider.type',
-            'spec.region',
-            'spec.seedName',
-            'spec.purpose',
-            'status.technicalID',
-            'spec.kubernetes.version'
-          ]),
-          stale: true // Flag them so that the UI can render them accordingly
-        }
-      })
-
-      commit('SET_FREEZED_SHOOT_SKELETONS', freezedShootSkeletons)
+      const uids = map(state.filteredShoots, 'metadata.uid')
+      commit('SET_UIDS_AT_FREEZE', uids)
     } else {
-      commit('SET_FREEZED_SHOOT_SKELETONS', undefined)
+      commit('CLEAR_FREEZED_STALE_SHOOTS')
+      commit('SET_UIDS_AT_FREEZE', undefined)
     }
-
     return state.freezeSorting
   }
 }
@@ -462,25 +444,6 @@ function getFilteredItems (state, rootState, rootGetters) {
   return items
 }
 
-const putItem = (state, newItem) => {
-  const item = findItem(state)(newItem.metadata)
-  if (item !== undefined) {
-    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
-    }
-  } else {
-    newItem.info = undefined // register property to ensure reactivity
-    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
-  }
-}
-
-const deleteItem = (state, deletedItem) => {
-  const item = findItem(state)(deletedItem.metadata)
-  if (item !== undefined) {
-    Vue.delete(state.shoots, keyForShoot(item.metadata))
-  }
-}
-
 // mutations
 const mutations = {
   RECEIVE (state, { rootState, rootGetters, shoots: items }) {
@@ -491,6 +454,26 @@ const mutations = {
         shoots[keyForShoot(object.metadata)] = object
       }
     }
+
+    if (state.freezeSorting) {
+      const oldKeys = Object.keys(state.shoots)
+      const newKeys = Object.keys(shoots)
+      const removedShootKeys = difference(oldKeys, newKeys)
+      const addedShootKeys = difference(newKeys, oldKeys)
+
+      removedShootKeys.forEach(removedShootKey => {
+        const removedShoot = state.shoots[removedShootKey]
+        if (some(state.uidsAtFreeze.includes(removedShoot.metadata.uid))) {
+          Vue.set(state.freezedStaleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
+        }
+      })
+
+      addedShootKeys.forEach(addedShootKey => {
+        const addedShoot = shoots[addedShootKey]
+        Vue.delete(state.freezedStaleShoots, addedShoot.metadata.uid)
+      })
+    }
+
     state.shoots = shoots
     state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
@@ -537,7 +520,10 @@ const mutations = {
   },
   CLEAR_ALL (state) {
     state.shoots = {}
-    state.filteredShoots = []
+    state.freezedStaleShoots = {}
+  },
+  CLEAR_FREEZED_STALE_SHOOTS (state) {
+    state.freezedStaleShoots = {}
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value
@@ -558,8 +544,8 @@ const mutations = {
   SET_FREEZE_SORTING (state, value) {
     state.freezeSorting = value
   },
-  SET_FREEZED_SHOOT_SKELETONS (state, value) {
-    state.freezedShootSkeletons = value
+  SET_UIDS_AT_FREEZE (state, value) {
+    state.uidsAtFreeze = value
   },
   SET_SUBSCRIPTION (state, value) {
     state.subscription = value
