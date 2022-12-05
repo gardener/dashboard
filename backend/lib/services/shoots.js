@@ -170,6 +170,20 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
+exports.replaceControlPlaneHighAvailability = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const highAvailability = body
+  const payload = {
+    spec: {
+      controlPlane: {
+        highAvailability
+      }
+    }
+  }
+
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
 exports.replaceDns = async function ({ user, namespace, name, body }) {
   const client = user.client
   const dns = body

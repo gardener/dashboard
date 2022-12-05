@@ -52,6 +52,8 @@ export function getRawVal (rootGetters, item, column) {
     }
     case 'errorCodes':
       return join(errorCodesFromArray(get(item, 'status.lastErrors', [])), ' ')
+    case 'cpha':
+      return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
@@ -195,6 +197,7 @@ export default {
         getRawVal(rootGetters, item, 'k8sVersion'),
         getRawVal(rootGetters, item, 'ticketLabels'),
         getRawVal(rootGetters, item, 'errorCodes'),
+        getRawVal(rootGetters, item, 'cpha'),
         ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
       ]
 

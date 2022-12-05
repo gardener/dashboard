@@ -750,7 +750,7 @@ const getters = {
       return find(dnsProviderList, ['type', poviderType])
     }))
   },
-  regionsWithSeedByCloudProfileName (state, getters) {
+  seedsByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (!cloudProfile) {
@@ -760,7 +760,16 @@ const getters = {
       if (!seedNames) {
         return []
       }
-      const seeds = getters.seedsByNames(seedNames)
+      return getters.seedsByNames(seedNames)
+    }
+  },
+  regionsWithSeedByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
+      const seeds = getters.seedsByCloudProfileName(cloudProfileName)
       const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
       const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
       return uniqueSeedRegionsWithZones

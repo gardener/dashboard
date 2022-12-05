@@ -389,6 +389,14 @@ export default {
           hidden: false
         },
         {
+          text: 'ControlPlane HA',
+          value: 'cpha',
+          sortable: true,
+          align: 'start',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
           text: 'ACCESS RESTRICTIONS',
           value: 'accessRestrictions',
           sortable: false,
