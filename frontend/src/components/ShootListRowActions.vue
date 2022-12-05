@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <rotate-credentials :shoot-item="shootItem" text></rotate-credentials>
+          <rotate-credentials :shoot-item="shootItem" type="ALL_CREDENTIALS" text></rotate-credentials>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
