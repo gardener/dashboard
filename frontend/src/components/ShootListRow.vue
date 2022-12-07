@@ -316,10 +316,10 @@ export default {
   }
 
   .theme--light .stale .stale-overlay {
-    background-color: rgba(255,255,255,0.8)
+    background-color: rgba(255,255,255,0.7)
   }
   .theme--dark .stale .stale-overlay {
-    background-color: rgba(0,0,0,0.8)
+    background-color: rgba(30,30,30,0.7)
   }
 
   .no-stale-pointer-events {

@@ -448,6 +448,7 @@ function getFilteredItems (state, rootState, rootGetters) {
 const mutations = {
   RECEIVE (state, { rootState, rootGetters, shoots: items }) {
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
+
     const shoots = {}
     for (const object of items) {
       if (notOnlyShootsWithIssues || shootHasIssue(object)) {
@@ -463,7 +464,7 @@ const mutations = {
 
       removedShootKeys.forEach(removedShootKey => {
         const removedShoot = state.shoots[removedShootKey]
-        if (some(state.uidsAtFreeze.includes(removedShoot.metadata.uid))) {
+        if (state.uidsAtFreeze.includes(removedShoot.metadata.uid)) {
           Vue.set(state.freezedStaleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
         }
       })
