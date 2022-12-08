@@ -15,8 +15,8 @@ import map from 'lodash/map'
 import padStart from 'lodash/padStart'
 import semver from 'semver'
 import find from 'lodash/find'
-import compact from 'lodash/compact'
 import differenceWith from 'lodash/differenceWith'
+import Vue from 'vue'
 
 import {
   getCreatedBy,
@@ -139,13 +139,18 @@ export default {
   filteredItems (state) {
     if (state.freezeSorting) {
       // When state is freezed, do not include new items
-      return compact(map(state.uidsAtFreeze, freezedUID => {
+      return map(state.uidsAtFreeze, freezedUID => {
         const storeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
         if (storeItem) {
           return storeItem
         }
-        return state.freezedStaleShoots[freezedUID]
-      }))
+        const freezedItem = state.freezedStaleShoots[freezedUID]
+        if (!freezedItem) {
+          // This should never happen ...
+          Vue.logger.error('Could not find freezed shoot with uid %s in filteredShoots or freezedStaleShoots', freezedUID)
+        }
+        return freezedItem
+      })
     }
     return state.filteredShoots
   },
