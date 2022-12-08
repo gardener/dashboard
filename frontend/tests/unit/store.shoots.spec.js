@@ -234,21 +234,6 @@ describe('store.shoots', () => {
       expect(sortedShoots[2].metadata.name).toBe('shoot2')
     })
 
-    it('should keep sorting static when shoot list is freezed', () => {
-      const sortBy = ['name']
-      const sortDesc = [false]
-      let sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-      expect(sortedShoots[0].metadata.name).toBe('shoot1')
-
-      setFreezeSorting(true)
-      // need to trigger sort one time since freeze to build sortedUIDsAtFreeze
-      sortItems(shootItems, sortBy, sortDesc)
-
-      sortedShoots[0].metadata.name = 'shoot4'
-      sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-      expect(sortedShoots[0].metadata.name).toBe('shoot4')
-    })
-
     it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
       deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
       shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)

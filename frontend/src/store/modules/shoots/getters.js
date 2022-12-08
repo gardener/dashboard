@@ -17,7 +17,6 @@ import semver from 'semver'
 import find from 'lodash/find'
 import compact from 'lodash/compact'
 import differenceWith from 'lodash/differenceWith'
-import isEqual from 'lodash/isEqual'
 
 import {
   getCreatedBy,
@@ -226,11 +225,7 @@ export default {
     }
   },
   sortItems (state, getters, rootState, rootGetters) {
-    let sortedUIDsAtFreeze
-    let sortByArrAtFreeze
-    let sortDescArrAtFreeze
-
-    const sortItems = (items, sortByArr, sortDescArr) => {
+    return (items, sortByArr, sortDescArr) => {
       const sortBy = head(sortByArr)
       const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
@@ -284,37 +279,7 @@ export default {
           items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-
       return items
-    }
-
-    return (items, sortByArr, sortDescArr) => {
-      if (!state.freezeSorting) {
-        sortedUIDsAtFreeze = undefined
-        sortByArrAtFreeze = undefined
-        sortDescArrAtFreeze = undefined
-
-        // Regular sorting logic
-        return sortItems(items, sortByArr, sortDescArr)
-      }
-
-      // if filter was active when freeze activated, need to reset sortedUIDsAtFreeze to include missing items
-      const searchStringChanged = items.length > sortedUIDsAtFreeze?.length
-
-      // If freezed, do not alter the order of the items
-      // except if the user explicitly changes the sorting or when the filter changes
-      if (!isEqual(sortByArrAtFreeze, sortByArr) || !isEqual(sortDescArrAtFreeze, sortDescArr) || searchStringChanged) {
-        // If the sorting or search has changed, sortedUIDsAtFreeze needs to be re-sorted according to the items order
-        const sortedItems = sortItems(items, sortByArr, sortDescArr)
-        sortedUIDsAtFreeze = map(sortedItems, 'metadata.uid')
-
-        sortByArrAtFreeze = [...sortByArr]
-        sortDescArrAtFreeze = [...sortDescArr]
-      }
-      // If freezed, the list is static - order is defined by the cached array
-      return compact(map(sortedUIDsAtFreeze, freezedUID => {
-        return find(items, ['metadata.uid', freezedUID])
-      }))
     }
   },
   numberOfNewItemsSinceFreeze (state) {

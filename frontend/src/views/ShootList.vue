@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0
         :search="shootSearch"
         :custom-filter="searchItems"
         must-sort
-        :custom-sort="sortItems"
+        :custom-sort="customSort"
       >
         <template v-slot:progress>
           <shoot-list-progress></shoot-list-progress>
@@ -138,6 +138,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
+import find from 'lodash/find'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import debounce from 'lodash/debounce'
@@ -165,7 +166,8 @@ export default {
       dialog: null,
       options: undefined,
       cachedItems: null,
-      selectedColumns: undefined
+      selectedColumns: undefined,
+      sortedUIDsAtFreeze: undefined
     }
   },
   watch: {
@@ -191,6 +193,15 @@ export default {
       } else {
         this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
+      }
+    },
+    freezeSorting (value) {
+      if (value) {
+        const { sortBy, sortDesc } = this.options
+        const sortedItems = this.sortItems(this.items, sortBy, sortDesc)
+        this.sortedUIDsAtFreeze = map(sortedItems, 'metadata.uid')
+      } else {
+        this.sortedUIDsAtFreeze = undefined
       }
     }
   },
@@ -277,7 +288,16 @@ export default {
     },
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
-    }, 500)
+    }, 500),
+    customSort (items, sortByArr, sortDescArr) {
+      if (this.freezeSorting) {
+        // If freezed, the list is static - order is defined by the cached array
+        map(this.sortedUIDsAtFreeze, freezedUID => {
+          return find(items, ['metadata.uid', freezedUID])
+        })
+      }
+      return this.sortItems(items, sortByArr, sortDescArr)
+    }
   },
   computed: {
     ...mapGetters({
@@ -523,8 +543,15 @@ export default {
       })
     },
     allHeaders () {
-      const allHeaders = [...this.standardHeaders, ...this.customHeaders]
-      return sortBy(allHeaders, ['weight', 'text'])
+      let allHeaders = [...this.standardHeaders, ...this.customHeaders]
+      allHeaders = sortBy(allHeaders, ['weight', 'text'])
+      if (this.freezeSorting) {
+        allHeaders.forEach(header => {
+          header.sortable = false
+        })
+      }
+
+      return allHeaders
     },
     selectableHeaders () {
       return filter(this.allHeaders, ['hidden', false])
