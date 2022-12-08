@@ -292,7 +292,7 @@ export default {
     customSort (items, sortByArr, sortDescArr) {
       if (this.freezeSorting) {
         // If freezed, the list is static - order is defined by the cached array
-        map(this.sortedUIDsAtFreeze, freezedUID => {
+        return map(this.sortedUIDsAtFreeze, freezedUID => {
           return find(items, ['metadata.uid', freezedUID])
         })
       }
@@ -546,8 +546,11 @@ export default {
       let allHeaders = [...this.standardHeaders, ...this.customHeaders]
       allHeaders = sortBy(allHeaders, ['weight', 'text'])
       if (this.freezeSorting) {
-        allHeaders.forEach(header => {
-          header.sortable = false
+        return map(allHeaders, header => {
+          return {
+            ...header,
+            sortable: false
+          }
         })
       }
 
