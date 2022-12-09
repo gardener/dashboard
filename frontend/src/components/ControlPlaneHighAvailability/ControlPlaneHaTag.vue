@@ -60,7 +60,9 @@ export default {
       return some(seeds, ({ data }) => data.zones.length >= 3)
     },
     zoneHAConfigurationError () {
-      return this.shootControlPlaneHighHAFailureTolerance === 'zone' && !this.zoneSupported
+      return this.shootControlPlaneHighHAFailureTolerance === 'zone' &&
+        !this.zoneSupported &&
+        !this.shootSeedName
     },
     color () {
       if (this.zoneHAConfigurationError) {
