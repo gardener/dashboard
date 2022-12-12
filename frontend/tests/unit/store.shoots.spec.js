@@ -29,7 +29,7 @@ describe('store.shoots', () => {
   }
   let state
   let sortItems
-  let setFreezeSorting
+  let setFocusMode
 
   beforeEach(() => {
     shootItems = [
@@ -134,12 +134,12 @@ describe('store.shoots', () => {
     state = {
       shoots: fromPairs(shootItemKeyValuePairs),
       filteredShoots: shootItems,
-      freezeSorting: false,
+      focusMode: false,
       freezedStaleShoots: []
     }
     assign(shootModule.state, state)
 
-    setFreezeSorting = (value) => shootModule.actions.setFreezeSorting({ commit: (f, v) => shootModule.mutations[f](shootModule.state, v) }, value)
+    setFocusMode = (value) => shootModule.actions.setFocusMode({ commit: (f, v) => shootModule.mutations[f](shootModule.state, v) }, value)
     sortItems = getters.sortItems(shootModule.state, undefined, undefined, rootGetters)
   })
 
@@ -240,7 +240,7 @@ describe('store.shoots', () => {
       expect(shootModule.state.filteredShoots.length).toBe(2)
       expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
       expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
-      setFreezeSorting(true)
+      setFocusMode(true)
 
       expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
       deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
@@ -252,7 +252,7 @@ describe('store.shoots', () => {
     })
 
     it('should not add new shoots to list when shoot list is freezed', () => {
-      setFreezeSorting(true)
+      setFocusMode(true)
       const newShoot = {
         metadata: {
           name: 'shoot4',
@@ -267,16 +267,16 @@ describe('store.shoots', () => {
 
       expect(getters.filteredItems(shootModule.state).length).toBe(3)
 
-      setFreezeSorting(false)
+      setFocusMode(false)
       expect(getters.filteredItems(shootModule.state).length).toBe(4)
 
-      setFreezeSorting(true)
+      setFocusMode(true)
       expect(getters.filteredItems(shootModule.state).length).toBe(4)
     })
 
     it('should add and remove freezedStaleShoots', () => {
       const shoot = Object.values(shootModule.state.shoots)[1]
-      setFreezeSorting(true)
+      setFocusMode(true)
 
       deleteItem(shootModule.state, shoot)
       expect(shootModule.state.freezedStaleShoots[shoot.metadata.uid]).not.toBeUndefined()
@@ -289,7 +289,7 @@ describe('store.shoots', () => {
   describe('mutations', () => {
     it('should receive items and update freezedStaleShoots', () => {
       const shoots = Object.values(shootModule.state.shoots)
-      setFreezeSorting(true)
+      setFocusMode(true)
       const itemToDelete = shoots[0]
       deleteItem(shootModule.state, itemToDelete)
 

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                 overlap
               >
                 <v-switch
-                  v-model="freezeSorting"
+                  v-model="focusModeInternal"
                   v-if="!projectScope && isAdmin"
                   class="mr-3"
                   color="primary lighten-3"
@@ -195,7 +195,7 @@ export default {
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
     },
-    freezeSorting (value) {
+    focusModeInternal (value) {
       if (value) {
         const { sortBy, sortDesc } = this.options
         const sortedItems = this.sortItems(this.items, sortBy, sortDesc)
@@ -213,9 +213,9 @@ export default {
     ...mapActions([
       'subscribeShoots'
     ]),
-    ...mapActions({
-      setFreezeSorting: 'shoots/setFreezeSorting'
-    }),
+    ...mapActions('shoots', [
+      'setFocusMode'
+    ]),
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -290,7 +290,7 @@ export default {
       this.shootSearch = value
     }, 500),
     customSort (items, sortByArr, sortDescArr) {
-      if (this.freezeSorting) {
+      if (this.focusModeInternal) {
         // If freezed, the list is static - order is defined by the cached array
         return map(this.sortedUIDsAtFreeze, freezedUID => {
           return find(items, ['metadata.uid', freezedUID])
@@ -326,13 +326,12 @@ export default {
     ...mapGetters('shoots', [
       'sortItems',
       'searchItems',
-      'getFreezeSorting',
       'numberOfNewItemsSinceFreeze'
     ]),
     ...mapState([
       'cfg',
       'namespace',
-      'shoots/freezeSorting'
+      'shoots/focusMode'
     ]),
     defaultTableOptions () {
       return {
@@ -351,12 +350,12 @@ export default {
         }
       }
     },
-    freezeSorting: {
+    focusModeInternal: {
       get () {
-        return this.getFreezeSorting
+        return this.focusMode
       },
       set (value) {
-        this.setFreezeSorting(value)
+        this.setFocusMode(value)
       }
     },
     currentName () {
@@ -545,7 +544,7 @@ export default {
     allHeaders () {
       let allHeaders = [...this.standardHeaders, ...this.customHeaders]
       allHeaders = sortBy(allHeaders, ['weight', 'text'])
-      if (this.freezeSorting) {
+      if (this.focusModeInternal) {
         return map(allHeaders, header => {
           return {
             ...header,
@@ -569,42 +568,42 @@ export default {
           value: 'onlyShootsWithIssues',
           selected: this.onlyShootsWithIssues,
           hidden: this.projectScope,
-          disabled: this.disableChangeFilters
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide progressing clusters',
           value: 'progressing',
           selected: this.isFilterActive('progressing'),
-          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
-          disabled: this.disableChangeFilters
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide no operator action required issues',
           value: 'noOperatorAction',
           selected: this.isFilterActive('noOperatorAction'),
-          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
             '- Clusters with temporary issues that will be retried automatically',
             '- Clusters with annotation dashboard.gardener.cloud/ignore-issues'
           ],
-          disabled: this.disableChangeFilters
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide clusters with deactivated reconciliation',
           value: 'deactivatedReconciliation',
           selected: this.isFilterActive('deactivatedReconciliation'),
-          hidden: this.projectScope || !this.isAdmin || this.hideFiltersForOnlyShootsWithIssues,
-          disabled: this.disableChangeFilters
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide clusters with configured ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
-          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.hideFiltersForOnlyShootsWithIssues,
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
           helpTooltip: this.hideTicketsWithLabelTooltip,
-          disabled: this.disableChangeFilters
+          disabled: this.changeFiltersDisabled
         }
       ]
     },
@@ -629,17 +628,16 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    disableChangeFilters () {
-      return this.freezeSorting
+    changeFiltersDisabled () {
+      return this.focusModeInternal
     },
-    hideFiltersForOnlyShootsWithIssues () {
+    showAllShoots () {
       return !this.showOnlyShootsWithIssues
     },
     filterTooltip () {
-      if (this.freezeSorting) {
-        return 'Filters cannot be changed when focus mode is active'
-      }
-      return undefined
+      return this.freezeSorting
+        ? 'Filters cannot be changed when focus mode is active'
+        : ''
     },
     headlineSubtitle () {
       const subtitle = []
@@ -676,13 +674,13 @@ export default {
   beforeRouteUpdate (to, from, next) {
     this.shootSearch = null
     this.updateTableSettings()
-    this.freezeSorting = false
+    this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
     this.shootSearch = null
-    this.freezeSorting = false
+    this.focusModeInternal = false
     next()
   }
 }

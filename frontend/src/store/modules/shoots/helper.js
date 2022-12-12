@@ -24,7 +24,7 @@ export function putItem (state, newItem) {
       Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
     }
   } else {
-    if (state.freezeSorting) {
+    if (state.focusMode) {
       Vue.delete(state.freezedStaleShoots, newItem.metadata.uid)
     }
     newItem.info = undefined // register property to ensure reactivity
@@ -35,7 +35,7 @@ export function deleteItem (state, deletedItem) {
   const item = findItem(state)(deletedItem.metadata)
 
   if (item !== undefined) {
-    if (state.freezeSorting && state.uidsAtFreeze.includes(item.metadata.uid)) {
+    if (state.focusMode && state.uidsAtFreeze.includes(item.metadata.uid)) {
       Vue.set(state.freezedStaleShoots, item.metadata.uid, { ...item, stale: true })
     }
     Vue.delete(state.shoots, keyForShoot(item.metadata))

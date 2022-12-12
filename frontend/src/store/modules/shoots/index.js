@@ -61,7 +61,7 @@ const state = {
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
-  freezeSorting: false,
+  focusMode: false,
   subscription: null,
   subscriptionState: constants.CLOSED,
   subscriptionError: null
@@ -368,8 +368,8 @@ const actions = {
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
     return state.newShootResource
   },
-  setFreezeSorting ({ commit }, value) {
-    commit('SET_FREEZE_SORTING', value)
+  setFocusMode ({ commit }, value) {
+    commit('SET_FOCUS_MODE', value)
     if (value) {
       const uids = map(state.filteredShoots, 'metadata.uid')
       commit('SET_UIDS_AT_FREEZE', uids)
@@ -377,7 +377,7 @@ const actions = {
       commit('CLEAR_FREEZED_STALE_SHOOTS')
       commit('SET_UIDS_AT_FREEZE', undefined)
     }
-    return state.freezeSorting
+    return state.focusMode
   }
 }
 
@@ -456,7 +456,7 @@ const mutations = {
       }
     }
 
-    if (state.freezeSorting) {
+    if (state.focusMode) {
       const oldKeys = Object.keys(state.shoots)
       const newKeys = Object.keys(shoots)
       const removedShootKeys = difference(oldKeys, newKeys)
@@ -542,8 +542,8 @@ const mutations = {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
   },
-  SET_FREEZE_SORTING (state, value) {
-    state.freezeSorting = value
+  SET_FOCUS_MODE (state, value) {
+    state.focusMode = value
   },
   SET_UIDS_AT_FREEZE (state, value) {
     state.uidsAtFreeze = value

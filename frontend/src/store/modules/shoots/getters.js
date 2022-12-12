@@ -137,7 +137,7 @@ export function getSortVal (rootGetters, item, sortBy) {
 
 export default {
   filteredItems (state) {
-    if (state.freezeSorting) {
+    if (state.focusMode) {
       // When state is freezed, do not include new items
       return map(state.uidsAtFreeze, freezedUID => {
         const storeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
@@ -164,9 +164,6 @@ export default {
   },
   getShootListFilters (state) {
     return state.shootListFilters
-  },
-  getFreezeSorting (state) {
-    return state.freezeSorting
   },
   onlyShootsWithIssues (state) {
     return get(state.shootListFilters, 'onlyShootsWithIssues', true)
@@ -288,7 +285,7 @@ export default {
     }
   },
   numberOfNewItemsSinceFreeze (state) {
-    if (!state.freezeSorting) {
+    if (!state.focusMode) {
       return 0
     }
     return differenceWith(state.filteredShoots, state.uidsAtFreeze, (filteredShoot, uid) => {
