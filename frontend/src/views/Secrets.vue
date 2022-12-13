@@ -527,7 +527,7 @@ export default {
     },
     relatedShootCountDns (secret) {
       const shootsByDnsSecret = filter(this.shootList, shoot => {
-        return find(shoot.spec.dns.providers, { type: secret.metadata.dnsProviderName, secretName: secret.metadata.name })
+        return find(shoot.spec.dns?.providers, { type: secret.metadata.dnsProviderName, secretName: secret.metadata.name })
       })
       return shootsByDnsSecret.length
     },
