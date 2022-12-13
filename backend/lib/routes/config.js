@@ -53,7 +53,8 @@ function sanitizeFrontendConfig (frontendConfig) {
       items = []
     } = {},
     vendorHints = [],
-    resourceQuotaHelp = ''
+    resourceQuotaHelp = '',
+    controlPlaneHaHelp = ''
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
@@ -61,7 +62,8 @@ function sanitizeFrontendConfig (frontendConfig) {
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
   convertAndSanitize(resourceQuotaHelp, 'text')
-
+  convertAndSanitize(controlPlaneHaHelp, 'text')
+  
   for (const item of items) {
     const {
       display = {},

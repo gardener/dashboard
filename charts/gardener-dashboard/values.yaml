@@ -301,6 +301,10 @@ global:
   #  # resourceQuotaHelp - configure help text how to configure project resource quota
   #  resourceQuotaHelp:
   #    text: Help text
+  
+  #  # controlPlaneHaHelp - configure help text for control plane high availability, control plane pricing etc.
+  #  controlPlaneHaHelp:
+  #    text: Help text
 
   livenessProbe:
     enabled: true

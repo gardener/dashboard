@@ -1316,6 +1316,9 @@ const getters = {
   resourceQuotaHelpText (state) {
     return get(state, 'cfg.resourceQuotaHelp.text')
   },
+  controlPlaneHaHelpText (state) {
+    return get(state, 'cfg.controlPlaneHaHelp.text')
+  },
   colorScheme (state, getters) {
     const colorScheme = getters['storage/colorScheme']
     return ['dark', 'light'].includes(colorScheme)
