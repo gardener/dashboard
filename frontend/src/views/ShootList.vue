@@ -93,12 +93,14 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
+        :sort-by.sync="sortByInternal"
+        :sort-desc.sync="sortDescInternal"
         :loading="loading || !connected"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
         :custom-filter="searchItems"
         must-sort
-        :custom-sort="customSort"
+        :custom-sort="sortItems"
       >
         <template v-slot:progress>
           <shoot-list-progress></shoot-list-progress>
@@ -130,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions, mapMutations, mapState } from 'vuex'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -138,7 +140,6 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
-import find from 'lodash/find'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import debounce from 'lodash/debounce'
@@ -166,8 +167,7 @@ export default {
       dialog: null,
       options: undefined,
       cachedItems: null,
-      selectedColumns: undefined,
-      sortedUIDsAtFreeze: undefined
+      selectedColumns: undefined
     }
   },
   watch: {
@@ -194,15 +194,6 @@ export default {
         this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-    },
-    focusModeInternal (value) {
-      if (value) {
-        const { sortBy, sortDesc } = this.options
-        const sortedItems = this.sortItems(this.items, sortBy, sortDesc)
-        this.sortedUIDsAtFreeze = map(sortedItems, 'metadata.uid')
-      } else {
-        this.sortedUIDsAtFreeze = undefined
-      }
     }
   },
   methods: {
@@ -216,6 +207,10 @@ export default {
     ...mapActions('shoots', [
       'setFocusMode'
     ]),
+    ...mapMutations('shoots', {
+      setSortBy: 'SET_SORT_BY',
+      setSortDesc: 'SET_SORT_DESC'
+    }),
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -288,16 +283,7 @@ export default {
     },
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
-    }, 500),
-    customSort (items, sortByArr, sortDescArr) {
-      if (this.focusModeInternal) {
-        // If freezed, the list is static - order is defined by the cached array
-        return map(this.sortedUIDsAtFreeze, freezedUID => {
-          return find(items, ['metadata.uid', freezedUID])
-        })
-      }
-      return this.sortItems(items, sortByArr, sortDescArr)
-    }
+    }, 500)
   },
   computed: {
     ...mapGetters({
@@ -331,7 +317,14 @@ export default {
     ...mapState([
       'cfg',
       'namespace',
-      'shoots/focusMode'
+      'shoots/focusMode',
+      'shoots/sortBy',
+      'shoots/sortDesc'
+    ]),
+    ...mapState('shoots', [
+      'focusMode',
+      'sortBy',
+      'sortDesc'
     ]),
     defaultTableOptions () {
       return {
@@ -358,6 +351,22 @@ export default {
         this.setFocusMode(value)
       }
     },
+    sortByInternal: {
+      get () {
+        return this.sortBy
+      },
+      set (value) {
+        this.setSortBy(value)
+      }
+    },
+    sortDescInternal: {
+      get () {
+        return this.sortDesc
+      },
+      set (value) {
+        this.setSortDesc(value)
+      }
+    },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
     },
@@ -378,10 +387,12 @@ export default {
       return mapTableHeader(this.customHeaders, 'defaultSelected')
     },
     standardHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
       const headers = [
         {
           text: 'PROJECT',
           value: 'project',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: !!this.projectScope,
@@ -390,6 +401,7 @@ export default {
         {
           text: 'NAME',
           value: 'name',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: false,
@@ -398,6 +410,7 @@ export default {
         {
           text: 'INFRASTRUCTURE',
           value: 'infrastructure',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: false
@@ -405,6 +418,7 @@ export default {
         {
           text: 'SEED',
           value: 'seed',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -412,6 +426,7 @@ export default {
         {
           text: 'TECHNICAL ID',
           value: 'technicalId',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.isAdmin
@@ -419,6 +434,7 @@ export default {
         {
           text: 'CREATED BY',
           value: 'createdBy',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -426,6 +442,7 @@ export default {
         {
           text: 'CREATED AT',
           value: 'createdAt',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -433,6 +450,7 @@ export default {
         {
           text: 'PURPOSE',
           value: 'purpose',
+          sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -440,6 +458,7 @@ export default {
         {
           text: 'STATUS',
           value: 'lastOperation',
+          sortable: isSortable(true),
           align: 'center',
           cellClass: 'pl-4',
           defaultSelected: true,
@@ -449,6 +468,7 @@ export default {
         {
           text: 'VERSION',
           value: 'k8sVersion',
+          sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -456,7 +476,7 @@ export default {
         {
           text: 'READINESS',
           value: 'readiness',
-          sortable: true,
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: false,
@@ -465,7 +485,7 @@ export default {
         {
           text: 'ISSUE SINCE',
           value: 'issueSince',
-          sortable: true,
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: this.projectScope || !this.isAdmin
@@ -481,7 +501,7 @@ export default {
         {
           text: 'TICKET',
           value: 'ticket',
-          sortable: true,
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
@@ -511,6 +531,7 @@ export default {
       }))
     },
     customHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
       const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
 
       return map(customHeaders, ({
@@ -529,7 +550,7 @@ export default {
           text: upperCase(name),
           class: 'nowrap',
           value: key,
-          sortable,
+          sortable: isSortable(sortable),
           align,
           selected: get(this.selectedColumns, key, defaultSelected),
           defaultSelected,
@@ -542,18 +563,8 @@ export default {
       })
     },
     allHeaders () {
-      let allHeaders = [...this.standardHeaders, ...this.customHeaders]
-      allHeaders = sortBy(allHeaders, ['weight', 'text'])
-      if (this.focusModeInternal) {
-        return map(allHeaders, header => {
-          return {
-            ...header,
-            sortable: false
-          }
-        })
-      }
-
-      return allHeaders
+      const allHeaders = [...this.standardHeaders, ...this.customHeaders]
+      return sortBy(allHeaders, ['weight', 'text'])
     },
     selectableHeaders () {
       return filter(this.allHeaders, ['hidden', false])

@@ -263,7 +263,7 @@ describe('store.shoots', () => {
       shootModule.state.shoots[keyForShoot(newShoot.metadata)] = newShoot
       shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
       expect(shootModule.state.filteredShoots.length).toBe(4)
-      expect(shootModule.state.uidsAtFreeze.length).toBe(3)
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
 
       expect(getters.filteredItems(shootModule.state).length).toBe(3)
 
@@ -293,7 +293,7 @@ describe('store.shoots', () => {
       const itemToDelete = shoots[0]
       deleteItem(shootModule.state, itemToDelete)
 
-      expect(shootModule.state.uidsAtFreeze.length).toBe(3)
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
       expect(shootModule.state.freezedStaleShoots[itemToDelete.metadata.uid]).not.toBeUndefined()
       expect(Object.values(shootModule.state.shoots).length).toBe(2)
       expect(Object.values(shootModule.state.shoots)).toContain(shoots[1], shoots[2])
@@ -302,7 +302,7 @@ describe('store.shoots', () => {
       const missingShoot = shoots[2]
       shootModule.mutations.RECEIVE(shootModule.state, { rootState: {}, rootGetters: {}, shoots: newShoots })
 
-      expect(shootModule.state.uidsAtFreeze.length).toBe(3)
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
       expect(shootModule.state.freezedStaleShoots[missingShoot.metadata.uid]).not.toBeUndefined()
       expect(shootModule.state.freezedStaleShoots[itemToDelete.metadata.uid]).toBeUndefined()
       expect(Object.values(shootModule.state.shoots).length).toBe(2)

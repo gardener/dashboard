@@ -35,7 +35,7 @@ export function deleteItem (state, deletedItem) {
   const item = findItem(state)(deletedItem.metadata)
 
   if (item !== undefined) {
-    if (state.focusMode && state.uidsAtFreeze.includes(item.metadata.uid)) {
+    if (state.focusMode && state.sortedUidsAtFreeze.includes(item.metadata.uid)) {
       Vue.set(state.freezedStaleShoots, item.metadata.uid, { ...item, stale: true })
     }
     Vue.delete(state.shoots, keyForShoot(item.metadata))

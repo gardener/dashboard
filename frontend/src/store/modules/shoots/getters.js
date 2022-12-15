@@ -15,6 +15,7 @@ import map from 'lodash/map'
 import padStart from 'lodash/padStart'
 import semver from 'semver'
 import find from 'lodash/find'
+import isArray from 'lodash/isArray'
 import differenceWith from 'lodash/differenceWith'
 import Vue from 'vue'
 
@@ -139,7 +140,7 @@ export default {
   filteredItems (state) {
     if (state.focusMode) {
       // When state is freezed, do not include new items
-      return map(state.uidsAtFreeze, freezedUID => {
+      return map(state.sortedUidsAtFreeze, freezedUID => {
         const storeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
         if (storeItem) {
           return storeItem
@@ -228,8 +229,12 @@ export default {
   },
   sortItems (state, getters, rootState, rootGetters) {
     return (items, sortByArr, sortDescArr) => {
-      const sortBy = head(sortByArr)
-      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
+      if (state.focusMode) {
+        // no need to sort in focus mode sorting is freezed and filteredItems return items in last sorted order
+        return items
+      }
+      const sortBy = isArray(sortByArr) ? head(sortByArr) : sortByArr
+      const sortOrder = (isArray(sortDescArr) ? head(sortDescArr) : sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
         return items
       }
@@ -288,7 +293,7 @@ export default {
     if (!state.focusMode) {
       return 0
     }
-    return differenceWith(state.filteredShoots, state.uidsAtFreeze, (filteredShoot, uid) => {
+    return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
       return filteredShoot.metadata.uid === uid
     }).length
   },

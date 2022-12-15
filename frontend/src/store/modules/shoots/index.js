@@ -55,7 +55,7 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 const state = {
   shoots: {},
   freezedStaleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
-  uidsAtFreeze: [],
+  sortedUidsAtFreeze: [],
   filteredShoots: [], // TODO fill
   selection: undefined,
   shootListFilters: undefined,
@@ -64,7 +64,9 @@ const state = {
   focusMode: false,
   subscription: null,
   subscriptionState: constants.CLOSED,
-  subscriptionError: null
+  subscriptionError: null,
+  sortBy: undefined,
+  sortDesc: undefined
 }
 
 function clearAll ({ commit }) {
@@ -368,16 +370,13 @@ const actions = {
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
     return state.newShootResource
   },
-  setFocusMode ({ commit }, value) {
-    commit('SET_FOCUS_MODE', value)
+  setFocusMode ({ commit, getters }, value) {
+    let sortedUids
     if (value) {
-      const uids = map(state.filteredShoots, 'metadata.uid')
-      commit('SET_UIDS_AT_FREEZE', uids)
-    } else {
-      commit('CLEAR_FREEZED_STALE_SHOOTS')
-      commit('SET_UIDS_AT_FREEZE', undefined)
+      const sortedShoots = getters.sortItems(state.filteredShoots, state.sortBy, state.sortDesc)
+      sortedUids = map(sortedShoots, 'metadata.uid')
     }
-    return state.focusMode
+    commit('SET_FOCUS_MODE', { value, sortedUids })
   }
 }
 
@@ -464,7 +463,7 @@ const mutations = {
 
       removedShootKeys.forEach(removedShootKey => {
         const removedShoot = state.shoots[removedShootKey]
-        if (state.uidsAtFreeze.includes(removedShoot.metadata.uid)) {
+        if (state.sortedUidsAtFreeze.includes(removedShoot.metadata.uid)) {
           Vue.set(state.freezedStaleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
         }
       })
@@ -542,11 +541,9 @@ const mutations = {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
   },
-  SET_FOCUS_MODE (state, value) {
+  SET_FOCUS_MODE (state, { value, sortedUids }) {
     state.focusMode = value
-  },
-  SET_UIDS_AT_FREEZE (state, value) {
-    state.uidsAtFreeze = value
+    state.sortedUidsAtFreeze = sortedUids
   },
   SET_SUBSCRIPTION (state, value) {
     state.subscription = value
@@ -580,6 +577,12 @@ const mutations = {
     } else {
       state.subscriptionError = null
     }
+  },
+  SET_SORT_BY (state, value) {
+    state.sortBy = value
+  },
+  SET_SORT_DESC (state, value) {
+    state.sortDesc = value
   }
 }
 
