@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <div class="ha-popper">
-      Failure Tolerance: <code>shootControlPlaneHighHAFailureTolerance</code>
+      Failure Tolerance: <code>{{shootControlPlaneHighHAFailureTolerance}}</code>
       <v-alert v-if="zoneHAConfigurationError" type="error" class="mt-2" max-width="600px">
         You configured your control plane failure tolerance type to be <code>zone</code>.
         However, no seed assigned to your cloud profile currently supports control planes with failure tolerance <code>zone</code>.

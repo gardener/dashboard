@@ -41,8 +41,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-alert type="info" v-if="!!cpFailureToleranceType && changeAllowed" dense outlined>
       It is not possible to disable control plane high availability later.
     </v-alert>
-    <external-link url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
-    <div class="wrap-text" v-html="controlPlaneHaHelpHtml"></div>
+    <div v-if="!!controlPlaneHaHelpHtml" class="wrap-text" v-html="controlPlaneHaHelpHtml"></div>
+    <external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
   </div>
 </template>
 
