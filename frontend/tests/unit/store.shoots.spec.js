@@ -135,7 +135,7 @@ describe('store.shoots', () => {
       shoots: fromPairs(shootItemKeyValuePairs),
       filteredShoots: shootItems,
       focusMode: false,
-      freezedStaleShoots: []
+      staleShoots: []
     }
     assign(shootModule.state, state)
 
@@ -279,27 +279,27 @@ describe('store.shoots', () => {
       expect(getters.filteredItems(shootModule.state).length).toBe(4)
     })
 
-    it('should add and remove freezedStaleShoots', () => {
+    it('should add and remove staleShoots', () => {
       const shoot = Object.values(shootModule.state.shoots)[1]
       setFocusMode(true)
 
       deleteItem(shootModule.state, shoot)
-      expect(shootModule.state.freezedStaleShoots[shoot.metadata.uid]).not.toBeUndefined()
+      expect(shootModule.state.staleShoots[shoot.metadata.uid]).not.toBeUndefined()
 
       putItem(shootModule.state, shoot)
-      expect(shootModule.state.freezedStaleShoots[shoot.metadata.uid]).toBeUndefined()
+      expect(shootModule.state.staleShoots[shoot.metadata.uid]).toBeUndefined()
     })
   })
 
   describe('mutations', () => {
-    it('should receive items and update freezedStaleShoots', () => {
+    it('should receive items and update staleShoots', () => {
       const shoots = Object.values(shootModule.state.shoots)
       setFocusMode(true)
       const itemToDelete = shoots[0]
       deleteItem(shootModule.state, itemToDelete)
 
       expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
-      expect(shootModule.state.freezedStaleShoots[itemToDelete.metadata.uid]).not.toBeUndefined()
+      expect(shootModule.state.staleShoots[itemToDelete.metadata.uid]).not.toBeUndefined()
       expect(Object.values(shootModule.state.shoots).length).toBe(2)
       expect(Object.values(shootModule.state.shoots)).toContain(shoots[1], shoots[2])
 
@@ -308,8 +308,8 @@ describe('store.shoots', () => {
       shootModule.mutations.RECEIVE(shootModule.state, { rootState: {}, rootGetters: {}, shoots: newShoots })
 
       expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
-      expect(shootModule.state.freezedStaleShoots[missingShoot.metadata.uid]).not.toBeUndefined()
-      expect(shootModule.state.freezedStaleShoots[itemToDelete.metadata.uid]).toBeUndefined()
+      expect(shootModule.state.staleShoots[missingShoot.metadata.uid]).not.toBeUndefined()
+      expect(shootModule.state.staleShoots[itemToDelete.metadata.uid]).toBeUndefined()
       expect(Object.values(shootModule.state.shoots).length).toBe(2)
       expect(Object.values(shootModule.state.shoots)).toContain(shoots[0], shoots[1])
     })

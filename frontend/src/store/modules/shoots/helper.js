@@ -19,13 +19,13 @@ export function findItem (state) {
 
 export function putItem (state, newItem) {
   const item = findItem(state)(newItem.metadata)
-  if (item !== undefined) {
+  if (item) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
       Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
     }
   } else {
     if (state.focusMode) {
-      Vue.delete(state.freezedStaleShoots, newItem.metadata.uid)
+      Vue.delete(state.staleShoots, newItem.metadata.uid)
     }
     newItem.info = undefined // register property to ensure reactivity
     Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
@@ -34,9 +34,9 @@ export function putItem (state, newItem) {
 export function deleteItem (state, deletedItem) {
   const item = findItem(state)(deletedItem.metadata)
 
-  if (item !== undefined) {
-    if (state.focusMode && state.sortedUidsAtFreeze.includes(item.metadata.uid)) {
-      Vue.set(state.freezedStaleShoots, item.metadata.uid, { ...item, stale: true })
+  if (item) {
+    if (state.focusMode) {
+      Vue.set(state.staleShoots, item.metadata.uid, item)
     }
     Vue.delete(state.shoots, keyForShoot(item.metadata))
   }

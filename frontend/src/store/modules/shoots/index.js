@@ -54,7 +54,7 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 // initial state
 const state = {
   shoots: {},
-  freezedStaleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
+  staleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
   sortedUidsAtFreeze: [],
   filteredShoots: [], // TODO fill
   selection: undefined,
@@ -464,13 +464,13 @@ const mutations = {
       removedShootKeys.forEach(removedShootKey => {
         const removedShoot = state.shoots[removedShootKey]
         if (state.sortedUidsAtFreeze.includes(removedShoot.metadata.uid)) {
-          Vue.set(state.freezedStaleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
+          Vue.set(state.staleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
         }
       })
 
       addedShootKeys.forEach(addedShootKey => {
         const addedShoot = shoots[addedShootKey]
-        Vue.delete(state.freezedStaleShoots, addedShoot.metadata.uid)
+        Vue.delete(state.staleShoots, addedShoot.metadata.uid)
       })
     }
 
@@ -520,10 +520,10 @@ const mutations = {
   },
   CLEAR_ALL (state) {
     state.shoots = {}
-    state.freezedStaleShoots = {}
+    state.staleShoots = {}
   },
   CLEAR_FREEZED_STALE_SHOOTS (state) {
-    state.freezedStaleShoots = {}
+    state.staleShoots = {}
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value

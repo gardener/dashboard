@@ -141,16 +141,20 @@ export default {
     if (state.focusMode) {
       // When state is freezed, do not include new items
       return map(state.sortedUidsAtFreeze, freezedUID => {
-        const storeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
-        if (storeItem) {
-          return storeItem
+        const activeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
+        if (activeItem) {
+          return activeItem
         }
-        const freezedItem = state.freezedStaleShoots[freezedUID]
-        if (!freezedItem) {
+        let staleItem = state.staleShoots[freezedUID]
+        if (!staleItem) {
+          // Object may have been filtered (e.g. now progressing) but is still in shoots. Also show as stale in this case
+          staleItem = find(Object.values(state.shoots), ['metadata.uid', freezedUID])
+          if (!staleItem) {
           // This should never happen ...
-          Vue.logger.error('Could not find freezed shoot with uid %s in filteredShoots or freezedStaleShoots', freezedUID)
+            Vue.logger.error('Could not find freezed shoot with uid %s in shoots or staleShoots', freezedUID)
+          }
         }
-        return freezedItem
+        return { ...staleItem, stale: true }
       })
     }
     return state.filteredShoots
