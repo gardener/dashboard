@@ -63,7 +63,7 @@ function sanitizeFrontendConfig (frontendConfig) {
   convertAndSanitize(addonDefinition, 'description')
   convertAndSanitize(resourceQuotaHelp, 'text')
   convertAndSanitize(controlPlaneHaHelp, 'text')
-  
+
   for (const item of items) {
     const {
       display = {},
