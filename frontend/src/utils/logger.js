@@ -17,7 +17,7 @@ const levels = {
 export class Logger {
   #level
 
-  constructor (level = 'error') {
+  constructor (level = 'debug') {
     this.#level = level
   }
 
