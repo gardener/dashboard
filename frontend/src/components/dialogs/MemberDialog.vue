@@ -173,25 +173,21 @@ export default {
     },
     validators () {
       const validators = {
-        internalRoles: {},
+        internalRoles: {
+          required: requiredIf(function () {
+            return this.isForeignServiceAccount || this.isUserDialog
+          })
+        },
         internalName: {}
       }
       if (!this.isUpdateDialog) {
         if (this.isUserDialog) {
-          validators.internalRoles = {
-            required
-          }
           validators.internalName = {
             required,
             unique: unique('projectUsernames'),
             isNoServiceAccount: value => !isServiceAccountUsername(value)
           }
         } else if (this.isServiceDialog) {
-          validators.internalRoles = {
-            required: requiredIf(function () {
-              return this.isForeignServiceAccount
-            })
-          }
           validators.internalName = {
             required,
             serviceAccountResource: value => {

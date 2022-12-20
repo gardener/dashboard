@@ -36,6 +36,7 @@ SPDX-License-Identifier: Apache-2.0
             @input="onInputWakeUpTime"
             :error-messages="getErrorMessages('wakeUpTime')"
             type="time"
+            clearable
           ></v-text-field>
         </v-col>
         <v-col cols="2">
@@ -48,6 +49,7 @@ SPDX-License-Identifier: Apache-2.0
             @input="onInputHibernateTime"
             :error-messages="getErrorMessages('hibernateTime')"
             type="time"
+            clearable
           ></v-text-field>
         </v-col>
         <v-col cols="3">
