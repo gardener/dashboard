@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     width="450"
     confirm-required
-    caption="Configure Admin Kubeconfig">
+    caption="Configure Static Token Kubeconfig">
     <template v-slot:actionComponent>
       <static-token-kubeconfig-switch
         v-model="enableStaticTokenKubeconfig"
