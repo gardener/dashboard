@@ -187,7 +187,11 @@ export default {
       'setColorScheme'
     ]),
     handleLogout () {
-      this.$auth.signout()
+      let err
+      if (this.autoLoginEnabled) {
+        err = new Error('NoAutoLogin')
+      }
+      this.$auth.signout(err)
     },
     targetRoute (name) {
       let query
@@ -212,6 +216,7 @@ export default {
       'isAdmin'
     ]),
     ...mapGetters('storage', [
+      'autoLoginEnabled',
       'colorScheme'
     ]),
     helpMenuItems () {

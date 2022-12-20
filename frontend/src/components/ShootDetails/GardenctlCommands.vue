@@ -28,39 +28,6 @@ SPDX-License-Identifier: Apache-2.0
             <span>{{visibilityTitle(index)}}</span>
           </v-tooltip>
         </v-list-item-action>
-        <v-list-item-action class="mx-0">
-          <g-popper
-            title="Customize Gardenctl Commands"
-            popper-key="gardenctl"
-          >
-            <template v-slot:popperRef>
-              <v-btn icon  color="action-button">
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-icon v-on="on">mdi-cog-outline</v-icon>
-                  </template>
-                  <span>Instructions on how to customize the <span class="font-family-monospace">gardenctl</span> commands</span>
-                </v-tooltip>
-              </v-btn>
-            </template>
-            <v-list class="py-0">
-              <v-list-item class="px-0">
-                <v-list-item-icon>
-                  <v-icon>mdi-information-outline</v-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  <span>
-                    Go to
-                    <router-link :to="{ name: 'Settings', query: { namespace: shootNamespace } }">Settings</router-link>
-                    to customize the
-                    <span class="font-family-monospace">gardenctl</span>
-                    command
-                  </span>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </g-popper>
-        </v-list-item-action>
       </v-list-item>
       <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
         <v-list-item-icon></v-list-item-icon>
@@ -77,7 +44,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GPopper from '@/components/GPopper'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
@@ -88,8 +54,7 @@ import Vue from 'vue'
 export default {
   components: {
     CopyBtn,
-    CodeBlock,
-    GPopper
+    CodeBlock
   },
   mixins: [shootItem],
   data () {
@@ -105,9 +70,6 @@ export default {
       'isAdmin',
       'projectFromProjectList'
     ]),
-    ...mapGetters('storage', [
-      'gardenctlOptions'
-    ]),
     projectName () {
       const project = this.projectFromProjectList
       return get(project, 'metadata.name')
@@ -119,11 +81,10 @@ export default {
           .replace(/ &&/g, ' \\\n  &&')
       }
 
-      const gardenctlVersion = this.legacyCommands ? 'Legacy gardenctl' : 'Gardenctl-v2'
       const cmds = [
         {
           title: 'Target Cluster',
-          subtitle: `${gardenctlVersion} command to target the shoot cluster`,
+          subtitle: 'Gardenctl-v2 command to target the shoot cluster',
           value: this.targetShootCommand,
           displayValue: displayValue(this.targetShootCommand)
         }
@@ -132,45 +93,14 @@ export default {
       if (this.isAdmin) {
         cmds.unshift({
           title: 'Target Control Plane',
-          subtitle: `${gardenctlVersion} command to target the control plane of the shoot cluster`,
+          subtitle: 'Gardenctl-v2 command to target the control plane of the shoot cluster',
           value: this.targetControlPlaneCommand,
           displayValue: displayValue(this.targetControlPlaneCommand)
         })
       }
       return cmds
     },
-    legacyCommands () {
-      return get(this.gardenctlOptions, 'legacyCommands', false)
-    },
     targetControlPlaneCommand () {
-      if (this.legacyCommands) {
-        return this.targetControlPlaneCommandV1
-      }
-
-      return this.targetControlPlaneCommandV2
-    },
-    targetShootCommand () {
-      if (this.legacyCommands) {
-        return this.targetShootCommandV1
-      }
-
-      return this.targetShootCommandV2
-    },
-    targetControlPlaneCommandV1 () {
-      const args = []
-      if (this.cfg.apiServerUrl) {
-        args.push(`--server ${this.cfg.apiServerUrl}`)
-      }
-      if (this.shootSeedName) {
-        args.push(`--seed ${this.shootSeedName}`)
-      }
-      if (this.shootTechnicalId) {
-        args.push(`--namespace ${this.shootTechnicalId}`)
-      }
-
-      return `gardenctl target ${args.join(' ')}`
-    },
-    targetControlPlaneCommandV2 () {
       const args = []
       if (this.cfg.clusterIdentity) {
         args.push(`--garden ${this.cfg.clusterIdentity}`)
@@ -186,21 +116,7 @@ export default {
 
       return `gardenctl target ${args.join(' ')}`
     },
-    targetShootCommandV1 () {
-      const args = []
-      if (this.cfg.apiServerUrl) {
-        args.push(`--server ${this.cfg.apiServerUrl}`)
-      }
-      if (this.projectName) {
-        args.push(`--project ${this.projectName}`)
-      }
-      if (this.shootName) {
-        args.push(`--shoot ${this.shootName}`)
-      }
-
-      return `gardenctl target ${args.join(' ')}`
-    },
-    targetShootCommandV2 () {
+    targetShootCommand () {
       const args = []
       if (this.cfg.clusterIdentity) {
         args.push(`--garden ${this.cfg.clusterIdentity}`)

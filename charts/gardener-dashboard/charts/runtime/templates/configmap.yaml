@@ -344,10 +344,6 @@ data:
       resourceQuotaHelp:
         text: {{ required ".Values.global.frontendConfig.resourceQuotaHelp.text is required" .Values.global.frontendConfig.resourceQuotaHelp.text | quote }}
       {{- end }}
-      {{- if .Values.global.frontendConfig.gardenctl }}
-      gardenctl:
-        legacyCommands: {{ .Values.global.frontendConfig.gardenctl.legacyCommands | default false }}
-      {{- end }}
       {{- if .Values.global.frontendConfig.defaultNodesCIDR }}
       defaultNodesCIDR: {{ .Values.global.frontendConfig.defaultNodesCIDR }}
       {{- end }}
