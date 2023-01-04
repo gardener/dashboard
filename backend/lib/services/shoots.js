@@ -288,7 +288,7 @@ exports.info = async function ({ user, namespace, name }) {
   try {
     data.kubeconfigGardenlogin = await getKubeconfigGardenlogin(client, shoot)
   } catch (err) {
-    logger.info('failed to get gardenlogin kubeconfig.', err.message)
+    logger.info('failed to get gardenlogin kubeconfig', err.message)
   }
 
   if (shoot.spec.seedName) {
@@ -380,7 +380,7 @@ exports.seedInfo = async function ({ user, namespace, name }) {
 }
 
 async function getKubeconfigGardenlogin (client, shoot) {
-  if (!shoot?.status?.advertisedAddresses?.length) {
+  if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
   }
 

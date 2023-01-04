@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig - Gardenlogin</v-list-item-title>
-        <v-list-item-subtitle class="wrap-text">Does not contain credentials</v-list-item-subtitle>
+        <v-list-item-subtitle class="wrap-text">Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="mx-0">
         <v-tooltip top>
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel; infoExpansionPanel = false" color="action-button">
+            <v-btn v-on="on" icon @click.native.stop="toggleKubeconfig" color="action-button">
               <v-icon>{{kubeconfigVisibilityIcon}}</v-icon>
             </v-btn>
           </template>
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="infoExpansionPanel = !infoExpansionPanel; kubeconfigExpansionPanel = false" color="action-button">
+            <v-btn v-on="on" icon @click.native.stop="toggleInfo" color="action-button">
               <v-icon>{{infoExpansionPanelIcon}}</v-icon>
             </v-btn>
           </template>
@@ -60,23 +60,19 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-subtitle class="wrap-text">
           <p>
             The downloaded <span class="font-family-monospace">kubeconfig</span> will transparently handle the
-            authentication via <span class="font-family-monospace">gardenlogin kubectl</span> credential plugin.
+            authentication via <span class="font-family-monospace">gardenlogin</span> kubectl credential plugin.
           </p>
           <p>
             If not already done, please
             <external-link url="https://github.com/gardener/gardenlogin#installation">install</external-link>
             <span class="font-family-monospace pl-1">gardenlogin</span> and
             <external-link url="https://github.com/gardener/gardenlogin#configure-gardenlogin">configure</external-link>
-            it accordingly.<br/>
-            Following is an example config file for
-            <span class="font-family-monospace pl-1">gardenlogin</span>.<br/>
-            Please note that the path of the
-            <span class="font-family-monospace">kubeconfig</span>
-            refers to the garden cluster
-            <span class="font-family-monospace">kubeconfig</span>
-            which you can download from the <router-link :to="accountRoute">Account</router-link> page.
+            it accordingly.
           </p>
-          <code-block lang="yaml" :content="gardenloginConfigYaml" :show-copy-button="true"></code-block>
+          <p>
+            Following is an example config file for <span class="font-family-monospace pl-1">gardenlogin</span>.
+          </p>
+          <gardenctl-v2-config-example></gardenctl-v2-config-example>
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
@@ -84,10 +80,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import ExternalLink from '@/components/ExternalLink'
+import GardenctlV2ConfigExample from '@/components/GardenctlV2ConfigExample'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -95,7 +91,8 @@ export default {
   components: {
     CopyBtn,
     CodeBlock,
-    ExternalLink
+    ExternalLink,
+    GardenctlV2ConfigExample
   },
   mixins: [shootItem],
   data () {
@@ -105,15 +102,6 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
-    accountRoute () {
-      return {
-        name: 'Account',
-        query: { namespace: this.shootNamespace }
-      }
-    },
     kubeconfig () {
       return this.shootInfo?.kubeconfigGardenlogin
     },
@@ -131,15 +119,17 @@ export default {
     },
     getQualifiedName () {
       return `kubeconfig-gardenlogin--${this.shootProjectName}--${this.shootName}.yaml`
-    },
-    gardenloginConfigYaml () {
-      return `# place gardenlogin config file under ~/.garden/gardenctl-v2.yaml
-gardens:
-  - identity: ${this.cfg.clusterIdentity}
-    kubeconfig: "<path-to-garden-cluster-kubeconfig>"`
     }
   },
   methods: {
+    toggleKubeconfig () {
+      this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
+      this.infoExpansionPanel = false
+    },
+    toggleInfo () {
+      this.infoExpansionPanel = !this.infoExpansionPanel
+      this.kubeconfigExpansionPanel = false
+    },
     reset () {
       this.kubeconfigExpansionPanel = false
     },

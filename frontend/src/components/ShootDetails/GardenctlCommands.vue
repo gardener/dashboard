@@ -28,6 +28,16 @@ SPDX-License-Identifier: Apache-2.0
             <span>{{visibilityTitle(index)}}</span>
           </v-tooltip>
         </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="toggleInfo(index)" color="action-button">
+                <v-icon>{{infoVisibilityIcon(index)}}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{visibilityTitle(index)}}</span>
+          </v-tooltip>
+        </v-list-item-action>
       </v-list-item>
       <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
         <v-list-item-icon></v-list-item-icon>
@@ -39,6 +49,24 @@ SPDX-License-Identifier: Apache-2.0
           ></code-block>
         </v-list-item-content>
       </v-list-item>
+      <v-list-item v-if="infoExpansionPanel[index]" :key="'expansion-gardenctl-info-' + title">
+        <v-list-item-icon></v-list-item-icon>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle class="wrap-text">
+            <p>
+              If not already done, please
+              <external-link url="https://github.com/gardener/gardenctl-v2#installation">install</external-link>
+              <span class="font-family-monospace pl-1">gardenctl-v2</span> and
+              <external-link url="https://github.com/gardener/gardenctl-v2#configuration">configure</external-link>
+              it accordingly.
+            </p>
+            <p>
+              Following is an example config file for <span class="font-family-monospace pl-1">gardenctl-v2</span>.
+            </p>
+            <gardenctl-v2-config-example></gardenctl-v2-config-example>
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
     </template>
   </v-list>
 </template>
@@ -46,6 +74,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
+import ExternalLink from '@/components/ExternalLink'
+import GardenctlV2ConfigExample from '@/components/GardenctlV2ConfigExample'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
@@ -54,12 +84,15 @@ import Vue from 'vue'
 export default {
   components: {
     CopyBtn,
-    CodeBlock
+    CodeBlock,
+    ExternalLink,
+    GardenctlV2ConfigExample
   },
   mixins: [shootItem],
   data () {
     return {
-      expansionPanel: []
+      expansionPanel: [],
+      infoExpansionPanel: []
     }
   },
   computed: {
@@ -140,6 +173,17 @@ export default {
     },
     toggle (index) {
       Vue.set(this.expansionPanel, index, !this.expansionPanel[index])
+      Vue.set(this.infoExpansionPanel, index, false)
+    },
+    infoVisibilityIcon (index) {
+      return this.infoExpansionPanel[index] ? 'mdi-chevron-up' : 'mdi-chevron-down'
+    },
+    infoVisibilityTitle (index) {
+      return this.infoExpansionPanel[index] ? 'Hide Info' : 'Show Info'
+    },
+    toggleInfo (index) {
+      Vue.set(this.infoExpansionPanel, index, !this.infoExpansionPanel[index])
+      Vue.set(this.expansionPanel, index, false)
     }
   }
 }
