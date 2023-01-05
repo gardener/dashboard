@@ -57,11 +57,11 @@ global:
   servicePort: 8080
   resources:
     limits:
-      cpu: 250m
-      memory: 300Mi
+      cpu: 1.0
+      memory: 1G
     requests:
       cpu: 100m
-      memory: 120Mi
+      memory: 350Mi
 
   # If dashboard is running in an environment with less than 1.5GB of available memory
   # you should cap the maximum available "old space". In a Docker-512MB-Container,
