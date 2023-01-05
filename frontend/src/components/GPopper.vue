@@ -80,7 +80,8 @@ export default {
             fn: this.customArrowStyles,
             order: 875 // needs to run beofre applyStyle modifier
           }
-        }
+        },
+        positionFixed: true
       }
       return options
     }
