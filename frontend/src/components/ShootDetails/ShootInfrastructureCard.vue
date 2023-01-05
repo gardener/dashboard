@@ -76,8 +76,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content :class="{ 'pt-0': showSeedInfo}">
           <v-list-item-subtitle>Control Plane High Availability</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <template v-if="!!shootControlPlaneHighHAFailureTolerance">
-              Failure Tolerance
+            <template v-if="!!shootControlPlaneHaFailureTolerance">
+              <span class="mr-1">Failure tolerance type</span>
               <control-plane-ha-tag :shoot-item="shootItem" x-small></control-plane-ha-tag>
             </template>
             <template v-else>Not configured</template>
@@ -150,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0
                   :key="secretName">
               </dns-provider>
             </template>
-            <span v-else>No DNS Provider configured</span>
+            <span v-else>No DNS provider configured</span>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>

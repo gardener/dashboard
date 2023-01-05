@@ -389,7 +389,7 @@ export default {
           hidden: false
         },
         {
-          text: 'ControlPlane HA',
+          text: 'Control Plane HA',
           value: 'cpha',
           sortable: true,
           align: 'start',

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <manage-control-plane-ha
         :configured-seed="shootSeedName"
-        :configured-cp-failure-tolerance-type="shootControlPlaneHighHAFailureTolerance"
+        :configured-cp-failure-tolerance-type="shootControlPlaneHaFailureTolerance"
       ></manage-control-plane-ha>
     </template>
   </action-button-dialog>
@@ -31,7 +31,6 @@ import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'addon-configuration',
   components: {
     ActionButtonDialog,
     ManageControlPlaneHa
