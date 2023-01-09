@@ -57,7 +57,7 @@ export default {
     ]),
     zoneSupported () {
       const seeds = this.seedsByCloudProfileName(this.shootCloudProfileName)
-      return some(seeds, ({ data }) => data.zones.length >= 3)
+      return some(seeds, ({ data }) => data.zones?.length >= 3)
     },
     zoneHAConfigurationError () {
       return this.shootControlPlaneHaFailureTolerance === 'zone' &&

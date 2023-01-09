@@ -95,7 +95,7 @@ export default {
       } else {
         seeds = this.seedsByCloudProfileName(this.cloudProfileName)
       }
-      return some(seeds, ({ data }) => data.zones.length >= 3)
+      return some(seeds, ({ data }) => data.zones?.length >= 3)
     },
     controlPlaneHa: {
       get () {
