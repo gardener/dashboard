@@ -23,6 +23,34 @@ SPDX-License-Identifier: Apache-2.0
       :hint="hint"
       persistent-hint
     >
+      <template v-slot:prepend-item>
+        <div class="d-flex filter-div">
+          <v-select
+            v-if="cpuItems.length > 2"
+            class="ma-1"
+            :items="cpuItems"
+            v-model="cpuFilter"
+            label="CPU Filter"
+          >
+          </v-select>
+          <v-select
+            v-if="memoryItems.length > 2"
+            class="ma-1"
+            :items="memoryItems"
+            v-model="memoryFilter"
+            label="Memory Filter"
+          >
+          </v-select>
+          <v-select
+            v-if="gpuItems.length > 2"
+            class="ma-1"
+            :items="gpuItems"
+            v-model="gpuFilter"
+            label="GPU Filter"
+          >
+          </v-select>
+        </div>
+      </template>
       <template v-slot:item="{ item }">
         <v-list-item-content>
           <v-list-item-title>
@@ -45,6 +73,9 @@ import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
+import uniq from 'lodash/uniq'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
 
 const validationErrors = {
   internalValue: {
@@ -82,7 +113,10 @@ export default {
     return {
       lazyValue: this.value,
       lazySearch: this.searchInput,
-      validationErrors
+      validationErrors,
+      cpuFilter: 'all',
+      gpuFilter: 'all',
+      memoryFilter: 'all'
     }
   },
   computed: {
@@ -107,12 +141,23 @@ export default {
       }
     },
     machineTypeItems () {
-      const machineTypes = [...this.machineTypes]
+      let machineTypes = [...this.machineTypes]
       if (this.notInList && this.internalValue) {
         machineTypes.push({
           name: this.internalValue
         })
       }
+
+      if (this.cpuFilter !== 'all') {
+        machineTypes = filter(machineTypes, ['cpu', this.cpuFilter])
+      }
+      if (this.gpuFilter !== 'all') {
+        machineTypes = filter(machineTypes, ['gpu', this.gpuFilter])
+      }
+      if (this.memoryFilter !== 'all') {
+        machineTypes = filter(machineTypes, ['memory', this.memoryFilter])
+      }
+
       return machineTypes
     },
     notInList () {
@@ -121,14 +166,40 @@ export default {
     },
     hint () {
       return this.notInList ? 'This machine type may not be supported by your worker' : ''
+    },
+    cpuItems () {
+      const cpuItems = uniq(map(this.machineTypes, 'cpu'))
+      return ['all', ...cpuItems.sort((a, b) => (a - b))]
+    },
+    gpuItems () {
+      const gpuItems = uniq(map(this.machineTypes, 'gpu'))
+      return ['all', ...gpuItems.sort((a, b) => (a - b))]
+    },
+    memoryItems () {
+      const memoryItems = uniq(map(this.machineTypes, 'memory'))
+      return ['all', ...memoryItems.sort((a, b) => this.rawMemoryValue(a) - this.rawMemoryValue(b))]
     }
   },
   validations,
   methods: {
+    rawMemoryValue (memoryString) {
+      let memoryVal = memoryString.replace(/\D/g, '')
+      if (memoryString.includes('Gi')) {
+        memoryVal = memoryVal * 1024
+      }
+      if (memoryString.includes('Ti')) {
+        memoryVal = memoryVal * 1024 * 1024
+      }
+
+      return memoryVal
+    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
     filter (item, query) {
+      if (query === this.internalValue) {
+        return true
+      }
       if (!item) {
         return false
       }
@@ -179,3 +250,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+
+  .filter-div {
+    width: 400px;
+  }
+
+</style>
