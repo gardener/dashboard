@@ -609,3 +609,34 @@ export function mapTableHeader (headers, valueKey) {
 export function isHtmlColorCode (value) {
   return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
 }
+
+const units = {
+  m: 0.001,
+  k: 1024,
+  Ki: 1000,
+  M: 1024 * 1024,
+  Mi: 1000 * 1000,
+  G: 1024 * 1024 * 1024,
+  Gi: 1000 * 1000 * 1000,
+  T: 1024 * 1024 * 1024 * 1024,
+  Ti: 1000 * 1000 * 1000 * 1000,
+  P: 1024 * 1024 * 1024 * 1024 * 1024,
+  Pi: 1000 * 1000 * 1000 * 1000 * 1000,
+  E: 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
+  Ei: 1000 * 1000 * 1000 * 1000 * 1000 * 1000
+}
+
+const sizeRegex = new RegExp('^(\\d+[e\\d]*)(' + Object.keys(units).join('|') + ')?$')
+
+export function sizeStringToBytes (sizeStr) {
+  const [ok, value, unit] = sizeRegex.exec(sizeStr) || []
+  if (!ok) {
+    return sizeStr
+  }
+
+  if (!unit) {
+    return parseFloat(value)
+  }
+
+  return parseFloat(value) * units[unit]
+}

@@ -11,6 +11,7 @@ import {
   canI,
   selectedImageIsNotLatest,
   isHtmlColorCode,
+  sizeStringToBytes,
   defaultCriNameByKubernetesVersion
 } from '@/utils'
 
@@ -542,6 +543,32 @@ describe('utils', () => {
 
     it('should return false on non-html color code', () => {
       expect(isHtmlColorCode('foo')).toBe(false)
+    })
+  })
+
+  describe('string to bytes', () => {
+    it('should not convert without unit', () => {
+      expect(sizeStringToBytes('5000')).toBe(5000)
+    })
+
+    it('should not convert with unknown unit', () => {
+      expect(sizeStringToBytes('5000a')).toBe('5000a')
+    })
+
+    it('should convert with m unit (increase)', () => {
+      expect(sizeStringToBytes('5000m')).toBe(5)
+    })
+
+    it('should convert with G unit (increase)', () => {
+      expect(sizeStringToBytes('5G')).toBe(5368709120)
+    })
+
+    it('should convert with Gi unit (increase)', () => {
+      expect(sizeStringToBytes('5Gi')).toBe(5000000000)
+    })
+
+    it('should convert with exponent', () => {
+      expect(sizeStringToBytes('5e3G')).toBe(5368709120000)
     })
   })
 })

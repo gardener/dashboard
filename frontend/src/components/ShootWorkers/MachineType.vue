@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, sizeStringToBytes } from '@/utils'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import map from 'lodash/map'
@@ -177,22 +177,11 @@ export default {
     },
     memoryItems () {
       const memoryItems = uniq(map(this.machineTypes, 'memory'))
-      return ['all', ...memoryItems.sort((a, b) => this.rawMemoryValue(a) - this.rawMemoryValue(b))]
+      return ['all', ...memoryItems.sort((a, b) => sizeStringToBytes(a) - sizeStringToBytes(b))]
     }
   },
   validations,
   methods: {
-    rawMemoryValue (memoryString) {
-      let memoryVal = memoryString.replace(/\D/g, '')
-      if (memoryString.includes('Gi')) {
-        memoryVal = memoryVal * 1024
-      }
-      if (memoryString.includes('Ti')) {
-        memoryVal = memoryVal * 1024 * 1024
-      }
-
-      return memoryVal
-    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
