@@ -42,7 +42,8 @@ const shootList = [
     createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
     secretBindingName: 'barSecretName',
-    seed: 'infra4-seed-without-secretRef'
+    seed: 'infra4-seed-without-secretRef',
+    advertisedAddresses: null
   }),
   getShoot({
     uid: 4,
@@ -68,7 +69,11 @@ function getShoot ({
   secretBindingName = 'foo-secret',
   seed = 'infra1-seed',
   hibernation = { enabled: false },
-  kubernetesVersion = '1.16.0'
+  kubernetesVersion = '1.16.0',
+  advertisedAddresses = [{
+    name: 'external',
+    url: 'https://api.barShoot.foo.shoot.test'
+  }]
 }) {
   uid = uid || `${namespace}--${name}`
   const shoot = {
@@ -99,6 +104,9 @@ function getShoot ({
   }
   if (project) {
     shoot.status.technicalID = `shoot--${project}--${name}`
+  }
+  if (advertisedAddresses) {
+    shoot.status.advertisedAddresses = advertisedAddresses
   }
   return shoot
 }

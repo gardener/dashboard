@@ -132,6 +132,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -225,6 +231,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -293,6 +305,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -431,6 +449,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -486,6 +510,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -552,6 +582,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -605,6 +641,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -660,6 +702,12 @@ Array [
         "seedName": "infra1-seed",
       },
       "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.barShoot.foo.shoot.test",
+          },
+        ],
         "technicalID": "shoot--foo--barShoot",
       },
     },
@@ -698,6 +746,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -754,6 +808,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -809,6 +869,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -880,6 +946,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -934,6 +1006,12 @@ Object {
     "seedName": "foo-new-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -1012,6 +1090,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -1058,6 +1142,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }
@@ -1326,6 +1416,12 @@ Object {
         "seedName": "infra1-seed",
       },
       "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.barShoot.foo.shoot.test",
+          },
+        ],
         "technicalID": "shoot--foo--fooShoot",
       },
     },
@@ -1355,6 +1451,12 @@ Object {
         "seedName": "infra1-seed",
       },
       "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.barShoot.foo.shoot.test",
+          },
+        ],
         "technicalID": "shoot--foo--barShoot",
       },
     },
