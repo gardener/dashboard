@@ -35,5 +35,11 @@ describe('utils', () => {
       expect(timeWithOffset.isValid()).toBe(true)
       expect(timeWithOffset.getTimezoneString({ colon: false })).toBe('+0102')
     })
+
+    it('should return next timestamp iso string', () => {
+      const timeWithOffset = new TimeWithOffset('01:02:03+04:05')
+      expect(timeWithOffset.isValid()).toBe(true)
+      expect(timeWithOffset.getNextTimestampISOString().length).toBe(24)
+    })
   })
 })

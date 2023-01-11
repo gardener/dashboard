@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import moment from '@/utils/moment'
+
 const timeWithOffsetRegex = /^(?:(\d{2}):?(\d{2}):?(\d{2})?)?(?:([+-])(\d{2}):?(\d{2}))?$/
 
 class TimeWithOffset {
@@ -33,6 +35,18 @@ class TimeWithOffset {
 
   toString () {
     return `${this.hours}:${this.minutes} GMT${this.offsetSign}${this.offsetHours}:${this.offsetMinutes}`
+  }
+
+  getNextTimestampISOString () {
+    let nextTimestamp = moment(`${this.hours}${this.minutes}${this.offsetSign}${this.offsetHours}${this.offsetMinutes}`, 'HHmmZ')
+    if (!nextTimestamp.isValid()) {
+      return
+    }
+    if (nextTimestamp.isBefore(moment())) {
+      nextTimestamp = nextTimestamp.add(1, 'd')
+    }
+
+    return nextTimestamp.toISOString()
   }
 }
 
