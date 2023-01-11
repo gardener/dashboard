@@ -1177,6 +1177,24 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.ca-cluster",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/kube-system/configmaps/cluster-identity",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
@@ -1240,10 +1258,137 @@ users:
       client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
       client-key-data: Y2xpZW50LWtleS1kYXRh
 ",
+  "kubeconfigGardenlogin": "apiVersion: v1
+kind: Config
+current-context: garden-foo--barShoot-external
+contexts:
+  - name: garden-foo--barShoot-external
+    context:
+      cluster: garden-foo--barShoot-external
+      user: garden-foo--barShoot
+      namespace: default
+clusters:
+  - name: garden-foo--barShoot-external
+    cluster:
+      server: https://api.barShoot.foo.shoot.test
+      certificate-authority-data: Y2EuY3J0
+      extensions:
+        - name: client.authentication.k8s.io/exec
+          extension:
+            shootRef:
+              namespace: garden-foo
+              name: barShoot
+            gardenClusterIdentity: kubernetes
+users:
+  - name: garden-foo--barShoot
+    user:
+      exec:
+        apiVersion: client.authentication.k8s.io/v1beta1
+        command: kubectl
+        args:
+          - gardenlogin
+          - get-client-certificate
+        provideClusterInfo: true
+        interactiveMode: IfAvailable
+",
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
   "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
   "serverUrl": "https://api.barShoot.foo.shoot.cluster",
+}
+`;
+
+exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dummyShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.kubeconfig",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra4-seed-without-secretRef",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.monitoring",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+    },
+  ],
+]
+`;
+
+exports[`api shoots should return shoot info without gardenlogin kubeconfig 2`] = `
+Object {
+  "canLinkToSeed": false,
+  "cluster_password": "pass-foo-dummyShoot",
+  "cluster_username": "user-foo-dummyShoot",
+  "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
+  "kubeconfig": "apiVersion: v1
+kind: Config
+current-context: shoot--foo--dummyShoot
+contexts:
+  - name: shoot--foo--dummyShoot
+    context:
+      cluster: shoot--foo--dummyShoot
+      user: shoot--foo--dummyShoot
+clusters:
+  - name: shoot--foo--dummyShoot
+    cluster:
+      server: https://api.dummyShoot.foo.shoot.cluster
+      certificate-authority-data: Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=
+users:
+  - name: shoot--foo--dummyShoot
+    user:
+      client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
+      client-key-data: Y2xpZW50LWtleS1kYXRh
+",
+  "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
+  "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
+  "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
+  "serverUrl": "https://api.dummyShoot.foo.shoot.cluster",
 }
 `;
 

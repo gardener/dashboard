@@ -114,6 +114,33 @@ describe('api', function () {
     it('should return shoot info', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(7)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
+
+      expect(logger.info).toBeCalledTimes(0)
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return shoot info without gardenlogin kubeconfig', async function () {
+      const name = 'dummyShoot' // has no advertised addresses
+
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
@@ -128,6 +155,9 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
+
+      expect(logger.info).toBeCalledTimes(1)
+      expect(logger.info).lastCalledWith('failed to get gardenlogin kubeconfig', 'Shoot has no advertised addresses')
 
       expect(res.body).toMatchSnapshot()
     })
