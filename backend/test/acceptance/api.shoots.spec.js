@@ -25,6 +25,7 @@ describe('api', function () {
   afterEach(() => {
     mockRequest.mockReset()
     kubeconfig.cleanKubeconfig.mockClear()
+    logger.info.mockReset()
   })
 
   describe('shoots', function () {
