@@ -138,7 +138,7 @@ export default {
       return `shootStatus_${this.popperKey}`
     },
     toolbarTitle () {
-      if (this.shootItem?.stale) {
+      if (this.isStaleShoot) {
         return 'Last Status'
       }
       return this.statusTitle
@@ -180,7 +180,7 @@ export default {
       return this.shootLastOperation.state || 'Pending'
     },
     color () {
-      if (this.isAborted || this.shootItem?.stale) {
+      if (this.isAborted || this.isStaleShoot) {
         return 'grey'
       } else if (this.isError) {
         return 'error'

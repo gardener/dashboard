@@ -134,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <v-tooltip top>
         <template v-slot:activator="{ on }">
-          <div class="stale-overlay" v-on="on"></div>
+          <div v-if="isStaleShoot" class="stale-overlay" v-on="on"></div>
         </template>
         This cluster is no longer part of the list and kept as stale item
       </v-tooltip>

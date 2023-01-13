@@ -249,6 +249,9 @@ export const shootItem = {
     },
     shootStatus () {
       return get(this.shootItem, 'status', {})
+    },
+    isStaleShoot () {
+      return this.shootItem?.stale
     }
   },
   methods: {
