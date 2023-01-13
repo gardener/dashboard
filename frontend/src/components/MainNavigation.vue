@@ -132,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-icon>mdi-home-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="text-subtitle-1">Home</v-list-item-title>
+            <v-list-item-title class="text-subtitle-1 main-navigation-title--text">Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <template v-if="namespace">
