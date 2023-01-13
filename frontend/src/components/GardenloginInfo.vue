@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" color="action-button">mdi-information-outline</v-icon>
           </template>
-          <span>Show information about Gardenlogin</span>
+          <span>Show information about gardenlogin</span>
         </v-tooltip>
       </v-btn>
     </template>
