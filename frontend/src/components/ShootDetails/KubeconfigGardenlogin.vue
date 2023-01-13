@@ -12,8 +12,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig - Gardenlogin</v-list-item-title>
-        <v-list-item-subtitle class="wrap-text">Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)</v-list-item-subtitle>
+        <v-list-item-subtitle class="wrap-text">
+          Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)
+        </v-list-item-subtitle>
       </v-list-item-content>
+      <v-list-item-action class="mx-0">
+        <gardenlogin-info></gardenlogin-info>
+      </v-list-item-action>
       <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -37,43 +42,11 @@ SPDX-License-Identifier: Apache-2.0
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action class="mx-0">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="toggleInfo" color="action-button">
-              <v-icon>{{infoExpansionPanelIcon}}</v-icon>
-            </v-btn>
-          </template>
-          <span>{{infoVisibilityTitle}}</span>
-        </v-tooltip>
-      </v-list-item-action>
     </v-list-item>
     <v-list-item v-if="kubeconfigExpansionPanel" key="expansion-gardenlogin-kubeconfig">
       <v-list-item-icon></v-list-item-icon>
       <v-list-item-content class="pt-0">
         <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
-      </v-list-item-content>
-    </v-list-item>
-    <v-list-item v-if="infoExpansionPanel" key="expansion-gardenlogin-info">
-      <v-list-item-icon></v-list-item-icon>
-      <v-list-item-content class="pt-0">
-        <v-list-item-subtitle class="wrap-text">
-          <p>
-            The downloaded <span class="font-family-monospace">kubeconfig</span> will transparently handle the
-            authentication via <span class="font-family-monospace">gardenlogin</span> kubectl credential plugin.
-          </p>
-          <p>
-            If not already done, please
-            <external-link url="https://github.com/gardener/gardenlogin#installation">install</external-link>
-            <span class="font-family-monospace pl-1">gardenlogin</span> and
-            <external-link url="https://github.com/gardener/gardenlogin#configure-gardenlogin">configure</external-link>
-            it accordingly.
-          </p>
-          <p>
-            Following is an example config file for <span class="font-family-monospace pl-1">gardenlogin</span>.
-          </p>
-          <gardenctl-v2-config-example></gardenctl-v2-config-example>
-        </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
   </div>
@@ -82,8 +55,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
-import ExternalLink from '@/components/ExternalLink'
-import GardenctlV2ConfigExample from '@/components/GardenctlV2ConfigExample'
+import GardenloginInfo from '@/components/GardenloginInfo.vue'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -91,25 +63,17 @@ export default {
   components: {
     CopyBtn,
     CodeBlock,
-    ExternalLink,
-    GardenctlV2ConfigExample
+    GardenloginInfo
   },
   mixins: [shootItem],
   data () {
     return {
-      kubeconfigExpansionPanel: false,
-      infoExpansionPanel: false
+      kubeconfigExpansionPanel: false
     }
   },
   computed: {
     kubeconfig () {
       return this.shootInfo?.kubeconfigGardenlogin
-    },
-    infoExpansionPanelIcon () {
-      return this.infoExpansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
-    },
-    infoVisibilityTitle () {
-      return this.infoExpansionPanel ? 'Hide Info' : 'Show Info'
     },
     kubeconfigVisibilityIcon () {
       return this.kubeconfigExpansionPanel ? 'mdi-eye-off' : 'mdi-eye'
@@ -124,11 +88,6 @@ export default {
   methods: {
     toggleKubeconfig () {
       this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
-      this.infoExpansionPanel = false
-    },
-    toggleInfo () {
-      this.infoExpansionPanel = !this.infoExpansionPanel
-      this.kubeconfigExpansionPanel = false
     },
     reset () {
       this.kubeconfigExpansionPanel = false
