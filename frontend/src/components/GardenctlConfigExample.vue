@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <div class="mt-2">
       Alternatively, you can run the following <span class="font-family-monospace pl-1">gardenctl</span> command:
     </div>
-     <code-block lang="shell" :content="configCmd" :show-copy-button="true"></code-block>
+     <code-block lang="shell" :content="`$ ${configCmd}`" :clipboard="configCmd" :show-copy-button="true"></code-block>
     <div class="mt-2">
       <v-icon class="pb-1" small>mdi-information-outline</v-icon>
       Note that the
@@ -48,7 +48,7 @@ export default {
     kubeconfig: "<path-to-garden-cluster-kubeconfig>"`
     },
     configCmd () {
-      return `$ gardenctl config set-garden ${this.cfg.clusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
+      return `gardenctl config set-garden ${this.cfg.clusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
     }
   }
 }
