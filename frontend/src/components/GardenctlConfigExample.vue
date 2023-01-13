@@ -39,8 +39,7 @@ export default {
     ]),
     accountRoute () {
       return {
-        name: 'Account',
-        query: { namespace: this.shootNamespace }
+        name: 'Account'
       }
     },
     gardenctlConfigYaml () {
