@@ -321,7 +321,6 @@ export function getControlPlaneZone (workers, infrastructureKind, oldControlPlan
   switch (infrastructureKind) {
     case 'gcp':
     case 'hcloud':
-    case 'openstack':
       if (includes(workerZones, oldControlPlaneZone)) {
         return oldControlPlaneZone
       }

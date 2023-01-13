@@ -365,12 +365,12 @@ function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
 }
 
 function decorateClassificationObject (obj) {
-  const classification = obj.classification
+  const classification = obj.classification ?? 'supported'
   const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
   return {
     ...obj,
     isPreview: classification === 'preview',
-    isSupported: !isExpired && (!classification || classification === 'supported'),
+    isSupported: classification === 'supported' && !isExpired,
     isDeprecated: classification === 'deprecated',
     isExpired,
     expirationDateString: getDateFormatted(obj.expirationDate)

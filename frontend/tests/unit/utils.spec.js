@@ -368,34 +368,52 @@ describe('utils', () => {
         vendorName: 'Foo',
         icon: 'icon',
         version: '1.1.1',
-        expirationDate: '2119-04-05T01:02:03Z' // not expired
+        expirationDate: '2119-04-05T01:02:03Z', // not expired
+        isSupported: true
       },
       {
         name: 'FooImage2',
         vendorName: 'Foo',
         icon: 'icon',
-        version: '1.2.2'
+        version: '1.2.2',
+        isSupported: true
       },
       {
         name: 'FooImage3',
         vendorName: 'Foo',
         icon: 'icon',
-        version: '1.3.2'
+        version: '1.3.2',
+        isSupported: true
       },
       {
         name: 'FooImage4',
         vendorName: 'Foo',
         icon: 'icon',
         version: '1.3.3',
-        isPreview: true,
-        expirationDate: '2119-04-05T01:02:03Z' // not expired
+        expirationDate: '2119-04-05T01:02:03Z', // not expired
+        isPreview: true
       },
       {
         name: 'BarImage',
         vendorName: 'Bar',
         icon: 'icon',
         version: '3.3.2',
+        isSupported: true,
         expirationDate: '2019-04-05T01:02:03Z' // expired
+      },
+      {
+        name: 'FooImage5',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.3.4',
+        isDeprecated: true
+      },
+      {
+        name: 'FooImage6',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.4.4',
+        isPreview: true
       }
     ]
 
@@ -422,19 +440,19 @@ describe('utils', () => {
     })
 
     describe('#selectedImageIsNotLatest', () => {
-      it('selected image should be latest (multiple exist, preview exists)', () => {
+      it('selected image should not be be latest (one newer supported exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
+        expect(result).toBe(true)
+      })
+
+      it('selected image should be latest (only newer deprecated, preview and other vendor exists)', () => {
         const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
         expect(result).toBe(false)
       })
 
-      it('selected image should be latest (one exists)', () => {
-        const result = selectedImageIsNotLatest(sampleMachineImages[3], sampleMachineImages)
+      it('selected image should be latest (only one exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[4], sampleMachineImages)
         expect(result).toBe(false)
-      })
-
-      it('selected image should not be latest', () => {
-        const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
-        expect(result).toBe(true)
       })
     })
 
