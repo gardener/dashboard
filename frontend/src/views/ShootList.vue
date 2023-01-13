@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-data-table>
 
-      <v-dialog v-model="clusterAccessDialog" max-width="600">
+      <v-dialog v-model="clusterAccessDialog" max-width="850">
         <v-card>
           <v-card-title class="toolbar-background toolbar-title--text">
             <div class="text-h5">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
