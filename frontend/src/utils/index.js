@@ -602,8 +602,8 @@ export function targetText (target) {
 export function selectedImageIsNotLatest (machineImage, machineImages) {
   const { version: testImageVersion, vendorName: testVendor } = machineImage
 
-  return some(machineImages, ({ version, vendorName, isPreview }) => {
-    return testVendor === vendorName && semver.gt(version, testImageVersion) && !isPreview
+  return some(machineImages, ({ version, vendorName, isSupported }) => {
+    return testVendor === vendorName && semver.gt(version, testImageVersion) && isSupported
   })
 }
 
