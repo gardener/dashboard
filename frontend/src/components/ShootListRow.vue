@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr>
-    <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class">
+  <tr :class="{ 'stale': isStale }">
+    <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class" class="position-relative">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
           {{ shootProjectName }}
@@ -77,6 +77,16 @@ SPDX-License-Identifier: Apache-2.0
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
+      <template v-if="cell.header.value === 'issueSince'">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix></time-string>
+            </div>
+          </template>
+          {{ shootIssueSince }}
+        </v-tooltip>
+      </template>
       <template v-if="cell.header.value === 'accessRestrictions'">
         <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
       </template>
@@ -122,6 +132,12 @@ SPDX-License-Identifier: Apache-2.0
           <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <div v-if="isStaleShoot" class="stale-overlay" v-on="on"></div>
+        </template>
+        This cluster is no longer part of the list and kept as stale item
+      </v-tooltip>
     </td>
   </tr>
 </template>
@@ -150,7 +166,9 @@ import AutoHide from '@/components/AutoHide'
 import ExternalLink from '@/components/ExternalLink'
 
 import {
-  isTypeDelete
+  isTypeDelete,
+  getTimestampFormatted,
+  getIssueSince
 } from '@/utils'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -240,17 +258,35 @@ export default {
         name: this.shootName
       })
     },
+    shootIssueSinceTimestamp () {
+      return getIssueSince(this.shootItem.status)
+    },
+    shootIssueSince () {
+      return getTimestampFormatted(this.shootIssueSinceTimestamp)
+    },
     cells () {
       return map(this.visibleHeaders, header => {
         let value = get(this.shootItem, header.path)
         if (isObject(value)) { // only allow primitive types
           value = undefined
         }
+
+        let className = header.class
+        if (this.isStale && !header.stalePointerEvents) {
+          className = `${header.class} no-stale-pointer-events`
+        }
+
         return {
-          header,
+          header: {
+            ...header,
+            class: className
+          },
           value // currently only applicable for header.customField === true
         }
       })
+    },
+    isStale () {
+      return this.shootItem.stale
     }
   },
   methods: {
@@ -264,5 +300,31 @@ export default {
 <style lang="scss" scoped>
   .labels {
     line-height: 10px;
+  }
+
+  .position-relative {
+    position: relative;
+  }
+
+  .stale-overlay {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .theme--light .stale .stale-overlay {
+    background-color: rgba(255,255,255,0.7)
+  }
+  .theme--dark .stale .stale-overlay {
+    background-color: rgba(30,30,30,0.7)
+  }
+
+  .no-stale-pointer-events {
+    .stale-overlay {
+      pointer-events: auto !important;
+    }
   }
 </style>

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="d-flex align-center">
-      <g-popper :title="statusTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
+      <g-popper :title="toolbarTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
         <template v-slot:popperRef>
           <div>
             <v-tooltip top>
@@ -137,6 +137,12 @@ export default {
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
     },
+    toolbarTitle () {
+      if (this.isStaleShoot) {
+        return 'Last Status'
+      }
+      return this.statusTitle
+    },
     statusTitle () {
       const statusTitle = []
       if (this.isShootStatusHibernationProgressing) {
@@ -174,8 +180,8 @@ export default {
       return this.shootLastOperation.state || 'Pending'
     },
     color () {
-      if (this.isAborted) {
-        return 'grey darken-1'
+      if (this.isAborted || this.isStaleShoot) {
+        return 'grey'
       } else if (this.isError) {
         return 'error'
       } else {
