@@ -23,24 +23,21 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!cpFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <div v-if="cpFailureToleranceType === 'node'">
-      Control plane failure tolerance type <code>node</code> configured
-      <v-alert type="info" v-if="!zoneSupported" dense outlined>
+    <div v-else>
+      Control plane failure tolerance type <code>cpFailureToleranceType</code> configured
+      <v-alert type="info" v-if="cpFailureToleranceType === 'node' && !zoneSupported" dense outlined>
         <template v-if="clusterIsNew">
           The selected cloud profile has no <code>multi-zonal</code> seed.
         </template>
         <template v-else>
-          The current seed {{configuredSeed}} is not <code>multi-zonal</code>.
+          The current Seed {{configuredSeed}} is not <code>multi-zonal</code>.
         </template>
         Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
       </v-alert>
+      <v-alert type="info" v-if="changeAllowed" dense outlined>
+        It is not possible to disable or change control plane high availability later.
+      </v-alert>
     </div>
-    <div v-if="cpFailureToleranceType === 'zone'">
-      Control plane failure tolerance type <code>zone</code> configured
-    </div>
-    <v-alert type="info" v-if="!!cpFailureToleranceType && changeAllowed" dense outlined>
-      It is not possible to disable control plane high availability later.
-    </v-alert>
     <div v-if="!!controlPlaneHaHelpHtml" class="wrap-text" v-html="controlPlaneHaHelpHtml"></div>
     <external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
   </div>
