@@ -14,11 +14,16 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import padStart from 'lodash/padStart'
 import semver from 'semver'
+import find from 'lodash/find'
+import isArray from 'lodash/isArray'
+import differenceWith from 'lodash/differenceWith'
+import Vue from 'vue'
 
 import {
   getCreatedBy,
   isShootStatusHibernated,
-  isReconciliationDeactivated
+  isReconciliationDeactivated,
+  getIssueSince
 } from '@/utils'
 import { findItem, parseSearch, constants } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
@@ -54,6 +59,8 @@ export function getRawVal (rootGetters, item, column) {
       return join(errorCodesFromArray(get(item, 'status.lastErrors', [])), ' ')
     case 'cpha':
       return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
+    case 'issueSince':
+      return getIssueSince(item.status) || 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
@@ -133,6 +140,25 @@ export function getSortVal (rootGetters, item, sortBy) {
 
 export default {
   filteredItems (state) {
+    if (state.focusMode) {
+      // When state is freezed, do not include new items
+      return map(state.sortedUidsAtFreeze, freezedUID => {
+        const activeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
+        if (activeItem) {
+          return activeItem
+        }
+        let staleItem = state.staleShoots[freezedUID]
+        if (!staleItem) {
+          // Object may have been filtered (e.g. now progressing) but is still in shoots. Also show as stale in this case
+          staleItem = find(Object.values(state.shoots), ['metadata.uid', freezedUID])
+          if (!staleItem) {
+          // This should never happen ...
+            Vue.logger.error('Could not find freezed shoot with uid %s in shoots or staleShoots', freezedUID)
+          }
+        }
+        return { ...staleItem, stale: true }
+      })
+    }
     return state.filteredShoots
   },
   itemByNameAndNamespace (state) {
@@ -210,8 +236,12 @@ export default {
   },
   sortItems (state, getters, rootState, rootGetters) {
     return (items, sortByArr, sortDescArr) => {
-      const sortBy = head(sortByArr)
-      const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
+      if (state.focusMode) {
+        // no need to sort in focus mode sorting is freezed and filteredItems return items in last sorted order
+        return items
+      }
+      const sortBy = isArray(sortByArr) ? head(sortByArr) : sortByArr
+      const sortOrder = (isArray(sortDescArr) ? head(sortDescArr) : sortDescArr) ? 'desc' : 'asc'
       if (!sortBy) {
         return items
       }
@@ -265,6 +295,14 @@ export default {
       }
       return items
     }
+  },
+  numberOfNewItemsSinceFreeze (state) {
+    if (!state.focusMode) {
+      return 0
+    }
+    return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
+      return filteredShoot.metadata.uid === uid
+    }).length
   },
   topic (state, getters, rootState) {
     const metadata = state.subscription

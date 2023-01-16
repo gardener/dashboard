@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="visible">
     <g-popper
       @input="onPopperInput"
-      :title="condition.name"
+      :title="popperTitle"
       :toolbar-color="color"
       :popper-key="popperKeyWithType"
       :placement="popperPlacement"
@@ -89,6 +89,9 @@ export default {
     },
     popperPlacement: {
       type: String
+    },
+    staleShoot: {
+      type: Boolean
     }
   },
   data () {
@@ -100,6 +103,12 @@ export default {
     ...mapGetters([
       'isAdmin'
     ]),
+    popperTitle () {
+      if (this.staleShoot) {
+        return 'Last Status'
+      }
+      return this.condition.name
+    },
     chipText () {
       return this.condition.shortName || ''
     },
@@ -182,11 +191,11 @@ export default {
       return `statusTag_${this.popperKey}`
     },
     color () {
+      if (this.isUnknown || this.staleShoot) {
+        return 'grey'
+      }
       if (this.isError) {
         return 'error'
-      }
-      if (this.isUnknown) {
-        return 'grey'
       }
       if (this.isProgressing && this.isAdmin) {
         return 'info'
