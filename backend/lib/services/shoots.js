@@ -394,16 +394,36 @@ async function getKubeconfigGardenlogin (client, shoot) {
     dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
   ])
 
+  const gardenClusterIdentity = clusterIdentity.data['cluster-identity']
+
   const caData = ca.data?.['ca.crt']
 
   const extensions = [{
     name: 'client.authentication.k8s.io/exec',
     extension: {
       shootRef: { namespace, name },
-      gardenClusterIdentity: clusterIdentity.data['cluster-identity']
+      gardenClusterIdentity
     }
   }]
   const userName = `${namespace}--${name}`
+
+  const installHint = `Follow the instructions on
+- https://github.com/gardener/gardenlogin#installation to install and
+- https://github.com/gardener/gardenlogin#configure-gardenlogin to configure the gardenlogin credential plugin.
+
+The following is a sample configuration for gardenlogin as well as gardenctl. Place the file under ~/.garden/gardenctl-v2.yaml.
+
+---
+gardens:
+  - identity: ${gardenClusterIdentity}
+    kubeconfig: "<path-to-garden-cluster-kubeconfig>"
+...
+
+Alternatively, you can run the following gardenctl command:
+
+$ gardenctl config set-garden ${gardenClusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"
+
+Note that the kubeconfig refers to the path of the garden cluster kubeconfig which you can download from the Account page.`
 
   const cfg = {
     clusters: [],
@@ -413,13 +433,13 @@ async function getKubeconfigGardenlogin (client, shoot) {
       user: {
         exec: {
           apiVersion: 'client.authentication.k8s.io/v1beta1',
-          command: 'kubectl',
+          command: 'kubectl-gardenlogin',
           args: [
-            'gardenlogin',
             'get-client-certificate'
           ],
           provideClusterInfo: true,
-          interactiveMode: 'IfAvailable'
+          interactiveMode: 'IfAvailable',
+          installHint
         }
       }
     }]
