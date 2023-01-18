@@ -5,16 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="retry-operation-div" v-if="canRetry">
-    <v-tooltip top>
-      <template v-slot:activator="{ on }">
-        <v-btn v-on="on" small icon text class="primary--text retryButton" @click="onRetryOperation">
-          <v-icon>mdi-reload</v-icon>
-        </v-btn>
-      </template>
-      Retry Operation
-    </v-tooltip>
-  </div>
+  <v-tooltip top v-if="canRetry">
+    <template v-slot:activator="{ on }">
+      <v-btn v-on="on" icon text class="primary--text retryButton" @click="onRetryOperation">
+        <v-icon>mdi-reload</v-icon>
+      </v-btn>
+    </template>
+    Retry Operation
+  </v-tooltip>
 </template>
 
 <script>
@@ -60,19 +58,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-.retry-operation-div {
-  display: inline-block;
-  width: 30px;
-  text-align: center;
-  height: auto;
-  max-height:  30px;
-}
-
-.retryButton {
-  margin: 0px;
-}
-
-</style>
