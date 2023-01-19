@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
         </v-toolbar>
         <slot name="card"></slot>
-        <v-card-text v-if="$slots.default">
+        <v-card-text>
           <slot></slot>
         </v-card-text>
       </v-card>
@@ -80,7 +80,8 @@ export default {
             fn: this.customArrowStyles,
             order: 875 // needs to run beofre applyStyle modifier
           }
-        }
+        },
+        positionFixed: true
       }
       return options
     }

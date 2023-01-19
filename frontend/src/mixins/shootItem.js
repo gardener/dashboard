@@ -255,6 +255,9 @@ export const shootItem = {
     },
     islastMaintenanceFailed () {
       return this.lastMaintenance.state === 'Failed'
+    },
+    isStaleShoot () {
+      return this.shootItem?.stale
     }
   },
   methods: {
