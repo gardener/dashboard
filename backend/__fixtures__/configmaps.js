@@ -27,14 +27,13 @@ function getConfigMap ({ namespace, name, labels, creationTimestamp, data = {} }
   return { metadata, data }
 }
 
-function getClusterIdentitConfigMap ({ identity = 'landscape-test', ...options } = {}) {
+function getClusterIdentitConfigMap ({ identity = 'landscape-test' } = {}) {
   return getConfigMap({
     namespace: 'kube-system',
     name: 'cluster-identity',
     data: {
       'cluster-identity': identity
-    },
-    ...options
+    }
   })
 }
 
@@ -53,7 +52,7 @@ const configMaps = {
       ? filter(items, ['metadata.namespace', namespace])
       : items
   },
-  getClusterIdentityConfigMap (identity) {
+  createClusterIdentityConfigMap (identity) {
     return getClusterIdentitConfigMap({ identity })
   }
 }
@@ -90,7 +89,7 @@ const mocks = {
 
       if (namespace === 'kube-system' && name === 'cluster-identity') {
         const [hostname] = split(headers[':authority'], ':')
-        const item = configMaps.getClusterIdentityConfigMap(hostname)
+        const item = configMaps.createClusterIdentityConfigMap(hostname)
         return Promise.resolve(item)
       }
 
