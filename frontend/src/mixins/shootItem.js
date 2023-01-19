@@ -249,6 +249,12 @@ export const shootItem = {
     },
     shootStatus () {
       return get(this.shootItem, 'status', {})
+    },
+    lastMaintenance () {
+      return get(this.shootStatus, 'lastMaintenance', {})
+    },
+    islastMaintenanceFailed () {
+      return this.lastMaintenance.state === 'Failed'
     }
   },
   methods: {

@@ -34,11 +34,20 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon color="primary">mdi-wrench-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Maintenance</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
+          <v-list-item-title class="d-flex align-center">
+            Maintenance
+            <shoot-messages
+            :shoot-item="shootItem"
+            filter="last-maintenance"
+            show-verbose
+            title="Last Maintenance Status"
+            small
+            class="ml-1" />
+          </v-list-item-title>
+          <v-list-item-subtitle>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <div class="d-flex" v-on="on">
+                <div class="d-flex align-center pt-1" v-on="on">
                   <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
                   <span v-if="isInMaintenanceWindow">
                     Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. Maintenance ends <time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></time-string></span>
