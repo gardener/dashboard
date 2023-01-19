@@ -22,13 +22,34 @@ SPDX-License-Identifier: Apache-2.0
         {{shootControlPlaneHighAvailabilityFailureTolerance}}
       </v-chip>
     </template>
-    <div class="text-left">
-      Failure Tolerance: <code>{{shootControlPlaneHighAvailabilityFailureTolerance}}</code>
-      <v-alert v-if="zoneHighAvailabilityConfigurationError" type="error" class="mt-2" max-width="600px">
-        You configured your control plane failure tolerance type to be <code>zone</code>.
-        However, no Seed assigned to your cloud profile currently supports this.
-      </v-alert>
-    </div>
+    <v-list>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="primary">mdi-information-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Failure Tolerance</v-list-item-subtitle>
+          <v-list-item-title>
+            <code>{{shootControlPlaneHighAvailabilityFailureTolerance}}</code>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <template v-if="zoneHighAvailabilityConfigurationError">
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="error">mdi-alert-circle-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Configuration Error</v-list-item-subtitle>
+            <v-list-item-title class="wrap-text">
+              You configured your control plane failure tolerance type to be <code>zone</code>.
+              However, no seed assigned to your cloud profile currently supports this.
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-list>
   </g-popper>
 </template>
 
@@ -72,3 +93,18 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+/* overwrite message class from g-popper child component */
+::v-deep .message {
+  max-height: 800px;
+}
+
+::v-deep .v-card {
+  .v-card__text {
+    padding: 0px;
+    text-align: left;
+    max-width: 600px;
+  }
+}
+</style>
