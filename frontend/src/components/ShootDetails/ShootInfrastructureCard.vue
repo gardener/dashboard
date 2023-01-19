@@ -76,15 +76,15 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content :class="{ 'pt-0': showSeedInfo}">
           <v-list-item-subtitle>Control Plane High Availability</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <template v-if="!!shootControlPlaneHaFailureTolerance">
+            <template v-if="!!shootControlPlaneHighAvailabilityFailureTolerance">
               <span class="mr-1">Failure tolerance type</span>
-              <control-plane-ha-tag :shoot-item="shootItem" x-small></control-plane-ha-tag>
+              <control-plane-high-availability-tag :shoot-item="shootItem" x-small></control-plane-high-availability-tag>
             </template>
             <template v-else>Not configured</template>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <control-plane-ha-configuration :shoot-item="shootItem"></control-plane-ha-configuration>
+          <control-plane-high-availability-configuration :shoot-item="shootItem"></control-plane-high-availability-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -221,8 +221,8 @@ import Vendor from '@/components/Vendor'
 import DnsProvider from '@/components/ShootDns/DnsProvider'
 import DnsConfiguration from '@/components/ShootDns/DnsConfiguration'
 import SeedConfiguration from '@/components/SeedConfiguration'
-import ControlPlaneHaConfiguration from '@/components/ControlPlaneHighAvailability/ControlPlaneHaConfiguration'
-import ControlPlaneHaTag from '@/components/ControlPlaneHighAvailability/ControlPlaneHaTag'
+import ControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/ControlPlaneHighAvailabilityConfiguration'
+import ControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/ControlPlaneHighAvailabilityTag'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -234,8 +234,8 @@ export default {
     DnsProvider,
     DnsConfiguration,
     SeedConfiguration,
-    ControlPlaneHaConfiguration,
-    ControlPlaneHaTag
+    ControlPlaneHighAvailabilityConfiguration,
+    ControlPlaneHighAvailabilityTag
   },
   mixins: [shootItem],
   computed: {

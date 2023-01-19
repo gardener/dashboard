@@ -492,7 +492,7 @@ export default {
         },
         {
           text: 'Control Plane HA',
-          value: 'cpha',
+          value: 'controlPlaneHighAvailability',
           sortable: true,
           align: 'start',
           defaultSelected: false,

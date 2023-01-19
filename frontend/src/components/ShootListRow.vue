@@ -77,9 +77,9 @@ SPDX-License-Identifier: Apache-2.0
           <status-tags :shoot-item="shootItem"></status-tags>
         </div>
       </template>
-      <template v-if="cell.header.value === 'cpha'">
+      <template v-if="cell.header.value === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
-          <control-plane-ha-tag :shoot-item="shootItem"></control-plane-ha-tag>
+          <control-plane-high-availability-tag :shoot-item="shootItem"></control-plane-high-availability-tag>
         </div>
       </template>
       <template v-if="cell.header.value === 'issueSince'">
@@ -169,7 +169,7 @@ import ShootMessages from '@/components/ShootMessages/ShootMessages'
 import ShootListRowActions from '@/components/ShootListRowActions'
 import AutoHide from '@/components/AutoHide'
 import ExternalLink from '@/components/ExternalLink'
-import ControlPlaneHaTag from '@/components/ControlPlaneHighAvailability/ControlPlaneHaTag'
+import ControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/ControlPlaneHighAvailabilityTag'
 
 import {
   isTypeDelete,
@@ -196,7 +196,7 @@ export default {
     ShootListRowActions,
     AutoHide,
     ExternalLink,
-    ControlPlaneHaTag
+    ControlPlaneHighAvailabilityTag
   },
   props: {
     visibleHeaders: {

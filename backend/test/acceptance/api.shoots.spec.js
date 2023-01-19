@@ -451,10 +451,8 @@ describe('api', function () {
         .put(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/highAvailability`)
         .set('cookie', await user.cookie)
         .send({
-          highAvailability: {
-            failureTolerance: {
-              type: 'node'
-            }
+          failureTolerance: {
+            type: 'node'
           }
         })
         .expect('content-type', /json/)

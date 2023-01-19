@@ -344,9 +344,9 @@ data:
       resourceQuotaHelp:
         text: {{ required ".Values.global.frontendConfig.resourceQuotaHelp.text is required" .Values.global.frontendConfig.resourceQuotaHelp.text | quote }}
       {{- end }}
-      {{- if .Values.global.frontendConfig.controlPlaneHaHelp }}
-      controlPlaneHaHelp:
-        text: {{ required ".Values.global.frontendConfig.controlPlaneHaHelp.text is required" .Values.global.frontendConfig.controlPlaneHaHelp.text | quote }}
+      {{- if .Values.global.frontendConfig.controlPlaneHighAvailabilityHelp }}
+      controlPlaneHighAvailabilityHelp:
+        text: {{ required ".Values.global.frontendConfig.controlPlaneHighAvailabilityHelp.text is required" .Values.global.frontendConfig.controlPlaneHighAvailabilityHelp.text | quote }}
       {{- end }}
       {{- if .Values.global.frontendConfig.defaultNodesCIDR }}
       defaultNodesCIDR: {{ .Values.global.frontendConfig.defaultNodesCIDR }}

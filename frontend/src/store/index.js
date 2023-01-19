@@ -1316,8 +1316,8 @@ const getters = {
   resourceQuotaHelpText (state) {
     return get(state, 'cfg.resourceQuotaHelp.text')
   },
-  controlPlaneHaHelpText (state) {
-    return get(state, 'cfg.controlPlaneHaHelp.text')
+  controlPlaneHighAvailabilityHelpText (state) {
+    return get(state, 'cfg.controlPlaneHighAvailabilityHelp.text')
   },
   colorScheme (state, getters) {
     const colorScheme = getters['storage/colorScheme']

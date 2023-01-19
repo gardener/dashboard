@@ -313,10 +313,8 @@ Array [
       "spec": Object {
         "controlPlane": Object {
           "highAvailability": Object {
-            "highAvailability": Object {
-              "failureTolerance": Object {
-                "type": "node",
-              },
+            "failureTolerance": Object {
+              "type": "node",
             },
           },
         },
@@ -341,10 +339,8 @@ Object {
     "cloudProfileName": "infra1-profileName",
     "controlPlane": Object {
       "highAvailability": Object {
-        "highAvailability": Object {
-          "failureTolerance": Object {
-            "type": "node",
-          },
+        "failureTolerance": Object {
+          "type": "node",
         },
       },
     },

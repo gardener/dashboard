@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:activator="{ on }">
         <div v-on="on">
           <v-checkbox
-            v-model="controlPlaneHa"
+            v-model="controlPlaneHighAvailability"
             label="Enable Control Plane High Availability"
             color="primary"
             hide-details
@@ -20,12 +20,12 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       It is not possible to change the control plane failure tolerance if a type has already been set
     </v-tooltip>
-    <div v-if="!cpFailureToleranceType">
+    <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
     <div v-else>
-      Control plane failure tolerance type <code>cpFailureToleranceType</code> configured
-      <v-alert type="info" v-if="cpFailureToleranceType === 'node' && !zoneSupported" dense outlined>
+      Control plane failure tolerance type <code>controlPlaneFailureToleranceType</code> configured
+      <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
         <template v-if="clusterIsNew">
           The selected cloud profile has no <code>multi-zonal</code> seed.
         </template>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         It is not possible to disable or change control plane high availability later.
       </v-alert>
     </div>
-    <div v-if="!!controlPlaneHaHelpHtml" class="wrap-text" v-html="controlPlaneHaHelpHtml"></div>
+    <div v-if="!!controlPlaneHighAvailabilityHelpHtml" class="wrap-text" v-html="controlPlaneHighAvailabilityHelpHtml"></div>
     <external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
   </div>
 </template>
@@ -51,7 +51,6 @@ import some from 'lodash/some'
 import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
-  name: 'manage-control-plane-ha',
   components: {
     ExternalLink
   },
@@ -59,7 +58,7 @@ export default {
     configuredSeed: {
       type: String
     },
-    configuredCpFailureToleranceType: {
+    configuredControlPlaneFailureToleranceType: {
       type: String
     }
   },
@@ -67,58 +66,49 @@ export default {
     ...mapGetters([
       'seedsByCloudProfileName',
       'seedByName',
-      'controlPlaneHaHelpText'
+      'controlPlaneHighAvailabilityHelpText'
     ]),
     ...mapGetters('shootStaging', [
       'clusterIsNew'
     ]),
     ...mapState('shootStaging', [
       'cloudProfileName',
-      'cpFailureToleranceType'
+      'controlPlaneFailureToleranceType'
     ]),
     changeAllowed () {
-      if (this.clusterIsNew) {
-        return true
-      }
-      if (!this.configuredCpFailureToleranceType) {
-        return true
-      }
-      return false
+      return this.clusterIsNew || !this.configuredControlPlaneFailureToleranceType
     },
     zoneSupported () {
-      let seeds
-      if (this.configuredSeed) {
-        seeds = [this.seedByName(this.configuredSeed)]
-      } else {
-        seeds = this.seedsByCloudProfileName(this.cloudProfileName)
-      }
+      const seeds = this.configuredSeed
+        ? [this.seedByName(this.configuredSeed)]
+        : this.seedsByCloudProfileName(this.cloudProfileName)
       return some(seeds, ({ data }) => data.zones?.length >= 3)
     },
-    controlPlaneHa: {
+    controlPlaneHighAvailability: {
       get () {
-        return !!this.cpFailureToleranceType
+        return !!this.controlPlaneFailureToleranceType
       },
       set (value) {
         if (!value) {
-          this.setCpFailureToleranceType(undefined)
+          this.setControlPlaneFailureToleranceType(undefined)
         } else {
-          this.setCpFailureToleranceType(this.zoneSupported ? 'zone' : 'node')
+          this.setControlPlaneFailureToleranceType(this.zoneSupported ? 'zone' : 'node')
         }
       }
     },
-    controlPlaneHaHelpHtml () {
-      return transformHtml(this.controlPlaneHaHelpText, true)
+    controlPlaneHighAvailabilityHelpHtml () {
+      return transformHtml(this.controlPlaneHighAvailabilityHelpText, true)
     }
   },
   methods: {
     ...mapActions('shootStaging', [
-      'setCpFailureToleranceType'
+      'setControlPlaneFailureToleranceType'
     ])
   },
   watch: {
     zoneSupported (value) {
-      if (!value && this.cpFailureToleranceType === 'zone') {
-        this.setCpFailureToleranceType('node')
+      if (!value && this.controlPlaneFailureToleranceType === 'zone') {
+        this.setControlPlaneFailureToleranceType('node')
       }
     }
   }

@@ -536,12 +536,12 @@ describe('gardener-dashboard', function () {
       })
     })
     
-    describe('controlPlaneHaHelp', function () {
-      it('should render the template with controlPlaneHaHelp markdown', async function () {
+    describe('controlPlaneHighAvailabilityHelp', function () {
+      it('should render the template with controlPlaneHighAvailabilityHelp markdown', async function () {
         const values = {
           global: {
             frontendConfig: {
-              controlPlaneHaHelp: {
+              controlPlaneHighAvailabilityHelp: {
                 text: '[foo](https://bar.baz)'
               }
             }
@@ -551,7 +551,7 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(pick(config, ['frontend.controlPlaneHaHelp'])).toMatchSnapshot()
+        expect(pick(config, ['frontend.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
       })
     })
   })

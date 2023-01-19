@@ -93,10 +93,10 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard configmap controlPlaneHaHelp should render the template with controlPlaneHaHelp markdown 1`] = `
+exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 Object {
   "frontend": Object {
-    "controlPlaneHaHelp": Object {
+    "controlPlaneHighAvailabilityHelp": Object {
       "text": "[foo](https://bar.baz)",
     },
   },

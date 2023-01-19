@@ -302,8 +302,8 @@ global:
   #  resourceQuotaHelp:
   #    text: Help text
   
-  #  # controlPlaneHaHelp - configure help text for control plane high availability, control plane pricing etc.
-  #  controlPlaneHaHelp:
+  #  # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
+  #  controlPlaneHighAvailabilityHelp:
   #    text: Help text
 
   livenessProbe:

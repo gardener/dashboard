@@ -43,7 +43,7 @@ const state = {
   dnsPrimaryProviderId: null,
   dnsPrimaryProviderValid: null,
   cloudProfileName: null,
-  cpFailureToleranceType: null
+  controlPlaneFailureToleranceType: null
 }
 
 // getters
@@ -162,8 +162,8 @@ const actions = {
   setCloudProfileName ({ commit, state, getters }, value) {
     commit('setCloudProfileName', value)
   },
-  setCpFailureToleranceType ({ commit, state, getters }, value) {
-    commit('setCpFailureToleranceType', value)
+  setControlPlaneFailureToleranceType ({ commit, state, getters }, value) {
+    commit('setControlPlaneFailureToleranceType', value)
   },
   setClusterConfiguration ({ commit, getters }, value) {
     const {
@@ -226,7 +226,7 @@ const actions = {
     })
 
     commit('setCloudProfileName', cloudProfileName)
-    commit('setCpFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
+    commit('setControlPlaneFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
   }
 }
 
@@ -290,8 +290,8 @@ const mutations = {
   setCloudProfileName (state, value) {
     state.cloudProfileName = value
   },
-  setCpFailureToleranceType (state, value) {
-    state.cpFailureToleranceType = value
+  setControlPlaneFailureToleranceType (state, value) {
+    state.controlPlaneFailureToleranceType = value
   }
 }
 

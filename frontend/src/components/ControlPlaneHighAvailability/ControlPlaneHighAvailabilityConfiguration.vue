@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -14,10 +14,10 @@ SPDX-License-Identifier: Apache-2.0
     max-height="60vh"
     >
     <template v-slot:actionComponent>
-      <manage-control-plane-ha
+      <manage-control-plane-high-availability
         :configured-seed="shootSeedName"
-        :configured-cp-failure-tolerance-type="shootControlPlaneHaFailureTolerance"
-      ></manage-control-plane-ha>
+        :configured-control-plane-failure-tolerance-type="shootControlPlaneHighAvailabilityFailureTolerance"
+      ></manage-control-plane-high-availability>
     </template>
   </action-button-dialog>
 </template>
@@ -25,20 +25,19 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions, mapState } from 'vuex'
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import ManageControlPlaneHa from '@/components/ControlPlaneHighAvailability/ManageControlPlaneHa'
-import { updateShootControlPlaneHa } from '@/utils/api'
+import ManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/ManageControlPlaneHighAvailability'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     ActionButtonDialog,
-    ManageControlPlaneHa
+    ManageControlPlaneHighAvailability
   },
   mixins: [shootItem],
   computed: {
     ...mapState('shootStaging', [
-      'cpFailureToleranceType'
+      'controlPlaneFailureToleranceType'
     ])
   },
   methods: {
@@ -56,10 +55,10 @@ export default {
       try {
         const highAvailability = {
           failureTolerance: {
-            type: this.cpFailureToleranceType
+            type: this.controlPlaneFailureToleranceType
           }
         }
-        await updateShootControlPlaneHa({ namespace: this.shootNamespace, name: this.shootName, data: highAvailability })
+        await this.$api.updateShootControlPlaneHighAvailability({ namespace: this.shootNamespace, name: this.shootName, data: highAvailability })
       } catch (err) {
         const errorMessage = 'Could not update control plane high availability'
         const errorDetails = errorDetailsFromError(err)
