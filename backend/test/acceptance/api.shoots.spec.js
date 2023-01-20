@@ -10,6 +10,7 @@ const { mockRequest } = require('@gardener-dashboard/request')
 const kubeconfig = require('@gardener-dashboard/kube-config')
 const originalKubeconfig = jest.requireActual('@gardener-dashboard/kube-config')
 const logger = require('../../lib/logger')
+const yaml = require('js-yaml')
 
 describe('api', function () {
   let agent
@@ -133,7 +134,12 @@ describe('api', function () {
 
       expect(logger.info).toBeCalledTimes(0)
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String),
+        kubeconfigGardenlogin: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
+      expect(yaml.load(res.body.kubeconfigGardenlogin)).toMatchSnapshot('body.kubeconfigGardenlogin')
     })
 
     it('should return shoot info without gardenlogin kubeconfig', async function () {
@@ -159,7 +165,10 @@ describe('api', function () {
       expect(logger.info).toBeCalledTimes(1)
       expect(logger.info).lastCalledWith('failed to get gardenlogin kubeconfig', 'Shoot has no advertised addresses')
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
     })
 
     it('should return shoot seed info when no fallback is needed', async function () {

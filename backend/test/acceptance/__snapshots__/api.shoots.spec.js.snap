@@ -1233,100 +1233,6 @@ Array [
 ]
 `;
 
-exports[`api shoots should return shoot info 2`] = `
-Object {
-  "canLinkToSeed": false,
-  "cluster_password": "pass-foo-barShoot",
-  "cluster_username": "user-foo-barShoot",
-  "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
-  "kubeconfig": "apiVersion: v1
-kind: Config
-current-context: shoot--foo--barShoot
-contexts:
-  - name: shoot--foo--barShoot
-    context:
-      cluster: shoot--foo--barShoot
-      user: shoot--foo--barShoot
-clusters:
-  - name: shoot--foo--barShoot
-    cluster:
-      server: https://api.barShoot.foo.shoot.cluster
-      certificate-authority-data: Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=
-users:
-  - name: shoot--foo--barShoot
-    user:
-      client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
-      client-key-data: Y2xpZW50LWtleS1kYXRh
-",
-  "kubeconfigGardenlogin": "apiVersion: v1
-kind: Config
-current-context: garden-foo--barShoot-external
-contexts:
-  - name: garden-foo--barShoot-external
-    context:
-      cluster: garden-foo--barShoot-external
-      user: garden-foo--barShoot
-      namespace: default
-clusters:
-  - name: garden-foo--barShoot-external
-    cluster:
-      server: https://api.barShoot.foo.shoot.test
-      certificate-authority-data: Y2EuY3J0
-      extensions:
-        - name: client.authentication.k8s.io/exec
-          extension:
-            shootRef:
-              namespace: garden-foo
-              name: barShoot
-            gardenClusterIdentity: kubernetes
-users:
-  - name: garden-foo--barShoot
-    user:
-      exec:
-        apiVersion: client.authentication.k8s.io/v1beta1
-        command: kubectl-gardenlogin
-        args:
-          - get-client-certificate
-        provideClusterInfo: true
-        interactiveMode: IfAvailable
-        installHint: >-
-          Follow the instructions on
-
-          - https://github.com/gardener/gardenlogin#installation to install and
-
-          - https://github.com/gardener/gardenlogin#configure-gardenlogin to
-          configure the gardenlogin credential plugin.
-
-
-          The following is a sample configuration for gardenlogin as well as
-          gardenctl. Place the file under ~/.garden/gardenctl-v2.yaml.
-
-
-          ---
-
-          gardens:
-            - identity: kubernetes
-              kubeconfig: \\"<path-to-garden-cluster-kubeconfig>\\"
-          ...
-
-
-          Alternatively, you can run the following gardenctl command:
-
-
-          $ gardenctl config set-garden kubernetes --kubeconfig
-          \\"<path-to-garden-cluster-kubeconfig>\\"
-
-
-          Note that the kubeconfig refers to the path of the garden cluster
-          kubeconfig which you can download from the Account page.
-",
-  "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
-  "monitoringUsername": "user-garden-foo-barShoot.monitoring",
-  "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
-  "serverUrl": "https://api.barShoot.foo.shoot.cluster",
-}
-`;
-
 exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] = `
 Array [
   Array [
@@ -1389,35 +1295,174 @@ Array [
 ]
 `;
 
-exports[`api shoots should return shoot info without gardenlogin kubeconfig 2`] = `
+exports[`api shoots should return shoot info without gardenlogin kubeconfig: body 1`] = `
 Object {
   "canLinkToSeed": false,
   "cluster_password": "pass-foo-dummyShoot",
   "cluster_username": "user-foo-dummyShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
-  "kubeconfig": "apiVersion: v1
-kind: Config
-current-context: shoot--foo--dummyShoot
-contexts:
-  - name: shoot--foo--dummyShoot
-    context:
-      cluster: shoot--foo--dummyShoot
-      user: shoot--foo--dummyShoot
-clusters:
-  - name: shoot--foo--dummyShoot
-    cluster:
-      server: https://api.dummyShoot.foo.shoot.cluster
-      certificate-authority-data: Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=
-users:
-  - name: shoot--foo--dummyShoot
-    user:
-      client-certificate-data: Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=
-      client-key-data: Y2xpZW50LWtleS1kYXRh
-",
+  "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
   "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
   "serverUrl": "https://api.dummyShoot.foo.shoot.cluster",
+}
+`;
+
+exports[`api shoots should return shoot info without gardenlogin kubeconfig: body.kubeconfig 1`] = `
+Object {
+  "apiVersion": "v1",
+  "clusters": Array [
+    Object {
+      "cluster": Object {
+        "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
+        "server": "https://api.dummyShoot.foo.shoot.cluster",
+      },
+      "name": "shoot--foo--dummyShoot",
+    },
+  ],
+  "contexts": Array [
+    Object {
+      "context": Object {
+        "cluster": "shoot--foo--dummyShoot",
+        "user": "shoot--foo--dummyShoot",
+      },
+      "name": "shoot--foo--dummyShoot",
+    },
+  ],
+  "current-context": "shoot--foo--dummyShoot",
+  "kind": "Config",
+  "users": Array [
+    Object {
+      "name": "shoot--foo--dummyShoot",
+      "user": Object {
+        "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
+        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api shoots should return shoot info: body 1`] = `
+Object {
+  "canLinkToSeed": false,
+  "cluster_password": "pass-foo-barShoot",
+  "cluster_username": "user-foo-barShoot",
+  "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
+  "kubeconfig": Any<String>,
+  "kubeconfigGardenlogin": Any<String>,
+  "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
+  "monitoringUsername": "user-garden-foo-barShoot.monitoring",
+  "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
+  "serverUrl": "https://api.barShoot.foo.shoot.cluster",
+}
+`;
+
+exports[`api shoots should return shoot info: body.kubeconfig 1`] = `
+Object {
+  "apiVersion": "v1",
+  "clusters": Array [
+    Object {
+      "cluster": Object {
+        "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
+        "server": "https://api.barShoot.foo.shoot.cluster",
+      },
+      "name": "shoot--foo--barShoot",
+    },
+  ],
+  "contexts": Array [
+    Object {
+      "context": Object {
+        "cluster": "shoot--foo--barShoot",
+        "user": "shoot--foo--barShoot",
+      },
+      "name": "shoot--foo--barShoot",
+    },
+  ],
+  "current-context": "shoot--foo--barShoot",
+  "kind": "Config",
+  "users": Array [
+    Object {
+      "name": "shoot--foo--barShoot",
+      "user": Object {
+        "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
+        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api shoots should return shoot info: body.kubeconfigGardenlogin 1`] = `
+Object {
+  "apiVersion": "v1",
+  "clusters": Array [
+    Object {
+      "cluster": Object {
+        "certificate-authority-data": "Y2EuY3J0",
+        "extensions": Array [
+          Object {
+            "extension": Object {
+              "gardenClusterIdentity": "kubernetes",
+              "shootRef": Object {
+                "name": "barShoot",
+                "namespace": "garden-foo",
+              },
+            },
+            "name": "client.authentication.k8s.io/exec",
+          },
+        ],
+        "server": "https://api.barShoot.foo.shoot.test",
+      },
+      "name": "garden-foo--barShoot-external",
+    },
+  ],
+  "contexts": Array [
+    Object {
+      "context": Object {
+        "cluster": "garden-foo--barShoot-external",
+        "namespace": "default",
+        "user": "garden-foo--barShoot",
+      },
+      "name": "garden-foo--barShoot-external",
+    },
+  ],
+  "current-context": "garden-foo--barShoot-external",
+  "kind": "Config",
+  "users": Array [
+    Object {
+      "name": "garden-foo--barShoot",
+      "user": Object {
+        "exec": Object {
+          "apiVersion": "client.authentication.k8s.io/v1beta1",
+          "args": Array [
+            "get-client-certificate",
+          ],
+          "command": "kubectl-gardenlogin",
+          "installHint": "Follow the instructions on
+- https://github.com/gardener/gardenlogin#installation to install and
+- https://github.com/gardener/gardenlogin#configure-gardenlogin to configure the gardenlogin credential plugin.
+
+The following is a sample configuration for gardenlogin as well as gardenctl. Place the file under ~/.garden/gardenctl-v2.yaml.
+
+---
+gardens:
+  - identity: kubernetes
+    kubeconfig: \\"<path-to-garden-cluster-kubeconfig>\\"
+...
+
+Alternatively, you can run the following gardenctl command:
+
+$ gardenctl config set-garden kubernetes --kubeconfig \\"<path-to-garden-cluster-kubeconfig>\\"
+
+Note that the kubeconfig refers to the path of the garden cluster kubeconfig which you can download from the Account page.",
+          "interactiveMode": "IfAvailable",
+          "provideClusterInfo": true,
+        },
+      },
+    },
+  ],
 }
 `;
 
