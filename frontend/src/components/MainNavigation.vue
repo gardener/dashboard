@@ -129,10 +129,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-list ref="mainMenu" class="main-menu" flat>
         <v-list-item :to="{name: 'Home'}" exact v-if="hasNoProjects">
           <v-list-item-action>
-            <v-icon>mdi-home-outline</v-icon>
+            <v-icon small color="main-navigation-title">mdi-home-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="text-subtitle-1">Home</v-list-item-title>
+            <v-list-item-title class="text-subtitle-1 main-navigation-title--text">Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <template v-if="namespace">
