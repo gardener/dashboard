@@ -1593,7 +1593,7 @@ Object {
         "advertisedAddresses": Array [
           Object {
             "name": "external",
-            "url": "https://api.barShoot.foo.shoot.test",
+            "url": "https://api.fooShoot.foo.shoot.test",
           },
         ],
         "technicalID": "shoot--foo--fooShoot",

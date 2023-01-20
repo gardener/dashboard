@@ -70,10 +70,7 @@ function getShoot ({
   seed = 'infra1-seed',
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0',
-  advertisedAddresses = [{
-    name: 'external',
-    url: 'https://api.barShoot.foo.shoot.test'
-  }]
+  advertisedAddresses
 }) {
   uid = uid || `${namespace}--${name}`
   const shoot = {
@@ -105,8 +102,11 @@ function getShoot ({
   if (project) {
     shoot.status.technicalID = `shoot--${project}--${name}`
   }
-  if (advertisedAddresses) {
-    shoot.status.advertisedAddresses = advertisedAddresses
+  if (advertisedAddresses !== null) {
+    shoot.status.advertisedAddresses = advertisedAddresses ?? [{
+      name: 'external',
+      url: `https://api.${name}.${project}.shoot.test`
+    }]
   }
   return shoot
 }
