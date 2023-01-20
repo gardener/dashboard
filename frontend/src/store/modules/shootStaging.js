@@ -164,13 +164,13 @@ const actions = {
       readonly: false
     })
   },
-  setCloudProfileName ({ commit, state, getters }, value) {
+  setCloudProfileName ({ commit }, value) {
     commit('setCloudProfileName', value)
   },
-  setControlPlaneFailureToleranceType ({ commit, state, getters }, value) {
+  setControlPlaneFailureToleranceType ({ commit }, value) {
     commit('setControlPlaneFailureToleranceType', value)
   },
-  setSeedName ({ commit, state, getters }, value) {
+  setSeedName ({ commit }, value) {
     commit('setSeedName', value)
   },
   setClusterConfiguration ({ commit, getters }, value) {
@@ -235,8 +235,8 @@ const actions = {
     })
 
     commit('setCloudProfileName', cloudProfileName)
-    commit('setControlPlaneFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
-    commit('setInitialControlPlaneFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
+    commit('setControlPlaneFailureToleranceType', controlPlane.highAvailability?.failureTolerance?.type)
+    commit('setInitialControlPlaneFailureToleranceType', controlPlane.highAvailability?.failureTolerance?.type)
     commit('setSeedName', seedName)
   }
 }

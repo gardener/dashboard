@@ -491,7 +491,7 @@ export default {
           hidden: this.projectScope || !this.isAdmin
         },
         {
-          text: 'Control Plane HA',
+          text: 'HIGH AVAILABILITY',
           value: 'controlPlaneHighAvailability',
           sortable: true,
           align: 'start',
