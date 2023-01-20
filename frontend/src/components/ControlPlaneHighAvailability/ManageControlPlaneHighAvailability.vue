@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <v-tooltip top :disabled="changeAllowed" max-width="400px">
+    <v-tooltip top :disabled="controlPlaneFailureToleranceTypeChangeAllowed" max-width="400px">
       <template v-slot:activator="{ on }">
         <div v-on="on">
           <v-checkbox
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Enable Control Plane High Availability"
             color="primary"
             hide-details
-            :disabled="!changeAllowed"
+            :disabled="!controlPlaneFailureToleranceTypeChangeAllowed"
             ></v-checkbox>
         </div>
       </template>
@@ -24,17 +24,22 @@ SPDX-License-Identifier: Apache-2.0
       No control plane failure tolerance type configured
     </div>
     <div v-else>
-      Control plane failure tolerance type <code>controlPlaneFailureToleranceType</code> configured
+      Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
       <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
         <template v-if="clusterIsNew">
-          The selected cloud profile has no <code>multi-zonal</code> seed.
+          <template v-if="seedName">
+            The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
+          </template>
+          <template v-else>
+            The selected cloud profile has no <code>multi-zonal</code> seed.
+          </template>
         </template>
         <template v-else>
-          The current Seed {{configuredSeed}} is not <code>multi-zonal</code>.
+          The current seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
         </template>
         Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
       </v-alert>
-      <v-alert type="info" v-if="changeAllowed" dense outlined>
+      <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" dense outlined>
         It is not possible to disable or change control plane high availability later.
       </v-alert>
     </div>
@@ -54,14 +59,6 @@ export default {
   components: {
     ExternalLink
   },
-  props: {
-    configuredSeed: {
-      type: String
-    },
-    configuredControlPlaneFailureToleranceType: {
-      type: String
-    }
-  },
   computed: {
     ...mapGetters([
       'seedsByCloudProfileName',
@@ -69,20 +66,19 @@ export default {
       'controlPlaneHighAvailabilityHelpText'
     ]),
     ...mapGetters('shootStaging', [
-      'clusterIsNew'
+      'clusterIsNew',
+      'controlPlaneFailureToleranceTypeChangeAllowed'
     ]),
     ...mapState('shootStaging', [
       'cloudProfileName',
-      'controlPlaneFailureToleranceType'
+      'controlPlaneFailureToleranceType',
+      'seedName'
     ]),
-    changeAllowed () {
-      return this.clusterIsNew || !this.configuredControlPlaneFailureToleranceType
-    },
     zoneSupported () {
-      const seeds = this.configuredSeed
-        ? [this.seedByName(this.configuredSeed)]
+      const seeds = this.seedName
+        ? [this.seedByName(this.seedName)]
         : this.seedsByCloudProfileName(this.cloudProfileName)
-      return some(seeds, ({ data }) => data.zones?.length >= 3)
+      return some(seeds, seed => seed?.data.zones?.length >= 3)
     },
     controlPlaneHighAvailability: {
       get () {
@@ -103,14 +99,25 @@ export default {
   methods: {
     ...mapActions('shootStaging', [
       'setControlPlaneFailureToleranceType'
-    ])
+    ]),
+    resetToleranceType (zoneSupported) {
+      if (this.controlPlaneFailureToleranceTypeChangeAllowed) {
+        if (!zoneSupported && this.controlPlaneFailureToleranceType === 'zone') {
+          this.setControlPlaneFailureToleranceType('node')
+        }
+        if (zoneSupported && this.controlPlaneFailureToleranceType === 'node') {
+          this.setControlPlaneFailureToleranceType('zone')
+        }
+      }
+    }
   },
   watch: {
     zoneSupported (value) {
-      if (!value && this.controlPlaneFailureToleranceType === 'zone') {
-        this.setControlPlaneFailureToleranceType('node')
-      }
+      this.resetToleranceType(value)
     }
+  },
+  mounted () {
+    this.resetToleranceType(this.zoneSupported)
   }
 }
 </script>

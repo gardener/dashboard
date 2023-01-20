@@ -14,10 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     max-height="60vh"
     >
     <template v-slot:actionComponent>
-      <manage-control-plane-high-availability
-        :configured-seed="shootSeedName"
-        :configured-control-plane-failure-tolerance-type="shootControlPlaneHighAvailabilityFailureTolerance"
-      ></manage-control-plane-high-availability>
+      <manage-control-plane-high-availability />
     </template>
   </action-button-dialog>
 </template>

@@ -43,7 +43,9 @@ const state = {
   dnsPrimaryProviderId: null,
   dnsPrimaryProviderValid: null,
   cloudProfileName: null,
-  controlPlaneFailureToleranceType: null
+  controlPlaneFailureToleranceType: null,
+  initialControlPlaneFailureToleranceType: null,
+  seedName: null
 }
 
 // getters
@@ -126,6 +128,9 @@ const getters = {
   },
   dnsConfigurationValid (state, getters) {
     return state.dnsPrimaryProviderValid && getters.dnsProvidersValid
+  },
+  controlPlaneFailureToleranceTypeChangeAllowed (state, getters) {
+    return getters.clusterIsNew || !state.initialControlPlaneFailureToleranceType
   }
 }
 
@@ -165,13 +170,17 @@ const actions = {
   setControlPlaneFailureToleranceType ({ commit, state, getters }, value) {
     commit('setControlPlaneFailureToleranceType', value)
   },
+  setSeedName ({ commit, state, getters }, value) {
+    commit('setSeedName', value)
+  },
   setClusterConfiguration ({ commit, getters }, value) {
     const {
       metadata = {},
       spec: {
         dns = {},
         cloudProfileName,
-        controlPlane = {}
+        controlPlane = {},
+        seedName
       }
     } = value
     // metadata
@@ -227,6 +236,8 @@ const actions = {
 
     commit('setCloudProfileName', cloudProfileName)
     commit('setControlPlaneFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
+    commit('setInitialControlPlaneFailureToleranceType', controlPlane?.highAvailability?.failureTolerance?.type)
+    commit('setSeedName', seedName)
   }
 }
 
@@ -292,6 +303,12 @@ const mutations = {
   },
   setControlPlaneFailureToleranceType (state, value) {
     state.controlPlaneFailureToleranceType = value
+  },
+  setInitialControlPlaneFailureToleranceType (state, value) {
+    state.initialControlPlaneFailureToleranceType = value
+  },
+  setSeedName (state, value) {
+    state.seedName = value
   }
 }
 
