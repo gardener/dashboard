@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list>
+  <v-list class="text-left">
     <v-list-item>
       <v-list-item-icon>
         <v-icon color="primary">mdi-information-outline</v-icon>

@@ -46,14 +46,16 @@ SPDX-License-Identifier: Apache-2.0
             </v-tooltip>
           </div>
         </template>
-        <shoot-message-details
-          :status-title="statusTitle"
-          :last-message="lastMessage"
-          :error-descriptions="errorDescriptions"
-          :last-update-time="shootLastOperation.lastUpdateTime"
-          :secret-binding-name="shootSecretBindingName"
-          :namespace="shootNamespace"
-        />
+        <template slot="card">
+          <shoot-message-details
+            :status-title="statusTitle"
+            :last-message="lastMessage"
+            :error-descriptions="errorDescriptions"
+            :last-update-time="shootLastOperation.lastUpdateTime"
+            :secret-binding-name="shootSecretBindingName"
+            :namespace="shootNamespace"
+          />
+        </template>
       </g-popper>
       <div>
         <retry-operation :shoot-item="shootItem"></retry-operation>
@@ -205,19 +207,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/* overwrite message class from g-popper child component */
-  ::v-deep .message {
-    max-height: 800px;
-  }
-
   .status-icon-check {
     font-size: 30px !important;
-  }
-
-  ::v-deep .v-card  {
-    .v-card__text {
-      padding: 0px;
-      text-align: left;
-    }
   }
 </style>

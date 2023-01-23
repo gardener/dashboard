@@ -491,6 +491,14 @@ export default {
           hidden: this.projectScope || !this.isAdmin
         },
         {
+          text: 'HIGH AVAILABILITY',
+          value: 'controlPlaneHighAvailability',
+          sortable: true,
+          align: 'start',
+          defaultSelected: false,
+          hidden: false
+        },
+        {
           text: 'ACCESS RESTRICTIONS',
           value: 'accessRestrictions',
           sortable: false,

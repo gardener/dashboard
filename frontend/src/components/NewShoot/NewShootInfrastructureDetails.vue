@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
-          :is-create-mode="true"
+          create-mode
           :cloud-profiles="cloudProfiles"
           @valid="onCloudProfileNameValid"
           @input="onUpdateCloudProfileName"
@@ -193,7 +193,7 @@ import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
 
 const validations = {
   region: {
@@ -406,6 +406,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('shootStaging', [
+      'setCloudProfileName'
+    ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -508,6 +511,7 @@ export default {
       this.validateInput()
     },
     onUpdateCloudProfileName () {
+      this.setCloudProfileName(this.cloudProfileName)
       this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
       this.validateInput()

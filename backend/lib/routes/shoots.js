@@ -146,6 +146,19 @@ router.route('/:name/spec/addons')
     }
   })
 
+router.route('/:name/spec/controlPlane/highAvailability')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.replaceControlPlaneHighAvailability({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 router.route('/:name/spec/dns')
   .put(async (req, res, next) => {
     try {

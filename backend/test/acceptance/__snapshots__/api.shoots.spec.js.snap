@@ -298,6 +298,72 @@ Object {
 }
 `;
 
+exports[`api shoots should replace control plane high availablility 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/merge-patch+json",
+    },
+    Object {
+      "spec": Object {
+        "controlPlane": Object {
+          "highAvailability": Object {
+            "failureTolerance": Object {
+              "type": "node",
+            },
+          },
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should replace control plane high availablility 2`] = `
+Object {
+  "metadata": Object {
+    "annotations": Object {
+      "gardener.cloud/created-by": "bar@example.org",
+    },
+    "name": "barShoot",
+    "namespace": "garden-foo",
+    "resourceVersion": "43",
+    "uid": 2,
+  },
+  "spec": Object {
+    "cloudProfileName": "infra1-profileName",
+    "controlPlane": Object {
+      "highAvailability": Object {
+        "failureTolerance": Object {
+          "type": "node",
+        },
+      },
+    },
+    "hibernation": Object {
+      "enabled": false,
+    },
+    "kubernetes": Object {
+      "version": "1.16.0",
+    },
+    "provider": Object {
+      "type": "fooInfra",
+    },
+    "purpose": "barPurpose",
+    "region": "foo-west",
+    "secretBindingName": "foo-infra1",
+    "seedName": "infra1-seed",
+  },
+  "status": Object {
+    "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
 exports[`api shoots should replace dns 1`] = `
 Array [
   Array [
