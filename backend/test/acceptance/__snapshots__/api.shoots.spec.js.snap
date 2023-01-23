@@ -377,6 +377,12 @@ Object {
     "seedName": "infra1-seed",
   },
   "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
     "technicalID": "shoot--foo--barShoot",
   },
 }

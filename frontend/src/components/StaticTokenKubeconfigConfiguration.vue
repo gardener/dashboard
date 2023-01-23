@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :shoot-item="shootItem"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
-    width="450"
+    width="500"
     confirm-required
     caption="Configure Static Token Kubeconfig">
     <template v-slot:actionComponent>

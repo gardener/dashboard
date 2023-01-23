@@ -95,8 +95,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <v-list v-if="isKubeconfigTileVisible">
-      <kubeconfig-gardenlogin v-if="kubeconfigGardenlogin" :shoot-item="shootItem"></kubeconfig-gardenlogin>
-      <kubeconfig-static-token :shoot-item="shootItem"></kubeconfig-static-token>
+      <shoot-kubeconfig v-if="kubeconfigGardenlogin" type="gardenlogin" :showIcon="true" :shoot-item="shootItem"></shoot-kubeconfig>
+      <shoot-kubeconfig :showIcon="!kubeconfigGardenlogin" type="token" :shoot-item="shootItem"></shoot-kubeconfig>
     </v-list>
 
     <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
@@ -110,8 +110,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import TerminalListTile from '@/components/TerminalListTile'
 import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
-import KubeconfigGardenlogin from '@/components/ShootDetails/KubeconfigGardenlogin'
-import KubeconfigStaticToken from '@/components/ShootDetails/KubeconfigStaticToken'
+import ShootKubeconfig from '@/components/ShootDetails/ShootKubeconfig'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
@@ -125,8 +124,7 @@ export default {
     CopyBtn,
     TerminalListTile,
     LinkListTile,
-    KubeconfigGardenlogin,
-    KubeconfigStaticToken,
+    ShootKubeconfig,
     GardenctlCommands,
     TerminalShortcutsTile
   },
