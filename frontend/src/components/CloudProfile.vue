@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <template v-if="isCreateMode">
+    <template v-if="createMode">
       <v-select
       :items="cloudProfiles"
       :value="value"
@@ -46,9 +46,9 @@ export default {
     value: {
       type: String
     },
-    isCreateMode: {
+    createMode: {
       type: Boolean,
-      required: true
+      default: false
     },
     cloudProfiles: {
       type: Array,

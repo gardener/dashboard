@@ -25,6 +25,7 @@ import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import moment from './moment'
+import forEach from 'lodash/forEach'
 import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 
@@ -285,6 +286,23 @@ export function isOwnSecret (infrastructureSecret) {
 
 export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
+}
+
+export function getIssueSince (shootStatus) {
+  const issueTimestamps = []
+  const lastOperation = get(shootStatus, 'lastOperation', {})
+  if (lastOperation.state === 'False') {
+    issueTimestamps.push(lastOperation.lastUpdateTime)
+  }
+  forEach([...get(shootStatus, 'conditions', []), ...get(shootStatus, 'constraints', [])], readiness => {
+    if (readiness.status !== 'True') {
+      issueTimestamps.push(readiness.lastTransitionTime)
+    }
+  })
+  forEach(get(shootStatus, 'lastErrors'), lastError => {
+    issueTimestamps.push(lastError.lastUpdateTime)
+  })
+  return head(issueTimestamps.sort())
 }
 
 export function getProjectDetails (project) {

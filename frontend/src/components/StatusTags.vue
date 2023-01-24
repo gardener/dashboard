@@ -14,7 +14,8 @@ SPDX-License-Identifier: Apache-2.0
         :key="condition.id"
         :popper-placement="popperPlacement"
         :secret-binding-name="shootSecretBindingName"
-        :namespace="shootNamespace">
+        :namespace="shootNamespace"
+        :stale-shoot="isStaleShoot">
     </status-tag>
     </div>
     <template v-if="showStatusText">

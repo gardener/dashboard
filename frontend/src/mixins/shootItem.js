@@ -155,6 +155,9 @@ export const shootItem = {
     shootMaintenance () {
       return get(this.shootSpec, 'maintenance', [])
     },
+    shootControlPlaneHighAvailabilityFailureTolerance () {
+      return get(this.shootSpec, 'controlPlane.highAvailability.failureTolerance.type')
+    },
     shootInfo () {
       return get(this.shootItem, 'info', {})
     },
@@ -249,6 +252,9 @@ export const shootItem = {
     },
     shootStatus () {
       return get(this.shootItem, 'status', {})
+    },
+    isStaleShoot () {
+      return this.shootItem?.stale
     }
   },
   methods: {

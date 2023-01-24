@@ -9,9 +9,15 @@ import {
 } from '@/store'
 
 import getters from '@/store/modules/shoots/getters'
-import { parseSearch } from '@/store/modules/shoots/helper'
+import shootModule from '@/store/modules/shoots'
 
-describe('store.shoots.getters', () => {
+import { parseSearch, deleteItem, putItem, keyForShoot } from '@/store/modules/shoots/helper'
+
+import assign from 'lodash/assign'
+import fromPairs from 'lodash/fromPairs'
+import map from 'lodash/map'
+
+describe('store.shoots', () => {
   let shootItems
   const rootGetters = {
     shootCustomFields: {
@@ -21,14 +27,17 @@ describe('store.shoots.getters', () => {
     },
     shootCustomFieldList: undefined
   }
-  const sortItems = getters.sortItems(undefined, undefined, undefined, rootGetters)
+  let state
+  let sortItems
+  let setFocusMode
 
   beforeEach(() => {
     shootItems = [
       {
         metadata: {
           name: 'shoot2',
-          namespace: 'foo'
+          namespace: 'foo',
+          uid: 'shoot2'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -57,7 +66,8 @@ describe('store.shoots.getters', () => {
       {
         metadata: {
           name: 'shoot1',
-          namespace: 'foo'
+          namespace: 'foo',
+          uid: 'shoot1'
         },
         spec: {
           creationTimestamp: '2020-02-01T20:00:00Z',
@@ -86,7 +96,8 @@ describe('store.shoots.getters', () => {
       {
         metadata: {
           name: 'shoot3',
-          namespace: 'bar'
+          namespace: 'bar',
+          uid: 'shoot3'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -118,96 +129,190 @@ describe('store.shoots.getters', () => {
         }
       }
     ]
+
+    const shootItemKeyValuePairs = map(shootItems, shootItem => [keyForShoot(shootItem.metadata), shootItem])
+    state = {
+      shoots: fromPairs(shootItemKeyValuePairs),
+      filteredShoots: shootItems,
+      focusMode: false,
+      staleShoots: []
+    }
+    assign(shootModule.state, state)
+
+    sortItems = getters.sortItems(shootModule.state, undefined, undefined, rootGetters)
+    setFocusMode = (value) => shootModule.actions.setFocusMode({
+      commit: (f, v) => shootModule.mutations[f](shootModule.state, v),
+      getters: {
+        sortItems
+      }
+    }, value)
   })
 
-  it('should sort shoots by name', () => {
-    const sortBy = ['name']
-    const sortDesc = [true]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+  describe('getters', () => {
+    it('should sort shoots by name', () => {
+      const sortBy = ['name']
+      const sortDesc = [true]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
 
-    expect(sortedShoots[0].metadata.name).toBe('shoot3')
-    expect(sortedShoots[1].metadata.name).toBe('shoot2')
-    expect(sortedShoots[2].metadata.name).toBe('shoot1')
+      expect(sortedShoots[0].metadata.name).toBe('shoot3')
+      expect(sortedShoots[1].metadata.name).toBe('shoot2')
+      expect(sortedShoots[2].metadata.name).toBe('shoot1')
+    })
+
+    it('should sort shoots by purpose', () => {
+      const sortBy = ['purpose']
+      const sortDesc = [true]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot2')
+      expect(sortedShoots[1].metadata.name).toBe('shoot3')
+      expect(sortedShoots[2].metadata.name).toBe('shoot1')
+    })
+
+    it('should sort shoots by creationTimestamp', () => {
+      const sortBy = ['creationTimestamp']
+      const sortDesc = [false]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot1')
+      expect(sortedShoots[1].metadata.name).toBe('shoot2')
+      expect(sortedShoots[2].metadata.name).toBe('shoot3')
+    })
+
+    it('should sort shoots by kubernetes version', () => {
+      const sortBy = ['k8sVersion']
+      const sortDesc = [false]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot2')
+      expect(sortedShoots[1].metadata.name).toBe('shoot3')
+      expect(sortedShoots[2].metadata.name).toBe('shoot1')
+    })
+
+    it('should sort shoots by infrastructure', () => {
+      const sortBy = ['infrastructure']
+      const sortDesc = [true]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot1')
+      expect(sortedShoots[1].metadata.name).toBe('shoot3')
+      expect(sortedShoots[2].metadata.name).toBe('shoot2')
+    })
+
+    it('should sort shoots by lastOperation (status)', () => {
+      const sortBy = ['lastOperation']
+      const sortDesc = [true]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot2')
+      expect(sortedShoots[1].metadata.name).toBe('shoot1')
+      expect(sortedShoots[2].metadata.name).toBe('shoot3')
+    })
+
+    it('should sort shoots by readiness', () => {
+      const sortBy = ['readiness']
+      const sortDesc = [false]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot3')
+      expect(sortedShoots[1].metadata.name).toBe('shoot1')
+      expect(sortedShoots[2].metadata.name).toBe('shoot2')
+    })
+
+    it('should sort shoots by readiness', () => {
+      const sortBy = ['readiness']
+      const sortDesc = [false]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot3')
+      expect(sortedShoots[1].metadata.name).toBe('shoot1')
+      expect(sortedShoots[2].metadata.name).toBe('shoot2')
+    })
+
+    it('should sort shoots by custom column', () => {
+      const sortBy = ['Z_Foo']
+      const sortDesc = [false]
+      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+
+      expect(sortedShoots[0].metadata.name).toBe('shoot3')
+      expect(sortedShoots[1].metadata.name).toBe('shoot1')
+      expect(sortedShoots[2].metadata.name).toBe('shoot2')
+    })
+
+    it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
+      deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
+      shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
+      expect(shootModule.state.filteredShoots.length).toBe(2)
+      expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
+      expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
+      setFocusMode(true)
+
+      expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(undefined)
+      deleteItem(shootModule.state, shootModule.state.filteredShoots[0])
+      shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
+      expect(shootModule.state.filteredShoots.length).toBe(1)
+
+      expect(shootModule.getters.filteredItems(shootModule.state).length).toBe(2)
+      expect(shootModule.getters.filteredItems(shootModule.state)[0].stale).toBe(true)
+    })
+
+    it('should not add new shoots to list when shoot list is freezed', () => {
+      setFocusMode(true)
+      const newShoot = {
+        metadata: {
+          name: 'shoot4',
+          namespace: 'foo',
+          uid: 'shoot4'
+        }
+      }
+      shootModule.state.shoots[keyForShoot(newShoot.metadata)] = newShoot
+      shootModule.state.filteredShoots = Object.values(shootModule.state.shoots)
+      expect(shootModule.state.filteredShoots.length).toBe(4)
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
+
+      expect(getters.filteredItems(shootModule.state).length).toBe(3)
+
+      setFocusMode(false)
+      expect(getters.filteredItems(shootModule.state).length).toBe(4)
+
+      setFocusMode(true)
+      expect(getters.filteredItems(shootModule.state).length).toBe(4)
+    })
+
+    it('should add and remove staleShoots', () => {
+      const shoot = Object.values(shootModule.state.shoots)[1]
+      setFocusMode(true)
+
+      deleteItem(shootModule.state, shoot)
+      expect(shootModule.state.staleShoots[shoot.metadata.uid]).not.toBeUndefined()
+
+      putItem(shootModule.state, shoot)
+      expect(shootModule.state.staleShoots[shoot.metadata.uid]).toBeUndefined()
+    })
   })
 
-  it('should sort shoots by purpose', () => {
-    const sortBy = ['purpose']
-    const sortDesc = [true]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+  describe('mutations', () => {
+    it('should receive items and update staleShoots', () => {
+      const shoots = Object.values(shootModule.state.shoots)
+      setFocusMode(true)
+      const itemToDelete = shoots[0]
+      deleteItem(shootModule.state, itemToDelete)
 
-    expect(sortedShoots[0].metadata.name).toBe('shoot2')
-    expect(sortedShoots[1].metadata.name).toBe('shoot3')
-    expect(sortedShoots[2].metadata.name).toBe('shoot1')
-  })
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
+      expect(shootModule.state.staleShoots[itemToDelete.metadata.uid]).not.toBeUndefined()
+      expect(Object.values(shootModule.state.shoots).length).toBe(2)
+      expect(Object.values(shootModule.state.shoots)).toContain(shoots[1], shoots[2])
 
-  it('should sort shoots by creationTimestamp', () => {
-    const sortBy = ['creationTimestamp']
-    const sortDesc = [false]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
+      const newShoots = [shoots[0], shoots[1]]
+      const missingShoot = shoots[2]
+      shootModule.mutations.RECEIVE(shootModule.state, { rootState: {}, rootGetters: {}, shoots: newShoots })
 
-    expect(sortedShoots[0].metadata.name).toBe('shoot1')
-    expect(sortedShoots[1].metadata.name).toBe('shoot2')
-    expect(sortedShoots[2].metadata.name).toBe('shoot3')
-  })
-
-  it('should sort shoots by kubernetes version', () => {
-    const sortBy = ['k8sVersion']
-    const sortDesc = [false]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot2')
-    expect(sortedShoots[1].metadata.name).toBe('shoot3')
-    expect(sortedShoots[2].metadata.name).toBe('shoot1')
-  })
-
-  it('should sort shoots by infrastructure', () => {
-    const sortBy = ['infrastructure']
-    const sortDesc = [true]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot1')
-    expect(sortedShoots[1].metadata.name).toBe('shoot3')
-    expect(sortedShoots[2].metadata.name).toBe('shoot2')
-  })
-
-  it('should sort shoots by lastOperation (status)', () => {
-    const sortBy = ['lastOperation']
-    const sortDesc = [true]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot2')
-    expect(sortedShoots[1].metadata.name).toBe('shoot1')
-    expect(sortedShoots[2].metadata.name).toBe('shoot3')
-  })
-
-  it('should sort shoots by readiness', () => {
-    const sortBy = ['readiness']
-    const sortDesc = [false]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot3')
-    expect(sortedShoots[1].metadata.name).toBe('shoot1')
-    expect(sortedShoots[2].metadata.name).toBe('shoot2')
-  })
-
-  it('should sort shoots by readiness', () => {
-    const sortBy = ['readiness']
-    const sortDesc = [false]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot3')
-    expect(sortedShoots[1].metadata.name).toBe('shoot1')
-    expect(sortedShoots[2].metadata.name).toBe('shoot2')
-  })
-
-  it('should sort shoots by custom column', () => {
-    const sortBy = ['Z_Foo']
-    const sortDesc = [false]
-    const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-    expect(sortedShoots[0].metadata.name).toBe('shoot3')
-    expect(sortedShoots[1].metadata.name).toBe('shoot1')
-    expect(sortedShoots[2].metadata.name).toBe('shoot2')
+      expect(shootModule.state.sortedUidsAtFreeze.length).toBe(3)
+      expect(shootModule.state.staleShoots[missingShoot.metadata.uid]).not.toBeUndefined()
+      expect(shootModule.state.staleShoots[itemToDelete.metadata.uid]).toBeUndefined()
+      expect(Object.values(shootModule.state.shoots).length).toBe(2)
+      expect(Object.values(shootModule.state.shoots)).toContain(shoots[0], shoots[1])
+    })
   })
 })
 

@@ -13,8 +13,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title>{{title}}</v-list-item-title>
-          <v-list-item-subtitle>{{subtitle}}</v-list-item-subtitle>
+          <v-list-item-subtitle>
+            {{subtitle}}
+          </v-list-item-subtitle>
         </v-list-item-content>
+        <v-list-item-action class="mx-0">
+          <gardenctl-info></gardenctl-info>
+        </v-list-item-action>
         <v-list-item-action>
           <copy-btn :clipboard-text="value"></copy-btn>
         </v-list-item-action>
@@ -46,6 +51,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
+import GardenctlInfo from '@/components/GardenctlInfo.vue'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
@@ -54,7 +60,8 @@ import Vue from 'vue'
 export default {
   components: {
     CopyBtn,
-    CodeBlock
+    CodeBlock,
+    GardenctlInfo
   },
   mixins: [shootItem],
   data () {
@@ -78,13 +85,12 @@ export default {
       const displayValue = command => {
         return '$ ' + command
           .replace(/ --/g, ' \\\n    --')
-          .replace(/ &&/g, ' \\\n  &&')
       }
 
       const cmds = [
         {
           title: 'Target Cluster',
-          subtitle: 'Gardenctl-v2 command to target the shoot cluster',
+          subtitle: 'Gardenctl command to target the shoot cluster',
           value: this.targetShootCommand,
           displayValue: displayValue(this.targetShootCommand)
         }
@@ -93,7 +99,7 @@ export default {
       if (this.isAdmin) {
         cmds.unshift({
           title: 'Target Control Plane',
-          subtitle: 'Gardenctl-v2 command to target the control plane of the shoot cluster',
+          subtitle: 'Gardenctl command to target the control plane of the shoot cluster',
           value: this.targetControlPlaneCommand,
           displayValue: displayValue(this.targetControlPlaneCommand)
         })

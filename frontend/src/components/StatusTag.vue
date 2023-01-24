@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="visible">
     <g-popper
       @input="onPopperInput"
-      :title="condition.name"
+      :title="popperTitle"
       :toolbar-color="color"
       :popper-key="popperKeyWithType"
       :placement="popperPlacement"
@@ -44,14 +44,16 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </div>
       </template>
-      <shoot-message-details
-        :status-title="chipStatus"
-        :last-message="nonErrorMessage"
-        :error-descriptions="errorDescriptions"
-        :last-transition-time="condition.lastTransitionTime"
-        :secret-binding-name="secretBindingName"
-        :namespace="namespace"
-      />
+      <template slot="card">
+        <shoot-message-details
+          :status-title="chipStatus"
+          :last-message="nonErrorMessage"
+          :error-descriptions="errorDescriptions"
+          :last-transition-time="condition.lastTransitionTime"
+          :secret-binding-name="secretBindingName"
+          :namespace="namespace"
+        />
+      </template>
     </g-popper>
   </div>
 </template>
@@ -89,6 +91,9 @@ export default {
     },
     popperPlacement: {
       type: String
+    },
+    staleShoot: {
+      type: Boolean
     }
   },
   data () {
@@ -100,6 +105,12 @@ export default {
     ...mapGetters([
       'isAdmin'
     ]),
+    popperTitle () {
+      if (this.staleShoot) {
+        return 'Last Status'
+      }
+      return this.condition.name
+    },
     chipText () {
       return this.condition.shortName || ''
     },
@@ -182,11 +193,11 @@ export default {
       return `statusTag_${this.popperKey}`
     },
     color () {
+      if (this.isUnknown || this.staleShoot) {
+        return 'grey'
+      }
       if (this.isError) {
         return 'error'
-      }
-      if (this.isUnknown) {
-        return 'grey'
       }
       if (this.isProgressing && this.isAdmin) {
         return 'info'
@@ -233,13 +244,6 @@ export default {
     .chip-icon {
       margin-left: -4px;
       margin-right: 1px;
-    }
-  }
-
-  ::v-deep .v-card  {
-    .v-card__text {
-      padding: 0px;
-      text-align: left;
     }
   }
 </style>

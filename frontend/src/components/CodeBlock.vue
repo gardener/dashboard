@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <copy-btn
       v-if="showCopyButton"
       class="copy-button"
-      :clipboard-text="content"
+      :clipboard-text="clipboardText"
       @copy="onCopy"
       :user-feedback="false"
     ></copy-btn>
@@ -55,6 +55,10 @@ export default {
       type: String,
       default: ''
     },
+    clipboard: {
+      type: String,
+      default: ''
+    },
     showCopyButton: {
       type: Boolean,
       default: true
@@ -62,9 +66,13 @@ export default {
 
   },
   data: () => ({
-    showMessage: false,
-    clipboard: undefined
+    showMessage: false
   }),
+  computed: {
+    clipboardText () {
+      return this.clipboard ? this.clipboard : this.content
+    }
+  },
   methods: {
     prettyPrint (textContent) {
       const block = this.$refs.block
