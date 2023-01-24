@@ -10,6 +10,7 @@ const { mockRequest } = require('@gardener-dashboard/request')
 const kubeconfig = require('@gardener-dashboard/kube-config')
 const originalKubeconfig = jest.requireActual('@gardener-dashboard/kube-config')
 const logger = require('../../lib/logger')
+const yaml = require('js-yaml')
 
 describe('api', function () {
   let agent
@@ -25,6 +26,7 @@ describe('api', function () {
   afterEach(() => {
     mockRequest.mockReset()
     kubeconfig.cleanKubeconfig.mockClear()
+    logger.info.mockClear()
   })
 
   describe('shoots', function () {
@@ -113,6 +115,38 @@ describe('api', function () {
     it('should return shoot info', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(7)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
+
+      expect(logger.info).toBeCalledTimes(0)
+
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String),
+        kubeconfigGardenlogin: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
+      expect(yaml.load(res.body.kubeconfigGardenlogin)).toMatchSnapshot('body.kubeconfigGardenlogin')
+    })
+
+    it('should return shoot info without gardenlogin kubeconfig', async function () {
+      const name = 'dummyShoot' // has no advertised addresses
+
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
@@ -128,7 +162,13 @@ describe('api', function () {
 
       expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
 
-      expect(res.body).toMatchSnapshot()
+      expect(logger.info).toBeCalledTimes(1)
+      expect(logger.info).lastCalledWith('failed to get gardenlogin kubeconfig', 'Shoot has no advertised addresses')
+
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
     })
 
     it('should return shoot seed info when no fallback is needed', async function () {
