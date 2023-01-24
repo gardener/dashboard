@@ -8,6 +8,7 @@
 
 const { matchers } = require('@gardener-dashboard/test-utils')
 const config = require('./config')
+const leases = require('./leases')
 const auth = require('./auth')
 const kube = require('./kube')
 const shoots = require('./shoots')
@@ -39,6 +40,7 @@ function resetAll () {
 const fixtures = {
   matchers,
   config,
+  leases,
   auth,
   user,
   kube,

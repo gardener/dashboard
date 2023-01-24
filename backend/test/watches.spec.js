@@ -225,40 +225,111 @@ describe('watches', function () {
 
     let gitHubStub
     let loadOpenIssuesStub
+    let abortController
+    let signalAddEventListenerStub
 
     beforeEach(function () {
       gitHubStub = jest.fn()
       Object.defineProperty(config, 'gitHub', { get: gitHubStub })
+      ticketCache.getIssueNumbers = jest.fn()
+      ticketCache.getIssueNumbers.mockReturnValue([])
       loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
       jest.clearAllMocks()
+
+      abortController = new AbortController()
+      signalAddEventListenerStub = jest.spyOn(abortController.signal, 'addEventListener')
     })
 
     afterEach(function () {
       Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
     })
 
-    it('should log missing gitHub config', async function () {
+    it('should log a warning if gitHub config is missing and not continue', async function () {
+      jest.spyOn(ticketCache, 'on')
       gitHubStub.mockReturnValue(false)
-      watches.tickets(io, ticketCache)
+      watches.tickets(io, informer, ticketCache, abortController.signal)
       expect(logger.warn).toBeCalledTimes(1)
+      expect(ticketCache.on).toBeCalledTimes(0)
     })
 
-    it('should watch tickets', async function () {
-      gitHubStub.mockReturnValue(true)
-      loadOpenIssuesStub.mockRejectedValueOnce(Object.assign(new Error('Service Unavailable'), {
-        status: 503
-      }))
+    it('should poll tickets in a given interval', async function () {
+      gitHubStub.mockReturnValue({
+        pollIntervalSeconds: 1
+      })
 
-      await watches.tickets(io, ticketCache, { minTimeout: 1 })
+      jest.useFakeTimers()
+      jest.spyOn(global, 'setInterval')
+
+      await watches.tickets(io, informer, ticketCache, abortController.signal)
+
+      expect(setInterval).toBeCalledTimes(1)
+      expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 1000)
+      expect(loadOpenIssuesStub).toBeCalledTimes(1)
+
+      jest.advanceTimersByTime(1_000)
+
       expect(loadOpenIssuesStub).toBeCalledTimes(2)
-      expect(logger.info).toBeCalledTimes(2)
     })
 
-    it('should fail to fetch tickets', async function () {
-      gitHubStub.mockReturnValue(true)
-      loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
+    it('should poll tickets when kubernetes lease object is updated', async function () {
+      gitHubStub.mockReturnValue({
+        webhookSecret: 'secret'
+      })
+      ticketCache.getIssueNumbers = jest.fn().mockReturnValue([])
+      jest.spyOn(informer, 'on')
 
-      await watches.tickets(io, ticketCache)
+      await watches.tickets(io, informer, ticketCache, abortController.signal)
+      expect(loadOpenIssuesStub).toBeCalledTimes(1)
+      expect(informer.on).toBeCalledTimes(1)
+
+      informer.emit('update')
+      expect(loadOpenIssuesStub).toBeCalledTimes(2)
+    })
+
+    it('should cleanup when abort is triggered', async function () {
+      gitHubStub.mockReturnValue({
+        pollThrottleSeconds: 0,
+        pollIntervalSeconds: 10,
+        webhookSecret: 'secret'
+      })
+
+      jest.useFakeTimers()
+      jest.spyOn(global, 'clearInterval')
+      jest.spyOn(informer, 'removeListener')
+
+      await watches.tickets(io, informer, ticketCache, abortController.signal)
+
+      expect(signalAddEventListenerStub).toHaveBeenCalledWith('abort', expect.any(Function), { once: true })
+
+      abortController.abort()
+
+      expect(clearInterval).toBeCalledTimes(1)
+      expect(informer.removeListener).toBeCalledTimes(1)
+    })
+
+    it('should listen to ticketCache events', async function () {
+      gitHubStub.mockReturnValue({
+        pollThrottleSeconds: 0
+      })
+      jest.spyOn(ticketCache, 'on')
+
+      await watches.tickets(io, informer, ticketCache, abortController.signal)
+
+      expect(ticketCache.on).toHaveBeenCalledWith('issue', expect.any(Function))
+      expect(nsp.emit).toHaveBeenCalledWith('issues', issueEvent)
+      expect(ticketCache.on).toHaveBeenCalledWith('comment', expect.any(Function))
+      expect(nsp.to).toHaveBeenCalledWith([`shoots;garden-foo/${metadata.name}`])
+    })
+
+    it('should log error if ticket fetching fails', async function () {
+      gitHubStub.mockReturnValue({
+        webhookSecret: 'secret'
+      })
+      loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
+      ticketCache.getIssueNumbers = jest.fn().mockReturnValue([])
+
+      await watches.tickets(io, informer, ticketCache, abortController.signal)
+
       expect(loadOpenIssuesStub).toBeCalledTimes(1)
       expect(logger.error).toBeCalledTimes(1)
     })

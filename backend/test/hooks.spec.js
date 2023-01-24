@@ -37,20 +37,25 @@ describe('hooks', () => {
     })
 
     it('#createInformers', async function () {
-      for (const [apiGroup, names] of Object.entries(LifecycleHooks.resources)) {
-        for (const name of names) {
+      for (const [apiGroup, resources] of Object.entries(LifecycleHooks.resources)) {
+        for (const resource of resources) {
+          let name
+          if (Array.isArray(resource)) {
+            [name] = resource
+          } else {
+            name = resource
+          }
           const observable = dashboardClient[apiGroup][name]
 
           const informer = {
             names: {
               plural: name
-            }
+            },
+            mockFn: jest.fn(() => informer)
           }
-          if (observable.constructor.scope === 'Namespaced') {
-            informer.mockFn = observable.informerAllNamespaces = jest.fn(() => informer)
-          } else {
-            informer.mockFn = observable.informer = jest.fn(() => informer)
-          }
+
+          observable.informerAllNamespaces = informer.mockFn
+          observable.informer = informer.mockFn
         }
       }
       const informers = LifecycleHooks.createInformers(dashboardClient)
@@ -129,10 +134,12 @@ describe('hooks', () => {
 
         for (const [key, watch] of Object.entries(watches)) {
           expect(watch).toBeCalledTimes(1)
-          expect(watch.mock.calls[0]).toHaveLength(2)
+          expect(watch.mock.calls[0]).toHaveLength(key === 'tickets' ? 4 : 2)
           expect(watch.mock.calls[0][0]).toBe(ioInstance)
-          expect(watch.mock.calls[0][1]).toBe(key === 'tickets' ? ticketCache : informers[key])
+          expect(watch.mock.calls[0][1]).toBe(informers[key])
         }
+        expect(watches.tickets.mock.calls[0][2]).toBe(ticketCache)
+        expect(watches.tickets.mock.calls[0][3]).toBeInstanceOf(AbortSignal)
       })
     })
   })
