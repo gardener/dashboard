@@ -119,7 +119,7 @@ describe('gardener-dashboard', function () {
       expect(container.volumeMounts).toMatchSnapshot()
     })
 
-    describe('virtual garden', function () {
+    describe('when virtual garden is enabled', function () {
       it('should render the template', async function () {
         const values = {
           global: {

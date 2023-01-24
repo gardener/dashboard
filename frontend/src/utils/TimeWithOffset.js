@@ -34,6 +34,16 @@ class TimeWithOffset {
   toString () {
     return `${this.hours}:${this.minutes} GMT${this.offsetSign}${this.offsetHours}:${this.offsetMinutes}`
   }
+
+  nextDate () {
+    let date = new Date()
+    const now = date.getTime()
+    date = new Date(date.toISOString().substring(0, 11) + this.getTimeString() + this.getTimezoneString())
+    while (date.getTime() <= now) {
+      date.setUTCDate(date.getUTCDate() + 1)
+    }
+    return date
+  }
 }
 
 export default TimeWithOffset
