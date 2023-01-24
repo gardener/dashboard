@@ -44,14 +44,16 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </div>
       </template>
-      <shoot-message-details
-        :status-title="chipStatus"
-        :last-message="nonErrorMessage"
-        :error-descriptions="errorDescriptions"
-        :last-transition-time="condition.lastTransitionTime"
-        :secret-binding-name="secretBindingName"
-        :namespace="namespace"
-      />
+      <template slot="card">
+        <shoot-message-details
+          :status-title="chipStatus"
+          :last-message="nonErrorMessage"
+          :error-descriptions="errorDescriptions"
+          :last-transition-time="condition.lastTransitionTime"
+          :secret-binding-name="secretBindingName"
+          :namespace="namespace"
+        />
+      </template>
     </g-popper>
   </div>
 </template>
@@ -242,13 +244,6 @@ export default {
     .chip-icon {
       margin-left: -4px;
       margin-right: 1px;
-    }
-  }
-
-  ::v-deep .v-card  {
-    .v-card__text {
-      padding: 0px;
-      text-align: left;
     }
   }
 </style>

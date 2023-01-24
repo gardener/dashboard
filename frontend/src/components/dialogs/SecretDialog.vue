@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
               <cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
-                :is-create-mode="isCreateMode"
+                :create-mode="isCreateMode"
                 :cloud-profiles="cloudProfiles">
               </cloud-profile>
             </div>

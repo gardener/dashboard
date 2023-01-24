@@ -9,28 +9,32 @@ Source: https://github.com/gardener/dashboard
 Files:
   */.gitignore
   */.helmignore
+  */.browserslistrc
+  */.editorconfig
   */.eslintignore
-  */yarn.lock
+  */.env
   *.ico
   *.json
   *.png
   *.sketch
   *.svg
+  *.gif
   *.tpl
+  *.snap
   .github/
-  .gitignore
-  backend/.babelrc
-  backend/.nycrc
-  frontend/.browserslistrc
-  frontend/.editorconfig
-  frontend/.env
-  frontend/jest.config.js
-  .dockerignore
-  .editorconfig
-  .secrets.baseline
+  .docforge/
+  .yarn/
+  charts/*/Chart.yaml
+  charts/*/values.yaml
+  charts/*/templates/*.yaml
+  charts/*/templates/*/*.yaml
   CODEOWNERS
   VERSION
-  .pnp.js
+  .editorconfig
+  .gitignore
+  .dockerignore
+  .yarnrc.yml
+  .pnp.cjs
   yarn.lock
 Copyright: 2017-2021 SAP SE or an SAP affiliate company and Gardener contributors
 License: Apache-2.0
@@ -40,6 +44,7 @@ License: Apache-2.0
 
 Files:
   *.md
+  docs/usage/shoot.yaml
 Copyright: 2017-2021 SAP SE or an SAP affiliate company and Gardener contributors
 License: CC-BY-4.0
 

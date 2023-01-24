@@ -7,7 +7,7 @@
 'use strict'
 
 const { isHttpError } = require('@gardener-dashboard/request')
-const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
+const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const utils = require('../utils')
 const cache = require('../cache')
@@ -170,6 +170,20 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
+exports.replaceControlPlaneHighAvailability = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const highAvailability = body
+  const payload = {
+    spec: {
+      controlPlane: {
+        highAvailability
+      }
+    }
+  }
+
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
 exports.replaceDns = async function ({ user, namespace, name, body }) {
   const client = user.client
   const dns = body
@@ -270,6 +284,13 @@ exports.info = async function ({ user, namespace, name }) {
   const data = {
     canLinkToSeed: false
   }
+
+  try {
+    data.kubeconfigGardenlogin = await getKubeconfigGardenlogin(client, shoot)
+  } catch (err) {
+    logger.info('failed to get gardenlogin kubeconfig', err.message)
+  }
+
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
     const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
@@ -356,6 +377,100 @@ exports.seedInfo = async function ({ user, namespace, name }) {
   }
 
   return data
+}
+
+async function getKubeconfigGardenlogin (client, shoot) {
+  if (!shoot.status?.advertisedAddresses?.length) {
+    throw new Error('Shoot has no advertised addresses')
+  }
+
+  const { namespace, name } = shoot.metadata
+
+  const [
+    ca,
+    clusterIdentity
+  ] = await Promise.all([
+    client.core.secrets.get(namespace, `${name}.ca-cluster`),
+    dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
+  ])
+
+  const gardenClusterIdentity = clusterIdentity.data['cluster-identity']
+
+  const caData = ca.data?.['ca.crt']
+
+  const extensions = [{
+    name: 'client.authentication.k8s.io/exec',
+    extension: {
+      shootRef: { namespace, name },
+      gardenClusterIdentity
+    }
+  }]
+  const userName = `${namespace}--${name}`
+
+  const installHint = `Follow the instructions on
+- https://github.com/gardener/gardenlogin#installation to install and
+- https://github.com/gardener/gardenlogin#configure-gardenlogin to configure the gardenlogin credential plugin.
+
+The following is a sample configuration for gardenlogin as well as gardenctl. Place the file under ~/.garden/gardenctl-v2.yaml.
+
+---
+gardens:
+  - identity: ${gardenClusterIdentity}
+    kubeconfig: "<path-to-garden-cluster-kubeconfig>"
+...
+
+Alternatively, you can run the following gardenctl command:
+
+$ gardenctl config set-garden ${gardenClusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"
+
+Note that the kubeconfig refers to the path of the garden cluster kubeconfig which you can download from the Account page.`
+
+  const cfg = {
+    clusters: [],
+    contexts: [],
+    users: [{
+      name: userName,
+      user: {
+        exec: {
+          apiVersion: 'client.authentication.k8s.io/v1beta1',
+          command: 'kubectl-gardenlogin',
+          args: [
+            'get-client-certificate'
+          ],
+          provideClusterInfo: true,
+          interactiveMode: 'IfAvailable',
+          installHint
+        }
+      }
+    }]
+  }
+
+  for (const [i, address] of shoot.status.advertisedAddresses.entries()) {
+    const name = `${userName}-${address.name}`
+    if (i === 0) {
+      cfg['current-context'] = name
+    }
+
+    cfg.clusters.push({
+      name,
+      cluster: {
+        server: address.url,
+        'certificate-authority-data': caData,
+        extensions
+      }
+    })
+
+    cfg.contexts.push({
+      name,
+      context: {
+        cluster: name,
+        user: userName,
+        namespace: 'default'
+      }
+    })
+  }
+
+  return new Config(cfg).toYAML()
 }
 
 async function getSecret (client, { namespace, name }) {

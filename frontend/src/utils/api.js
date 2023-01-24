@@ -175,6 +175,12 @@ export function updateShootAddons ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
 }
 
+export function updateShootControlPlaneHighAvailability ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/highAvailability`, data)
+}
+
 export function updateShootDns ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -428,5 +434,6 @@ export default {
   heartbeat,
   terminalConfig,
   listProjectTerminalShortcuts,
-  getGardenerExtensions
+  getGardenerExtensions,
+  updateShootControlPlaneHighAvailability
 }
