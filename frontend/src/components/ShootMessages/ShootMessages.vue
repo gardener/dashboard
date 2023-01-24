@@ -265,13 +265,13 @@ export default {
       if (!this.lastMaintenance.state) {
         return []
       }
-      if (!this.islastMaintenanceFailed && !this.showVerbose) {
+      if (!this.isLastMaintenanceFailed && !this.showVerbose) {
         return []
       }
       return [{
         key: 'lastMaintenanceFailedWarning',
-        icon: this.islastMaintenanceFailed ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline',
-        severity: this.islastMaintenanceFailed ? 'warning' : 'verbose',
+        icon: this.isLastMaintenanceFailed ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline',
+        severity: this.isLastMaintenanceFailed ? 'warning' : 'verbose',
         component: {
           name: 'maintenance-status-message',
           props: {
