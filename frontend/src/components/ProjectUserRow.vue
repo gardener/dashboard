@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <member-account-roles :role-display-names="item.roleDisplayNames"></member-account-roles>
       </div>
     </td>
-    <td width="250px" v-if="selectedHeaders.actions">
+    <td v-if="selectedHeaders.actions">
       <div class="d-flex flex-row justify-end mr-n2">
         <div v-if="canManageMembers" class="ml-1">
           <v-tooltip top>
