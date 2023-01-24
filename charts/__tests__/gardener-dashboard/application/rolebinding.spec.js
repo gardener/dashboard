@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -12,12 +12,12 @@ const { helm } = fixtures
 const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
 
 describe('gardener-dashboard', function () {
-  describe('clusterrolebinding', function () {
+  describe('rolebinding', function () {
     let templates
 
     beforeEach(() => {
       templates = [
-        'clusterrolebinding'
+        'rolebinding'
       ]
     })
 
@@ -25,8 +25,8 @@ describe('gardener-dashboard', function () {
       const values = {}
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
-      const [clusterRoleBinding] = documents
-      expect(clusterRoleBinding).toMatchSnapshot()
+      const [roleBinding] = documents
+      expect(roleBinding).toMatchSnapshot()
     })
 
     describe('when virtual garden is enabled', function () {
@@ -42,8 +42,8 @@ describe('gardener-dashboard', function () {
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
-        const [clusterRoleBinding] = documents
-        expect(clusterRoleBinding).toMatchSnapshot()
+        const [roleBinding] = documents
+        expect(roleBinding).toMatchSnapshot()
       })
     })
   })
