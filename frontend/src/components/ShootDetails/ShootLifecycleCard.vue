@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="d-flex align-center pt-1" v-on="on">
                   <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
                   <span v-if="isInMaintenanceWindow">
-                    Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. Maintenance ends <time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></time-string></span>
+                    Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. The maintenance time window ends <time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></time-string></span>
                   </span>
                   <span v-else-if="nextMaintenanceBeginTimestamp">
                     Maintenance time window starts
@@ -181,7 +181,7 @@ export default {
         return
       }
 
-      return maintenanceStartTime.getNextTimestampISOString()
+      return maintenanceStartTime.nextDate().toISOString()
     },
     nextMaintenanceEndTimestamp () {
       const maintenanceEnd = get(this.shootMaintenance, 'timeWindow.end')
@@ -190,7 +190,7 @@ export default {
         return
       }
 
-      return maintenanceEndTime.getNextTimestampISOString()
+      return maintenanceEndTime.nextDate().toISOString()
     },
     isInMaintenanceWindow () {
       return moment(this.nextMaintenanceBeginTimestamp).isAfter(this.nextMaintenanceEndTimestamp)

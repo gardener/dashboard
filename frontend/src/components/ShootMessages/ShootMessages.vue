@@ -45,7 +45,6 @@ import NoHibernationScheduleMessage from '@/components/ShootMessages/NoHibernati
 import ClusterExpirationMessage from '@/components/ShootMessages/ClusterExpirationMessage'
 import ConstraintMessage from '@/components/ShootMessages/ConstraintMessage'
 import MaintenanceStatusMessage from '@/components/ShootMessages/MaintenanceStatusMessage'
-import some from 'lodash/some'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -296,14 +295,10 @@ export default {
       return 'mdi-alert-circle-outline'
     },
     overallSeverity () {
-      if (some(this.shootMessages, { severity: 'error' })) {
-        return 'error'
-      }
-      if (some(this.shootMessages, { severity: 'warning' })) {
-        return 'warning'
-      }
-      if (some(this.shootMessages, { severity: 'verbose' })) {
-        return 'verbose'
+      for (const { severity } of this.shootMessages) {
+        if (['error', 'warning', 'verbose'].includes(severity)) {
+          return severity
+        }
       }
       return 'info'
     },

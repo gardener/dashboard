@@ -35,11 +35,25 @@ describe('utils', () => {
       expect(timeWithOffset.isValid()).toBe(true)
       expect(timeWithOffset.getTimezoneString({ colon: false })).toBe('+0102')
     })
+  })
 
+  describe('#nextDate', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+    afterEach(() => {
+      jest.useRealTimers()
+    })
     it('should return next timestamp iso string', () => {
-      const timeWithOffset = new TimeWithOffset('01:02:03+04:05')
+      const timeWithOffset = new TimeWithOffset('01:02+04:05')
       expect(timeWithOffset.isValid()).toBe(true)
-      expect(timeWithOffset.getNextTimestampISOString().length).toBe(24)
+      expect(timeWithOffset.nextDate().toISOString()).toMatch(/T20:57:00.000Z$/)
+      jest.setSystemTime(new Date('2023-01-01T20:56:59Z'))
+      expect(timeWithOffset.nextDate().getUTCDate()).toBe(1)
+      jest.setSystemTime(new Date('2023-01-01T20:57:00Z'))
+      expect(timeWithOffset.nextDate().getUTCDate()).toBe(2)
+      jest.setSystemTime(new Date('2023-01-01T20:57:01Z'))
+      expect(timeWithOffset.nextDate().getUTCDate()).toBe(2)
     })
   })
 })
