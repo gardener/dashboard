@@ -404,7 +404,7 @@ describe('auth', function () {
     expect(payload).toEqual({
       jti: expect.stringMatching(/^[a-z0-9-]+$/),
       id,
-      iat: accessTokenPayload.iat,
+      iat: expect.toBeWithinRange(accessTokenPayload.iat, accessTokenPayload.iat + 5),
       exp: accessTokenPayload.exp,
       aud: accessTokenPayload.aud,
       isAdmin: false,

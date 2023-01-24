@@ -16,6 +16,8 @@ const mockLoadResult = new ClientConfig(Config.build({
 
 module.exports = {
   ...originalKubeconfig,
+  Config,
+  ClientConfig,
   cleanKubeconfig: jest.fn().mockImplementation(cleanKubeconfig),
   load: jest.fn().mockReturnValue(mockLoadResult),
   mockLoadResult

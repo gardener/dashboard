@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-checkbox
           color="primary"
           v-model="addons[addonDefinition.name].enabled"
-          :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+          :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>
       </v-list-item-action>
       <v-list-item-content  class="align-self-start">
@@ -32,9 +32,9 @@ import { shootAddonList } from '@/utils'
 export default {
   name: 'manage-shoot-addons',
   props: {
-    isCreateMode: {
+    createMode: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   data () {
