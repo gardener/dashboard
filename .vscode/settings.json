@@ -42,8 +42,6 @@
     ".pre-commit-config.yaml": true,
     ".secrets.baseline": true,
     ".docforge": true,
-    ".github": true,
-    ".reuse": true,
     "logo": true,
     "LICENSES": true,
     "**/node_modules": true,
