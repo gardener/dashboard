@@ -303,24 +303,5 @@ export default {
     return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
       return filteredShoot.metadata.uid === uid
     }).length
-  },
-  topic (state, getters, rootState) {
-    const metadata = state.subscription
-    if (!metadata) {
-      return
-    }
-    const { namespace = rootState.namespace, name } = metadata
-    if (!namespace) {
-      return
-    }
-    let topic = 'shoots'
-    if (name) {
-      topic += `;${namespace}/${name}`
-    } else if (namespace !== '_all') {
-      topic += `;${namespace}`
-    } else if (getters.onlyShootsWithIssues) {
-      topic += ':unhealthy'
-    }
-    return topic
   }
 }
