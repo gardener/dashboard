@@ -257,7 +257,7 @@ Array [
 ]
 `;
 
-exports[`gardener-dashboard deployment virtual garden should render the template 1`] = `
+exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 1`] = `
 Object {
   "name": "service-account-token",
   "projected": Object {
@@ -274,7 +274,7 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard deployment virtual garden should render the template 2`] = `
+exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 2`] = `
 Object {
   "mountPath": "/var/run/secrets/projected/serviceaccount",
   "name": "service-account-token",

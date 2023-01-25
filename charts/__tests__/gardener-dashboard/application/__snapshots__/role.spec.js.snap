@@ -24,7 +24,7 @@ Object {
         "gardener-dashboard-github-webhook",
       ],
       "resources": Array [
-        "lease",
+        "leases",
       ],
       "verbs": Array [
         "get",

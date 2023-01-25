@@ -24,6 +24,6 @@ subjects:
   name: {{ .Values.global.virtualGarden.userName }}
 {{- else }}
 - kind: ServiceAccount
-  name: {{ required ".Values.global.serviceAccountName is required" .Values.global.serviceAccountName }}
+  name: {{ required ".Values.global.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
 {{- end }}

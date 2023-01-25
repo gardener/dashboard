@@ -28,7 +28,7 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard clusterrolebinding virtual garden should render the template 1`] = `
+exports[`gardener-dashboard clusterrolebinding when virtual garden is enabled should render the template 1`] = `
 Object {
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "ClusterRoleBinding",

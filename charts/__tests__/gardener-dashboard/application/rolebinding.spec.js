@@ -6,10 +6,9 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardApplicationTemplates
 
 describe('gardener-dashboard', function () {
   describe('rolebinding', function () {
@@ -37,7 +36,9 @@ describe('gardener-dashboard', function () {
               enabled: true,
               userName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard'
             },
-            serviceAccountName: 'gardener-dashboard'
+            dashboard: {
+              serviceAccountName: 'gardener-dashboard'
+            }
           }
         }
         const documents = await renderTemplates(templates, values)

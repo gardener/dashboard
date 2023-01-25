@@ -564,14 +564,16 @@ describe('gardener-dashboard', function () {
         expect(pick(config, ['frontend.resourceQuotaHelp'])).toMatchSnapshot()
       })
     })
-    
+
     describe('controlPlaneHighAvailabilityHelp', function () {
       it('should render the template with controlPlaneHighAvailabilityHelp markdown', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              controlPlaneHighAvailabilityHelp: {
-                text: '[foo](https://bar.baz)'
+            dashboard: {
+              frontendConfig: {
+                controlPlaneHighAvailabilityHelp: {
+                  text: '[foo](https://bar.baz)'
+                }
               }
             }
           }
