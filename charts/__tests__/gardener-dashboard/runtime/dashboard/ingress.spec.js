@@ -73,7 +73,7 @@ describe('gardener-dashboard', function () {
         hosts: defaults.global.dashboard.ingress.hosts
       })
 
-      expect(tlsSecret).toBeFalsy()
+      expect(tlsSecret).toBe(null)
     })
 
     it('should render the template without tls', async function () {
@@ -93,7 +93,7 @@ describe('gardener-dashboard', function () {
 
       expect(ingress.spec.tls).toBeUndefined()
 
-      expect(tlsSecret).toBeFalsy()
+      expect(tlsSecret).toBe(null)
     })
   })
 })

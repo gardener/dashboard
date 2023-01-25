@@ -40,7 +40,7 @@ describe('gardener-dashboard', function () {
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [serviceaccount] = documents
-      expect(serviceaccount).toBeFalsy()
+      expect(serviceaccount).toBe(null)
     })
   })
 })

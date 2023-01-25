@@ -89,13 +89,22 @@ function renderTemplatesFn (...paths) {
   }
 }
 
-const renderDashboardRuntimeTemplates = renderTemplatesFn('gardener-dashboard', 'charts', 'runtime', 'templates', 'dashboard')
-const renderDashboardApplicationTemplates = renderTemplatesFn('gardener-dashboard', 'charts', 'application', 'templates', 'dashboard')
+const gardenerDashboardRuntimeTemplates = ['gardener-dashboard', 'charts', 'runtime', 'templates']
+const gardenerDashboardApplicationTemplates = ['gardener-dashboard', 'charts', 'application', 'templates']
+
+const renderDashboardRuntimeTemplates = renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'dashboard')
+const renderDashboardApplicationTemplates = renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'dashboard')
+
+const renderBootstrapperRuntimeTemplates = renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'bootstrapper')
+const renderBootstrapperApplicationTemplates = renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'bootstrapper')
+
 const renderIdentityTemplates = renderTemplatesFn('identity')
 
 module.exports = {
   renderTemplatesFn,
   renderDashboardRuntimeTemplates,
   renderDashboardApplicationTemplates,
+  renderBootstrapperRuntimeTemplates,
+  renderBootstrapperApplicationTemplates,
   renderIdentityTemplates
 }

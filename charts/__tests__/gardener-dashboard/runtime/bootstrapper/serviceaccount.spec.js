@@ -1,47 +1,57 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
+const { merge } = require('lodash')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderDashboardRuntimeTemplates
+const renderTemplates = helm.renderBootstrapperRuntimeTemplates
 
-describe('gardener-dashboard', function () {
+describe('gardener-dashboard-terminal-bootstrapper', () => {
   describe('serviceaccount', function () {
+    let values
     let templates
 
     beforeEach(() => {
+      values = {
+        global: {
+          bootstrapper: {
+            enabled: true
+          }
+        }
+      }
       templates = [
         'serviceaccount'
       ]
     })
 
-    it('should not render the template with default values', async function () {
-      const values = {}
+    it('should not render the template', async function () {
+      values.global.bootstrapper.enabled = false
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [serviceaccount] = documents
-      expect(serviceaccount).toBeFalsy()
+      expect(serviceaccount).toBe(null)
     })
 
     describe('when virtual garden is enabled', function () {
-      it('should render the template', async function () {
-        const values = {
-          global: {
-            virtualGarden: {
-              enabled: true
-            },
-            dashboard: {
-              serviceAccountTokenVolumeProjection: {
-                enabled: true
-              }
-            }
+      beforeEach(() => {
+        merge(values.global, {
+          virtualGarden: {
+            enabled: true
           }
-        }
+        })
+      })
+
+      it('should render the template', async function () {
+        merge(values.global.bootstrapper, {
+          serviceAccountTokenVolumeProjection: {
+            enabled: true
+          }
+        })
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [serviceaccount] = documents
@@ -49,22 +59,15 @@ describe('gardener-dashboard', function () {
       })
 
       it('should not render the template', async function () {
-        const values = {
-          global: {
-            virtualGarden: {
-              enabled: true
-            },
-            dashboard: {
-              serviceAccountTokenVolumeProjection: {
-                enabled: false
-              }
-            }
+        merge(values.global.bootstrapper, {
+          serviceAccountTokenVolumeProjection: {
+            enabled: false
           }
-        }
+        })
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [serviceaccount] = documents
-        expect(serviceaccount).toBeFalsy()
+        expect(serviceaccount).toBe(null)
       })
     })
   })

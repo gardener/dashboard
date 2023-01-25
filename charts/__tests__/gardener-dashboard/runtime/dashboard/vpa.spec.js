@@ -41,7 +41,7 @@ describe('gardener-dashboard', function () {
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [vpa] = documents
-      expect(vpa).toBeFalsy()
+      expect(vpa).toBe(null)
     })
 
     it('should render the template with overwritten values', async function () {

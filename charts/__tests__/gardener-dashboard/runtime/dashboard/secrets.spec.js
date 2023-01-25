@@ -69,7 +69,7 @@ describe('gardener-dashboard', function () {
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [kubeconfigSecret] = documents
-      expect(kubeconfigSecret).toMatchSnapshot()
+      expect(kubeconfigSecret).toBe(null)
     })
   })
 

@@ -105,7 +105,7 @@ describe('gardener-dashboard', function () {
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [deployment] = documents
-        expect(deployment.spec.template.spec.automountServiceAccountToken).toBeFalsy()
+        expect(deployment.spec.template.spec.automountServiceAccountToken).toBe(false)
         const volumes = deployment.spec.template.spec.volumes
         expect(volumes).toHaveLength(4)
         const [, , , kubeconfigVolume] = volumes

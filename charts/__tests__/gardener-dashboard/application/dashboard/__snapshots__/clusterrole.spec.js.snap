@@ -121,39 +121,6 @@ Object {
         "get",
       ],
     },
-    Object {
-      "apiGroups": Array [
-        "core.gardener.cloud",
-      ],
-      "resources": Array [
-        "shoots",
-      ],
-      "verbs": Array [
-        "get",
-      ],
-    },
-    Object {
-      "apiGroups": Array [
-        "core.gardener.cloud",
-      ],
-      "resources": Array [
-        "shoots/adminkubeconfig",
-      ],
-      "verbs": Array [
-        "create",
-      ],
-    },
-    Object {
-      "apiGroups": Array [
-        "seedmanagement.gardener.cloud",
-      ],
-      "resources": Array [
-        "managedseeds",
-      ],
-      "verbs": Array [
-        "get",
-      ],
-    },
   ],
 }
 `;

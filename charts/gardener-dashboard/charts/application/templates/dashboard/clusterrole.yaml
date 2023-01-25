@@ -63,29 +63,10 @@ rules:
   verbs:
   - list
   - watch
-# required for terminal bootstrapping and gardener/dashboard#943
+# keep until gardener/monitoring#11 is resolved
 - apiGroups:
   - ""
   resources:
   - secrets
-  verbs:
-  - get
-# required for terminal bootstrapping
-- apiGroups:
-  - core.gardener.cloud
-  resources:
-  - shoots
-  verbs:
-  - get
-- apiGroups:
-  - core.gardener.cloud
-  resources:
-  - shoots/adminkubeconfig
-  verbs:
-  - create
-- apiGroups:
-  - seedmanagement.gardener.cloud
-  resources:
-  - managedseeds
   verbs:
   - get

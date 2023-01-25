@@ -1,0 +1,26 @@
+{{- if .Values.global.bootstrapper.enabled }}
+apiVersion: {{ include "rbacversion" . }}
+kind: ClusterRoleBinding
+metadata:
+  name: gardener.cloud:system:dashboard-terminal-bootstrapper
+  labels:
+    app: gardener-dashboard
+    role: terminal-bootstrapper 
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gardener.cloud:system:dashboard-terminal-bootstrapper
+subjects:
+{{- if and .Values.global.virtualGarden.enabled .Values.global.virtualGarden.terminalBootstrapperUserName }}
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: {{ .Values.global.virtualGarden.terminalBootstrapperUserName }}
+{{- else }}
+- kind: ServiceAccount
+  name: {{ required ".Values.global.bootstrapper.serviceAccountName is required" .Values.global.bootstrapper.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

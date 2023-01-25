@@ -16,20 +16,21 @@ spec:
     matchLabels:
       app: gardener-dashboard
       role: terminal-bootstrapper
-      release: {{ .Release.Name }}
   template:
     metadata:
       labels:
         app: gardener-dashboard
         role: terminal-bootstrapper
-        release: {{ .Release.Name }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
         {{- if .Values.global.bootstrapper.podLabels }}
 {{ toYaml .Values.global.bootstrapper.podLabels | indent 8 }}
         {{- end }}
       annotations:
-        checksum/configmap-gardener-dashboard-terminal-bootstrapper-config: {{ include (print .Template.BasePath "/terminal-bootstrapper/configmap-config.yaml") . | sha256sum }}
+        checksum/configmap-gardener-dashboard-terminal-bootstrapper-config: {{ include (print .Template.BasePath "/bootstrapper/configmap-config.yaml") . | sha256sum }}
         {{- if .Values.global.bootstrapper.kubeconfig }}
-        checksum/secret-gardener-dashboard-terminal-bootstrapper-kubeconfig: {{ include (print .Template.BasePath "/terminal-bootstrapper/secret-kubeconfig.yaml") . | sha256sum }}
+        checksum/secret-gardener-dashboard-terminal-bootstrapper-kubeconfig: {{ include (print .Template.BasePath "/bootstrapper/secret-kubeconfig.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.global.bootstrapper.podAnnotations }}
 {{ toYaml .Values.global.apiserver.podAnnotations | indent 8 }}
@@ -84,14 +85,13 @@ spec:
         - name: KUBECONFIG
           value: /etc/gardener-dashboard-terminal-bootstrapper/kubeconfig/kubeconfig.yaml
         {{- end }}
-        resources:
-{{ toYaml .Values.global.bootstrapper.resources | trim | indent 12 }}
+        resources: {{ toYaml .Values.global.bootstrapper.resources | nindent 12 }}
         volumeMounts:
         - name: gardener-dashboard-terminal-bootstrapper-config
           mountPath: /etc/gardener-dashboard-terminal-bootstrapper/config
           readOnly: true
         {{- if .Values.global.bootstrapper.kubeconfig }}
-        - name: gardener-dashboard-secret-kubeconfig
+        - name: gardener-dashboard-terminal-bootstrapper-kubeconfig
           mountPath: /etc/gardener-dashboard-terminal-bootstrapper/kubeconfig
           readOnly: true
         {{- end }}
@@ -103,11 +103,11 @@ spec:
       volumes:
       - name: gardener-dashboard-terminal-bootstrapper-config
         configMap:
-          name: gardener-dashboard-terminal-bootstrapper-configmap
+          name: gardener-dashboard-terminal-bootstrapper-configmap-config
       {{- if .Values.global.bootstrapper.kubeconfig }}
       - name: gardener-dashboard-terminal-bootstrapper-kubeconfig
         secret:
-          secretName: gardener-dashboard-terminal-bootstrapper-kubeconfig
+          secretName: gardener-dashboard-terminal-bootstrapper-secret-kubeconfig
       {{- end }}
       {{- if .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.enabled }}
       - name: service-account-token
