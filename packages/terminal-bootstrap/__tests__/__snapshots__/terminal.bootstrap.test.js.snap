@@ -1,0 +1,1545 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`terminal bootstrap disabled should not bootstrap anything: bootstrapper 1`] = `
+Object {
+  "successRate": 0,
+  "total": 0,
+}
+`;
+
+exports[`terminal bootstrap disabled should not bootstrap anything: mocks 1`] = `Object {}`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should bootstrap a host cluster with IP address: bootstrapper 1`] = `
+Object {
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should bootstrap a host cluster with IP address: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "firstSecret",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockHostEndpointsMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Endpoints",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "subsets": Array [
+          Object {
+            "addresses": Array [
+              Object {
+                "ip": "192.168.178.2",
+              },
+            ],
+            "ports": Array [
+              Object {
+                "port": 6443,
+                "protocol": "TCP",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  ],
+  "mockHostIngressesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "gardenTerminalApiServerIngressHost",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "garden-host-cluster-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "gardenTerminalApiServerIngressHost",
+              ],
+              "secretName": "garden-host-cluster-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockHostServicesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": "None",
+          "externalName": undefined,
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 6443,
+            },
+          ],
+          "type": undefined,
+        },
+      },
+    ],
+  ],
+  "mockSecretsList": Array [
+    Array [
+      "garden",
+      Object {
+        "labelSelector": "runtime=gardenTerminalHost",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should bootstrap the host cluster with domain name: bootstrapper 1`] = `
+Object {
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should bootstrap the host cluster with domain name: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "firstSecret",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockHostIngressesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "gardenTerminalApiServerIngressHost",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "garden-host-cluster-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "gardenTerminalApiServerIngressHost",
+              ],
+              "secretName": "garden-host-cluster-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockHostServicesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": undefined,
+          "externalName": "host-apiserver",
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 6443,
+            },
+          ],
+          "type": "ExternalName",
+        },
+      },
+    ],
+  ],
+  "mockSecretsList": Array [
+    Array [
+      "garden",
+      Object {
+        "labelSelector": "runtime=gardenTerminalHost",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should fail to bootstrap the host cluster: bootstrapper 1`] = `
+Object {
+  "successRate": 0,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should fail to bootstrap the host cluster: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "firstSecret",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockHostIngressesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "gardenTerminalApiServerIngressHost",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "garden-host-cluster-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "gardenTerminalApiServerIngressHost",
+              ],
+              "secretName": "garden-host-cluster-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockHostServicesCreate": Array [
+    Array [
+      "garden",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": undefined,
+          "externalName": "host-apiserver",
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 6443,
+            },
+          ],
+          "type": "ExternalName",
+        },
+      },
+    ],
+  ],
+  "mockHostServicesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": undefined,
+          "externalName": "host-apiserver",
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 6443,
+            },
+          ],
+          "type": "ExternalName",
+        },
+      },
+    ],
+  ],
+  "mockSecretsList": Array [
+    Array [
+      "garden",
+      Object {
+        "labelSelector": "runtime=gardenTerminalHost",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should not bootstrap an unsupported kind: bootstrapper 1`] = `
+Object {
+  "successRate": 1,
+  "total": 2,
+}
+`;
+
+exports[`terminal bootstrap gardenTerminalHost enabled should not bootstrap an unsupported kind: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "firstSecret",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockHostIngressesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "gardenTerminalApiServerIngressHost",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "garden-host-cluster-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "gardenTerminalApiServerIngressHost",
+              ],
+              "secretName": "garden-host-cluster-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockHostServicesMergePatch": Array [
+    Array [
+      "garden",
+      "garden-host-cluster-apiserver",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "garden-host-cluster-apiserver",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": undefined,
+          "externalName": "host-apiserver",
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 443,
+            },
+          ],
+          "type": "ExternalName",
+        },
+      },
+    ],
+  ],
+  "mockSecretsList": Array [
+    Array [
+      "garden",
+      Object {
+        "labelSelector": "runtime=gardenTerminalHost",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster after revision changed: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra1-seed",
+      "BOOTSTRAPPED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/bar",
+      "INITIAL",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "INITIAL",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/dummy",
+      "INITIAL",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/unreachable",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster after revision changed: bootstrapper 2`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra1-seed",
+      "BOOTSTRAPPED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/bar",
+      "POSTPONED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "BOOTSTRAPPED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/dummy",
+      "INITIAL",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/unreachable",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 1,
+  "total": 3,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster after revision changed: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "seedsecret-soil-infra1",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "soil-infra1",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockGetShoot": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden",
+      "soil-infra1",
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+    Array [
+      "soil-infra1",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+  ],
+  "mockSoilIngressesMergePatch": Array [
+    Array [
+      "shoot--garden--infra1-seed",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-1wopgy9.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster after revision changed: mocks 2`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "seedsecret-soil-infra1",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockCreateShootAdminKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "soil-infra1",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockGetShoot": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden",
+      "soil-infra1",
+    ],
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+  ],
+  "mockSeedIngressesMergePatch": Array [
+    Array [
+      "shoot--foo--baz",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+            "kubernetes.io/ingress.class": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-178qqdk.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+    Array [
+      "soil-infra1",
+    ],
+    Array [
+      "infra1-seed",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden-foo",
+      "baz",
+    ],
+  ],
+  "mockShootsListAllNamespaces": Array [
+    Array [
+      Object {
+        "fieldSelector": "spec.seedName=infra1-seed",
+      },
+    ],
+  ],
+  "mockSoilIngressesMergePatch": Array [
+    Array [
+      "shoot--garden--infra1-seed",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+            "kubernetes.io/ingress.class": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-1wopgy9.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra1-seed",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap a seed cluster: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "seedsecret-soil-infra1",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "soil-infra1",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockGetShoot": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden",
+      "soil-infra1",
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+    Array [
+      "soil-infra1",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+  ],
+  "mockSoilIngressesMergePatch": Array [
+    Array [
+      "shoot--garden--infra1-seed",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-1wopgy9.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap an unmanged seed cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "soil-infra1",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should bootstrap an unmanged seed cluster: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "seedsecret-soil-infra1",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "soil-infra1",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "soil-infra1",
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "soil-infra1",
+    ],
+  ],
+  "mockSoilIngressesMergePatch": Array [
+    Array [
+      "garden",
+      "dashboard-terminal-kube-apiserver-soil-infra1",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver-soil-infra1",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-g.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "dashboard-terminal-kube-apiserver-soil-infra1",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-soil-infra1-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap seed enabled should skip bootstrap if required config is missing: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra1-seed",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 0,
+  "total": 0,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should skip bootstrap if required config is missing: mocks 1`] = `Object {}`;
+
+exports[`terminal bootstrap seed enabled should skip bootstrap of unreachable seed cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra3-seed",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should skip bootstrap of unreachable seed cluster: mocks 1`] = `
+Object {
+  "mockSeedsGet": Array [
+    Array [
+      "infra3-seed",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should bootstrap a shoot cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/bar",
+      "POSTPONED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "BOOTSTRAPPED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/dummy",
+      "BOOTSTRAPPED",
+    ],
+    Array [
+      "Shoot",
+      "garden-foo/unreachable",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 3,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should bootstrap a shoot cluster: mocks 1`] = `
+Object {
+  "mockCreateShootAdminKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "infra4-seed-without-secretRef",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden",
+      "infra4-seed-without-secretRef",
+    ],
+  ],
+  "mockSeedIngressesMergePatch": Array [
+    Array [
+      "shoot--foo--baz",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-178qqdk.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+    Array [
+      "infra4-seed-without-secretRef",
+    ],
+    Array [
+      "infra3-seed",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "baz",
+    ],
+    Array [
+      "garden-foo",
+      "dummy",
+    ],
+    Array [
+      "garden-foo",
+      "unreachable",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a failed bootstrap task: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 0,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a failed bootstrap task: mocks 1`] = `
+Object {
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "baz",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a running bootstrap task: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 0,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a running bootstrap task: mocks 1`] = `
+Object {
+  "mockCreateShootAdminKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+  ],
+  "mockSeedIngressesMergePatch": Array [
+    Array [
+      "shoot--foo--baz",
+      "dashboard-terminal-kube-apiserver",
+      Object {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": Object {
+          "annotations": Object {
+            "foo": "bar",
+          },
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "rules": Array [
+            Object {
+              "host": "k-178qqdk.ingress.foo-east.infra1.example.org",
+              "http": Object {
+                "paths": Array [
+                  Object {
+                    "backend": Object {
+                      "service": Object {
+                        "name": "kube-apiserver",
+                        "port": Object {
+                          "number": 443,
+                        },
+                      },
+                    },
+                    "path": "/",
+                    "pathType": "Prefix",
+                  },
+                ],
+              },
+            },
+          ],
+          "tls": Array [
+            Object {
+              "hosts": Array [
+                "*.ingress.foo-east.infra1.example.org",
+              ],
+              "secretName": "dashboard-terminal-kube-apiserver-tls",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "baz",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a starting bootstrap task: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "INITIAL",
+    ],
+  ],
+  "successRate": 0,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should cancel a starting bootstrap task: mocks 1`] = `Object {}`;
+
+exports[`terminal bootstrap shoot enabled should fail to bootstrap a shoot: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/baz",
+      "FAILED",
+    ],
+  ],
+  "successRate": 0,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should fail to bootstrap a shoot: mocks 1`] = `
+Object {
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "baz",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should not bootstrap shoot cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/dummy",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should not bootstrap shoot cluster: mocks 1`] = `
+Object {
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra4-seed-without-secretRef",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra4-seed-without-secretRef",
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra4-seed-without-secretRef",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "dummy",
+    ],
+  ],
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should not bootstrap unreachable shoot cluster: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Shoot",
+      "garden-foo/unreachable",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap shoot enabled should not bootstrap unreachable shoot cluster: mocks 1`] = `
+Object {
+  "mockSeedsGet": Array [
+    Array [
+      "infra3-seed",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden-foo",
+      "unreachable",
+    ],
+  ],
+}
+`;

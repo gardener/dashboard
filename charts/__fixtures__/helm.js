@@ -7,24 +7,72 @@
 'use strict'
 
 const fs = require('fs')
-const util = require('util')
 const path = require('path')
 const assert = require('assert/strict')
 const childProcess = require('child_process')
-const exec = util.promisify(childProcess.exec)
 const yaml = require('js-yaml')
-const { flatMap, defaultsDeep } = require('lodash')
+const { defaultsDeep } = require('lodash')
 const { randomNumber } = require('./helper')
 
 function renderTemplatesFn (...paths) {
-  const cwd = path.resolve(__dirname, '..', ...paths)
+  let cwdPaths, tplPaths
+  const index = paths.indexOf('templates')
+  if (index !== -1) {
+    cwdPaths = paths.slice(0, index)
+    tplPaths = paths.slice(index)
+  } else {
+    cwdPaths = paths
+    tplPaths = ['templates']
+  }
+  const cwd = path.resolve(__dirname, '..', ...cwdPaths)
   let name, defaults
   try {
-    defaults = require('./' + paths[0])
+    defaults = require('./' + cwdPaths[0])
     const data = fs.readFileSync(path.join(cwd, 'Chart.yaml'), 'utf8')
     name = yaml.load(data).name
   } catch (err) {
-    assert.fail(`Invalid chart "${path.join(paths)}"`)
+    assert.fail(err.message)
+  }
+  const renderTemplate = (template, filename) => {
+    const cmd = [
+      'helm',
+      'template',
+      name,
+      '-n',
+      'garden',
+      '-s',
+      path.join(...tplPaths, `${template}.yaml`),
+      '.',
+      '-f',
+      filename
+    ]
+    return new Promise((resolve, reject) => {
+      const { KUBECONFIG, ...env } = process.env
+      childProcess.exec(cmd.join(' '), { env, cwd }, (err, stdout, stderr) => {
+        if (err) {
+          let message = err.message
+          if (stderr) {
+            for (const line of stderr.split('\n')) {
+              if (!line || line.startsWith('walk.go:')) {
+                continue
+              }
+              if (line.startsWith('Error:')) {
+                message = line
+                break
+              }
+              message = line
+            }
+          }
+          if (/^Error: could not find template .* in chart$/.test(message)) {
+            resolve(null)
+          } else {
+            reject(new Error(message))
+          }
+        } else {
+          resolve(yaml.loadAll(stdout))
+        }
+      })
+    })
   }
   return async (templates, values) => {
     defaultsDeep(values, defaults)
@@ -33,25 +81,21 @@ function renderTemplatesFn (...paths) {
     const filename = path.join(dirname, `values-${randomNumber()}.yaml`)
     try {
       fs.writeFileSync(filename, yaml.dump(values, { skipInvalid: true }))
-      const cmd = [
-        'helm',
-        'template',
-        name,
-        '-n',
-        'garden',
-        ...flatMap(templates, template => ['-s', `templates/${template}.yaml`]),
-        '.',
-        '-f',
-        filename
-      ]
-      const { stdout } = await exec(cmd.join(' '), { cwd })
-      return yaml.loadAll(stdout)
+      const documents = await Promise.all(templates.map(template => renderTemplate(template, filename)))
+      return documents.flat()
     } finally {
       fs.unlinkSync(filename)
     }
   }
 }
 
+const renderDashboardRuntimeTemplates = renderTemplatesFn('gardener-dashboard', 'charts', 'runtime', 'templates', 'dashboard')
+const renderDashboardApplicationTemplates = renderTemplatesFn('gardener-dashboard', 'charts', 'application', 'templates', 'dashboard')
+const renderIdentityTemplates = renderTemplatesFn('identity')
+
 module.exports = {
-  renderTemplatesFn
+  renderTemplatesFn,
+  renderDashboardRuntimeTemplates,
+  renderDashboardApplicationTemplates,
+  renderIdentityTemplates
 }

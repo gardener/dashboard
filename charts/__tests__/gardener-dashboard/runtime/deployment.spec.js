@@ -6,10 +6,9 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('deployment', function () {
@@ -41,10 +40,33 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    it('should render the template with a sha256 tag', async function () {
+      const tag = 'sha256:4d529c1'
+      const values = {
+        global: {
+          dashboard: {
+            image: { tag }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const containers = deployment.spec.template.spec.containers
+      expect(containers).toHaveLength(1)
+      const [container] = containers
+      expect(container).toEqual(expect.objectContaining({
+        image: 'eu.gcr.io/gardener-project/gardener/dashboard@' + tag,
+        imagePullPolicy: 'IfNotPresent'
+      }))
+    })
+
     it('should render the template with node options', async function () {
       const values = {
         global: {
-          nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
+          dashboard: {
+            nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
+          }
         }
       }
       const documents = await renderTemplates(templates, values)
@@ -75,7 +97,9 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            kubeconfig: 'apiVersion: v1'
+            dashboard: {
+              kubeconfig: 'apiVersion: v1'
+            }
           }
         }
         const documents = await renderTemplates(templates, values)
@@ -101,8 +125,10 @@ describe('gardener-dashboard', function () {
     it('should not project service account token if disabled', async function () {
       const values = {
         global: {
-          serviceAccountTokenVolumeProjection: {
-            enabled: false
+          dashboard: {
+            serviceAccountTokenVolumeProjection: {
+              enabled: false
+            }
           }
         }
       }
@@ -126,10 +152,12 @@ describe('gardener-dashboard', function () {
             virtualGarden: {
               enabled: true
             },
-            serviceAccountTokenVolumeProjection: {
-              enabled: true,
-              expirationSeconds: 3600,
-              audience: 'https://identity.garden.example.org'
+            dashboard: {
+              serviceAccountTokenVolumeProjection: {
+                enabled: true,
+                expirationSeconds: 3600,
+                audience: 'https://identity.garden.example.org'
+              }
             }
           }
         }
@@ -155,8 +183,10 @@ describe('gardener-dashboard', function () {
             virtualGarden: {
               enabled: true
             },
-            serviceAccountTokenVolumeProjection: {
-              enabled: false
+            dashboard: {
+              serviceAccountTokenVolumeProjection: {
+                enabled: false
+              }
             }
           }
         }

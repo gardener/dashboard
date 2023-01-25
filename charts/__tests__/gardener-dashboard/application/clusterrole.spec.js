@@ -6,10 +6,9 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardApplicationTemplates
 
 describe('gardener-dashboard', function () {
   describe('clusterrole', function () {

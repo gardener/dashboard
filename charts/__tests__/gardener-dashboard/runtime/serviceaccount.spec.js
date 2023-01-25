@@ -6,10 +6,9 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('serviceaccount', function () {
@@ -36,8 +35,10 @@ describe('gardener-dashboard', function () {
             virtualGarden: {
               enabled: true
             },
-            serviceAccountTokenVolumeProjection: {
-              enabled: true
+            dashboard: {
+              serviceAccountTokenVolumeProjection: {
+                enabled: true
+              }
             }
           }
         }
@@ -53,8 +54,10 @@ describe('gardener-dashboard', function () {
             virtualGarden: {
               enabled: true
             },
-            serviceAccountTokenVolumeProjection: {
-              enabled: false
+            dashboard: {
+              serviceAccountTokenVolumeProjection: {
+                enabled: false
+              }
             }
           }
         }

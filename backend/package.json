@@ -138,10 +138,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 66,
-        "functions": 94,
-        "lines": 88,
-        "statements": 88
+        "branches": 68,
+        "functions": 95,
+        "lines": 90,
+        "statements": 90
       }
     },
     "setupFilesAfterEnv": [

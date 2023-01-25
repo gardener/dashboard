@@ -6,11 +6,10 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm, helper } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('secret-github', function () {
@@ -25,11 +24,13 @@ describe('gardener-dashboard', function () {
     it('should render the template', async function () {
       const values = {
         global: {
-          gitHub: {
-            authentication: {
-              token: 'token'
-            },
-            webhookSecret: 'webhook-secret'
+          dashboard: {
+            gitHub: {
+              authentication: {
+                token: 'token'
+              },
+              webhookSecret: 'webhook-secret'
+            }
           }
         }
       }
@@ -52,7 +53,9 @@ describe('gardener-dashboard', function () {
     it('should render the template', async function () {
       const values = {
         global: {
-          kubeconfig: 'apiVersion: v1'
+          dashboard: {
+            kubeconfig: 'apiVersion: v1'
+          }
         }
       }
       const documents = await renderTemplates(templates, values)
@@ -82,11 +85,13 @@ describe('gardener-dashboard', function () {
     it('should render the template', async function () {
       const values = {
         global: {
-          gitHub: {
-            authentication: {
-              token: 'token'
-            },
-            webhookSecret: 'webhook-secret'
+          dashboard: {
+            gitHub: {
+              authentication: {
+                token: 'token'
+              },
+              webhookSecret: 'webhook-secret'
+            }
           }
         }
       }
@@ -129,13 +134,14 @@ describe('gardener-dashboard', function () {
     it('should render the templates', async function () {
       const values = {
         global: {
-          ingress: {
-            tls: {
-              secretName: 'other-gardener-dashboard-tls',
-              key: tlsKey,
-              crt: tlsCrt
+          dashboard: {
+            ingress: {
+              tls: {
+                secretName: 'other-gardener-dashboard-tls',
+                key: tlsKey,
+                crt: tlsCrt
+              }
             }
-
           },
           terminal: {
             bootstrap: {

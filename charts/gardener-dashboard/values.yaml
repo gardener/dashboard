@@ -1,327 +1,362 @@
-# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
-#
-# SPDX-License-Identifier: Apache-2.0
-
 # Default values for gardener-dashboard.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
-  replicaCount: 1
+  # Gardener dashboard configuration values
+  dashboard:
+    replicaCount: 1
 
-  image:
-    repository: eu.gcr.io/gardener-project/gardener/dashboard
-    tag: latest
-    pullPolicy: IfNotPresent
+    image:
+      repository: eu.gcr.io/gardener-project/gardener/dashboard
+      tag: latest
+      pullPolicy: IfNotPresent
 
-  # virtualGarden defines deployment related configuration
+    serviceAccountName: gardener-dashboard
+
+    serviceAccountTokenVolumeProjection:
+      enabled: true
+      expirationSeconds: 43200 # 12 hours
+      audience: ''
+
+    # vertical Pod autoscaling disabled by default
+    # vpa:
+    #   updateMode: Off
+    #   controlledValues: RequestsOnly
+    #   minAllowedCpu: 50m
+    #   minAllowedMemory: 100Mi
+    #   maxAllowedCpu: 500m
+    #   maxAllowedMemory: 500Mi
+
+    logLevel: debug
+    # # the external url of the apiServer
+    # apiServerUrl: https://api.example.org
+    # # the certificateAuthorityData of the kube apiserver
+    # apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
+    # # or the certificateAuthority of the kube apiserver
+    # apiServerCa: |
+    #   -----BEGIN CERTIFICATE-----
+    #   Li4u
+    #   -----END CERTIFICATE-----
+    # # or skip tls verify (insecure)
+    # apiServerSkipTlsVerify: true
+    # # Optional list of the intended audiences of the service account token (garden cluster)
+    # tokenRequestAudiences:
+    # - foo
+    # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
+    # clusterIdentity: my-landscape-dev
+    containerPort: 8080
+    servicePort: 8080
+    resources:
+      limits:
+        cpu: "1.0"
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 350Mi
+
+    # If dashboard is running in an environment with less than 1.5GB of available memory
+    # you should cap the maximum available "old space". In a Docker-512MB-Container,
+    # the value should not be greater than 90% of the available memory.
+    # nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
+
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
+        kubernetes.io/ingress.class: nginx
+      # # configuration of hosts used for rules and tls
+      # hosts:
+      # - dashboard.ingress.example.org
+      # - dashboard.example.org
+      tls:
+        secretName: gardener-dashboard-tls
+        # crt: |
+        #   -----BEGIN CERTIFICATE-----
+        #   Li4u
+        #   -----END CERTIFICATE-----
+        #   -----BEGIN CERTIFICATE-----
+        #   Li4u
+        #   -----END CERTIFICATE-----
+        # key: |
+        #   -----BEGIN RSA PRIVATE KEY-----
+        #   Li4u
+        #   -----END RSA PRIVATE KEY-----
+
+    # sessionSecret is used for signing and encrytion of session data
+    sessionSecret: ~
+
+    # oidc:
+    #   # well-known URL for OpenID Provider Issuer Discovery
+    #   issuerUrl: ~
+    #   # clientId is the public identifier of the gardener-dashboard aplication
+    #   clientId: dashboard
+    #   # clientSecret is the private secret of the gardener-dashboard aplication
+    #   clientSecret: ~
+    #   # force PKCE usage
+    #   usePKCE: true
+    #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
+    #   sessionLifetime: 86400
+    #   # certificate authority of the OpenID provider
+    #   ca: |
+    #     -----BEGIN CERTIFICATE-----
+    #     Li4u
+    #     -----END CERTIFICATE-----
+    #   # secretKey reference to the certificate authority
+    #   caSecretKeyRef:
+    #     name: oidc-ca-secret-name
+    #     key: ca.crt
+    #   # configuration for kubeconfig download required by kubelogin
+    #   public:
+    #     # clientId is the identifier of the public oidc client use by kubelogin
+    #     clientId: kube-kubectl
+    #     # clientSecret is the public client secret use by kubelogin and all users
+    #     clientSecret: ~
+    #     # force PKCE usage (automatically enabled if no clientSecret is given)
+    #     usePKCE: true
+
+    frontendConfig:
+      landingPageUrl: https://github.com/gardener
+      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
+      # assets:
+      #   favicon-16x16.png: |
+      #   favicon-32x32.png: |
+      #   favicon-96x96.png: |
+      #   favicon.ico: |
+      #   logo.svg: |
+      helpMenuItems:
+      - title: Getting Started
+        icon: description
+        url: https://github.com/gardener/gardener/tree/master/docs
+      - title: Issues
+        icon: bug_report
+        url: https://github.com/gardener/gardener/issues
+      # ticket:
+      #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
+      #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+      #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
+      #   - ignore
+      #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
+      #   - default-label
+      #   # issueDescriptionTemplate variables:
+      #   # - `${shootName}`: name of the shoot
+      #   # - `${shootNamespace}`: namespace of the shoot
+      #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
+      #   # - `${shootUrl}`: dashboard url of the shoot
+      #   # - `${providerType}`: shoot provider type
+      #   # - `${region}`: region of the shoot
+      #   # - `${machineImageNames}`: comma separated list of (unique) machine image names from the shoot workers
+      #   # - `${projectName}`: name of the project
+      #   # - `${utcDateTimeNow}`: current date-time in utc format
+      #   # - `${seedName}`: shoot's seed name
+      #   issueDescriptionTemplate: |
+      #     ## Which cluster is affected?
+
+      #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
+      #     `Operating System`: ${machineImageNames}
+      #     `Platform`: ${providerType}
+
+      #     ## What happened?
+
+      #     ## What you expected to happen?
+
+      #     ## When did it happen or started to happen?
+      #     `Timestamp`: ${utcDateTimeNow}
+
+      #     ## How would we reproduce it?
+
+      #     ## Anything else we need to know?
+      defaultHibernationSchedule:
+        evaluation:
+        - start: 00 17 * * 1,2,3,4,5
+        development:
+        - start: 00 17 * * 1,2,3,4,5
+          end: 00 08 * * 1,2,3,4,5
+        production: ~
+      seedCandidateDeterminationStrategy: SameRegion
+      features:
+        terminalEnabled: false
+        projectTerminalShortcutsEnabled: false
+      # alert:
+      #   type: error
+      #   message: This is an **alert** banner
+      #   # identifer: alert-identifier # Optional. If not set, a hash of the alert.message will be used as identifier. The identifier is used to store the user's decision to not show the alert message with this identifier again.
+
+      # terminal:
+      #   shortcuts:
+      #   - title: "Watch Control Plane Pods"
+      #     description: Using kubectl to watch the pods of the control plane for this cluster
+      #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
+      #     container:
+      #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+      #       # command: ~
+      #       args:
+      #       - watch
+      #       - kubectl
+      #       - get
+      #       - pods
+      #       - "-o"
+      #       - wide
+      #   heartbeatIntervalSeconds: 60
+
+      # # costObject is used for billing purposes and is assigned to the gardener project
+      # costObject:
+      #   title: Cost Object
+      #   description: Costs for the control planes of the clusters in this project will be charged to this cost object.
+      #   regex: ^([0-9]{10})$
+      #   errorMessage: Invalid cost object
+
+      # sla:
+      #   title: SLAs
+      #   description: https://foo.example.com/gardener-sla
+
+      # # accessRestriction is used to define the access restricion text, keys and value mappings
+      # accessRestriction:
+      #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
+      #   items:
+      #   - key: seed.gardener.cloud/eu-access
+      #     display:
+      #       visibleIf: true
+      #       # title: foo # optional title, if not defined key will be used
+      #       # description: bar # optional description displayed in a tooltip
+      #     input:
+      #       title: EU Access
+      #       description: |
+      #         This service is offered to you with our regular SLAs and 24x7 support for the control plane of the cluster. 24x7 support for cluster add-ons and nodes is only available if you meet the following conditions:
+      #       # inverted: false
+      #     options:
+      #     - key: support.gardener.cloud/eu-access-for-cluster-addons
+      #       display:
+      #         visibleIf: false
+      #         # title: bar # optional title, if not defined key will be used
+      #         # description: baz # optional description displayed in a tooltip
+      #       input:
+      #         title: No personal data is used as name or in the content of Gardener or Kubernetes resources (e.g. Gardener project name or Kubernetes namespace, configMap or secret in Gardener or Kubernetes)
+      #         description: |
+      #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all cluster add-ons such as DNS and certificates, Calico overlay network and network policies, kube-proxy and services, and everything else that would require direct inspection of your cluster through its API server
+      #         inverted: true
+      #     - key: support.gardener.cloud/eu-access-for-cluster-nodes
+      #       display:
+      #         visibleIf: false
+      #       input:
+      #         title: No personal data is stored in any Kubernetes volume except for container file system, emptyDirs, and persistentVolumes (in particular, not on hostPath volumes)
+      #         description: |
+      #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
+      #         inverted: true
+
+      # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
+      # themes:
+      #   light: # overwrite light theme colors
+      #     primary: '#0b8062'
+      #     anchor: '#0b8062'
+      #     main-background: 'grey.darken3'
+      #     main-navigation-title: 'shades.white'
+      #     toolbar-background: '#0b8062'
+      #     toolbar-title: 'shades.white'
+      #     action-button: 'grey.darken4'
+      #   dark: # overwrite dark theme colors
+      #     primary: '#0b8062'
+      #     anchor: '#0b8062'
+      #     main-background: 'grey.darken3'
+      #     main-navigation-title: 'shades.white'
+      #     toolbar-background: '#0b8062'
+      #     toolbar-title: 'shades.white'
+      #     action-button: 'grey.lighten4'
+      #     error: 'red.darken4'
+      #     warning: 'orange.darken4'
+
+      defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
+
+      # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
+      # If no value is provided, the default value corresponds to 90 days
+      # The token issuer may return a token with a different validity duration
+      serviceAccountDefaultTokenExpiration: 7776000 # seconds
+
+      # # externalTools are links displayed in a dedicated card External Tools on the cluster details page.
+      # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The variables namespace and name of the shoot are available when the url is expanded.
+      # externalTools:
+      # - title: Example Tool
+      #   icon: link
+      #   url: https://example.org/foo/bar{?namespace,name}
+
+    # # github configuration of the ticket feature
+    # gitHub:
+    #   apiUrl: https://api.foo-github.com
+    #   org: dummyorg
+    #   repository: dummyrepo
+    #   webhookSecret: foobar # optional if pollIntervalSeconds is defined
+    #   authentication:
+    #     username: dashboard
+    #     token: dummytoken
+    #   # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
+
+    #  # resourceQuotaHelp - configure help text how to configure project resource quota
+    #  resourceQuotaHelp:
+    #    text: Help text
+
+    #  # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
+    #  controlPlaneHighAvailabilityHelp:
+    #    text: Help text
+
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+
+  # Terminal terminal-bootstrapper configuration values
+  bootstrapper:
+    enabled: false
+    image:
+      repository: eu.gcr.io/gardener-project/gardener/terminal-bootstrap
+      tag: latest
+      pullPolicy: IfNotPresent
+    serviceAccountName: gardener-dashboard-terminal-bootstrapper
+    serviceAccountTokenVolumeProjection:
+      enabled: true
+      expirationSeconds: 43200 # 12 hours
+      audience: ''
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+    readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 1
+      successThreshold: 1
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+    config:
+      logLevel: debug
+
+  # Virtual garden related configuration
   virtualGarden:
     # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
     enabled: false
-    # # userName is the fully qualified name of the dashboard user, as it would be returned by the tokenreview (.status.user.username) on the virtual garden
-    # userName: runtime-cluster:system:serviceaccount:garden:gardener-dashboard
+    # fully qualified name of the dashboard user as they would be returned by the tokenreview (.status.user.username) on the virtual garden
+    dashboardUserName: ~
+    # fully qualified name of the terminal-bootstrap user
+    terminalBootstrapperUserName: ~
 
-  serviceAccountName: gardener-dashboard
-
-  serviceAccountTokenVolumeProjection:
-    enabled: true
-    expirationSeconds: 43200 # 12 hours
-    audience: ''
-
-  # vertical Pod autoscaling disabled by default
-  # vpa:
-  #   updateMode: Off
-  #   controlledValues: RequestsOnly
-  #   minAllowedCpu: 50m
-  #   minAllowedMemory: 100Mi
-  #   maxAllowedCpu: 500m
-  #   maxAllowedMemory: 500Mi
-
-  logLevel: debug
-  # # the external url of the apiServer
-  # apiServerUrl: https://api.example.org
-  # # the certificateAuthorityData of the kube apiserver
-  # apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
-  # # or the certificateAuthority of the kube apiserver
-  # apiServerCa: |
-  #   -----BEGIN CERTIFICATE-----
-  #   Li4u
-  #   -----END CERTIFICATE-----
-  # # or skip tls verify (insecure)
-  # apiServerSkipTlsVerify: true
-  # # Optional list of the intended audiences of the service account token (garden cluster)
-  # tokenRequestAudiences:
-  # - foo
-  # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
-  # clusterIdentity: my-landscape-dev
-  containerPort: 8080
-  servicePort: 8080
-  resources:
-    limits:
-      cpu: 1.0
-      memory: 1G
-    requests:
-      cpu: 100m
-      memory: 350Mi
-
-  # If dashboard is running in an environment with less than 1.5GB of available memory
-  # you should cap the maximum available "old space". In a Docker-512MB-Container,
-  # the value should not be greater than 90% of the available memory.
-  # nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
-
-  ingress:
-    annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
-      kubernetes.io/ingress.class: nginx
-    # # configuration of hosts used for rules and tls
-    # hosts:
-    # - dashboard.ingress.example.org
-    # - dashboard.example.org
-    tls:
-      secretName: gardener-dashboard-tls
-      # crt: |
-      #   -----BEGIN CERTIFICATE-----
-      #   Li4u
-      #   -----END CERTIFICATE-----
-      #   -----BEGIN CERTIFICATE-----
-      #   Li4u
-      #   -----END CERTIFICATE-----
-      # key: |
-      #   -----BEGIN RSA PRIVATE KEY-----
-      #   Li4u
-      #   -----END RSA PRIVATE KEY-----
-
-  # sessionSecret is used for signing and encrytion of session data
-  sessionSecret: ~
-
-  # oidc:
-  #   # well-known URL for OpenID Provider Issuer Discovery
-  #   issuerUrl: ~
-  #   # clientId is the public identifier of the gardener-dashboard aplication
-  #   clientId: dashboard
-  #   # clientSecret is the private secret of the gardener-dashboard aplication
-  #   clientSecret: ~
-  #   # force PKCE usage
-  #   usePKCE: true
-  #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
-  #   sessionLifetime: 86400
-  #   # certificate authority of the OpenID provider
-  #   ca: |
-  #     -----BEGIN CERTIFICATE-----
-  #     Li4u
-  #     -----END CERTIFICATE-----
-  #   # secretKey reference to the certificate authority
-  #   caSecretKeyRef:
-  #     name: oidc-ca-secret-name
-  #     key: ca.crt
-  #   # configuration for kubeconfig download required by kubelogin
-  #   public:
-  #     # clientId is the identifier of the public oidc client use by kubelogin
-  #     clientId: kube-kubectl
-  #     # clientSecret is the public client secret use by kubelogin and all users
-  #     clientSecret: ~
-  #     # force PKCE usage (automatically enabled if no clientSecret is given)
-  #     usePKCE: true
-
-  frontendConfig:
-    landingPageUrl: https://github.com/gardener
-    # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
-    # assets:
-    #   favicon-16x16.png: |
-    #   favicon-32x32.png: |
-    #   favicon-96x96.png: |
-    #   favicon.ico: |
-    #   logo.svg: |
-    helpMenuItems:
-    - title: Getting Started
-      icon: description
-      url: https://github.com/gardener/gardener/tree/master/docs
-    - title: Issues
-      icon: bug_report
-      url: https://github.com/gardener/gardener/issues
-    # ticket:
-    #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
-    #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
-    #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
-    #   - ignore
-    #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
-    #   - default-label
-    #   # issueDescriptionTemplate variables:
-    #   # - `${shootName}`: name of the shoot
-    #   # - `${shootNamespace}`: namespace of the shoot
-    #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
-    #   # - `${shootUrl}`: dashboard url of the shoot
-    #   # - `${providerType}`: shoot provider type
-    #   # - `${region}`: region of the shoot
-    #   # - `${machineImageNames}`: comma separated list of (unique) machine image names from the shoot workers
-    #   # - `${projectName}`: name of the project
-    #   # - `${utcDateTimeNow}`: current date-time in utc format
-    #   # - `${seedName}`: shoot's seed name
-    #   issueDescriptionTemplate: |
-    #     ## Which cluster is affected?
-
-    #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
-    #     `Operating System`: ${machineImageNames}
-    #     `Platform`: ${providerType}
-
-    #     ## What happened?
-
-    #     ## What you expected to happen?
-
-    #     ## When did it happen or started to happen?
-    #     `Timestamp`: ${utcDateTimeNow}
-
-    #     ## How would we reproduce it?
-
-    #     ## Anything else we need to know?
-    defaultHibernationSchedule:
-      evaluation:
-      - start: 00 17 * * 1,2,3,4,5
-      development:
-      - start: 00 17 * * 1,2,3,4,5
-        end: 00 08 * * 1,2,3,4,5
-      production: ~
-    seedCandidateDeterminationStrategy: SameRegion
-    features:
-      terminalEnabled: false
-      projectTerminalShortcutsEnabled: false
-    # alert:
-    #   type: error
-    #   message: This is an **alert** banner
-    #   # identifer: alert-identifier # Optional. If not set, a hash of the alert.message will be used as identifier. The identifier is used to store the user's decision to not show the alert message with this identifier again.
-
-    # terminal:
-    #   shortcuts:
-    #   - title: "Watch Control Plane Pods"
-    #     description: Using kubectl to watch the pods of the control plane for this cluster
-    #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
-    #     container:
-    #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
-    #       # command: ~
-    #       args:
-    #       - watch
-    #       - kubectl
-    #       - get
-    #       - pods
-    #       - "-o"
-    #       - wide
-    #   heartbeatIntervalSeconds: 60
-
-    # # costObject is used for billing purposes and is assigned to the gardener project
-    # costObject:
-    #   title: Cost Object
-    #   description: Costs for the control planes of the clusters in this project will be charged to this cost object.
-    #   regex: ^([0-9]{10})$
-    #   errorMessage: Invalid cost object
-
-    # sla:
-    #   title: SLAs
-    #   description: https://foo.example.com/gardener-sla
-
-    # # accessRestriction is used to define the access restricion text, keys and value mappings
-    # accessRestriction:
-    #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
-    #   items:
-    #   - key: seed.gardener.cloud/eu-access
-    #     display:
-    #       visibleIf: true
-    #       # title: foo # optional title, if not defined key will be used
-    #       # description: bar # optional description displayed in a tooltip
-    #     input:
-    #       title: EU Access
-    #       description: |
-    #         This service is offered to you with our regular SLAs and 24x7 support for the control plane of the cluster. 24x7 support for cluster add-ons and nodes is only available if you meet the following conditions:
-    #       # inverted: false
-    #     options:
-    #     - key: support.gardener.cloud/eu-access-for-cluster-addons
-    #       display:
-    #         visibleIf: false
-    #         # title: bar # optional title, if not defined key will be used
-    #         # description: baz # optional description displayed in a tooltip
-    #       input:
-    #         title: No personal data is used as name or in the content of Gardener or Kubernetes resources (e.g. Gardener project name or Kubernetes namespace, configMap or secret in Gardener or Kubernetes)
-    #         description: |
-    #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all cluster add-ons such as DNS and certificates, Calico overlay network and network policies, kube-proxy and services, and everything else that would require direct inspection of your cluster through its API server
-    #         inverted: true
-    #     - key: support.gardener.cloud/eu-access-for-cluster-nodes
-    #       display:
-    #         visibleIf: false
-    #       input:
-    #         title: No personal data is stored in any Kubernetes volume except for container file system, emptyDirs, and persistentVolumes (in particular, not on hostPath volumes)
-    #         description: |
-    #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
-    #         inverted: true
-
-    # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
-    # themes:
-    #   light: # overwrite light theme colors
-    #     primary: '#0b8062'
-    #     anchor: '#0b8062'
-    #     main-background: 'grey.darken3'
-    #     main-navigation-title: 'shades.white'
-    #     toolbar-background: '#0b8062'
-    #     toolbar-title: 'shades.white'
-    #     action-button: 'grey.darken4'
-    #   dark: # overwrite dark theme colors
-    #     primary: '#0b8062'
-    #     anchor: '#0b8062'
-    #     main-background: 'grey.darken3'
-    #     main-navigation-title: 'shades.white'
-    #     toolbar-background: '#0b8062'
-    #     toolbar-title: 'shades.white'
-    #     action-button: 'grey.lighten4'
-    #     error: 'red.darken4'
-    #     warning: 'orange.darken4'
-
-    defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
-
-    # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
-    # If no value is provided, the default value corresponds to 90 days
-    # The token issuer may return a token with a different validity duration
-    serviceAccountDefaultTokenExpiration: 7776000 # seconds
-
-    # # externalTools are links displayed in a dedicated card External Tools on the cluster details page.
-    # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The variables namespace and name of the shoot are available when the url is expanded.
-    # externalTools:
-    # - title: Example Tool
-    #   icon: link
-    #   url: https://example.org/foo/bar{?namespace,name}
-
-  # # github configuration of the ticket feature
-  # gitHub:
-  #   apiUrl: https://api.foo-github.com
-  #   org: dummyorg
-  #   repository: dummyrepo
-  #   webhookSecret: foobar # optional if pollIntervalSeconds is defined
-  #   authentication:
-  #     username: dashboard
-  #     token: dummytoken
-  #   # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
-
-  #  # resourceQuotaHelp - configure help text how to configure project resource quota
-  #  resourceQuotaHelp:
-  #    text: Help text
-  
-  #  # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
-  #  controlPlaneHighAvailabilityHelp:
-  #    text: Help text
-
-  livenessProbe:
-    enabled: true
-    initialDelaySeconds: 15
-    periodSeconds: 20
-    timeoutSeconds: 5
-    failureThreshold: 6
-    successThreshold: 1
-
-  readinessProbe:
-    enabled: true
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 6
-    successThreshold: 1
-
+  # Terminal related configuration
   # terminal:
   #   container:
   #     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
@@ -381,6 +416,8 @@ global:
   #           Li4u
   #           -----END RSA PRIVATE KEY-----
 
-  # unreachableSeeds: # disables some UI features for seeds that are unreachable by the dashboard
+  # Unreachable seeds configuration
+  # disables some UI features for seeds that are unreachable by the dashboard
+  # unreachableSeeds:
   #   matchLabels:
   #     seed.gardener.cloud/network: private

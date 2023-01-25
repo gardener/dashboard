@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gardener-dashboard-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: gardener-dashboard
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+  - port: {{ .Values.global.dashboard.servicePort }}
+    targetPort: {{ .Values.global.dashboard.containerPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: gardener-dashboard
+    release: {{ .Release.Name }}
+  type: ClusterIP
+  sessionAffinity: ClientIP

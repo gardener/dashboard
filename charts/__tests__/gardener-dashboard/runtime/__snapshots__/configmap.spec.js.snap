@@ -327,9 +327,6 @@ Li4u
     "periodSeconds": 10,
   },
   "terminal": Object {
-    "bootstrap": Object {
-      "disabled": true,
-    },
     "container": Object {
       "image": "ops-toolbelt:0.11.0-mod1",
     },
@@ -351,12 +348,6 @@ Li4u
 exports[`gardener-dashboard configmap terminal config should render the template 1`] = `
 Object {
   "terminal": Object {
-    "bootstrap": Object {
-      "disabled": false,
-      "gardenTerminalHostDisabled": true,
-      "seedDisabled": true,
-      "shootDisabled": true,
-    },
     "container": Object {
       "image": "chart-test:0.1.0",
     },

@@ -6,10 +6,9 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardApplicationTemplates
 
 describe('gardener-dashboard', function () {
   describe('serviceaccount', function () {
@@ -34,7 +33,7 @@ describe('gardener-dashboard', function () {
         global: {
           virtualGarden: {
             enabled: true,
-            userName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard'
+            dashboardUserName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard'
           }
         }
       }

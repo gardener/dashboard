@@ -8,11 +8,10 @@
 
 const yaml = require('js-yaml')
 const { omit, pick } = require('lodash')
-const { basename } = require('path')
 const { helm, helper } = fixtures
 const { getCertificate } = helper
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('configmap', function () {
@@ -51,10 +50,12 @@ describe('gardener-dashboard', function () {
       beforeEach(() => {
         values = {
           global: {
-            apiServerCa: getCertificate('apiServerCa'),
-            oidc: {
-              public: {
-                clientId: 'kube-kubectl'
+            dashboard: {
+              apiServerCa: getCertificate('apiServerCa'),
+              oidc: {
+                public: {
+                  clientId: 'kube-kubectl'
+                }
               }
             }
           }
@@ -62,7 +63,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template w/ `public.client_secret`', async function () {
-        Object.assign(values.global.oidc.public, {
+        Object.assign(values.global.dashboard.oidc.public, {
           clientSecret: 'kube-kubectl-secret'
         })
         expect.assertions(2)
@@ -75,7 +76,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with PKCE flow for the public client', async function () {
-        Object.assign(values.global.oidc.public, {
+        Object.assign(values.global.dashboard.oidc.public, {
           clientSecret: 'kube-kubectl-secret',
           usePKCE: true
         })
@@ -98,7 +99,9 @@ describe('gardener-dashboard', function () {
       beforeEach(() => {
         values = {
           global: {
-            oidc: {}
+            dashboard: {
+              oidc: {}
+            }
           }
         }
       })
@@ -109,7 +112,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with scope containing offline_access', async function () {
-        Object.assign(values.global.oidc, {
+        Object.assign(values.global.dashboard.oidc, {
           scope: 'openid email groups offline_access',
           sessionLifetime: 30 * 24 * 60 * 60
         })
@@ -118,7 +121,7 @@ describe('gardener-dashboard', function () {
       })
 
       it('should render the template with PKCE flow for the internal client', async function () {
-        Object.assign(values.global.oidc, {
+        Object.assign(values.global.dashboard.oidc, {
           usePKCE: true
         })
         const documents = await renderTemplates(templates, values)
@@ -133,20 +136,22 @@ describe('gardener-dashboard', function () {
       it('should render the template w/o `item.options`', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              accessRestriction: {
-                noItemsText: 'no items text',
-                items: [
-                  {
-                    key: 'foo',
-                    display: {
-                      visibleIf: true
-                    },
-                    input: {
-                      title: 'Foo'
+            dashboard: {
+              frontendConfig: {
+                accessRestriction: {
+                  noItemsText: 'no items text',
+                  items: [
+                    {
+                      key: 'foo',
+                      display: {
+                        visibleIf: true
+                      },
+                      input: {
+                        title: 'Foo'
+                      }
                     }
-                  }
-                ]
+                  ]
+                }
               }
             }
           }
@@ -161,49 +166,51 @@ describe('gardener-dashboard', function () {
       it('should render the template w/ `item.options`', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              accessRestriction: {
-                items: [
-                  {
-                    key: 'foo',
-                    display: {
-                      visibleIf: true,
-                      title: 'display Foo',
-                      description: 'display Foo description'
-                    },
-                    input: {
-                      title: 'input Foo',
-                      description: 'input Foo description',
-                      inverted: true
-                    },
-                    options: [
-                      {
-                        key: 'foo-option-1',
-                        display: {
-                          visibleIf: false,
-                          title: 'display Foo Option 1',
-                          description: 'display Foo  Option 1 description'
-                        },
-                        input: {
-                          title: 'input Foo Option 1',
-                          description: 'input Foo  Option 1 description',
-                          inverted: false
-                        }
+            dashboard: {
+              frontendConfig: {
+                accessRestriction: {
+                  items: [
+                    {
+                      key: 'foo',
+                      display: {
+                        visibleIf: true,
+                        title: 'display Foo',
+                        description: 'display Foo description'
                       },
-                      {
-                        key: 'foo-option-2',
-                        display: {
-                          visibleIf: true
+                      input: {
+                        title: 'input Foo',
+                        description: 'input Foo description',
+                        inverted: true
+                      },
+                      options: [
+                        {
+                          key: 'foo-option-1',
+                          display: {
+                            visibleIf: false,
+                            title: 'display Foo Option 1',
+                            description: 'display Foo  Option 1 description'
+                          },
+                          input: {
+                            title: 'input Foo Option 1',
+                            description: 'input Foo  Option 1 description',
+                            inverted: false
+                          }
                         },
-                        input: {
-                          title: 'input Foo Option 2',
-                          description: 'input Foo  Option 2 description',
-                          inverted: true
+                        {
+                          key: 'foo-option-2',
+                          display: {
+                            visibleIf: true
+                          },
+                          input: {
+                            title: 'input Foo Option 2',
+                            description: 'input Foo  Option 2 description',
+                            inverted: true
+                          }
                         }
-                      }
-                    ]
-                  }
-                ]
+                      ]
+                    }
+                  ]
+                }
               }
             }
           }
@@ -220,10 +227,12 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              serviceAccountDefaultTokenExpiration: 42
-            },
-            tokenRequestAudiences: ['foo', 'bar']
+            dashboard: {
+              frontendConfig: {
+                serviceAccountDefaultTokenExpiration: 42
+              },
+              tokenRequestAudiences: ['foo', 'bar']
+            }
           }
         }
         const documents = await renderTemplates(templates, values)
@@ -242,23 +251,25 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              ticket: {
-                avatarSource: 'gravatar',
-                gitHubRepoUrl: 'https://github.com/gardener/tickets',
-                hideClustersWithLabels: ['ignore1', 'ignore2'],
-                newTicketLabels: ['default-label'],
-                issueDescriptionTemplate: 'issue description'
-              }
-            },
-            gitHub: {
-              apiUrl: 'https://github.com/api/v3/',
-              org: 'gardener',
-              repository: 'tickets',
-              webhookSecret: 'webhookSecret',
-              authentication: {
-                username: 'dashboard-tickets',
-                token: 'webhookAuthenticationToken'
+            dashboard: {
+              frontendConfig: {
+                ticket: {
+                  avatarSource: 'gravatar',
+                  gitHubRepoUrl: 'https://github.com/gardener/tickets',
+                  hideClustersWithLabels: ['ignore1', 'ignore2'],
+                  newTicketLabels: ['default-label'],
+                  issueDescriptionTemplate: 'issue description'
+                }
+              },
+              gitHub: {
+                apiUrl: 'https://github.com/api/v3/',
+                org: 'gardener',
+                repository: 'tickets',
+                webhookSecret: 'webhookSecret',
+                authentication: {
+                  username: 'dashboard-tickets',
+                  token: 'webhookAuthenticationToken'
+                }
               }
             }
           }
@@ -297,10 +308,12 @@ describe('gardener-dashboard', function () {
       it('should render the template w/o `alert.identifier`', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              alert: {
-                message: 'foo',
-                type: 'warning'
+            dashboard: {
+              frontendConfig: {
+                alert: {
+                  message: 'foo',
+                  type: 'warning'
+                }
               }
             }
           }
@@ -315,11 +328,13 @@ describe('gardener-dashboard', function () {
       it('should render the template w/ `alert.identifier`', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              alert: {
-                message: 'foo',
-                type: 'warning',
-                identifier: 'bar'
+            dashboard: {
+              frontendConfig: {
+                alert: {
+                  message: 'foo',
+                  type: 'warning',
+                  identifier: 'bar'
+                }
               }
             }
           }
@@ -337,26 +352,28 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              terminal: {
-                shortcuts: [
-                  {
-                    title: 'title',
-                    description: 'description',
-                    target: 'foo-target',
-                    container: {
-                      command: [
-                        'command'
-                      ],
-                      image: 'repo:tag',
-                      args: [
-                        'a',
-                        'b',
-                        'c'
-                      ]
+            dashboard: {
+              frontendConfig: {
+                terminal: {
+                  shortcuts: [
+                    {
+                      title: 'title',
+                      description: 'description',
+                      target: 'foo-target',
+                      container: {
+                        command: [
+                          'command'
+                        ],
+                        image: 'repo:tag',
+                        args: [
+                          'a',
+                          'b',
+                          'c'
+                        ]
+                      }
                     }
-                  }
-                ]
+                  ]
+                }
               }
             }
           }
@@ -407,15 +424,17 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              themes: {
-                light: {
-                  primary: '#ff0000',
-                  'main-navigation-title': 'grey.darken3'
-                },
-                dark: {
-                  primary: '#ff0000',
-                  'main-navigation-title': 'grey.darken3'
+            dashboard: {
+              frontendConfig: {
+                themes: {
+                  light: {
+                    primary: '#ff0000',
+                    'main-navigation-title': 'grey.darken3'
+                  },
+                  dark: {
+                    primary: '#ff0000',
+                    'main-navigation-title': 'grey.darken3'
+                  }
                 }
               }
             }
@@ -431,11 +450,13 @@ describe('gardener-dashboard', function () {
       it('should render the template with light theme values only', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              themes: {
-                light: {
-                  primary: '#ff0000',
-                  'main-navigation-title': 'grey.darken3'
+            dashboard: {
+              frontendConfig: {
+                themes: {
+                  light: {
+                    primary: '#ff0000',
+                    'main-navigation-title': 'grey.darken3'
+                  }
                 }
               }
             }
@@ -451,10 +472,12 @@ describe('gardener-dashboard', function () {
       it('should render the template with sla description markdown hyperlink', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              sla: {
-                title: 'SLA title',
-                description: '[foo](https://bar.baz)'
+            dashboard: {
+              frontendConfig: {
+                sla: {
+                  title: 'SLA title',
+                  description: '[foo](https://bar.baz)'
+                }
               }
             }
           }
@@ -471,23 +494,25 @@ describe('gardener-dashboard', function () {
       it('should render the template', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              vendorHints: [
-                {
-                  matchNames: [
-                    'foo',
-                    'bar'
-                  ],
-                  message: '[foo](https://bar.baz)',
-                  severity: 'warning'
-                },
-                {
-                  matchNames: [
-                    'fooz'
-                  ],
-                  message: 'other message'
-                }
-              ]
+            dashboard: {
+              frontendConfig: {
+                vendorHints: [
+                  {
+                    matchNames: [
+                      'foo',
+                      'bar'
+                    ],
+                    message: '[foo](https://bar.baz)',
+                    severity: 'warning'
+                  },
+                  {
+                    matchNames: [
+                      'fooz'
+                    ],
+                    message: 'other message'
+                  }
+                ]
+              }
             }
           }
         }
@@ -505,7 +530,9 @@ describe('gardener-dashboard', function () {
         const clusterIdentity = 'my-lanscape-dev'
         const values = {
           global: {
-            clusterIdentity
+            dashboard: {
+              clusterIdentity
+            }
           }
         }
 
@@ -521,9 +548,11 @@ describe('gardener-dashboard', function () {
       it('should render the template with resourceQuotaHelp markdown', async function () {
         const values = {
           global: {
-            frontendConfig: {
-              resourceQuotaHelp: {
-                text: '[foo](https://bar.baz)'
+            dashboard: {
+              frontendConfig: {
+                resourceQuotaHelp: {
+                  text: '[foo](https://bar.baz)'
+                }
               }
             }
           }

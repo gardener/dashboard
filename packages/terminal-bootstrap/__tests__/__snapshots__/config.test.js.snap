@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config #getDefaults should return the default production config 1`] = `
+Object {
+  "logLevel": "warn",
+}
+`;
+
+exports[`config #getDefaults should return the default test config 1`] = `
+Object {
+  "logLevel": "debug",
+}
+`;
+
+exports[`config #load should load the config 1`] = `
+Object {
+  "logLevel": "info",
+  "terminal": Object {
+    "bootstrap": Object {
+      "disabled": true,
+    },
+    "gardenTerminalHost": Object {
+      "seedRef": "infra1-seed2",
+    },
+  },
+  "unreachableSeeds": Object {
+    "matchLabels": Object {
+      "test-unreachable": "true",
+    },
+  },
+}
+`;

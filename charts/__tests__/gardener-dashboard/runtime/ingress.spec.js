@@ -6,7 +6,6 @@
 
 'use strict'
 
-const { basename } = require('path')
 const {
   helm,
   helper,
@@ -14,7 +13,7 @@ const {
 } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('ingress', function () {
@@ -33,11 +32,13 @@ describe('gardener-dashboard', function () {
     it('should render the template with tls and a secret', async function () {
       const values = {
         global: {
-          ingress: {
-            tls: {
-              secretName: tlsSecretName,
-              key: getPrivateKey('tls.key'),
-              crt: getCertificate('tls.crt')
+          dashboard: {
+            ingress: {
+              tls: {
+                secretName: tlsSecretName,
+                key: getPrivateKey('tls.key'),
+                crt: getCertificate('tls.crt')
+              }
             }
           }
         }
@@ -52,9 +53,11 @@ describe('gardener-dashboard', function () {
     it('should render the template with tls', async function () {
       const values = {
         global: {
-          ingress: {
-            tls: {
-              secretName: tlsSecretName
+          dashboard: {
+            ingress: {
+              tls: {
+                secretName: tlsSecretName
+              }
             }
           }
         }
@@ -67,7 +70,7 @@ describe('gardener-dashboard', function () {
       expect(ingress.spec.tls).toHaveLength(1)
       expect(ingress.spec.tls[0]).toEqual({
         secretName: tlsSecretName,
-        hosts: defaults.global.ingress.hosts
+        hosts: defaults.global.dashboard.ingress.hosts
       })
 
       expect(tlsSecret).toBeFalsy()
@@ -76,8 +79,10 @@ describe('gardener-dashboard', function () {
     it('should render the template without tls', async function () {
       const values = {
         global: {
-          ingress: {
-            tls: null
+          dashboard: {
+            ingress: {
+              tls: null
+            }
           }
         }
       }

@@ -34,6 +34,7 @@ fi
 # bump version
 yarn workspace @gardener-dashboard/frontend version "${EFFECTIVE_VERSION}"
 yarn workspace @gardener-dashboard/backend version "${EFFECTIVE_VERSION}"
+yarn workspace @gardener-dashboard/terminal-bootstrap version "${EFFECTIVE_VERSION}"
 
 # restore previous working directory
 cd "${WORK_DIR}"

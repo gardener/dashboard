@@ -1,0 +1,11 @@
+{{- if .Values.global.dashboard.frontendConfig.assets }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-assets
+binaryData:
+{{- range $file, $content := .Values.global.dashboard.frontendConfig.assets }}
+  {{ $file }}: |
+    {{ $content }}
+{{- end }}
+{{- end }}

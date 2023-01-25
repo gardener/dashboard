@@ -6,11 +6,10 @@
 
 'use strict'
 
-const { basename } = require('path')
 const { helm, helper } = fixtures
 const { encodeBase64 } = helper
 
-const renderTemplates = helm.renderTemplatesFn('gardener-dashboard', 'charts', basename(__dirname))
+const renderTemplates = helm.renderDashboardRuntimeTemplates
 
 describe('gardener-dashboard', function () {
   describe('configmap-assets', function () {
@@ -25,9 +24,11 @@ describe('gardener-dashboard', function () {
     it('should render the template', async function () {
       const values = {
         global: {
-          frontendConfig: {
-            assets: {
-              'bar.png': encodeBase64('foo\n')
+          dashboard: {
+            frontendConfig: {
+              assets: {
+                'bar.png': encodeBase64('foo\n')
+              }
             }
           }
         }
