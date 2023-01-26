@@ -54,5 +54,21 @@ describe('gardener-dashboard-terminal-bootstrapper', () => {
         }
       })
     })
+
+    it('should render the template with pod labels and annotations', async () => {
+      const labels = {
+        b: 'foo'
+      }
+      const annotations = {
+        a: 'bar'
+      }
+      values.global.bootstrapper.podLabels = labels
+      values.global.bootstrapper.podAnnotations = annotations
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.metadata.labels).toEqual(expect.objectContaining(labels))
+      expect(deployment.spec.template.metadata.annotations).toEqual(expect.objectContaining(annotations))
+    })
   })
 })

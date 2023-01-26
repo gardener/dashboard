@@ -25,7 +25,7 @@ spec:
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
         {{- if .Values.global.bootstrapper.podLabels }}
-{{ toYaml .Values.global.bootstrapper.podLabels | indent 8 }}
+        {{- toYaml .Values.global.bootstrapper.podLabels | nindent 8 }}
         {{- end }}
       annotations:
         checksum/configmap-gardener-dashboard-terminal-bootstrapper-config: {{ include (print .Template.BasePath "/bootstrapper/configmap-config.yaml") . | sha256sum }}
@@ -33,7 +33,7 @@ spec:
         checksum/secret-gardener-dashboard-terminal-bootstrapper-kubeconfig: {{ include (print .Template.BasePath "/bootstrapper/secret-kubeconfig.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.global.bootstrapper.podAnnotations }}
-{{ toYaml .Values.global.apiserver.podAnnotations | indent 8 }}
+        {{- toYaml .Values.global.bootstrapper.podAnnotations | nindent 8 }}
         {{- end }}
     spec:
       {{- if .Values.global.dashboard.kubeconfig }}
