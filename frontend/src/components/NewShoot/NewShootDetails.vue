@@ -92,7 +92,7 @@ const Purpose = () => import('@/components/Purpose')
 const validationErrors = {
   name: {
     required: 'Name is required',
-    maxLength: 'Name ist too long',
+    maxLength: 'Name is too long',
     resourceName: 'Name must only be lowercase letters, numbers and hyphens',
     unique: 'Cluster name must be unique',
     noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
