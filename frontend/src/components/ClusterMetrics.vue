@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     <link-list-tile
       icon="mdi-developer-board"
       app-title="Grafana"
-      :url="grafanaUrlUsers"
-      :url-text="grafanaUrlUsers"
+      :url="grafanaUrl"
+      :url-text="grafanaUrl"
       :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
     <link-list-tile
@@ -45,11 +45,8 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    grafanaUrlOperators () {
-      return get(this.shootItem, 'info.grafanaUrlOperators', '')
-    },
-    grafanaUrlUsers () {
-      return get(this.shootItem, 'info.grafanaUrlUsers', '')
+    grafanaUrl () {
+      return get(this.shootItem, 'info.grafanaUrl', '')
     },
     prometheusUrl () {
       return get(this.shootItem, 'info.prometheusUrl', '')

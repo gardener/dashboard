@@ -182,8 +182,7 @@ const actions = {
 
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
-        info.grafanaUrlUsers = `https://gu-${baseHost}`
-        info.grafanaUrlOperators = `https://go-${baseHost}`
+        info.grafanaUrl = `https://gu-${baseHost}`
 
         info.prometheusUrl = `https://p-${baseHost}`
 
