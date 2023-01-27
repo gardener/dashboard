@@ -6,21 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-list>
-    <link-list-tile v-if="isAdmin"
-      icon="mdi-developer-board"
-      app-title="Grafana"
-      :url="grafanaUrlOperators"
-      :url-text="grafanaUrlOperators"
-      :is-shoot-status-hibernated="isShootStatusHibernated"
-    ></link-list-tile>
-    <link-list-tile v-else
+    <link-list-tile
       icon="mdi-developer-board"
       app-title="Grafana"
       :url="grafanaUrlUsers"
       :url-text="grafanaUrlUsers"
       :is-shoot-status-hibernated="isShootStatusHibernated"
     ></link-list-tile>
-    <link-list-tile v-if="isAdmin"
+    <link-list-tile
       app-title="Prometheus"
       :url="prometheusUrl"
       :url-text="prometheusUrl"
@@ -35,18 +28,7 @@ SPDX-License-Identifier: Apache-2.0
       content-class="pt-0"
     ></link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
-    <username-password v-if="isAdmin" :username="username" :password="password" :show-not-available-placeholder="isSeedUnreachable">
-      <template v-slot:notAvailablePlaceholder>
-        <v-list-item-content>
-          <v-list-item-subtitle>Operator Credentials</v-list-item-subtitle>
-          <v-list-item-title class="wrap-text pt-1">
-            <v-icon color="primary">mdi-alert-circle-outline</v-icon>
-            Credentials not available as the Seed {{shootSeedName}} is not reachable by the dashboard
-          </v-list-item-title>
-        </v-list-item-content>
-      </template>
-    </username-password>
-    <username-password v-else :username="username" :password="password"></username-password>
+    <username-password :username="username" :password="password"></username-password>
   </v-list>
 </template>
 
@@ -54,7 +36,6 @@ SPDX-License-Identifier: Apache-2.0
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import LinkListTile from '@/components/LinkListTile'
-import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -64,9 +45,6 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'isAdmin'
-    ]),
     grafanaUrlOperators () {
       return get(this.shootItem, 'info.grafanaUrlOperators', '')
     },
@@ -80,10 +58,10 @@ export default {
       return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringUsername', '') : get(this.shootItem, 'info.monitoringUsername', '')
+      return get(this.shootItem, 'info.monitoringUsername', '')
     },
     password () {
-      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoringPassword', '') : get(this.shootItem, 'info.monitoringPassword', '')
+      return get(this.shootItem, 'info.monitoringPassword', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])
