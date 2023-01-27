@@ -333,17 +333,14 @@ exports.info = async function ({ user, namespace, name }) {
     data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin) {
-    /*
-      We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
-      as we agreed that also project viewers should be able to see the monitoring credentials.
-      Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
-      Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
-      This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
-    */
-    await assignMonitoringSecret(dashboardClient, data, namespace, name)
-  }
+  /*
+    We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
+    as we agreed that also project viewers should be able to see the monitoring credentials.
+    Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
+    Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
+    This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
+  */
+  await assignMonitoringSecret(dashboardClient, data, namespace, name)
 
   return data
 }
