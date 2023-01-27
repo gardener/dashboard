@@ -451,37 +451,9 @@ async function getSecret (client, { namespace, name }) {
   }
 }
 
-async function getMonitoringSecret (client, namespace, shootName) {
-  let name
-  if (!shootName) {
-    try {
-      // read operator secret from seed
-      const labelSelector = 'name=observability-ingress,managed-by=secrets-manager,manager-identity=gardenlet'
-      const secretList = await client.core.secrets.list(namespace, { labelSelector })
-      const secret = _
-        .chain(secretList.items)
-        .orderBy(['metadata.creationTimestamp'], ['desc'])
-        .head()
-        .value()
-      if (secret) {
-        return secret
-      }
-      // fallback to old secret name
-      name = 'monitoring-ingress-credentials'
-    } catch (err) {
-      logger.error('failed to fetch %s secret: %s', name, err)
-      throw err
-    }
-  } else {
-    // read user secret from garden cluster
-    name = `${shootName}.monitoring`
-  }
-  return getSecret(client, { namespace, name })
-}
-
 async function assignMonitoringSecret (client, data, namespace, shootName) {
-  const secret = await getMonitoringSecret(client, namespace, shootName)
-
+  const name = `${shootName}.monitoring`
+  const secret = await getSecret(client, { namespace, name })
   if (secret) {
     _
       .chain(secret)
