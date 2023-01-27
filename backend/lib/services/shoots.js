@@ -348,37 +348,6 @@ exports.info = async function ({ user, namespace, name }) {
   return data
 }
 
-exports.seedInfo = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  const shoot = await read({ user, namespace, name })
-
-  const data = {}
-  let seed
-  if (shoot.spec.seedName) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
-  }
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin || !seed) {
-    return data
-  }
-
-  if (!seed.spec.secretRef) {
-    logger.info(`Could not fetch info from seed. 'spec.secretRef' on the seed ${seed.metadata.name} is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
-    return data
-  }
-
-  try {
-    const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
-    const seedShootNamespace = shoot.status.technicalID
-    await assignMonitoringSecret(seedClient, data, seedShootNamespace)
-  } catch (err) {
-    logger.error('Failed to retrieve information using seed core client', err)
-  }
-
-  return data
-}
-
 async function getKubeconfigGardenlogin (client, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
