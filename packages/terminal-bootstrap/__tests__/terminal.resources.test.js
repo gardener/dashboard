@@ -6,11 +6,14 @@
 
 'use strict'
 
+const logger = require('../lib/logger')
+
 const {
   toResource,
   toIngressResource,
   toServiceResource,
-  toEndpointResource
+  toEndpointResource,
+  replaceResource
 } = require('../lib/terminal/resources')
 
 describe('terminal', () => {
@@ -77,6 +80,15 @@ describe('terminal', () => {
         labels
       })
       expect(resource).toMatchSnapshot()
+    })
+
+    it('should skip replaceResource in dryRun mode', async () => {
+      const resource = {
+        version: 'v1',
+        names: { kind: 'Service' }
+      }
+      await expect(replaceResource(resource, { namespace, name, dryRun: true })).resolves.toEqual({ metadata: { namespace, name } })
+      expect(logger.info).toBeCalledWith('Replacing resource v1, Kind=Service was skipped in dry run mode')
     })
   })
 })

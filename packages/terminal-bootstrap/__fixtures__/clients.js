@@ -124,15 +124,22 @@ const hostClient = {
   }),
   core: {
     services: {
+      version: 'v1',
+      names: { kind: 'Service' },
       create: jest.fn((...args) => Promise.resolve(args[1])),
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     },
     endpoints: {
+      version: 'v1',
+      names: { kind: 'Endpoint' },
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     }
   },
   'networking.k8s.io': {
     ingresses: {
+      group: 'networking.k8s.io',
+      version: 'v1',
+      names: { kind: 'Ingress' },
       create: jest.fn((...args) => Promise.resolve(args[1])),
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     }
@@ -149,11 +156,16 @@ const soilClient = {
   }),
   core: {
     services: {
+      version: 'v1',
+      names: { kind: 'Service' },
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     }
   },
   'networking.k8s.io': {
     ingresses: {
+      group: 'networking.k8s.io',
+      version: 'v1',
+      names: { kind: 'Ingress' },
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     }
   }

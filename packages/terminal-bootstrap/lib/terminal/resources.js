@@ -10,6 +10,10 @@
 const { isHttpError } = require('@gardener-dashboard/request')
 const { Resources } = require('@gardener-dashboard/kube-client')
 
+const logger = require('../logger')
+
+const { kDryRun } = require('./symbols')
+
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
@@ -76,14 +80,21 @@ function toResource ({
   return resourceBody
 }
 
-async function replaceResource (resource, { namespace, name, body }) {
-  try {
-    return await resource.mergePatch(namespace, name, body)
-  } catch (err) {
-    if (isHttpError(err, 404)) {
-      return resource.create(namespace, body)
+async function replaceResource (resource, { namespace, name, body, dryRun }) {
+  if (dryRun !== true) {
+    try {
+      return await resource.mergePatch(namespace, name, body)
+    } catch (err) {
+      if (isHttpError(err, 404)) {
+        return resource.create(namespace, body)
+      }
+      throw err
     }
-    throw err
+  } else {
+    const { group, version, names: { kind } } = resource
+    const apiVersion = group ? `${group}/${version}` : version
+    logger.info(`Replacing resource ${apiVersion}, Kind=${kind} was skipped in dry run mode`)
+    return { metadata: { namespace, name } }
   }
 }
 
@@ -126,7 +137,12 @@ function replaceIngressApiServer (client, { namespace, name, host, tlsHost, serv
 
   const body = toIngressResource({ name, annotations, spec, ownerReferences })
 
-  return replaceResource(client['networking.k8s.io'].ingresses, { namespace, name, body })
+  return replaceResource(client['networking.k8s.io'].ingresses, {
+    namespace,
+    name,
+    body,
+    dryRun: client[kDryRun]
+  })
 }
 
 function replaceEndpointApiServer (client, { namespace, name, ip, port, ownerReferences }) {
@@ -148,7 +164,12 @@ function replaceEndpointApiServer (client, { namespace, name, ip, port, ownerRef
 
   const body = toEndpointResource({ namespace, name, subsets, ownerReferences })
 
-  return replaceResource(client.core.endpoints, { namespace, name, body })
+  return replaceResource(client.core.endpoints, {
+    namespace,
+    name,
+    body,
+    dryRun: client[kDryRun]
+  })
 }
 
 function replaceServiceApiServer (client, { namespace, name, externalName, ownerReferences, clusterIP = 'None', targetPort }) {
@@ -173,7 +194,12 @@ function replaceServiceApiServer (client, { namespace, name, externalName, owner
 
   const body = toServiceResource({ namespace, name, spec, ownerReferences })
 
-  return replaceResource(client.core.services, { namespace, name, body })
+  return replaceResource(client.core.services, {
+    namespace,
+    name,
+    body,
+    dryRun: client[kDryRun]
+  })
 }
 
 module.exports = {

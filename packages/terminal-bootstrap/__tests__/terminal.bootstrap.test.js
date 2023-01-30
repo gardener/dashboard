@@ -252,6 +252,18 @@ describe('terminal', () => {
         expect(bootstrapper.requiredConfigExists).toBe(false)
         expect(logger.error).toBeCalledWith("required terminal config 'terminal.bootstrap.apiServerIngress.annotations' not found")
       })
+
+      it('should skip replaceResource in dryRun mode', async () => {
+        terminalConfig.bootstrap.queueOptions = { dryRun: true }
+        const items = [seed]
+        const bootstrapper = await TestBootstrapper.create(terminalConfig, items)
+
+        expect.hasAssertions()
+        expectMocksToMatchSnapshots(mocks)
+        expectBootstrapperToMatchSnapshots(bootstrapper, ...items)
+
+        expect(logger.info).toBeCalledWith('Replacing resource networking.k8s.io/v1, Kind=Ingress was skipped in dry run mode')
+      })
     })
 
     describe('shoot enabled', () => {

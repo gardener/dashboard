@@ -25,6 +25,8 @@ const {
   replaceEndpointApiServer
 } = require('./resources')
 
+const { kDryRun } = require('./symbols')
+
 const GardenTerminalHostRefType = {
   SECRET_REF: 'secretRef',
   SEED_REF: 'seedRef',
@@ -155,7 +157,7 @@ function seedShootNamespaceExists ({ status, spec }) {
 }
 
 async function handleSeed (client, seed) {
-  const { metadata: { name, deletionTimestamp } } = seed
+  const { name, deletionTimestamp } = seed.metadata
 
   if (deletionTimestamp) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
@@ -168,21 +170,25 @@ async function handleSeed (client, seed) {
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
-  const managedSeed = await client.getManagedSeed({ namespace: 'garden', name, throwNotFound: false })
+  const managedSeed = await client.getManagedSeed({
+    namespace: 'garden',
+    name,
+    throwNotFound: false
+  })
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
   if (managedSeed) {
     const shootRef = getShootRef(managedSeed)
     const shoot = await client.getShoot(shootRef)
     const seedName = getSeedNameFromShoot(shoot)
-    const seedForShoot = await client['core.gardener.cloud'].seeds.get(seedName)
-    await ensureTrustedCertForShootApiServer(client, shoot, seedForShoot)
+    seed = await client['core.gardener.cloud'].seeds.get(seedName)
+    await ensureTrustedCertForShootApiServer(client, shoot, seed)
   } else {
     await ensureTrustedCertForSeedApiServer(client, seed)
   }
 }
 
 async function handleShoot (client, shoot, seed) {
-  const { metadata: { namespace, name } } = shoot
+  const { namespace, name } = shoot.metadata
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
   await ensureTrustedCertForShootApiServer(client, shoot, seed)
 }
@@ -194,39 +200,44 @@ async function handleShoot (client, shoot, seed) {
   Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube-apiserver.
   https://github.com/gardener/gardener/issues/1413
 */
-async function ensureTrustedCertForShootApiServer (client, shootResource, seedResource) {
-  const { metadata: { namespace, name, deletionTimestamp } } = shootResource
+async function ensureTrustedCertForShootApiServer (client, shoot, seed) {
+  const { namespace, name, deletionTimestamp } = shoot.metadata
   if (deletionTimestamp) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return
   }
 
-  const seedName = seedResource.metadata.name
+  const seedName = seed.metadata.name
 
-  if (isSeedUnreachable(seedResource)) {
+  if (isSeedUnreachable(seed)) {
     logger.debug(`Seed ${seedName} is not reachable from the dashboard for shoot ${namespace}/${name}, bootstrapping aborted`)
     return
   }
 
   let seedClient
 
-  const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
+  const managedSeed = await client.getManagedSeed({
+    namespace: 'garden',
+    name: seedName,
+    throwNotFound: false
+  })
   if (managedSeed) {
     const shootRef = getShootRef(managedSeed)
     seedClient = await client.createShootAdminKubeconfigClient(shootRef)
   } else {
-    if (!seedResource.spec.secretRef) {
+    if (!seed.spec.secretRef) {
       logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing.`)
       return
     }
-    seedClient = await client.createKubeconfigClient(seedResource.spec.secretRef)
+    seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
   }
+  seedClient[kDryRun] = client[kDryRun]
 
   // calculate ingress domain
-  const apiServerIngressHost = getKubeApiServerHostForShoot(shootResource, seedResource)
-  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seedResource)
+  const apiServerIngressHost = getKubeApiServerHostForShoot(shoot, seed)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
 
-  const seedShootNamespace = _.get(shootResource, 'status.technicalID')
+  const seedShootNamespace = _.get(shoot, 'status.technicalID')
   if (!seedShootNamespace) {
     throw new Error(`could not get namespace on seed for shoot ${namespace}/${name}`)
   }
@@ -234,7 +245,7 @@ async function ensureTrustedCertForShootApiServer (client, shootResource, seedRe
   const serviceName = 'kube-apiserver'
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
-  const ingressClass = _.get(seedResource, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
+  const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
   if (ingressClass && annotations) {
     annotations['kubernetes.io/ingress.class'] = ingressClass
   }
@@ -263,6 +274,7 @@ async function ensureTrustedCertForGardenTerminalHostApiServer (client) {
       const { name, namespace } = await getGardenTerminalHostClusterSecretRef(client)
 
       const hostClient = await client.createKubeconfigClient({ name, namespace })
+      hostClient[kDryRun] = client[kDryRun]
       const hostNamespace = getConfigValue('terminal.bootstrap.gardenTerminalHost.namespace', 'garden')
       const apiServerIngressHost = getConfigValue('terminal.gardenTerminalHost.apiServerIngressHost')
       const ingressAnnotations = getConfigValue('terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations')
@@ -289,6 +301,7 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
   }
 
   const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+  seedClient[kDryRun] = client[kDryRun]
 
   const apiServerIngressHost = getKubeApiServerHostForSeed(seed)
   const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
@@ -399,6 +412,7 @@ function bootstrapRevision (seed) {
 }
 
 module.exports = {
+  kDryRun,
   getConfigValue,
   getSeedNameFromShoot,
   isSeedUnreachable,

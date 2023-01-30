@@ -26,6 +26,8 @@ const {
   bootstrapRevision
 } = require('./utils')
 
+const { kDryRun } = require('./symbols')
+
 const BootstrapReasonEnum = {
   IRRELEVANT: 0,
   NOT_BOOTSTRAPPED: 1,
@@ -142,8 +144,9 @@ class Handler {
 }
 
 class Bootstrapper extends Queue {
-  constructor (client, processFn = Bootstrapper.process, options = Bootstrapper.options) {
+  constructor (client, processFn = Bootstrapper.process, { dryRun, ...options } = Bootstrapper.options) {
     super(processFn, options)
+    client[kDryRun] = dryRun === true
     this.client = client
     this.bootstrapState = new BootstrapMap()
     this.requiredConfigExists = verifyRequiredConfigExists()
@@ -374,7 +377,7 @@ class Bootstrapper extends Queue {
 
   static get options () {
     const defaultOptions = {
-      maxTimeout: 600000 // 10 minutes
+      maxTimeout: 600000 // 10 minutes,
     }
     const configOptions = _
       .chain(config)

@@ -1155,6 +1155,81 @@ Object {
 }
 `;
 
+exports[`terminal bootstrap seed enabled should skip replaceResource in dryRun mode: bootstrapper 1`] = `
+Object {
+  "states": Array [
+    Array [
+      "Seed",
+      "infra1-seed",
+      "BOOTSTRAPPED",
+    ],
+  ],
+  "successRate": 1,
+  "total": 1,
+}
+`;
+
+exports[`terminal bootstrap seed enabled should skip replaceResource in dryRun mode: mocks 1`] = `
+Object {
+  "mockCreateKubeconfigClient": Array [
+    Array [
+      Object {
+        "name": "seedsecret-soil-infra1",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockGetManagedSeed": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+    Array [
+      Object {
+        "name": "soil-infra1",
+        "namespace": "garden",
+        "throwNotFound": false,
+      },
+    ],
+  ],
+  "mockGetShoot": Array [
+    Array [
+      Object {
+        "name": "infra1-seed",
+        "namespace": "garden",
+      },
+    ],
+  ],
+  "mockManagedSeedsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+    Array [
+      "garden",
+      "soil-infra1",
+    ],
+  ],
+  "mockSeedsGet": Array [
+    Array [
+      "infra1-seed",
+    ],
+    Array [
+      "soil-infra1",
+    ],
+  ],
+  "mockShootsGet": Array [
+    Array [
+      "garden",
+      "infra1-seed",
+    ],
+  ],
+}
+`;
+
 exports[`terminal bootstrap shoot enabled should bootstrap a shoot cluster: bootstrapper 1`] = `
 Object {
   "states": Array [
