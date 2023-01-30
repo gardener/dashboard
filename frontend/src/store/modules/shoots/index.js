@@ -406,7 +406,11 @@ function getFilteredItems (state, rootState, rootGetters) {
         }
         const conditions = get(item, 'status.conditions', [])
         const allConditionCodes = errorCodesFromArray(conditions)
-        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes))
+
+        const constraints = get(item, 'status.constraints', [])
+        const allConstraintCodes = errorCodesFromArray(constraints)
+
+        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
       }
       items = filter(items, predicate)
     }
