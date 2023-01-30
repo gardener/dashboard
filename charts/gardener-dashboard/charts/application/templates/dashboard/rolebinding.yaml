@@ -1,7 +1,4 @@
-# SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
-#
-# SPDX-License-Identifier: Apache-2.0
-
+{{- if .Values.global.dashboard.enabled }}
 apiVersion: {{ include "rbacversion" . }}
 kind: RoleBinding
 metadata:
@@ -26,4 +23,5 @@ subjects:
 - kind: ServiceAccount
   name: {{ required ".Values.global.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

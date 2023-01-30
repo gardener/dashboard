@@ -8,25 +8,28 @@
 
 const yaml = require('js-yaml')
 const { helm, helper } = fixtures
+const { getPrivateKey, getCertificate } = helper
 
 const renderTemplates = helm.renderBootstrapperRuntimeTemplates
 
 describe('gardener-dashboard-terminal-bootstrapper', () => {
-  describe('secret-kubeconfig', function () {
-    let values
-    let templates
+  let values
+  let templates
 
-    beforeEach(() => {
-      values = {
-        global: {
-          bootstrapper: {
-            enabled: true
-          }
+  beforeEach(() => {
+    values = {
+      global: {
+        bootstrapper: {
+          enabled: true
         }
       }
-      templates = [
-        'secret-kubeconfig'
-      ]
+    }
+    templates = []
+  })
+
+  describe('secret-kubeconfig', function () {
+    beforeEach(() => {
+      templates.push('secret-kubeconfig')
     })
 
     it('should not render the template', async function () {
@@ -48,6 +51,34 @@ describe('gardener-dashboard-terminal-bootstrapper', () => {
       })
       const kubeconfig = yaml.load(helper.decodeBase64(kubeconfigSecret.data['kubeconfig.yaml']))
       expect(kubeconfig).toMatchSnapshot('kubeconfig.yaml')
+    })
+  })
+
+  describe('secret-apiserver-tls', () => {
+    const tlsKey = getPrivateKey('tls.key')
+    const tlsCrt = getCertificate('tls.crt')
+
+    beforeEach(() => {
+      templates.push('secret-apiserver-tls')
+    })
+
+    it('should render the templates', async function () {
+      values.global.terminal = {
+        bootstrap: {
+          disabled: false,
+          gardenTerminalHostDisabled: false,
+          gardenTerminalHost: {
+            apiServerTls: {
+              key: tlsKey,
+              crt: tlsCrt
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [terminalSecret] = documents
+      expect(terminalSecret).toMatchSnapshot()
     })
   })
 })

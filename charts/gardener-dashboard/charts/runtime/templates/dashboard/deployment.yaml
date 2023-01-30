@@ -1,3 +1,4 @@
+{{- if .Values.global.dashboard.enabled }}
 apiVersion: {{ include "deploymentversion" . }}
 kind: Deployment
 metadata:
@@ -182,3 +183,4 @@ spec:
             readOnly: true
           {{- end }}
       restartPolicy: Always
+{{- end }}

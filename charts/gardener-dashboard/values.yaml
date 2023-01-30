@@ -4,6 +4,7 @@
 global:
   # Gardener dashboard configuration values
   dashboard:
+    enabled: true
     replicaCount: 1
 
     image:

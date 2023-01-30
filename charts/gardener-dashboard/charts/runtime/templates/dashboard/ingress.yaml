@@ -1,3 +1,4 @@
+{{- if .Values.global.dashboard.enabled }}
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
@@ -34,3 +35,4 @@ spec:
         path: /
         pathType: Prefix
   {{- end }}
+{{- end }}

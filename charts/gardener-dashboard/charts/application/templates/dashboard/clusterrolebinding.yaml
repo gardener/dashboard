@@ -1,3 +1,4 @@
+{{- if .Values.global.dashboard.enabled }}
 apiVersion: {{ include "rbacversion" . }}
 kind: ClusterRoleBinding
 metadata:
@@ -20,4 +21,5 @@ subjects:
 - kind: ServiceAccount
   name: {{ required ".Values.global.dashboard.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

@@ -1,3 +1,4 @@
+{{- if .Values.global.dashboard.enabled }}
 {{- if .Values.global.dashboard.frontendConfig.assets }}
 apiVersion: v1
 kind: ConfigMap
@@ -7,5 +8,6 @@ binaryData:
 {{- range $file, $content := .Values.global.dashboard.frontendConfig.assets }}
   {{ $file }}: |
     {{ $content }}
+{{- end }}
 {{- end }}
 {{- end }}

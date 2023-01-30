@@ -142,26 +142,13 @@ describe('gardener-dashboard', function () {
                 crt: tlsCrt
               }
             }
-          },
-          terminal: {
-            bootstrap: {
-              disabled: false,
-              gardenTerminalHostDisabled: false,
-              gardenTerminalHost: {
-                apiServerTls: {
-                  key: tlsKey,
-                  crt: tlsCrt
-                }
-              }
-            }
           }
         }
       }
       const documents = await renderTemplates(templates, values)
-      expect(documents).toHaveLength(2)
-      const [ingressSecret, terminalSecret] = documents
+      expect(documents).toHaveLength(1)
+      const [ingressSecret] = documents
       expect(ingressSecret).toMatchSnapshot()
-      expect(terminalSecret).toMatchSnapshot()
     })
   })
 })
