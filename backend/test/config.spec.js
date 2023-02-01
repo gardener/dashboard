@@ -39,7 +39,8 @@ describe('config', function () {
         expect(defaults).toEqual({
           isProd: false,
           logLevel: 'debug',
-          port: 3030
+          port: 3030,
+          metricsPort: 9050
         })
       })
     })

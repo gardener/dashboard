@@ -21,7 +21,7 @@ function toMilliseconds (seconds) {
 function createServer (app) {
   const port = app.get('port')
   const periodSeconds = app.get('periodSeconds')
-  const healthCheck = app.get('healthCheck')
+  const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
 
@@ -29,11 +29,14 @@ function createServer (app) {
   const server = http.createServer(app)
 
   // create terminus
+  const healthChecks = {}
+  if (typeof healthCheckFunc === 'function') {
+    healthChecks['/healthz'] = () => healthCheckFunc(false)
+    healthChecks['/healthz-transitive'] = () => healthCheckFunc(true)
+  }
+
   terminus.createTerminus(server, {
-    healthChecks: {
-      '/healthz': () => healthCheck(false),
-      '/healthz-transitive': () => healthCheck(true)
-    },
+    healthChecks,
     beforeShutdown () {
       // To not lose any connections, we delay the shutdown with the number of milliseconds
       // that's defined by the readiness probe in the deployment configuration.

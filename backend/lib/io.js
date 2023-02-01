@@ -11,6 +11,7 @@ const createServer = require('socket.io')
 const cookieParser = require('cookie-parser')
 const createError = require('http-errors')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
+const { monitorSocketIO } = require('@gardener-dashboard/monitor')
 const cache = require('./cache')
 const logger = require('./logger')
 const { projectFilter } = require('./utils')
@@ -211,6 +212,8 @@ function init (httpServer, cache) {
       logger.debug('Socket %s disconnected. Reason: %s', socketId, reason)
     })
   })
+
+  monitorSocketIO(io)
 
   // return io instance
   return io

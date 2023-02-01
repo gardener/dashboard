@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metrics should create and export the application defined metrics 1`] = `
+Object {
+  "connectionsCount": Gauge {
+    "aggregator": "sum",
+    "hashMap": Object {},
+    "help": "dashboard currently open connections",
+    "labelNames": Array [
+      "type",
+    ],
+    "name": "tcp_connections_count",
+    "registers": Array [
+      Object {
+        "clear": [MockFunction],
+        "contentType": "text/plain; version=0.0.4; charset=utf-8; mock=true",
+        "metrics": [MockFunction],
+        "registerMetric": [MockFunction],
+      },
+    ],
+  },
+  "connectionsTotal": Counter {
+    "aggregator": "sum",
+    "hashMap": Object {},
+    "help": "dashboard total opened connections",
+    "labelNames": Array [
+      "type",
+    ],
+    "name": "tcp_connections_total",
+    "registers": Array [
+      Object {
+        "clear": [MockFunction],
+        "contentType": "text/plain; version=0.0.4; charset=utf-8; mock=true",
+        "metrics": [MockFunction],
+        "registerMetric": [MockFunction],
+      },
+    ],
+  },
+  "responseTime": Histogram {
+    "aggregator": "sum",
+    "bucketValues": Object {
+      "42": 0,
+    },
+    "buckets": Array [
+      42,
+      42,
+      42,
+    ],
+    "hashMap": Object {},
+    "help": "Time to first byte for requests served in seconds",
+    "labelNames": Array [
+      "method",
+      "service",
+    ],
+    "name": "http_response_duration_seconds",
+    "registers": Array [
+      Object {
+        "clear": [MockFunction],
+        "contentType": "text/plain; version=0.0.4; charset=utf-8; mock=true",
+        "metrics": [MockFunction],
+        "registerMetric": [MockFunction],
+      },
+    ],
+    "upperBounds": Array [
+      42,
+      42,
+      42,
+    ],
+  },
+}
+`;

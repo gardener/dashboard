@@ -16,10 +16,12 @@ const { notFound, renderError, historyFallback, noCache } = require('./middlewar
 const helmet = require('helmet')
 const api = require('./api')
 const auth = require('./auth')
+const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
 const githubWebhook = require('./github/webhook')
 const { healthCheck } = require('./healthz')
+
 const port = config.port
-const periodSeconds = _.get(config, 'readinessProbe.periodSeconds', 10)
+const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
@@ -54,7 +56,9 @@ app.use(helmet.noSniff())
 app.use(helmet.hsts())
 app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
+app.use('/webhook', monitorResponseTimes({ service: 'webhook' }))
 app.use('/webhook', githubWebhook.router)
+app.use('/api', monitorResponseTimes({ service: 'api' }))
 app.use('/api', api.router)
 
 app.use(helmet.xssFilter())
