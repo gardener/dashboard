@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <status-tag
         v-for="condition in conditions"
         :condition="condition"
-        :popper-key="condition.id"
-        :key="condition.id"
+        :popper-key="condition.type"
+        :key="condition.type"
         :popper-placement="popperPlacement"
         :secret-binding-name="shootSecretBindingName"
         :namespace="shootNamespace"
@@ -66,15 +66,12 @@ export default {
     ]),
     conditions () {
       const shootConditions = filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
-      const conditions = map(shootConditions, condition => {
-        const { lastTransitionTime, message, status, type, codes } = condition
-        const id = type
-        const { displayName: name, shortName, description, showAdminOnly } = this.getCondition(condition.type)
-
-        return { id, name, shortName, description, message, lastTransitionTime, status, codes, showAdminOnly }
+      const conditions = map(shootConditions, conditionStatus => {
+        const condition = this.getCondition(conditionStatus.type)
+        return { ...condition, ...conditionStatus }
       })
 
-      return sortBy(conditions, 'shortName')
+      return sortBy(conditions, 'sort', 'shortName')
     },
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
@@ -104,9 +101,9 @@ export default {
         conditionComponents = dropRight(conditionComponents)
       }
 
-      const displayName = join(conditionComponents, ' ')
+      const name = join(conditionComponents, ' ')
       const shortName = join(map(conditionComponents, first), '')
-      const conditionMetaData = { displayName, shortName }
+      const conditionMetaData = { name, shortName }
       this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
 
       return conditionMetaData

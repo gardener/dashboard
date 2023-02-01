@@ -61,11 +61,14 @@ export function getRawVal (rootGetters, item, column) {
       return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
     case 'issueSince':
       return getIssueSince(item.status) || 0
+    case 'technicalId':
+      return item.status?.technicalID
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
         return get(item, path)
       }
+
       return metadata[column]
     }
   }
@@ -120,11 +123,6 @@ export function getSortVal (rootGetters, item, sortBy) {
         return 500
       }
       return 700
-    }
-    case 'readiness': {
-      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-      return lastErrorTransitionTime
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -268,32 +266,36 @@ export default {
               return sortbyNameAsc(a, b)
             }
           })
-          break
+          return items
         }
         case 'readiness': {
-          items.sort((a, b) => {
-            const readinessA = getSortVal(rootGetters, a, sortBy)
-            const readinessB = getSortVal(rootGetters, b, sortBy)
+          const sortValues = {}
+          items.forEach(item => {
+            const errorConditionStatuses = filter(item.status?.conditions, condition => get(condition, 'status') !== 'True')
+            const errorConditions = map(errorConditionStatuses, conditionStatus => {
+              const condition = rootState.conditionCache[conditionStatus.type]
+              return {
+                ...conditionStatus,
+                sort: condition?.sort ?? condition?.shortName
+              }
+            })
 
-            if (readinessA === readinessB) {
-              return sortbyNameAsc(a, b)
-            } else if (!readinessA) {
-              return 1
-            } else if (!readinessB) {
-              return -1
-            } else if (readinessA > readinessB) {
-              return 1 * inverse
-            } else {
-              return -1 * inverse
+            if (errorConditions.length) {
+              const { sort: group, lastTransitionTime } = head(orderBy(errorConditions, 'sort'))
+
+              sortValues[item.metadata.uid] = {
+                group,
+                lastTransitionTime
+              }
             }
           })
-          break
+
+          return orderBy(items, [item => sortValues[item.metadata.uid]?.group, item => sortValues[item.metadata.uid]?.lastTransitionTime, 'metadata.name'], ['asc', sortOrder, 'asc'])
         }
         default: {
-          items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          return orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-      return items
     }
   },
   numberOfNewItemsSinceFreeze (state) {

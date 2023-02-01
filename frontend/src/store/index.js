@@ -134,33 +134,41 @@ const state = {
   projectTerminalShortcuts: null,
   conditionCache: {
     APIServerAvailable: {
-      displayName: 'API Server',
+      name: 'API Server',
       shortName: 'API',
-      description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.'
+      description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.',
+      sort: '0'
     },
     ControlPlaneHealthy: {
-      displayName: 'Control Plane',
+      name: 'Control Plane',
       shortName: 'CP',
       description: 'Indicates whether all control plane components are up and running.',
-      showAdminOnly: true
+      showAdminOnly: true,
+      sort: '1'
     },
     EveryNodeReady: {
-      displayName: 'Nodes',
+      name: 'Nodes',
       shortName: 'N',
       description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.'
     },
     SystemComponentsHealthy: {
-      displayName: 'System Components',
+      name: 'System Components',
       shortName: 'SC',
-      description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
+      description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
+      sort: '2'
+    },
+    ObservabilityComponentsHealthy: {
+      name: 'Observability Components',
+      shortName: 'OC',
+      description: 'Indicates whether all observability components like Prometheus, Loki, Grafana, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     },
     MaintenancePreconditionsSatisfied: {
-      displayName: 'Maintenance Preconditions Satisfied',
+      name: 'Maintenance Preconditions Satisfied',
       shortName: 'M',
       description: 'Indicates whether Gardener is able to perform required actions during maintenance. If you do not resolve this issue your cluster will eventually turn into an error state.'
     },
     HibernationPossible: {
-      displayName: 'Hibernation Preconditions Satisfied',
+      name: 'Hibernation Preconditions Satisfied',
       shortName: 'H',
       description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.'
     }
