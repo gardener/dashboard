@@ -28,14 +28,20 @@ describe('condition.vue', () => {
   const cfg = {
     knownConditions: {
       ControlPlaneHealthy: {
-        displayName: 'Control Plane Overwritten',
+        name: 'Control Plane Overwritten',
         shortName: 'CPO',
         description: 'Overwritten Description'
       },
       ConditionFromConfigAvailability: {
-        displayName: 'Config Condition',
+        name: 'Config Condition',
         shortName: 'CC',
         description: 'Config Condition Description'
+      },
+      ImportantCondition: {
+        name: 'Important Condition',
+        shortName: 'IC',
+        description: 'Important Config Condition Description',
+        sort: '0'
       }
     }
   }
@@ -107,6 +113,7 @@ describe('condition.vue', () => {
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('API')
     expect(condition.name).toBe('API Server')
+    expect(condition.sort).toBe('0')
     expect(condition.description).not.toHaveLength(0)
   })
 
@@ -126,11 +133,13 @@ describe('condition.vue', () => {
     expect(condition.description).toBe('Overwritten Description')
   })
 
-  it('should return conditions sorted by shortname', () => {
-    const wrapper = shallowMountStatusTags(['CB', 'AB'])
+  it('should return conditions sorted by sortvalue and shortname', () => {
+    const wrapper = shallowMountStatusTags(['CB', 'AB', 'ImportantCondition'])
     const firstCondition = wrapper.vm.conditions[0]
     const secondCondition = wrapper.vm.conditions[1]
-    expect(firstCondition.shortName).toBe('A')
-    expect(secondCondition.shortName).toBe('C')
+    const thirdCondition = wrapper.vm.conditions[2]
+    expect(firstCondition.shortName).toBe('IC')
+    expect(secondCondition.shortName).toBe('A')
+    expect(thirdCondition.shortName).toBe('C')
   })
 })

@@ -149,7 +149,8 @@ const state = {
     EveryNodeReady: {
       name: 'Nodes',
       shortName: 'N',
-      description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.'
+      description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
+      sort: '3'
     },
     SystemComponentsHealthy: {
       name: 'System Components',
@@ -160,7 +161,8 @@ const state = {
     ObservabilityComponentsHealthy: {
       name: 'Observability Components',
       shortName: 'OC',
-      description: 'Indicates whether all observability components like Prometheus, Loki, Grafana, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
+      description: 'Indicates whether all observability components like Prometheus, Loki, Grafana, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
+      sort: '4'
     },
     MaintenancePreconditionsSatisfied: {
       name: 'Maintenance Preconditions Satisfied',

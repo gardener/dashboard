@@ -269,9 +269,11 @@ export default {
           return items
         }
         case 'readiness': {
+          const hideProgressingClusters = get(rootGetters.getShootListFilters, 'progressing', false)
+
           const sortValues = {}
           items.forEach(item => {
-            const errorConditionStatuses = filter(item.status?.conditions, condition => get(condition, 'status') !== 'True')
+            const errorConditionStatuses = filter(item.status?.conditions, condition => condition?.status !== 'True' && (!hideProgressingClusters || condition?.status !== 'Progressing'))
             const errorConditions = map(errorConditionStatuses, conditionStatus => {
               const condition = rootState.conditionCache[conditionStatus.type]
               return {
