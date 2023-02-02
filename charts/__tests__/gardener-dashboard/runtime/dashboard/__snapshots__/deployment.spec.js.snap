@@ -106,6 +106,10 @@ Object {
       "spec": Object {
         "containers": Array [
           Object {
+            "args": Array [
+              "--max-old-space-size=920",
+              "server.js",
+            ],
             "env": Array [
               Object {
                 "name": "SESSION_SECRET",

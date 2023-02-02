@@ -52,7 +52,7 @@ describe('dockerfile', function () {
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
     expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
     expect(buildStages['node-scratch'].getImage()).toBe('scratch')
-    for (const key of ['dashboard', 'terminal-bootstrap']) {
+    for (const key of ['dashboard', 'dashboard-terminal-bootstrapper']) {
       expect(buildStages[key].getImage()).toBe('node-scratch')
     }
   })

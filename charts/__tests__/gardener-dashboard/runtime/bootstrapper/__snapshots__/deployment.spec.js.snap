@@ -40,6 +40,10 @@ Object {
       "spec": Object {
         "containers": Array [
           Object {
+            "args": Array [
+              "--max-old-space-size=460",
+              "main.js",
+            ],
             "env": Array [
               Object {
                 "name": "GARDENER_CONFIG",
@@ -50,7 +54,7 @@ Object {
                 "value": "/etc/gardener-dashboard-terminal-bootstrapper/kubeconfig/kubeconfig.yaml",
               },
             ],
-            "image": "eu.gcr.io/gardener-project/gardener/terminal-bootstrap:latest",
+            "image": "eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper:latest",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": Object {
               "failureThreshold": 3,

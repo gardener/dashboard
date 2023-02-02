@@ -20,13 +20,13 @@ dashboard:
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
             target: dashboard
-          terminal-bootstrap:
+          dashboard-terminal-bootstrapper:
             inputs:
               repos:
                 source: ~ # default
             registry: 'gcr-readwrite'
-            image: 'eu.gcr.io/gardener-project/gardener/terminal-bootstrap'
-            target: terminal-bootstrap
+            image: 'eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper'
+            target: dashboard-terminal-bootstrapper
     steps: ~
   jobs:
     head-update:
@@ -59,5 +59,5 @@ dashboard:
           dockerimages:
             dashboard:
               tag_as_latest: true
-            terminal-bootstrap:
+            dashboard-terminal-bootstrapper:
               tag_as_latest: true

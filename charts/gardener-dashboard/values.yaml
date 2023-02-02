@@ -54,11 +54,11 @@ global:
       requests:
         cpu: 100m
         memory: 350Mi
-
     # If dashboard is running in an environment with less than 1.5GB of available memory
     # you should cap the maximum available "old space". In a Docker-512MB-Container,
     # the value should not be greater than 90% of the available memory.
-    # nodeOptions: [--optimize-for-size, --max-old-space-size=460, --gc-interval=100]
+    # nodeOptions: [--optimize-for-size, --max-old-space-size=920, --gc-interval=100]
+    nodeOptions: [--max-old-space-size=920]
 
     ingress:
       annotations:
@@ -318,7 +318,7 @@ global:
   bootstrapper:
     enabled: false
     image:
-      repository: eu.gcr.io/gardener-project/gardener/terminal-bootstrap
+      repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper
       tag: latest
       pullPolicy: IfNotPresent
     serviceAccountName: gardener-dashboard-terminal-bootstrapper
@@ -333,6 +333,7 @@ global:
       limits:
         cpu: 250m
         memory: 512Mi
+    nodeOptions: [--max-old-space-size=460]
     readinessProbe:
       initialDelaySeconds: 5
       periodSeconds: 5

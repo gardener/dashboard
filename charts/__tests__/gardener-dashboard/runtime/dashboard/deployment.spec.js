@@ -81,7 +81,9 @@ describe('gardener-dashboard', function () {
     it('should render the template with an empty list node options', async function () {
       const values = {
         global: {
-          nodeOptions: []
+          dashboard: {
+            nodeOptions: []
+          }
         }
       }
       const documents = await renderTemplates(templates, values)
