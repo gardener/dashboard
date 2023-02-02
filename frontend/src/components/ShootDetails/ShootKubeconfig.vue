@@ -12,9 +12,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-icon>
       <v-list-item-content v-if="isGardenloginType">
         <v-list-item-title>Kubeconfig - Gardenlogin</v-list-item-title>
-        <v-list-item-subtitle class="wrap-text">
-          Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)
-        </v-list-item-subtitle>
+        <v-list-item-subtitle v-if="isKubeconfigAvailable" class="wrap-text">Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)</v-list-item-subtitle>
+        <v-list-item-subtitle v-else>Gardenlogin kubeconfig currently not available</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-content v-else>
         <v-list-item-title>Kubeconfig - Static Token</v-list-item-title>
