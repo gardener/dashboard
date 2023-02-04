@@ -300,7 +300,7 @@ const actions = {
     if (!isEmpty(firewallImage)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
     }
-    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [partitionID] }), 'name')
+    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region }), 'name')
     const firewallSize = head(firewallSizes)
     if (!isEmpty(firewallSize)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)

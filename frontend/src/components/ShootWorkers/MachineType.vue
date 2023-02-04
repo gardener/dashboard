@@ -76,6 +76,10 @@ export default {
     machineTypes: {
       type: Array,
       default: () => []
+    },
+    unavailableZonesForMachineType: {
+      type: Array,
+      default: () => []
     }
   },
   data () {
@@ -120,7 +124,14 @@ export default {
       return !find(this.machineTypes, ['name', this.internalValue])
     },
     hint () {
-      return this.notInList ? 'This machine type may not be supported by your worker' : ''
+      if (this.notInList) {
+        return 'This machine type may not be supported by your worker as it is not supported by your current worker settings.'
+      }
+      if (this.unavailableZonesForMachineType.length) {
+        const zones = this.unavailableZonesForMachineType.join(', ')
+        return `This machine type may not be supported by your worker as it is not available in zone(s) ${zones}`
+      }
+      return ''
     }
   },
   validations,

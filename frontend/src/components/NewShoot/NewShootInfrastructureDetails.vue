@@ -293,7 +293,7 @@ export default {
       'partitionIDsByCloudProfileNameAndRegion',
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
-      'firewallSizesByCloudProfileNameAndRegionAndZones',
+      'firewallSizesByCloudProfileNameAndRegion',
       'networkingTypeList'
     ]),
     validationErrors () {
@@ -381,8 +381,7 @@ export default {
     firewallSizes () {
       const cloudProfileName = this.cloudProfileName
       const region = this.region
-      const zones = [this.partitionID]
-      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region })
       return map(firewallSizes, 'name')
     },
     allFirewallNetworks () {

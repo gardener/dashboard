@@ -33,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="regularInput">
         <machine-type
           :machine-types="machineTypes"
+          :unavailable-zones-for-machine-type="unavailableZonesForMachineType"
           v-model="machineTypeValue"
           :valid.sync="internalMachineTypeValid"
         ></machine-type>
@@ -58,6 +59,7 @@ SPDX-License-Identifier: Apache-2.0
       <div v-if="volumeInCloudProfile" class="regularInput">
         <volume-type
         :volume-types="volumeTypes"
+        :unavailable-zones-for-volume-type="unavailableZonesForVolumeType"
         :worker="worker"
         :cloud-profile-name="cloudProfileName"
         @update-volume-type="onUpdateVolumeType"
@@ -253,11 +255,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture',
-      'machineArchitecturesByCloudProfileNameAndRegionAndZones',
-      'volumeTypesByCloudProfileNameAndRegionAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndArchitecture',
+      'machineArchitecturesByCloudProfileNameAndRegion',
+      'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
-      'minimumVolumeSizeByCloudProfileNameAndRegion'
+      'minimumVolumeSizeByCloudProfileNameAndRegion',
+      'unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType',
+      'unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType'
     ]),
     validators () {
       return {
@@ -301,25 +305,40 @@ export default {
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({
+      return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
         cloudProfileName: this.cloudProfileName,
         region: this.region,
-        zones: this.worker.zones,
         architecture: this.worker.machine.architecture
       })
     },
-    machineArchitectures () {
-      return this.machineArchitecturesByCloudProfileNameAndRegionAndZones({
+    unavailableZonesForMachineType () {
+      return this.unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType({
         cloudProfileName: this.cloudProfileName,
         region: this.region,
-        zones: this.worker.zones
+        architecture: this.worker.machine.architecture,
+        zones: this.worker.zones,
+        machineType: this.machineTypeValue
+      })
+    },
+    unavailableZonesForVolumeType () {
+      return this.unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+        architecture: this.worker.machine.architecture,
+        zones: this.worker.zones,
+        volumeType: this.worker.volume.type
+      })
+    },
+    machineArchitectures () {
+      return this.machineArchitecturesByCloudProfileNameAndRegion({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region
       })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndRegionAndZones({
+      return this.volumeTypesByCloudProfileNameAndRegion({
         cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        zones: this.worker.zones
+        region: this.region
       })
     },
     volumeInCloudProfile () {
