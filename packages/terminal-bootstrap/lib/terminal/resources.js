@@ -91,7 +91,7 @@ async function replaceResource (resource, { namespace, name, body, dryRun }) {
       throw err
     }
   } else {
-    const { group, version, names: { kind } } = resource
+    const { group, version, names: { kind } } = resource.constructor
     const apiVersion = group ? `${group}/${version}` : version
     logger.info(`Replacing resource ${apiVersion}, Kind=${kind} was skipped in dry run mode`)
     return { metadata: { namespace, name } }
