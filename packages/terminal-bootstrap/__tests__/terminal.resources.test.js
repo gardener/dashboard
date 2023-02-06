@@ -84,8 +84,10 @@ describe('terminal', () => {
 
     it('should skip replaceResource in dryRun mode', async () => {
       const resource = {
-        version: 'v1',
-        names: { kind: 'Service' }
+        constructor: {
+          version: 'v1',
+          names: { kind: 'Service' }
+        }
       }
       await expect(replaceResource(resource, { namespace, name, dryRun: true })).resolves.toEqual({ metadata: { namespace, name } })
       expect(logger.info).toBeCalledWith('Replacing resource v1, Kind=Service was skipped in dry run mode')
