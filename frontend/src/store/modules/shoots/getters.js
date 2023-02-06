@@ -256,7 +256,7 @@ export default {
       const inverse = sortOrder === 'desc' ? -1 : 1
       switch (sortBy) {
         case 'k8sVersion': {
-          items.sort((a, b) => {
+          return [...items].sort((a, b) => {
             const versionA = getRawVal(rootGetters, a, sortBy)
             const versionB = getRawVal(rootGetters, b, sortBy)
 
@@ -268,10 +268,9 @@ export default {
               return sortbyNameAsc(a, b)
             }
           })
-          break
         }
         case 'readiness': {
-          items.sort((a, b) => {
+          return [...items].sort((a, b) => {
             const readinessA = getSortVal(rootGetters, a, sortBy)
             const readinessB = getSortVal(rootGetters, b, sortBy)
 
@@ -287,13 +286,11 @@ export default {
               return -1 * inverse
             }
           })
-          break
         }
         default: {
-          items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          return orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-      return items
     }
   },
   numberOfNewItemsSinceFreeze (state) {
