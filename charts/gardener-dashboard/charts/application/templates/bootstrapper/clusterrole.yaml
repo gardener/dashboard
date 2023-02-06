@@ -4,11 +4,11 @@ kind: ClusterRole
 metadata:
   name: gardener.cloud:system:dashboard-terminal-bootstrapper
   labels:
-    app: gardener-dashboard
-    role: terminal-bootstrapper 
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: terminal-bootstrapper
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 rules:
 - apiGroups:
   - ""
@@ -22,6 +22,8 @@ rules:
   - shoots
   verbs:
   - get
+  - list
+  - watch
 - apiGroups:
   - core.gardener.cloud
   resources:

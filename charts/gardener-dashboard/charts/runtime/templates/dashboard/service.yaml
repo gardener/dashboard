@@ -5,10 +5,11 @@ metadata:
   name: gardener-dashboard-service
   namespace: {{ .Release.Namespace }}
   labels:
-    app: gardener-dashboard
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 spec:
   ports:
   - port: {{ .Values.global.dashboard.servicePort }}
@@ -16,8 +17,8 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: gardener-dashboard
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
   type: ClusterIP
   sessionAffinity: ClientIP
 {{- end }}

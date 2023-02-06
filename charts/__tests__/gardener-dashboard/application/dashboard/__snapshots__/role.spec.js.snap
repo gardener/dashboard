@@ -6,11 +6,11 @@ Object {
   "kind": "Role",
   "metadata": Object {
     "labels": Object {
-      "app": "gardener-dashboard",
-      "chart": "application-0.1.0",
-      "heritage": "Helm",
-      "release": "application",
-      "role": "dashboard",
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-application-0.1.0",
     },
     "name": "gardener.cloud:system:dashboard-github-webhook",
     "namespace": "garden",

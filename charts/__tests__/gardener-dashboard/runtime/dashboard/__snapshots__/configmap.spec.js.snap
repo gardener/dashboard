@@ -239,10 +239,11 @@ Object {
   "kind": "ConfigMap",
   "metadata": Object {
     "labels": Object {
-      "app": "gardener-dashboard",
-      "chart": "runtime-0.1.0",
-      "heritage": "Helm",
-      "release": "runtime",
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
     },
     "name": "gardener-dashboard-configmap",
     "namespace": "garden",
@@ -469,10 +470,11 @@ Object {
   "kind": "Secret",
   "metadata": Object {
     "labels": Object {
-      "app": "gardener-dashboard",
-      "chart": "runtime-0.1.0",
-      "heritage": "Helm",
-      "release": "runtime",
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
     },
     "name": "gardener-dashboard-github",
     "namespace": "garden",

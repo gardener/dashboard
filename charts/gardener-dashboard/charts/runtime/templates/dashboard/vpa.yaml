@@ -5,6 +5,12 @@ kind: VerticalPodAutoscaler
 metadata:
   name: gardener-dashboard-vpa
   namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 spec:
   targetRef:
     apiVersion: {{ include "deploymentversion" . }}

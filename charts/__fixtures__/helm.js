@@ -25,11 +25,9 @@ function renderTemplatesFn (...paths) {
     tplPaths = ['templates']
   }
   const cwd = path.resolve(__dirname, '..', ...cwdPaths)
-  let name, defaults
+  let defaults
   try {
     defaults = require('./' + cwdPaths[0])
-    const data = fs.readFileSync(path.join(cwd, 'Chart.yaml'), 'utf8')
-    name = yaml.load(data).name
   } catch (err) {
     assert.fail(err.message)
   }
@@ -37,7 +35,7 @@ function renderTemplatesFn (...paths) {
     const cmd = [
       'helm',
       'template',
-      name,
+      'gardener-dashboard',
       '-n',
       'garden',
       '-s',

@@ -5,16 +5,17 @@ metadata:
   name: gardener-dashboard
   namespace: {{ .Release.Namespace }}
   labels:
-    app: gardener-dashboard
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.global.dashboard.replicaCount }}
   selector:
     matchLabels:
-      app: gardener-dashboard
-      release: "{{ .Release.Name }}"
+      app.kubernetes.io/name: gardener-dashboard
+      app.kubernetes.io/component: dashboard
   template:
     metadata:
       annotations:
@@ -30,8 +31,11 @@ spec:
         checksum/secret-gardener-dashboard-kubeconfig: {{ include (print .Template.BasePath "/dashboard/secret-kubeconfig.yaml") . | sha256sum }}
         {{- end }}
       labels:
-        app: gardener-dashboard
-        release: {{ .Release.Name }}
+        app.kubernetes.io/name: gardener-dashboard
+        app.kubernetes.io/component: dashboard
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/managed-by: "{{ .Release.Service }}"
         {{- if .Values.global.dashboard.podLabels }}
 {{ toYaml .Values.global.dashboard.podLabels | indent 8 }}
         {{- end }}

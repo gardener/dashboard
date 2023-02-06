@@ -4,6 +4,13 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dashboard-assets
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 binaryData:
 {{- range $file, $content := .Values.global.dashboard.frontendConfig.assets }}
   {{ $file }}: |

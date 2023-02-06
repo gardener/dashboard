@@ -75,10 +75,11 @@ Object {
   "kind": "Deployment",
   "metadata": Object {
     "labels": Object {
-      "app": "gardener-dashboard",
-      "chart": "runtime-0.1.0",
-      "heritage": "Helm",
-      "release": "runtime",
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
     },
     "name": "gardener-dashboard",
     "namespace": "garden",
@@ -87,8 +88,8 @@ Object {
     "replicas": 1,
     "selector": Object {
       "matchLabels": Object {
-        "app": "gardener-dashboard",
-        "release": "runtime",
+        "app.kubernetes.io/component": "dashboard",
+        "app.kubernetes.io/name": "gardener-dashboard",
       },
     },
     "template": Object {
@@ -99,8 +100,11 @@ Object {
           "checksum/secret-gardener-dashboard-sessionSecret": StringMatching /\\[0-9a-f\\]\\{64\\}/,
         },
         "labels": Object {
-          "app": "gardener-dashboard",
-          "release": "runtime",
+          "app.kubernetes.io/component": "dashboard",
+          "app.kubernetes.io/instance": "gardener-dashboard",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "gardener-dashboard",
+          "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
         },
       },
       "spec": Object {

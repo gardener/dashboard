@@ -5,25 +5,25 @@ metadata:
   name: gardener-dashboard-terminal-bootstrapper
   namespace: {{ .Release.Namespace }}
   labels:
-    app: gardener-dashboard
-    role: terminal-bootstrapper
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: terminal-bootstrapper
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gardener-dashboard
-      role: terminal-bootstrapper
+      app.kubernetes.io/name: gardener-dashboard
+      app.kubernetes.io/component: terminal-bootstrapper
   template:
     metadata:
       labels:
-        app: gardener-dashboard
-        role: terminal-bootstrapper
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        release: "{{ .Release.Name }}"
-        heritage: "{{ .Release.Service }}"
+        app.kubernetes.io/name: gardener-dashboard
+        app.kubernetes.io/component: terminal-bootstrapper
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/managed-by: "{{ .Release.Service }}"
         {{- if .Values.global.bootstrapper.podLabels }}
         {{- toYaml .Values.global.bootstrapper.podLabels | nindent 8 }}
         {{- end }}
@@ -46,7 +46,7 @@ spec:
       {{- end }}
       restartPolicy: Always
       containers:
-      - name: gardener-dashboard
+      - name: gardener-dashboard-terminal-bootstrapper
         {{- if .Values.global.bootstrapper.nodeOptions }}
         args:
         {{- range .Values.global.bootstrapper.nodeOptions }}

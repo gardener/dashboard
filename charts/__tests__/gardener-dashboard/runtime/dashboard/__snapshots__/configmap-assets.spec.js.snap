@@ -9,7 +9,15 @@ Object {
   },
   "kind": "ConfigMap",
   "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
     "name": "dashboard-assets",
+    "namespace": "garden",
   },
 }
 `;

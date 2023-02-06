@@ -5,6 +5,13 @@ Object {
   "apiVersion": "autoscaling.k8s.io/v1beta2",
   "kind": "VerticalPodAutoscaler",
   "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
     "name": "gardener-dashboard-vpa",
     "namespace": "garden",
   },
@@ -46,6 +53,13 @@ Object {
   "apiVersion": "autoscaling.k8s.io/v1beta2",
   "kind": "VerticalPodAutoscaler",
   "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
     "name": "gardener-dashboard-vpa",
     "namespace": "garden",
   },
