@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <v-row v-for="{ key, title, description, options } in selectedAccessRestrictions" :key="key" class="mx-0 mb-1">
+    <div v-for="{ key, title, description, options } in selectedAccessRestrictions" :key="key" class="d-flex">
       <v-tooltip
         top
         :disabled="!description"
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             small
             outlined
             color="primary"
-            class="mr-2 mb-1"
+            class="mr-2 my-0"
           >{{title}}</v-chip>
         </template>
         <section v-html="transformHtml(description)"/>
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <section v-html="transformHtml(description)"/>
       </v-tooltip>
-    </v-row>
+    </div>
   </div>
 </template>
 
