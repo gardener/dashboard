@@ -356,7 +356,6 @@ export default {
     },
     profileHint () {
       if (this.infrastructureKind === 'openstack') {
-        console.log(this.cloudProfileName)
         switch (this.cloudProfileName) {
           case 'pluscloudopen':
             return 'Cluster running in DE-WEST - Cologne'
