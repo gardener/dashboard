@@ -79,7 +79,14 @@ export default {
   computed: {
     cloudProviderKindPatched () {
       if (this.cloudProviderKind === 'openstack') {
-        return 'pluscloudopen'
+        switch (this.region) {
+          case 'prod1':
+          case 'intern1':
+          case 'RegionOne':
+            return 'pluscloudopen-cgn'
+          case 'prod2':
+            return 'pluscloudopen-ham5'
+        }
       }
 
       return this.cloudProviderKind

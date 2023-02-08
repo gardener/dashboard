@@ -43,6 +43,10 @@ export default {
           return require('@/assets/pluscloudopen.svg')
         case 'pluscloudopen':
           return require('@/assets/pluscloudopen.svg')
+        case 'pluscloudopen-cgn':
+          return require('@/assets/pluscloudopen.svg')
+        case 'pluscloudopen-ham5':
+          return require('@/assets/pluscloudopen.svg')
         case 'alicloud':
           return require('@/assets/alicloud.svg')
         case 'vsphere':

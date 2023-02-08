@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="isCreateMode">
       <v-select
-      :items="cloudProfiles"
+      :items="fixedCloudProfiles"
       :value="value"
       item-value="metadata.name"
       item-text="metadata.displayName"
@@ -71,6 +71,18 @@ export default {
           required
         }
       }
+    },
+    fixedCloudProfiles () {
+      this.cloudProfiles.forEach(element => {
+        switch (element.metadata.name) {
+          case 'pluscloudopen':{
+            element.metadata.displayName = 'pluscloudopen-cgn'
+            break
+          }
+        }
+      })
+
+      return this.cloudProfiles
     }
   },
   methods: {

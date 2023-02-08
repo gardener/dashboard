@@ -713,6 +713,9 @@ const getters = {
     return filter(state.cloudProviderSecrets.all, secret => {
       if (secret.metadata.cloudProviderKind === 'openstack') {
         secret.metadata.cloudProviderKind = 'pluscloudopen'
+        if (secret.metadata.cloudProfileName === 'pluscloudopen') {
+          secret.metadata.cloudProfileName = 'pluscloudopen-cgn'
+        }
       }
       return !!secret.metadata.cloudProviderKind
     })
@@ -783,6 +786,7 @@ const getters = {
       case 'dashboard.dev.gardener.get-cloud.io':
       case 'dashboard.stage.gardener.get-cloud.io':
       case 'dashboard.intern.gardener.get-cloud.io':
+      case 'localhost':
         return true
 
       default:
