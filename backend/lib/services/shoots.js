@@ -293,7 +293,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
+    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
     if (prefix) {
       const ingressDomain = getSeedIngressDomain(seed)
       if (ingressDomain) {
