@@ -210,18 +210,6 @@ router.route('/:name/info')
     }
   })
 
-router.route('/:name/seed-info')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      res.send(await shoots.seedInfo({ user, namespace, name }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
 router.route('/:name/spec/purpose')
   .put(async (req, res, next) => {
     try {
