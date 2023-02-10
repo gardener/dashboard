@@ -293,7 +293,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
+    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
     if (prefix) {
       const ingressDomain = getSeedIngressDomain(seed)
       if (ingressDomain) {
@@ -333,48 +333,14 @@ exports.info = async function ({ user, namespace, name }) {
     data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin) {
-    /*
-      We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
-      as we agreed that also project viewers should be able to see the monitoring credentials.
-      Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
-      Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
-      This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
-    */
-    await assignMonitoringSecret(dashboardClient, data, namespace, name)
-  }
-
-  return data
-}
-
-exports.seedInfo = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  const shoot = await read({ user, namespace, name })
-
-  const data = {}
-  let seed
-  if (shoot.spec.seedName) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
-  }
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin || !seed) {
-    return data
-  }
-
-  if (!seed.spec.secretRef) {
-    logger.info(`Could not fetch info from seed. 'spec.secretRef' on the seed ${seed.metadata.name} is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
-    return data
-  }
-
-  try {
-    const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
-    const seedShootNamespace = shoot.status.technicalID
-    await assignMonitoringSecret(seedClient, data, seedShootNamespace)
-  } catch (err) {
-    logger.error('Failed to retrieve information using seed core client', err)
-  }
+  /*
+    We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
+    as we agreed that also project viewers should be able to see the monitoring credentials.
+    Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
+    Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
+    This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
+  */
+  await assignMonitoringSecret(dashboardClient, data, namespace, name)
 
   return data
 }
@@ -485,37 +451,9 @@ async function getSecret (client, { namespace, name }) {
   }
 }
 
-async function getMonitoringSecret (client, namespace, shootName) {
-  let name
-  if (!shootName) {
-    try {
-      // read operator secret from seed
-      const labelSelector = 'name=observability-ingress,managed-by=secrets-manager,manager-identity=gardenlet'
-      const secretList = await client.core.secrets.list(namespace, { labelSelector })
-      const secret = _
-        .chain(secretList.items)
-        .orderBy(['metadata.creationTimestamp'], ['desc'])
-        .head()
-        .value()
-      if (secret) {
-        return secret
-      }
-      // fallback to old secret name
-      name = 'monitoring-ingress-credentials'
-    } catch (err) {
-      logger.error('failed to fetch %s secret: %s', name, err)
-      throw err
-    }
-  } else {
-    // read user secret from garden cluster
-    name = `${shootName}.monitoring`
-  }
-  return getSecret(client, { namespace, name })
-}
-
 async function assignMonitoringSecret (client, data, namespace, shootName) {
-  const secret = await getMonitoringSecret(client, namespace, shootName)
-
+  const name = `${shootName}.monitoring`
+  const secret = await getSecret(client, { namespace, name })
   if (secret) {
     _
       .chain(secret)
