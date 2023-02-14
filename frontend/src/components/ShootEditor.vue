@@ -180,6 +180,9 @@ export default {
     },
     completionPaths: {
       type: Array
+    },
+    animateAppear: {
+      type: Boolean
     }
   },
   data () {
@@ -208,7 +211,7 @@ export default {
         description: undefined
       },
       showManagedFields: false,
-      containerClass: 'collapsed'
+      containerClass: undefined
     }
   },
   mixins: [shootItem],
@@ -460,10 +463,21 @@ export default {
       this.snackbarColor = 'error'
       this.snackbarText = 'Copy to clipboard failed'
       this.snackbar = true
+    },
+    animateExpansion () {
+      this.containerClass = 'collapsed'
+      this.$nextTick(() => {
+        this.containerClass = 'animate'
+        setTimeout(() => {
+          this.containerClass = undefined
+        }, 1500)
+      })
     }
   },
   async mounted () {
-    this.containerClass = 'expanded'
+    if (this.animateAppear) {
+      this.animateExpansion()
+    }
 
     this.createInstance(this.$refs.container)
     this.update(this.value)
@@ -527,7 +541,7 @@ export default {
   }
 </style>
 <style lang="scss">
-  @import '~vuetify/src/styles/styles.sass';
+@import '~vuetify/src/styles/styles.sass';
 
   .CodeMirror-hint {
 
@@ -588,11 +602,8 @@ export default {
     max-height: 0px;
   }
 
-  .CodeMirror-lines {
-    transition: max-height 1s;
-  }
-
-  .expanded .CodeMirror-lines {
+  .animate .CodeMirror-lines {
+    transition: max-height 1.5s;
     max-height: 100vh;
   }
 </style>

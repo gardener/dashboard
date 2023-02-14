@@ -52,6 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             v-on="$workerEditor.hooks"
             hide-toolbar
             :style="`min-height: ${overViewTabHeight}px`"
+            animate-appear
           >
           </shoot-editor>
         </v-tab-item>
