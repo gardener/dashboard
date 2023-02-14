@@ -8,20 +8,14 @@
 
 const { createHmac, timingSafeEqual } = require('crypto')
 const bodyParser = require('body-parser')
-const _ = require('lodash')
 const createError = require('http-errors')
 const config = require('../config')
 
 function digestsEqual (a, b) {
-  if (!Buffer.isBuffer(a)) {
-    a = Buffer.from(a, 'ascii')
-  }
-  if (!Buffer.isBuffer(b)) {
-    b = Buffer.from(b, 'ascii')
-  }
-
-  if (a.length !== b.length) return false
-  return timingSafeEqual(a, b)
+  const aBuff = Buffer.from(a)
+  const bBuff = Buffer.from(b)
+  if (aBuff.length !== bBuff.length) return false
+  return timingSafeEqual(aBuff, bBuff)
 }
 
 function createHubSignature (secret, value) {
@@ -30,7 +24,7 @@ function createHubSignature (secret, value) {
 }
 
 function verify (req, res, body) {
-  const webhookSecret = _.get(config, 'gitHub.webhookSecret')
+  const webhookSecret = config.gitHub?.webhookSecret
   if (!webhookSecret) {
     throw createError(500, 'Property \'gitHub.webhookSecret\' not configured on dashboard backend')
   }

@@ -1,4 +1,4 @@
-{{- if .Values.global.dashboard.enabled }}
+{{- if and .Values.global.dashboard.enabled (.Values.global.dashboard.gitHub).webhookSecret }}
 apiVersion: coordination.k8s.io/v1
 kind: Lease
 metadata:

@@ -8,8 +8,8 @@
 
 const express = require('express')
 const { requestLogger } = require('../middleware')
-const { handleGithubEvent } = require('../github/webhookHandler')
-const { parser } = require('../github/webhookParser')
+const { handleGithubEvent } = require('./webhookHandler')
+const { parser } = require('./webhookParser')
 
 const router = express.Router()
 

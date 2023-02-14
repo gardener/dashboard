@@ -7,11 +7,10 @@
 'use strict'
 
 const os = require('os')
-const _ = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
 const { cache: { resetTicketCache } } = require('../../lib/cache')
 const { createHubSignature } = require('../../lib/github/webhookParser')
-const { loadOpenIssues, converter } = require('../../lib/services/tickets')
+const { loadOpenIssues } = require('../../lib/services/tickets')
 const { octokit } = require('../../lib/github')
 
 describe('github', function () {
@@ -23,7 +22,6 @@ describe('github', function () {
 
   let agent
   let cache
-  let makeSanitizedHtmlStub
 
   beforeAll(() => {
     agent = createAgent()
@@ -36,7 +34,6 @@ describe('github', function () {
   beforeEach(async () => {
     cache = resetTicketCache()
     await loadOpenIssues()
-    makeSanitizedHtmlStub = jest.spyOn(converter, 'makeSanitizedHtml').mockImplementation(text => text)
   })
 
   describe('#loadOpenIssues', function () {
@@ -51,11 +48,9 @@ describe('github', function () {
   describe('event "issues"', function () {
     const githubEvent = 'issues'
     let newGithubIssue
-    let hostnameStub
 
     beforeEach(function () {
-      hostnameStub = jest.spyOn(os, 'hostname')
-      newGithubIssue = fixtures.github.issues.create({ number: 42, updated_at: "2006-01-02T15:04:05.000Z" })
+      newGithubIssue = fixtures.github.issues.create({ number: 42, updated_at: '2006-01-02T15:04:05.000Z' })
       mockRequest.mockImplementationOnce(fixtures.leases.mocks.mergePatch())
     })
 
@@ -64,8 +59,6 @@ describe('github', function () {
     })
 
     it('should handle valid github webhook', async function () {
-      hostnameStub.mockImplementationOnce(() => 'dummy-host')
-
       const body = JSON.stringify({ action: 'opened', issue: newGithubIssue })
 
       await agent
@@ -81,8 +74,8 @@ describe('github', function () {
         expect.anything(),
         {
           spec: {
-            holderIdentity: "dummy-host",
-            renewTime: "2006-01-02T15:04:05.000000Z",
+            holderIdentity: fixtures.config.default.pod.name,
+            renewTime: '2006-01-02T15:04:05.000000Z'
           }
         }
       )
@@ -97,7 +90,7 @@ describe('github', function () {
         .set('x-hub-signature-256', createHubSignature(webhookSecret, body))
         .type('application/json')
         .send(body)
-        .expect(400)
+        .expect(422)
 
       expect(mockRequest).toBeCalledTimes(0)
     })
@@ -113,7 +106,7 @@ describe('github', function () {
         .send(body)
         .expect((res) => {
           expect(res.status).toEqual(405)
-          expect(res.headers['allow']).toEqual('POST')
+          expect(res.headers.allow).toEqual('POST')
         })
 
       expect(mockRequest).toBeCalledTimes(0)

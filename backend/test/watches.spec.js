@@ -6,6 +6,10 @@
 
 'use strict'
 
+const fixtures = require('../__fixtures__')
+
+jest.mock('../lib/github/syncManager')
+
 const EventEmitter = require('events')
 const _ = require('lodash')
 const logger = require('../lib/logger')
@@ -13,6 +17,7 @@ const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const tickets = require('../lib/services/tickets')
+const SyncManager = require('../lib/github/syncManager')
 
 const rooms = new Map()
 
@@ -200,7 +205,7 @@ describe('watches', function () {
     })
   })
 
-  describe('tickets', function () {
+  describe('leases', function () {
     const metadata = {
       projectName: 'foo',
       name: 'bar'
@@ -221,117 +226,127 @@ describe('watches', function () {
       }
     }
 
-    const gitHubConfig = config.gitHub
+    const synchronization = {
+      intervalSeconds: 10,
+      throttleSeconds: 2
+    }
 
     let gitHubStub
-    let loadOpenIssuesStub
     let abortController
-    let signalAddEventListenerStub
+    let signal
 
     beforeEach(function () {
-      gitHubStub = jest.fn()
-      Object.defineProperty(config, 'gitHub', { get: gitHubStub })
-      ticketCache.getIssueNumbers = jest.fn()
-      ticketCache.getIssueNumbers.mockReturnValue([])
-      loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
       jest.clearAllMocks()
 
-      abortController = new AbortController()
-      signalAddEventListenerStub = jest.spyOn(abortController.signal, 'addEventListener')
-    })
+      gitHubStub = jest.fn()
+      Object.defineProperty(config, 'gitHub', { get: gitHubStub })
+      gitHubStub.mockReturnValue({ synchronization })
 
-    afterEach(function () {
-      Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
+      abortController = new AbortController()
+      signal = abortController.signal
+
+      jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
     })
 
     it('should log a warning if gitHub config is missing and not continue', async function () {
       jest.spyOn(ticketCache, 'on')
       gitHubStub.mockReturnValue(false)
-      watches.tickets(io, informer, ticketCache, abortController.signal)
+
+      await watches.leases(io, informer, { signal: abortController.signal })
+
       expect(logger.warn).toBeCalledTimes(1)
       expect(ticketCache.on).toBeCalledTimes(0)
     })
 
-    it('should poll tickets in a given interval', async function () {
-      gitHubStub.mockReturnValue({
-        pollIntervalSeconds: 1
-      })
-
-      jest.useFakeTimers()
-      jest.spyOn(global, 'setInterval')
-
-      await watches.tickets(io, informer, ticketCache, abortController.signal)
-
-      expect(setInterval).toBeCalledTimes(1)
-      expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 1000)
-      expect(loadOpenIssuesStub).toBeCalledTimes(1)
-
-      jest.advanceTimersByTime(1_000)
-
-      expect(loadOpenIssuesStub).toBeCalledTimes(2)
-    })
-
-    it('should poll tickets when kubernetes lease object is updated', async function () {
-      gitHubStub.mockReturnValue({
-        webhookSecret: 'secret'
-      })
-      ticketCache.getIssueNumbers = jest.fn().mockReturnValue([])
+    it('should add event listeners and create SyncManager', async function () {
+      jest.spyOn(ticketCache, 'on')
       jest.spyOn(informer, 'on')
 
-      await watches.tickets(io, informer, ticketCache, abortController.signal)
-      expect(loadOpenIssuesStub).toBeCalledTimes(1)
+      await watches.leases(io, informer, { signal })
+
+      expect(io.of).toBeCalledTimes(1)
+      expect(io.of).toBeCalledWith('/')
+
+      expect(ticketCache.on).toBeCalledTimes(2)
+      expect(ticketCache.on).toBeCalledWith('issue', expect.any(Function))
+      expect(ticketCache.on).toBeCalledWith('comment', expect.any(Function))
+
+      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toBeCalledWith({
+        interval: synchronization.intervalSeconds * 1000,
+        throttle: synchronization.throttleSeconds * 1000,
+        signal,
+        loadTickets: watches.leases.test.loadOpenIssuesAndComments
+      })
+      const syncManagerInstance = SyncManager.mock.instances[0]
+      expect(syncManagerInstance.start).toBeCalledTimes(1)
+
       expect(informer.on).toBeCalledTimes(1)
-
-      informer.emit('update')
-      expect(loadOpenIssuesStub).toBeCalledTimes(2)
+      expect(informer.on).toBeCalledWith('update', expect.any(Function))
     })
 
-    it('should cleanup when abort is triggered', async function () {
-      gitHubStub.mockReturnValue({
-        pollThrottleSeconds: 0,
-        pollIntervalSeconds: 10,
-        webhookSecret: 'secret'
+    it('should creat SyncManager with defaults', async () => {
+      gitHubStub.mockReturnValue({ synchronization: {} })
+
+      await watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toBeCalledWith({
+        interval: 0,
+        throttle: 0,
+        signal,
+        loadTickets: watches.leases.test.loadOpenIssuesAndComments
       })
-
-      jest.useFakeTimers()
-      jest.spyOn(global, 'clearInterval')
-      jest.spyOn(informer, 'removeListener')
-
-      await watches.tickets(io, informer, ticketCache, abortController.signal)
-
-      expect(signalAddEventListenerStub).toHaveBeenCalledWith('abort', expect.any(Function), { once: true })
-
-      abortController.abort()
-
-      expect(clearInterval).toBeCalledTimes(1)
-      expect(informer.removeListener).toBeCalledTimes(1)
     })
 
-    it('should listen to ticketCache events', async function () {
-      gitHubStub.mockReturnValue({
-        pollThrottleSeconds: 0
-      })
-      jest.spyOn(ticketCache, 'on')
+    it('should emit ticket cache events to socket io', async () => {
+      await watches.leases(io, informer, { signal })
 
-      await watches.tickets(io, informer, ticketCache, abortController.signal)
+      expect(nsp.emit).toBeCalledTimes(1)
+      expect(nsp.emit).toBeCalledWith('issues', issueEvent)
 
-      expect(ticketCache.on).toHaveBeenCalledWith('issue', expect.any(Function))
-      expect(nsp.emit).toHaveBeenCalledWith('issues', issueEvent)
-      expect(ticketCache.on).toHaveBeenCalledWith('comment', expect.any(Function))
-      expect(nsp.to).toHaveBeenCalledWith([`shoots;garden-foo/${metadata.name}`])
+      const room = `shoots;${cache.getProjectNamespace(issueEvent.object.metadata.projectName)}/${issueEvent.object.metadata.name}`
+      const mockRoom = rooms.get(room)
+      expect(nsp.to).toBeCalledWith([room])
+      expect(mockRoom.emit).toBeCalledTimes(1)
+      expect(mockRoom.emit).toBeCalledWith('comments', issueEvent)
     })
 
-    it('should log error if ticket fetching fails', async function () {
-      gitHubStub.mockReturnValue({
-        webhookSecret: 'secret'
-      })
-      loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
-      ticketCache.getIssueNumbers = jest.fn().mockReturnValue([])
+    it('should listen to informer update events', async function () {
+      jest.spyOn(informer, 'on')
 
-      await watches.tickets(io, informer, ticketCache, abortController.signal)
+      await watches.leases(io, informer, { signal })
 
-      expect(loadOpenIssuesStub).toBeCalledTimes(1)
-      expect(logger.error).toBeCalledTimes(1)
+      expect(informer.on).toBeCalledTimes(1)
+      expect(informer.on).toBeCalledWith('update', expect.any(Function))
+
+      informer.emit('update', {})
+
+      const syncManagerInstance = SyncManager.mock.instances[0]
+      expect(syncManagerInstance.sync).toBeCalledTimes(1)
+    })
+
+    it('should should load issues and comments of all issues', async function () {
+      const { loadOpenIssuesAndComments } = watches.leases.test
+
+      const issues = fixtures.github.issues.list()
+      const issueNumbers = issues.map(i => i.id)
+      const comments = fixtures.github.comments.list()
+      const t = issues.map(i => tickets.fromIssue(i))
+
+      jest.spyOn(tickets, 'loadOpenIssues')
+      jest.spyOn(tickets, 'loadIssueComments')
+      tickets.loadOpenIssues.mockReturnValue(t)
+      const loadIssueCommentsMock = ({ number }) => comments.filter((comment) => comment.number === number)
+      tickets.loadIssueComments.mockImplementation(loadIssueCommentsMock)
+
+      await loadOpenIssuesAndComments()
+
+      expect(tickets.loadOpenIssues).toBeCalledTimes(1)
+      expect(tickets.loadIssueComments).toBeCalledTimes(t.length)
+      for (const number of issueNumbers) {
+        expect(tickets.loadIssueComments).toBeCalledWith({ number })
+      }
     })
   })
 })

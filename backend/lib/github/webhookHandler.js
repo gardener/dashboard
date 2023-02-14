@@ -6,10 +6,10 @@
 
 'use strict'
 
-const os = require('os')
 const createError = require('http-errors')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../logger')
+const config = require('../config')
 
 function dateStrToMicroDateStr (dateStr) {
   const date = new Date(dateStr).toISOString()
@@ -17,15 +17,19 @@ function dateStrToMicroDateStr (dateStr) {
 }
 
 async function updateLease (updateTime) {
-  const namespace = 'garden'
+  const { name: holderIdentity, namespace } = config.pod
   const name = 'gardener-dashboard-github-webhook'
   const body = {
     spec: {
-      holderIdentity: os.hostname(),
+      holderIdentity,
       renewTime: dateStrToMicroDateStr(updateTime)
     }
   }
-  await dashboardClient['coordination.k8s.io'].leases.mergePatch(namespace, name, body)
+  try {
+    await dashboardClient['coordination.k8s.io'].leases.mergePatch(namespace, name, body)
+  } catch (err) {
+    throw createError(500, `Failed to update lease: ${err.message}`)
+  }
 }
 
 async function handleGithubEvent (name, data) {
@@ -34,13 +38,12 @@ async function handleGithubEvent (name, data) {
       ? data.issue?.updated_at
       : data.comment?.updated_at
     if (isNaN(new Date(updatedAt))) {
-      throw createError(400, `GitHub-Event has invalid value '${updatedAt}' in updated_at field`)
+      throw createError(422, `GitHub-Event has invalid date value '${updatedAt}' in updated_at field`)
     }
 
     await updateLease(updatedAt)
   } else {
-    logger.warn(`Unhandled event: ${name}`)
-    throw createError(400, `GitHub-Event '${name}' is not supported by this webhook endpoint`)
+    throw createError(422, `GitHub-Event '${name}' is not supported by this webhook endpoint`)
   }
 }
 

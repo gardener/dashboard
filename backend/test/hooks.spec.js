@@ -37,31 +37,33 @@ describe('hooks', () => {
     })
 
     it('#createInformers', async function () {
-      for (const [apiGroup, resources] of Object.entries(LifecycleHooks.resources)) {
-        for (const resource of resources) {
-          let name
-          if (Array.isArray(resource)) {
-            [name] = resource
-          } else {
-            name = resource
-          }
-          const observable = dashboardClient[apiGroup][name]
+      const resources = [
+        ['core.gardener.cloud', 'cloudprofiles'],
+        ['core.gardener.cloud', 'seeds'],
+        ['core.gardener.cloud', 'controllerregistrations'],
+        ['core.gardener.cloud', 'quotas'],
+        ['core.gardener.cloud', 'shoots'],
+        ['core', 'resourcequotas'],
+        ['coordination.k8s.io', 'leases']
+      ]
 
-          const informer = {
-            names: {
-              plural: name
-            },
-            mockFn: jest.fn(() => informer)
-          }
+      for (const [apiGroup, name] of resources) {
+        const observable = dashboardClient[apiGroup][name]
 
-          observable.informerAllNamespaces = informer.mockFn
-          observable.informer = informer.mockFn
+        const informer = {
+          names: {
+            plural: name
+          },
+          mockFn: jest.fn(() => informer)
         }
+
+        observable.informerAllNamespaces = informer.mockFn
+        observable.informer = informer.mockFn
       }
       const informers = LifecycleHooks.createInformers(dashboardClient)
-      for (const key of Object.keys(informers)) {
-        const { mockFn, names } = informers[key]
-        expect(names.plural).toBe(key)
+      for (const [, name] of resources) {
+        const { mockFn, names } = informers[name]
+        expect(names.plural).toBe(name)
         expect(mockFn).toBeCalledTimes(1)
       }
     })
@@ -91,16 +93,16 @@ describe('hooks', () => {
 
       beforeEach(() => {
         informers = {
-          foo: {
+          leases: {
             run: jest.fn(),
             store: {
-              untilHasSynced: Promise.resolve('foo')
+              untilHasSynced: Promise.resolve('leases')
             }
           },
-          bar: {
+          shoots: {
             run: jest.fn(),
             store: {
-              untilHasSynced: Promise.resolve('bar')
+              untilHasSynced: Promise.resolve('shoots')
             }
           }
         }
@@ -111,7 +113,7 @@ describe('hooks', () => {
       })
 
       it('should create and run informers, create io instance and initialize cache and watches', async function () {
-        await expect(hooks.beforeListen(server)).resolves.toEqual(['foo', 'bar'])
+        await expect(hooks.beforeListen(server)).resolves.toEqual(['leases', 'shoots'])
 
         expect(mockCreateInformers).toBeCalledTimes(1)
         expect(mockCreateInformers.mock.calls[0]).toHaveLength(1)
@@ -130,16 +132,13 @@ describe('hooks', () => {
         expect(io).toBeCalledTimes(1)
         expect(io.mock.calls[0]).toEqual([server, cache])
 
-        expect(cache.getTicketCache).toBeCalledTimes(1)
-
         for (const [key, watch] of Object.entries(watches)) {
           expect(watch).toBeCalledTimes(1)
-          expect(watch.mock.calls[0]).toHaveLength(key === 'tickets' ? 4 : 2)
+          expect(watch.mock.calls[0]).toHaveLength(key === 'leases' ? 3 : 2)
           expect(watch.mock.calls[0][0]).toBe(ioInstance)
           expect(watch.mock.calls[0][1]).toBe(informers[key])
         }
-        expect(watches.tickets.mock.calls[0][2]).toBe(ticketCache)
-        expect(watches.tickets.mock.calls[0][3]).toBeInstanceOf(AbortSignal)
+        expect(watches.leases.mock.calls[0][2].signal).toBeInstanceOf(AbortSignal)
       })
     })
   })

@@ -9,9 +9,9 @@
 const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
 const { monitorHttpServer, monitorSocketIO } = require('@gardener-dashboard/monitor')
 const cache = require('./cache')
+const config = require('./config')
 const watches = require('./watches')
 const io = require('./io')
-const assert = require('assert').strict
 
 class LifecycleHooks {
   constructor (client) {
@@ -50,10 +50,12 @@ class LifecycleHooks {
     this.io = io(server, cache)
     // register watches
     for (const [key, watch] of Object.entries(watches)) {
-      if (key === 'tickets') {
-        watch(this.io, informers.leases, cache.getTicketCache(), this.ac.signal)
-      } else {
-        watch(this.io, informers[key])
+      if (informers[key]) {
+        if (key === 'leases') {
+          watch(this.io, informers[key], { signal: this.ac.signal })
+        } else {
+          watch(this.io, informers[key])
+        }
       }
     }
 
@@ -64,58 +66,25 @@ class LifecycleHooks {
   }
 
   static createInformers (client) {
-    const informers = {}
-    for (const [apiGroup, resources] of Object.entries(this.resources)) {
-      for (const resource of resources) {
-        let name
-        let args = []
-        if (Array.isArray(resource)) {
-          [name, args] = resource
-        } else {
-          name = resource
-        }
-
-        if (!apiGroup || !name) {
-          assert.fail('Invalid resource key. Need to have format apiGroup/resourceName.')
-        }
-
-        const observable = client[apiGroup][name]
-        if (observable.constructor.scope === 'Cluster') {
-          informers[name] = observable.informer(...args)
-        } else {
-          const method = typeof args[0] === 'string'
-            ? 'informer'
-            : 'informerAllNamespaces'
-          informers[name] = observable[method](...args)
-        }
-      }
+    const informers = {
+      // core.gardener
+      cloudprofiles: client['core.gardener.cloud'].cloudprofiles.informer(),
+      seeds: client['core.gardener.cloud'].seeds.informer(),
+      controllerregistrations: client['core.gardener.cloud'].controllerregistrations.informer(),
+      quotas: client['core.gardener.cloud'].quotas.informerAllNamespaces(),
+      shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
+      // core
+      resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
+      // coordination
+      leases: null
     }
+
+    if (config.gitHub?.webhookSecret) {
+      const informerOpts = { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
+      informers.leases = client['coordination.k8s.io'].leases.informer(config.pod.namespace, informerOpts)
+    }
+
     return informers
-  }
-
-  static get resources () {
-    return {
-      'coordination.k8s.io': [
-        [
-          'leases',
-          [
-            'garden',
-            { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
-          ]
-        ]
-      ],
-      'core.gardener.cloud': [
-        'cloudprofiles',
-        'quotas',
-        'seeds',
-        'shoots',
-        'projects',
-        'controllerregistrations'
-      ],
-      core: [
-        'resourcequotas'
-      ]
-    }
   }
 }
 
