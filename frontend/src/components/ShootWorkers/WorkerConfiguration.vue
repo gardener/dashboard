@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template v-slot:card>
       <v-tabs-items v-model="tab">
-        <v-tab-item id="overview">
+        <v-tab-item id="overview" ref="overviewTab">
           <manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
@@ -51,6 +51,7 @@ SPDX-License-Identifier: Apache-2.0
             ref="workerEditor"
             v-on="$workerEditor.hooks"
             hide-toolbar
+            :style="`min-height: ${overViewTabHeight}px`"
           >
           </shoot-editor>
         </v-tab-item>
@@ -107,7 +108,8 @@ export default {
       networkConfiguration: [],
       networkConfigurationYaml: undefined,
       tabValue: 'overview',
-      editorData: {}
+      editorData: {},
+      overViewTabHeight: 0
     }
   },
   mixins: [
@@ -126,6 +128,9 @@ export default {
           this.setOverviewData()
         }
         if (value === 'yaml') {
+          // set current height as min-height for yaml tab to avoid
+          // dialog downsize as editor not xet rendered
+          this.overViewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
           this.setEditorData()
         }
       }

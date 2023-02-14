@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-alert>
     </div>
-    <div ref="container" :style="containerStyles"></div>
+    <div ref="container" :style="containerStyles" :class="containerClass"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
       <g-message
         color="error"
@@ -207,7 +207,8 @@ export default {
         type: undefined,
         description: undefined
       },
-      showManagedFields: false
+      showManagedFields: false,
+      containerClass: 'collapsed'
     }
   },
   mixins: [shootItem],
@@ -462,6 +463,8 @@ export default {
     }
   },
   async mounted () {
+    this.containerClass = 'expanded'
+
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
@@ -579,5 +582,17 @@ export default {
     .CodeMirror-hint-active {
       background-color: map-get($grey, 'darken-4') !important;
     }
+  }
+
+  .collapsed .CodeMirror-lines {
+    max-height: 0px;
+  }
+
+  .CodeMirror-lines {
+    transition: max-height 1s;
+  }
+
+  .expanded .CodeMirror-lines {
+    max-height: 100vh;
   }
 </style>
