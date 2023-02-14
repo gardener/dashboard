@@ -58,24 +58,26 @@ SPDX-License-Identifier: Apache-2.0
       </v-tabs-items>
     </template>
     <template v-slot:errorMessage>
-      <v-alert
-        type="warning"
-        outlined
-        tile
-        prominent
-        v-if="networkConfiguration.length"
-        dismissible
-        @input="setNetworkConfiguration(undefined)"
-        class="mx-1">
-        <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
-        <code-block
-          lang="yaml"
-          :content="networkConfigurationYaml"
-          :show-copy-button="false"
-          ></code-block>
-        <div class="font-weight-bold">This change cannot be undone.</div>
-        <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
-      </v-alert>
+      <v-expand-transition appear>
+        <v-alert
+          type="warning"
+          outlined
+          tile
+          prominent
+          v-if="networkConfiguration.length"
+          dismissible
+          @input="setNetworkConfiguration(undefined)"
+          class="mx-1">
+          <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
+          <code-block
+            lang="yaml"
+            :content="networkConfigurationYaml"
+            :show-copy-button="false"
+            ></code-block>
+          <div class="font-weight-bold">This change cannot be undone.</div>
+          <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
+        </v-alert>
+      </v-expand-transition>
     </template>
   </action-button-dialog>
 </template>
