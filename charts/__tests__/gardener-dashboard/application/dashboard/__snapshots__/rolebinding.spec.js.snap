@@ -52,9 +52,9 @@ Object {
   },
   "subjects": Array [
     Object {
-      "apiGroup": "rbac.authorization.k8s.io",
-      "kind": "User",
-      "name": "runtime-cluster:system:serviceaccount:garden:gardener-dashboard",
+      "kind": "ServiceAccount",
+      "name": "gardener-dashboard",
+      "namespace": "garden",
     },
   ],
 }

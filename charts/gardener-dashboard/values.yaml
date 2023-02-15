@@ -11,6 +11,10 @@ global:
       repository: eu.gcr.io/gardener-project/gardener/dashboard
       tag: latest
       pullPolicy: IfNotPresent
+    # additional labels to add to all dashboard pods (e.g. security policies)
+    podLabels: {}
+    # additional annotations to add to all dashboard pods
+    podAnnotations: {}
 
     serviceAccountName: gardener-dashboard
 
@@ -19,7 +23,7 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
-    # vertical Pod autoscaling disabled by default
+    # # vertical Pod autoscaling disabled by default
     # vpa:
     #   updateMode: Off
     #   controlledValues: RequestsOnly
@@ -57,7 +61,7 @@ global:
     # If dashboard is running in an environment with less than 1.5GB of available memory
     # you should cap the maximum available "old space". In a Docker-512MB-Container,
     # the value should not be greater than 90% of the available memory.
-    # nodeOptions: [--optimize-for-size, --max-old-space-size=920, --gc-interval=100]
+    # Example: nodeOptions: [--optimize-for-size, --max-old-space-size=920, --gc-interval=100]
     nodeOptions: [--max-old-space-size=920]
 
     ingress:
@@ -138,7 +142,7 @@ global:
       #   - ignore
       #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
       #   - default-label
-      #   # issueDescriptionTemplate variables:
+      #   # Available issue description template variables:
       #   # - `${shootName}`: name of the shoot
       #   # - `${shootNamespace}`: namespace of the shoot
       #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
@@ -244,7 +248,7 @@ global:
       #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
       #         inverted: true
 
-      # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
+      # # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
       # themes:
       #   light: # overwrite light theme colors
       #     primary: '#0b8062'
@@ -279,6 +283,14 @@ global:
       #   icon: link
       #   url: https://example.org/foo/bar{?namespace,name}
 
+      # # resourceQuotaHelp - configure help text how to configure project resource quota
+      # resourceQuotaHelp:
+      #   text: Help text
+
+      # # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
+      # controlPlaneHighAvailabilityHelp:
+      #   text: Help text
+
     # # github configuration of the ticket feature
     # gitHub:
     #   apiUrl: https://api.foo-github.com
@@ -290,13 +302,6 @@ global:
     #     token: dummytoken
     #   # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
 
-    #  # resourceQuotaHelp - configure help text how to configure project resource quota
-    #  resourceQuotaHelp:
-    #    text: Help text
-
-    #  # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
-    #  controlPlaneHighAvailabilityHelp:
-    #    text: Help text
 
     livenessProbe:
       enabled: true
@@ -321,6 +326,10 @@ global:
       repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper
       tag: latest
       pullPolicy: IfNotPresent
+    # additional labels to add to the bootstrapper pod (e.g. security policies)
+    podLabels: {}
+    # additional annotations to add to the bootstrapper pod
+    podAnnotations: {}
     serviceAccountName: gardener-dashboard-terminal-bootstrapper
     serviceAccountTokenVolumeProjection:
       enabled: true
@@ -358,7 +367,7 @@ global:
     # fully qualified name of the terminal-bootstrap user
     terminalBootstrapperUserName: ~
 
-  # Terminal related configuration
+  # # Terminal related configuration
   # terminal:
   #   container:
   #     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
@@ -418,8 +427,8 @@ global:
   #           Li4u
   #           -----END RSA PRIVATE KEY-----
 
-  # Unreachable seeds configuration
-  # disables some UI features for seeds that are unreachable by the dashboard
+  # # Unreachable seeds configuration
+  # # disables some UI features for seeds that are unreachable by the dashboard
   # unreachableSeeds:
   #   matchLabels:
   #     seed.gardener.cloud/network: private

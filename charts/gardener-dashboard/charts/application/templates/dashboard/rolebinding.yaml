@@ -15,13 +15,13 @@ roleRef:
   kind: Role
   name: gardener.cloud:system:dashboard-github-webhook
 subjects:
-{{- if and .Values.global.virtualGarden.enabled .Values.global.virtualGarden.userName }}
+{{- if and .Values.global.virtualGarden.enabled .Values.global.virtualGarden.dashboardUserName }}
 - apiGroup: rbac.authorization.k8s.io
   kind: User
-  name: {{ .Values.global.virtualGarden.userName }}
+  name: {{ .Values.global.virtualGarden.dashboardUserName }}
 {{- else }}
 - kind: ServiceAccount
-  name: {{ required ".Values.global.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
+  name: {{ required ".Values.global.dashboard.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
 {{- end }}
 {{- end }}

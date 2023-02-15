@@ -9,9 +9,12 @@
 const EventEmitter = require('events')
 const { Store } = require('@gardener-dashboard/kube-client')
 const { TimeoutError } = require('p-timeout')
+const logger = require('../lib/logger')
 const createApp = require('../lib/app')
 
 describe('app', () => {
+  const successMessage = 'Initial synchronization of %s was completed successfully'
+  const timeoutMessage = 'Initial synchronization of %s timed out'
   const shoot = {
     kind: 'Shoot',
     metadata: { uid: '1' }
@@ -20,8 +23,9 @@ describe('app', () => {
     kind: 'Seed',
     metadata: { uid: '2' }
   }
-  const createInformer = () => {
+  const createInformer = plural => {
     const informer = new EventEmitter()
+    informer.names = { plural }
     informer.run = jest.fn()
     informer.abort = jest.fn()
     informer.store = new Store()
@@ -35,8 +39,8 @@ describe('app', () => {
 
   beforeEach(() => {
     informers = {
-      shoots: createInformer(),
-      seeds: createInformer()
+      shoots: createInformer('shoots'),
+      seeds: createInformer('seeds')
     }
     client = {
       'core.gardener.cloud': {
@@ -92,6 +96,7 @@ describe('app', () => {
     }, 1)
     app.run()
     await expect(readyPromise).resolves.toBeUndefined()
+    expect(logger.debug.mock.calls).toEqual(['shoots', 'seeds'].map(name => [successMessage, name]))
     app.shutdown()
     expect(informers.shoots.abort).toBeCalledTimes(1)
     expect(informers.seeds.abort).toBeCalledTimes(1)
@@ -105,6 +110,7 @@ describe('app', () => {
     })
     app.run()
     await expect(readyPromise).rejects.toThrow(TimeoutError)
+    expect(logger.error.mock.calls).toEqual(['shoots', 'seeds'].map(name => [timeoutMessage, name]))
     expect(informers.shoots.abort).toBeCalledTimes(1)
     expect(informers.seeds.abort).toBeCalledTimes(1)
   })

@@ -24,11 +24,14 @@ spec:
         {{- if .Values.global.dashboard.oidc }}
         checksum/secret-gardener-dashboard-oidc: {{ include (print .Template.BasePath "/dashboard/secret-oidc.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.global.dashboard.github }}
+        {{- if .Values.global.dashboard.gitHub }}
         checksum/secret-gardener-dashboard-github: {{ include (print .Template.BasePath "/dashboard/secret-github.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.global.dashboard.kubeconfig }}
         checksum/secret-gardener-dashboard-kubeconfig: {{ include (print .Template.BasePath "/dashboard/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.global.dashboard.podAnnotations }}
+        {{- toYaml .Values.global.dashboard.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
         app.kubernetes.io/name: gardener-dashboard
@@ -37,7 +40,7 @@ spec:
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/managed-by: "{{ .Release.Service }}"
         {{- if .Values.global.dashboard.podLabels }}
-{{ toYaml .Values.global.dashboard.podLabels | indent 8 }}
+        {{- toYaml .Values.global.dashboard.podLabels | nindent 8 }}
         {{- end }}
     spec:
       volumes:
@@ -164,8 +167,7 @@ spec:
           - name: KUBECONFIG
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
-          resources:
-{{ toYaml .Values.global.dashboard.resources | trim | indent 12 }}
+          resources: {{ toYaml .Values.global.dashboard.resources | nindent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard

@@ -1,4 +1,5 @@
 {{- if .Values.global.dashboard.enabled }}
+{{- if and .Values.global.dashboard.ingress.hosts (len .Values.global.dashboard.ingress.hosts) }}
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
@@ -10,10 +11,7 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-  {{- with .Values.global.dashboard.ingress.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-  {{- end }}
+  annotations: {{ toYaml .Values.global.dashboard.ingress.annotations | nindent 4 }}
 spec:
 {{- if .Values.global.dashboard.ingress.tls }}
   tls:
@@ -36,4 +34,5 @@ spec:
         path: /
         pathType: Prefix
   {{- end }}
+{{- end }}
 {{- end }}

@@ -16,6 +16,7 @@ rules:
   - secrets
   verbs:
   - get
+  - list
 - apiGroups:
   - core.gardener.cloud
   resources:
