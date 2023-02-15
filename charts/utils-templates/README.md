@@ -6,7 +6,7 @@ To add this chart to another as dependency, execute
 mkdir -p ./charts/PATH-TO-MY-CHART/charts
 ln -sr ./charts/utils-templates ./charts/PATH-TO-MY-CHART/charts/utils-templates
 ```
-This requires the `ln` or `gln` command for GNU `coreutils`. 
+This requires the `ln` or `gln` command for GNU `coreutils`.
 
 
 Then check for broken links with:
