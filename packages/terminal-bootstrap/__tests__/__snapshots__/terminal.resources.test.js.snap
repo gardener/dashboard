@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`terminal resources should return a resource with generateName 1`] = `
+Object {
+  "apiVersion": "test.io/v1",
+  "kind": "Foo",
+  "metadata": Object {
+    "annotations": Object {
+      "foo": "bar",
+    },
+    "generateName": "test-name-",
+    "labels": Object {
+      "component": "dashboard-terminal",
+    },
+    "ownerReferences": Array [
+      Object {
+        "name": "ownerReferenceName",
+      },
+    ],
+  },
+  "spec": Object {
+    "baz": "foo",
+  },
+}
+`;
+
+exports[`terminal resources should return a service resource 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": Object {
+    "annotations": Object {
+      "foo": "bar",
+    },
+    "labels": Object {
+      "component": "dashboard-terminal",
+    },
+    "name": "name",
+    "namespace": "namespace",
+    "ownerReferences": Array [
+      Object {
+        "name": "ownerReferenceName",
+      },
+    ],
+  },
+  "spec": Object {
+    "baz": "foo",
+  },
+}
+`;
+
+exports[`terminal resources should return an endpoints resource 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "Endpoints",
+  "metadata": Object {
+    "annotations": Object {
+      "foo": "bar",
+    },
+    "labels": Object {
+      "component": "dashboard-terminal",
+    },
+    "name": "name",
+    "namespace": "namespace",
+    "ownerReferences": Array [
+      Object {
+        "name": "ownerReferenceName",
+      },
+    ],
+  },
+  "subsets": Object {
+    "baz": "bar",
+  },
+}
+`;
+
+exports[`terminal resources should return an ingress resource 1`] = `
+Object {
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "Ingress",
+  "metadata": Object {
+    "annotations": Object {
+      "foo": "bar",
+    },
+    "labels": Object {
+      "component": "dashboard-terminal",
+    },
+    "name": "name",
+    "ownerReferences": Array [
+      Object {
+        "name": "ownerReferenceName",
+      },
+    ],
+  },
+  "spec": Object {
+    "baz": "foo",
+  },
+}
+`;

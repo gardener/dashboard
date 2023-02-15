@@ -41,7 +41,6 @@
     "@godaddy/terminus": "^4.10.2",
     "@octokit/rest": "^18.12.0",
     "base64url": "^3.0.1",
-    "better-queue": "^3.8.10",
     "body-parser": "^1.20.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -138,10 +137,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 66,
-        "functions": 94,
-        "lines": 88,
-        "statements": 88
+        "branches": 68,
+        "functions": 95,
+        "lines": 90,
+        "statements": 90
       }
     },
     "setupFilesAfterEnv": [

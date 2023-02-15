@@ -1,0 +1,24 @@
+{{- if .Values.global.dashboard.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: gardener-dashboard-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+spec:
+  ports:
+  - port: {{ .Values.global.dashboard.servicePort }}
+    targetPort: {{ .Values.global.dashboard.containerPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+  type: ClusterIP
+  sessionAffinity: ClientIP
+{{- end }}

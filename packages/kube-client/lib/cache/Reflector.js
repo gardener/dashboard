@@ -197,15 +197,17 @@ class Reflector {
     this.lastSyncResourceVersion = resourceVersion
 
     while (!this.signal.aborted) {
+      const timeoutSeconds = randomize(this.minWatchTimeout)
+      const gracePeriod = 5
       const options = {
         allowWatchBookmarks: true,
-        timeoutSeconds: randomize(this.minWatchTimeout),
+        timeoutSeconds,
         resourceVersion: this.lastSyncResourceVersion
       }
-      let asyncIterable
+      let response
       try {
         logger.debug('Watch %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
-        asyncIterable = await this.listWatcher.watch(options)
+        response = await this.listWatcher.watch(options)
       } catch (err) {
         if (isConnectionRefused(err)) {
           // If this is "connection refused" error, it means that most likely apiserver is not responsive.
@@ -219,7 +221,7 @@ class Reflector {
         throw err
       }
       try {
-        await this.watchHandler(asyncIterable)
+        await this.watchHandler(response, (timeoutSeconds + gracePeriod) * 1000)
       } catch (err) {
         if (isExpiredError(err)) {
           // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
@@ -234,44 +236,54 @@ class Reflector {
     }
   }
 
-  async watchHandler (asyncIterable) {
+  async watchHandler (response, timeout) {
     const begin = Date.now()
     let count = 0
-    for await (const event of asyncIterable) {
-      count++
-      if (event instanceof Error) {
-        throw event
+    const timeoutCallack = () => {
+      const message = `Forcefully destroying watch ${this.expectedTypeName} after ${timeout} ms`
+      logger.error(message)
+      response.destroy(new Error(message))
+    }
+    const timeoutId = setTimeout(timeoutCallack, timeout)
+    try {
+      for await (const event of response) {
+        count++
+        if (event instanceof Error) {
+          throw event
+        }
+        const { type, object = {} } = event
+        if (type === 'ERROR') {
+          throw new StatusError(object)
+        }
+        const { apiVersion, kind, metadata: { resourceVersion } = {} } = object
+        if (apiVersion !== this.apiVersion || kind !== this.kind) {
+          const typeName = getTypeName(apiVersion, kind)
+          logger.error('Expected %s, but watch event object had %s', this.expectedTypeName, typeName)
+          continue
+        }
+        switch (type) {
+          case 'ADDED':
+            this.store.add(object)
+            break
+          case 'MODIFIED':
+            this.store.update(object)
+            break
+          case 'DELETED':
+            this.store.delete(object)
+            break
+          case 'BOOKMARK':
+            break
+          default:
+            logger.error('Unable to understand event %s for watch %s', type, this.expectedTypeName)
+        }
+        if (resourceVersion) {
+          this.lastSyncResourceVersion = resourceVersion
+        } else {
+          logger.error('Received event object without resource version for watch %s', this.expectedTypeName)
+        }
       }
-      const { type, object = {} } = event
-      if (type === 'ERROR') {
-        throw new StatusError(object)
-      }
-      const { apiVersion, kind, metadata: { resourceVersion } = {} } = object
-      if (apiVersion !== this.apiVersion || kind !== this.kind) {
-        const typeName = getTypeName(apiVersion, kind)
-        logger.error('Expected %s, but watch event object had %s', this.expectedTypeName, typeName)
-        continue
-      }
-      switch (type) {
-        case 'ADDED':
-          this.store.add(object)
-          break
-        case 'MODIFIED':
-          this.store.update(object)
-          break
-        case 'DELETED':
-          this.store.delete(object)
-          break
-        case 'BOOKMARK':
-          break
-        default:
-          logger.error('Unable to understand event %s for watch %s', type, this.expectedTypeName)
-      }
-      if (resourceVersion) {
-        this.lastSyncResourceVersion = resourceVersion
-      } else {
-        logger.error('Received event object without resource version for watch %s', this.expectedTypeName)
-      }
+    } finally {
+      clearTimeout(timeoutId)
     }
     const duration = Date.now() - begin
     if (duration < 1000 && count === 0) {

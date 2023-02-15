@@ -2,22 +2,30 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-REGISTRY     := eu.gcr.io/gardener-project
-ORGANIZATION := gardener
-PROJECT      := dashboard
-IMAGE        := $(REGISTRY)/$(ORGANIZATION)/$(PROJECT)
-TAG          := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
+REGISTRY                      := eu.gcr.io/gardener-project/gardener
+DASHBOARD_IMAGE_REPOSITORY    := $(REGISTRY)/dashboard
+BOOTSTRAPPER_IMAGE_REPOSITORY := $(REGISTRY)/dashboard-terminal-bootstrapper
+TAG                           := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
+PUSH_LATEST_TAG               := true
 
 .PHONY: build
 build:
-	@docker build -t $(IMAGE):$(TAG) --rm .
+	@echo "Building docker images with version and tag $(TAG)"
+	@docker build -t $(DASHBOARD_IMAGE_REPOSITORY):$(TAG)    -t $(DASHBOARD_IMAGE_REPOSITORY):latest    -f Dockerfile --target dashboard .
+	@docker build -t $(BOOTSTRAPPER_IMAGE_REPOSITORY):$(TAG) -t $(BOOTSTRAPPER_IMAGE_REPOSITORY):latest -f Dockerfile --target dashboard-terminal-bootstrapper .
 
 .PHONY: push
 push:
-	@if ! gcloud config configurations list | tail -n +2 | awk '{ print $$1 }' | grep -q -F "gardener"; then echo "Activation of gcloud configuration \"gardener\" failed"; false; fi
+	@if ! gcloud config configurations list              | tail -n +2 | awk '{ print $$1 }' | grep -q -F "gardener"; then echo "Activation of gcloud configuration \"gardener\" failed";                                    false; fi
+	@if ! docker images $(DASHBOARD_IMAGE_REPOSITORY)    | tail -n +2 | awk '{ print $$2 }' | grep -q -F "$(TAG)";   then echo "$(DASHBOARD_IMAGE_REPOSITORY) version $(TAG) is not yet built. Please run 'make build'";    false; fi
+	@if ! docker images $(BOOTSTRAPPER_IMAGE_REPOSITORY) | tail -n +2 | awk '{ print $$2 }' | grep -q -F "$(TAG)";   then echo "$(BOOTSTRAPPER_IMAGE_REPOSITORY) version $(TAG) is not yet built. Please run 'make build'"; false; fi
 	@gcloud config configurations activate gardener
-	@if ! docker images $(IMAGE) | tail -n +2 | awk '{ print $$2 }' | grep -q -F "$(TAG)"; then echo "Dashboard image \"$(TAG)\" not found. Please run 'make build'"; false; fi
-	@docker push $(IMAGE):$(TAG)
+	@docker push $(DASHBOARD_IMAGE_REPOSITORY):$(TAG);
+	@docker push $(BOOTSTRAPPER_IMAGE_REPOSITORY):$(TAG);
+	@if [[ "$(PUSH_LATEST_TAG)" == "true" ]]; then \
+		docker push $(DASHBOARD_IMAGE_REPOSITORY):latest; \
+		docker push $(BOOTSTRAPPER_IMAGE_REPOSITORY):latest; \
+	fi
 
 .PHONY: release
 release: build push
