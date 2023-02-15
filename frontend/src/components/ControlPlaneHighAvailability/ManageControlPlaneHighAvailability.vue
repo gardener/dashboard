@@ -23,26 +23,28 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <div v-else>
-      Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
-      <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
-        <template v-if="clusterIsNew">
-          <template v-if="seedName">
-            The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
+    <v-expand-transition :appear="animateAppear" v-else>
+      <div>
+        Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
+        <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
+          <template v-if="clusterIsNew">
+            <template v-if="seedName">
+              The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
+            </template>
+            <template v-else>
+              The selected cloud profile has no <code>multi-zonal</code> seed.
+            </template>
           </template>
           <template v-else>
-            The selected cloud profile has no <code>multi-zonal</code> seed.
+            The current seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
           </template>
-        </template>
-        <template v-else>
-          The current seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
-        </template>
-        Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
-      </v-alert>
-      <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" dense outlined>
-        It is not possible to disable or change control plane high availability later.
-      </v-alert>
-    </div>
+          Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
+        </v-alert>
+        <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" dense outlined>
+          It is not possible to disable or change control plane high availability later.
+        </v-alert>
+      </div>
+    </v-expand-transition>
     <div v-if="!!controlPlaneHighAvailabilityHelpHtml" class="wrap-text" v-html="controlPlaneHighAvailabilityHelpHtml"></div>
     <external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
   </div>
@@ -58,6 +60,11 @@ import ExternalLink from '@/components/ExternalLink.vue'
 export default {
   components: {
     ExternalLink
+  },
+  data () {
+    return {
+      animateAppear: false
+    }
   },
   computed: {
     ...mapGetters([
@@ -118,6 +125,7 @@ export default {
   },
   mounted () {
     this.resetToleranceType(this.zoneSupported)
+    this.animateAppear = true
   }
 }
 </script>

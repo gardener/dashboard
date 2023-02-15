@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="alternate-row-background">
     <v-expand-transition
-      :appear="worker.isNew"
+      :appear="animateAppear"
       v-for="(worker, index) in internalWorkers"
-      :key="index"
+      :key="worker.id"
     >
       <v-row class="list-item pt-2 my-0 mx-1" >
         <worker-input-generic
@@ -111,7 +111,8 @@ export default {
       isNewCluster: false,
       existingWorkerCIDR: undefined,
       kubernetesVersion: undefined,
-      initialZones: undefined
+      initialZones: undefined,
+      animateAppear: false
     }
   },
   computed: {
@@ -225,7 +226,6 @@ export default {
       const worker = this.generateWorker(availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
       this.validateInput()
-      console.log(this.internalWorkers)
     },
     onRemoveWorker (index) {
       this.internalWorkers.splice(index, 1)
@@ -307,6 +307,9 @@ export default {
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
+      this.$nextTick(() => {
+        this.animateAppear = true
+      })
     }
   },
   mounted () {

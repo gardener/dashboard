@@ -6,19 +6,25 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <transition-group name="list" class="alternate-row-background">
-      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
-        <hibernation-schedule-event
-          ref="scheduleEvents"
-          :schedule-event="scheduleEvent"
-          @remove-schedule-event="onRemoveSchedule(index)"
-          @update-wake-up-time="onUpdateWakeUpTime"
-          @update-hibernate-time="onUpdateHibernateTime"
-          @update-selected-days="onUpdateSelectedDays"
-          @update-location="onUpdateLocation"
-          @valid="onScheduleEventValid">
-        </hibernation-schedule-event>
-      </v-row>
+    <div class="alternate-row-background">
+      <v-expand-transition
+        :appear="animateAppear"
+        v-for="(scheduleEvent, index) in parsedScheduleEvents"
+        :key="scheduleEvent.id"
+      >
+        <v-row class="list-item pt-2">
+          <hibernation-schedule-event
+            ref="scheduleEvents"
+            :schedule-event="scheduleEvent"
+            @remove-schedule-event="onRemoveSchedule(index)"
+            @update-wake-up-time="onUpdateWakeUpTime"
+            @update-hibernate-time="onUpdateHibernateTime"
+            @update-selected-days="onUpdateSelectedDays"
+            @update-location="onUpdateLocation"
+            @valid="onScheduleEventValid">
+          </hibernation-schedule-event>
+        </v-row>
+      </v-expand-transition>
       <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
         <v-col>
           <v-btn
@@ -38,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
         </v-col>
       </v-row>
-    </transition-group>
+    </div>
     <v-row v-show="showNoScheduleCheckbox" key="noSchedule" align="center" class="list-item pt-6">
       <v-col>
         <v-checkbox
@@ -106,7 +112,8 @@ export default {
       confirmNoSchedule: false,
       scheduleCrontab: undefined,
       purpose: undefined,
-      noSchedule: undefined
+      noSchedule: undefined,
+      animateAppear: false
     }
   },
   computed: {
@@ -253,6 +260,9 @@ export default {
       this.purpose = purpose
       this.parseSchedules(hibernationSchedule)
       this.setNoHibernationSchedule(noHibernationSchedule)
+      this.$nextTick(() => {
+        this.animateAppear = true
+      })
     }
   },
   mounted () {
