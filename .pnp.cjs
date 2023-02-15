@@ -2746,7 +2746,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@octokit/rest", "npm:18.12.0"],\
             ["abort-controller", "npm:3.0.0"],\
             ["base64url", "npm:3.0.1"],\
-            ["better-queue", "npm:3.8.10"],\
             ["body-parser", "npm:1.20.0"],\
             ["compression", "npm:1.7.4"],\
             ["cookie-parser", "npm:1.4.6"],\
