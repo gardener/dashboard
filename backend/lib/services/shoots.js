@@ -346,6 +346,19 @@ exports.info = async function ({ user, namespace, name }) {
   return data
 }
 
+async function getGardenClusterIdentity () {
+  const configClusterIdentity = _.get(config, 'clusterIdentity')
+
+  if (configClusterIdentity) {
+    return configClusterIdentity
+  }
+
+  const clusterIdentity = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
+
+  return clusterIdentity.data['cluster-identity']
+}
+exports.getGardenClusterIdentity = getGardenClusterIdentity
+
 async function getKubeconfigGardenlogin (client, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
@@ -467,14 +480,4 @@ async function assignMonitoringSecret (client, data, namespace, shootName) {
       })
       .commit()
   }
-}
-
-async function getGardenClusterIdentity() {
-  if(_.has(config, 'clusterIdentity')) {
-    return _.get(config, 'clusterIdentity')
-  }
-
-  const clusterIdentity = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity');
-
-  return clusterIdentity.data['cluster-identity']
 }
