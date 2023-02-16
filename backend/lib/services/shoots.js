@@ -15,6 +15,7 @@ const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const semver = require('semver')
+const config = require('../config')
 
 const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
 const { getSeed } = cache
@@ -354,13 +355,11 @@ async function getKubeconfigGardenlogin (client, shoot) {
 
   const [
     ca,
-    clusterIdentity
+    gardenClusterIdentity
   ] = await Promise.all([
     client.core.secrets.get(namespace, `${name}.ca-cluster`),
-    dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
+    getGardenClusterIdentity()
   ])
-
-  const gardenClusterIdentity = clusterIdentity.data['cluster-identity']
 
   const caData = ca.data?.['ca.crt']
 
@@ -468,4 +467,14 @@ async function assignMonitoringSecret (client, data, namespace, shootName) {
       })
       .commit()
   }
+}
+
+async function getGardenClusterIdentity() {
+  if(_.has(config, 'clusterIdentity')) {
+    return _.get(config, 'clusterIdentity')
+  }
+
+  const clusterIdentity = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity');
+
+  return clusterIdentity.data['cluster-identity']
 }
