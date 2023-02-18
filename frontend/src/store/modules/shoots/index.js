@@ -176,7 +176,7 @@ const actions = {
 
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
-        info.grafanaUrl = `https://gu-${baseHost}`
+        info.plutonoUrl = `https://pl-${baseHost}`
 
         info.prometheusUrl = `https://p-${baseHost}`
 
