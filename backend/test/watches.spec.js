@@ -12,7 +12,6 @@ const logger = require('../lib/logger')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
-const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
 
 const rooms = new Map()
@@ -48,8 +47,6 @@ const io = {
 }
 
 describe('watches', function () {
-  const foo = { metadata: { name: 'foo', uid: 1 }, spec: { namespace: 'foo' } }
-  const bar = { metadata: { name: 'bar', uid: 2 } }
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
   const foobaz = { metadata: { namespace: 'foo', name: 'baz', uid: 5 } }
   const projectList = [
@@ -75,25 +72,6 @@ describe('watches', function () {
     jest.clearAllMocks()
   })
 
-  describe('seeds', function () {
-    const kind = 'Seed'
-
-    it('should watch seeds', async function () {
-      const bootstrapStub = jest.spyOn(bootstrapper, 'bootstrapResource')
-      watches.seeds(io, informer)
-      informer.emit('add', foo)
-      informer.emit('add', bar)
-      informer.emit('update', { kind, ...bar }, bar)
-      informer.emit('delete', bar)
-      expect(bootstrapStub).toHaveBeenCalledTimes(3)
-      expect(bootstrapStub.mock.calls).toEqual([
-        [foo],
-        [bar],
-        [{ kind, ...bar }]
-      ])
-    })
-  })
-
   describe('shoots', function () {
     const foobarUnhealthy = _
       .chain(foobar)
@@ -110,15 +88,11 @@ describe('watches', function () {
     let shootsWithIssues
 
     let deleteTicketsStub
-    let bootstrapResourceStub
-    let removeResourceStub
     let findProjectByNamespaceStub
 
     beforeEach(() => {
       shootsWithIssues = new Set()
       deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
-      bootstrapResourceStub = jest.spyOn(bootstrapper, 'bootstrapResource').mockReturnValue()
-      removeResourceStub = jest.spyOn(bootstrapper.bootstrapState, 'removeResource').mockReturnValue()
       findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockImplementation(namespace => {
         return _.find(projectList, ['spec.namespace', namespace])
       })
@@ -135,9 +109,6 @@ describe('watches', function () {
       informer.emit('delete', foobar)
 
       expect(logger.error).not.toBeCalled()
-      expect(bootstrapResourceStub).toBeCalledTimes(2)
-      expect(removeResourceStub).toBeCalledTimes(1)
-      expect(removeResourceStub.mock.calls).toEqual([[foobar]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub).toBeCalledTimes(1)
       expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
@@ -181,9 +152,6 @@ describe('watches', function () {
       informer.emit('delete', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
-      expect(bootstrapResourceStub).toBeCalledTimes(4)
-      expect(removeResourceStub).toBeCalledTimes(1)
-      expect(removeResourceStub.mock.calls).toEqual([[foobazUnhealthy]])
       expect(deleteTicketsStub).toBeCalledTimes(1)
 
       const fooRoom = rooms.get('shoots;foo')
@@ -228,8 +196,6 @@ describe('watches', function () {
       informer.emit('delete', foobaz)
 
       expect(logger.error).toBeCalledTimes(1)
-      expect(removeResourceStub).toBeCalledTimes(2)
-      expect(removeResourceStub.mock.calls).toEqual([[foobar], [foobaz]])
       expect(deleteTicketsStub).toBeCalledTimes(2)
     })
   })
