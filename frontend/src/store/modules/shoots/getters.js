@@ -271,28 +271,35 @@ export default {
         case 'readiness': {
           const hideProgressingClusters = get(rootGetters.getShootListFilters, 'progressing', false)
 
-          const sortValues = {}
+          const errorConditionsToUseForSorting = {}
           items.forEach(item => {
-            const errorConditionStatuses = filter(item.status?.conditions, condition => condition?.status !== 'True' && (!hideProgressingClusters || condition?.status !== 'Progressing'))
+            const errorConditionStatuses = filter(item.status?.conditions,
+              condition => condition?.status !== 'True' &&
+              (!hideProgressingClusters || condition?.status !== 'Progressing'))
+
             const errorConditions = map(errorConditionStatuses, conditionStatus => {
               const condition = rootState.conditionCache[conditionStatus.type]
               return {
                 ...conditionStatus,
-                sort: condition?.sort ?? condition?.shortName
+                ...condition
               }
             })
 
             if (errorConditions.length) {
-              const { sort: group, lastTransitionTime } = head(orderBy(errorConditions, 'sort'))
+              const { sort, shortName, lastTransitionTime } = head(orderBy(errorConditions, ['sort', 'shortName']))
 
-              sortValues[item.metadata.uid] = {
-                group,
+              errorConditionsToUseForSorting[item.metadata.uid] = {
+                group: sort ?? shortName,
                 lastTransitionTime
               }
             }
           })
 
-          return orderBy(items, [item => sortValues[item.metadata.uid]?.group, item => sortValues[item.metadata.uid]?.lastTransitionTime, 'metadata.name'], ['asc', sortOrder, 'asc'])
+          return orderBy(items,
+            [item => errorConditionsToUseForSorting[item.metadata.uid]?.group,
+              item => errorConditionsToUseForSorting[item.metadata.uid]?.lastTransitionTime,
+              'metadata.name'],
+            [sortOrder, sortOrder, 'asc'])
         }
         default: {
           return orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
