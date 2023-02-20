@@ -10,7 +10,7 @@ const yaml = require('js-yaml')
 const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsWith, endsWith, isEmpty } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
-const { toBase64, createUrl, parseLabelSelector } = require('./helper')
+const { toBase64, createUrl } = require('./helper')
 const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
@@ -110,12 +110,6 @@ const secrets = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  },
-  listMonitoringSecrets (namespace) {
-    return [
-      secrets.getMonitoringSecret(namespace, 'foo.monitoring', '2019-03-13T13:11:36Z'),
-      secrets.getMonitoringSecret(namespace, 'bar.monitoring', '2022-03-13T13:11:36Z')
-    ]
   },
   getTerminalShortcutsSecret (namespace, options = {}) {
     const {
@@ -229,13 +223,10 @@ const mocks = {
       }
 
       const url = createUrl(headers)
-      const labelSelector = parseLabelSelector(url)
       const matchResult = matchList(url.pathname)
       if (matchResult) {
         const { params: { namespace } = {} } = matchResult
-        const items = labelSelector.name === 'observability-ingress' && labelSelector['managed-by'] === 'secrets-manager'
-          ? secrets.listMonitoringSecrets(namespace)
-          : secrets.list(namespace)
+        const items = secrets.list(namespace)
         return Promise.resolve({ items })
       }
 
@@ -292,11 +283,6 @@ const mocks = {
         }
 
         if (endsWith(name, '.monitoring')) {
-          const item = secrets.getMonitoringSecret(namespace, name)
-          return Promise.resolve(item)
-        }
-      } else if (endsWith(hostname, 'seed.cluster')) {
-        if (name === 'monitoring-ingress-credentials') {
           const item = secrets.getMonitoringSecret(namespace, name)
           return Promise.resolve(item)
         }

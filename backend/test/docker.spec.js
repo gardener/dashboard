@@ -39,7 +39,7 @@ describe('dockerfile', function () {
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
-    expect(dashboardDockerfile.getFROMs()).toHaveLength(2)
+    expect(dashboardDockerfile.getFROMs()).toHaveLength(6)
     const buildStages = _
       .chain(dashboardDockerfile.getFROMs())
       .map(from => [from.getBuildStage(), from])
@@ -51,6 +51,9 @@ describe('dockerfile', function () {
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
     expect(endOfLife.getTime()).toBeGreaterThan(Date.now())
-    expect(buildStages.release.getImage()).toBe('scratch')
+    expect(buildStages['node-scratch'].getImage()).toBe('scratch')
+    for (const key of ['dashboard', 'dashboard-terminal-bootstrapper']) {
+      expect(buildStages[key].getImage()).toBe('node-scratch')
+    }
   })
 })

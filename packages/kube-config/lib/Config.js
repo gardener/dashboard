@@ -25,6 +25,18 @@ class Config {
       .pick(PROPERTY_NAMES)
       .cloneDeep()
       .value()
+    for (const { user } of input.users) {
+      if (user.exec?.command === 'gke-gcloud-auth-plugin') {
+        delete user.exec
+        user['auth-provider'] = {
+          name: 'gcp',
+          config: {
+            'access-token': undefined,
+            expiry: '1970-01-01T00:00:00.000Z'
+          }
+        }
+      }
+    }
     Object.assign(this, {
       apiVersion: 'v1',
       kind: 'Config'
@@ -123,6 +135,7 @@ class Config {
           await gToken.getToken()
           authProvider.config['access-token'] = gToken.accessToken
           authProvider.config.expiry = new Date(gToken.expiresAt).toISOString()
+          break
         }
       }
     }

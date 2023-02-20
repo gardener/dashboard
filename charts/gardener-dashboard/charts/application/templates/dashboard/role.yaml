@@ -1,0 +1,25 @@
+{{- if .Values.global.dashboard.enabled }}
+apiVersion: {{ include "rbacversion" . }}
+kind: Role
+metadata:
+  name: gardener.cloud:system:dashboard-github-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - patch
+  - watch
+  - list
+  resourceNames:
+  - gardener-dashboard-github-webhook
+{{- end }}

@@ -29,7 +29,6 @@ import {
   getIssues,
   getIssuesAndComments,
   getShootInfo,
-  getShootSeedInfo,
   createShoot,
   deleteShoot
 } from '@/utils/api'
@@ -100,8 +99,8 @@ const actions = {
         getShoot(options),
         getIssuesAndComments(options)
       ])
-      // fetch shootInfo and shootSeedInfo in the background (do not await the promise)
-      assignInfoAndSeedInfo(shoot)
+      // fetch shootInfo in the background (do not await the promise)
+      assignInfo(shoot)
       logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
       return { shoots: [shoot], issues, comments }
     }
@@ -119,16 +118,11 @@ const actions = {
       return { shoots: items, issues, comments: [] }
     }
 
-    const assignInfoAndSeedInfo = async ({ metadata, spec }) => {
-      const promises = [dispatch('getInfo', metadata)]
-      const seedName = spec.seedName
-      if (rootGetters.isAdmin && !rootGetters.isSeedUnreachableByName(seedName)) {
-        promises.push(dispatch('getSeedInfo', metadata))
-      }
+    const assignInfo = async ({ metadata, spec }) => {
       try {
-        await Promise.all(promises)
+        await dispatch('getInfo', metadata)
       } catch (err) {
-        logger.error('Failed to fetch shoot or shootSeed info:', err.message)
+        logger.error('Failed to fetch shoot info:', err.message)
       }
     }
 
@@ -182,8 +176,7 @@ const actions = {
 
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
-        info.grafanaUrlUsers = `https://gu-${baseHost}`
-        info.grafanaUrlOperators = `https://go-${baseHost}`
+        info.grafanaUrl = `https://gu-${baseHost}`
 
         info.prometheusUrl = `https://p-${baseHost}`
 
@@ -193,19 +186,6 @@ const actions = {
       return info
     } catch (error) {
       // shoot info not found -> ignore if KubernetesError
-      if (isNotFound(error)) {
-        return
-      }
-      throw error
-    }
-  },
-  async getSeedInfo ({ commit, rootState }, { name, namespace }) {
-    try {
-      const { data: info } = await getShootSeedInfo({ namespace, name })
-      commit('RECEIVE_SEED_INFO', { name, namespace, info })
-      return info
-    } catch (error) {
-      // shoot seed info not found -> ignore if KubernetesError
       if (isNotFound(error)) {
         return
       }
@@ -485,12 +465,6 @@ const mutations = {
     const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
-    }
-  },
-  RECEIVE_SEED_INFO (state, { namespace, name, info }) {
-    const item = findItem(state)({ namespace, name })
-    if (item !== undefined) {
-      Vue.set(item, 'seedInfo', info)
     }
   },
   SET_SELECTION (state, metadata) {

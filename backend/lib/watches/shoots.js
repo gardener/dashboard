@@ -9,7 +9,6 @@
 const logger = require('../logger')
 const { shootHasIssue } = require('../utils')
 const { tickets } = require('../services')
-const { bootstrapper } = require('../services/terminals')
 const cache = require('../cache')
 
 async function deleteTickets ({ namespace, name }) {
@@ -54,8 +53,6 @@ module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
       nsp.to(rooms).emit('shoots', { type, object })
     }
     unhealthyShootsPublish(event)
-
-    bootstrapper.handleResourceEvent(event)
 
     switch (event.type) {
       case 'DELETED':

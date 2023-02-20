@@ -6,6 +6,5 @@
 
 'use strict'
 
-exports.seeds = require('./seeds')
 exports.shoots = require('./shoots')
 exports.tickets = require('./tickets')
