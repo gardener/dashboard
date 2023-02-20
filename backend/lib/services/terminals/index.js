@@ -25,7 +25,7 @@ const {
 const {
   toTerminalResource,
   fromNodeResource
-} = require('./terminalResources')
+} = require('./resources')
 
 const {
   getKubeApiServerHostForSeedOrManagedSeed,
@@ -34,10 +34,6 @@ const {
   getGardenHostClusterKubeApiServer,
   getShootRef
 } = require('./utils')
-
-const {
-  Bootstrapper
-} = require('./terminalBootstrap')
 
 const { getSeed, findProjectByNamespace } = require('../../cache')
 const logger = require('../../logger')
@@ -866,5 +862,3 @@ async function listShortcuts ({ user, namespace }) {
     throw err
   }
 }
-
-exports.bootstrapper = new Bootstrapper()

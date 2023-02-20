@@ -1,0 +1,38 @@
+{{- if .Values.global.dashboard.enabled }}
+{{- if and .Values.global.dashboard.ingress.hosts (len .Values.global.dashboard.ingress.hosts) }}
+apiVersion: {{ include "ingressversion" . }}
+kind: Ingress
+metadata:
+  name: gardener-dashboard-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+  annotations: {{ toYaml .Values.global.dashboard.ingress.annotations | nindent 4 }}
+spec:
+{{- if .Values.global.dashboard.ingress.tls }}
+  tls:
+  - secretName: {{ required ".Values.global.dashboard.ingress.tls.secretName is required" .Values.global.dashboard.ingress.tls.secretName }}
+    hosts:
+    {{- range .Values.global.dashboard.ingress.hosts }}
+    - {{ . }}
+    {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.global.dashboard.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - backend:
+          service:
+              name: gardener-dashboard-service
+              port:
+                number: {{ $.Values.global.dashboard.servicePort }}
+        path: /
+        pathType: Prefix
+  {{- end }}
+{{- end }}
+{{- end }}
