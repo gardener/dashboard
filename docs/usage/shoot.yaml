@@ -54,8 +54,6 @@ spec:
         location: Europe/Kiev
   kubernetes:
     allowPrivilegedContainers: true
-    kubeAPIServer:
-      enableBasicAuthentication: false
     kubeControllerManager:
       nodeCIDRMaskSize: 24
     kubeProxy:
@@ -66,4 +64,3 @@ spec:
       enabled: false
     kubernetesDashboard:
       enabled: false
-      

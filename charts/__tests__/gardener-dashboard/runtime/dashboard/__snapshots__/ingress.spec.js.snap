@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gardener-dashboard ingress should render the template with tls and a secret 1`] = `
+Object {
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "Ingress",
+  "metadata": Object {
+    "annotations": Object {
+      "kubernetes.io/ingress.class": "nginx",
+      "nginx.ingress.kubernetes.io/ssl-redirect": "true",
+      "nginx.ingress.kubernetes.io/use-port-in-redirects": "true",
+    },
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
+    "name": "gardener-dashboard-ingress",
+    "namespace": "garden",
+  },
+  "spec": Object {
+    "rules": Array [
+      Object {
+        "host": "dashboard.garden.example.org",
+        "http": Object {
+          "paths": Array [
+            Object {
+              "backend": Object {
+                "service": Object {
+                  "name": "gardener-dashboard-service",
+                  "port": Object {
+                    "number": 8080,
+                  },
+                },
+              },
+              "path": "/",
+              "pathType": "Prefix",
+            },
+          ],
+        },
+      },
+      Object {
+        "host": "dashboard.ingress.garden.example.org",
+        "http": Object {
+          "paths": Array [
+            Object {
+              "backend": Object {
+                "service": Object {
+                  "name": "gardener-dashboard-service",
+                  "port": Object {
+                    "number": 8080,
+                  },
+                },
+              },
+              "path": "/",
+              "pathType": "Prefix",
+            },
+          ],
+        },
+      },
+    ],
+    "tls": Array [
+      Object {
+        "hosts": Array [
+          "dashboard.garden.example.org",
+          "dashboard.ingress.garden.example.org",
+        ],
+        "secretName": "other-gardener-dashboard-tls",
+      },
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard ingress should render the template with tls and a secret 2`] = `
+Object {
+  "apiVersion": "v1",
+  "data": Object {
+    "tls.crt": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCmRHeHpMbU55ZEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t",
+    "tls.key": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpkR3h6TG10bGVRPT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0=",
+  },
+  "kind": "Secret",
+  "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
+    "name": "other-gardener-dashboard-tls",
+    "namespace": "garden",
+  },
+  "type": "kubernetes.io/tls",
+}
+`;

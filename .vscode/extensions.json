@@ -2,6 +2,7 @@
   "recommendations": [
     "arcanis.vscode-zipfs",
     "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
     "firsttris.vscode-jest-runner",
     "octref.vetur",
     "syler.sass-indented"

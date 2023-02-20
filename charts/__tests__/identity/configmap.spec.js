@@ -8,10 +8,9 @@
 
 const yaml = require('js-yaml')
 const { omit } = require('lodash')
-const { basename } = require('path')
 const { helm } = fixtures
 
-const renderTemplates = helm.renderTemplatesFn(basename(__dirname))
+const renderTemplates = helm.renderIdentityTemplates
 
 describe('identity', function () {
   describe('configmap', function () {

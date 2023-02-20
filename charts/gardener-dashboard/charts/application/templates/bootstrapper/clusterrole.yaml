@@ -1,0 +1,40 @@
+{{- if .Values.global.bootstrapper.enabled }}
+apiVersion: {{ include "rbacversion" . }}
+kind: ClusterRole
+metadata:
+  name: gardener.cloud:system:dashboard-terminal-bootstrapper
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: terminal-bootstrapper
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - shoots
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - shoots/adminkubeconfig
+  verbs:
+  - create
+- apiGroups:
+  - seedmanagement.gardener.cloud
+  resources:
+  - managedseeds
+  verbs:
+  - get
+{{- end }}

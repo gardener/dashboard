@@ -7,6 +7,7 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const _ = require('lodash')
 
 const fnv = require('fnv-plus')
@@ -16,7 +17,6 @@ const {
   getSeedIngressDomain
 } = require('../../utils')
 
-const assert = require('assert').strict
 const { getSeed } = require('../../cache')
 
 const GardenTerminalHostRefType = {
@@ -113,11 +113,6 @@ function getKubeApiServerHostForSeed (seed) {
   return `k-g.${ingressDomain}`
 }
 
-function getWildcardIngressDomainForSeed (seed) {
-  const ingressDomain = getSeedIngressDomain(seed)
-  return `*.${ingressDomain}`
-}
-
 function getGardenTerminalHostClusterRefType () {
   return _
     .chain(getConfigValue('terminal.gardenTerminalHost'))
@@ -145,13 +140,9 @@ function getShootRef (managedSeed) {
 }
 
 module.exports = {
-  getGardenTerminalHostClusterSecretRef,
-  getGardenTerminalHostClusterRefType,
-  getGardenHostClusterKubeApiServer,
-  getKubeApiServerHostForSeed,
-  getKubeApiServerHostForShoot,
-  getWildcardIngressDomainForSeed,
   getKubeApiServerHostForSeedOrManagedSeed,
-  getShootRef,
-  GardenTerminalHostRefType
+  getKubeApiServerHostForShoot,
+  getGardenTerminalHostClusterSecretRef,
+  getGardenHostClusterKubeApiServer,
+  getShootRef
 }

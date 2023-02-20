@@ -252,8 +252,6 @@ To create a new cluster using the command line, you need a YAML definition of th
             location: Europe/Kiev
       kubernetes:
         allowPrivilegedContainers: true
-        kubeAPIServer:
-          enableBasicAuthentication: false
         kubeControllerManager:
           nodeCIDRMaskSize: 24
         kubeProxy:
