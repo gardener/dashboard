@@ -1,0 +1,33 @@
+{{- if .Values.global.dashboard.enabled }}
+{{- if .Values.global.dashboard.vpa }}
+apiVersion: autoscaling.k8s.io/v1beta2
+kind: VerticalPodAutoscaler
+metadata:
+  name: gardener-dashboard-vpa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+spec:
+  targetRef:
+    apiVersion: {{ include "deploymentversion" . }}
+    kind: Deployment
+    name: gardener-dashboard
+  updatePolicy:
+    updateMode: {{ .Values.global.dashboard.vpa.updateMode | default "Off" }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledValues: {{ .Values.global.dashboard.vpa.controlledValues | default "RequestsOnly" }}
+        controlledResources: ["cpu", "memory"]
+        minAllowed:
+          cpu:    {{ .Values.global.dashboard.vpa.minAllowedCpu | default "50m" }}
+          memory: {{ .Values.global.dashboard.vpa.minAllowedMemory | default "100Mi" }}
+        maxAllowed:
+          cpu:    {{ .Values.global.dashboard.vpa.maxAllowedCpu | default "500m" }}
+          memory: {{ .Values.global.dashboard.vpa.maxAllowedMemory | default "500Mi" }}
+{{- end }}
+{{- end }}

@@ -261,13 +261,18 @@ describe('kube-client', () => {
       })
 
       describe('#watchHandler', () => {
+        let stream
+
+        function emitEvent (event, ms) {
+          setTimeout(() => stream.write(event), ms)
+        }
+
+        beforeEach(() => {
+          stream = new TestStream()
+        })
+
         it('should handle watch events', async () => {
           const error = { code: 410, reason: 'Expired' }
-          const stream = new TestStream()
-
-          function emitEvent (event, ms) {
-            setTimeout(() => stream.write(event), ms)
-          }
 
           emitEvent({ type: 'ADDED', object: a }, 1)
           emitEvent({ type: 'ADDED', object: b }, 2)
@@ -282,14 +287,22 @@ describe('kube-client', () => {
 
           expect.assertions(3)
           try {
-            await reflector.watchHandler(stream)
+            await reflector.watchHandler(stream, 1000)
           } catch (err) {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(ApiErrors.isExpiredError(err)).toBe(true)
           }
-
           expect(reflector.lastSyncResourceVersion).toBe('9')
           expect(store.listKeys()).toEqual(['b'])
+        })
+
+        it('should destroy the watch after 5', async () => {
+          emitEvent({ type: 'ADDED', object: a }, 1)
+          emitEvent({ type: 'ADDED', object: b }, 2)
+          await expect(reflector.watchHandler(stream, 5)).rejects.toThrow(/^Forcefully destroying watch .+ after 5 ms$/)
+
+          expect(reflector.lastSyncResourceVersion).toBe('2')
+          expect(store.listKeys()).toEqual(['a', 'b'])
         })
       })
 

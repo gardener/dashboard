@@ -6,10 +6,8 @@
 
 'use strict'
 
-const EventEmitter = require('events')
 const { AssertionError } = require('assert').strict
 const { encodeBase64, decodeBase64, getConfigValue, shootHasIssue, getSeedNameFromShoot } = require('../lib/utils')
-const { AbstractBatchEmitter, EventsEmitter, NamespacedBatchEmitter } = require('../lib/utils/batchEmitter')
 
 describe('utils', function () {
   describe('index', function () {
@@ -56,106 +54,6 @@ describe('utils', function () {
         }
       }
       expect(getSeedNameFromShoot(shoot)).toBe('foo')
-    })
-  })
-
-  describe('batchEmitter', function () {
-    const kind = 'foo'
-    const eventName = 'events'
-    const socket = new EventEmitter()
-    const objectKeyPath = 'id'
-    const notImplemented = 'You have to implement the method!'
-
-    class TestEmitter extends AbstractBatchEmitter {
-      clearData () {
-        try {
-          super.clearData()
-        } catch (err) {
-          this.socket.emit('error', err)
-        }
-      }
-    }
-
-    beforeEach(function () {
-      socket.removeAllListeners()
-    })
-
-    it('should ensure abstract methods throw an error', function () {
-      let message
-      socket.once('error', err => {
-        message = err.message
-      })
-      const emitter = new TestEmitter({ eventName, kind, socket, objectKeyPath })
-      expect(message).toBe(notImplemented)
-      expect(() => emitter.emit()).toThrowError(notImplemented)
-      expect(emitter.count()).toBe(0)
-      expect(() => emitter.appendChunkedEvents()).toThrowError(notImplemented)
-    })
-
-    it('should emit events in batches', function () {
-      const chunks = []
-      const emitter = new EventsEmitter({ kind, socket, objectKeyPath, eventName })
-      emitter.MIN_CHUNK_SIZE = 2
-      emitter.MAX_CHUNK_SIZE = 3
-      socket.on(eventName, ({ events }) => {
-        const chunk = events.map(event => event.objectKey)
-        chunks.push(chunk)
-      })
-      emitter.batchEmitObjects([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 }
-      ])
-      emitter.batchEmitObjectsAndFlush([
-        { id: 5 },
-        { id: 6 },
-        { id: 7 },
-        { id: 8 }
-      ])
-      expect(chunks).toEqual([
-        [1, 2, 3],
-        [4, 5, 6, 7],
-        [8]
-      ])
-    })
-
-    it('should emit namespaced events in batches', function () {
-      const chunks = []
-      const emitter = new NamespacedBatchEmitter({ eventName, kind, socket, objectKeyPath })
-      emitter.MIN_CHUNK_SIZE = 2
-      emitter.MAX_CHUNK_SIZE = 3
-      socket.on(eventName, ({ namespaces }) => {
-        const chunk = {}
-        for (const [namespace, events] of Object.entries(namespaces)) {
-          chunk[namespace] = events.map(event => event.objectKey)
-        }
-        chunks.push(chunk)
-      })
-      emitter.batchEmitObjects([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 }
-      ], 'bar')
-      emitter.batchEmitObjects([
-        { id: 1 }
-      ], 'foo')
-      emitter.batchEmitObjects([
-        { id: 5 },
-        { id: 6 },
-        { id: 7 },
-        { id: 8 }
-      ], 'bar')
-      emitter.batchEmitObjectsAndFlush([
-        { id: 2 }
-      ], 'foo')
-      expect(chunks).toEqual([
-        { bar: [1, 2, 3] },
-        { bar: [4], foo: [1] },
-        { bar: [5, 6, 7] },
-        { bar: [8], foo: [2] }
-      ])
     })
   })
 })

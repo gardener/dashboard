@@ -1,0 +1,75 @@
+{{- if .Values.global.dashboard.enabled }}
+apiVersion: {{ include "rbacversion" . }}
+kind: ClusterRole
+metadata:
+  name: gardener.cloud:system:dashboard
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - quotas
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - projects
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - shoots
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - apiregistration.k8s.io
+  resources:
+  - apiservices
+  verbs:
+  - get
+- apiGroups:
+  - core.gardener.cloud
+  resources:
+  - controllerregistrations
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  resourceNames:
+  - cluster-identity
+- apiGroups:
+  - ""
+  resources:
+  - resourcequotas
+  verbs:
+  - list
+  - watch
+# keep until gardener/monitoring#11 is resolved
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+{{- end }}

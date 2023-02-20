@@ -301,6 +301,18 @@ describe('kube-config', () => {
       })
     })
 
+    it('should return a config for the gke-gcloud-auth-plugin', () => {
+      kubeconfig.users[0].user = {
+        exec: {
+          command: 'gke-gcloud-auth-plugin'
+        }
+      }
+      const config = fromKubeconfig(kubeconfig)
+      expect(config).toEqual({
+        rejectUnauthorized: true
+      })
+    })
+
     it('should return a config with unsupported user', () => {
       kubeconfig.users[0].user = {}
       const config = fromKubeconfig(kubeconfig)
@@ -387,7 +399,7 @@ describe('kube-config', () => {
 
   describe('#parseKubeconfig', () => {
     it('should return the input object instance', () => {
-      const input = Config.build({}, undefined)
+      const input = Config.build({}, {})
       const kubeconfig = parseKubeconfig(input)
       expect(kubeconfig).toBe(input)
     })
@@ -452,6 +464,20 @@ describe('kube-config', () => {
 
     it('should create an auth-provider token', async () => {
       delete input.users[0].user['auth-provider'].config
+      const kubeconfig = parseKubeconfig(input)
+      await kubeconfig.refreshAuthProviderConfig(credentials)
+      expect(mockGetToken).toBeCalledTimes(1)
+      expect(kubeconfig.users).toHaveLength(1)
+      const authProvider = kubeconfig.currentUser['auth-provider']
+      expect(authProvider.config['access-token']).toBe('valid-access-token')
+    })
+
+    it('should convert the exec command "gke-gcloud-auth-plugin" to a gcp auth-provider', async () => {
+      input.users[0].user = {
+        exec: {
+          command: 'gke-gcloud-auth-plugin'
+        }
+      }
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
       expect(mockGetToken).toBeCalledTimes(1)

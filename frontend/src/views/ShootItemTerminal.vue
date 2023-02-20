@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <!-- TODO on shootsubscription done do not fetch seedInfo -->
   <terminal-splitpanes
     ref="terminalSplitpanes"
     :name="name"

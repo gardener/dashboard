@@ -10,30 +10,68 @@ const { getCertificate } = require('./helper')
 
 const defaults = {
   global: {
-    image: {
-      tag: '1.26.0-dev-4d529c1'
-    },
-    apiServerUrl: 'https://api.garden.example.org',
     virtualGarden: {
       enabled: false
     },
-    serviceAccountName: 'gardener-dashboard',
-    serviceAccountTokenVolumeProjection: {
-      enabled: true,
-      expirationSeconds: 43200
-    },
-    ingress: {
-      annotations: {
-        'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
-        'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true',
-        'kubernetes.io/ingress.class': 'nginx'
+    dashboard: {
+      image: {
+        tag: '1.26.0-dev-4d529c1'
       },
-      hosts: [
-        'dashboard.garden.example.org',
-        'dashboard.ingress.garden.example.org'
-      ],
-      tls: {
-        secretName: 'default-gardener-dashboard-tls'
+      apiServerUrl: 'https://api.garden.example.org',
+      serviceAccountName: 'gardener-dashboard',
+      serviceAccountTokenVolumeProjection: {
+        enabled: true,
+        expirationSeconds: 43200
+      },
+      ingress: {
+        annotations: {
+          'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
+          'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true',
+          'kubernetes.io/ingress.class': 'nginx'
+        },
+        hosts: [
+          'dashboard.garden.example.org',
+          'dashboard.ingress.garden.example.org'
+        ],
+        tls: {
+          secretName: 'default-gardener-dashboard-tls'
+        }
+      },
+
+      sessionSecret: 'sessionSecret',
+      secret: 'secret',
+      oidc: {
+        issuerUrl: 'https://identity.garden.example.org',
+        clientId: 'dashboard',
+        clientSecret: 'dashboardSecret',
+        ca: getCertificate('...')
+      },
+      frontendConfig: {
+        landingPageUrl: 'https://gardener.cloud/',
+        helpMenuItems: [
+          {
+            title: 'Getting Started',
+            icon: 'description',
+            url: 'https://gardener.cloud/about/'
+          },
+          {
+            title: 'slack',
+            icon: 'mdi-slack',
+            url: 'https://kubernetes.slack.com/messages/gardener'
+          },
+          {
+            title: 'Issues',
+            icon: 'mdi-bug',
+            url: 'https://github.com/gardener/dashboard/issues/'
+          }
+        ],
+        externalTools: [
+          {
+            title: 'Applications and Services Hub',
+            icon: 'apps',
+            url: 'https://apps.garden.example.org/foo/bar{?namespace,name}'
+          }
+        ]
       }
     },
     terminal: {
@@ -66,41 +104,6 @@ const defaults = {
           }
         }
       }
-    },
-    sessionSecret: 'sessionSecret',
-    secret: 'secret',
-    oidc: {
-      issuerUrl: 'https://identity.garden.example.org',
-      clientId: 'dashboard',
-      clientSecret: 'dashboardSecret',
-      ca: getCertificate('...')
-    },
-    frontendConfig: {
-      landingPageUrl: 'https://gardener.cloud/',
-      helpMenuItems: [
-        {
-          title: 'Getting Started',
-          icon: 'description',
-          url: 'https://gardener.cloud/about/'
-        },
-        {
-          title: 'slack',
-          icon: 'mdi-slack',
-          url: 'https://kubernetes.slack.com/messages/gardener'
-        },
-        {
-          title: 'Issues',
-          icon: 'mdi-bug',
-          url: 'https://github.com/gardener/dashboard/issues/'
-        }
-      ],
-      externalTools: [
-        {
-          title: 'Applications and Services Hub',
-          icon: 'apps',
-          url: 'https://apps.garden.example.org/foo/bar{?namespace,name}'
-        }
-      ]
     }
   }
 }
