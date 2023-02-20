@@ -7,8 +7,11 @@
 'use strict'
 
 const {
-  getDashboardUrlPath
+  getDashboardUrlPath,
+  getGardenClusterIdentity
 } = require('../lib/services/shoots')
+const config = require('../lib/config')
+const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('services', function () {
   describe('shoots', function () {
@@ -42,6 +45,36 @@ describe('services', function () {
 
       it('should return no dashboard URL path', function () {
         expect(getDashboardUrlPath(undefined)).toBeUndefined()
+      })
+    })
+
+    describe('#getGardenClusterIdentity', function () {
+      const clusterIdentity = config.clusterIdentity
+      let clusterIdentityStub
+
+      beforeEach(function () {
+        clusterIdentityStub = jest.fn()
+        Object.defineProperty(config, 'clusterIdentity', { configurable: true, get: clusterIdentityStub })
+      })
+
+      afterEach(function () {
+        Object.defineProperty(config, 'clusterIdentity', { configurable: true, value: clusterIdentity })
+      })
+
+      it('should return value from cluster identity configmap', async function () {
+        clusterIdentityStub.mockReturnValue(undefined)
+        mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
+
+        expect(await getGardenClusterIdentity()).toEqual('kubernetes')
+      })
+
+      it('should return value from dashboard config, if present', async function () {
+        clusterIdentityStub.mockReturnValue('myCluster')
+        const reqStub = jest.fn()
+        mockRequest.mockImplementationOnce(reqStub)
+
+        expect(await getGardenClusterIdentity()).toEqual('myCluster')
+        expect(reqStub).not.toHaveBeenCalled()
       })
     })
   })
