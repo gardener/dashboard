@@ -44,6 +44,14 @@ SPDX-License-Identifier: Apache-2.0
           hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
         ></v-text-field>
       </div>
+      <div v-if="vendor === 'aws-route53'">
+        <v-text-field
+          color="primary"
+          v-model="awsRegion"
+          label="Region (optional)"
+          hint="e.g. eu-central-1"
+        ></v-text-field>
+      </div>
     </template>
     <template v-slot:help-slot>
       <p v-if="vendor==='aws'">
@@ -118,6 +126,7 @@ export default {
     return {
       accessKeyId: undefined,
       secretAccessKey: undefined,
+      awsRegion: undefined,
       hideSecret: true,
       validationErrors,
       templateAws: {
@@ -214,7 +223,8 @@ export default {
     secretData () {
       return {
         accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
+        secretAccessKey: this.secretAccessKey,
+        AWS_REGION: this.awsRegion
       }
     },
     validators () {
@@ -255,6 +265,7 @@ export default {
 
       this.accessKeyId = ''
       this.secretAccessKey = ''
+      this.awsRegion = ''
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'accessKeyId')
