@@ -132,7 +132,7 @@ export default {
     },
     hint () {
       if (this.notInCloudProfile) {
-        return 'This volume type may not be supported by your worker as it is not supported by your current worker settings.'
+        return 'This volume type may not be supported by your worker as it is not supported by your current worker settings'
       }
       return ''
     },
