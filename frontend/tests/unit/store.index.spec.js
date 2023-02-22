@@ -263,9 +263,6 @@ describe('Store', () => {
         },
         zonesByCloudProfileNameAndRegion (...args) {
           return getters.zonesByCloudProfileNameAndRegion({}, this)(...args)
-        },
-        unavailableZonesByCloudProfileNameAndRegionAndZonesAndItem (...args) {
-          return getters.unavailableZonesByCloudProfileNameAndRegionAndZonesAndItem({}, this)(...args)
         }
       }
     })
@@ -284,12 +281,6 @@ describe('Store', () => {
       expect(dashboardMachineTypes[0].name).toBe('machineType4')
     })
 
-    it('should return unavailable zones by region and zones and machine type from cloud profile', () => {
-      const unavailableZones = getters.unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1', 'zone2'], machineType: 'machineType1' })
-      expect(unavailableZones).toHaveLength(1)
-      expect(unavailableZones[0]).toBe('zone2')
-    })
-
     it('should return volumeTypes by region and zones from cloud profile', () => {
       let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
       expect(dashboardVolumeTypes).toHaveLength(3)
@@ -299,12 +290,6 @@ describe('Store', () => {
 
       dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2' })
       expect(dashboardVolumeTypes).toHaveLength(3)
-    })
-
-    it('should return unavailable zones by region and zones and volume type from cloud profile', () => {
-      const unavailableZones = getters.unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1', 'zone2', 'zone3'], volumeType: 'volumeType3' })
-      expect(unavailableZones).toHaveLength(1)
-      expect(unavailableZones[0]).toBe('zone3')
     })
 
     it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {

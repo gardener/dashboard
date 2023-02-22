@@ -70,10 +70,6 @@ export default {
     },
     cloudProfileName: {
       type: String
-    },
-    unavailableZonesForVolumeType: {
-      type: Array,
-      default: () => []
     }
   },
   data () {
@@ -137,10 +133,6 @@ export default {
     hint () {
       if (this.notInCloudProfile) {
         return 'This volume type may not be supported by your worker as it is not supported by your current worker settings.'
-      }
-      if (this.unavailableZonesForVolumeType.length) {
-        const zones = this.unavailableZonesForMachineType.join(', ')
-        return `This volume type may not be supported by your worker as it is not available in zone(s) ${zones}`
       }
       return ''
     },

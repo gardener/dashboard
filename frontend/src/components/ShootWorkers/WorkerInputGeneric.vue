@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
       <div class="regularInput">
         <machine-type
           :machine-types="machineTypes"
-          :unavailable-zones-for-machine-type="unavailableZonesForMachineType"
           v-model="machineTypeValue"
           :valid.sync="internalMachineTypeValid"
         ></machine-type>
@@ -59,7 +58,6 @@ SPDX-License-Identifier: Apache-2.0
       <div v-if="volumeInCloudProfile" class="regularInput">
         <volume-type
         :volume-types="volumeTypes"
-        :unavailable-zones-for-volume-type="unavailableZonesForVolumeType"
         :worker="worker"
         :cloud-profile-name="cloudProfileName"
         @update-volume-type="onUpdateVolumeType"
@@ -259,9 +257,7 @@ export default {
       'machineArchitecturesByCloudProfileNameAndRegion',
       'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
-      'minimumVolumeSizeByCloudProfileNameAndRegion',
-      'unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType',
-      'unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType'
+      'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
     validators () {
       return {
@@ -309,24 +305,6 @@ export default {
         cloudProfileName: this.cloudProfileName,
         region: this.region,
         architecture: this.worker.machine.architecture
-      })
-    },
-    unavailableZonesForMachineType () {
-      return this.unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType({
-        cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        architecture: this.worker.machine.architecture,
-        zones: this.worker.zones,
-        machineType: this.machineTypeValue
-      })
-    },
-    unavailableZonesForVolumeType () {
-      return this.unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType({
-        cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        architecture: this.worker.machine.architecture,
-        zones: this.worker.zones,
-        volumeType: this.worker.volume.type
       })
     },
     machineArchitectures () {
