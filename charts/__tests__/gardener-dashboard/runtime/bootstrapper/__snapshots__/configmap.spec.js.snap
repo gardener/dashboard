@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gardener-dashboard-terminal-bootstrapper configmap should render the template w/ defaults values 1`] = `
+Object {
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "terminal-bootstrapper",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
+    "name": "gardener-dashboard-terminal-bootstrapper-configmap-config",
+    "namespace": "garden",
+  },
+}
+`;
+
+exports[`gardener-dashboard-terminal-bootstrapper configmap should render the template w/ defaults values 2`] = `
+Object {
+  "logLevel": "debug",
+  "readinessProbe": Object {
+    "periodSeconds": 5,
+  },
+  "terminal": Object {
+    "bootstrap": Object {
+      "disabled": true,
+    },
+    "gardenTerminalHost": Object {
+      "seedRef": "soil-gcp",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard-terminal-bootstrapper configmap when bootstrap is enabled for all clusters should render the template 1`] = `
+Object {
+  "logLevel": "debug",
+  "readinessProbe": Object {
+    "periodSeconds": 5,
+  },
+  "terminal": Object {
+    "bootstrap": Object {
+      "apiServerIngress": Object {
+        "annotations": Object {
+          "kubernetes.io/ingress.class": "nginx",
+        },
+      },
+      "disabled": false,
+      "gardenTerminalHost": Object {
+        "apiServerIngress": Object {
+          "annotations": Object {
+            "cert.gardener.cloud/purpose": "managed",
+            "kubernetes.io/ingress.class": "nginx",
+            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+          },
+        },
+        "namespace": null,
+      },
+      "gardenTerminalHostDisabled": false,
+      "queueOptions": Object {
+        "concurrent": 3,
+      },
+      "seedDisabled": false,
+      "shootDisabled": false,
+    },
+    "gardenTerminalHost": Object {
+      "seedRef": "soil-gcp",
+    },
+  },
+}
+`;

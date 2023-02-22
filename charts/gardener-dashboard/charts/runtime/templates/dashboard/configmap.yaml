@@ -1,0 +1,326 @@
+{{- if .Values.global.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gardener-dashboard-configmap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+data:
+  login-config.json: |
+    {
+       "landingPageUrl": {{ quote .Values.global.dashboard.frontendConfig.landingPageUrl }},
+       {{- if .Values.global.dashboard.oidc }}
+       "loginTypes": ["oidc", "token"]
+       {{- else }}
+       "loginTypes": ["token"]
+       {{- end }}
+    }
+  config.yaml: |
+    ---
+    port: {{ .Values.global.dashboard.containerPort }}
+    logLevel: {{ .Values.global.dashboard.logLevel }}
+    logFormat: text
+    apiServerUrl: {{ required ".Values.global.dashboard.apiServerUrl is required" .Values.global.dashboard.apiServerUrl }}
+    {{- if .Values.global.dashboard.apiServerCaData }}
+    apiServerCaData: {{ .Values.global.dashboard.apiServerCaData }}
+    {{- else if .Values.global.dashboard.apiServerCa }}
+    apiServerCaData: {{ b64enc .Values.global.dashboard.apiServerCa }}
+    {{- else if eq (default false .Values.global.dashboard.apiServerSkipTlsVerify) true }}
+    apiServerSkipTlsVerify: true
+    {{- end }}
+    {{- if .Values.global.dashboard.tokenRequestAudiences }}
+    tokenRequestAudiences:
+      {{- range .Values.global.dashboard.tokenRequestAudiences }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.global.dashboard.clusterIdentity }}
+    clusterIdentity: {{ .Values.global.dashboard.clusterIdentity }}
+    {{- end }}
+    readinessProbe:
+      periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
+    {{- if .Values.global.dashboard.gitHub }}
+    gitHub:
+      apiUrl: {{ .Values.global.dashboard.gitHub.apiUrl }}
+      {{- if .Values.global.dashboard.gitHub.ca }}
+      ca: {{ quote .Values.global.dashboard.gitHub.ca }}
+      {{- end }}
+      org: {{ .Values.global.dashboard.gitHub.org }}
+      repository: {{ .Values.global.dashboard.gitHub.repository }}
+      {{- if .Values.global.dashboard.gitHub.pollIntervalSeconds }}
+      pollIntervalSeconds: {{ .Values.global.dashboard.gitHub.pollIntervalSeconds }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.global.unreachableSeeds }}
+    unreachableSeeds:
+      {{- with .Values.global.unreachableSeeds.matchLabels }}
+      matchLabels:
+{{ toYaml . | trim | indent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.global.dashboard.oidc }}
+    oidc:
+      issuer: {{ required ".Values.global.dashboard.oidc.issuerUrl is required" .Values.global.dashboard.oidc.issuerUrl }}
+      {{- if .Values.global.dashboard.oidc.usePKCE }}
+      usePKCE: true
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc.sessionLifetime }}
+      sessionLifetime: {{ .Values.global.dashboard.oidc.sessionLifetime }}
+      {{- end }}
+      redirect_uris:
+      {{- $protocol := ternary "http" "https" ( empty .Values.global.dashboard.ingress.tls ) }}
+      {{- range .Values.global.dashboard.ingress.hosts }}
+      - "{{ $protocol }}://{{ . }}/auth/callback"
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc.scope }}
+      scope: {{ .Values.global.dashboard.oidc.scope }}
+      {{- else }}
+      scope: "openid email profile groups audience:server:client_id:{{ .Values.global.dashboard.oidc.clientId }} audience:server:client_id:kube-kubectl"
+      {{- end }}
+      {{- if hasKey .Values.global.dashboard.oidc "rejectUnauthorized" }}
+      rejectUnauthorized: {{ .Values.global.dashboard.oidc.rejectUnauthorized }}
+      {{- else }}
+      rejectUnauthorized: true
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc.ca }}
+      ca: {{ quote .Values.global.dashboard.oidc.ca }}
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc.clockTolerance }}
+      clockTolerance: {{ .Values.global.dashboard.oidc.clockTolerance }}
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc.public }}
+      public:
+        clientId: {{ .Values.global.dashboard.oidc.public.clientId | default "kube-kubectl" }}
+        {{- if .Values.global.dashboard.oidc.public.clientSecret }}
+        clientSecret: {{ .Values.global.dashboard.oidc.public.clientSecret }}
+        {{- end }}
+        {{- if or .Values.global.dashboard.oidc.public.usePKCE (not .Values.global.dashboard.oidc.public.clientSecret) }}
+        usePKCE: true
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.global.terminal }}
+    terminal:
+      container:
+        image: {{ .Values.global.terminal.container.image }}
+      {{- if .Values.global.terminal.containerOperator }}
+      {{- if .Values.global.terminal.containerOperator.image }}
+      containerOperator:
+        image: {{ .Values.global.terminal.containerOperator.image }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.global.terminal.containerImageDescriptions }}
+      containerImageDescriptions:
+      {{- range .Values.global.terminal.containerImageDescriptions }}
+      - image: {{ .image }}
+        description: {{ .description }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.global.terminal.serviceAccountTokenExpiration }}
+      serviceAccountTokenExpiration: {{ .Values.global.terminal.serviceAccountTokenExpiration }}
+      {{- end }}
+      gardenTerminalHost:
+        {{- if .Values.global.terminal.gardenTerminalHost.secretRef }}
+        apiServerIngressHost: {{ .Values.global.terminal.gardenTerminalHost.apiServerIngressHost }}
+        secretRef:
+          namespace: {{ .Values.global.terminal.gardenTerminalHost.secretRef.namespace }}
+          {{- with .Values.global.terminal.gardenTerminalHost.secretRef.labelSelector }}
+          labelSelector:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.global.terminal.gardenTerminalHost.seedRef }}
+        seedRef: {{ .Values.global.terminal.gardenTerminalHost.seedRef }}
+        {{- end }}
+        {{- if .Values.global.terminal.gardenTerminalHost.shootRef }}
+        shootRef:
+          name: {{ .Values.global.terminal.gardenTerminalHost.shootRef.name }}
+          namespace: {{ .Values.global.terminal.gardenTerminalHost.shootRef.namespace }}
+        {{- end }}
+      garden:
+        operatorCredentials:
+{{ toYaml .Values.global.terminal.garden.operatorCredentials | trim | indent 10 }}
+    {{- end }}
+    frontend:
+      {{- if .Values.global.dashboard.frontendConfig.helpMenuItems }}
+      helpMenuItems:
+      {{- range .Values.global.dashboard.frontendConfig.helpMenuItems }}
+      - title: {{ .title }}{{- if .icon }}
+        icon: {{ .icon }}{{- end }}
+        url: {{ .url }}{{- if .target }}
+        target: {{ .target }}{{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.externalTools }}
+      externalTools:
+      {{- range .Values.global.dashboard.frontendConfig.externalTools }}
+      - title: {{ .title }}{{- if .icon }}
+        icon: {{ .icon }}{{- end }}
+        url: {{ .url }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.ticket }}
+      ticket:
+        {{- if .Values.global.dashboard.frontendConfig.ticket.hideClustersWithLabels }}
+        hideClustersWithLabels:
+          {{- range .Values.global.dashboard.frontendConfig.ticket.hideClustersWithLabels }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.ticket.newTicketLabels }}
+        newTicketLabels:
+          {{- range .Values.global.dashboard.frontendConfig.ticket.newTicketLabels }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
+        gitHubRepoUrl: {{ .Values.global.dashboard.frontendConfig.ticket.gitHubRepoUrl }}
+        avatarSource: {{ .Values.global.dashboard.frontendConfig.ticket.avatarSource | default "github" }}
+        issueDescriptionTemplate: {{ quote .Values.global.dashboard.frontendConfig.ticket.issueDescriptionTemplate }}
+      {{- end }}
+      features:
+        terminalEnabled: {{ .Values.global.dashboard.frontendConfig.features.terminalEnabled | default false }}
+        projectTerminalShortcutsEnabled: {{ .Values.global.dashboard.frontendConfig.features.projectTerminalShortcutsEnabled | default false }}
+      {{- if .Values.global.dashboard.frontendConfig.terminal }}
+      terminal:
+        {{- if .Values.global.dashboard.frontendConfig.terminal.heartbeatIntervalSeconds }}
+        heartbeatIntervalSeconds: {{ .Values.global.dashboard.frontendConfig.terminal.heartbeatIntervalSeconds }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.terminal.shortcuts }}
+        shortcuts:
+        {{- range .Values.global.dashboard.frontendConfig.terminal.shortcuts }}
+        - title: {{ .title }}
+          description: {{ .description }}
+          target: {{ .target }}
+          {{- if .container }}
+          container:
+            {{- if .container.image }}
+            image: {{ .container.image }}
+            {{- end }}
+            {{- if .container.command }}
+            command:
+            {{- range .container.command }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- if .container.args }}
+            args:
+            {{- range .container.args }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.defaultHibernationSchedule }}
+      defaultHibernationSchedule:
+{{ toYaml .Values.global.dashboard.frontendConfig.defaultHibernationSchedule | trim | indent 8 }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.seedCandidateDeterminationStrategy }}
+      seedCandidateDeterminationStrategy: {{ .Values.global.dashboard.frontendConfig.seedCandidateDeterminationStrategy }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.alert }}
+      alert:
+        type: {{ .Values.global.dashboard.frontendConfig.alert.type }}
+        message: {{ .Values.global.dashboard.frontendConfig.alert.message }}
+        {{- if .Values.global.dashboard.frontendConfig.alert.identifier }}
+        identifier: {{ .Values.global.dashboard.frontendConfig.alert.identifier }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.costObject }}
+      costObject:
+        title: {{ .Values.global.dashboard.frontendConfig.costObject.title }}
+        description: {{ .Values.global.dashboard.frontendConfig.costObject.description }}
+        regex: {{ .Values.global.dashboard.frontendConfig.costObject.regex }}
+        errorMessage: {{ .Values.global.dashboard.frontendConfig.costObject.errorMessage }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.sla }}
+      sla:
+        title: {{ .Values.global.dashboard.frontendConfig.sla.title }}
+        description: {{ quote .Values.global.dashboard.frontendConfig.sla.description }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.accessRestriction }}
+      accessRestriction:
+        {{- if  .Values.global.dashboard.frontendConfig.accessRestriction.noItemsText }}
+        noItemsText: {{ quote .Values.global.dashboard.frontendConfig.accessRestriction.noItemsText }}
+        {{- end }}
+        items:
+        {{- range .Values.global.dashboard.frontendConfig.accessRestriction.items }}
+        - key: {{ .key }}
+          display:
+            visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+            title: {{ .display.title }}{{- end }}{{- if .display.description }}
+            description: {{ .display.description }}{{- end }}
+          input:
+            title: {{ quote .input.title }}
+            {{- if .input.description }}
+            description: {{ quote .input.description }}
+            {{- end }}
+            {{- if .input.inverted }}
+            inverted: {{ .input.inverted }}
+            {{- end }}
+          {{- if .options }}
+          options:
+          {{- range .options }}
+          - key: {{ .key }}
+            display:
+              visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+              title: {{ .display.title }}{{- end }}{{- if .display.description }}
+              description: {{ .display.description }}{{- end }}
+            input:
+              title: {{ quote .input.title }}
+              {{- if .input.description }}
+              description: {{ quote .input.description }}
+              {{- end }}
+              {{- if .input.inverted }}
+              inverted: {{ .input.inverted }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.themes }}
+      themes:
+        {{- if .Values.global.dashboard.frontendConfig.themes.light }}
+          {{- with .Values.global.dashboard.frontendConfig.themes.light }}
+          light:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.themes.dark }}
+          {{- with .Values.global.dashboard.frontendConfig.themes.dark }}
+          dark:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.vendorHints }}
+      vendorHints:
+        {{- range .Values.global.dashboard.frontendConfig.vendorHints }}
+        - matchNames: {{ toJson .matchNames }}
+          message: {{ quote .message }}
+          {{- if .severity }}
+          severity: {{ .severity }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.resourceQuotaHelp }}
+      resourceQuotaHelp:
+        text: {{ required ".Values.global.dashboard.frontendConfig.resourceQuotaHelp.text is required" .Values.global.dashboard.frontendConfig.resourceQuotaHelp.text | quote }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp }}
+      controlPlaneHighAvailabilityHelp:
+        text: {{ required ".Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text is required" .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text | quote }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
+      defaultNodesCIDR: {{ .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
+      serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,192 @@
+{{- if .Values.global.dashboard.enabled }}
+apiVersion: {{ include "deploymentversion" . }}
+kind: Deployment
+metadata:
+  name: gardener-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.global.dashboard.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gardener-dashboard
+      app.kubernetes.io/component: dashboard
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-gardener-dashboard-config: {{ include (print .Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
+        checksum/secret-gardener-dashboard-sessionSecret: {{ include (print .Template.BasePath "/dashboard/secret-sessionSecret.yaml") . | sha256sum }}
+        {{- if .Values.global.dashboard.oidc }}
+        checksum/secret-gardener-dashboard-oidc: {{ include (print .Template.BasePath "/dashboard/secret-oidc.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.global.dashboard.gitHub }}
+        checksum/secret-gardener-dashboard-github: {{ include (print .Template.BasePath "/dashboard/secret-github.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.global.dashboard.kubeconfig }}
+        checksum/secret-gardener-dashboard-kubeconfig: {{ include (print .Template.BasePath "/dashboard/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.global.dashboard.podAnnotations }}
+        {{- toYaml .Values.global.dashboard.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/name: gardener-dashboard
+        app.kubernetes.io/component: dashboard
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+        {{- if .Values.global.dashboard.podLabels }}
+        {{- toYaml .Values.global.dashboard.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      volumes:
+      - name: gardener-dashboard-config
+        configMap:
+          name: gardener-dashboard-configmap
+          items:
+          - key: config.yaml
+            path: config.yaml
+          defaultMode: 420
+      - name: gardener-dashboard-login-config
+        configMap:
+          name: gardener-dashboard-configmap
+          items:
+          - key: login-config.json
+            path: login-config.json
+          defaultMode: 0444
+      {{- if .Values.global.dashboard.frontendConfig.assets }}
+      - name: assets
+        configMap:
+          name: dashboard-assets
+          defaultMode: 0444
+      {{- end }}
+      {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
+      - name: service-account-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: {{ required ".Values.global.dashboard.serviceAccountTokenVolumeProjection.expirationSeconds is required" .Values.global.dashboard.serviceAccountTokenVolumeProjection.expirationSeconds }}
+              {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.audience }}
+              audience: {{ .Values.global.dashboard.serviceAccountTokenVolumeProjection.audience }}
+              {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.kubeconfig }}
+      - name: gardener-dashboard-secret-kubeconfig
+        secret:
+          secretName: gardener-dashboard-kubeconfig
+      {{- end }}
+      {{- if .Values.global.dashboard.kubeconfig }}
+      automountServiceAccountToken: false
+      {{- end }}
+      {{- if or ( not .Values.global.virtualGarden.enabled ) .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
+      serviceAccountName: {{ required ".Values.global.dashboard.serviceAccountName is required" .Values.global.dashboard.serviceAccountName }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+      containers:
+        - name: gardener-dashboard
+          {{- if .Values.global.dashboard.nodeOptions }}
+          args:
+          {{- range .Values.global.dashboard.nodeOptions }}
+          - {{ . }}
+          {{- end }}
+          - server.js
+          {{- end }}
+          image: "{{ include "utils-templates.image" .Values.global.dashboard.image }}"
+          imagePullPolicy: {{ .Values.global.dashboard.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.global.dashboard.containerPort }}
+              protocol: TCP
+          {{- if .Values.global.dashboard.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.global.dashboard.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.global.dashboard.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.global.dashboard.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.global.dashboard.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.global.dashboard.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.global.dashboard.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.global.dashboard.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.global.dashboard.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.global.dashboard.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.global.dashboard.readinessProbe.failureThreshold }}
+          {{- end }}
+          env:
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-sessionsecret
+                key: keyValue
+          {{- if .Values.global.dashboard.oidc }}
+          - name: OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_id
+          - name: OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_secret
+          {{- if .Values.global.dashboard.oidc.caSecretKeyRef }}
+          - name: OIDC_CA
+            valueFrom:
+              secretKeyRef:
+                name: {{  required ".Values.global.dashboard.oidc.caSecretKeyRef.name is required" .Values.global.dashboard.oidc.caSecretKeyRef.name }}
+                key: {{ .Values.global.dashboard.oidc.caSecretKeyRef.key | default "ca.crt" }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.global.dashboard.gitHub }}
+          - name: GITHUB_AUTHENTICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.token
+          - name: GITHUB_WEBHOOK_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: webhookSecret
+          {{- end }}
+          - name: GARDENER_CONFIG
+            value: /etc/gardener-dashboard/config.yaml
+          {{- if .Values.global.dashboard.kubeconfig }}
+          - name: KUBECONFIG
+            value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
+          {{- end }}
+          resources: {{ toYaml .Values.global.dashboard.resources | nindent 12 }}
+          volumeMounts:
+          - name: gardener-dashboard-config
+            mountPath: /etc/gardener-dashboard
+          - name: gardener-dashboard-login-config
+            mountPath: /app/public/login-config.json
+            subPath: login-config.json
+          {{- if .Values.global.dashboard.frontendConfig.assets }}
+          - name: assets
+            mountPath: /app/public/static/assets
+          {{- end }}
+          {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
+          - name: service-account-token
+            mountPath: /var/run/secrets/projected/serviceaccount
+            readOnly: true
+          {{- end }}
+          {{- if .Values.global.dashboard.kubeconfig }}
+          - name: gardener-dashboard-secret-kubeconfig
+            mountPath: /etc/gardener-dashboard/secrets/kubeconfig
+            readOnly: true
+          {{- end }}
+      restartPolicy: Always
+{{- end }}

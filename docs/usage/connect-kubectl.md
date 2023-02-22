@@ -30,6 +30,7 @@ On this page:
 3. If `gardenlogin` is not installed or configured, click on the *show gardenlogin info* action to follow the installation and configuration hints.
 
    <img width="700" src="../images/03-gardenlogin-info.png">
+4. You might also need to install [kubelogin](https://github.com/int128/kubelogin#setup)
 
 ### Connecting to the cluster
 

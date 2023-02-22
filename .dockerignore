@@ -46,6 +46,15 @@
 !packages/kube-client/__fixtures__
 !packages/kube-client/__mocks__
 
+# include workspace packages/terminal-bootstrap
+!packages/terminal-bootstrap/package.json
+!packages/terminal-bootstrap/jest.setup.js
+!packages/terminal-bootstrap/main.js
+!packages/terminal-bootstrap/lib
+!packages/terminal-bootstrap/__tests__
+!packages/terminal-bootstrap/__fixtures__
+!packages/terminal-bootstrap/__mocks__
+
 # include workspace backend
 !backend/package.json
 !backend/jest.setup.js

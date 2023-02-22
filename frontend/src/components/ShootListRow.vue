@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr :class="{ 'stale': isStale }">
+  <tr :class="{ 'stale': isStaleShoot }">
     <td v-for="cell in cells" :key="cell.header.value" :class="cell.header.class" class="position-relative">
       <template v-if="cell.header.value === 'project'">
         <router-link :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         </router-link>
       </template>
       <template v-if="cell.header.value === 'name'">
-        <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
+        <v-row class="pa-0 ma-0 fill-height flex-nowrap align-center">
           <v-col class="grow pa-0 ma-0">
             <auto-hide right>
               <template v-slot:activator>
@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
               <copy-btn :clipboard-text="shootName"></copy-btn>
             </auto-hide>
           </v-col>
-          <v-col class="shrink" >
+          <v-col class="shrink pa-0 ma-0">
             <shoot-messages :shoot-item="shootItem" />
           </v-col>
         </v-row>
@@ -137,9 +137,9 @@ SPDX-License-Identifier: Apache-2.0
           <shoot-list-row-actions :shoot-item="shootItem"></shoot-list-row-actions>
         </v-row>
       </template>
-      <v-tooltip top>
+      <v-tooltip top v-if="isStaleShoot">
         <template v-slot:activator="{ on }">
-          <div v-if="isStaleShoot" class="stale-overlay" v-on="on"></div>
+          <div class="stale-overlay" v-on="on"></div>
         </template>
         This cluster is no longer part of the list and kept as stale item
       </v-tooltip>
@@ -279,7 +279,7 @@ export default {
         }
 
         let className = header.class
-        if (this.isStale && !header.stalePointerEvents) {
+        if (this.isStaleShoot && !header.stalePointerEvents) {
           className = `${header.class} no-stale-pointer-events`
         }
 
@@ -291,9 +291,6 @@ export default {
           value // currently only applicable for header.customField === true
         }
       })
-    },
-    isStale () {
-      return this.shootItem.stale
     }
   },
   methods: {

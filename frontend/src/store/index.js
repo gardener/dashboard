@@ -1375,12 +1375,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  getShootSeedInfo ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/getSeedInfo', { name, namespace })
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
       .catch(err => {
