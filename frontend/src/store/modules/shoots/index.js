@@ -353,7 +353,7 @@ const actions = {
   setFocusMode ({ commit, getters }, value) {
     let sortedUids
     if (value) {
-      const sortedShoots = getters.sortItems(state.filteredShoots, state.sortBy, state.sortDesc)
+      const sortedShoots = getters.sortItems([...state.filteredShoots], state.sortBy, state.sortDesc)
       sortedUids = map(sortedShoots, 'metadata.uid')
     }
     commit('SET_FOCUS_MODE', { value, sortedUids })

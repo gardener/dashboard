@@ -654,7 +654,7 @@ export default {
       return !this.showOnlyShootsWithIssues
     },
     filterTooltip () {
-      return this.freezeSorting
+      return this.focusModeInternal
         ? 'Filters cannot be changed when focus mode is active'
         : ''
     },
