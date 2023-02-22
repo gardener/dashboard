@@ -456,37 +456,6 @@ const getters = {
       return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
     }
   },
-  unavailableZonesByCloudProfileNameAndRegionAndZonesAndItem (state, getters) {
-    return ({ type, cloudProfileName, region, zones, item }) => {
-      if (!cloudProfileName) {
-        return []
-      }
-
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const regionObject = find(cloudProfile.data.regions, { name: region })
-      let regionZones = get(regionObject, 'zones', [])
-      regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
-      const unavailableZones = filter(regionZones, zone => {
-        if (type === 'machineTypes') {
-          return includes(zone.unavailableMachineTypes, item)
-        } else if (type === 'volumeTypes') {
-          return includes(zone.unavailableVolumeTypes, item)
-        }
-        return true
-      })
-      return map(unavailableZones, 'name')
-    }
-  },
-  unavailableZonesByCloudProfileNameAndRegionAndZonesAndMachineType (state, getters) {
-    return ({ cloudProfileName, region, zones, machineType }) => {
-      return getters.unavailableZonesByCloudProfileNameAndRegionAndZonesAndItem({ type: 'machineTypes', cloudProfileName, region, zones, item: machineType })
-    }
-  },
-  unavailableZonesByCloudProfileNameAndRegionAndZonesAndVolumeType (state, getters) {
-    return ({ cloudProfileName, region, zones, volumeType }) => {
-      return getters.unavailableZonesByCloudProfileNameAndRegionAndZonesAndItem({ type: 'volumeTypes', cloudProfileName, region, zones, item: volumeType })
-    }
-  },
   machineTypesByCloudProfileName (state, getters) {
     return ({ cloudProfileName }) => {
       return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
