@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
                   <img src="/static/assets/logo.svg" alt="Login to PSKE" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h5 font-weight-light">Managed Kubernetes at Scale</span>
+                  <span class="flex my-4 primary--text text-h5 font-weight-light">{{ customSubheader }}</span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -68,7 +68,11 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </v-container>
       <div v-if="landingPageUrl" class="footer text-caption">
-        <span class="primary--text">Discover what our service is about at the <a :href="landingPageUrl" target="_blank" rel="noopener">PSKE Landing Page</a></span>
+        <span class="primary--text">
+          {{ customLandingPagePre }}
+          <a :href="landingPageUrl" target="_blank" rel="noopener">{{ landingPageName }}</a>
+          {{ customLandingPagePost }}
+        </span>
       </div>
     </v-main>
     <g-snotify></g-snotify>
@@ -104,7 +108,11 @@ export default {
       loginType: undefined,
       cfg: {
         loginTypes: undefined,
-        landingPageUrl: undefined
+        landingPageUrl: undefined,
+        landingPageName: undefined,
+        customLandingPagePre: undefined,
+        customLandingPagePost: undefined,
+        customSubheader: undefined
       },
       loading: false
     }
@@ -120,7 +128,19 @@ export default {
       return getPrimaryLoginType(this.cfg)
     },
     landingPageUrl () {
-      return this.cfg.landingPageUrl
+      return this.cfg.landingPageUrl || 'https://plusserver.com/pske'
+    },
+    landingPageName () {
+      return this.cfg.landingPageName || 'PSKE'
+    },
+    customSubheader () {
+      return this.cfg.customSubheader || 'Managed Kubernetes'
+    },
+    customLandingPagePre () {
+      return this.cfg.customLandingPagePre || 'Powered by'
+    },
+    customLandingPagePost () {
+      return this.cfg.customLandingPagePost || ''
     }
   },
   beforeRouteEnter (to, from, next) {

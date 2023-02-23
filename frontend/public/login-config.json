@@ -1,4 +1,7 @@
 {
-  "landingPageUrl": "https://gardener.cloud/",
+  "landingPageUrl": "https://plusserver.com/pske",
+  "landingPageName": "Plusserver Kubernetes Engine",
+  "customLandingPagePre": "Based on ",
+  "customSubheader": "Managed Flowerpower",
   "loginTypes": ["token"]
 }
