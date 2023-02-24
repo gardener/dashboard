@@ -29,7 +29,7 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "@braintree/sanitize-url": "^6.0.0",
+    "@braintree/sanitize-url": "^6.0.1",
     "@fontsource/roboto": "4.5.7",
     "@mdi/font": "^5.9.55",
     "ansi-html": "^0.0.9",
