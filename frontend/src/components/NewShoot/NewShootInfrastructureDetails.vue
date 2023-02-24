@@ -341,9 +341,9 @@ export default {
           case 'intern1':
           case 'prod1':
           case 'RegionOne':
-            return 'Cluster running in DE-WEST - Cologne'
+            return 'Cluster running in DE-WEST-1 - Cologne'
           case 'prod2':
-            return 'Cluster running in DE-NORTH - Hamburg'
+            return 'Cluster running in DE-NORTH-1 - Hamburg'
         }
       } else {
         if (includes(this.regionsWithSeed, this.region)) {
@@ -358,9 +358,9 @@ export default {
       if (this.infrastructureKind === 'openstack') {
         switch (this.cloudProfileName) {
           case 'pluscloudopen':
-            return 'Cluster running in DE-WEST - Cologne'
+            return 'Cluster running in DE-WEST-1 - Cologne'
           case 'pluscloudopen-ham5':
-            return 'Cluster running in DE-NORTH - Hamburg'
+            return 'Cluster running in DE-NORTH-1 - Hamburg'
         }
       }
 
