@@ -16,6 +16,10 @@ data:
   login-config.json: |
     {
        "landingPageUrl": {{ quote .Values.global.frontendConfig.landingPageUrl }},
+       "landingPageName": {{ quote .Values.global.frontendConfig.landingPageName }},
+       "customSubheader": {{ quote .Values.global.frontendConfig.customSubheader }},
+       "customLandingPagePre": {{ quote .Values.global.frontendConfig.customLandingPagePre }},
+       "customLandingPagePost": {{ quote .Values.global.frontendConfig.customLandingPagePost }},
        {{- if .Values.global.oidc.enabled }}
        "loginTypes": ["oidc", "token"]
        {{- else }}

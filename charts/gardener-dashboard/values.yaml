@@ -106,7 +106,11 @@ global:
       #   -----END RSA PRIVATE KEY-----
 
   frontendConfig:
-    landingPageUrl: https://github.com/gardener
+    landingPageUrl: https://plusserver.com/pske
+    landingPageName: PSKE Landing Page
+    customSubheader: Managed Kubernetes at Scale
+    customLandingPagePre: "Discover what our service is about at the "
+    customLandingPagePost: ""
     # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
     # assets:
     #   favicon-16x16.png: |

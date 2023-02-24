@@ -2,6 +2,6 @@
   "landingPageUrl": "https://plusserver.com/pske",
   "landingPageName": "Plusserver Kubernetes Engine",
   "customLandingPagePre": "Based on ",
-  "customSubheader": "Managed Flowerpower",
+  "customSubheader": "Managed Kubernetes",
   "loginTypes": ["token"]
 }
