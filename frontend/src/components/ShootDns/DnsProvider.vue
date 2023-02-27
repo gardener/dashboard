@@ -32,6 +32,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
+      <v-list-item v-if="secret" class="px-0">
+        <secret-details-item-content
+          class="pb-2"
+          dns
+          :secret="secret"
+          details-title />
+      </v-list-item>
     </v-list>
   </g-popper>
 </template>
@@ -42,12 +49,14 @@ import GPopper from '@/components/GPopper'
 import VendorIcon from '@/components/VendorIcon'
 import join from 'lodash/join'
 import get from 'lodash/get'
+import SecretDetailsItemContent from '@/components/SecretDetailsItemContent.vue'
 
 export default {
   name: 'worker-group',
   components: {
     GPopper,
-    VendorIcon
+    VendorIcon,
+    SecretDetailsItemContent
   },
   props: {
     type: {
@@ -71,6 +80,10 @@ export default {
       required: false
     },
     zones: {
+      type: Object,
+      required: false
+    },
+    secret: {
       type: Object,
       required: false
     }
