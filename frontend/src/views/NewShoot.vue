@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div class="newshoot-container">
+  <div v-if="sortedCloudProviderKindList.length" class="newshoot-container">
     <v-container fluid class="newshoot-cards">
       <v-card flat>
         <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
@@ -131,6 +131,10 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
+  <v-alert class="ma-3" type="warning" v-else>
+    No supported cloud profile found.
+    Ensure that you have confiugred at least one cloud profile supported by the dashboard as well as a corresponding seed.
+  </v-alert>
 </template>
 
 <script>
@@ -218,7 +222,8 @@ export default {
       'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName',
       'zonesByCloudProfileNameAndRegion',
-      'nodesCIDR'
+      'nodesCIDR',
+      'sortedCloudProviderKindList'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -516,28 +521,33 @@ export default {
     }
   },
   async beforeRouteLeave (to, from, next) {
-    if (to.name === 'NewShootEditor') {
-      if (!this.valid) {
-        if (!await this.confirmNavigateToYamlIfInvalid()) {
-          return next(false)
+    if (this.sortedCloudProviderKindList.length) {
+      if (to.name === 'NewShootEditor') {
+        if (!this.valid) {
+          if (!await this.confirmNavigateToYamlIfInvalid()) {
+            return next(false)
+          }
+        }
+        await this.updateShootResourceWithUIComponents()
+      } else {
+        if (!this.isShootCreated && await this.isShootContentDirty()) {
+          if (!await this.confirmNavigation()) {
+            return next(false)
+          }
         }
       }
-      await this.updateShootResourceWithUIComponents()
-      return next()
-    } else {
-      if (!this.isShootCreated && await this.isShootContentDirty()) {
-        if (!await this.confirmNavigation()) {
-          return next(false)
-        }
-      }
-      return next()
     }
+    return next()
   },
   mounted () {
-    this.updateUIComponentsWithShootResource()
+    if (this.sortedCloudProviderKindList.length) {
+      this.updateUIComponentsWithShootResource()
+    }
   },
   created () {
-    this.setClusterConfiguration(this.newShootResource)
+    if (this.sortedCloudProviderKindList.length) {
+      this.setClusterConfiguration(this.newShootResource)
+    }
   }
 }
 </script>
