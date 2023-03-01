@@ -70,7 +70,7 @@ const cloudProfileList = [
     seedSelector: {
       providerTypes: ['*']
     }
-  }),
+  })
 ]
 
 const cloudprofiles = {
