@@ -57,6 +57,7 @@ frontend:
 The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
 
 If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
+Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup. Please login to the Dashboard with a token of a service account that has cluster admin permission.
 
 Concurrently run the `backend` server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) with hot reload enabled.
 
