@@ -342,7 +342,7 @@ export default {
       return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
     },
     showAllRegions () {
-      return this.cfg.seedCandidateDeterminationStrategy && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+      return this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
     },
     regionItems () {
       const regionItems = []
