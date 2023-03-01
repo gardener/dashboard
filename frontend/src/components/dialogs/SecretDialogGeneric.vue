@@ -48,11 +48,13 @@ SPDX-License-Identifier: Apache-2.0
 import SecretDialog from '@/components/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import isObject from 'lodash/isObject'
+const yaml = require('js-yaml')
 
 const validationErrors = {
   data: {
     required: 'You can\'t leave this empty.',
-    isJSON: 'You need to enter secret data as JSON Object'
+    isYAML: 'You need to enter secret data as valid YAML object'
   }
 }
 
@@ -90,7 +92,7 @@ export default {
       const validators = {
         data: {
           required,
-          isJSON: () => { return this.secretJSON !== undefined }
+          isYAML: () => isObject(this.secretYAML)
         }
       }
       return validators
@@ -98,15 +100,15 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    secretJSON () {
+    secretYAML () {
       try {
-        return JSON.parse(this.data)
-      } catch (err) {
+        return yaml.load(this.data)
+      } catch (e) {
         return undefined
       }
     },
     secretData () {
-      return this.secretJSON ?? {}
+      return isObject(this.secretYAML) ? this.secretYAML : {}
     }
   },
   methods: {
