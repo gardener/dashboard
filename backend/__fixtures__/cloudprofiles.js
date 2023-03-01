@@ -62,7 +62,15 @@ const cloudProfileList = [
     uid: 5,
     name: 'infra3-profileName2',
     kind: 'infra3'
-  })
+  }),
+  getCloudProfile({
+    uid: 6,
+    name: 'infra4-profileName',
+    kind: 'infra4',
+    seedSelector: {
+      providerTypes: ['*']
+    }
+  }),
 ]
 
 const cloudprofiles = {

@@ -139,5 +139,38 @@ Array [
       "name": "infra3-profileName2",
     },
   },
+  Object {
+    "data": Object {
+      "kubernetes": Object {
+        "versions": Array [
+          Object {
+            "version": "1.9.0",
+          },
+          Object {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedNames": Array [
+        "infra1-seed",
+        "infra1-seed2",
+        "infra3-seed",
+        "infra4-seed-without-secretRef",
+        "infra3-seed-with-selector",
+        "infra3-seed-without-selector",
+      ],
+      "seedSelector": Object {
+        "providerTypes": Array [
+          "*",
+        ],
+      },
+      "type": "infra4",
+    },
+    "metadata": Object {
+      "cloudProviderKind": "infra4",
+      "displayName": "infra4-profileName",
+      "name": "infra4-profileName",
+    },
+  },
 ]
 `;
