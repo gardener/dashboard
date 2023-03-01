@@ -533,6 +533,8 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) 
       return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
     case 'metal':
       return false // metal clusters do not support zones for worker groups
+    case 'local':
+      return false // local development provider does not support zones
     default:
       return true
   }

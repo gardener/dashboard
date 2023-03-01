@@ -457,6 +457,13 @@ export default {
               value: secretData.hcloudToken
             }
           ]
+        default:
+          return [
+            {
+              label: 'Secret Data',
+              value: JSON.stringify(secretData)
+            }
+          ]
       }
     },
     getSecretDetailsDns (secret) {

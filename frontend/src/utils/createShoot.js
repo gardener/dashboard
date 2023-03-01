@@ -180,6 +180,10 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           kind: 'ControlPlaneConfig'
         }
       }
+    default:
+      return {
+        type: infrastructureKind
+      }
   }
 }
 
