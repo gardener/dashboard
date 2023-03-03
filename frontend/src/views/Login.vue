@@ -14,8 +14,9 @@ SPDX-License-Identifier: Apache-2.0
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
-                  <img src="/static/assets/logo.svg" alt="Login to Gardener" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h5 font-weight-light">Universal Kubernetes at Scale</span>
+                  <img src="/static/assets/logo.svg" alt="Product Login Logo" width="180" height="180">
+                  <span v-if="productName" class="flex my-4 primary--text text-h4 font-weight-light">{{ productName }}</span>
+                  <span v-if="productSlogan" class="flex my-4 primary--text text-h5 font-weight-light">{{ productSlogan }}</span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -60,7 +61,13 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-text>
               <v-card-actions v-show="!loading" class="bt-2 pb-4">
                 <div class="d-flex justify-center flex-grow-1">
+                  <a :href="documentationURL" target="_blank" rel="noopener">Docs</a>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
                   <v-btn @click="handleLogin" color="primary">Login</v-btn>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
+                  <a :href="supportURL" target="_blank" rel="noopener">Support</a>
                 </div>
               </v-card-actions>
             </v-card>
@@ -68,7 +75,11 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </v-container>
       <div v-if="landingPageUrl" class="footer text-caption">
-        <span class="primary--text">Discover what our service is about at the <a :href="landingPageUrl" target="_blank" rel="noopener">Gardener Landing Page</a></span>
+        <span class="primary--text">
+          {{ customLandingPagePre }}
+          <a :href="landingPageUrl" target="_blank" rel="noopener">{{ landingPageName }}</a>
+          {{ customLandingPagePost }}
+        </span>
       </div>
     </v-main>
     <g-snotify></g-snotify>
@@ -103,8 +114,15 @@ export default {
       token: '',
       loginType: undefined,
       cfg: {
+        productName: undefined,
+        productSlogan: undefined,
+        documentationURL: undefined,
+        supportURL: undefined,
         loginTypes: undefined,
-        landingPageUrl: undefined
+        landingPageUrl: undefined,
+        landingPageName: undefined,
+        customLandingPagePre: undefined,
+        customLandingPagePost: undefined
       },
       loading: false
     }
@@ -119,8 +137,29 @@ export default {
     primaryLoginType () {
       return getPrimaryLoginType(this.cfg)
     },
+    productName () {
+      return this.cfg.productName
+    },
+    productSlogan () {
+      return this.cfg.productSlogan
+    },
+    documentationURL () {
+      return this.cfg.documentationURL
+    },
+    supportURL () {
+      return this.cfg.supportURL
+    },
     landingPageUrl () {
       return this.cfg.landingPageUrl
+    },
+    landingPageName () {
+      return this.cfg.landingPageName
+    },
+    customLandingPagePre () {
+      return this.cfg.customLandingPagePre
+    },
+    customLandingPagePost () {
+      return this.cfg.customLandingPagePost
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -136,6 +175,9 @@ export default {
       try {
         const { data } = await api.getLoginConfiguration()
         cfg = data
+        Object.keys(cfg).forEach(key => {
+          sessionStorage.setItem('wl.' + key, cfg[key])
+        })
       } catch (err) {
         logger.error('Failed to fetch login configuration: %s', err.message)
         cfg = {

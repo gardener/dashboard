@@ -19,8 +19,8 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
           <a href="/">
             <img src="/static/assets/logo.svg" class="logo" alt="gardener logo">
-            <h1 class="main-navigation-title--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2 class="primary--text">Universal Kubernetes at Scale</h2>
+            <h1 class="main-navigation-title--text">{{ productName }} <span class="version">{{version}}</span></h1>
+            <h2 class="primary--text">{{ customSubheader }}</h2>
           </a>
         </div>
       </div>
@@ -204,6 +204,12 @@ export default {
     ]),
     version () {
       return get(this.cfg, 'appVersion', process.env.VUE_APP_VERSION)
+    },
+    productName () {
+      return sessionStorage.getItem('wl.productName') || 'Gardener'
+    },
+    customSubheader () {
+      return sessionStorage.getItem('wl.productSlogan') || 'Universal Kubernetes at Scale'
     },
     isActive: {
       get () {
