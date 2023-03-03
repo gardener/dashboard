@@ -6,14 +6,6 @@
 
 'use strict'
 
-const globalLogger = {
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn()
-}
+const { globalLogger } = require('@gardener-dashboard/logger')
 
-module.exports = {
-  globalLogger
-}
+module.exports = globalLogger

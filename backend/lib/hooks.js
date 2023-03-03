@@ -7,7 +7,7 @@
 'use strict'
 
 const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
-const { monitorHttpServer } = require('@gardener-dashboard/monitor')
+const { monitorHttpServer, monitorSocketIO } = require('@gardener-dashboard/monitor')
 const cache = require('./cache')
 const watches = require('./watches')
 const io = require('./io')
@@ -58,6 +58,7 @@ class LifecycleHooks {
     }
 
     monitorHttpServer(server)
+    monitorSocketIO(this.io)
 
     return Promise.all(untilHasSyncedList)
   }

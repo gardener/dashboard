@@ -2972,8 +2972,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.2.0"],\
             ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.0.0"],\
             ["express", "npm:4.18.1"],\
+            ["http-errors", "npm:2.0.0"],\
             ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
             ["prom-client", "npm:14.1.1"],\
+            ["response-time", "npm:2.3.2"],\
             ["supertest", "npm:6.2.3"]\
           ],\
           "linkType": "SOFT"\
@@ -15982,6 +15984,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/resolve.exports-npm-1.1.0-81756e03ba-52865af8ed.zip/node_modules/resolve.exports/",\
           "packageDependencies": [\
             ["resolve.exports", "npm:1.1.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["response-time", [\
+        ["npm:2.3.2", {\
+          "packageLocation": "./.yarn/cache/response-time-npm-2.3.2-e5c67ab5c5-2520478f03.zip/node_modules/response-time/",\
+          "packageDependencies": [\
+            ["response-time", "npm:2.3.2"],\
+            ["depd", "npm:1.1.2"],\
+            ["on-headers", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\

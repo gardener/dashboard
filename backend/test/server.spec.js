@@ -8,6 +8,7 @@
 
 const http = require('http')
 const terminus = require('@godaddy/terminus')
+const metricsApp = require('@gardener-dashboard/monitor')
 const createServer = require('../lib/server')
 
 function createApplication (port) {
@@ -65,13 +66,15 @@ describe('server', () => {
     hooks = app.get('hooks')
     logger = app.get('logger')
     healthCheck = app.get('healthCheck')
-    server = createServer(app)
+    server = createServer(app, metricsApp)
   })
 
   it('should create and run the server', async () => {
-    expect(mockCreateServer).toBeCalledTimes(1)
+    expect(mockCreateServer).toBeCalledTimes(2)
     expect(mockCreateServer.mock.calls[0]).toHaveLength(1)
     expect(mockCreateServer.mock.calls[0][0]).toBe(app)
+    expect(mockCreateServer.mock.calls[1]).toHaveLength(1)
+    expect(mockCreateServer.mock.calls[1][0]).toBe(metricsApp)
     expect(mockCreateTerminus).toBeCalledTimes(1)
     expect(mockCreateTerminus.mock.calls[0]).toHaveLength(2)
     expect(mockCreateTerminus.mock.calls[0][0]).toBe(mockServer)

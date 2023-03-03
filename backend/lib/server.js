@@ -18,8 +18,9 @@ function toMilliseconds (seconds) {
   return seconds * 1000 + 200
 }
 
-function createServer (app) {
+function createServer (app, metricsApp) {
   const port = app.get('port')
+  const metricsPort = app.get('metricsPort')
   const periodSeconds = app.get('periodSeconds')
   const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
@@ -27,12 +28,12 @@ function createServer (app) {
 
   // create server
   const server = http.createServer(app)
+  const metricsServer = http.createServer(metricsApp)
 
   // create terminus
-  const healthChecks = {}
-  if (typeof healthCheckFunc === 'function') {
-    healthChecks['/healthz'] = () => healthCheckFunc(false)
-    healthChecks['/healthz-transitive'] = () => healthCheckFunc(true)
+  const healthChecks = {
+    '/healthz': () => healthCheckFunc(false),
+    '/healthz-transitive': () => healthCheckFunc(true)
   }
 
   terminus.createTerminus(server, {
@@ -52,6 +53,7 @@ function createServer (app) {
     },
     onShutdown () {
       logger.debug('Cleanup has been finished. Server is shutting down')
+      metricsApp.destroy()
     },
     logger (...args) {
       logger.error(...args)
@@ -60,7 +62,10 @@ function createServer (app) {
 
   return {
     async run () {
+      await new Promise(resolve => metricsServer.listen(metricsPort, resolve))
+
       const begin = Date.now()
+
       try {
         await pTimeout(hooks.beforeListen(server), 15 * 1000)
         const milliseconds = Date.now() - begin

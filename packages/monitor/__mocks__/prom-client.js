@@ -6,24 +6,19 @@
 
 'use strict'
 
-const prometheus = jest.requireActual('prom-client')
+const promClient = jest.requireActual('prom-client')
 
-const contentType = 'text/plain; version=0.0.4; charset=utf-8; mock=true'
-
-const mockRegistry = {
-  contentType,
-  registerMetric: jest.fn(),
-  metrics: jest.fn(),
-  clear: jest.fn()
-}
+const register = promClient.register
 
 module.exports = {
-  ...prometheus,
-  contentType,
-  mockRegistry,
+  ...promClient,
+  register: {
+    ...register,
+    contentType: register.contentType, // property not enumerable
+    registerMetric: jest.fn(),
+    metrics: jest.fn(),
+    clear: jest.fn()
+  },
   collectDefaultMetrics: jest.fn(),
-  linearBuckets: jest.fn().mockImplementation(() => {
-    return [42]
-  }),
-  Registry: jest.fn().mockReturnValue(mockRegistry)
+  linearBuckets: jest.fn()
 }

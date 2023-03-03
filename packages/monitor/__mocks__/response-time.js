@@ -4,11 +4,4 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const app = require('./app')
-const monitors = require('./monitors')
-
-Object.assign(app, monitors)
-
-module.exports = app
+module.exports = jest.fn()

@@ -8,12 +8,16 @@
 
 const express = require('express')
 const { shoots } = require('../services')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
+const metricsMiddleware = metricsRoute('shoots')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -35,7 +39,9 @@ router.route('/')
     }
   })
 
-router.route('/:name')
+router
+  .route('/:name')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -69,6 +75,7 @@ router.route('/:name')
   })
 
 router.route('/:name/spec/kubernetes/enableStaticTokenKubeconfig')
+  .all(metricsRoute('shoots/:name/spec/kubernetes/enableStaticTokenKubeconfig'))
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -82,6 +89,7 @@ router.route('/:name/spec/kubernetes/enableStaticTokenKubeconfig')
   })
 
 router.route('/:name/spec/kubernetes/version')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -95,6 +103,7 @@ router.route('/:name/spec/kubernetes/version')
   })
 
 router.route('/:name/spec/maintenance')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -108,6 +117,7 @@ router.route('/:name/spec/maintenance')
   })
 
 router.route('/:name/spec/hibernation/enabled')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -121,6 +131,7 @@ router.route('/:name/spec/hibernation/enabled')
   })
 
 router.route('/:name/spec/hibernation/schedules')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -134,6 +145,7 @@ router.route('/:name/spec/hibernation/schedules')
   })
 
 router.route('/:name/spec/addons')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -147,6 +159,7 @@ router.route('/:name/spec/addons')
   })
 
 router.route('/:name/spec/controlPlane/highAvailability')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -160,6 +173,7 @@ router.route('/:name/spec/controlPlane/highAvailability')
   })
 
 router.route('/:name/spec/dns')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -173,6 +187,7 @@ router.route('/:name/spec/dns')
   })
 
 router.route('/:name/spec/provider')
+  .all(metricsMiddleware)
   .patch(async (req, res, next) => {
     try {
       const user = req.user
@@ -186,6 +201,7 @@ router.route('/:name/spec/provider')
   })
 
 router.route('/:name/metadata/annotations')
+  .all(metricsMiddleware)
   .patch(async (req, res, next) => {
     try {
       const user = req.user
@@ -199,6 +215,7 @@ router.route('/:name/metadata/annotations')
   })
 
 router.route('/:name/info')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -211,6 +228,7 @@ router.route('/:name/info')
   })
 
 router.route('/:name/spec/purpose')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user
@@ -224,6 +242,7 @@ router.route('/:name/spec/purpose')
   })
 
 router.route('/:name/spec/seedName')
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user

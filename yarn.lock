@@ -1698,8 +1698,10 @@ __metadata:
     eslint-plugin-n: ^15.2.0
     eslint-plugin-promise: ^6.0.0
     express: ^4.18.1
+    http-errors: ^2.0.0
     jest: ^27.5.1
     prom-client: ^14.1.1
+    response-time: ^2.3.2
     supertest: ^6.2.3
   languageName: unknown
   linkType: soft
@@ -5791,7 +5793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"depd@npm:^1.1.2, depd@npm:~1.1.2":
+"depd@npm:^1.1.2, depd@npm:~1.1.0, depd@npm:~1.1.2":
   version: 1.1.2
   resolution: "depd@npm:1.1.2"
   checksum: 6b406620d269619852885ce15965272b829df6f409724415e0002c8632ab6a8c0a08ec1f0bd2add05dc7bd7507606f7e2cc034fa24224ab829580040b835ecd9
@@ -10544,7 +10546,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"on-headers@npm:~1.0.2":
+"on-headers@npm:~1.0.1, on-headers@npm:~1.0.2":
   version: 1.0.2
   resolution: "on-headers@npm:1.0.2"
   checksum: 2bf13467215d1e540a62a75021e8b318a6cfc5d4fc53af8e8f84ad98dbcea02d506c6d24180cd62e1d769c44721ba542f3154effc1f7579a8288c9f7873ed8e5
@@ -12014,6 +12016,16 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: c79ecaea36c872ee4a79e3db0d3d4160b593f2ca16e031d8283735acd01715a203607e9ded3f91f68899c2937fa0d49390cddbe0fb2852629212f3cda283f4a7
+  languageName: node
+  linkType: hard
+
+"response-time@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "response-time@npm:2.3.2"
+  dependencies:
+    depd: ~1.1.0
+    on-headers: ~1.0.1
+  checksum: 2520478f03dfe2bf44a099a696b3904af71e563e7df810e413d8d075945a23dd4277a5b44eb18a65fa01f3167fa4cf309166a3872a803649d387cfe67de8fbc8
   languageName: node
   linkType: hard
 

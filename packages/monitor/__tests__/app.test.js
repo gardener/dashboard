@@ -6,19 +6,12 @@
 
 'use strict'
 
-const { createApp } = require('../lib/app')
+const promClient = require('prom-client')
+const app = require('../lib/app')
 
 describe('app', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it('should create an express app', () => {
-    const port = 4242
-    const periodSeconds = 42
-    const app = createApp({ port, periodSeconds })
-
-    expect(app.get('port')).toEqual(port)
-    expect(app.get('periodSeconds')).toEqual(periodSeconds)
+  it('should clear register on destroy', () => {
+    app.destroy()
+    expect(promClient.register.clear).toBeCalledTimes(1)
   })
 })

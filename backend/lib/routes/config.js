@@ -12,12 +12,15 @@ const markdown = require('../markdown')
 const express = require('express')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const config = require('../config')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
 const frontendConfig = sanitizeFrontendConfig(config.frontend)
+const metricsMiddleware = metricsRoute('config')
 
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       if (!frontendConfig.clusterIdentity) {

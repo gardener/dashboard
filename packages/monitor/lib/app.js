@@ -7,34 +7,39 @@
 'use strict'
 
 const express = require('express')
-const route = require('./route')
-const hooks = require('./hooks')
-const { Logger } = require('@gardener-dashboard/logger')
+const promClient = require('prom-client')
+const createError = require('http-errors')
+const logger = require('./logger')
 
-function createApp ({ port, periodSeconds }) {
-  const logger = new Logger()
+const { register } = promClient
 
-  const app = express()
+promClient.collectDefaultMetrics()
 
-  app.set('port', port)
-  app.set('periodSeconds', periodSeconds)
-  app.set('hooks', hooks)
-  app.set('logger', logger)
-
-  app.set('x-powered-by', false)
-
-  app.use('/metrics', route)
-  app.use('*', (req, res) => res.sendStatus(404))
-  app.use((err, req, res, next) => {
-    const { message, status = 500 } = err
-    logger.error('Error in monitoring server: %s', message)
-    res.status(status).json({
-      status,
-      message
-    })
+const app = express()
+app.set('x-powered-by', false)
+app.get('/metrics', async (req, res, next) => {
+  try {
+    const metrics = await register.metrics()
+    res
+      .set({
+        'cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'content-type': register.contentType
+      })
+      .send(metrics)
+  } catch (err) {
+    next(err)
+  }
+})
+app.use((req, res, next) => next(createError(404)))
+app.use((err, req, res, next) => {
+  const { message, status = 500 } = err
+  logger.error('Error in monitoring server: %s', message)
+  res.status(status).json({
+    status,
+    message
   })
+})
 
-  return app
-}
+app.destroy = () => register.clear()
 
-module.exports = { createApp }
+module.exports = app

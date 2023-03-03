@@ -12,4 +12,6 @@ mockMonitor.monitorResponseTimes.mockImplementation(() => {
   return (req, res, next) => next()
 })
 
+mockMonitor.destroy = jest.fn()
+
 module.exports = mockMonitor

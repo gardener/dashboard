@@ -6,16 +6,13 @@
 
 'use strict'
 
+const responseTime = require('response-time')
 const { monitorSocketIO, monitorHttpServer, monitorResponseTimes } = require('../lib/monitors')
-const { metrics } = require('../lib/metrics')
+const metrics = require('../lib/metrics')
 
 jest.mock('../lib/metrics')
 
 describe('monitors', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   describe('socketIO connection monitor', () => {
     const ioStub = { on: jest.fn() }
     const socketStub = { once: jest.fn() }
@@ -49,79 +46,92 @@ describe('monitors', () => {
     it('should add connect/close listeners', () => {
       monitorHttpServer(serverStub)
 
-      expect(serverStub.on).toBeCalledTimes(2)
-      expect(serverStub.on).toHaveBeenCalledWith('connect', expect.any(Function))
-      expect(serverStub.on).toHaveBeenCalledWith('close', expect.any(Function))
+      expect(serverStub.on).toBeCalledTimes(1)
+      expect(serverStub.on).toHaveBeenCalledWith('request', expect.any(Function))
 
       const connectHandler = serverStub.on.mock.calls[0][1]
-      const closeHandler = serverStub.on.mock.calls[1][1]
+      const res = {
+        once: jest.fn()
+      }
 
-      connectHandler()
+      connectHandler(undefined, res)
       expect(metrics.connectionsCount.inc).toBeCalledTimes(1)
       expect(metrics.connectionsCount.inc).toHaveBeenLastCalledWith({ type: 'http' }, 1)
       expect(metrics.connectionsTotal.inc).toBeCalledTimes(1)
       expect(metrics.connectionsTotal.inc).toHaveBeenLastCalledWith({ type: 'http' }, 1)
 
-      closeHandler()
+      expect(res.once).toBeCalledTimes(1)
+      const onceCall = res.once.mock.calls[0]
+      expect(onceCall[0]).toEqual('close')
+      const reqCloseHandler = onceCall[1]
+      expect(reqCloseHandler).toEqual(expect.any(Function))
+
+      reqCloseHandler()
       expect(metrics.connectionsCount.dec).toBeCalledTimes(1)
       expect(metrics.connectionsCount.dec).toHaveBeenLastCalledWith({ type: 'http' }, 1)
     })
   })
 
   describe('HTTP Server response time monitor', () => {
-    it('should return an express middleware', () => {
-      const middleware = monitorResponseTimes()
-      expect(middleware).toEqual(expect.any(Function))
-      expect(middleware.length).toEqual(3)
+    it('should report observed respons times with additional labels', () => {
+      const additionalLabels = { some: 'label' }
+      const method = 'PATCH'
+      const statusCode = 42
+      const requestDuration = 1234
+
+      monitorResponseTimes(additionalLabels)
+      expect(responseTime).toHaveBeenCalledTimes(1)
+      const responseTimeHandler = responseTime.mock.calls[0][0]
+      expect(responseTimeHandler).toEqual(expect.any(Function))
+
+      responseTimeHandler({ method }, { statusCode }, requestDuration)
+
+      expect(metrics.responseTime.observe).toBeCalledTimes(1)
+      expect(metrics.responseTime.observe).toHaveBeenCalledWith({
+        ...additionalLabels,
+        method,
+        status_code: statusCode
+      }, requestDuration / 1000)
     })
 
-    it('should add connect/close listeners', () => {
-      const writeHeadStub = jest.fn()
-      const resStub = { writeHead: writeHeadStub }
-      const defaultLabels = { some: 'label' }
+    it('should report observed respons times without additional labels', () => {
       const method = 'PATCH'
-      const nextStub = jest.fn()
-      const endTimerStub = jest.fn()
-      metrics.responseTime.startTimer.mockReturnValue(endTimerStub)
+      const statusCode = 42
+      const requestDuration = 1234
 
-      const middleware = monitorResponseTimes(defaultLabels)
-      middleware({ method }, resStub, nextStub)
+      monitorResponseTimes()
+      expect(responseTime).toHaveBeenCalledTimes(1)
+      const responseTimeHandler = responseTime.mock.calls[0][0]
+      expect(responseTimeHandler).toEqual(expect.any(Function))
 
-      expect(metrics.responseTime.startTimer).toBeCalledTimes(1)
-      expect(metrics.responseTime.startTimer).toHaveBeenCalledWith({
-        ...defaultLabels,
-        method
-      })
-      expect(resStub.writeHead).toEqual(expect.any(Function))
-      expect(resStub.writeHead).not.toEqual(writeHeadStub)
-      expect(nextStub).toBeCalledTimes(1)
-      expect(nextStub).toBeCalledWith() // expect no error
+      responseTimeHandler({ method }, { statusCode }, requestDuration)
 
-      resStub.writeHead('testArg')
-      expect(endTimerStub).toBeCalledTimes(1)
-      expect(writeHeadStub).toHaveBeenCalledWith('testArg')
-
-      resStub.writeHead('testArg')
-      expect(endTimerStub).toBeCalledTimes(1)
-      expect(writeHeadStub).toBeCalledTimes(2)
+      expect(metrics.responseTime.observe).toBeCalledTimes(1)
+      expect(metrics.responseTime.observe).toHaveBeenCalledWith({
+        method,
+        status_code: statusCode
+      }, requestDuration / 1000)
     })
 
-    it('should pass on errors', () => {
-      const nextStub = jest.fn()
-      const writeHeadStub = jest.fn()
-      const resStub = { writeHead: writeHeadStub }
+    it('should report observed respons times with route label', () => {
       const method = 'PATCH'
-      const middleware = monitorResponseTimes()
-      const unexpectedError = new Error('some error')
+      const statusCode = 42
+      const requestDuration = 1234
+      const metricsRoute = 'someroute/:name'
 
-      metrics.responseTime.startTimer.mockImplementationOnce(() => {
-        throw unexpectedError
-      })
+      monitorResponseTimes()
+      expect(responseTime).toHaveBeenCalledTimes(1)
+      const responseTimeHandler = responseTime.mock.calls[0][0]
+      expect(responseTimeHandler).toEqual(expect.any(Function))
 
-      middleware({ method }, resStub, nextStub)
+      responseTimeHandler({ method, metricsRoute }, { statusCode }, requestDuration)
 
-      expect(nextStub).toBeCalledTimes(1)
-      expect(nextStub).toBeCalledWith(unexpectedError)
+      expect(metrics.responseTime.observe).toBeCalledTimes(1)
+      expect(metrics.responseTime.observe).toHaveBeenCalledWith({
+        method,
+        route: metricsRoute,
+        status_code: statusCode
+      }, requestDuration / 1000)
     })
   })
 })
