@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <v-card tile width="300px">
           <v-card-title primary-title>
-            <div class="content text-h6 mb-2">PSKE</div>
+            <div class="content text-h6 mb-2">{{ productName }}</div>
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="px-3">
@@ -242,6 +242,9 @@ export default {
     },
     settingsLink () {
       return this.targetRoute('Settings')
+    },
+    productName () {
+      return sessionStorage.getItem('wl.productName') || 'PSKE'
     },
     colorSchemeIndex: {
       get () {

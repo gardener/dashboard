@@ -15,7 +15,8 @@ SPDX-License-Identifier: Apache-2.0
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
                   <img src="/static/assets/logo.svg" alt="Product Login Logo" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h5 font-weight-light">{{ customSubheader }}</span>
+                  <span class="flex my-4 primary--text text-h4 font-weight-light">{{ productName }}</span>
+                  <span class="flex my-4 primary--text text-h5 font-weight-light">{{ productSlogan }}</span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -113,14 +114,15 @@ export default {
       token: '',
       loginType: undefined,
       cfg: {
+        productName: undefined,
+        productSlogan: undefined,
         documentationURL: undefined,
         supportURL: undefined,
         loginTypes: undefined,
         landingPageUrl: undefined,
         landingPageName: undefined,
         customLandingPagePre: undefined,
-        customLandingPagePost: undefined,
-        customSubheader: undefined
+        customLandingPagePost: undefined
       },
       loading: false
     }
@@ -135,6 +137,12 @@ export default {
     primaryLoginType () {
       return getPrimaryLoginType(this.cfg)
     },
+    productName () {
+      return this.cfg.productName || 'PSKE'
+    },
+    productSlogan () {
+      return this.cfg.productSlogan || 'Managed Kubernetes at Scale'
+    },
     documentationURL () {
       return this.cfg.documentationURL || 'https://docs.pske.get-cloud.io'
     },
@@ -146,9 +154,6 @@ export default {
     },
     landingPageName () {
       return this.cfg.landingPageName || 'PSKE'
-    },
-    customSubheader () {
-      return this.cfg.customSubheader || 'Managed Kubernetes'
     },
     customLandingPagePre () {
       return this.cfg.customLandingPagePre || 'Powered by'
@@ -170,6 +175,9 @@ export default {
       try {
         const { data } = await api.getLoginConfiguration()
         cfg = data
+        Object.keys(cfg).forEach(key => {
+          sessionStorage.setItem('wl.' + key, cfg[key])
+        })
       } catch (err) {
         logger.error('Failed to fetch login configuration: %s', err.message)
         cfg = {
