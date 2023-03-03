@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
-                  <img src="/static/assets/logo.svg" alt="Login to PSKE" width="180" height="180">
+                  <img src="/static/assets/logo.svg" alt="Product Login Logo" width="180" height="180">
                   <span class="flex my-4 primary--text text-h5 font-weight-light">{{ customSubheader }}</span>
                 </div>
                 <v-tabs
@@ -60,7 +60,13 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-text>
               <v-card-actions v-show="!loading" class="bt-2 pb-4">
                 <div class="d-flex justify-center flex-grow-1">
+                  <a :href="documentationURL" target="_blank" rel="noopener">Docs</a>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
                   <v-btn @click="handleLogin" color="primary">Login</v-btn>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
+                  <a :href="supportURL" target="_blank" rel="noopener">Support</a>
                 </div>
               </v-card-actions>
             </v-card>
@@ -107,6 +113,8 @@ export default {
       token: '',
       loginType: undefined,
       cfg: {
+        documentationURL: undefined,
+        supportURL: undefined,
         loginTypes: undefined,
         landingPageUrl: undefined,
         landingPageName: undefined,
@@ -126,6 +134,12 @@ export default {
     },
     primaryLoginType () {
       return getPrimaryLoginType(this.cfg)
+    },
+    documentationURL () {
+      return this.cfg.documentationURL || 'https://docs.pske.get-cloud.io'
+    },
+    supportURL () {
+      return this.cfg.supportURL || 'https://www.plusserver.com/ueber-uns/plusserver-kontakt'
     },
     landingPageUrl () {
       return this.cfg.landingPageUrl || 'https://plusserver.com/pske'
