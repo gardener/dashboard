@@ -8457,10 +8457,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["dns-packet", [\
-        ["npm:5.3.1", {\
-          "packageLocation": "./.yarn/cache/dns-packet-npm-5.3.1-8f9567465f-196ff74a06.zip/node_modules/dns-packet/",\
+        ["npm:5.4.0", {\
+          "packageLocation": "./.yarn/cache/dns-packet-npm-5.4.0-4d0332a163-a169963848.zip/node_modules/dns-packet/",\
           "packageDependencies": [\
-            ["dns-packet", "npm:5.3.1"],\
+            ["dns-packet", "npm:5.4.0"],\
             ["@leichtgewicht/ip-codec", "npm:2.0.4"]\
           ],\
           "linkType": "HARD"\
@@ -13526,7 +13526,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/multicast-dns-npm-7.2.5-e1c9c3ec64-00b8a57df1.zip/node_modules/multicast-dns/",\
           "packageDependencies": [\
             ["multicast-dns", "npm:7.2.5"],\
-            ["dns-packet", "npm:5.3.1"],\
+            ["dns-packet", "npm:5.4.0"],\
             ["thunky", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
