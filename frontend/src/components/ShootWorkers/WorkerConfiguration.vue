@@ -89,6 +89,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
+import { mapState } from 'vuex'
 const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
 const ShootEditor = () => import('@/components/ShootEditor')
 
@@ -116,6 +117,9 @@ export default {
     asyncRef('workerEditor')
   ],
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     tab: {
       get () {
         return this.tabValue
@@ -163,7 +167,7 @@ export default {
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       const cloudProfileName = this.shootCloudProfileName
       const region = this.shootRegion
-      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
+      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec, customCloudProviders: this.cfg.customCloudProviders })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
       await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })

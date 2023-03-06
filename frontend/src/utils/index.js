@@ -524,7 +524,11 @@ export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) 
     ? criName
     : head(criNames)
 }
-export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
+export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster, customCloudProviders }) {
+  const customCloudProviderZone = get(customCloudProviders, [cloudProviderKind, 'zoned'])
+  if (customCloudProviderZone !== undefined) {
+    return customCloudProviderZone
+  }
   switch (cloudProviderKind) {
     case 'azure':
       if (isNewCluster) {

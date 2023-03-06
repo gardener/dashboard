@@ -286,7 +286,7 @@ export default {
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.nodesCIDR))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.nodesCIDR, this.cfg.customCloudProviders))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -462,7 +462,7 @@ export default {
       })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
+      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true, customCloudProviders: this.cfg.customCloudProviders })
 
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.nodesCIDR)
       await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })

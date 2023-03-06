@@ -13,7 +13,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import startsWith from 'lodash/startsWith'
+import get from 'lodash/get'
 
 export default {
   props: {
@@ -30,60 +32,35 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     iconSrc () {
-      switch (this.value) {
-        // infrastructures
-        case 'azure':
-          return require('@/assets/azure.svg')
-        case 'aws':
-          return require('@/assets/aws.svg')
-        case 'gcp':
-          return require('@/assets/gcp.svg')
-        case 'openstack':
-          return require('@/assets/openstack.svg')
-        case 'alicloud':
-          return require('@/assets/alicloud.svg')
-        case 'vsphere':
-          return require('@/assets/vsphere.svg')
-        case 'metal':
-          return require('@/assets/metal.svg')
+      const customCloudProviderIcon = get(this.cfg, ['customCloudProviders', this.value, 'icon'])
+      if (customCloudProviderIcon) {
+        return customCloudProviderIcon
+      }
 
-        // dns
-        case 'aws-route53':
-          return require('@/assets/aws-route53.svg')
-        case 'azure-dns':
+      // If filename is different from value you need to specify this below
+      switch (this.value) {
         case 'azure-private-dns':
           return require('@/assets/azure-dns.svg')
-        case 'google-clouddns':
-          return require('@/assets/google-clouddns.svg')
         case 'openstack-designate':
           return require('@/assets/openstack.svg')
-        case 'alicloud-dns':
-          return require('@/assets/alicloud-dns.png')
-        case 'cloudflare-dns':
-          return require('@/assets/cloudflare-dns.svg')
-        case 'infoblox-dns':
-          return require('@/assets/infoblox-dns.svg')
-        case 'netlify-dns':
-          return require('@/assets/netlify-dns.svg')
 
-        // os
-        case 'coreos':
-          return require('@/assets/coreos.svg')
         case 'suse-jeos':
           return require('@/assets/suse.svg')
         case 'suse-chost':
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
-        case 'gardenlinux':
-          return require('@/assets/gardenlinux.svg')
-        case 'flatcar':
-          return require('@/assets/flatcar.svg')
-        case 'hcloud':
-          return require('@/assets/hcloud.svg')
       }
-      return undefined
+
+      try {
+        return require(`@/assets/${this.value}.svg`)
+      } catch (err) {
+        return undefined
+      }
     },
     isMdiIcon () {
       return startsWith(this.value, 'mdi-')

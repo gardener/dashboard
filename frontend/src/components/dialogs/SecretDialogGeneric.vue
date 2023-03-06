@@ -16,21 +16,37 @@ SPDX-License-Identifier: Apache-2.0
     @input="onInput">
 
     <template v-slot:secret-slot>
-      <div>
-        <v-textarea
-          ref="data"
-          color="primary"
-          filled
-          v-model="data"
-          label="Secret Data"
-          :error-messages="getErrorMessages('data')"
-          @input="$v.data.$touch()"
-          @blur="$v.data.$touch()"
-        ></v-textarea>
-      </div>
+      <template v-if="customCloudProviderFields">
+        <div v-for="{ key, label, hint, password } in customCloudProviderFields" :key="key">
+          <v-text-field
+            color="primary"
+            v-model="customCloudProviderData[key]"
+            :label="label"
+            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            :append-icon="password ? showSecrets[key] ? 'mdi-eye' : 'mdi-eye-off' : undefined"
+            :type="password && !showSecrets[key] ? 'password' : 'text'"
+            @click:append="toggleShowSecrets(key)"
+            @input="$v.customCloudProviderData[key].$touch()"
+            @blur="$v.customCloudProviderData[key].$touch()"
+            :hint="hint"
+          ></v-text-field>
+        </div>
+      </template>
+      <v-textarea
+        v-else
+        ref="textAreaData"
+        color="primary"
+        filled
+        v-model="textAreaData"
+        label="Secret Data"
+        :error-messages="getErrorMessages('textAreaData')"
+        @input="$v.textAreaData.$touch()"
+        @blur="$v.textAreaData.$touch()"
+      ></v-textarea>
     </template>
     <template v-slot:help-slot>
-      <div class="help-content">
+      <div v-if="helpHtml" class="markdown" v-html="helpHtml"></div>
+      <div v-else>
         <p>
           This is a generic provider service account dialog.
         </p>
@@ -46,17 +62,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import { requiredIf } from 'vuelidate/lib/validators'
+import { getValidationErrors, setDelayedInputFocus, transformHtml } from '@/utils'
 import isObject from 'lodash/isObject'
+import forEach from 'lodash/forEach'
+import get from 'lodash/get'
+import { mapState } from 'vuex'
+import Vue from 'vue'
 const yaml = require('js-yaml')
-
-const validationErrors = {
-  data: {
-    required: 'You can\'t leave this empty.',
-    isYAML: 'You need to enter secret data as valid YAML object'
-  }
-}
 
 export default {
   components: {
@@ -76,8 +89,9 @@ export default {
   },
   data () {
     return {
-      data: undefined,
-      validationErrors
+      textAreaData: undefined,
+      customCloudProviderData: {},
+      showSecrets: {}
     }
   },
   validations () {
@@ -85,30 +99,67 @@ export default {
     return this.validators
   },
   computed: {
-    valid () {
-      return !this.$v.$invalid
+    ...mapState([
+      'cfg'
+    ]),
+    validationErrors () {
+      const allValidationErrors = {
+        textAreaData: {
+          required: 'You can\'t leave this empty.',
+          isYAML: 'You need to enter secret data as valid YAML object'
+        },
+        customCloudProviderData: {}
+      }
+      forEach(this.customCloudProviderFields, ({ key, validationErrors }) => {
+        allValidationErrors.customCloudProviderData[key] = validationErrors
+      })
+      return allValidationErrors
     },
     validators () {
-      const validators = {
-        data: {
-          required,
-          isYAML: () => isObject(this.secretYAML)
-        }
+      const allValidators = {
+        textAreaData: {
+          required: requiredIf(() => !this.customCloudProviderFields),
+          isYAML: () => this.customCloudProviderFields || isObject(this.textAreaYAML)
+        },
+        customCloudProviderData: {}
       }
-      return validators
+      forEach(this.customCloudProviderFields, ({ key, validators }) => {
+        const compiledValidators = {}
+        forEach(validators, (validator, key) => {
+          compiledValidators[key] = value => new RegExp(validator).test(value)
+        })
+        allValidators.customCloudProviderData[key] = compiledValidators
+      })
+
+      return allValidators
+    },
+    customCloudProvider () {
+      return get(this.cfg, ['customCloudProviders', this.vendor])
+    },
+    customCloudProviderFields () {
+      return this.customCloudProvider?.secret?.fields
+    },
+    helpHtml () {
+      return transformHtml(this.customCloudProvider?.secret?.help)
+    },
+    valid () {
+      return !this.$v.$invalid
     },
     isCreateMode () {
       return !this.secret
     },
-    secretYAML () {
+    textAreaYAML () {
       try {
-        return yaml.load(this.data)
+        return yaml.load(this.textAreaData)
       } catch (e) {
         return undefined
       }
     },
     secretData () {
-      return isObject(this.secretYAML) ? this.secretYAML : {}
+      if (this.customCloudProviderFields) {
+        return this.customCloudProviderData
+      }
+      return isObject(this.textAreaYAML) ? this.textAreaYAML : {}
     }
   },
   methods: {
@@ -118,39 +169,26 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.data = ''
+      this.textAreaData = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'data')
+        setDelayedInputFocus(this, 'textAreaData')
       }
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
+    },
+    toggleShowSecrets (key) {
+      Vue.set(this.showSecrets, key, !this.showSecrets[key])
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
-  ::v-deep .v-input__control textarea {
-    font-family: monospace;
-    font-size: 14px;
+.markdown {
+  ::v-deep > p {
+    margin: 0px;
   }
-
-    .help-content {
-    ul {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      list-style-type: none;
-      border-left: 4px solid #318334 !important;
-      margin-left: 20px;
-      padding-left: 24px;
-      li {
-        font-weight: 300;
-        font-size: 16px;
-      }
-    }
-  }
-
+}
 </style>

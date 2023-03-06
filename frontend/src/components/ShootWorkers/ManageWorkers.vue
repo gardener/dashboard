@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
@@ -117,6 +117,9 @@ export default {
       'cloudProfileByName',
       'generateWorker',
       'expiringWorkerGroupsForShoot'
+    ]),
+    ...mapState([
+      'cfg'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -311,7 +314,7 @@ export default {
          * do not pass shootspec as we do not have it available in this component and it is (currently) not required to determine isZoned for new clusters. This event handler is only called for new clusters, as the
          * userInterActionBus is only set for the create cluster use case
          */
-        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster, customCloudProviders: this.cfg.customCloudProviders })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {

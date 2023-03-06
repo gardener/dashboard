@@ -234,7 +234,7 @@ const actions = {
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, 'spec', getSpecTemplate(infrastructureKind, rootGetters.nodesCIDR))
+    set(shootResource, 'spec', getSpecTemplate(infrastructureKind, rootGetters.nodesCIDR, rootState.cfg.customCloudProviders))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
