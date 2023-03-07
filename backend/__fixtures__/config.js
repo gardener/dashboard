@@ -31,10 +31,6 @@ const defaultConfig = {
       token: toHex('token')
     }
   },
-  pod: {
-    name: 'dashboard-testpod',
-    namespace: 'dashboard-testns'
-  },
   sessionSecret: toHex('session-secret'),
   oidc: {
     issuer: 'https://kubernetes:32001',

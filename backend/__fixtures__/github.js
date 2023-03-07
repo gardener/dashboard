@@ -8,6 +8,7 @@
 
 /* eslint-disable camelcase */
 
+const { createHmac } = require('crypto')
 const { cloneDeep } = require('lodash')
 const { formatTime } = require('./helper')
 const {
@@ -15,7 +16,8 @@ const {
     apiUrl,
     org,
     repository,
-    authentication
+    authentication,
+    webhookSecret
   }
 } = require('./config').default
 
@@ -123,6 +125,11 @@ const comments = {
   }
 }
 
+function createHubSignature (body, secret = null) {
+  const key = secret ?? webhookSecret
+  return `sha256=${createHmac('sha256', key).update(body).digest('hex')}`
+}
+
 module.exports = {
   server,
   ':scheme': scheme,
@@ -137,5 +144,6 @@ module.exports = {
   },
   createComment (id, number) {
     return getComment({ id, number })
-  }
+  },
+  createHubSignature
 }

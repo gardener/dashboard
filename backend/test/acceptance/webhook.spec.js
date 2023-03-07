@@ -6,20 +6,12 @@
 
 'use strict'
 
-const os = require('os')
 const { mockRequest } = require('@gardener-dashboard/request')
 const { cache: { resetTicketCache } } = require('../../lib/cache')
-const { createHubSignature } = require('../../lib/github/webhookParser')
 const { loadOpenIssues } = require('../../lib/services/tickets')
 const { octokit } = require('../../lib/github')
 
 describe('github', function () {
-  const {
-    gitHub: {
-      webhookSecret
-    }
-  } = fixtures.config.default
-
   let agent
   let cache
 
@@ -64,7 +56,7 @@ describe('github', function () {
       await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
-        .set('x-hub-signature-256', createHubSignature(webhookSecret, body))
+        .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
         .type('application/json')
         .send(body)
         .expect(204)
@@ -74,7 +66,7 @@ describe('github', function () {
         expect.anything(),
         {
           spec: {
-            holderIdentity: fixtures.config.default.pod.name,
+            holderIdentity: fixtures.env.POD_NAME,
             renewTime: '2006-01-02T15:04:05.000000Z'
           }
         }
@@ -87,7 +79,7 @@ describe('github', function () {
       await agent
         .post('/webhook')
         .set('x-github-event', githubEvent)
-        .set('x-hub-signature-256', createHubSignature(webhookSecret, body))
+        .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
         .type('application/json')
         .send(body)
         .expect(422)
@@ -101,7 +93,7 @@ describe('github', function () {
       await agent
         .patch('/webhook')
         .set('x-github-event', githubEvent)
-        .set('x-hub-signature-256', createHubSignature(webhookSecret, body))
+        .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
         .type('application/json')
         .send(body)
         .expect((res) => {

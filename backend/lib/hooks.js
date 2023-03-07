@@ -69,19 +69,19 @@ class LifecycleHooks {
     const informers = {
       // core.gardener
       cloudprofiles: client['core.gardener.cloud'].cloudprofiles.informer(),
-      seeds: client['core.gardener.cloud'].seeds.informer(),
       controllerregistrations: client['core.gardener.cloud'].controllerregistrations.informer(),
+      projects: client['core.gardener.cloud'].projects.informer(),
       quotas: client['core.gardener.cloud'].quotas.informerAllNamespaces(),
+      seeds: client['core.gardener.cloud'].seeds.informer(),
       shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
       // core
-      resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
-      // coordination
-      leases: null
+      resourcequotas: client.core.resourcequotas.informerAllNamespaces()
     }
 
     if (config.gitHub?.webhookSecret) {
       const informerOpts = { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
-      informers.leases = client['coordination.k8s.io'].leases.informer(config.pod.namespace, informerOpts)
+      const namespace = process.env.POD_NAMESPACE || 'garden'
+      informers.leases = client['coordination.k8s.io'].leases.informer(namespace, informerOpts)
     }
 
     return informers

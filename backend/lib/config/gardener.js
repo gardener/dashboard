@@ -17,8 +17,6 @@ const environmentVariableDefinitions = {
   VUE_APP_VERSION: 'frontend.appVersion',
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
   API_SERVER_URL: 'apiServerUrl',
-  POD_NAME: 'pod.name',
-  POD_NAMESPACE: 'pod.namespace',
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret

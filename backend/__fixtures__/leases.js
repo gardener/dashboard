@@ -9,7 +9,7 @@
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { cloneDeep, find, merge } = require('lodash')
-const { default: defaultConfig } = require('./config')
+const { POD_NAME, POD_NAMESPACE } = require('./env')
 
 const getLease = (renewTime = null) => {
   if (!renewTime) {
@@ -20,8 +20,6 @@ const getLease = (renewTime = null) => {
     }
   }
 
-  const { name, namespace } = defaultConfig.pod
-
   return {
     apiVersion: 'coordination.k8s.io/v1',
     kind: 'Lease',
@@ -31,12 +29,12 @@ const getLease = (renewTime = null) => {
         app: 'gardener-dashboard',
         role: 'dashboard'
       },
-      namespace,
+      namespace: POD_NAMESPACE,
       name: 'gardener-dashboard-github-webhook',
       uid: 'f810e8c6-e37f-4668-913d-89b37c598dd1'
     },
     spec: {
-      holderIdentity: name,
+      holderIdentity: POD_NAME,
       renewTime
     }
   }

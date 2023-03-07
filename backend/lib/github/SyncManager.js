@@ -10,42 +10,41 @@ const logger = require('../logger')
 
 class SyncManager {
   ready = false
-  #throttled = false
-  #loadTickets
-  #loadHasPendingExec
+  #load
   #retryPeriod
   #interval
-  #syncPeriodTimeoutId
   #throttle
-  #throttleTimeoutId
+  #idleSyncTimeoutId
+  #lastInvokeTime = 0
+  #scheduledInvocationTimeoutId
 
-  constructor ({ interval, throttle, signal, loadTickets }) {
+  constructor (loadFunc, { interval, throttle, signal }) {
     signal.addEventListener('abort', () => this.#stop(), { once: true })
 
     this.#interval = interval
     this.#throttle = throttle
-    this.#loadTickets = loadTickets
-    this.#retryPeriod = throttle || parseInt(30_000 + Math.random() * 60_000, 10)
+    this.#load = loadFunc
+    this.#retryPeriod = throttle || Math.floor(60_000 * (0.5 + Math.random()))
   }
 
   /**
-   * Calls #loadTickets() and will automatically trigger a regular re-sync by calling
+   * Calls #load() and will automatically trigger a regular re-sync by calling
    * .sync() after #interval ms after the last completed call. If the first call/sync encounters an
    * error #retryPeriod is used instead of #interval. #retryPeriod should be lower then
    * #syncPeriod. This way, in case of an error during the initial data load, we avoid staying
    * too long in the unintialized state.
    */
-  async #load () {
-    clearTimeout(this.#syncPeriodTimeoutId)
+  async #invokeLoad () {
+    clearTimeout(this.#idleSyncTimeoutId)
     try {
-      await this.#loadTickets()
+      await this.#load()
       this.ready = true
     } catch (err) {
       logger.error('Failed to load open issues and comments: %s', err.message)
     } finally {
       const delay = this.ready ? this.#interval : this.#retryPeriod
       if (delay) {
-        this.#syncPeriodTimeoutId = setTimeout(() => this.sync(), delay)
+        this.#idleSyncTimeoutId = setTimeout(() => this.sync(), delay)
       }
     }
   }
@@ -56,44 +55,26 @@ class SyncManager {
    * @returns {undefined}
    */
   async #throttledLoad () {
-    if (this.#throttled) {
-      this.#loadHasPendingExec = true
-      return
-    }
-
-    const execStart = Date.now()
-    this.#throttled = true
-
-    await this.#load()
-
-    const execDuration = Date.now() - execStart
-    const unthrottleDelay = Math.max(0, this.#throttle - execDuration)
-    const unthrottle = () => {
-      this.#throttled = false
-      if (this.#loadHasPendingExec) {
-        this.#loadHasPendingExec = false
-        this.#throttledLoad()
-      }
-    }
-    this.#throttleTimeoutId = setTimeout(unthrottle, unthrottleDelay)
+    clearTimeout(this.#scheduledInvocationTimeoutId)
+    const wait = Math.max(0, this.#lastInvokeTime + this.#throttle - Date.now())
+    this.#scheduledInvocationTimeoutId = setTimeout(() => {
+      this.#lastInvokeTime = Date.now()
+      this.#invokeLoad()
+    }, wait)
   }
 
   /**
    * To be called by externals in a fire-and-forget fashion. Depending on internal handled
-   * throttling etc. a call to sync does not necessarily lead to an immediate sync. No errors
-   * or values are returned/thrown.
+   * throttling etc. a call to sync does not necessarily lead to an immediate sync. No values
+   * or errors are returned or thrown.
    */
   sync () {
     this.#throttledLoad()
   }
 
-  start () {
-    this.sync()
-  }
-
   #stop () {
-    clearTimeout(this.#syncPeriodTimeoutId)
-    clearTimeout(this.#throttleTimeoutId)
+    clearTimeout(this.#idleSyncTimeoutId)
+    clearTimeout(this.#scheduledInvocationTimeoutId)
   }
 }
 

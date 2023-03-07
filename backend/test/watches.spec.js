@@ -8,7 +8,7 @@
 
 const fixtures = require('../__fixtures__')
 
-jest.mock('../lib/github/syncManager')
+jest.mock('../lib/github/SyncManager')
 
 const EventEmitter = require('events')
 const _ = require('lodash')
@@ -17,7 +17,7 @@ const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const tickets = require('../lib/services/tickets')
-const SyncManager = require('../lib/github/syncManager')
+const SyncManager = require('../lib/github/SyncManager')
 
 const rooms = new Map()
 
@@ -272,14 +272,13 @@ describe('watches', function () {
       expect(ticketCache.on).toBeCalledWith('comment', expect.any(Function))
 
       expect(SyncManager).toBeCalledTimes(1)
-      expect(SyncManager).toBeCalledWith({
+      expect(SyncManager).toBeCalledWith(watches.leases.test.loadOpenIssuesAndComments, {
         interval: synchronization.intervalSeconds * 1000,
         throttle: synchronization.throttleSeconds * 1000,
-        signal,
-        loadTickets: watches.leases.test.loadOpenIssuesAndComments
+        signal
       })
       const syncManagerInstance = SyncManager.mock.instances[0]
-      expect(syncManagerInstance.start).toBeCalledTimes(1)
+      expect(syncManagerInstance.sync).toBeCalledTimes(1)
 
       expect(informer.on).toBeCalledTimes(1)
       expect(informer.on).toBeCalledWith('update', expect.any(Function))
@@ -291,11 +290,10 @@ describe('watches', function () {
       await watches.leases(io, informer, { signal })
 
       expect(SyncManager).toBeCalledTimes(1)
-      expect(SyncManager).toBeCalledWith({
+      expect(SyncManager).toBeCalledWith(watches.leases.test.loadOpenIssuesAndComments, {
         interval: 0,
         throttle: 0,
-        signal,
-        loadTickets: watches.leases.test.loadOpenIssuesAndComments
+        signal
       })
     })
 
@@ -323,14 +321,14 @@ describe('watches', function () {
       informer.emit('update', {})
 
       const syncManagerInstance = SyncManager.mock.instances[0]
-      expect(syncManagerInstance.sync).toBeCalledTimes(1)
+      expect(syncManagerInstance.sync).toBeCalledTimes(2)
     })
 
     it('should should load issues and comments of all issues', async function () {
       const { loadOpenIssuesAndComments } = watches.leases.test
 
       const issues = fixtures.github.issues.list()
-      const issueNumbers = issues.map(i => i.id)
+      const issueNumbers = issues.map(i => i.number)
       const comments = fixtures.github.comments.list()
       const t = issues.map(i => tickets.fromIssue(i))
 

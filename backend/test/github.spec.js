@@ -11,27 +11,29 @@ const { UnprocessableEntity, InternalServerError } = require('http-errors')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
 const config = require('../lib/config')
-const { handleGithubEvent } = require('../lib/github/webhookHandler')
-const { verify } = require('../lib/github/webhookParser')
-const SyncManager = require('../lib/github/syncManager')
+const handleGithubEvent = require('../lib/github/webhook/handler')
+const verify = require('../lib/github/webhook/verify')
+const SyncManager = require('../lib/github/SyncManager')
 const actualNextTick = jest.requireActual('process').nextTick
 
 jest.mock('crypto')
 jest.useFakeTimers().setSystemTime(new Date('2023-01-01 00:00:00Z'))
 
 const flushPromises = () => new Promise(actualNextTick)
+// NOTE: if during an advance action a new timeout with a delay of 0(ms)
+// shall be triggered we need to call this fn again but with 1ms as param.
 const advanceTimersAndFlushPromises = async (ms) => {
   jest.advanceTimersByTime(ms)
   await flushPromises()
 }
 
 describe('github webhook', function () {
-  const namespace = fixtures.config.default.pod.namespace
-  const leaseName = 'gardener-dashboard-github-webhook'
-  const microDateStr = '2006-01-02T15:04:05.000000Z'
-  const dateStr = new Date(microDateStr).toISOString()
-
   describe('handler', () => {
+    const namespace = fixtures.env.POD_NAMESPACE
+    const holderIdentity = fixtures.env.POD_NAME
+    const leaseName = 'gardener-dashboard-github-webhook'
+    const microDateStr = '2006-01-02T15:04:05.000000Z'
+    const dateStr = new Date(microDateStr).toISOString()
     let mergePatchStub
 
     beforeEach(() => {
@@ -39,9 +41,8 @@ describe('github webhook', function () {
       mergePatchStub.mockResolvedValue({})
     })
 
-    it('should log a warning and throw an error in case of unknown event', async () => {
+    it('should throw an error in case of unknown event', async () => {
       await expect(handleGithubEvent('unknown', null)).rejects.toThrow(UnprocessableEntity)
-      expect(logger.warn).toBeCalledTimes(1)
     })
 
     it('should error in case of missing properties in payload', async () => {
@@ -56,7 +57,7 @@ describe('github webhook', function () {
 
       const expectedBody = {
         spec: {
-          holderIdentity: config.pod.name,
+          holderIdentity,
           renewTime: microDateStr
         }
       }
@@ -66,7 +67,7 @@ describe('github webhook', function () {
     it('should update the lease object for an issue_comment event', async () => {
       const expectedBody = {
         spec: {
-          holderIdentity: config.pod.name,
+          holderIdentity,
           renewTime: microDateStr
         }
       }
@@ -76,10 +77,10 @@ describe('github webhook', function () {
       expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
     })
 
-    it('should log and rethrow errors from underlying kube client', async () => {
+    it('should rethrow errors from underlying kube client', async () => {
       const expectedBody = {
         spec: {
-          holderIdentity: config.pod.name,
+          holderIdentity,
           renewTime: microDateStr
         }
       }
@@ -91,7 +92,6 @@ describe('github webhook', function () {
 
       await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
       expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-      expect(logger.error).toBeCalledTimes(1)
     })
   })
 
@@ -106,7 +106,7 @@ describe('github webhook', function () {
     }
     const fakeBody = JSON.stringify({ some: 'body' })
 
-    beforeAll(() => {
+    beforeEach(() => {
       hmacUpdateStub = jest.fn()
       hmacDigestStub = jest.fn()
       crypto.timingSafeEqual.mockImplementation((...args) => {
@@ -121,21 +121,21 @@ describe('github webhook', function () {
     })
 
     it('should succeed if signatures match', () => {
-      hmacDigestStub.mockReturnValueOnce(fakeSignature)
+      hmacDigestStub.mockReturnValueOnce(Buffer.from(fakeSignature, 'hex'))
 
       expect(() => verify(req, {}, fakeBody)).not.toThrow()
       expect(crypto.createHmac).toBeCalledWith('sha256', config.gitHub.webhookSecret)
       expect(hmacUpdateStub).toBeCalledWith(fakeBody)
-      expect(hmacDigestStub).toBeCalledWith('hex')
+      expect(hmacDigestStub).toBeCalledTimes(1)
     })
 
     it('should fail in case of an invalid signature', () => {
-      hmacDigestStub.mockReturnValueOnce('invalid-signature')
+      hmacDigestStub.mockReturnValueOnce(Buffer.from('invalid-signature'))
 
       expect(() => verify(req, {}, fakeBody)).toThrow()
       expect(crypto.createHmac).toBeCalledWith('sha256', config.gitHub.webhookSecret)
       expect(hmacUpdateStub).toBeCalledWith(fakeBody)
-      expect(hmacDigestStub).toBeCalledWith('hex')
+      expect(hmacDigestStub).toBeCalledTimes(1)
     })
 
     it('should fail if webhookSecret is not configured', () => {
@@ -151,7 +151,6 @@ describe('github webhook', function () {
 
       expect(thrownError).not.toBeFalsy()
       expect(thrownError.message).toEqual("Property 'gitHub.webhookSecret' not configured on dashboard backend")
-      expect(thrownError.status).toEqual(500)
 
       Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
     })
@@ -165,14 +164,15 @@ describe('github webhook', function () {
       }
 
       expect(thrownError).not.toBeFalsy()
-      expect(thrownError.message).toEqual("Header 'x-hub-signature-256' not provided")
+      expect(thrownError.message).toEqual("Header 'x-hub-signature-256' not provided or invalid")
       expect(thrownError.status).toEqual(403)
     })
   })
 
-  describe('syncManager', () => {
+  describe('SyncManager', () => {
     let abortController
     let syncManagerOpts
+    let loadTicketsStub
     const loadTicketsDuration = 500
 
     beforeAll(() => {
@@ -182,15 +182,15 @@ describe('github webhook', function () {
     beforeEach(() => {
       jest.resetAllMocks()
       abortController = new AbortController()
+      loadTicketsStub = jest.fn().mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(resolve, loadTicketsDuration)
+        })
+      })
       syncManagerOpts = {
         signal: abortController.signal,
         interval: 10_000,
-        throttle: 2_000,
-        loadTickets: jest.fn().mockImplementation(() => {
-          return new Promise((resolve) => {
-            setTimeout(resolve, loadTicketsDuration)
-          })
-        })
+        throttle: 2_000
       }
     })
 
@@ -207,26 +207,27 @@ describe('github webhook', function () {
       jest.spyOn(signal, 'addEventListener')
 
       // eslint-disable-next-line no-unused-vars
-      const syncManager = new SyncManager(syncManagerOpts)
+      const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
       expect(signal.addEventListener).toBeCalledTimes(1)
       expect(signal.addEventListener).toBeCalledWith('abort', expect.any(Function), { once: true })
     })
 
-    it('should trigger an initial sync on start', async () => {
-      const syncManager = new SyncManager(syncManagerOpts)
-      syncManager.start()
+    it('should be "ready" after first successful sync', async () => {
+      const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
+      syncManager.sync()
 
-      expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+      await advanceTimersAndFlushPromises(0)
+      expect(loadTicketsStub).toBeCalledTimes(1)
       await advanceTimersAndFlushPromises(loadTicketsDuration)
       expect(syncManager.ready).toEqual(true)
     })
 
     it('should log errors if the provided loadTickets function errors', async () => {
-      syncManagerOpts.loadTickets.mockImplementationOnce(async () => {
+      loadTicketsStub.mockImplementationOnce(async () => {
         throw Error('test error message')
       })
-      const syncManager = new SyncManager(syncManagerOpts)
-      syncManager.start()
+      const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
+      syncManager.sync()
 
       jest.advanceTimersByTime(loadTicketsDuration)
       await flushPromises()
@@ -234,120 +235,117 @@ describe('github webhook', function () {
       expect(logger.error).toBeCalledTimes(1)
     })
 
-    describe('interval loading', () => {
+    describe('interval loading of tickets', () => {
       beforeEach(() => {
         syncManagerOpts.throttle = 0 // disable
       })
 
       it('should load data after idle interval has passed', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
-        syncManager.start()
+        syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
         await advanceTimersAndFlushPromises(syncManagerOpts.interval)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(2)
+        // When the interval is over a new timeout - in this case - with delay of 0 ms is scheduled.
+        // jest.advanceTimersByTime(0) does not trigger setTimeout(..., 0). So use 1(ms) here.
+        await advanceTimersAndFlushPromises(1)
+        expect(loadTicketsStub).toBeCalledTimes(2)
       })
 
       it('interval should be reset upon sync call', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
         const incompleteInterval = Math.ceil(syncManagerOpts.interval * 0.75)
 
-        syncManager.start()
+        syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
         // reset interval by calling sync manually
         await advanceTimersAndFlushPromises(incompleteInterval)
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(2)
+        expect(loadTicketsStub).toBeCalledTimes(2)
 
         await advanceTimersAndFlushPromises(incompleteInterval)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(2)
+        expect(loadTicketsStub).toBeCalledTimes(2)
 
         // advance timers so that one full sync interval has passed since last sync()-call
         await advanceTimersAndFlushPromises(syncManagerOpts.interval - incompleteInterval)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(3)
+        await advanceTimersAndFlushPromises(1)
+        expect(loadTicketsStub).toBeCalledTimes(3)
       })
 
       it('should stop interval loading on abort', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
-        syncManager.start()
+        syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
         abortController.abort()
 
-        await advanceTimersAndFlushPromises(syncManagerOpts.interval)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        await advanceTimersAndFlushPromises(syncManagerOpts.interval * 2)
+        expect(loadTicketsStub).toBeCalledTimes(1)
       })
     })
 
-    describe('call throttling and no parallel loads', () => {
+    describe('throttled loading of tickets', () => {
       beforeEach(() => {
         syncManagerOpts.interval = 0 // disable
       })
 
       it('should throttle calls', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
         syncManager.sync()
-        syncManager.sync()
+        await advanceTimersAndFlushPromises(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
-        jest.advanceTimersByTime(syncManagerOpts.throttle)
-        await flushPromises()
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        syncManager.sync() // still within the throttle period after which it should execute
 
-        jest.advanceTimersByTime(syncManagerOpts.throttle)
-        await flushPromises()
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(2)
+        await advanceTimersAndFlushPromises(syncManagerOpts.throttle)
+        expect(loadTicketsStub).toBeCalledTimes(2)
       })
 
-      it('should not run multiple loadTicket invocations in parallel', async () => {
+      it('should run multiple loadTicket invocations in parallel', async () => {
         syncManagerOpts.throttle = 0
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
         for (let i = 0; i < 3; i += 1) {
           syncManager.sync()
+          await advanceTimersAndFlushPromises(1)
         }
 
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
-
-        jest.advanceTimersByTime(loadTicketsDuration)
-        await flushPromises()
-        jest.advanceTimersByTime(0)
-
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(2)
+        expect(loadTicketsStub).toBeCalledTimes(3)
       })
 
       it('should idle if no new or pending sync calls occure', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
         syncManager.sync()
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
         jest.runAllTimers()
         await flushPromises()
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
       })
 
       it('should not execute pending throttled loads after abort', async () => {
-        const syncManager = new SyncManager(syncManagerOpts)
+        const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
 
-        syncManager.start()
+        syncManager.sync()
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
 
         abortController.abort()
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle - loadTicketsDuration)
-        expect(syncManagerOpts.loadTickets).toBeCalledTimes(1)
+        expect(loadTicketsStub).toBeCalledTimes(1)
       })
     })
   })

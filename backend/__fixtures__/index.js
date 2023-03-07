@@ -27,6 +27,7 @@ const nodes = require('./nodes')
 const terminals = require('./terminals')
 const github = require('./github')
 const helper = require('./helper')
+const env = require('./env')
 const user = {
   create (...args) {
     return auth.createUser(...args)
@@ -60,6 +61,7 @@ const fixtures = {
   terminals,
   github,
   helper,
+  env,
   resetAll
 }
 module.exports = fixtures

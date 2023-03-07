@@ -10,7 +10,7 @@ const logger = require('../logger')
 const config = require('../config')
 const cache = require('../cache')
 const tickets = require('../services/tickets')
-const SyncManager = require('../github/syncManager')
+const SyncManager = require('../github/SyncManager')
 
 async function loadOpenIssuesAndComments () {
   const issues = await tickets.loadOpenIssues()
@@ -40,13 +40,12 @@ module.exports = (io, informer, { signal }) => {
   })
 
   const { intervalSeconds, throttleSeconds } = config.gitHub.synchronization
-  const syncManager = new SyncManager({
+  const syncManager = new SyncManager(loadOpenIssuesAndComments, {
     interval: intervalSeconds * 1000 || 0,
     throttle: throttleSeconds * 1000 || 0,
-    loadTickets: loadOpenIssuesAndComments,
     signal
   })
-  syncManager.start()
+  syncManager.sync()
 
   const handleEvent = event => syncManager.sync()
   informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
