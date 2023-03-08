@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
             ref="workerEditor"
             v-on="$workerEditor.hooks"
             hide-toolbar
-            :style="`min-height: ${overViewTabHeight}px`"
+            :style="{ 'min-height': `${overviewTabHeight}px` }"
             animate-appear
           >
           </shoot-editor>
@@ -112,7 +112,7 @@ export default {
       networkConfigurationYaml: undefined,
       tabValue: 'overview',
       editorData: {},
-      overViewTabHeight: 0
+      overviewTabHeight: 0
     }
   },
   mixins: [
@@ -132,8 +132,8 @@ export default {
         }
         if (value === 'yaml') {
           // set current height as min-height for yaml tab to avoid
-          // dialog downsize as editor not xet rendered
-          this.overViewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
+          // dialog downsize as editor not yet rendered
+          this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
           this.setEditorData()
         }
       }

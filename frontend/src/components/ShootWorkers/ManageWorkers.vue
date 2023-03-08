@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="alternate-row-background">
     <v-expand-transition
-      :appear="animateAppear"
+      :appear="animateOnAppear"
       v-for="(worker, index) in internalWorkers"
       :key="worker.id"
     >
@@ -112,7 +112,7 @@ export default {
       existingWorkerCIDR: undefined,
       kubernetesVersion: undefined,
       initialZones: undefined,
-      animateAppear: false
+      animateOnAppear: false
     }
   },
   computed: {
@@ -308,7 +308,9 @@ export default {
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
       this.$nextTick(() => {
-        this.animateAppear = true
+        // need to defer until data has been set and rendered
+        // can be removed when we adapt this component to shoot staging store module
+        this.animateOnAppear = true
       })
     }
   },

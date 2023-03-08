@@ -181,7 +181,7 @@ export default {
     completionPaths: {
       type: Array
     },
-    animateAppear: {
+    animateOnAppear: {
       type: Boolean
     }
   },
@@ -467,15 +467,16 @@ export default {
     animateExpansion () {
       this.containerClass = 'collapsed'
       this.$nextTick(() => {
+        // wait for ui to render collapsed class before setting animation class
         this.containerClass = 'animate'
         setTimeout(() => {
           this.containerClass = undefined
-        }, 1500)
+        }, 1500) // remove after animation ends (1.5 sec)
       })
     }
   },
   async mounted () {
-    if (this.animateAppear) {
+    if (this.animateOnAppear) {
       this.animateExpansion()
     }
 

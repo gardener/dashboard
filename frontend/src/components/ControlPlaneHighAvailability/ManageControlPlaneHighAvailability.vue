@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <v-expand-transition :appear="animateAppear" v-else>
+    <v-expand-transition :appear="animateOnAppear" v-else>
       <div>
         Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
         <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
@@ -63,7 +63,7 @@ export default {
   },
   data () {
     return {
-      animateAppear: false
+      animateOnAppear: false
     }
   },
   computed: {
@@ -125,7 +125,7 @@ export default {
   },
   mounted () {
     this.resetToleranceType(this.zoneSupported)
-    this.animateAppear = true
+    this.animateOnAppear = true
   }
 }
 </script>

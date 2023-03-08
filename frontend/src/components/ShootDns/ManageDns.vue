@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <div class="alternate-row-background">
       <v-expand-transition
-        :appear="animateAppear"
+        :appear="animateOnAppear"
         v-for="id in dnsProviderIds"
         :key="id"
       >
@@ -114,7 +114,7 @@ export default {
   validations,
   data () {
     return {
-      animateAppear: false
+      animateOnAppear: false
     }
   },
   computed: {
@@ -175,7 +175,7 @@ export default {
   },
   mounted () {
     this.$v.$touch()
-    this.animateAppear = true
+    this.animateOnAppear = true
   },
   watch: {
     '$v.primaryProvider.$invalid' (value) {

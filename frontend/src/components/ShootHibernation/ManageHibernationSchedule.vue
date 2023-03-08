@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <div class="alternate-row-background">
       <v-expand-transition
-        :appear="animateAppear"
+        :appear="animateOnAppear"
         v-for="(scheduleEvent, index) in parsedScheduleEvents"
         :key="scheduleEvent.id"
       >
@@ -113,7 +113,7 @@ export default {
       scheduleCrontab: undefined,
       purpose: undefined,
       noSchedule: undefined,
-      animateAppear: false
+      animateOnAppear: false
     }
   },
   computed: {
@@ -261,7 +261,9 @@ export default {
       this.parseSchedules(hibernationSchedule)
       this.setNoHibernationSchedule(noHibernationSchedule)
       this.$nextTick(() => {
-        this.animateAppear = true
+        // need to defer until data has been set and rendered
+        // can be removed when we adapt this component to shoot staging store module
+        this.animateOnAppear = true
       })
     }
   },
