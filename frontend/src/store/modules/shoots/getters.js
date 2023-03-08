@@ -270,36 +270,26 @@ export default {
         }
         case 'readiness': {
           const hideProgressingClusters = get(rootGetters.getShootListFilters, 'progressing', false)
-
-          const errorConditionsToUseForSorting = {}
-          items.forEach(item => {
-            const errorConditionStatuses = filter(item.status?.conditions,
-              condition => condition?.status !== 'True' &&
-              (!hideProgressingClusters || condition?.status !== 'Progressing'))
-
-            const errorConditions = map(errorConditionStatuses, conditionStatus => {
-              const condition = rootState.conditionCache[conditionStatus.type]
+          return orderBy(items, item => {
+            const errorGroups = map(item.status?.conditions, itemCondition => {
+              const isErrorCondition = (itemCondition?.status !== 'True' &&
+                (!hideProgressingClusters || itemCondition?.status !== 'Progressing'))
+              if (!isErrorCondition) {
+                return {
+                  weight: Number.MAX_SAFE_INTEGER,
+                  lastTransitionTime: itemCondition.lastTransitionTime
+                }
+              }
+              const condition = rootState.conditionCache[itemCondition.type]
               return {
-                ...conditionStatus,
-                ...condition
+                weight: condition?.weight ?? itemCondition.type,
+                lastTransitionTime: itemCondition.lastTransitionTime
               }
             })
-
-            if (errorConditions.length) {
-              const { sort, shortName, lastTransitionTime } = head(orderBy(errorConditions, ['sort', 'shortName']))
-
-              errorConditionsToUseForSorting[item.metadata.uid] = {
-                group: sort ?? shortName,
-                lastTransitionTime
-              }
-            }
-          })
-
-          return orderBy(items,
-            [item => errorConditionsToUseForSorting[item.metadata.uid]?.group,
-              item => errorConditionsToUseForSorting[item.metadata.uid]?.lastTransitionTime,
-              'metadata.name'],
-            [sortOrder, sortOrder, 'asc'])
+            const { weight, lastTransitionTime } = head(orderBy(errorGroups, ['weight']))
+            return [weight, lastTransitionTime, 'metadata.name']
+          },
+          [sortOrder, sortOrder, 'asc'])
         }
         default: {
           return orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])

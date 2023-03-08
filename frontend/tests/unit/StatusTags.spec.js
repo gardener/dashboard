@@ -41,7 +41,7 @@ describe('condition.vue', () => {
         name: 'Important Condition',
         shortName: 'IC',
         description: 'Important Config Condition Description',
-        sort: '0'
+        weight: '0'
       }
     }
   }
@@ -113,7 +113,7 @@ describe('condition.vue', () => {
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('API')
     expect(condition.name).toBe('API Server')
-    expect(condition.sort).toBe('0')
+    expect(condition.weight).toBe('0')
     expect(condition.description).not.toHaveLength(0)
   })
 

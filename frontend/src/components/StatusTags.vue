@@ -71,7 +71,7 @@ export default {
         return { ...condition, ...conditionStatus }
       })
 
-      return sortBy(conditions, 'sort', 'shortName')
+      return sortBy(conditions, 'weight')
     },
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
@@ -103,7 +103,7 @@ export default {
 
       const name = join(conditionComponents, ' ')
       const shortName = join(map(conditionComponents, first), '')
-      const conditionMetaData = { name, shortName }
+      const conditionMetaData = { name, shortName, weight: shortName }
       this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
 
       return conditionMetaData

@@ -151,7 +151,7 @@ describe('store.shoots', () => {
     rootState = {
       conditionCache: {
         APIServerAvailable: {
-          sort: '0'
+          weight: '0'
         }
       }
     }
