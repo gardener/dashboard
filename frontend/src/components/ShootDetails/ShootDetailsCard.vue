@@ -142,7 +142,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Access Restrictions</v-list-item-subtitle>
-            <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
+            <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex flex-wrap align-center pt-1">
               <access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
             </v-list-item-title>
             <v-list-item-title v-else class="d-flex align-center pt-1">
