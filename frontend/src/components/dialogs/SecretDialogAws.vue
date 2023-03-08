@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           v-model="awsRegion"
           label="Region (optional)"
-          hint="e.g. eu-central-1"
+          hint="Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1"
         ></v-text-field>
       </div>
     </template>
