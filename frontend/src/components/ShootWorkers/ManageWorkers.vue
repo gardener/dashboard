@@ -5,36 +5,42 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <transition-group name="list" class="alternate-row-background">
-    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2 my-0 mx-1">
-      <worker-input-generic
-        ref="workerInput"
-        :worker="worker"
-        :workers="internalWorkers"
-        :cloud-profile-name="cloudProfileName"
-        :region="region"
-        :all-zones="allZones"
-        :available-zones="availableZones"
-        :initialZones="initialZones"
-        :zoned-cluster="zonedCluster"
-        :updateOSMaintenance="updateOSMaintenance"
-        :is-new="isNewCluster || worker.isNew"
-        :max-additional-zones="maxAdditionalZones"
-        :kubernetes-version="kubernetesVersion"
-        @valid="onWorkerValid"
-        @removed-zones="onRemovedZones">
-        <template v-slot:action>
-          <v-btn v-show="index > 0 || internalWorkers.length > 1"
-            small
-            outlined
-            icon
-            color="grey"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </template>
-      </worker-input-generic>
-    </v-row>
+  <div class="alternate-row-background">
+    <v-expand-transition
+      :appear="animateOnAppear"
+      v-for="(worker, index) in internalWorkers"
+      :key="worker.id"
+    >
+      <v-row class="list-item pt-2 my-0 mx-1" >
+        <worker-input-generic
+          ref="workerInput"
+          :worker="worker"
+          :workers="internalWorkers"
+          :cloud-profile-name="cloudProfileName"
+          :region="region"
+          :all-zones="allZones"
+          :available-zones="availableZones"
+          :initialZones="initialZones"
+          :zoned-cluster="zonedCluster"
+          :updateOSMaintenance="updateOSMaintenance"
+          :is-new="isNewCluster || worker.isNew"
+          :max-additional-zones="maxAdditionalZones"
+          :kubernetes-version="kubernetesVersion"
+          @valid="onWorkerValid"
+          @removed-zones="onRemovedZones">
+          <template v-slot:action>
+            <v-btn v-show="index > 0 || internalWorkers.length > 1"
+              small
+              outlined
+              icon
+              color="grey"
+              @click.native.stop="onRemoveWorker(index)">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
+        </worker-input-generic>
+      </v-row>
+    </v-expand-transition>
     <v-row key="addWorker" class="list-item mb-1 mx-1">
       <v-col>
         <v-btn
@@ -57,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
       </v-col>
     </v-row>
-  </transition-group>
+  </div>
 </template>
 
 <script>
@@ -105,7 +111,8 @@ export default {
       isNewCluster: false,
       existingWorkerCIDR: undefined,
       kubernetesVersion: undefined,
-      initialZones: undefined
+      initialZones: undefined,
+      animateOnAppear: false
     }
   },
   computed: {
@@ -300,6 +307,11 @@ export default {
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
+      this.$nextTick(() => {
+        // need to defer until data has been set and rendered
+        // can be removed when we adapt this component to shoot staging store module
+        this.animateOnAppear = true
+      })
     }
   },
   mounted () {

@@ -132,9 +132,9 @@ export default {
     },
     hint () {
       if (this.notInCloudProfile) {
-        return 'This volume type may not be supported by your worker'
+        return 'This volume type may not be supported by your worker as it is not supported by your current worker settings'
       }
-      return undefined
+      return ''
     },
     isAWS () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)

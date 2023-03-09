@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-alert>
     </div>
-    <div ref="container" :style="containerStyles"></div>
+    <div ref="container" :style="containerStyles" :class="containerClass"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
       <g-message
         color="error"
@@ -180,6 +180,9 @@ export default {
     },
     completionPaths: {
       type: Array
+    },
+    animateOnAppear: {
+      type: Boolean
     }
   },
   data () {
@@ -207,7 +210,8 @@ export default {
         type: undefined,
         description: undefined
       },
-      showManagedFields: false
+      showManagedFields: false,
+      containerClass: undefined
     }
   },
   mixins: [shootItem],
@@ -459,9 +463,23 @@ export default {
       this.snackbarColor = 'error'
       this.snackbarText = 'Copy to clipboard failed'
       this.snackbar = true
+    },
+    animateExpansion () {
+      this.containerClass = 'collapsed'
+      this.$nextTick(() => {
+        // wait for ui to render collapsed class before setting animation class
+        this.containerClass = 'animate'
+        setTimeout(() => {
+          this.containerClass = undefined
+        }, 1500) // remove after animation ends (1.5 sec)
+      })
     }
   },
   async mounted () {
+    if (this.animateOnAppear) {
+      this.animateExpansion()
+    }
+
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
@@ -524,7 +542,7 @@ export default {
   }
 </style>
 <style lang="scss">
-  @import '~vuetify/src/styles/styles.sass';
+@import '~vuetify/src/styles/styles.sass';
 
   .CodeMirror-hint {
 
@@ -579,5 +597,14 @@ export default {
     .CodeMirror-hint-active {
       background-color: map-get($grey, 'darken-4') !important;
     }
+  }
+
+  .collapsed .CodeMirror-lines {
+    max-height: 0px;
+  }
+
+  .animate .CodeMirror-lines {
+    transition: max-height 1.5s;
+    max-height: 100vh;
   }
 </style>
