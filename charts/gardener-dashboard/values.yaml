@@ -153,13 +153,27 @@ global:
       #   # - `${projectName}`: name of the project
       #   # - `${utcDateTimeNow}`: current date-time in utc format
       #   # - `${seedName}`: shoot's seed name
+      #   # - `${accessRestrictions}`: list with shoot's selected access restrictions
+      #   #     accessRestrictions[].title: access restriction title
+      #   #     accessRestrictions[].description: access restriction description
+      #   #     accessRestrictions[].key: unique identifier
+      #   #     accessRestrictions[].options: list with selected options for the access restriction
+      #   #       accessRestrictions[].options[].title: option title
+      #   #       accessRestrictions[].options[].description: option description
+      #   #       accessRestrictions[].options[].key: unique identifier
       #   issueDescriptionTemplate: |
       #     ## Which cluster is affected?
 
       #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
       #     `Operating System`: ${machineImageNames}
       #     `Platform`: ${providerType}
-
+      #     <% if(accessRestrictions.length) { %>
+      #     ## Attention: This cluster has access restrictions
+      #     <% accessRestrictions.forEach(accessRestriction => { %>
+      #     - <%- accessRestriction.title %><% accessRestriction.options.forEach(option => { %>
+      #       - <%- option.title %><% }) }) %>
+      #     <%
+      #     }%>
       #     ## What happened?
 
       #     ## What you expected to happen?

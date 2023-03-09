@@ -81,7 +81,8 @@ export default {
         machineImageNames: this.shootMachineImageNames,
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
-        seedName: this.shootSeedName
+        seedName: this.shootSeedName,
+        accessRestrictions: this.shootSelectedAccessRestrictions
       })
     },
     shootUrl () {
