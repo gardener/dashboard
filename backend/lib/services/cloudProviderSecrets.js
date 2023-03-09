@@ -10,7 +10,7 @@ const { Resources } = require('@gardener-dashboard/kube-client')
 const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL']
+const cleartextPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL']
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
@@ -44,7 +44,7 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
 
     const iteratee = (value, key) => {
       value = decodeBase64(value)
-      if (!_.includes(_.map(whitelistedPropertyKeys, _.toLower), _.toLower(key))) {
+      if (!_.includes(_.map(cleartextPropertyKeys, _.toLower), _.toLower(key))) {
         value = '****************'
       }
       return value

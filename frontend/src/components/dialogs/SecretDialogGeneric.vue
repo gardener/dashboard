@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="data"
           label="Secret Data"
           :error-messages="getErrorMessages('data')"
-          @input="$v.data.$touch()"
+          @change="onChangeData"
           @blur="$v.data.$touch()"
         ></v-textarea>
       </div>
@@ -32,10 +32,10 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:help-slot>
       <div class="help-content">
         <p>
-          This is a generic provider service account dialog.
+          This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for this provider type.
+          Please enter data required for ${vendor}.
         </p>
       </div>
     </template>
@@ -49,12 +49,11 @@ import SecretDialog from '@/components/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import isObject from 'lodash/isObject'
-const yaml = require('js-yaml')
 
 const validationErrors = {
   data: {
     required: 'You can\'t leave this empty.',
-    isYAML: 'You need to enter secret data as valid YAML object'
+    isYAML: 'You need to enter secret data as YAML key-value pairs'
   }
 }
 
@@ -77,6 +76,7 @@ export default {
   data () {
     return {
       data: undefined,
+      parsedYAML: undefined,
       validationErrors
     }
   },
@@ -92,7 +92,7 @@ export default {
       const validators = {
         data: {
           required,
-          isYAML: () => isObject(this.secretYAML)
+          isYAML: () => isObject(this.parsedYAML)
         }
       }
       return validators
@@ -100,25 +100,27 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    secretYAML () {
-      try {
-        return yaml.load(this.data)
-      } catch (e) {
-        return undefined
-      }
-    },
     secretData () {
-      return isObject(this.secretYAML) ? this.secretYAML : {}
+      return isObject(this.parsedYAML) ? this.parsedYAML : {}
     }
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
+    async onChangeData () {
+      try {
+        this.parsedYAML = await this.$yaml.load(this.data)
+      } catch (err) {
+        this.parsedYAML = undefined
+      }
+      this.$v.data.$touch()
+    },
     reset () {
       this.$v.$reset()
 
       this.data = ''
+      this.parsedYAML = undefined
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'data')
@@ -138,7 +140,7 @@ export default {
     font-size: 14px;
   }
 
-    .help-content {
+  .help-content {
     ul {
       margin-top: 20px;
       margin-bottom: 20px;
