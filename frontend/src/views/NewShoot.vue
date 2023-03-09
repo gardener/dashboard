@@ -132,8 +132,7 @@ SPDX-License-Identifier: Apache-2.0
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
   <v-alert class="ma-3" type="warning" v-else>
-    No supported cloud profile found.
-    Ensure that you have confiugred at least one cloud profile supported by the dashboard as well as a corresponding seed.
+    There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's requirements.
   </v-alert>
 </template>
 
@@ -521,22 +520,23 @@ export default {
     }
   },
   async beforeRouteLeave (to, from, next) {
-    if (this.sortedCloudProviderKindList.length) {
-      if (to.name === 'NewShootEditor') {
-        if (!this.valid) {
-          if (!await this.confirmNavigateToYamlIfInvalid()) {
-            return next(false)
-          }
-        }
-        await this.updateShootResourceWithUIComponents()
-      } else {
-        if (!this.isShootCreated && await this.isShootContentDirty()) {
-          if (!await this.confirmNavigation()) {
-            return next(false)
-          }
-        }
-      }
+    if (!this.sortedCloudProviderKindList.length) {
+      return next()
     }
+
+    if (to.name === 'NewShootEditor') {
+      if (!this.valid && !await this.confirmNavigateToYamlIfInvalid()) {
+        return next(false)
+      }
+
+      await this.updateShootResourceWithUIComponents()
+      return next()
+    }
+
+    if (!this.isShootCreated && await this.isShootContentDirty() && !await this.confirmNavigation()) {
+      return next(false)
+    }
+
     return next()
   },
   mounted () {

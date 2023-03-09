@@ -57,7 +57,8 @@ frontend:
 The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
 
 If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
-Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup. Please login to the Dashboard with a token of a service account that has cluster admin permission.
+Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
+See [6. Login to the dashboard](#6-login-to-the-dashboard) for more information on how to use the Dashboard with a local gardener or any other Gardener landscape.
 
 Concurrently run the `backend` server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) with hot reload enabled.
 
@@ -73,6 +74,20 @@ yarn serve
 ```
 
 You can now access the UI on http://localhost:8080/
+
+### 6. Login to the dashboard
+To login to the dashboard you can either configure oidc, or alternatively login using a token:
+
+To login using a token, first create a service account.
+`kubectl -n garden create serviceaccount dashboard-user``
+
+Assign it a role, e.g. cluster-admin.
+`kubectl set subject clusterrolebinding cluster-admin --serviceaccount=garden:dashboard-user`
+
+Get the token of the service account.
+`kubectl -n garden create token dashboard-user --duration 24h`
+
+Copy the token and login to the dashboard.
 
 ## Build
 
