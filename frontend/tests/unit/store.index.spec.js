@@ -165,166 +165,138 @@ describe('Store', () => {
     expect(kubernetesVersion).toBe(dashboardVersions[0]) // check sorting
   })
 
-  it('should return machineTypes by region and zones from cloud profile', () => {
-    const cpMachineTypes = [
-      {
-        name: 'machineType1',
-        architecture: 'amd64'
-      },
-      {
-        name: 'machineType2'
-      },
-      {
-        name: 'machineType3'
-      },
-      {
-        name: 'machineType4',
-        architecture: 'arm64'
-      }
-    ]
+  describe('machine type / volume type getters', () => {
+    let storeGetters
 
-    const storeGetters = {
-      cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).toBe('foo')
-        return {
-          data: {
-            machineTypes: cpMachineTypes,
-            regions: [
-              {
-                name: 'region1',
-                zones: [
-                  {
-                    name: 'zone1'
-                  },
-                  {
-                    name: 'zone2',
-                    unavailableMachineTypes: [
-                      'machineType2'
-                    ]
-                  }
-                ]
-              },
-              {
-                name: 'region2',
-                zones: [
-                  {
-                    name: 'zone1'
-                  }
-                ]
-              }
-            ]
-          }
+    beforeEach(async () => {
+      const cpMachineTypes = [
+        {
+          name: 'machineType1',
+          architecture: 'amd64'
+        },
+        {
+          name: 'machineType2'
+        },
+        {
+          name: 'machineType3'
+        },
+        {
+          name: 'machineType4',
+          architecture: 'arm64'
         }
-      },
-      machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture (...args) {
-        return getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({}, this)(...args)
-      },
-      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
-        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
-      }
-    }
+      ]
 
-    let dashboardMachineTypes = getters.machineTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
-    expect(dashboardMachineTypes).toHaveLength(4)
-
-    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2'], architecture: 'amd64' })
-    expect(dashboardMachineTypes).toHaveLength(2)
-    expect(dashboardMachineTypes[0].name).toBe('machineType1')
-    expect(dashboardMachineTypes[1].name).toBe('machineType3')
-
-    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1', 'zone3'], architecture: 'amd64' })
-    expect(dashboardMachineTypes).toHaveLength(3)
-
-    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'], architecture: 'amd64' })
-    expect(dashboardMachineTypes).toHaveLength(3)
-
-    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'], architecture: 'arm64' })
-    expect(dashboardMachineTypes).toHaveLength(1)
-    expect(dashboardMachineTypes[0].name).toBe('machineType4')
-  })
-
-  it('should return volumeTypes by region and zones from cloud profile', () => {
-    const cpVolumeTypes = [
-      {
-        name: 'volumeType1'
-      },
-      {
-        name: 'volumeType2'
-      },
-      {
-        name: 'volumeType3'
-      }
-    ]
-
-    const storeGetters = {
-      cloudProfileByName (cloudProfileName) {
-        expect(cloudProfileName).toBe('foo')
-        return {
-          data: {
-            volumeTypes: cpVolumeTypes,
-            regions: [
-              {
-                name: 'region1',
-                zones: [
-                  {
-                    name: 'zone1'
-                  },
-                  {
-                    name: 'zone2',
-                    unavailableVolumeTypes: [
-                      'volumeType2'
-                    ]
-                  },
-                  {
-                    name: 'zone3',
-                    unavailableVolumeTypes: [
-                      'volumeType1',
-                      'volumeType3'
-                    ]
-                  }
-                ]
-              },
-              {
-                name: 'region2',
-                zones: [
-                  {
-                    name: 'zone1'
-                  }
-                ]
-              }
-            ]
-          }
+      const cpVolumeTypes = [
+        {
+          name: 'volumeType1'
+        },
+        {
+          name: 'volumeType2'
+        },
+        {
+          name: 'volumeType3'
         }
-      },
-      volumeTypesByCloudProfileNameAndRegionAndZones (...args) {
-        return getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
-      },
-      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
-        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      ]
+
+      storeGetters = {
+        cloudProfileByName (cloudProfileName) {
+          expect(cloudProfileName).toBe('foo')
+          return {
+            data: {
+              machineTypes: cpMachineTypes,
+              volumeTypes: cpVolumeTypes,
+              regions: [
+                {
+                  name: 'region1',
+                  zones: [
+                    {
+                      name: 'zone1',
+                      unavailableMachineTypes: [
+                        'machineType2'
+                      ],
+                      unavailableVolumeTypes: [
+                        'volumeType2'
+                      ]
+                    },
+                    {
+                      name: 'zone2',
+                      unavailableMachineTypes: [
+                        'machineType2',
+                        'machineType1'
+                      ],
+                      unavailableVolumeTypes: [
+                        'volumeType2'
+                      ]
+                    },
+                    {
+                      name: 'zone3',
+                      unavailableMachineTypes: [
+                        'machineType2'
+                      ],
+                      unavailableVolumeTypes: [
+                        'volumeType2',
+                        'volumeType3'
+                      ]
+                    }
+                  ]
+                },
+                {
+                  name: 'region2',
+                  zones: [
+                    {
+                      name: 'zone1'
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        volumeTypesByCloudProfileNameAndRegion (...args) {
+          return getters.volumeTypesByCloudProfileNameAndRegion({}, this)(...args)
+        },
+        machineTypesByCloudProfileNameAndRegionAndArchitecture (...args) {
+          return getters.machineTypesByCloudProfileNameAndRegionAndArchitecture({}, this)(...args)
+        },
+        machineTypesOrVolumeTypesByCloudProfileNameAndRegion (...args) {
+          return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegion({}, this)(...args)
+        },
+        zonesByCloudProfileNameAndRegion (...args) {
+          return getters.zonesByCloudProfileNameAndRegion({}, this)(...args)
+        }
       }
-    }
+    })
 
-    let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
-    expect(dashboardVolumeTypes).toHaveLength(3)
+    it('should return machineTypes by region and zones from cloud profile', () => {
+      let dashboardMachineTypes = getters.machineTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
+      expect(dashboardMachineTypes).toHaveLength(4)
 
-    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1'] })
-    expect(dashboardVolumeTypes).toHaveLength(3)
+      dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', architecture: 'amd64' })
+      expect(dashboardMachineTypes).toHaveLength(2)
+      expect(dashboardMachineTypes[0].name).toBe('machineType1')
+      expect(dashboardMachineTypes[1].name).toBe('machineType3')
 
-    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2', 'zone3'] })
-    expect(dashboardVolumeTypes).toHaveLength(0)
+      dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndArchitecture({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', architecture: 'arm64' })
+      expect(dashboardMachineTypes).toHaveLength(1)
+      expect(dashboardMachineTypes[0].name).toBe('machineType4')
+    })
 
-    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone3'] })
-    expect(dashboardVolumeTypes).toHaveLength(1)
-    expect(dashboardVolumeTypes[0].name).toBe('volumeType2')
+    it('should return volumeTypes by region and zones from cloud profile', () => {
+      let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
+      expect(dashboardVolumeTypes).toHaveLength(3)
 
-    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
-    expect(dashboardVolumeTypes).toHaveLength(3)
-  })
+      dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1' })
+      expect(dashboardVolumeTypes).toHaveLength(2)
 
-  it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
-    const items = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, getters)({ })
-    expect(items).toBeInstanceOf(Array)
-    expect(items).toHaveLength(0)
+      dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2' })
+      expect(dashboardVolumeTypes).toHaveLength(3)
+    })
+
+    it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
+      const items = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegion({}, getters)({})
+      expect(items).toBeInstanceOf(Array)
+      expect(items).toHaveLength(0)
+    })
   })
 
   it('should return floating pool names by region and domain from cloud profile', () => {
