@@ -12,6 +12,10 @@ dashboard:
           'inject-commit-hash'
         inject_effective_version: true
       publish:
+        oci-builder: docker-buildx
+        platforms:
+        - linux/amd64
+        - linux/arm64
         dockerimages:
           dashboard:
             inputs:
