@@ -11,6 +11,7 @@ const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const cleartextPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL', 'AWS_REGION']
+const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
@@ -41,13 +42,11 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
       .pick(['resourceVersion'])
       .assign(cloudProviderSecret.metadata)
       .value()
-
+      
     const iteratee = (value, key) => {
-      value = decodeBase64(value)
-      if (!_.includes(_.map(cleartextPropertyKeys, _.toLower), _.toLower(key))) {
-        value = '****************'
-      }
-      return value
+      return normalizedCleartextPropertyKeys.includes(key.toLowerCase())
+        ? decodeBase64(value) 
+        : '****************'
     }
     cloudProviderSecret.data = _.mapValues(secret.data, iteratee)
 

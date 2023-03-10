@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="data"
           label="Secret Data"
           :error-messages="getErrorMessages('data')"
-          @change="onChangeData"
+          @change="onChange"
           @blur="$v.data.$touch()"
         ></v-textarea>
       </div>
@@ -76,7 +76,7 @@ export default {
   data () {
     return {
       data: undefined,
-      parsedYAML: undefined,
+      parsedYAML: {},
       validationErrors
     }
   },
@@ -92,7 +92,7 @@ export default {
       const validators = {
         data: {
           required,
-          isYAML: () => isObject(this.parsedYAML)
+          isYAML: () => Object.keys(this.parsedYAML).length
         }
       }
       return validators
@@ -101,26 +101,33 @@ export default {
       return !this.secret
     },
     secretData () {
-      return isObject(this.parsedYAML) ? this.parsedYAML : {}
+      return this.parsedYAML
     }
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
-    async onChangeData () {
+    async parseYAML () {
       try {
         this.parsedYAML = await this.$yaml.load(this.data)
       } catch (err) {
-        this.parsedYAML = undefined
+        // Prevent errors on cosole for invalid yaml
+      } finally {
+        if (!isObject(this.parsedYAML)) {
+          this.parsedYAML = {}
+        }
       }
+    },
+    onChange () {
+      this.parseYAML()
       this.$v.data.$touch()
     },
     reset () {
       this.$v.$reset()
 
       this.data = ''
-      this.parsedYAML = undefined
+      this.parsedYAML = {}
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'data')

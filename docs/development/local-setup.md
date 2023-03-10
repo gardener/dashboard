@@ -76,17 +76,20 @@ yarn serve
 You can now access the UI on http://localhost:8080/
 
 ### 6. Login to the dashboard
-To login to the dashboard you can either configure oidc, or alternatively login using a token:
+To login to the dashboard you can either configure `oidc`, or alternatively login using a token:
 
 To login using a token, first create a service account.
-`kubectl -n garden create serviceaccount dashboard-user``
-
+```bash
+kubectl -n garden create serviceaccount dashboard-user
+```
 Assign it a role, e.g. cluster-admin.
-`kubectl set subject clusterrolebinding cluster-admin --serviceaccount=garden:dashboard-user`
-
+```bash
+kubectl set subject clusterrolebinding cluster-admin --serviceaccount=garden:dashboard-user
+```
 Get the token of the service account.
-`kubectl -n garden create token dashboard-user --duration 24h`
-
+```bash
+kubectl -n garden create token dashboard-user --duration 24h
+```
 Copy the token and login to the dashboard.
 
 ## Build
