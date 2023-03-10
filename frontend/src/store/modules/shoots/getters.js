@@ -276,7 +276,7 @@ export default {
                 (!hideProgressingClusters || itemCondition?.status !== 'Progressing'))
               if (!isErrorCondition) {
                 return {
-                  weight: Number.MAX_SAFE_INTEGER,
+                  weight: `${Number.MAX_SAFE_INTEGER}`,
                   lastTransitionTime: itemCondition.lastTransitionTime
                 }
               }
