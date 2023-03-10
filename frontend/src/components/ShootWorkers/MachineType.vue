@@ -120,7 +120,7 @@ export default {
       return !find(this.machineTypes, ['name', this.internalValue])
     },
     hint () {
-      return this.notInList ? 'This machine type may not be supported by your worker' : ''
+      return this.notInList ? 'This machine type may not be supported by your worker as it is not supported by your current worker settings' : ''
     }
   },
   validations,

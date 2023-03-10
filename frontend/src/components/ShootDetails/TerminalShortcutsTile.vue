@@ -27,15 +27,17 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
-    <v-card v-if="expansionPanel" flat class="ml-14 mt-2">
-      <v-card-text class="pa-0">
-        <terminal-shortcuts
-          :shoot-item="shootItem"
-          :popper-boundaries-selector="popperBoundariesSelector"
-          @add-terminal-shortcut="onAddTerminalShortcut"
-        ></terminal-shortcuts>
-      </v-card-text>
-    </v-card>
+    <v-expand-transition appear>
+      <v-card v-if="expansionPanel" flat class="ml-14 mt-2">
+        <v-card-text class="pa-0">
+          <terminal-shortcuts
+            :shoot-item="shootItem"
+            :popper-boundaries-selector="popperBoundariesSelector"
+            @add-terminal-shortcut="onAddTerminalShortcut"
+          ></terminal-shortcuts>
+        </v-card-text>
+      </v-card>
+    </v-expand-transition>
     <unverified-terminal-shortcuts-dialog
       ref="unverified"
     ></unverified-terminal-shortcuts-dialog>
