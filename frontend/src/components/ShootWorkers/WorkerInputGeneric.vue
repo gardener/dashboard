@@ -253,9 +253,9 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture',
-      'machineArchitecturesByCloudProfileNameAndRegionAndZones',
-      'volumeTypesByCloudProfileNameAndRegionAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndArchitecture',
+      'machineArchitecturesByCloudProfileNameAndRegion',
+      'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
@@ -301,25 +301,22 @@ export default {
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({
+      return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
         cloudProfileName: this.cloudProfileName,
         region: this.region,
-        zones: this.worker.zones,
         architecture: this.worker.machine.architecture
       })
     },
     machineArchitectures () {
-      return this.machineArchitecturesByCloudProfileNameAndRegionAndZones({
+      return this.machineArchitecturesByCloudProfileNameAndRegion({
         cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        zones: this.worker.zones
+        region: this.region
       })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndRegionAndZones({
+      return this.volumeTypesByCloudProfileNameAndRegion({
         cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        zones: this.worker.zones
+        region: this.region
       })
     },
     volumeInCloudProfile () {
