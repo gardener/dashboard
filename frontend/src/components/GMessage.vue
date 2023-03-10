@@ -5,19 +5,21 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
-    <div class="text-subtitle-1">
-      {{message}}
-      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
-        Details
-      </v-btn>
-    </div>
-    <transition name="fade">
-      <div v-if="!!detailedMessageVisible">
-        <code>{{detailedMessage}}</code>
+  <v-expand-transition appear>
+    <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
+      <div class="text-subtitle-1">
+        {{message}}
+        <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
+          Details
+        </v-btn>
       </div>
-    </transition>
-  </v-alert>
+      <transition name="fade">
+        <div v-if="!!detailedMessageVisible">
+          <code>{{detailedMessage}}</code>
+        </div>
+      </transition>
+    </v-alert>
+  </v-expand-transition>
 </template>
 
 <script>
