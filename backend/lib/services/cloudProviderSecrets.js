@@ -42,10 +42,10 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
       .pick(['resourceVersion'])
       .assign(cloudProviderSecret.metadata)
       .value()
-      
+
     const iteratee = (value, key) => {
       return normalizedCleartextPropertyKeys.includes(key.toLowerCase())
-        ? decodeBase64(value) 
+        ? decodeBase64(value)
         : '****************'
     }
     cloudProviderSecret.data = _.mapValues(secret.data, iteratee)
