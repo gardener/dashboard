@@ -92,7 +92,7 @@ export default {
       const validators = {
         data: {
           required,
-          isYAML: () => Object.keys(this.parsedYAML).length
+          isYAML: () => Object.keys(this.parsedYAML).length > 0
         }
       }
       return validators
@@ -112,7 +112,7 @@ export default {
       try {
         this.parsedYAML = await this.$yaml.load(this.data)
       } catch (err) {
-        // Prevent errors on cosole for invalid yaml
+        /* ignore errors */
       } finally {
         if (!isObject(this.parsedYAML)) {
           this.parsedYAML = {}
