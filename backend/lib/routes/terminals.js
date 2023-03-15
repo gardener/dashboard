@@ -10,10 +10,13 @@ const express = require('express')
 const { terminals, authorization } = require('../services')
 const _ = require('lodash')
 const { UnprocessableEntity } = require('http-errors')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
+
+const metricsMiddleware = metricsRoute('terminals')
 
 router.use(async (req, res, next) => {
   try {
@@ -31,6 +34,7 @@ router.use(async (req, res, next) => {
 })
 
 router.route('/')
+  .all(metricsMiddleware)
   .post(async (req, res, next) => {
     try {
       const user = req.user

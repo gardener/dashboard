@@ -45,6 +45,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:packages/logger"\
       },\
       {\
+        "name": "@gardener-dashboard/monitor",\
+        "reference": "workspace:packages/monitor"\
+      },\
+      {\
         "name": "@gardener-dashboard/request",\
         "reference": "workspace:packages/request"\
       },\
@@ -66,6 +70,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@gardener-dashboard/kube-client", ["workspace:packages/kube-client"]],\
       ["@gardener-dashboard/kube-config", ["workspace:packages/kube-config"]],\
       ["@gardener-dashboard/logger", ["workspace:packages/logger"]],\
+      ["@gardener-dashboard/monitor", ["workspace:packages/monitor"]],\
       ["@gardener-dashboard/request", ["workspace:packages/request"]],\
       ["@gardener-dashboard/terminal-bootstrap", ["workspace:packages/terminal-bootstrap"]],\
       ["@gardener-dashboard/test-utils", ["workspace:packages/test-utils"]],\
@@ -2740,6 +2745,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
             ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
             ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+            ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
             ["@gardener-dashboard/request", "workspace:packages/request"],\
             ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["@godaddy/terminus", "npm:4.10.2"],\
@@ -2949,6 +2955,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.0.0"],\
             ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
             ["jest-date-mock", "npm:1.0.8"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@gardener-dashboard/monitor", [\
+        ["workspace:packages/monitor", {\
+          "packageLocation": "./packages/monitor/",\
+          "packageDependencies": [\
+            ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
+            ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+            ["eslint", "npm:8.16.0"],\
+            ["eslint-config-standard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:17.0.0"],\
+            ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.26.0"],\
+            ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:26.4.5"],\
+            ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.2.0"],\
+            ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.0.0"],\
+            ["express", "npm:4.18.1"],\
+            ["http-errors", "npm:2.0.0"],\
+            ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
+            ["prom-client", "npm:14.1.1"],\
+            ["response-time", "npm:2.3.2"],\
+            ["supertest", "npm:6.2.3"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -6430,6 +6458,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/binary-extensions-npm-2.2.0-180c33fec7-ccd267956c.zip/node_modules/binary-extensions/",\
           "packageDependencies": [\
             ["binary-extensions", "npm:2.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["bintrees", [\
+        ["npm:1.0.2", {\
+          "packageLocation": "./.yarn/cache/bintrees-npm-1.0.2-b28feeda03-56a52b7d36.zip/node_modules/bintrees/",\
+          "packageDependencies": [\
+            ["bintrees", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -15405,6 +15442,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["prom-client", [\
+        ["npm:14.1.1", {\
+          "packageLocation": "./.yarn/cache/prom-client-npm-14.1.1-922a88d5b4-7ff3e85636.zip/node_modules/prom-client/",\
+          "packageDependencies": [\
+            ["prom-client", "npm:14.1.1"],\
+            ["tdigest", "npm:0.1.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["promise-inflight", [\
         ["npm:1.0.1", {\
           "packageLocation": "./.yarn/cache/promise-inflight-npm-1.0.1-5bb925afac-2274948309.zip/node_modules/promise-inflight/",\
@@ -15937,6 +15984,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/resolve.exports-npm-1.1.0-81756e03ba-52865af8ed.zip/node_modules/resolve.exports/",\
           "packageDependencies": [\
             ["resolve.exports", "npm:1.1.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["response-time", [\
+        ["npm:2.3.2", {\
+          "packageLocation": "./.yarn/cache/response-time-npm-2.3.2-e5c67ab5c5-2520478f03.zip/node_modules/response-time/",\
+          "packageDependencies": [\
+            ["response-time", "npm:2.3.2"],\
+            ["depd", "npm:1.1.2"],\
+            ["on-headers", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -17208,6 +17266,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minizlib", "npm:2.1.2"],\
             ["mkdirp", "npm:1.0.4"],\
             ["yallist", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["tdigest", [\
+        ["npm:0.1.2", {\
+          "packageLocation": "./.yarn/cache/tdigest-npm-0.1.2-b73cfcf726-44de824675.zip/node_modules/tdigest/",\
+          "packageDependencies": [\
+            ["tdigest", "npm:0.1.2"],\
+            ["bintrees", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\

@@ -11,15 +11,20 @@ const express = require('express')
 const config = require('../config')
 const { encodeBase64 } = require('../utils')
 const { authorization } = require('../services')
+const { metricsRoute } = require('../middleware')
+
 const router = module.exports = express.Router({
   mergeParams: true
 })
+
+const metricsMiddleware = metricsRoute('user')
 
 function getToken ({ auth = {} } = {}) {
   return auth.bearer
 }
 
 router.route('/subjectrules')
+  .all(metricsMiddleware)
   .post(async (req, res, next) => {
     try {
       const user = req.user || {}
@@ -32,6 +37,7 @@ router.route('/subjectrules')
   })
 
 router.route('/token')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     const token = getToken(req.user)
     res.send({
@@ -40,6 +46,7 @@ router.route('/token')
   })
 
 router.route('/kubeconfig')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     const {
       apiServerUrl: server,

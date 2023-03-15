@@ -55,6 +55,14 @@
 !packages/terminal-bootstrap/__fixtures__
 !packages/terminal-bootstrap/__mocks__
 
+# include workspace packages/monitor
+!packages/monitor/package.json
+!packages/monitor/jest.setup.js
+!packages/monitor/lib
+!packages/monitor/__tests__
+!packages/monitor/__fixtures__
+!packages/monitor/__mocks__
+
 # include workspace backend
 !backend/package.json
 !backend/jest.setup.js

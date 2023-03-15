@@ -32,6 +32,10 @@ const environmentVariableDefinitions = {
   PORT: {
     type: 'Integer',
     path: 'port'
+  },
+  METRICS_PORT: {
+    type: 'Integer',
+    path: 'metricsPort'
   }
 }
 
@@ -67,7 +71,8 @@ module.exports = {
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
-      port: 3030
+      port: 3030,
+      metricsPort: 9050
     }
   },
   getFilename ({ argv, env } = process) {

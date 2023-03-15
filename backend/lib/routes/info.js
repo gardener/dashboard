@@ -12,10 +12,14 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { version } = require('../../package')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
+const metricsMiddleware = metricsRoute('info')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const gardenerVersion = await fetchGardenerVersion()

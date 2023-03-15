@@ -1484,6 +1484,7 @@ __metadata:
     "@gardener-dashboard/kube-client": "workspace:*"
     "@gardener-dashboard/kube-config": "workspace:*"
     "@gardener-dashboard/logger": "workspace:*"
+    "@gardener-dashboard/monitor": "workspace:*"
     "@gardener-dashboard/request": "workspace:*"
     "@gardener-dashboard/test-utils": "workspace:*"
     "@godaddy/terminus": ^4.10.2
@@ -1682,6 +1683,26 @@ __metadata:
     eslint-plugin-promise: ^6.0.0
     jest: ^27.5.1
     jest-date-mock: ^1.0.8
+  languageName: unknown
+  linkType: soft
+
+"@gardener-dashboard/monitor@workspace:*, @gardener-dashboard/monitor@workspace:packages/monitor":
+  version: 0.0.0-use.local
+  resolution: "@gardener-dashboard/monitor@workspace:packages/monitor"
+  dependencies:
+    "@gardener-dashboard/logger": "workspace:*"
+    eslint: ^8.16.0
+    eslint-config-standard: ^17.0.0
+    eslint-plugin-import: ^2.26.0
+    eslint-plugin-jest: ^26.4.5
+    eslint-plugin-n: ^15.2.0
+    eslint-plugin-promise: ^6.0.0
+    express: ^4.18.1
+    http-errors: ^2.0.0
+    jest: ^27.5.1
+    prom-client: ^14.1.1
+    response-time: ^2.3.2
+    supertest: ^6.2.3
   languageName: unknown
   linkType: soft
 
@@ -4370,6 +4391,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bintrees@npm:1.0.2":
+  version: 1.0.2
+  resolution: "bintrees@npm:1.0.2"
+  checksum: 56a52b7d3634e30002b1eda740d2517a22fa8e9e2eb088e919f37c030a0ed86e364ab59e472fc770fc8751308054bb1c892979d150e11d9e11ac33bcc1b5d16e
+  languageName: node
+  linkType: hard
+
 "bl@npm:^4.1.0":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
@@ -5765,7 +5793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"depd@npm:^1.1.2, depd@npm:~1.1.2":
+"depd@npm:^1.1.2, depd@npm:~1.1.0, depd@npm:~1.1.2":
   version: 1.1.2
   resolution: "depd@npm:1.1.2"
   checksum: 6b406620d269619852885ce15965272b829df6f409724415e0002c8632ab6a8c0a08ec1f0bd2add05dc7bd7507606f7e2cc034fa24224ab829580040b835ecd9
@@ -10518,7 +10546,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"on-headers@npm:~1.0.2":
+"on-headers@npm:~1.0.1, on-headers@npm:~1.0.2":
   version: 1.0.2
   resolution: "on-headers@npm:1.0.2"
   checksum: 2bf13467215d1e540a62a75021e8b318a6cfc5d4fc53af8e8f84ad98dbcea02d506c6d24180cd62e1d769c44721ba542f3154effc1f7579a8288c9f7873ed8e5
@@ -11508,6 +11536,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prom-client@npm:^14.1.1":
+  version: 14.1.1
+  resolution: "prom-client@npm:14.1.1"
+  dependencies:
+    tdigest: ^0.1.1
+  checksum: 7ff3e85636b1f0ca590b38ad7c7c5f9998b985c06a1c572ffffc69f052d5b4baf84c9124923e3824c63f78b5e8400081c6472173d04382ca296ebdf36d774a88
+  languageName: node
+  linkType: hard
+
 "promise-inflight@npm:^1.0.1":
   version: 1.0.1
   resolution: "promise-inflight@npm:1.0.1"
@@ -11979,6 +12016,16 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: c79ecaea36c872ee4a79e3db0d3d4160b593f2ca16e031d8283735acd01715a203607e9ded3f91f68899c2937fa0d49390cddbe0fb2852629212f3cda283f4a7
+  languageName: node
+  linkType: hard
+
+"response-time@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "response-time@npm:2.3.2"
+  dependencies:
+    depd: ~1.1.0
+    on-headers: ~1.0.1
+  checksum: 2520478f03dfe2bf44a099a696b3904af71e563e7df810e413d8d075945a23dd4277a5b44eb18a65fa01f3167fa4cf309166a3872a803649d387cfe67de8fbc8
   languageName: node
   linkType: hard
 
@@ -13120,6 +13167,15 @@ __metadata:
     mkdirp: ^1.0.3
     yallist: ^4.0.0
   checksum: a04c07bb9e2d8f46776517d4618f2406fb977a74d914ad98b264fc3db0fe8224da5bec11e5f8902c5b9bcb8ace22d95fbe3c7b36b8593b7dfc8391a25898f32f
+  languageName: node
+  linkType: hard
+
+"tdigest@npm:^0.1.1":
+  version: 0.1.2
+  resolution: "tdigest@npm:0.1.2"
+  dependencies:
+    bintrees: 1.0.2
+  checksum: 44de8246752b6f8c2924685f969fd3d94c36949f22b0907e99bef2b2220726dd8467f4730ea96b06040b9aa2587c0866049640039d1b956952dfa962bc2075a3
   languageName: node
   linkType: hard
 

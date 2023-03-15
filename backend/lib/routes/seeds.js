@@ -8,10 +8,14 @@
 
 const express = require('express')
 const { seeds } = require('../services')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
+const metricsMiddleware = metricsRoute('seeds')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user

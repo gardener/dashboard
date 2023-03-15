@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metrics should create and export the application defined metrics 1`] = `
+Array [
+  "connectionsCount",
+  "connectionsTotal",
+  "responseTime",
+]
+`;
