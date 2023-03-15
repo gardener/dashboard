@@ -87,6 +87,14 @@ function renderError (err, req, res, next) {
   })
 }
 
+function metricsRoute (prefix) {
+  return (req, res, next) => {
+    const path = req.route?.path ?? ''
+    req.metricsRoute = prefix + path
+    next()
+  }
+}
+
 const ErrorTemplate = _.template(`<!doctype html>
 <html lang="en">
 <head>
@@ -120,5 +128,6 @@ module.exports = {
   notFound,
   sendError,
   renderError,
+  metricsRoute,
   ErrorTemplate
 }

@@ -126,6 +126,13 @@ export default {
               value: secretData.hcloudToken
             }
           ]
+        default:
+          return [
+            {
+              label: 'Secret Data',
+              value: JSON.stringify(secretData)
+            }
+          ]
       }
     },
     getSecretDetailsDns (secret) {
@@ -192,8 +199,14 @@ export default {
               value: 'hidden'
             }
           ]
+        default:
+          return [
+            {
+              label: 'Secret Data',
+              value: JSON.stringify(secretData)
+            }
+          ]
       }
-      return undefined
     }
   }
 }

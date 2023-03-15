@@ -9,12 +9,16 @@
 const express = require('express')
 const { members } = require('../services')
 const { UnprocessableEntity } = require('http-errors')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
+const metricsMiddleware = metricsRoute('members')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -36,6 +40,7 @@ router.route('/')
   })
 
 router.route('/:name')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user

@@ -228,6 +228,11 @@ const actions = {
       }
     }
 
+    if (!rootGetters.sortedCloudProviderKindList.length) {
+      Vue.logger.warn('Could not reset new shoot resource as there is no supported cloud profile')
+      return
+    }
+
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
     set(shootResource, 'spec', getSpecTemplate(infrastructureKind, rootGetters.nodesCIDR))
 

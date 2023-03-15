@@ -11,6 +11,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import some from 'lodash/some'
 import filter from 'lodash/filter'
+import compact from 'lodash/compact'
 import { mapGetters } from 'vuex'
 
 import {
@@ -129,7 +130,7 @@ export const shootItem = {
       return this.shootSpec.region
     },
     shootZones () {
-      return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
+      return compact(uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones')))
     },
     podsCidr () {
       return get(this.shootSpec, 'networking.pods')

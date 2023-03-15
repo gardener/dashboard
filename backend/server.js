@@ -7,5 +7,8 @@
 'use strict'
 
 const app = require('./lib/app')
+const metricsApp = require('@gardener-dashboard/monitor')
+
 const createServer = require('./lib/server')
-createServer(app).run()
+
+createServer(app, metricsApp).run()
