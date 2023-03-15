@@ -171,7 +171,7 @@ spec:
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
           - name: METRICS_PORT
-            value: {{ .Values.global.metricsContainerPort }}
+            value: {{ quote .Values.global.dashboard.metricsContainerPort }}
           resources: {{ toYaml .Values.global.dashboard.resources | nindent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
