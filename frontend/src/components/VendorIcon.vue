@@ -47,7 +47,8 @@ export default {
           return require('@/assets/vsphere.svg')
         case 'metal':
           return require('@/assets/metal.svg')
-
+        case 'onmetal':
+          return require('@/assets/onmetal.svg')
         // dns
         case 'aws-route53':
           return require('@/assets/aws-route53.svg')
