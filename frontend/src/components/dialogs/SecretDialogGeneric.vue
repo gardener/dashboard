@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="data"
           label="Secret Data"
           :error-messages="getErrorMessages('data')"
-          @change="onChange"
+          @input="onInputSecretData"
           @blur="$v.data.$touch()"
         ></v-textarea>
       </div>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for ${vendor}.
+          Please enter data required for {{vendor}}.
         </p>
       </div>
     </template>
@@ -49,6 +49,7 @@ import SecretDialog from '@/components/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import isObject from 'lodash/isObject'
+import debounce from 'lodash/debounce'
 
 const validationErrors = {
   data: {
@@ -112,17 +113,17 @@ export default {
       try {
         this.parsedYAML = await this.$yaml.load(this.data)
       } catch (err) {
-        /* ignore errors */
+        this.parsedYAML = undefined
       } finally {
         if (!isObject(this.parsedYAML)) {
           this.parsedYAML = {}
         }
       }
     },
-    onChange () {
+    onInputSecretData: debounce(function () {
       this.parseYAML()
       this.$v.data.$touch()
-    },
+    }, 500),
     reset () {
       this.$v.$reset()
 
