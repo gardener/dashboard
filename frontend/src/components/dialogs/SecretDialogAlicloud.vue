@@ -89,13 +89,13 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.'
+    required: 'You can\'t leave this empty',
+    minLength: 'It must contain at least 16 characters',
+    maxLength: 'It exceeds the maximum length of 128 characters'
   },
   accessKeySecret: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 30 characters.'
+    required: 'You can\'t leave this empty',
+    minLength: 'It must contain at least 30 characters'
   }
 }
 
@@ -160,7 +160,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

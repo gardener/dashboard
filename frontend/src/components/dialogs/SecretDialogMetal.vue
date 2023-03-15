@@ -61,10 +61,10 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   apiHmac: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   apiUrl: {
-    required: 'You can\'t leave this empty.',
+    required: 'You can\'t leave this empty',
     url: 'You must enter a valid URL'
   }
 }
@@ -91,7 +91,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

@@ -36,7 +36,7 @@ import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
   value: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   }
 }
 

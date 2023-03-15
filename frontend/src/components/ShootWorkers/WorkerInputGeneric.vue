@@ -164,7 +164,7 @@ const validationErrors = {
       required: 'Name is required',
       maxLength: 'Name is too long',
       resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-      uniqueWorkerName: 'Name is taken. Try another.',
+      uniqueWorkerName: 'Name is taken. Try another',
       noStartEndHyphen: 'Name must not start or end with a hyphen'
     },
     minimum: {
@@ -253,9 +253,9 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture',
-      'machineArchitecturesByCloudProfileNameAndRegionAndZones',
-      'volumeTypesByCloudProfileNameAndRegionAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndArchitecture',
+      'machineArchitecturesByCloudProfileNameAndRegion',
+      'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
@@ -301,25 +301,22 @@ export default {
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndZonesAndArchitecture({
+      return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
         cloudProfileName: this.cloudProfileName,
         region: this.region,
-        zones: this.worker.zones,
         architecture: this.worker.machine.architecture
       })
     },
     machineArchitectures () {
-      return this.machineArchitecturesByCloudProfileNameAndRegionAndZones({
+      return this.machineArchitecturesByCloudProfileNameAndRegion({
         cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        zones: this.worker.zones
+        region: this.region
       })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndRegionAndZones({
+      return this.volumeTypesByCloudProfileNameAndRegion({
         cloudProfileName: this.cloudProfileName,
-        region: this.region,
-        zones: this.worker.zones
+        region: this.region
       })
     },
     volumeInCloudProfile () {

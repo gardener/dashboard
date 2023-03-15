@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template v-slot:card>
       <v-tabs-items v-model="tab">
-        <v-tab-item id="overview">
+        <v-tab-item id="overview" ref="overviewTab">
           <manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
@@ -51,30 +51,34 @@ SPDX-License-Identifier: Apache-2.0
             ref="workerEditor"
             v-on="$workerEditor.hooks"
             hide-toolbar
+            :style="{ 'min-height': `${overviewTabHeight}px` }"
+            animate-on-appear
           >
           </shoot-editor>
         </v-tab-item>
       </v-tabs-items>
     </template>
     <template v-slot:errorMessage>
-      <v-alert
-        type="warning"
-        outlined
-        tile
-        prominent
-        v-if="networkConfiguration.length"
-        dismissible
-        @input="setNetworkConfiguration(undefined)"
-        class="mx-1">
-        <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
-        <code-block
-          lang="yaml"
-          :content="networkConfigurationYaml"
-          :show-copy-button="false"
-          ></code-block>
-        <div class="font-weight-bold">This change cannot be undone.</div>
-        <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
-      </v-alert>
+      <v-expand-transition appear>
+        <v-alert
+          type="warning"
+          outlined
+          tile
+          prominent
+          v-if="networkConfiguration.length"
+          dismissible
+          @input="setNetworkConfiguration(undefined)"
+          class="mx-1">
+          <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
+          <code-block
+            lang="yaml"
+            :content="networkConfigurationYaml"
+            :show-copy-button="false"
+            ></code-block>
+          <div class="font-weight-bold">This change cannot be undone.</div>
+          <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
+        </v-alert>
+      </v-expand-transition>
     </template>
   </action-button-dialog>
 </template>
@@ -108,7 +112,8 @@ export default {
       networkConfiguration: [],
       networkConfigurationYaml: undefined,
       tabValue: 'overview',
-      editorData: {}
+      editorData: {},
+      overviewTabHeight: 0
     }
   },
   mixins: [
@@ -130,6 +135,9 @@ export default {
           this.setOverviewData()
         }
         if (value === 'yaml') {
+          // set current height as min-height for yaml tab to avoid
+          // dialog downsize as editor not yet rendered
+          this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
           this.setEditorData()
         }
       }

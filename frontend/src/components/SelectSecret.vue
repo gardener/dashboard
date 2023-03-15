@@ -95,7 +95,7 @@ export default {
             const isSecretInProject = this.projectName === projectName
 
             return isSecretInProject
-              ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
+              ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}`
               : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
           }
         }

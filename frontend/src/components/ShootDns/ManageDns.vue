@@ -56,10 +56,16 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider class="mx-3" />
       </v-row>
     </template>
-    <transition-group name="list" class="alternate-row-background">
-      <v-row v-for="id in dnsProviderIds" :key="id" class="list-item pt-2">
-        <dns-provider-row :dnsProviderId="id"/>
-      </v-row>
+    <div class="alternate-row-background">
+      <v-expand-transition
+        :appear="animateOnAppear"
+        v-for="id in dnsProviderIds"
+        :key="id"
+      >
+        <v-row class="list-item pt-2">
+          <dns-provider-row :dnsProviderId="id"/>
+        </v-row>
+      </v-expand-transition>
       <v-row key="addProvider" class="list-item pt-2">
         <v-col>
           <v-btn
@@ -79,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
         </v-col>
       </v-row>
-    </transition-group>
+    </div>
   </v-container>
 </template>
 
@@ -106,6 +112,11 @@ export default {
     VendorIcon
   },
   validations,
+  data () {
+    return {
+      animateOnAppear: false
+    }
+  },
   computed: {
     ...mapState('shootStaging', [
       'dnsDomain',
@@ -164,6 +175,7 @@ export default {
   },
   mounted () {
     this.$v.$touch()
+    this.animateOnAppear = true
   },
   watch: {
     '$v.primaryProvider.$invalid' (value) {

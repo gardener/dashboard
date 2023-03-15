@@ -79,7 +79,7 @@ export default {
       return permanentlyHiddenIds[this.identifier] === true
     },
     updateAlertVisibility () {
-      const visible = !!this.message && !this.isPermanentlyHidden(this.identifier)
+      const visible = (this.$slots.message || !!this.message) && !this.isPermanentlyHidden(this.identifier)
       this.setAlertVisibility(visible)
     },
     setAlertVisibility (visible) {

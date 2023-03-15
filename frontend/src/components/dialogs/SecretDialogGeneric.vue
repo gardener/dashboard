@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model="textAreaData"
         label="Secret Data"
         :error-messages="getErrorMessages('textAreaData')"
-        @input="$v.textAreaData.$touch()"
+        @input="onInputTextAreaData"
         @blur="$v.textAreaData.$touch()"
       ></v-textarea>
     </template>
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic provider service account dialog.
         </p>
         <p>
-          Please enter data required for this provider type.
+          Please enter data required for {{ vendor }}.
         </p>
       </div>
     </template>
@@ -69,7 +69,6 @@ import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import { mapState } from 'vuex'
 import Vue from 'vue'
-const yaml = require('js-yaml')
 
 export default {
   components: {
@@ -90,12 +89,12 @@ export default {
   data () {
     return {
       textAreaData: undefined,
+      textAreaDataObject: {},
       customCloudProviderData: {},
       showSecrets: {}
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {
@@ -105,8 +104,8 @@ export default {
     validationErrors () {
       const allValidationErrors = {
         textAreaData: {
-          required: 'You can\'t leave this empty.',
-          isYAML: 'You need to enter secret data as valid YAML object'
+          required: 'You can\'t leave this empty',
+          isYAML: 'You need to enter secret data as YAML key- value pairs'
         },
         customCloudProviderData: {}
       }
@@ -119,7 +118,7 @@ export default {
       const allValidators = {
         textAreaData: {
           required: requiredIf(() => !this.customCloudProviderFields),
-          isYAML: () => this.customCloudProviderFields || isObject(this.textAreaYAML)
+          isYAML: () => Object.keys(this.textAreaDataObject).length > 0
         },
         customCloudProviderData: {}
       }
@@ -148,28 +147,37 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    textAreaYAML () {
-      try {
-        return yaml.load(this.textAreaData)
-      } catch (e) {
-        return undefined
-      }
-    },
     secretData () {
       if (this.customCloudProviderFields) {
         return this.customCloudProviderData
       }
-      return isObject(this.textAreaYAML) ? this.textAreaYAML : {}
+      return this.textAreaDataObject
     }
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
+    async onInputTextAreaData () {
+      this.textAreaDataObject = {}
+      try {
+        this.textAreaDataObject = await this.$yaml.load(this.textAreaData)
+      } catch (err) {
+        /* ignore errors */
+      } finally {
+        if (!isObject(this.textAreaDataObject)) {
+          this.textAreaDataObject = {}
+        }
+      }
+      this.$v.textAreaData.$touch()
+    },
     reset () {
       this.$v.$reset()
 
-      this.textAreaData = ''
+      this.textAreaData = undefined
+      this.textAreaDataObject = {}
+      this.customCloudProviderData = {}
+      this.showSecrets = {}
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'textAreaData')

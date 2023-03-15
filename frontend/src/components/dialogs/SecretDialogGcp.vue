@@ -88,7 +88,7 @@ import { handleTextFieldDrop, getValidationErrors, setDelayedInputFocus } from '
 
 const validationErrors = {
   serviceAccountKey: {
-    required: 'You can\'t leave this empty.',
+    required: 'You can\'t leave this empty',
     serviceAccountKey: 'Not a valid Service Account Key'
   }
 }
@@ -118,7 +118,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

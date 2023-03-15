@@ -56,13 +56,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'infrastructureSecretsByCloudProfileName'
+      'infrastructureSecretList'
     ]),
     valid () {
       return this.purposeValid
     },
     secret () {
-      const secrets = this.infrastructureSecretsByCloudProfileName(this.shootCloudProfileName)
+      const secrets = this.infrastructureSecretList
       const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
       if (!secret) {
         console.error('Secret must not be undefined')

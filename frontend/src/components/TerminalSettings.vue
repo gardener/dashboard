@@ -110,7 +110,7 @@ import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
   selectedContainerImage: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   }
 }
 

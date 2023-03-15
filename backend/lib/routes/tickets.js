@@ -10,12 +10,14 @@ const express = require('express')
 const _ = require('lodash')
 const cache = require('../cache')
 const tickets = require('../services/tickets')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
 const ticketCache = cache.getTicketCache()
+const metricsMiddleware = metricsRoute('tickets')
 
 function getProjectName (namespace = '_all') {
   if (namespace !== '_all') {
@@ -39,6 +41,7 @@ async function getIssuesAndComments (namespace, name) {
 }
 
 router.route('/')
+  .all(metricsMiddleware)
   .get((req, res, next) => {
     try {
       const namespace = req.params.namespace
@@ -50,6 +53,7 @@ router.route('/')
   })
 
 router.route('/:name')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const namespace = req.params.namespace

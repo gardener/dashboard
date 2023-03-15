@@ -44,6 +44,14 @@ SPDX-License-Identifier: Apache-2.0
           hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
         ></v-text-field>
       </div>
+      <div v-if="vendor === 'aws-route53'">
+        <v-text-field
+          color="primary"
+          v-model="awsRegion"
+          label="Region (optional)"
+          hint="Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1"
+        ></v-text-field>
+      </div>
     </template>
     <template v-slot:help-slot>
       <p v-if="vendor==='aws'">
@@ -84,15 +92,15 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
+    required: 'You can\'t leave this empty',
+    minLength: 'It must contain at least 16 characters',
+    maxLength: 'It exceeds the maximum length of 128 characters',
+    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore'
   },
   secretAccessKey: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 40 characters.',
-    base64: 'Invalid secret access key.'
+    required: 'You can\'t leave this empty',
+    minLength: 'It must contain at least 40 characters',
+    base64: 'Invalid secret access key'
   }
 }
 
@@ -118,6 +126,7 @@ export default {
     return {
       accessKeyId: undefined,
       secretAccessKey: undefined,
+      awsRegion: undefined,
       hideSecret: true,
       validationErrors,
       templateAws: {
@@ -204,7 +213,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {
@@ -214,7 +222,8 @@ export default {
     secretData () {
       return {
         accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
+        secretAccessKey: this.secretAccessKey,
+        AWS_REGION: this.awsRegion
       }
     },
     validators () {
@@ -255,6 +264,7 @@ export default {
 
       this.accessKeyId = ''
       this.secretAccessKey = ''
+      this.awsRegion = ''
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'accessKeyId')

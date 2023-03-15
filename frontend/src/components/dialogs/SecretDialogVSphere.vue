@@ -98,16 +98,16 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   vsphereUsername: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   vspherePassword: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   nsxtUsername: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   nsxtPassword: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   }
 }
 
@@ -136,7 +136,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

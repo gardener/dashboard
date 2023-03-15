@@ -167,7 +167,7 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import HintColorizer from '@/components/HintColorizer'
 import ExternalLink from '@/components/ExternalLink'
 
-const requiredMessage = 'You can\'t leave this empty.'
+const requiredMessage = 'You can\'t leave this empty'
 const requiredUserMessage = 'Required for technical user authentication'
 const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
 
@@ -185,7 +185,7 @@ const validationErrors = {
     required: requiredUserMessage
   },
   authURL: {
-    required: 'Required for Secret Type DNS.'
+    required: 'Required for Secret Type DNS'
   },
   applicationCredentialID: {
     required: requiredApplicationCredentialsMessage
@@ -233,7 +233,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

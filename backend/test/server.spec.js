@@ -8,15 +8,17 @@
 
 const http = require('http')
 const terminus = require('@godaddy/terminus')
+const metricsApp = require('@gardener-dashboard/monitor')
 const createServer = require('../lib/server')
 
-function createApplication (port) {
+function createApplication (port, metricsPort) {
   const app = (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
   }
   const map = new Map()
   map.set('port', port)
+  map.set('metricsPort', metricsPort)
   map.set('periodSeconds', 1)
   map.set('healthCheck', jest.fn())
   map.set('hooks', {
@@ -46,6 +48,7 @@ jest.useFakeTimers('legacy')
 
 describe('server', () => {
   const port = 1234
+  const metricsPort = 5678
   const mockServer = {
     listen: jest.fn((_, callback) => setImmediate(callback))
   }
@@ -61,17 +64,19 @@ describe('server', () => {
   beforeEach(() => {
     mockCreateServer = jest.spyOn(http, 'createServer').mockReturnValue(mockServer)
     mockCreateTerminus = jest.spyOn(terminus, 'createTerminus').mockReturnValue(mockTerminus)
-    app = createApplication(port)
+    app = createApplication(port, metricsPort)
     hooks = app.get('hooks')
     logger = app.get('logger')
     healthCheck = app.get('healthCheck')
-    server = createServer(app)
+    server = createServer(app, metricsApp)
   })
 
   it('should create and run the server', async () => {
-    expect(mockCreateServer).toBeCalledTimes(1)
+    expect(mockCreateServer).toBeCalledTimes(2)
     expect(mockCreateServer.mock.calls[0]).toHaveLength(1)
     expect(mockCreateServer.mock.calls[0][0]).toBe(app)
+    expect(mockCreateServer.mock.calls[1]).toHaveLength(1)
+    expect(mockCreateServer.mock.calls[1][0]).toBe(metricsApp)
     expect(mockCreateTerminus).toBeCalledTimes(1)
     expect(mockCreateTerminus.mock.calls[0]).toHaveLength(2)
     expect(mockCreateTerminus.mock.calls[0][0]).toBe(mockServer)
@@ -83,6 +88,7 @@ describe('server', () => {
     expect(hooks.beforeListen.mock.calls[0]).toHaveLength(1)
     expect(hooks.beforeListen.mock.calls[0][0]).toEqual(mockServer)
     expect(logger.log.mock.calls).toEqual([
+      ['info', 'Metrics server listening on port %d', metricsPort],
       ['debug', 'Before listen hook succeeded after %d ms', expect.any(Number)],
       ['info', 'Server listening on port %d', 1234]
     ])

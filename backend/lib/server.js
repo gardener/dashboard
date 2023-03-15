@@ -18,22 +18,26 @@ function toMilliseconds (seconds) {
   return seconds * 1000 + 200
 }
 
-function createServer (app) {
+function createServer (app, metricsApp) {
   const port = app.get('port')
+  const metricsPort = app.get('metricsPort')
   const periodSeconds = app.get('periodSeconds')
-  const healthCheck = app.get('healthCheck')
+  const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
 
   // create server
   const server = http.createServer(app)
+  const metricsServer = http.createServer(metricsApp)
 
   // create terminus
+  const healthChecks = {
+    '/healthz': () => healthCheckFunc(false),
+    '/healthz-transitive': () => healthCheckFunc(true)
+  }
+
   terminus.createTerminus(server, {
-    healthChecks: {
-      '/healthz': () => healthCheck(false),
-      '/healthz-transitive': () => healthCheck(true)
-    },
+    healthChecks,
     beforeShutdown () {
       // To not lose any connections, we delay the shutdown with the number of milliseconds
       // that's defined by the readiness probe in the deployment configuration.
@@ -49,6 +53,7 @@ function createServer (app) {
     },
     onShutdown () {
       logger.debug('Cleanup has been finished. Server is shutting down')
+      metricsApp.destroy()
     },
     logger (...args) {
       logger.error(...args)
@@ -57,7 +62,11 @@ function createServer (app) {
 
   return {
     async run () {
+      await new Promise(resolve => metricsServer.listen(metricsPort, resolve))
+      logger.info('Metrics server listening on port %d', metricsPort)
+
       const begin = Date.now()
+
       try {
         await pTimeout(hooks.beforeListen(server), 15 * 1000)
         const milliseconds = Date.now() - begin

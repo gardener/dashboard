@@ -148,7 +148,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {
@@ -215,7 +214,7 @@ export default {
         }
         validationErrors.internalName = {
           required: 'User is required',
-          unique: `User '${this.internalName}' is already member of this project.`,
+          unique: `User '${this.internalName}' is already member of this project`,
           isNoServiceAccount: 'Please use add service account to add service accounts'
         }
       } else if (this.isServiceDialog) {
@@ -226,7 +225,7 @@ export default {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
           serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
-          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`
+          unique: `Service Account '${this.internalName}' already exists. Please try a different name`
         }
       }
       return validationErrors

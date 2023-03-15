@@ -45,6 +45,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:packages/logger"\
       },\
       {\
+        "name": "@gardener-dashboard/monitor",\
+        "reference": "workspace:packages/monitor"\
+      },\
+      {\
         "name": "@gardener-dashboard/request",\
         "reference": "workspace:packages/request"\
       },\
@@ -66,6 +70,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@gardener-dashboard/kube-client", ["workspace:packages/kube-client"]],\
       ["@gardener-dashboard/kube-config", ["workspace:packages/kube-config"]],\
       ["@gardener-dashboard/logger", ["workspace:packages/logger"]],\
+      ["@gardener-dashboard/monitor", ["workspace:packages/monitor"]],\
       ["@gardener-dashboard/request", ["workspace:packages/request"]],\
       ["@gardener-dashboard/terminal-bootstrap", ["workspace:packages/terminal-bootstrap"]],\
       ["@gardener-dashboard/test-utils", ["workspace:packages/test-utils"]],\
@@ -2647,10 +2652,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@braintree/sanitize-url", [\
-        ["npm:6.0.0", {\
-          "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-6.0.0-c4f0ae4c7f-409ce7709d.zip/node_modules/@braintree/sanitize-url/",\
+        ["npm:6.0.2", {\
+          "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-6.0.2-a8e98c2fde-6a9dfd4081.zip/node_modules/@braintree/sanitize-url/",\
           "packageDependencies": [\
-            ["@braintree/sanitize-url", "npm:6.0.0"]\
+            ["@braintree/sanitize-url", "npm:6.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2740,6 +2745,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
             ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
             ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+            ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
             ["@gardener-dashboard/request", "workspace:packages/request"],\
             ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["@godaddy/terminus", "npm:4.10.2"],\
@@ -2815,7 +2821,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/frontend", "workspace:frontend"],\
             ["@babel/core", "npm:7.18.2"],\
             ["@babel/eslint-parser", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:7.18.2"],\
-            ["@braintree/sanitize-url", "npm:6.0.0"],\
+            ["@braintree/sanitize-url", "npm:6.0.2"],\
             ["@fontsource/roboto", "npm:4.5.7"],\
             ["@mdi/font", "npm:5.9.55"],\
             ["@vue/cli-plugin-babel", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.4"],\
@@ -2949,6 +2955,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.0.0"],\
             ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
             ["jest-date-mock", "npm:1.0.8"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@gardener-dashboard/monitor", [\
+        ["workspace:packages/monitor", {\
+          "packageLocation": "./packages/monitor/",\
+          "packageDependencies": [\
+            ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
+            ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+            ["eslint", "npm:8.16.0"],\
+            ["eslint-config-standard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:17.0.0"],\
+            ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.26.0"],\
+            ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:26.4.5"],\
+            ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.2.0"],\
+            ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.0.0"],\
+            ["express", "npm:4.18.1"],\
+            ["http-errors", "npm:2.0.0"],\
+            ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
+            ["prom-client", "npm:14.1.1"],\
+            ["response-time", "npm:2.3.2"],\
+            ["supertest", "npm:6.2.3"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -6434,6 +6462,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["bintrees", [\
+        ["npm:1.0.2", {\
+          "packageLocation": "./.yarn/cache/bintrees-npm-1.0.2-b28feeda03-56a52b7d36.zip/node_modules/bintrees/",\
+          "packageDependencies": [\
+            ["bintrees", "npm:1.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["bl", [\
         ["npm:4.1.0", {\
           "packageLocation": "./.yarn/cache/bl-npm-4.1.0-7f94cdcf3f-9e8521fa7e.zip/node_modules/bl/",\
@@ -8457,10 +8494,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["dns-packet", [\
-        ["npm:5.3.1", {\
-          "packageLocation": "./.yarn/cache/dns-packet-npm-5.3.1-8f9567465f-196ff74a06.zip/node_modules/dns-packet/",\
+        ["npm:5.4.0", {\
+          "packageLocation": "./.yarn/cache/dns-packet-npm-5.4.0-4d0332a163-a169963848.zip/node_modules/dns-packet/",\
           "packageDependencies": [\
-            ["dns-packet", "npm:5.3.1"],\
+            ["dns-packet", "npm:5.4.0"],\
             ["@leichtgewicht/ip-codec", "npm:2.0.4"]\
           ],\
           "linkType": "HARD"\
@@ -13526,7 +13563,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/multicast-dns-npm-7.2.5-e1c9c3ec64-00b8a57df1.zip/node_modules/multicast-dns/",\
           "packageDependencies": [\
             ["multicast-dns", "npm:7.2.5"],\
-            ["dns-packet", "npm:5.3.1"],\
+            ["dns-packet", "npm:5.4.0"],\
             ["thunky", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
@@ -15405,6 +15442,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["prom-client", [\
+        ["npm:14.1.1", {\
+          "packageLocation": "./.yarn/cache/prom-client-npm-14.1.1-922a88d5b4-7ff3e85636.zip/node_modules/prom-client/",\
+          "packageDependencies": [\
+            ["prom-client", "npm:14.1.1"],\
+            ["tdigest", "npm:0.1.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["promise-inflight", [\
         ["npm:1.0.1", {\
           "packageLocation": "./.yarn/cache/promise-inflight-npm-1.0.1-5bb925afac-2274948309.zip/node_modules/promise-inflight/",\
@@ -15937,6 +15984,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/resolve.exports-npm-1.1.0-81756e03ba-52865af8ed.zip/node_modules/resolve.exports/",\
           "packageDependencies": [\
             ["resolve.exports", "npm:1.1.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["response-time", [\
+        ["npm:2.3.2", {\
+          "packageLocation": "./.yarn/cache/response-time-npm-2.3.2-e5c67ab5c5-2520478f03.zip/node_modules/response-time/",\
+          "packageDependencies": [\
+            ["response-time", "npm:2.3.2"],\
+            ["depd", "npm:1.1.2"],\
+            ["on-headers", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -17208,6 +17266,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minizlib", "npm:2.1.2"],\
             ["mkdirp", "npm:1.0.4"],\
             ["yallist", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["tdigest", [\
+        ["npm:0.1.2", {\
+          "packageLocation": "./.yarn/cache/tdigest-npm-0.1.2-b73cfcf726-44de824675.zip/node_modules/tdigest/",\
+          "packageDependencies": [\
+            ["tdigest", "npm:0.1.2"],\
+            ["bintrees", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\

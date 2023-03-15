@@ -97,16 +97,16 @@ import { required } from 'vuelidate/lib/validators'
 
 const validationErrors = {
   clientId: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   clientSecret: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   tenantId: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   },
   subscriptionId: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty'
   }
 }
 
@@ -138,7 +138,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

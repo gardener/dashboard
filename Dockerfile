@@ -22,8 +22,9 @@ RUN apk add --no-cache tini \
     && chown 1000:1000 ./home/node \
     # libc, libgcc and libstdc++ libraries
     && mkdir -p ./lib ./usr/lib \
-    && cp -d /lib/ld-musl-x86_64.so.* ./lib \
-    && cp -d /lib/libc.musl-x86_64.so.* ./lib \
+    && alpineArch="$(apk --print-arch)" \
+    && cp -d /lib/ld-musl-$alpineArch.so.* ./lib \
+    && cp -d /lib/libc.musl-$alpineArch.so.* ./lib \
     && cp -d /usr/lib/libgcc_s.so.* ./usr/lib \
     && cp -d /usr/lib/libstdc++.so.* ./usr/lib
 

@@ -92,10 +92,10 @@ import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
   name: {
-    required: 'You can\'t leave this empty.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
+    required: 'You can\'t leave this empty',
+    maxLength: 'It exceeds the maximum length of 128 characters',
     resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-    unique: 'Name is taken. Try another.'
+    unique: 'Name is taken. Try another'
   }
 }
 
@@ -145,7 +145,6 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {

@@ -10,7 +10,8 @@ const { Resources } = require('@gardener-dashboard/kube-client')
 const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const whitelistedPropertyKeys = ['accesskeyid', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL']
+const cleartextPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL', 'AWS_REGION']
+const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
@@ -43,11 +44,9 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], 
       .value()
 
     const iteratee = (value, key) => {
-      value = decodeBase64(value)
-      if (!_.includes(_.map(whitelistedPropertyKeys, _.toLower), _.toLower(key))) {
-        value = '****************'
-      }
-      return value
+      return normalizedCleartextPropertyKeys.includes(key.toLowerCase())
+        ? decodeBase64(value)
+        : '****************'
     }
     cloudProviderSecret.data = _.mapValues(secret.data, iteratee)
 
