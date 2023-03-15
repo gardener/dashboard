@@ -75,7 +75,7 @@ router
   })
 
 router.route('/:name/spec/kubernetes/enableStaticTokenKubeconfig')
-  .all(metricsRoute('shoots/:name/spec/kubernetes/enableStaticTokenKubeconfig'))
+  .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
       const user = req.user

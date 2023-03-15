@@ -63,6 +63,7 @@ function createServer (app, metricsApp) {
   return {
     async run () {
       await new Promise(resolve => metricsServer.listen(metricsPort, resolve))
+      logger.info('Metrics server listening on port %d', metricsPort)
 
       const begin = Date.now()
 
