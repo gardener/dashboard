@@ -50,6 +50,7 @@ global:
     # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
     # clusterIdentity: my-landscape-dev
     containerPort: 8080
+    metricsContainerPort: 9050
     servicePort: 8080
     resources:
       limits:

@@ -485,11 +485,11 @@ function getPodLabels (target) {
       labels = {} // no network restrictions for now
       break
     case TargetEnum.CONTROL_PLANE:
-      labels['networking.gardener.cloud/to-seed-apiserver'] = 'allowed'
+      labels['networking.gardener.cloud/to-runtime-apiserver'] = 'allowed'
       break
     case TargetEnum.SHOOT:
-      labels['networking.gardener.cloud/to-shoot-apiserver'] = 'allowed'
       labels['networking.gardener.cloud/to-shoot-networks'] = 'allowed'
+      labels['networking.resources.gardener.cloud/to-kube-apiserver-tcp-443'] = 'allowed'
       break
   }
   return labels

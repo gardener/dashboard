@@ -8,10 +8,14 @@
 
 const express = require('express')
 const { controllerregistrations } = require('../services')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
+const metricsMiddleware = metricsRoute('gardenerextensions')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
