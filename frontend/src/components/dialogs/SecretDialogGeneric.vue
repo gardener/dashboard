@@ -49,7 +49,6 @@ import SecretDialog from '@/components/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import isObject from 'lodash/isObject'
-import debounce from 'lodash/debounce'
 
 const validationErrors = {
   data: {
@@ -77,7 +76,7 @@ export default {
   data () {
     return {
       data: undefined,
-      parsedYAML: {},
+      secretData: {},
       validationErrors
     }
   },
@@ -93,42 +92,39 @@ export default {
       const validators = {
         data: {
           required,
-          isYAML: () => Object.keys(this.parsedYAML).length > 0
+          isYAML: () => Object.keys(this.secretData).length > 0
         }
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    },
-    secretData () {
-      return this.parsedYAML
     }
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
-    async parseYAML () {
+    async onInputSecretData () {
+      this.secretData = {}
+
       try {
-        this.parsedYAML = await this.$yaml.load(this.data)
+        this.secretData = await this.$yaml.load(this.data)
       } catch (err) {
-        this.parsedYAML = undefined
+        /* ignore errors */
       } finally {
-        if (!isObject(this.parsedYAML)) {
-          this.parsedYAML = {}
+        if (!isObject(this.secretData)) {
+          this.secretData = {}
         }
       }
-    },
-    onInputSecretData: debounce(function () {
-      this.parseYAML()
+
       this.$v.data.$touch()
-    }, 500),
+    },
     reset () {
       this.$v.$reset()
 
       this.data = ''
-      this.parsedYAML = {}
+      this.secretData = {}
 
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'data')
