@@ -30,7 +30,7 @@ function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
     function filterProviderType (seed) {
       const seedProviderType = _.get(seed, 'spec.provider.type')
-      return _.includes(providerTypes, seedProviderType)
+      return providerTypes.some(providerType => [seedProviderType, '*'].includes(providerType))
     }
     const providerType = cloudProfileResource.spec.type
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels')

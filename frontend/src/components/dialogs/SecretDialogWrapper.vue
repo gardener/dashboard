@@ -21,26 +21,30 @@ import InfobloxDialog from '@/components/dialogs/SecretDialogInfoblox'
 import NetlifyDialog from '@/components/dialogs/SecretDialogNetlify'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import HcloudDialog from '@/components/dialogs/SecretDialogHCloud'
+import GenericDialog from '@/components/dialogs/SecretDialogGeneric'
 
 import upperFirst from 'lodash/upperFirst'
 import split from 'lodash/split'
 import head from 'lodash/head'
 
+const components = {
+  GcpDialog,
+  AzureDialog,
+  AwsDialog,
+  OpenstackDialog,
+  AlicloudDialog,
+  MetalDialog,
+  VsphereDialog,
+  CloudflareDialog,
+  InfobloxDialog,
+  NetlifyDialog,
+  HcloudDialog,
+  GenericDialog,
+  DeleteDialog
+}
+
 export default {
-  components: {
-    GcpDialog,
-    AzureDialog,
-    AwsDialog,
-    OpenstackDialog,
-    AlicloudDialog,
-    MetalDialog,
-    VsphereDialog,
-    CloudflareDialog,
-    InfobloxDialog,
-    NetlifyDialog,
-    HcloudDialog,
-    DeleteDialog
-  },
+  components,
   data () {
     return {
       visibleDialogState: false
@@ -63,7 +67,12 @@ export default {
           return 'GcpDialog'
         default: {
           const name = upperFirst(head(split(this.visibleDialog, '-')))
-          return `${name}Dialog`
+          const componentName = `${name}Dialog`
+          const componentNames = Object.keys(components)
+          if (componentNames.includes(componentName)) {
+            return componentName
+          }
+          return 'GenericDialog'
         }
       }
     }

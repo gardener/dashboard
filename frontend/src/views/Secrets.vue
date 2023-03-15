@@ -57,7 +57,13 @@ SPDX-License-Identifier: Apache-2.0
         ></table-column-selection>
       </v-toolbar>
 
-      <v-card-text v-if="!infrastructureSecretItems.length">
+      <v-card-text v-if="!sortedCloudProviderKindList.length">
+        <v-alert class="ma-3" type="warning">
+          No supported cloud profile found.
+          There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's seed selector.
+        </v-alert>
+      </v-card-text>
+      <v-card-text v-else-if="!infrastructureSecretItems.length">
         <div class="text-h6 grey--text text--darken-1 my-4">Add Infrastructure Secrets to your project</div>
         <p class="text-body-1">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
