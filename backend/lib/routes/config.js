@@ -87,7 +87,7 @@ function sanitizeFrontendConfig (frontendConfig) {
     convertAndSanitize(vendorHint, 'message')
   }
 
-  for (const key of Object.keys(customCloudProviders)) {   
+  for (const key of Object.keys(customCloudProviders)) {
     convertAndSanitize(customCloudProviders[key]?.secret, 'help')
   }
 

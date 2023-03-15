@@ -167,10 +167,23 @@ export default {
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       const cloudProfileName = this.shootCloudProfileName
       const region = this.shootRegion
-      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec, customCloudProviders: this.cfg.customCloudProviders })
+      const zonedCluster = isZonedCluster({
+        cloudProviderKind: this.shootCloudProviderKind,
+        shootSpec: this.shootSpec,
+        customCloudProviders: this.cfg.customCloudProviders
+      })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
-      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      await this.$manageWorkers.dispatch('setWorkersData', {
+        workers,
+        cloudProfileName,
+        region,
+        zonesNetworkConfiguration,
+        zonedCluster,
+        existingWorkerCIDR,
+        kubernetesVersion:
+        this.shootK8sVersion
+      })
       this.tabValue = 'overview'
     },
     onWorkersValid (value) {

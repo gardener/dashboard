@@ -38,7 +38,7 @@ export default {
     iconSrc () {
       const customCloudProviderIcon = get(this.cfg, ['customCloudProviders', this.value, 'icon'])
       if (customCloudProviderIcon) {
-        return customCloudProviderIcon
+        return `/static/assets/${customCloudProviderIcon}`
       }
 
       // If filename is different from value you need to specify this below
