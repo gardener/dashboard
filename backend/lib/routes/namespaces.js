@@ -8,10 +8,14 @@
 
 const express = require('express')
 const { projects } = require('../services')
+const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
+const metricsMiddleware = metricsRoute('namespaces')
+
 router.route('/')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -31,6 +35,7 @@ router.route('/')
   })
 
 router.route('/:namespace')
+  .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user

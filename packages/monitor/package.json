@@ -1,0 +1,82 @@
+{
+  "name": "@gardener-dashboard/monitor",
+  "version": "1.0.0",
+  "description": "Prometheus Monitoring",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/monitor"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "lint": "eslint --ext .js .",
+    "test": "jest",
+    "test-coverage": "yarn test --coverage"
+  },
+  "dependencies": {
+    "@gardener-dashboard/logger": "workspace:*",
+    "express": "^4.18.1",
+    "http-errors": "^2.0.0",
+    "prom-client": "^14.1.1",
+    "response-time": "^2.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.16.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.4.5",
+    "eslint-plugin-n": "^15.2.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^27.5.1",
+    "supertest": "^6.2.3"
+  },
+  "eslintConfig": {
+    "env": {
+      "commonjs": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {
+      "createAgent": true,
+      "fixtures": true
+    }
+  },
+  "jest": {
+    "restoreMocks": true,
+    "clearMocks": true,
+    "verbose": true,
+    "coverageDirectory": "coverage",
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
+  },
+  "packageManager": "yarn@3.2.1",
+  "engines": {
+    "node": "^18.4.0"
+  }
+}

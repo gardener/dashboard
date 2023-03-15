@@ -103,6 +103,9 @@ spec:
             - name: http
               containerPort: {{ .Values.global.dashboard.containerPort }}
               protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.global.dashboard.metricsContainerPort }}
+              protocol: TCP
           {{- if .Values.global.dashboard.livenessProbe.enabled }}
           livenessProbe:
             tcpSocket:
@@ -167,6 +170,8 @@ spec:
           - name: KUBECONFIG
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
+          - name: METRICS_PORT
+            value: {{ quote .Values.global.dashboard.metricsContainerPort }}
           resources: {{ toYaml .Values.global.dashboard.resources | nindent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
