@@ -311,13 +311,12 @@ global:
     #   apiUrl: https://api.foo-github.com
     #   org: dummyorg
     #   repository: dummyrepo
-    #   webhookSecret: foobar # optional if synchronization.intervalSeconds is defined
+    #   webhookSecret: foobar # optional if pollIntervalSeconds is defined
     #   authentication:
     #     username: dashboard
     #     token: dummytoken
-    #   synchronization:
-    #     throttleSeconds: 60 # Max number of refresh cycles in a given interval to avoid issues with rate limiting.
-    #     intervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook.
+    #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook.
+    #   syncThrottleSeconds: 20 # Max number of syncs in a given time window to avoid issues with rate limiting. Default 20.
 
 
     livenessProbe:

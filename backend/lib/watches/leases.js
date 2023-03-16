@@ -6,6 +6,7 @@
 
 'use strict'
 
+const pLimit = require('p-limit')
 const logger = require('../logger')
 const config = require('../config')
 const cache = require('../cache')
@@ -14,10 +15,14 @@ const SyncManager = require('../github/SyncManager')
 
 async function loadOpenIssuesAndComments () {
   const issues = await tickets.loadOpenIssues()
-  for (const issue of issues) {
-    const number = issue.metadata.id
-    await tickets.loadIssueComments({ number })
-  }
+
+  const limit = pLimit(10)
+  const input = issues.map((issue) => {
+    const { number } = issue.metadata
+    return limit(() => tickets.loadIssueComments({ number }))
+  })
+
+  await Promise.all(input)
 }
 
 module.exports = (io, informer, { signal }) => {
@@ -39,10 +44,10 @@ module.exports = (io, informer, { signal }) => {
     nsp.to(rooms).emit('comments', event)
   })
 
-  const { intervalSeconds, throttleSeconds } = config.gitHub.synchronization
+  const { pollIntervalSeconds, syncThrottleSeconds } = config.gitHub
   const syncManager = new SyncManager(loadOpenIssuesAndComments, {
-    interval: intervalSeconds * 1000 || 0,
-    throttle: throttleSeconds * 1000 || 0,
+    interval: pollIntervalSeconds * 1000 || 0,
+    throttle: syncThrottleSeconds * 1000 || 0,
     signal
   })
   syncManager.sync()

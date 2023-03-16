@@ -52,13 +52,10 @@ data:
       {{- end }}
       org: {{ .Values.global.dashboard.gitHub.org }}
       repository: {{ .Values.global.dashboard.gitHub.repository }}
-      synchronization:
-        {{- if .Values.global.gitHub.webhookSecret }}
-        throttleSeconds: {{ required ".Values.global.gitHub.synchronization.throttleSeconds is required" .Values.global.gitHub.synchronization.throttleSeconds }}
-        intervalSeconds: {{ .Values.global.gitHub.synchronization.intervalSeconds | default 0 }}
-        {{- else }}
-        intervalSeconds: {{ required ".Values.global.gitHub.synchronization.intervalSeconds is required" .Values.global.gitHub.synchronization.intervalSeconds }}
-        {{- end }}
+      {{- if .Values.global.dashboard.gitHub.pollIntervalSeconds }}
+      pollIntervalSeconds: {{ .Values.global.dashboard.gitHub.pollIntervalSeconds }}
+      {{- end }}
+      syncThrottleSeconds: {{ .Values.global.dashboard.gitHub.syncThrottleSeconds | default 20 }}
     {{- end }}
     {{- if .Values.global.unreachableSeeds }}
     unreachableSeeds:

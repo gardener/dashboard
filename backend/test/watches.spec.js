@@ -226,9 +226,9 @@ describe('watches', function () {
       }
     }
 
-    const synchronization = {
-      intervalSeconds: 10,
-      throttleSeconds: 2
+    const gitHubConfig = {
+      pollIntervalSeconds: 10,
+      syncThrottleSeconds: 2
     }
 
     let gitHubStub
@@ -240,7 +240,7 @@ describe('watches', function () {
 
       gitHubStub = jest.fn()
       Object.defineProperty(config, 'gitHub', { get: gitHubStub })
-      gitHubStub.mockReturnValue({ synchronization })
+      gitHubStub.mockReturnValue(gitHubConfig)
 
       abortController = new AbortController()
       signal = abortController.signal
@@ -273,8 +273,8 @@ describe('watches', function () {
 
       expect(SyncManager).toBeCalledTimes(1)
       expect(SyncManager).toBeCalledWith(watches.leases.test.loadOpenIssuesAndComments, {
-        interval: synchronization.intervalSeconds * 1000,
-        throttle: synchronization.throttleSeconds * 1000,
+        interval: gitHubConfig.pollIntervalSeconds * 1000,
+        throttle: gitHubConfig.syncThrottleSeconds * 1000,
         signal
       })
       const syncManagerInstance = SyncManager.mock.instances[0]
