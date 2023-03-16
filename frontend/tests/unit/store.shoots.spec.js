@@ -156,7 +156,7 @@ describe('store.shoots', () => {
       }
     }
 
-    sortItems = getters.sortItems(shootModule.state, undefined, rootState, rootGetters)
+    sortItems = getters.sortItems(shootModule.state, getters, rootState, rootGetters)
     setFocusMode = (value) => shootModule.actions.setFocusMode({
       commit: (f, v) => shootModule.mutations[f](shootModule.state, v),
       getters: {

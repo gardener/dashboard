@@ -28,16 +28,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
-import join from 'lodash/join'
+import { mapGetters } from 'vuex'
 import map from 'lodash/map'
-import split from 'lodash/split'
-import dropRight from 'lodash/dropRight'
-import last from 'lodash/last'
-import first from 'lodash/first'
-import snakeCase from 'lodash/snakeCase'
-import includes from 'lodash/includes'
-import upperFirst from 'lodash/upperFirst'
 import StatusTag from '@/components/StatusTag'
 import ExternalLink from '@/components/ExternalLink'
 import filter from 'lodash/filter'
@@ -61,13 +53,13 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapState([
-      'conditionCache'
+    ...mapGetters('shoots', [
+      'getConditionForType'
     ]),
     conditions () {
       const shootConditions = filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
       const conditions = map(shootConditions, conditionStatus => {
-        const condition = this.getCondition(conditionStatus.type)
+        const condition = this.getConditionForType(conditionStatus.type)
         return { ...condition, ...conditionStatus }
       })
 
@@ -76,37 +68,6 @@ export default {
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
       return objectsFromErrorCodes(allErrorCodes)
-    }
-  },
-  methods: {
-    ...mapMutations([
-      'setCondition'
-    ]),
-    getCondition (type) {
-      const condition = this.conditionCache[type]
-      if (condition) {
-        return condition
-      }
-
-      const dropSuffixes = [
-        'Available',
-        'Healthy',
-        'Ready',
-        'Availability'
-      ]
-      let conditionComponents = snakeCase(type)
-      conditionComponents = split(conditionComponents, '_')
-      conditionComponents = map(conditionComponents, upperFirst)
-      if (includes(dropSuffixes, last(conditionComponents))) {
-        conditionComponents = dropRight(conditionComponents)
-      }
-
-      const name = join(conditionComponents, ' ')
-      const shortName = join(map(conditionComponents, first), '')
-      const conditionMetaData = { name, shortName, weight: shortName }
-      this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
-
-      return conditionMetaData
     }
   }
 }

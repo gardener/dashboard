@@ -15,7 +15,8 @@ import StatusTags from '@/components/StatusTags'
 
 // Utilities
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import { state, actions, getters, mutations } from '@/store'
+import shootModule from '@/store/modules/shoots'
+import { conditionCache } from '@/store/modules/shoots/getters'
 
 describe('condition.vue', () => {
   const localVue = createLocalVue()
@@ -62,17 +63,18 @@ describe('condition.vue', () => {
         }
       }
     })
-    store.dispatch('setConfiguration', cfg)
     return wrapper
   }
 
   beforeEach(() => {
     vuetify = new Vuetify()
     store = new Vuex.Store({
-      state,
-      actions,
-      getters,
-      mutations
+      state: {
+        cfg: { ...cfg }
+      },
+      modules: {
+        shoots: shootModule
+      }
     })
   })
 
@@ -101,11 +103,11 @@ describe('condition.vue', () => {
   })
 
   it('should cache generated condition object for unknown condition type', () => {
-    expect(store.state.conditionCache.UnknownCondition).toBeUndefined()
+    expect(conditionCache.UnknownCondition).toBeUndefined()
     const wrapper = shallowMountStatusTags(['UnknownCondition'])
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('UC')
-    expect(store.state.conditionCache.UnknownCondition.shortName).toBe('UC')
+    expect(conditionCache.UnknownCondition.shortName).toBe('UC')
   })
 
   it('should return condition object for known condition types', () => {
