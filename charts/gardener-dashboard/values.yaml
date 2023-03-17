@@ -316,7 +316,7 @@ global:
     #     username: dashboard
     #     token: dummytoken
     #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook.
-    #   syncThrottleSeconds: 20 # Max number of syncs in a given time window to avoid issues with rate limiting. Default 20.
+    #   syncThrottleSeconds: 20 # Defines the time window in which only one sync is allowed to avoid issues with rate limiting. Default 20.
 
 
     livenessProbe:
