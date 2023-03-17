@@ -39,7 +39,7 @@ import head from 'lodash/head'
 
 const validationErrors = {
   internalPurpose: {
-    required: 'Purpose is required.'
+    required: 'Purpose is required'
   }
 }
 

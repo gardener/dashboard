@@ -91,7 +91,10 @@ function sanitizeFrontendConfig (frontendConfig) {
   }
 
   for (const key of Object.keys(customCloudProviders)) {
-    convertAndSanitize(customCloudProviders[key]?.secret, 'help')
+    const secret = customCloudProviders[key]?.secret
+    if (secret) {
+      convertAndSanitize(secret, 'help')
+    }
   }
 
   return sanitizedFrontendConfig
