@@ -742,7 +742,7 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    const cloudProviderList = state.cfg.cloudProviderList ?? ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'local']
+    const cloudProviderList = state.cfg.cloudProviderList ?? ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'local']
     return intersection(cloudProviderList, getters.cloudProviderKindList)
   },
   sortedDnsProviderList (state, getters) {
