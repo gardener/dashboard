@@ -118,6 +118,10 @@ function createCondition (type) {
   })
 }
 
+export function getCondition (state, type) {
+  return state.conditions[type] ?? createCondition(type)
+}
+
 export function setConditionTypes (state, object) {
   const setConditionType = ({ type }) => {
     if (!state.conditions[type]) {

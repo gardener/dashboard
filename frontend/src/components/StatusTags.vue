@@ -31,6 +31,7 @@ SPDX-License-Identifier: Apache-2.0
 import StatusTag from '@/components/StatusTag'
 import ExternalLink from '@/components/ExternalLink'
 import sortBy from 'lodash/sortBy'
+import { getCondition } from '@/store/modules/shoots/helper'
 import { shootItem } from '@/mixins/shootItem'
 import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
@@ -54,7 +55,7 @@ export default {
       return sortBy(this.shootReadiness
         .filter(condition => !!condition.lastTransitionTime)
         .map(condition => ({
-          ...this.$store.state.shoots.conditions[condition.type],
+          ...getCondition(this.$store.state.shoots, condition.type),
           ...condition
         })), 'weight')
     },

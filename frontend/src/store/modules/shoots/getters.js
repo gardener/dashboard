@@ -25,7 +25,7 @@ import {
   isReconciliationDeactivated,
   getIssueSince
 } from '@/utils'
-import { findItem, parseSearch, constants } from './helper'
+import { findItem, parseSearch, constants, getCondition } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
@@ -280,7 +280,7 @@ export default {
                   lastTransitionTime: itemCondition.lastTransitionTime
                 }
               }
-              const weight = state.conditions[itemCondition.type].weight
+              const weight = getCondition(state, itemCondition.type).weight
               return {
                 weight,
                 lastTransitionTime: itemCondition.lastTransitionTime
