@@ -22,7 +22,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
 import getters from './getters'
-import { keyForShoot, findItem, constants, putItem, deleteItem } from './helper'
+import { keyForShoot, findItem, constants, putItem, deleteItem, setConditionTypes, knownConditions } from './helper'
 import {
   getShoots,
   getShoot,
@@ -65,7 +65,8 @@ const state = {
   subscriptionState: constants.CLOSED,
   subscriptionError: null,
   sortBy: undefined,
-  sortDesc: undefined
+  sortDesc: undefined,
+  conditions: { ...knownConditions }
 }
 
 function clearAll ({ commit }) {
@@ -464,6 +465,9 @@ const mutations = {
     }
 
     state.shoots = shoots
+    for (const object of Object.values(shoots)) {
+      setConditionTypes(state, object)
+    }
     state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
   RECEIVE_INFO (state, { namespace, name, info }) {
@@ -475,9 +479,6 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
-  ITEM_PUT (state, { newItem }) {
-    putItem(state, newItem)
-  },
   HANDLE_EVENT (state, { rootState, rootGetters, event }) {
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
     let setFilteredItemsRequired = false
@@ -487,6 +488,7 @@ const mutations = {
         // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
         if (notOnlyShootsWithIssues || shootHasIssue(event.object)) {
           putItem(state, event.object)
+          setConditionTypes(state, event.object)
           setFilteredItemsRequired = true
         }
         break
@@ -566,6 +568,9 @@ const mutations = {
   },
   SET_SORT_DESC (state, value) {
     state.sortDesc = value
+  },
+  SET_CONDITION_TYPES (state, object) {
+    setConditionTypes(state, object)
   }
 }
 

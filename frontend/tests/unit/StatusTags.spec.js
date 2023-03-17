@@ -9,6 +9,7 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 import map from 'lodash/map'
+import cloneDeep from 'lodash/cloneDeep'
 
 // Components
 import StatusTags from '@/components/StatusTags'
@@ -16,7 +17,6 @@ import StatusTags from '@/components/StatusTags'
 // Utilities
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import shootModule from '@/store/modules/shoots'
-import { conditionCache } from '@/store/modules/shoots/getters'
 
 describe('condition.vue', () => {
   const localVue = createLocalVue()
@@ -26,28 +26,9 @@ describe('condition.vue', () => {
   let vuetify
   let store
 
-  const cfg = {
-    knownConditions: {
-      ControlPlaneHealthy: {
-        name: 'Control Plane Overwritten',
-        shortName: 'CPO',
-        description: 'Overwritten Description'
-      },
-      ConditionFromConfigAvailability: {
-        name: 'Config Condition',
-        shortName: 'CC',
-        description: 'Config Condition Description'
-      },
-      ImportantCondition: {
-        name: 'Important Condition',
-        shortName: 'IC',
-        description: 'Important Config Condition Description',
-        weight: '0'
-      }
-    }
-  }
-
   const shallowMountStatusTags = conditionTypes => {
+    const conditions = conditionTypes.map(type => ({ type }))
+    store.commit('shoots/SET_CONDITION_TYPES', { status: { conditions } })
     const wrapper = shallowMount(StatusTags, {
       localVue,
       vuetify,
@@ -68,12 +49,32 @@ describe('condition.vue', () => {
 
   beforeEach(() => {
     vuetify = new Vuetify()
-    store = new Vuex.Store({
-      state: {
-        cfg: { ...cfg }
+    const state = cloneDeep(shootModule.state)
+    Object.assign(state.conditions, {
+      ControlPlaneHealthy: {
+        name: 'Control Plane Overwritten',
+        shortName: 'CPO',
+        description: 'Overwritten Description'
       },
+      ConditionFromConfigAvailability: {
+        name: 'Config Condition',
+        shortName: 'CC',
+        description: 'Config Condition Description'
+      },
+      ImportantCondition: {
+        name: 'Important Condition',
+        shortName: 'IC',
+        description: 'Important Config Condition Description',
+        weight: '0'
+      }
+    })
+    store = new Vuex.Store({
+      state: {},
       modules: {
-        shoots: shootModule
+        shoots: {
+          ...shootModule,
+          state
+        }
       }
     })
   })
@@ -103,11 +104,11 @@ describe('condition.vue', () => {
   })
 
   it('should cache generated condition object for unknown condition type', () => {
-    expect(conditionCache.UnknownCondition).toBeUndefined()
+    expect(store.state.shoots.conditions.UnknownCondition).toBeUndefined()
     const wrapper = shallowMountStatusTags(['UnknownCondition'])
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('UC')
-    expect(conditionCache.UnknownCondition.shortName).toBe('UC')
+    expect(store.state.shoots.conditions.UnknownCondition.shortName).toBe('UC')
   })
 
   it('should return condition object for known condition types', () => {

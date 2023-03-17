@@ -17,13 +17,6 @@ import semver from 'semver'
 import find from 'lodash/find'
 import isArray from 'lodash/isArray'
 import differenceWith from 'lodash/differenceWith'
-import split from 'lodash/split'
-import dropRight from 'lodash/dropRight'
-import last from 'lodash/last'
-import first from 'lodash/first'
-import snakeCase from 'lodash/snakeCase'
-import includes from 'lodash/includes'
-import upperFirst from 'lodash/upperFirst'
 import Vue from 'vue'
 
 import {
@@ -140,52 +133,6 @@ export function getSortVal (rootGetters, item, sortBy) {
     }
     default:
       return toLower(value)
-  }
-}
-
-export const conditionCache = {
-  APIServerAvailable: {
-    name: 'API Server',
-    shortName: 'API',
-    description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.',
-    weight: '0'
-  },
-  ControlPlaneHealthy: {
-    name: 'Control Plane',
-    shortName: 'CP',
-    description: 'Indicates whether all control plane components are up and running.',
-    showAdminOnly: true,
-    weight: '1'
-  },
-  EveryNodeReady: {
-    name: 'Nodes',
-    shortName: 'N',
-    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
-    weight: '3'
-  },
-  SystemComponentsHealthy: {
-    name: 'System Components',
-    shortName: 'SC',
-    description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
-    weight: '2'
-  },
-  ObservabilityComponentsHealthy: {
-    name: 'Observability Components',
-    shortName: 'OC',
-    description: 'Indicates whether all observability components like Prometheus, Loki, Grafana, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
-    weight: '4'
-  },
-  MaintenancePreconditionsSatisfied: {
-    name: 'Maintenance Preconditions Satisfied',
-    shortName: 'M',
-    description: 'Indicates whether Gardener is able to perform required actions during maintenance. If you do not resolve this issue your cluster will eventually turn into an error state.',
-    weight: '5'
-  },
-  HibernationPossible: {
-    name: 'Hibernation Preconditions Satisfied',
-    shortName: 'H',
-    description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.',
-    weight: '6'
   }
 }
 
@@ -333,9 +280,9 @@ export default {
                   lastTransitionTime: itemCondition.lastTransitionTime
                 }
               }
-              const condition = getters.getConditionForType(itemCondition.type)
+              const weight = state.conditions[itemCondition.type].weight
               return {
-                weight: condition.weight,
+                weight,
                 lastTransitionTime: itemCondition.lastTransitionTime
               }
             })
@@ -357,33 +304,5 @@ export default {
     return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
       return filteredShoot.metadata.uid === uid
     }).length
-  },
-  getConditionForType (state, getters, rootState) {
-    return (type) => {
-      let condition = get(rootState.cfg, ['knownConditions', type], conditionCache[type])
-      if (condition) {
-        return condition
-      }
-
-      const dropSuffixes = [
-        'Available',
-        'Healthy',
-        'Ready',
-        'Availability'
-      ]
-      let conditionComponents = snakeCase(type)
-      conditionComponents = split(conditionComponents, '_')
-      conditionComponents = map(conditionComponents, upperFirst)
-      if (includes(dropSuffixes, last(conditionComponents))) {
-        conditionComponents = dropRight(conditionComponents)
-      }
-
-      const name = join(conditionComponents, ' ')
-      const shortName = join(map(conditionComponents, first), '')
-      condition = { name, shortName, weight: shortName }
-      conditionCache[type] = condition
-
-      return condition
-    }
   }
 }

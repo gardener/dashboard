@@ -11,7 +11,7 @@ import {
 import getters from '@/store/modules/shoots/getters'
 import shootModule from '@/store/modules/shoots'
 
-import { parseSearch, deleteItem, putItem, keyForShoot } from '@/store/modules/shoots/helper'
+import { parseSearch, deleteItem, putItem, keyForShoot, setConditionTypes, knownConditions } from '@/store/modules/shoots/helper'
 
 import assign from 'lodash/assign'
 import fromPairs from 'lodash/fromPairs'
@@ -134,6 +134,16 @@ describe('store.shoots', () => {
               status: 'False',
               lastTransitionTime: '2022-01-01T20:00:00Z'
             }
+          ],
+          constraints: [
+            {
+              type: 'InfrastructureQuotaExceeded',
+              status: 'True',
+              lastTransitionTime: '2022-03-01T00:00:00Z',
+              codes: [
+                'ERR_INFRA_QUOTA_EXCEEDED'
+              ]
+            }
           ]
         }
       }
@@ -144,17 +154,15 @@ describe('store.shoots', () => {
       shoots: fromPairs(shootItemKeyValuePairs),
       filteredShoots: shootItems,
       focusMode: false,
-      staleShoots: []
+      staleShoots: [],
+      conditions: { ...knownConditions }
+    }
+    for (const object of shootItems) {
+      setConditionTypes(state, object)
     }
     assign(shootModule.state, state)
 
-    rootState = {
-      conditionCache: {
-        APIServerAvailable: {
-          weight: '0'
-        }
-      }
-    }
+    rootState = {}
 
     sortItems = getters.sortItems(shootModule.state, getters, rootState, rootGetters)
     setFocusMode = (value) => shootModule.actions.setFocusMode({

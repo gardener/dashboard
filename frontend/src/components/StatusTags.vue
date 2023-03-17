@@ -28,11 +28,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import map from 'lodash/map'
 import StatusTag from '@/components/StatusTag'
 import ExternalLink from '@/components/ExternalLink'
-import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import { shootItem } from '@/mixins/shootItem'
 import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
@@ -53,17 +50,13 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters('shoots', [
-      'getConditionForType'
-    ]),
     conditions () {
-      const shootConditions = filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
-      const conditions = map(shootConditions, conditionStatus => {
-        const condition = this.getConditionForType(conditionStatus.type)
-        return { ...condition, ...conditionStatus }
-      })
-
-      return sortBy(conditions, 'weight')
+      return sortBy(this.shootReadiness
+        .filter(condition => !!condition.lastTransitionTime)
+        .map(condition => ({
+          ...this.$store.state.shoots.conditions[condition.type],
+          ...condition
+        })), 'weight')
     },
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
