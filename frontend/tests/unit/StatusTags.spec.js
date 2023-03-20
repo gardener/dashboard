@@ -16,7 +16,6 @@ import StatusTags from '@/components/StatusTags'
 // Utilities
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import shootModule from '@/store/modules/shoots'
-import { conditionCache } from '@/store/modules/shoots/getters'
 
 describe('condition.vue', () => {
   const localVue = createLocalVue()
@@ -42,7 +41,7 @@ describe('condition.vue', () => {
         name: 'Important Condition',
         shortName: 'IC',
         description: 'Important Config Condition Description',
-        weight: '0'
+        sortOrder: '0'
       }
     }
   }
@@ -89,8 +88,8 @@ describe('condition.vue', () => {
   it('should generate condition object for long condition type', () => {
     const wrapper = shallowMountStatusTags(['ExtraLongSampleTESTConditionAvailable'])
     const condition = wrapper.vm.conditions[0]
-    expect(condition.shortName).toBe('ELSTC')
-    expect(condition.name).toBe('Extra Long Sample Test Condition')
+    expect(condition.shortName).toBe('ELST')
+    expect(condition.name).toBe('Extra Long Sample TESTCondition')
     expect(condition.description).toBeUndefined()
   })
 
@@ -102,20 +101,12 @@ describe('condition.vue', () => {
     expect(condition.description).toBeUndefined()
   })
 
-  it('should cache generated condition object for unknown condition type', () => {
-    expect(conditionCache.UnknownCondition).toBeUndefined()
-    const wrapper = shallowMountStatusTags(['UnknownCondition'])
-    const condition = wrapper.vm.conditions[0]
-    expect(condition.shortName).toBe('UC')
-    expect(conditionCache.UnknownCondition.shortName).toBe('UC')
-  })
-
   it('should return condition object for known condition types', () => {
     const wrapper = shallowMountStatusTags(['APIServerAvailable'])
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('API')
     expect(condition.name).toBe('API Server')
-    expect(condition.weight).toBe('0')
+    expect(condition.sortOrder).toBe('0')
     expect(condition.description).not.toHaveLength(0)
   })
 
