@@ -317,6 +317,7 @@ global:
     #     token: dummytoken
     #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook. Disabled if 0 or not defined.
     #   syncThrottleSeconds: 20 # Defines the time window in which only one sync is allowed to avoid issues with rate limiting. Default 20. Disabled if 0.
+    #   syncConcurrency: 10 # Defines the maximum number of parallel requests towards GitHub per instance and sync. Default 10.
 
 
     livenessProbe:

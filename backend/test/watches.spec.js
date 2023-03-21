@@ -11,6 +11,7 @@ const fixtures = require('../__fixtures__')
 jest.mock('../lib/github/SyncManager')
 
 const EventEmitter = require('events')
+const pLimit = require('p-limit')
 const _ = require('lodash')
 const logger = require('../lib/logger')
 const config = require('../lib/config')
@@ -272,7 +273,7 @@ describe('watches', function () {
       expect(ticketCache.on).toBeCalledWith('comment', expect.any(Function))
 
       expect(SyncManager).toBeCalledTimes(1)
-      expect(SyncManager).toBeCalledWith(watches.leases.test.loadOpenIssuesAndComments, {
+      expect(SyncManager).toBeCalledWith(expect.any(Function), {
         interval: gitHubConfig.pollIntervalSeconds * 1000,
         throttle: gitHubConfig.syncThrottleSeconds * 1000,
         signal
@@ -290,11 +291,34 @@ describe('watches', function () {
       await watches.leases(io, informer, { signal })
 
       expect(SyncManager).toBeCalledTimes(1)
-      expect(SyncManager).toBeCalledWith(watches.leases.test.loadOpenIssuesAndComments, {
+      const [func, opts] = SyncManager.mock.calls[0]
+      expect(typeof func).toEqual('function')
+      expect(opts).toEqual({
         interval: 0,
         throttle: 0,
         signal
       })
+    })
+
+    it('should call loadOpenIssuesAndComments with concurrency parameter', async () => {
+      jest.spyOn(tickets, 'loadOpenIssues')
+      tickets.loadOpenIssues.mockReturnValue([])
+
+      gitHubStub.mockReturnValue({})
+      await watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(1)
+      const [funcWithDefaultConcurrency] = SyncManager.mock.calls[0]
+      await funcWithDefaultConcurrency()
+      expect(pLimit).toBeCalledWith(10)
+
+      gitHubStub.mockReturnValue({ syncConcurrency: 42 })
+      await watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(2)
+      const [funcWithConfiguredConcurrency] = SyncManager.mock.calls[1]
+      await funcWithConfiguredConcurrency()
+      expect(pLimit).toBeCalledWith(42)
     })
 
     it('should emit ticket cache events to socket io', async () => {
@@ -338,7 +362,7 @@ describe('watches', function () {
       const loadIssueCommentsMock = ({ number }) => comments.filter((comment) => comment.number === number)
       tickets.loadIssueComments.mockImplementation(loadIssueCommentsMock)
 
-      await loadOpenIssuesAndComments()
+      await loadOpenIssuesAndComments(10)
 
       expect(tickets.loadOpenIssues).toBeCalledTimes(1)
       expect(tickets.loadIssueComments).toBeCalledTimes(t.length)

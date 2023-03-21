@@ -13,10 +13,10 @@ const cache = require('../cache')
 const tickets = require('../services/tickets')
 const SyncManager = require('../github/SyncManager')
 
-async function loadOpenIssuesAndComments () {
+async function loadOpenIssuesAndComments (concurrency) {
   const issues = await tickets.loadOpenIssues()
 
-  const limit = pLimit(10)
+  const limit = pLimit(concurrency)
   const input = issues.map((issue) => {
     const { number } = issue.metadata
     return limit(() => tickets.loadIssueComments({ number }))
@@ -44,8 +44,10 @@ module.exports = (io, informer, { signal }) => {
     nsp.to(rooms).emit('comments', event)
   })
 
-  const { pollIntervalSeconds, syncThrottleSeconds } = config.gitHub
-  const syncManager = new SyncManager(loadOpenIssuesAndComments, {
+  const { pollIntervalSeconds, syncThrottleSeconds, syncConcurrency } = config.gitHub
+  const syncManager = new SyncManager(() => {
+    return loadOpenIssuesAndComments(syncConcurrency || 10)
+  }, {
     interval: pollIntervalSeconds * 1000 || 0,
     throttle: syncThrottleSeconds * 1000 || 0,
     signal

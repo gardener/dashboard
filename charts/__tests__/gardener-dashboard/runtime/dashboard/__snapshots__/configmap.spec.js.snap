@@ -457,6 +457,7 @@ Object {
     "org": "gardener",
     "pollIntervalSeconds": 60,
     "repository": "tickets",
+    "syncConcurrency": 5,
     "syncThrottleSeconds": 10,
   },
 }
