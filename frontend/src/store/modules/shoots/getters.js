@@ -280,7 +280,7 @@ export default {
                   lastTransitionTime: itemCondition.lastTransitionTime
                 }
               }
-              const condition = getters.getConditionForType(itemCondition.type)
+              const condition = getters.conditionForType(itemCondition.type)
               return {
                 sortOrder: condition.sortOrder,
                 lastTransitionTime: itemCondition.lastTransitionTime
@@ -305,7 +305,7 @@ export default {
       return filteredShoot.metadata.uid === uid
     }).length
   },
-  getConditionForType (state, getters, rootState) {
+  conditionForType (state, getters, rootState) {
     return (type) => {
       return get(rootState.cfg, ['knownConditions', type], getCondition(type))
     }

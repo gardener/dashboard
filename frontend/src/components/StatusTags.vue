@@ -52,13 +52,13 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters('shoots', [
-      'getConditionForType'
+      'conditionForType'
     ]),
     conditions () {
       return sortBy(this.shootReadiness
         .filter(condition => !!condition.lastTransitionTime)
         .map(condition => ({
-          ...this.getConditionForType(condition.type),
+          ...this.conditionForType(condition.type),
           ...condition
         })), 'sortOrder')
     },
