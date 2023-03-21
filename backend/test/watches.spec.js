@@ -284,8 +284,8 @@ describe('watches', function () {
       expect(informer.on).toBeCalledWith('update', expect.any(Function))
     })
 
-    it('should creat SyncManager with defaults', async () => {
-      gitHubStub.mockReturnValue({ synchronization: {} })
+    it('should create SyncManager with defaults', async () => {
+      gitHubStub.mockReturnValue({})
 
       await watches.leases(io, informer, { signal })
 

@@ -59,7 +59,7 @@ app.use(helmet.hsts())
 app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
 app.use('/auth', auth.router)
 app.use('/webhook', monitorResponseTimes())
-app.use('/webhook', githubWebhook)
+app.use('/webhook', githubWebhook.router)
 app.use('/api', monitorResponseTimes())
 app.use('/api', api.router)
 

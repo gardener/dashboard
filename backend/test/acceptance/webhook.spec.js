@@ -42,7 +42,10 @@ describe('github', function () {
     let newGithubIssue
 
     beforeEach(function () {
-      newGithubIssue = fixtures.github.issues.create({ number: 42, updated_at: '2006-01-02T15:04:05.000Z' })
+      newGithubIssue = fixtures.github.issues.create({
+        number: 42,
+        updated_at: '2006-01-02T15:04:05.000Z'
+      })
       mockRequest.mockImplementationOnce(fixtures.leases.mocks.mergePatch())
     })
 

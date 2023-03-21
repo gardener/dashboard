@@ -21,17 +21,9 @@ const getLease = (renewTime = null) => {
   }
 
   return {
-    apiVersion: 'coordination.k8s.io/v1',
-    kind: 'Lease',
     metadata: {
-      creationTimestamp: '2023-01-01T01:01:01Z',
-      labels: {
-        app: 'gardener-dashboard',
-        role: 'dashboard'
-      },
       namespace: POD_NAMESPACE,
-      name: 'gardener-dashboard-github-webhook',
-      uid: 'f810e8c6-e37f-4668-913d-89b37c598dd1'
+      name: 'gardener-dashboard-github-webhook'
     },
     spec: {
       holderIdentity: POD_NAME,

@@ -6,6 +6,6 @@
 
 'use strict'
 
-const route = require('./route')
+const router = require('./router')
 
-module.exports = route
+module.exports = { router }

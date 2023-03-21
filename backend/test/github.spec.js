@@ -6,17 +6,19 @@
 
 'use strict'
 
-const crypto = require('crypto')
-const { UnprocessableEntity, InternalServerError } = require('http-errors')
+const { AssertionError } = require('assert')
+const createError = require('http-errors')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
 const config = require('../lib/config')
 const handleGithubEvent = require('../lib/github/webhook/handler')
 const verify = require('../lib/github/webhook/verify')
 const SyncManager = require('../lib/github/SyncManager')
+
 const actualNextTick = jest.requireActual('process').nextTick
 
-jest.mock('crypto')
+const { UnprocessableEntity, InternalServerError } = createError
+
 jest.useFakeTimers().setSystemTime(new Date('2023-01-01 00:00:00Z'))
 
 const flushPromises = () => new Promise(actualNextTick)
@@ -95,77 +97,49 @@ describe('github webhook', function () {
     })
   })
 
-  describe('verifier', () => {
-    let hmacDigestStub
-    let hmacUpdateStub
-    const fakeSignature = 'fake signature'.toString('hex')
-    const req = {
-      headers: {
-        'x-hub-signature-256': `sha256=${fakeSignature}`
-      }
+  describe('verify', () => {
+    const req = {}
+    const res = {}
+    const body = 'foo'
+
+    const setHubSignatureHeader = body => {
+      req.headers['x-hub-signature-256'] = fixtures.github.createHubSignature(body, config.gitHub.webhookSecret)
     }
-    const fakeBody = JSON.stringify({ some: 'body' })
 
     beforeEach(() => {
-      hmacUpdateStub = jest.fn()
-      hmacDigestStub = jest.fn()
-      crypto.timingSafeEqual.mockImplementation((...args) => {
-        return jest.requireActual('crypto').timingSafeEqual(...args)
-      })
-      crypto.createHmac.mockReturnValue({
-        update: hmacUpdateStub
-      })
-      hmacUpdateStub.mockReturnValue({
-        digest: hmacDigestStub
-      })
+      req.headers = {}
     })
 
     it('should succeed if signatures match', () => {
-      hmacDigestStub.mockReturnValueOnce(Buffer.from(fakeSignature, 'hex'))
-
-      expect(() => verify(req, {}, fakeBody)).not.toThrow()
-      expect(crypto.createHmac).toBeCalledWith('sha256', config.gitHub.webhookSecret)
-      expect(hmacUpdateStub).toBeCalledWith(fakeBody)
-      expect(hmacDigestStub).toBeCalledTimes(1)
+      setHubSignatureHeader(body)
+      expect(() => verify(req, res, body)).not.toThrow()
     })
 
     it('should fail in case of an invalid signature', () => {
-      hmacDigestStub.mockReturnValueOnce(Buffer.from('invalid-signature'))
-
-      expect(() => verify(req, {}, fakeBody)).toThrow()
-      expect(crypto.createHmac).toBeCalledWith('sha256', config.gitHub.webhookSecret)
-      expect(hmacUpdateStub).toBeCalledWith(fakeBody)
-      expect(hmacDigestStub).toBeCalledTimes(1)
-    })
-
-    it('should fail if webhookSecret is not configured', () => {
-      const gitHubConfig = config.gitHub
-      Object.defineProperty(config, 'gitHub', { value: {} })
-
-      let thrownError = null
-      try {
-        verify(req, {}, fakeBody)
-      } catch (err) {
-        thrownError = err
-      }
-
-      expect(thrownError).not.toBeFalsy()
-      expect(thrownError.message).toEqual("Property 'gitHub.webhookSecret' not configured on dashboard backend")
-
-      Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
+      setHubSignatureHeader('baz')
+      expect(() => verify(req, res, body)).toThrow(createError(403, 'Signatures didn\'t match!'))
     })
 
     it('should fail if signature is missing', () => {
-      let thrownError = null
-      try {
-        verify({ headers: {} }, {}, fakeBody)
-      } catch (err) {
-        thrownError = err
-      }
+      expect(() => verify(req, res, body)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
+    })
 
-      expect(thrownError).not.toBeFalsy()
-      expect(thrownError.message).toEqual("Header 'x-hub-signature-256' not provided or invalid")
-      expect(thrownError.status).toEqual(403)
+    describe('when webhookSecret is not configured', () => {
+      const gitHubConfig = config.gitHub
+
+      beforeEach(() => {
+        Object.defineProperty(config, 'gitHub', { value: {} })
+      })
+
+      afterEach(() => {
+        Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
+      })
+
+      it('should fail with an assertion error', () => {
+        expect(() => verify(req, res, body)).toThrow(new AssertionError({
+          message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend'
+        }))
+      })
     })
   })
 

@@ -52,7 +52,6 @@ class SyncManager {
   /**
    * Calls #load() but throttles calls to it by allowing only one invocation
    * at a time and only once every #throttlePeriod ms.
-   * @returns {undefined}
    */
   async #throttledLoad () {
     clearTimeout(this.#scheduledInvocationTimeoutId)
