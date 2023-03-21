@@ -146,6 +146,10 @@ Object {
                 "name": "GARDENER_CONFIG",
                 "value": "/etc/gardener-dashboard/config.yaml",
               },
+              Object {
+                "name": "METRICS_PORT",
+                "value": "9050",
+              },
             ],
             "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
             "imagePullPolicy": "IfNotPresent",
@@ -164,6 +168,11 @@ Object {
               Object {
                 "containerPort": 8080,
                 "name": "http",
+                "protocol": "TCP",
+              },
+              Object {
+                "containerPort": 9050,
+                "name": "metrics",
                 "protocol": "TCP",
               },
             ],

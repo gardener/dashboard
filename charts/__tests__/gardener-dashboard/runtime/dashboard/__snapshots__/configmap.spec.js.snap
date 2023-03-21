@@ -93,11 +93,71 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap cloudProviderList should render the template with cloudProviderList 1`] = `
+Object {
+  "frontend": Object {
+    "cloudProviderList": Array [
+      "foo",
+      "bar",
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 Object {
   "frontend": Object {
     "controlPlaneHighAvailabilityHelp": Object {
       "text": "[foo](https://bar.baz)",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap customCloudProviders should render the template with customCloudProviders 1`] = `
+Object {
+  "frontend": Object {
+    "customCloudProviders": Object {
+      "bar": Object {
+        "secret": Object {
+          "fields": Array [
+            Object {
+              "key": "user",
+              "type": "text",
+            },
+            Object {
+              "key": "password",
+              "type": "password",
+            },
+          ],
+        },
+        "shoot": Object {
+          "provider": Object {
+            "type": "bar",
+          },
+        },
+        "zoned": false,
+      },
+      "foo": Object {
+        "secret": Object {
+          "fields": Array [
+            Object {
+              "key": "user",
+              "type": "text",
+            },
+            Object {
+              "key": "password",
+              "type": "password",
+            },
+          ],
+        },
+        "shoot": Object {
+          "provider": Object {
+            "type": "foo",
+          },
+        },
+        "zoned": true,
+      },
     },
   },
 }
@@ -524,6 +584,18 @@ Object {
         "message": "other message",
       },
     ],
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap vendors should render the template with vendors 1`] = `
+Object {
+  "frontend": Object {
+    "vendors": Object {
+      "foo": Object {
+        "icon": "foo_icon.svg",
+      },
+    },
   },
 }
 `;

@@ -306,6 +306,43 @@ global:
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
 
+      # # cloudProviderList - configure available cloud providers. This allows to change order and to add additional (not built-in providers), see also customCloudProviders
+      # cloudProviderList:
+      # - aws
+      # - custom-provider
+
+      # # customCloudProviders - configure additional cloud providers
+      # customCloudProviders:
+      #   custom-provider:
+      #     zoned: true
+      #     shoot: # shoot template for this provider
+      #       specTemplate:
+      #         provider:
+      #           type: custom-provider
+      #         networking:
+      #           nodes: ${workerCIDR}
+      #     secret: # secret dialog
+      #       fields:
+      #       - key: user
+      #         hint: Enter a valid user
+      #         label: User
+      #         type: text
+      #         validators:
+      #           required:
+      #             type: required
+      #         validationErrors:
+      #           required: User is required
+      #       help: | # help text for secret dialog
+      #         #Foo Cloud Provider
+
+      # # vendors - configure additional or overwrite built-in vendor icons
+      # vendors:
+      #   custom-provider:
+      #     icon: custom-provider.svg
+      #
+      # vendorAssets:
+      #   custom-provider.svg: |
+
     # # github configuration of the ticket feature
     # gitHub:
     #   apiUrl: https://api.foo-github.com

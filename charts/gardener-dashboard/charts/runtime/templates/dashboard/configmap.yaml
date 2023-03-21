@@ -323,4 +323,16 @@ data:
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.cloudProviderList }}
+      cloudProviderList:
+        {{- range .Values.global.dashboard.frontendConfig.cloudProviderList }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.customCloudProviders }}
+      customCloudProviders: {{ toJson .Values.global.dashboard.frontendConfig.customCloudProviders }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.vendors }}
+      vendors: {{ toJson .Values.global.dashboard.frontendConfig.vendors }}
+      {{- end }}
 {{- end }}
