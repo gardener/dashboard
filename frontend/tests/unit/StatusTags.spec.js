@@ -69,7 +69,7 @@ describe('condition.vue', () => {
     vuetify = new Vuetify()
     store = new Vuex.Store({
       state: {
-        cfg: { ...cfg }
+        cfg
       },
       modules: {
         shoots: shootModule
@@ -88,8 +88,8 @@ describe('condition.vue', () => {
   it('should generate condition object for long condition type', () => {
     const wrapper = shallowMountStatusTags(['ExtraLongSampleTESTConditionAvailable'])
     const condition = wrapper.vm.conditions[0]
-    expect(condition.shortName).toBe('ELST')
-    expect(condition.name).toBe('Extra Long Sample TESTCondition')
+    expect(condition.shortName).toBe('ELSTC')
+    expect(condition.name).toBe('Extra Long Sample TEST Condition')
     expect(condition.description).toBeUndefined()
   })
 

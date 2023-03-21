@@ -149,9 +149,9 @@ describe('store.shoots', () => {
     assign(shootModule.state, state)
 
     rootState = {
-      conditionCache: {
+      wellKnownConditions: {
         APIServerAvailable: {
-          weight: '0'
+          sortOrder: '0'
         }
       }
     }

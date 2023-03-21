@@ -101,7 +101,7 @@ export const constants = Object.freeze({
   CLOSED: 5
 })
 
-const conditionCache = {
+const wellKnownConditions = {
   APIServerAvailable: {
     name: 'API Server',
     shortName: 'API',
@@ -147,26 +147,26 @@ const conditionCache = {
   }
 }
 
-const conditionRegex = /(?:Available|Healthy|Ready|Availability)$|(([A-Z]){1}(?:[A-Z])*[a-z]*)/g
-
 export function getCondition (type) {
-  let condition = conditionCache[type]
-  if (condition) {
-    return condition
+  if (type in wellKnownConditions) {
+    return wellKnownConditions[type]
   }
 
-  let components
-  const names = []
-  const shortnames = []
-  while ((components = conditionRegex.exec(type)) !== null) {
-    if (components[1]) {
-      names.push(components[1])
-      shortnames.push(components[2])
+  let name = ''
+  let shortName = ''
+  const words = type
+    .replace(/(Available|Healthy|Ready|Availability)$/, '')
+    .split(/(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/)
+  for (const word of words) {
+    if (name) {
+      name += ' '
     }
+    name += word
+    shortName += word[0]
   }
-  const name = names.join(' ')
-  const shortName = shortnames.join('')
-  condition = { name, shortName, sortOrder: shortName }
-
-  return condition
+  return {
+    name,
+    shortName,
+    sortOrder: shortName
+  }
 }
