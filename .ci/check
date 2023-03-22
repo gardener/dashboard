@@ -19,3 +19,6 @@ cd "${SOURCE_PATH}"
 # the cache folder was to be modified or
 # the checksums of the packages are not consistent
 yarn install --immutable --immutable-cache --check-cache
+
+# Run the helm chart unit tests
+yarn workspace @gardener-dashboard/charts run test
