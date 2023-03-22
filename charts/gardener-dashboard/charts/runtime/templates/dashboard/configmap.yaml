@@ -330,10 +330,10 @@ data:
         {{- end }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.customCloudProviders }}
-      customCloudProviders: {{ toJson .Values.global.dashboard.frontendConfig.customCloudProviders }}
+      customCloudProviders: {{ toYaml .Values.global.dashboard.frontendConfig.customCloudProviders | nindent 8 }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.vendors }}
-      vendors: {{ toJson .Values.global.dashboard.frontendConfig.vendors }}
+      vendors: {{ toYaml .Values.global.dashboard.frontendConfig.vendors | nindent 8  }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.knownConditions }}
       knownConditions: {{ toYaml .Values.global.dashboard.frontendConfig.knownConditions | nindent 8 }}
