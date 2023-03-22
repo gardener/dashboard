@@ -188,10 +188,6 @@ Object {
               "timeoutSeconds": 5,
             },
             "resources": Object {
-              "limits": Object {
-                "cpu": "1.0",
-                "memory": "1Gi",
-              },
               "requests": Object {
                 "cpu": "100m",
                 "memory": "350Mi",
