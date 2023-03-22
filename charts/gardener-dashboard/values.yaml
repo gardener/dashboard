@@ -306,6 +306,15 @@ global:
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
 
+      # # knownConditions - overwrite or add shoot condition descriptions
+      # knownConditions:
+      #   ExampleConditionReady:
+      #     name: Example
+      #     shortName: E
+      #     description: Example Description
+      #     showAdmin: false
+      #     sortOrder: 99
+
     # # github configuration of the ticket feature
     # gitHub:
     #   apiUrl: https://api.foo-github.com
