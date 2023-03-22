@@ -7,4 +7,4 @@
 'use strict'
 
 exports.shoots = require('./shoots')
-exports.tickets = require('./tickets')
+exports.leases = require('./leases')

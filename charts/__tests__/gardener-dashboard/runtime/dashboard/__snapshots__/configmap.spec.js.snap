@@ -471,7 +471,10 @@ Object {
   "gitHub": Object {
     "apiUrl": "https://github.com/api/v3/",
     "org": "gardener",
+    "pollIntervalSeconds": 60,
     "repository": "tickets",
+    "syncConcurrency": 5,
+    "syncThrottleSeconds": 10,
   },
 }
 `;

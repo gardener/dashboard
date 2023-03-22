@@ -18,6 +18,7 @@ const api = require('./api')
 const auth = require('./auth')
 const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
 const githubWebhook = require('./github/webhook')
+
 const { healthCheck } = require('./healthz')
 
 const { port, metricsPort } = config

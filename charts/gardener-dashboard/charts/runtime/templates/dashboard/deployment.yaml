@@ -172,6 +172,14 @@ spec:
           {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           resources: {{ toYaml .Values.global.dashboard.resources | nindent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config

@@ -8,6 +8,7 @@
 
 const { matchers } = require('@gardener-dashboard/test-utils')
 const config = require('./config')
+const leases = require('./leases')
 const auth = require('./auth')
 const kube = require('./kube')
 const shoots = require('./shoots')
@@ -26,6 +27,7 @@ const nodes = require('./nodes')
 const terminals = require('./terminals')
 const github = require('./github')
 const helper = require('./helper')
+const env = require('./env')
 const user = {
   create (...args) {
     return auth.createUser(...args)
@@ -39,6 +41,7 @@ function resetAll () {
 const fixtures = {
   matchers,
   config,
+  leases,
   auth,
   user,
   kube,
@@ -58,6 +61,7 @@ const fixtures = {
   terminals,
   github,
   helper,
+  env,
   resetAll
 }
 module.exports = fixtures

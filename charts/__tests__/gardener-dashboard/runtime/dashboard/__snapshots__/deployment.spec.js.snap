@@ -150,6 +150,22 @@ Object {
                 "name": "METRICS_PORT",
                 "value": "9050",
               },
+              Object {
+                "name": "POD_NAME",
+                "valueFrom": Object {
+                  "fieldRef": Object {
+                    "fieldPath": "metadata.name",
+                  },
+                },
+              },
+              Object {
+                "name": "POD_NAMESPACE",
+                "valueFrom": Object {
+                  "fieldRef": Object {
+                    "fieldPath": "metadata.namespace",
+                  },
+                },
+              },
             ],
             "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
             "imagePullPolicy": "IfNotPresent",

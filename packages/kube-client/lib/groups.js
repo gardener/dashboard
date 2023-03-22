@@ -27,6 +27,12 @@ class Authorization extends V1(NamedGroup(HttpClient)) {
   }
 }
 
+class Coordination extends V1(NamedGroup(HttpClient)) {
+  static get group () {
+    return 'coordination.k8s.io'
+  }
+}
+
 class Core extends V1(CoreGroup(HttpClient)) {
   static get group () {
     return ''
@@ -61,6 +67,7 @@ module.exports = {
   APIRegistration,
   Authentication,
   Authorization,
+  Coordination,
   Core,
   Networking,
   GardenerCore,

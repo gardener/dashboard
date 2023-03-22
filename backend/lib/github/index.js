@@ -7,8 +7,8 @@
 'use strict'
 
 const octokit = require('./octokit')()
-
 const config = require('../config')
+
 const {
   org: owner,
   repository: repo
@@ -16,7 +16,8 @@ const {
 
 function searchIssues ({ state, title } = {}) {
   const q = [
-    `repo:${owner}/${repo}`
+    `repo:${owner}/${repo}`,
+    'is:issue'
   ]
   if (state) {
     q.push(`state:${state}`)
