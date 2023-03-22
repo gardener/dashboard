@@ -594,11 +594,11 @@ describe('gardener-dashboard', function () {
               frontendConfig: {
                 knownConditions: {
                   ExampleConditionReady: {
-                  name: 'Example',
-                  shortName: 'E',
-                  description: 'Example Description',
-                  showAdmin: false,
-                  sortOrder: '99'
+                    name: 'Example',
+                    shortName: 'E',
+                    description: 'Example Description',
+                    showAdmin: false,
+                    sortOrder: '99'
                   }
                 }
               }

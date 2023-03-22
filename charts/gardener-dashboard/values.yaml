@@ -306,7 +306,7 @@ global:
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
 
-      # #knownConditions - overwrite or add shoot condition descriptions
+      # # knownConditions - overwrite or add shoot condition descriptions
       # knownConditions:
       #   ExampleConditionReady:
       #     name: Example
