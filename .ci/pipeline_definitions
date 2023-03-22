@@ -42,7 +42,7 @@ dashboard:
         pull-request: ~
       steps:
         check:
-          image: 'eu.gcr.io/gardener-project/3rd/node:16-alpine3.15'
+          image: 'node:18-alpine3.17'
         check-docforge:
           image: 'eu.gcr.io/gardener-project/3rd/golang:1.16.7'
     release:
