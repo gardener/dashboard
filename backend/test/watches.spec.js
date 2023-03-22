@@ -263,7 +263,7 @@ describe('watches', function () {
       jest.spyOn(ticketCache, 'on')
       jest.spyOn(informer, 'on')
 
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
       expect(io.of).toBeCalledTimes(1)
       expect(io.of).toBeCalledWith('/')
@@ -288,41 +288,47 @@ describe('watches', function () {
     it('should create SyncManager with defaults', async () => {
       gitHubStub.mockReturnValue({})
 
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
       expect(SyncManager).toBeCalledTimes(1)
-      const [func, opts] = SyncManager.mock.calls[0]
-      expect(typeof func).toEqual('function')
-      expect(opts).toEqual({
-        interval: 0,
-        throttle: 0,
-        signal
-      })
+      expect(SyncManager.mock.calls[0]).toEqual([
+        expect.any(Function),
+        {
+          interval: 0,
+          throttle: 0,
+          signal
+        }
+      ])
     })
 
-    it('should call loadOpenIssuesAndComments with concurrency parameter', async () => {
+    it('should call loadOpenIssuesAndComments with defaulted concurrency parameter', async () => {
       jest.spyOn(tickets, 'loadOpenIssues')
       tickets.loadOpenIssues.mockReturnValue([])
 
       gitHubStub.mockReturnValue({})
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
       expect(SyncManager).toBeCalledTimes(1)
       const [funcWithDefaultConcurrency] = SyncManager.mock.calls[0]
       await funcWithDefaultConcurrency()
       expect(pLimit).toBeCalledWith(10)
+    })
+
+    it('should call loadOpenIssuesAndComments with configured concurrency parameter', async () => {
+      jest.spyOn(tickets, 'loadOpenIssues')
+      tickets.loadOpenIssues.mockReturnValue([])
 
       gitHubStub.mockReturnValue({ syncConcurrency: 42 })
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
-      expect(SyncManager).toBeCalledTimes(2)
-      const [funcWithConfiguredConcurrency] = SyncManager.mock.calls[1]
+      expect(SyncManager).toBeCalledTimes(1)
+      const [funcWithConfiguredConcurrency] = SyncManager.mock.calls[0]
       await funcWithConfiguredConcurrency()
       expect(pLimit).toBeCalledWith(42)
     })
 
     it('should emit ticket cache events to socket io', async () => {
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
       expect(nsp.emit).toBeCalledTimes(1)
       expect(nsp.emit).toBeCalledWith('issues', issueEvent)
@@ -337,7 +343,7 @@ describe('watches', function () {
     it('should listen to informer update events', async function () {
       jest.spyOn(informer, 'on')
 
-      await watches.leases(io, informer, { signal })
+      watches.leases(io, informer, { signal })
 
       expect(informer.on).toBeCalledTimes(1)
       expect(informer.on).toBeCalledWith('update', expect.any(Function))
