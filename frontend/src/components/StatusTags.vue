@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <status-tag
         v-for="condition in conditions"
         :condition="condition"
-        :popper-key="condition.id"
-        :key="condition.id"
+        :popper-key="condition.type"
+        :key="condition.type"
         :popper-placement="popperPlacement"
         :secret-binding-name="shootSecretBindingName"
         :namespace="shootNamespace"
@@ -28,19 +28,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import split from 'lodash/split'
-import dropRight from 'lodash/dropRight'
-import last from 'lodash/last'
-import first from 'lodash/first'
-import snakeCase from 'lodash/snakeCase'
-import includes from 'lodash/includes'
-import upperFirst from 'lodash/upperFirst'
+import { mapGetters } from 'vuex'
 import StatusTag from '@/components/StatusTag'
 import ExternalLink from '@/components/ExternalLink'
-import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import { shootItem } from '@/mixins/shootItem'
 import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
@@ -61,55 +51,20 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapState([
-      'conditionCache'
+    ...mapGetters('shoots', [
+      'conditionForType'
     ]),
     conditions () {
-      const shootConditions = filter(this.shootReadiness, condition => !!condition.lastTransitionTime)
-      const conditions = map(shootConditions, condition => {
-        const { lastTransitionTime, message, status, type, codes } = condition
-        const id = type
-        const { displayName: name, shortName, description, showAdminOnly } = this.getCondition(condition.type)
-
-        return { id, name, shortName, description, message, lastTransitionTime, status, codes, showAdminOnly }
-      })
-
-      return sortBy(conditions, 'shortName')
+      return sortBy(this.shootReadiness
+        .filter(condition => !!condition.lastTransitionTime)
+        .map(condition => ({
+          ...this.conditionForType(condition.type),
+          ...condition
+        })), 'sortOrder')
     },
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
       return objectsFromErrorCodes(allErrorCodes)
-    }
-  },
-  methods: {
-    ...mapMutations([
-      'setCondition'
-    ]),
-    getCondition (type) {
-      const condition = this.conditionCache[type]
-      if (condition) {
-        return condition
-      }
-
-      const dropSuffixes = [
-        'Available',
-        'Healthy',
-        'Ready',
-        'Availability'
-      ]
-      let conditionComponents = snakeCase(type)
-      conditionComponents = split(conditionComponents, '_')
-      conditionComponents = map(conditionComponents, upperFirst)
-      if (includes(dropSuffixes, last(conditionComponents))) {
-        conditionComponents = dropRight(conditionComponents)
-      }
-
-      const displayName = join(conditionComponents, ' ')
-      const shortName = join(map(conditionComponents, first), '')
-      const conditionMetaData = { displayName, shortName }
-      this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
-
-      return conditionMetaData
     }
   }
 }

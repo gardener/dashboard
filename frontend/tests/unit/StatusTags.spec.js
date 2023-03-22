@@ -15,7 +15,7 @@ import StatusTags from '@/components/StatusTags'
 
 // Utilities
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import { state, actions, getters, mutations } from '@/store'
+import shootModule from '@/store/modules/shoots'
 
 describe('condition.vue', () => {
   const localVue = createLocalVue()
@@ -28,14 +28,20 @@ describe('condition.vue', () => {
   const cfg = {
     knownConditions: {
       ControlPlaneHealthy: {
-        displayName: 'Control Plane Overwritten',
+        name: 'Control Plane Overwritten',
         shortName: 'CPO',
         description: 'Overwritten Description'
       },
       ConditionFromConfigAvailability: {
-        displayName: 'Config Condition',
+        name: 'Config Condition',
         shortName: 'CC',
         description: 'Config Condition Description'
+      },
+      ImportantCondition: {
+        name: 'Important Condition',
+        shortName: 'IC',
+        description: 'Important Config Condition Description',
+        sortOrder: '0'
       }
     }
   }
@@ -56,17 +62,18 @@ describe('condition.vue', () => {
         }
       }
     })
-    store.dispatch('setConfiguration', cfg)
     return wrapper
   }
 
   beforeEach(() => {
     vuetify = new Vuetify()
     store = new Vuex.Store({
-      state,
-      actions,
-      getters,
-      mutations
+      state: {
+        cfg
+      },
+      modules: {
+        shoots: shootModule
+      }
     })
   })
 
@@ -82,7 +89,7 @@ describe('condition.vue', () => {
     const wrapper = shallowMountStatusTags(['ExtraLongSampleTESTConditionAvailable'])
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('ELSTC')
-    expect(condition.name).toBe('Extra Long Sample Test Condition')
+    expect(condition.name).toBe('Extra Long Sample TEST Condition')
     expect(condition.description).toBeUndefined()
   })
 
@@ -94,19 +101,12 @@ describe('condition.vue', () => {
     expect(condition.description).toBeUndefined()
   })
 
-  it('should cache generated condition object for unknown condition type', () => {
-    expect(store.state.conditionCache.UnknownCondition).toBeUndefined()
-    const wrapper = shallowMountStatusTags(['UnknownCondition'])
-    const condition = wrapper.vm.conditions[0]
-    expect(condition.shortName).toBe('UC')
-    expect(store.state.conditionCache.UnknownCondition.shortName).toBe('UC')
-  })
-
   it('should return condition object for known condition types', () => {
     const wrapper = shallowMountStatusTags(['APIServerAvailable'])
     const condition = wrapper.vm.conditions[0]
     expect(condition.shortName).toBe('API')
     expect(condition.name).toBe('API Server')
+    expect(condition.sortOrder).toBe('0')
     expect(condition.description).not.toHaveLength(0)
   })
 
@@ -126,11 +126,13 @@ describe('condition.vue', () => {
     expect(condition.description).toBe('Overwritten Description')
   })
 
-  it('should return conditions sorted by shortname', () => {
-    const wrapper = shallowMountStatusTags(['CB', 'AB'])
+  it('should return conditions sorted by sortvalue and shortname', () => {
+    const wrapper = shallowMountStatusTags(['CB', 'AB', 'ImportantCondition'])
     const firstCondition = wrapper.vm.conditions[0]
     const secondCondition = wrapper.vm.conditions[1]
-    expect(firstCondition.shortName).toBe('A')
-    expect(secondCondition.shortName).toBe('C')
+    const thirdCondition = wrapper.vm.conditions[2]
+    expect(firstCondition.shortName).toBe('IC')
+    expect(secondCondition.shortName).toBe('A')
+    expect(thirdCondition.shortName).toBe('C')
   })
 })

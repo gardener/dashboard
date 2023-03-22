@@ -25,7 +25,7 @@ import {
   isReconciliationDeactivated,
   getIssueSince
 } from '@/utils'
-import { findItem, parseSearch, constants } from './helper'
+import { findItem, parseSearch, constants, getCondition } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 export function getRawVal (rootGetters, item, column) {
@@ -61,11 +61,14 @@ export function getRawVal (rootGetters, item, column) {
       return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
     case 'issueSince':
       return getIssueSince(item.status) || 0
+    case 'technicalId':
+      return item.status?.technicalID
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(rootGetters.shootCustomFields, [column, 'path'])
         return get(item, path)
       }
+
       return metadata[column]
     }
   }
@@ -120,11 +123,6 @@ export function getSortVal (rootGetters, item, sortBy) {
         return 500
       }
       return 700
-    }
-    case 'readiness': {
-      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-      return lastErrorTransitionTime
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -268,32 +266,35 @@ export default {
               return sortbyNameAsc(a, b)
             }
           })
-          break
+          return items
         }
         case 'readiness': {
-          items.sort((a, b) => {
-            const readinessA = getSortVal(rootGetters, a, sortBy)
-            const readinessB = getSortVal(rootGetters, b, sortBy)
-
-            if (readinessA === readinessB) {
-              return sortbyNameAsc(a, b)
-            } else if (!readinessA) {
-              return 1
-            } else if (!readinessB) {
-              return -1
-            } else if (readinessA > readinessB) {
-              return 1 * inverse
-            } else {
-              return -1 * inverse
-            }
-          })
-          break
+          const hideProgressingClusters = get(rootGetters.getShootListFilters, 'progressing', false)
+          return orderBy(items, item => {
+            const errorGroups = map(item.status?.conditions, itemCondition => {
+              const isErrorCondition = (itemCondition?.status !== 'True' &&
+                (!hideProgressingClusters || itemCondition?.status !== 'Progressing'))
+              if (!isErrorCondition) {
+                return {
+                  sortOrder: `${Number.MAX_SAFE_INTEGER}`,
+                  lastTransitionTime: itemCondition.lastTransitionTime
+                }
+              }
+              const condition = getters.conditionForType(itemCondition.type)
+              return {
+                sortOrder: condition.sortOrder,
+                lastTransitionTime: itemCondition.lastTransitionTime
+              }
+            })
+            const { sortOrder, lastTransitionTime } = head(orderBy(errorGroups, ['sortOrder']))
+            return [sortOrder, lastTransitionTime, 'metadata.name']
+          },
+          [sortOrder, sortOrder, 'asc'])
         }
         default: {
-          items = orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          return orderBy(items, [item => getSortVal(rootGetters, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
         }
       }
-      return items
     }
   },
   numberOfNewItemsSinceFreeze (state) {
@@ -303,5 +304,10 @@ export default {
     return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
       return filteredShoot.metadata.uid === uid
     }).length
+  },
+  conditionForType (state, getters, rootState) {
+    return (type) => {
+      return get(rootState.cfg, ['knownConditions', type], getCondition(type))
+    }
   }
 }
