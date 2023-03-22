@@ -323,4 +323,8 @@ data:
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.knownConditions }}
+      knownConditions:
+{{ toYaml .Values.global.dashboard.frontendConfig.knownConditions | trim | indent 8 }}
+      {{- end }}
 {{- end }}
