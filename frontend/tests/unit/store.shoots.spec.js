@@ -30,6 +30,7 @@ describe('store.shoots', () => {
   let state
   let sortItems
   let setFocusMode
+  let rootState
 
   beforeEach(() => {
     shootItems = [
@@ -57,8 +58,14 @@ describe('store.shoots', () => {
           },
           conditions: [
             {
+              type: 'ObservabilityComponentsHealthy',
               status: 'True',
               lastTransitionTime: '2020-03-01T20:00:00Z'
+            },
+            {
+              type: 'ControlPlaneHealthy',
+              status: 'False',
+              lastTransitionTime: '2020-01-01T20:00:00Z'
             }
           ]
         }
@@ -87,8 +94,9 @@ describe('store.shoots', () => {
           },
           conditions: [
             {
+              type: 'APIServerAvailable',
               status: 'False',
-              lastTransitionTime: '2020-02-01T20:00:00Z'
+              lastTransitionTime: '2022-02-01T20:00:00Z'
             }
           ]
         }
@@ -122,8 +130,9 @@ describe('store.shoots', () => {
           ],
           conditions: [
             {
+              type: 'APIServerAvailable',
               status: 'False',
-              lastTransitionTime: '2020-01-01T20:00:00Z'
+              lastTransitionTime: '2022-01-01T20:00:00Z'
             }
           ]
         }
@@ -139,7 +148,15 @@ describe('store.shoots', () => {
     }
     assign(shootModule.state, state)
 
-    sortItems = getters.sortItems(shootModule.state, undefined, undefined, rootGetters)
+    rootState = {
+      wellKnownConditions: {
+        APIServerAvailable: {
+          sortOrder: '0'
+        }
+      }
+    }
+
+    sortItems = getters.sortItems(shootModule.state, getters, rootState, rootGetters)
     setFocusMode = (value) => shootModule.actions.setFocusMode({
       commit: (f, v) => shootModule.mutations[f](shootModule.state, v),
       getters: {
@@ -207,16 +224,6 @@ describe('store.shoots', () => {
       expect(sortedShoots[0].metadata.name).toBe('shoot2')
       expect(sortedShoots[1].metadata.name).toBe('shoot1')
       expect(sortedShoots[2].metadata.name).toBe('shoot3')
-    })
-
-    it('should sort shoots by readiness', () => {
-      const sortBy = ['readiness']
-      const sortDesc = [false]
-      const sortedShoots = sortItems(shootItems, sortBy, sortDesc)
-
-      expect(sortedShoots[0].metadata.name).toBe('shoot3')
-      expect(sortedShoots[1].metadata.name).toBe('shoot1')
-      expect(sortedShoots[2].metadata.name).toBe('shoot2')
     })
 
     it('should sort shoots by readiness', () => {
