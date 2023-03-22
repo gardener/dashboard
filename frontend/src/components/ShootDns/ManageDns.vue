@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
         v-for="id in dnsProviderIds"
         :key="id"
       >
-        <v-row class="list-item pt-2">
+        <v-row class="list-item pt-2" :key="id">
           <dns-provider-row :dnsProviderId="id"/>
         </v-row>
       </v-expand-transition>

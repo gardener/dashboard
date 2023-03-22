@@ -540,9 +540,10 @@ export default {
     },
     validateInput () {
       const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid && this.machineImageValid && this.containerRuntimeValid
-      // Do not evaluate this.valid !== valid when component is reused as valid state may not be emitted
-      this.valid = valid
-      this.$emit('valid', { id: this.worker.id, valid: this.valid })
+      if (this.valid !== valid) {
+        this.valid = valid
+        this.$emit('valid', { id: this.worker.id, valid: this.valid })
+      }
     },
     setVolumeDependingOnMachineType () {
       const storage = get(this.selectedMachineType, 'storage')
