@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, purposesForSecret } from '@/utils'
 import map from 'lodash/map'
-import head from 'lodash/head'
 
 const validationErrors = {
   internalPurpose: {
@@ -100,9 +99,11 @@ export default {
           return ''
       }
     },
-    setDefaultPurpose () {
-      this.internalPurpose = head(this.purposes).purpose
-      this.onInputPurpose()
+    resetPurpose () {
+      if (!this.purposes.some(p => p.purpose === this.internalPurpose)) {
+        this.internalPurpose = undefined
+        this.onInputPurpose()
+      }
     },
     setPurpose (purpose) {
       this.internalPurpose = purpose

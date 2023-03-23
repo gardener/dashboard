@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         v-for="(scheduleEvent, index) in parsedScheduleEvents"
         :key="scheduleEvent.id"
       >
-        <v-row class="list-item pt-2">
+        <v-row class="list-item pt-2" :key="scheduleEvent.id">
           <hibernation-schedule-event
             ref="scheduleEvents"
             :schedule-event="scheduleEvent"

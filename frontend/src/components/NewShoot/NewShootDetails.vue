@@ -228,6 +228,7 @@ export default {
     },
     onPurposeValid (value) {
       this.purposeValid = value
+      this.validateInput()
     },
     validateInput () {
       const valid = !this.$v.$invalid && this.purposeValid
@@ -274,7 +275,7 @@ export default {
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.$purpose.dispatch('setDefaultPurpose')
+      this.$purpose.dispatch('resetPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName
