@@ -100,7 +100,7 @@ export default {
       }
     },
     resetPurpose () {
-      if (!this.purposes.map(p => p.purpose).includes(this.internalPurpose)) {
+      if (!this.purposes.some(p => p.purpose === this.internalPurpose)) {
         this.internalPurpose = undefined
         this.onInputPurpose()
       }
