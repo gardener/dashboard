@@ -23,16 +23,12 @@ yarn install --immutable --immutable-cache --check-cache
 # Install helm
 VERSION="3.11.1"
 BASE_URL="https://get.helm.sh"
-case `uname -m` in
-  x86_64) ARCH=amd64; ;;
-  aarch64) ARCH=arm64; ;;
-  *) echo "un-supported arch, exit ..."; exit 1; ;;
-esac
-apk add --update --no-cache wget
-wget ${BASE_URL}/helm-v${VERSION}-linux-${ARCH}.tar.gz -O - | tar -xz
-mv linux-${ARCH}/helm /usr/bin/helm
-chmod +x /usr/bin/helm
-rm -rf linux-${ARCH}
+ARCH="$(uname -m | sed 's/x86_64/amd64/')"
+mkdir -p "${SOURCE_PATH}/bin"
+curl -sSL "${BASE_URL}/helm-v${VERSION}-linux-${ARCH}.tar.gz" | tar -xz -C "${SOURCE_PATH}/bin" --strip-components=1 "linux-${ARCH}/helm"
+chmod +x "${SOURCE_PATH}/bin/helm"
+# Add the bin directory to the PATH
+export PATH="${SOURCE_PATH}/bin:$PATH"
 
 # Run the helm chart unit tests
 yarn workspace @gardener-dashboard/charts run test
