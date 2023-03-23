@@ -15,6 +15,9 @@ describe('github', function () {
   let agent
   let cache
 
+  const now = new Date('2006-01-02T15:04:05.000Z')
+  const microDateStr = now.toISOString().replace(/Z$/, '000Z')
+
   beforeAll(() => {
     agent = createAgent()
   })
@@ -28,8 +31,8 @@ describe('github', function () {
     await loadOpenIssues()
   })
 
-  describe('#loadOpenIssues', function () {
-    it('should initialize the cache with all open issues', async function () {
+  describe('#loadOpenIssues', () => {
+    it('should initialize the cache with all open issues', async () => {
       expect(octokit.paginate).toBeCalledTimes(1)
 
       const issues = cache.getIssues()
@@ -42,10 +45,7 @@ describe('github', function () {
     let newGithubIssue
 
     beforeEach(function () {
-      newGithubIssue = fixtures.github.issues.create({
-        number: 42,
-        updated_at: '2006-01-02T15:04:05.000Z'
-      })
+      newGithubIssue = fixtures.github.issues.create({ number: 42 })
       mockRequest.mockImplementationOnce(fixtures.leases.mocks.mergePatch())
     })
 
@@ -53,7 +53,10 @@ describe('github', function () {
       jest.resetAllMocks()
     })
 
-    it('should handle valid github webhook', async function () {
+    it('should handle valid github webhook', async () => {
+      // do not enable that globally (e.g. in beforeEach) because express error handlers
+      // won't be called when fake timers are enabled.
+      jest.useFakeTimers().setSystemTime(now)
       const body = JSON.stringify({ action: 'opened', issue: newGithubIssue })
 
       await agent
@@ -64,33 +67,37 @@ describe('github', function () {
         .send(body)
         .expect(204)
 
+      jest.useRealTimers()
+
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest).toBeCalledWith(
         expect.anything(),
         {
           spec: {
             holderIdentity: fixtures.env.POD_NAME,
-            renewTime: '2006-01-02T15:04:05.000000Z'
+            renewTime: microDateStr
           }
         }
       )
     })
 
-    it('should error on invalid github webhook event', async function () {
-      const body = JSON.stringify({ action: 'invalid', issue: {} })
+    it('should error on invalid github webhook event', async () => {
+      const body = JSON.stringify({ foo: 1 })
 
       await agent
         .post('/webhook')
-        .set('x-github-event', githubEvent)
+        .set('x-github-event', 'unknown_event')
         .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
         .type('application/json')
         .send(body)
-        .expect(422)
+        .expect((res) => {
+          expect(res.status).toEqual(422)
+        })
 
       expect(mockRequest).toBeCalledTimes(0)
     })
 
-    it('should error if wrong HTTP method is used', async function () {
+    it('should error if wrong HTTP method is used', async () => {
       const body = JSON.stringify({ action: 'opened', issue: newGithubIssue })
 
       await agent
