@@ -417,7 +417,7 @@ export default {
       this.floatingPoolValid = true
       this.cloudProfileValid = true
 
-      this.secret = head(this.infrastructureSecretsByProfileName)
+      this.onUpdateSecret(head(this.infrastructureSecretsByProfileName))
       this.region = head(this.regionsWithSeed)
       if (!this.region && this.showAllRegions) {
         this.region = head(this.regionsWithoutSeed)

@@ -11,9 +11,6 @@ image:
 containerPort: 5556
 servicePort: 5556
 resources:
-  limits:
-    cpu: 200m
-    memory: 128Mi
   requests:
     cpu: 100m
     memory: 64Mi

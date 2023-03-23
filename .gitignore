@@ -32,6 +32,7 @@ scripts/bin
 # other files to ignore
 .DS_Store
 node_modules/
+bin/
 dist/
 tmp/
 coverage/

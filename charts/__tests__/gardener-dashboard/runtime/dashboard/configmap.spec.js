@@ -266,6 +266,9 @@ describe('gardener-dashboard', function () {
                 org: 'gardener',
                 repository: 'tickets',
                 webhookSecret: 'webhookSecret',
+                pollIntervalSeconds: 60,
+                syncThrottleSeconds: 10,
+                syncConcurrency: 5,
                 authentication: {
                   username: 'dashboard-tickets',
                   token: 'webhookAuthenticationToken'

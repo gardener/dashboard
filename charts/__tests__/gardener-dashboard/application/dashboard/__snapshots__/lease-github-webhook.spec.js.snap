@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gardener-dashboard lease-github-webhook should not render the template with default values 1`] = `null`;
+
+exports[`gardener-dashboard lease-github-webhook should render the template if gitHub webhook is configured 1`] = `
+Object {
+  "apiVersion": "coordination.k8s.io/v1",
+  "kind": "Lease",
+  "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-application-0.1.0",
+    },
+    "name": "gardener-dashboard-github-webhook",
+    "namespace": "garden",
+  },
+  "spec": Object {
+    "holderIdentity": "",
+    "renewTime": "1970-01-01T00:00:00.000000Z",
+  },
+}
+`;

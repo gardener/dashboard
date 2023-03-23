@@ -58,6 +58,7 @@
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
     "openid-client": "^5.1.6",
+    "p-limit": "^3.1.0",
     "p-retry": "^4.6.2",
     "p-timeout": "^4.1.0",
     "sanitize-html": "^2.7.0",
