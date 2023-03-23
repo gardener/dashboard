@@ -38,10 +38,6 @@
   "files.exclude": {
     ".pnp.*": true,
     ".yarn": true,
-    ".vscode": false,
-    "yarn.lock": true,
-    ".pre-commit-config.yaml": true,
-    ".secrets.baseline": true,
     ".docforge": true,
     "logo": true,
     "LICENSES": true,
