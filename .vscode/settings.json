@@ -43,6 +43,7 @@
     ".pre-commit-config.yaml": true,
     ".secrets.baseline": true,
     ".docforge": true,
+    "bin": true,
     "logo": true,
     "LICENSES": true,
     "**/node_modules": true,
