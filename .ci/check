@@ -27,6 +27,7 @@ ARCH="$(uname -m | sed 's/x86_64/amd64/')"
 mkdir -p "${SOURCE_PATH}/bin"
 curl -sSL "${BASE_URL}/helm-v${VERSION}-linux-${ARCH}.tar.gz" | tar -xz -C "${SOURCE_PATH}/bin" --strip-components=1 "linux-${ARCH}/helm"
 chmod +x "${SOURCE_PATH}/bin/helm"
+
 # Add the bin directory to the PATH
 export PATH="${SOURCE_PATH}/bin:$PATH"
 
