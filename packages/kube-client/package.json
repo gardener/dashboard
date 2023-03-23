@@ -37,13 +37,13 @@
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:*",
     "abort-controller": "^3.0.0",
-    "eslint": "^8.16.0",
+    "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jest": "^26.4.5",
-    "eslint-plugin-n": "^15.2.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "express": "^4.18.1",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^26.9.0",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "express": "^4.18.2",
     "jest": "^27.5.1"
   },
   "eslintConfig": {

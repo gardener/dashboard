@@ -29,7 +29,7 @@
     "@gardener-dashboard/kube-config": "workspace:*",
     "@gardener-dashboard/logger": "workspace:*",
     "@gardener-dashboard/request": "workspace:*",
-    "better-queue": "^3.8.10",
+    "better-queue": "^3.8.12",
     "fnv-plus": "^1.3.1",
     "http-errors": "^2.0.0",
     "js-yaml": "^4.1.0",
@@ -41,12 +41,12 @@
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:*",
     "abort-controller": "^3.0.0",
-    "eslint": "^8.16.0",
+    "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jest": "^26.4.5",
-    "eslint-plugin-n": "^15.2.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^26.9.0",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
     "jest": "^27.5.1"
   },
   "eslintConfig": {
