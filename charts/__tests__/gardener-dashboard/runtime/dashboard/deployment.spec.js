@@ -118,7 +118,7 @@ describe('gardener-dashboard', function () {
         expect(container.volumeMounts).toHaveLength(4)
         const [, , , kubeconfigVolumeMount] = container.volumeMounts
         expect(kubeconfigVolumeMount).toMatchSnapshot()
-        expect(container.env).toHaveLength(5)
+        expect(container.env).toHaveLength(8)
         const [, , , , kubeconfigEnv] = container.env
         expect(kubeconfigEnv).toMatchSnapshot()
       })

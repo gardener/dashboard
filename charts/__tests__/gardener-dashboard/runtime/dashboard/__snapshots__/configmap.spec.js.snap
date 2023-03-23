@@ -103,6 +103,22 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap knownConditions should render the template with knownConditions markdown 1`] = `
+Object {
+  "frontend": Object {
+    "knownConditions": Object {
+      "ExampleConditionReady": Object {
+        "description": "Example Description",
+        "name": "Example",
+        "shortName": "E",
+        "showAdmin": false,
+        "sortOrder": "99",
+      },
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`public.client_secret\` 1`] = `
 Object {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
@@ -455,7 +471,10 @@ Object {
   "gitHub": Object {
     "apiUrl": "https://github.com/api/v3/",
     "org": "gardener",
+    "pollIntervalSeconds": 60,
     "repository": "tickets",
+    "syncConcurrency": 5,
+    "syncThrottleSeconds": 10,
   },
 }
 `;

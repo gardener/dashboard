@@ -55,6 +55,8 @@ data:
       {{- if .Values.global.dashboard.gitHub.pollIntervalSeconds }}
       pollIntervalSeconds: {{ .Values.global.dashboard.gitHub.pollIntervalSeconds }}
       {{- end }}
+      syncThrottleSeconds: {{ .Values.global.dashboard.gitHub.syncThrottleSeconds | default 20 }}
+      syncConcurrency: {{ .Values.global.dashboard.gitHub.syncConcurrency | default 10 }}
     {{- end }}
     {{- if .Values.global.unreachableSeeds }}
     unreachableSeeds:
@@ -322,5 +324,8 @@ data:
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.knownConditions }}
+      knownConditions: {{ toYaml .Values.global.dashboard.frontendConfig.knownConditions | nindent 8 }}
       {{- end }}
 {{- end }}

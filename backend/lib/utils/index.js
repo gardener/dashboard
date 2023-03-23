@@ -95,6 +95,11 @@ function isSeedUnreachable (seed) {
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
+function isDateValid (dateOrDateString) {
+  const date = dateOrDateString instanceof Date ? dateOrDateString : new Date(dateOrDateString)
+  return !isNaN(date.getTime())
+}
+
 module.exports = {
   decodeBase64,
   encodeBase64,
@@ -103,5 +108,6 @@ module.exports = {
   getSeedNameFromShoot,
   shootHasIssue,
   isSeedUnreachable,
-  getSeedIngressDomain
+  getSeedIngressDomain,
+  isDateValid
 }

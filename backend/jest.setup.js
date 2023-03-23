@@ -142,5 +142,9 @@ jest.mock('./lib/cache', () => {
   return originalCache
 })
 
+beforeAll(() => {
+  Object.assign(process.env, fixtures.env)
+})
+
 global.createAgent = createAgent
 global.fixtures = fixtures

@@ -146,6 +146,26 @@ Object {
                 "name": "GARDENER_CONFIG",
                 "value": "/etc/gardener-dashboard/config.yaml",
               },
+              Object {
+                "name": "METRICS_PORT",
+                "value": "9050",
+              },
+              Object {
+                "name": "POD_NAME",
+                "valueFrom": Object {
+                  "fieldRef": Object {
+                    "fieldPath": "metadata.name",
+                  },
+                },
+              },
+              Object {
+                "name": "POD_NAMESPACE",
+                "valueFrom": Object {
+                  "fieldRef": Object {
+                    "fieldPath": "metadata.namespace",
+                  },
+                },
+              },
             ],
             "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
             "imagePullPolicy": "IfNotPresent",
@@ -166,6 +186,11 @@ Object {
                 "name": "http",
                 "protocol": "TCP",
               },
+              Object {
+                "containerPort": 9050,
+                "name": "metrics",
+                "protocol": "TCP",
+              },
             ],
             "readinessProbe": Object {
               "failureThreshold": 6,
@@ -179,10 +204,6 @@ Object {
               "timeoutSeconds": 5,
             },
             "resources": Object {
-              "limits": Object {
-                "cpu": "1.0",
-                "memory": "1Gi",
-              },
               "requests": Object {
                 "cpu": "100m",
                 "memory": "350Mi",

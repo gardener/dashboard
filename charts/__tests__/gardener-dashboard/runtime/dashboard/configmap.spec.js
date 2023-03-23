@@ -266,6 +266,9 @@ describe('gardener-dashboard', function () {
                 org: 'gardener',
                 repository: 'tickets',
                 webhookSecret: 'webhookSecret',
+                pollIntervalSeconds: 60,
+                syncThrottleSeconds: 10,
+                syncConcurrency: 5,
                 authentication: {
                   username: 'dashboard-tickets',
                   token: 'webhookAuthenticationToken'
@@ -583,6 +586,33 @@ describe('gardener-dashboard', function () {
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
+      })
+    })
+
+    describe('knownConditions', function () {
+      it('should render the template with knownConditions markdown', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                knownConditions: {
+                  ExampleConditionReady: {
+                    name: 'Example',
+                    shortName: 'E',
+                    description: 'Example Description',
+                    showAdmin: false,
+                    sortOrder: '99'
+                  }
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.knownConditions'])).toMatchSnapshot()
       })
     })
   })

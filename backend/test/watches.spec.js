@@ -6,13 +6,19 @@
 
 'use strict'
 
+const fixtures = require('../__fixtures__')
+
+jest.mock('../lib/github/SyncManager')
+
 const EventEmitter = require('events')
+const pLimit = require('p-limit')
 const _ = require('lodash')
 const logger = require('../lib/logger')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const tickets = require('../lib/services/tickets')
+const SyncManager = require('../lib/github/SyncManager')
 
 const rooms = new Map()
 
@@ -200,7 +206,7 @@ describe('watches', function () {
     })
   })
 
-  describe('tickets', function () {
+  describe('leases', function () {
     const metadata = {
       projectName: 'foo',
       name: 'bar'
@@ -221,46 +227,154 @@ describe('watches', function () {
       }
     }
 
-    const gitHubConfig = config.gitHub
+    const gitHubConfig = {
+      pollIntervalSeconds: 10,
+      syncThrottleSeconds: 2
+    }
 
     let gitHubStub
-    let loadOpenIssuesStub
+    let abortController
+    let signal
 
     beforeEach(function () {
+      jest.clearAllMocks()
+
       gitHubStub = jest.fn()
       Object.defineProperty(config, 'gitHub', { get: gitHubStub })
-      loadOpenIssuesStub = jest.spyOn(tickets, 'loadOpenIssues').mockResolvedValue([])
-      jest.clearAllMocks()
+      gitHubStub.mockReturnValue(gitHubConfig)
+
+      abortController = new AbortController()
+      signal = abortController.signal
+
+      jest.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
     })
 
-    afterEach(function () {
-      Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
-    })
-
-    it('should log missing gitHub config', async function () {
+    it('should log a warning if gitHub config is missing and not continue', async function () {
+      jest.spyOn(ticketCache, 'on')
       gitHubStub.mockReturnValue(false)
-      watches.tickets(io, ticketCache)
+
+      await watches.leases(io, informer, { signal: abortController.signal })
+
       expect(logger.warn).toBeCalledTimes(1)
+      expect(ticketCache.on).toBeCalledTimes(0)
     })
 
-    it('should watch tickets', async function () {
-      gitHubStub.mockReturnValue(true)
-      loadOpenIssuesStub.mockRejectedValueOnce(Object.assign(new Error('Service Unavailable'), {
-        status: 503
-      }))
+    it('should add event listeners and create SyncManager', async function () {
+      jest.spyOn(ticketCache, 'on')
+      jest.spyOn(informer, 'on')
 
-      await watches.tickets(io, ticketCache, { minTimeout: 1 })
-      expect(loadOpenIssuesStub).toBeCalledTimes(2)
-      expect(logger.info).toBeCalledTimes(2)
+      watches.leases(io, informer, { signal })
+
+      expect(io.of).toBeCalledTimes(1)
+      expect(io.of).toBeCalledWith('/')
+
+      expect(ticketCache.on).toBeCalledTimes(2)
+      expect(ticketCache.on).toBeCalledWith('issue', expect.any(Function))
+      expect(ticketCache.on).toBeCalledWith('comment', expect.any(Function))
+
+      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toBeCalledWith(expect.any(Function), {
+        interval: gitHubConfig.pollIntervalSeconds * 1000,
+        throttle: gitHubConfig.syncThrottleSeconds * 1000,
+        signal
+      })
+      const syncManagerInstance = SyncManager.mock.instances[0]
+      expect(syncManagerInstance.sync).toBeCalledTimes(1)
+
+      expect(informer.on).toBeCalledTimes(1)
+      expect(informer.on).toBeCalledWith('update', expect.any(Function))
     })
 
-    it('should fail to fetch tickets', async function () {
-      gitHubStub.mockReturnValue(true)
-      loadOpenIssuesStub.mockRejectedValueOnce(new Error('Unexpected'))
+    it('should create SyncManager with defaults', async () => {
+      gitHubStub.mockReturnValue({})
 
-      await watches.tickets(io, ticketCache)
-      expect(loadOpenIssuesStub).toBeCalledTimes(1)
-      expect(logger.error).toBeCalledTimes(1)
+      watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager.mock.calls[0]).toEqual([
+        expect.any(Function),
+        {
+          interval: 0,
+          throttle: 0,
+          signal
+        }
+      ])
+    })
+
+    it('should call loadOpenIssuesAndComments with defaulted concurrency parameter', async () => {
+      jest.spyOn(tickets, 'loadOpenIssues')
+      tickets.loadOpenIssues.mockReturnValue([])
+
+      gitHubStub.mockReturnValue({})
+      watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(1)
+      const [funcWithDefaultConcurrency] = SyncManager.mock.calls[0]
+      await funcWithDefaultConcurrency()
+      expect(pLimit).toBeCalledWith(10)
+    })
+
+    it('should call loadOpenIssuesAndComments with configured concurrency parameter', async () => {
+      jest.spyOn(tickets, 'loadOpenIssues')
+      tickets.loadOpenIssues.mockReturnValue([])
+
+      gitHubStub.mockReturnValue({ syncConcurrency: 42 })
+      watches.leases(io, informer, { signal })
+
+      expect(SyncManager).toBeCalledTimes(1)
+      const [funcWithConfiguredConcurrency] = SyncManager.mock.calls[0]
+      await funcWithConfiguredConcurrency()
+      expect(pLimit).toBeCalledWith(42)
+    })
+
+    it('should emit ticket cache events to socket io', async () => {
+      watches.leases(io, informer, { signal })
+
+      expect(nsp.emit).toBeCalledTimes(1)
+      expect(nsp.emit).toBeCalledWith('issues', issueEvent)
+
+      const room = `shoots;${cache.getProjectNamespace(issueEvent.object.metadata.projectName)}/${issueEvent.object.metadata.name}`
+      const mockRoom = rooms.get(room)
+      expect(nsp.to).toBeCalledWith([room])
+      expect(mockRoom.emit).toBeCalledTimes(1)
+      expect(mockRoom.emit).toBeCalledWith('comments', issueEvent)
+    })
+
+    it('should listen to informer update events', async function () {
+      jest.spyOn(informer, 'on')
+
+      watches.leases(io, informer, { signal })
+
+      expect(informer.on).toBeCalledTimes(1)
+      expect(informer.on).toBeCalledWith('update', expect.any(Function))
+
+      informer.emit('update', {})
+
+      const syncManagerInstance = SyncManager.mock.instances[0]
+      expect(syncManagerInstance.sync).toBeCalledTimes(2)
+    })
+
+    it('should should load issues and comments of all issues', async function () {
+      const { loadOpenIssuesAndComments } = watches.leases.test
+
+      const issues = fixtures.github.issues.list()
+      const issueNumbers = issues.map(i => i.number)
+      const comments = fixtures.github.comments.list()
+      const t = issues.map(i => tickets.fromIssue(i))
+
+      jest.spyOn(tickets, 'loadOpenIssues')
+      jest.spyOn(tickets, 'loadIssueComments')
+      tickets.loadOpenIssues.mockReturnValue(t)
+      const loadIssueCommentsMock = ({ number }) => comments.filter((comment) => comment.number === number)
+      tickets.loadIssueComments.mockImplementation(loadIssueCommentsMock)
+
+      await loadOpenIssuesAndComments(10)
+
+      expect(tickets.loadOpenIssues).toBeCalledTimes(1)
+      expect(tickets.loadIssueComments).toBeCalledTimes(t.length)
+      for (const number of issueNumbers) {
+        expect(tickets.loadIssueComments).toBeCalledWith({ number })
+      }
     })
   })
 })

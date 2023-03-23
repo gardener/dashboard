@@ -53,9 +53,6 @@ global:
     metricsContainerPort: 9050
     servicePort: 8080
     resources:
-      limits:
-        cpu: "1.0"
-        memory: 1Gi
       requests:
         cpu: 100m
         memory: 350Mi
@@ -306,6 +303,15 @@ global:
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
 
+      # # knownConditions - overwrite or add shoot condition descriptions
+      # knownConditions:
+      #   ExampleConditionReady:
+      #     name: Example
+      #     shortName: E
+      #     description: Example Description
+      #     showAdmin: false
+      #     sortOrder: 99
+
     # # github configuration of the ticket feature
     # gitHub:
     #   apiUrl: https://api.foo-github.com
@@ -315,7 +321,9 @@ global:
     #   authentication:
     #     username: dashboard
     #     token: dummytoken
-    #   # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
+    #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook. Disabled if 0 or not defined.
+    #   syncThrottleSeconds: 20 # Defines the time window in which only one sync is allowed to avoid issues with rate limiting. Default 20. Disabled if 0.
+    #   syncConcurrency: 10 # Defines the maximum number of parallel requests towards GitHub per instance and sync. Default 10.
 
 
     livenessProbe:
@@ -354,9 +362,6 @@ global:
       requests:
         cpu: 100m
         memory: 100Mi
-      limits:
-        cpu: 250m
-        memory: 512Mi
     nodeOptions: [--max-old-space-size=460]
     readinessProbe:
       initialDelaySeconds: 5
