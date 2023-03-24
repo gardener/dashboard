@@ -42,13 +42,13 @@ describe('github webhook', () => {
       jest.useFakeTimers().setSystemTime(now)
     })
 
+    afterAll(() => {
+      jest.useRealTimers()
+    })
+
     beforeEach(() => {
       mergePatchStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'mergePatch')
       mergePatchStub.mockResolvedValue({})
-    })
-
-    afterAll(() => {
-      jest.useRealTimers()
     })
 
     it('should throw an error in case of unknown event', async () => {
