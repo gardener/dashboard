@@ -37,10 +37,12 @@ class SyncManager {
   async #invokeLoad () {
     clearTimeout(this.#idleSyncTimeoutId)
     try {
+      logger.debug('Starting synchronization of GitHub issues and comments')
       await this.#load()
+      logger.info('GitHub issues and comments successfully synchronized')
       this.ready = true
     } catch (err) {
-      logger.error('Failed to load open issues and comments: %s', err.message)
+      logger.error('Failed to load open GitHub issues and comments: %s', err.message)
     } finally {
       const delay = this.ready ? this.#interval : this.#retryPeriod
       if (delay) {
@@ -56,6 +58,9 @@ class SyncManager {
   async #throttledLoad () {
     clearTimeout(this.#scheduledInvocationTimeoutId)
     const wait = Math.max(0, this.#lastInvokeTime + this.#throttle - Date.now())
+    if (wait) {
+      logger.debug(`GitHub synchronization delayed due to throttling for ${wait / 1000}s`)
+    }
     this.#scheduledInvocationTimeoutId = setTimeout(() => {
       this.#lastInvokeTime = Date.now()
       this.#invokeLoad()
