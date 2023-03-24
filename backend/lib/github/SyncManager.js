@@ -58,7 +58,9 @@ class SyncManager {
   async #throttledLoad () {
     clearTimeout(this.#scheduledInvocationTimeoutId)
     const wait = Math.max(0, this.#lastInvokeTime + this.#throttle - Date.now())
-    wait && logger.debug(`GitHub synchronization delayed due to throttling for ${wait / 1000}s`)
+    if (wait) {
+      logger.debug(`GitHub synchronization delayed due to throttling for ${wait / 1000}s`)
+    }
     this.#scheduledInvocationTimeoutId = setTimeout(() => {
       this.#lastInvokeTime = Date.now()
       this.#invokeLoad()
