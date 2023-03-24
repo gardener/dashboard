@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <action-button-dialog
+    :key="componentKey"
     :shoot-item="shootItem"
     :valid="workersValid"
     @dialog-opened="onConfigurationDialogOpened"
@@ -93,6 +94,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
+import { v4 as uuidv4 } from '@/utils/uuid'
 const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
 const ShootEditor = () => import('@/components/ShootEditor')
 
@@ -112,7 +114,8 @@ export default {
       networkConfigurationYaml: undefined,
       tabValue: 'overview',
       editorData: {},
-      overviewTabHeight: 0
+      overviewTabHeight: 0,
+      componentKey: uuidv4()
     }
   },
   mixins: [
@@ -146,6 +149,8 @@ export default {
       if (confirmed) {
         await this.updateConfiguration()
       }
+      this.tabValue = 'overview'
+      this.componentKey = uuidv4() // force re-render
     },
     async updateConfiguration () {
       try {
@@ -175,7 +180,6 @@ export default {
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
       await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
-      this.tabValue = 'overview'
     },
     onWorkersValid (value) {
       this.workersValid = value
