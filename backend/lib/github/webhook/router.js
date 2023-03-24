@@ -25,9 +25,8 @@ router.route('/')
   .post(middlewares, async (req, res, next) => {
     try {
       const eventName = req.headers['x-github-event']
-      const eventData = req.body
 
-      await handleGithubEvent(eventName, eventData)
+      await handleGithubEvent(eventName)
       res.status(204).end()
     } catch (err) {
       next(err)

@@ -8,20 +8,19 @@
 
 const createError = require('http-errors')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { isDateValid } = require('../../utils')
 
-function dateStrToMicroDateStr (dateStr) {
-  const date = new Date(dateStr).toISOString()
+function currentMicroDateStr () {
+  const date = new Date().toISOString()
   return date.replace(/Z$/, '000Z')
 }
 
-async function updateLease (updateTime) {
+async function updateLease () {
   const namespace = process.env.POD_NAMESPACE || 'garden'
   const name = 'gardener-dashboard-github-webhook'
   const body = {
     spec: {
       holderIdentity: process.env.POD_NAME || 'gardener-dashboard',
-      renewTime: dateStrToMicroDateStr(updateTime)
+      renewTime: currentMicroDateStr()
     }
   }
   try {
@@ -31,18 +30,12 @@ async function updateLease (updateTime) {
   }
 }
 
-async function handleGithubEvent (name, data) {
+async function handleGithubEvent (name) {
   if (!['issues', 'issue_comment'].includes(name)) {
     throw createError(422, `GitHub-Event '${name}' is not supported by this webhook endpoint`)
   }
 
-  const obj = name === 'issues' ? data.issue : data.comment
-  const updatedAt = obj?.updated_at
-  if (!isDateValid(updatedAt)) {
-    throw createError(422, `GitHub-Event has invalid date value '${updatedAt}' in updated_at field`)
-  }
-
-  await updateLease(updatedAt)
+  await updateLease()
 }
 
 module.exports = handleGithubEvent

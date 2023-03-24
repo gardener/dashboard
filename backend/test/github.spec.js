@@ -19,8 +19,6 @@ const actualNextTick = jest.requireActual('process').nextTick
 
 const { UnprocessableEntity, InternalServerError } = createError
 
-jest.useFakeTimers().setSystemTime(new Date('2023-01-01 00:00:00Z'))
-
 const flushPromises = () => new Promise(actualNextTick)
 // NOTE: if during an advance action a new timeout with a delay of 0(ms)
 // shall be triggered we need to call this fn again but with 1ms as param.
@@ -29,14 +27,24 @@ const advanceTimersAndFlushPromises = async (ms) => {
   await flushPromises()
 }
 
-describe('github webhook', function () {
+describe('github webhook', () => {
+  const now = new Date('2006-01-02T15:04:05.000Z')
+
   describe('handler', () => {
     const namespace = fixtures.env.POD_NAMESPACE
     const holderIdentity = fixtures.env.POD_NAME
     const leaseName = 'gardener-dashboard-github-webhook'
-    const microDateStr = '2006-01-02T15:04:05.000000Z'
+    const microDateStr = now.toISOString().replace(/Z$/, '000Z')
     const dateStr = new Date(microDateStr).toISOString()
     let mergePatchStub
+
+    beforeAll(() => {
+      jest.useFakeTimers().setSystemTime(now)
+    })
+
+    afterAll(() => {
+      jest.useRealTimers()
+    })
 
     beforeEach(() => {
       mergePatchStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'mergePatch')
@@ -45,13 +53,6 @@ describe('github webhook', function () {
 
     it('should throw an error in case of unknown event', async () => {
       await expect(handleGithubEvent('unknown', null)).rejects.toThrow(UnprocessableEntity)
-    })
-
-    it('should error in case of missing properties in payload', async () => {
-      let data = { issue: {} }
-      await expect(handleGithubEvent('issues', data)).rejects.toThrow(UnprocessableEntity)
-      data = { comment: {} }
-      await expect(handleGithubEvent('issue_comment', data)).rejects.toThrow(UnprocessableEntity)
     })
 
     it('should update the lease object for an issue event', async () => {
@@ -150,11 +151,10 @@ describe('github webhook', function () {
     const loadTicketsDuration = 500
 
     beforeAll(() => {
-      jest.setSystemTime(new Date('2023-01-01 00:00:00Z'))
+      jest.useFakeTimers().setSystemTime(now)
     })
 
     beforeEach(() => {
-      jest.resetAllMocks()
       abortController = new AbortController()
       loadTicketsStub = jest.fn().mockImplementation(() => {
         return new Promise((resolve) => {
