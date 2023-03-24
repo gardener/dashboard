@@ -175,12 +175,14 @@ export default {
   },
   mounted () {
     this.$v.$touch()
-    this.animateOnAppear = true
   },
   watch: {
     '$v.primaryProvider.$invalid' (value) {
       this.setDnsPrimaryProviderValid(!value)
     }
+  },
+  updated () {
+    this.animateOnAppear = true
   }
 }
 </script>

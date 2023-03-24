@@ -260,11 +260,6 @@ export default {
       this.purpose = purpose
       this.parseSchedules(hibernationSchedule)
       this.setNoHibernationSchedule(noHibernationSchedule)
-      this.$nextTick(() => {
-        // need to defer until data has been set and rendered
-        // can be removed when we adapt this component to shoot staging store module
-        this.animateOnAppear = true
-      })
     }
   },
   mounted () {
@@ -274,6 +269,9 @@ export default {
         this.setDefaultHibernationSchedule()
       })
     }
+  },
+  updated () {
+    this.animateOnAppear = true
   }
 }
 </script>

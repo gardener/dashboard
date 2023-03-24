@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     max-height="60vh"
     >
     <template v-slot:actionComponent>
-      <manage-control-plane-high-availability />
+      <manage-control-plane-high-availability :key="componentKey" />
     </template>
   </action-button-dialog>
 </template>
@@ -25,6 +25,7 @@ import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/ManageControlPlaneHighAvailability'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
   components: {
@@ -32,6 +33,11 @@ export default {
     ManageControlPlaneHighAvailability
   },
   mixins: [shootItem],
+  data () {
+    return {
+      componentKey: uuidv4()
+    }
+  },
   computed: {
     ...mapState('shootStaging', [
       'controlPlaneFailureToleranceType'
@@ -66,6 +72,7 @@ export default {
     },
     reset () {
       this.setClusterConfiguration(this.shootItem)
+      this.componentKey = uuidv4() // force re-render
     }
   }
 }
