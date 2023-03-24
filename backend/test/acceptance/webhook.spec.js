@@ -90,9 +90,7 @@ describe('github', function () {
         .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
         .type('application/json')
         .send(body)
-        .expect((res) => {
-          expect(res.status).toEqual(422)
-        })
+        .expect(422)
 
       expect(mockRequest).toBeCalledTimes(0)
     })
