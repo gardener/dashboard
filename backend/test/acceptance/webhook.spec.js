@@ -53,32 +53,39 @@ describe('github', function () {
       jest.resetAllMocks()
     })
 
-    it('should handle valid github webhook', async () => {
-      // do not enable that globally (e.g. in beforeEach) because express error handlers
-      // won't be called when fake timers are enabled.
-      jest.useFakeTimers().setSystemTime(now)
-      const body = JSON.stringify({ action: 'opened', issue: newGithubIssue })
+    describe('handle valid github webhook', () => {
+      beforeAll(() => {
+        // Be careful when adding other tests in this block. E.g. express error handlers
+        // won't be work when fake timers are enabled as the test in that case never complete.
+        jest.useFakeTimers().setSystemTime(now)
+      })
 
-      await agent
-        .post('/webhook')
-        .set('x-github-event', githubEvent)
-        .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
-        .type('application/json')
-        .send(body)
-        .expect(204)
+      afterAll(() => {
+        jest.useRealTimers()
+      })
 
-      jest.useRealTimers()
+      it('should succeed if system time matches new value for lease renewTime', async () => {
+        const body = JSON.stringify({ action: 'opened', issue: newGithubIssue })
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest).toBeCalledWith(
-        expect.anything(),
-        {
-          spec: {
-            holderIdentity: fixtures.env.POD_NAME,
-            renewTime: microDateStr
+        await agent
+          .post('/webhook')
+          .set('x-github-event', githubEvent)
+          .set('x-hub-signature-256', fixtures.github.createHubSignature(body))
+          .type('application/json')
+          .send(body)
+          .expect(204)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toBeCalledWith(
+          expect.anything(),
+          {
+            spec: {
+              holderIdentity: fixtures.env.POD_NAME,
+              renewTime: microDateStr
+            }
           }
-        }
-      )
+        )
+      })
     })
 
     it('should error on invalid github webhook event', async () => {
