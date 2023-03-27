@@ -6,6 +6,8 @@ global:
   dashboard:
     enabled: true
     replicaCount: 1
+    # If connections from a particular client should not be passed to the same Pod each time, set the session affinity to "None".
+    sessionAffinity: ClientIP
 
     image:
       repository: eu.gcr.io/gardener-project/gardener/dashboard

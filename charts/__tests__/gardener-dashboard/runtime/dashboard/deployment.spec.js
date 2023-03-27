@@ -95,6 +95,20 @@ describe('gardener-dashboard', function () {
       expect(container.args).toBeUndefined()
     })
 
+    it('should render the template with three replicas', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            replicaCount: 3
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.replicas).toBe(values.global.dashboard.replicaCount)
+    })
+
     describe('kubeconfig', function () {
       it('should render the template', async function () {
         const values = {
