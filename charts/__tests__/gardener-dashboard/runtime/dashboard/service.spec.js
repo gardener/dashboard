@@ -27,5 +27,19 @@ describe('gardener-dashboard', function () {
       const [service] = documents
       expect(service).toMatchSnapshot()
     })
+
+    it('should render the template with sessionAffinity None', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            sessionAffinity: 'None'
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [service] = documents
+      expect(service.spec.sessionAffinity).toBe(values.global.dashboard.sessionAffinity)
+    })
   })
 })

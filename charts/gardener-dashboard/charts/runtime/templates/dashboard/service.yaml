@@ -20,5 +20,5 @@ spec:
     app.kubernetes.io/name: gardener-dashboard
     app.kubernetes.io/component: dashboard
   type: ClusterIP
-  sessionAffinity: ClientIP
+  sessionAffinity: {{ .Values.global.dashboard.sessionAffinity }}
 {{- end }}
