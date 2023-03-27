@@ -16,6 +16,7 @@ const hooks = require('./hooks')()
 const { authenticate } = require('./security')
 const { createClient } = require('@gardener-dashboard/kube-client')
 const { notFound, sendError, requestLogger } = require('./middleware')
+const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
 // configure router
 const router = express.Router()
 
@@ -24,6 +25,7 @@ router.use(compression({
   level: zlib.constants.Z_DEFAULT_COMPRESSION
 }))
 router.use(requestLogger)
+router.use(monitorResponseTimes())
 router.use(cookieParser())
 router.use(bodyParser.json())
 router.use(authenticate({ createClient }))
