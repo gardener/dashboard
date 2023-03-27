@@ -9,6 +9,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const { requestLogger } = require('../../middleware')
+const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
 const handleGithubEvent = require('./handler')
 const verify = require('./verify')
 
@@ -18,6 +19,7 @@ const router = express.Router()
 // under a different path or before other (auth) middlewares and handlers.
 const middlewares = [
   requestLogger,
+  monitorResponseTimes(),
   bodyParser.json({ verify })
 ]
 
