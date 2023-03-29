@@ -125,8 +125,6 @@ export default {
   },
   mounted () {
     this.resetToleranceType(this.zoneSupported)
-  },
-  updated () {
     this.animateOnAppear = true
   }
 }
