@@ -271,33 +271,21 @@ describe('services', function () {
           const isAdmin = true
           const method = 'foo'
           const target = 'foo'
-          try {
-            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          } catch (err) {
-            expect.fail('No exception expected')
-          }
+          expect(() => ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })).not.toThrow()
         })
 
         it('should allow terminals for project admins', function () {
           const isAdmin = false
           const method = 'create'
           const target = 'shoot'
-          try {
-            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          } catch (err) {
-            expect.fail('No exception expected')
-          }
+          expect(() => ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })).not.toThrow()
         })
 
         it('should allow to list terminals for project admins', function () {
           const isAdmin = false
           const method = 'list'
           const target = 'foo'
-          try {
-            ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
-          } catch (err) {
-            expect.fail('No exception expected')
-          }
+          expect(() => ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })).not.toThrow()
         })
 
         it('should disallow cp terminals for project admins', function () {

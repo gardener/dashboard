@@ -310,11 +310,6 @@ export default {
       this.newShootWorkerCIDR = newShootWorkerCIDR
       this.kubernetesVersion = kubernetesVersion
       this.initialZones = uniq(flatMap(workers, 'zones'))
-      this.$nextTick(() => {
-        // need to defer until data has been set and rendered
-        // can be removed when we adapt this component to shoot staging store module
-        this.animateOnAppear = true
-      })
     }
   },
   mounted () {
@@ -344,6 +339,9 @@ export default {
         this.kubernetesVersion = updatedVersion
       })
     }
+  },
+  updated () {
+    this.animateOnAppear = true
   }
 }
 </script>

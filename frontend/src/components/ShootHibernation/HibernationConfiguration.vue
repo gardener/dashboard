@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Hibernation Schedule">
     <template v-slot:actionComponent>
       <manage-hibernation-schedule
+        :key="componentKey"
         :is-hibernation-possible="isHibernationPossible"
         :hibernation-possible-message="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
@@ -31,6 +32,7 @@ import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 import shootItem from '@/mixins/shootItem'
 import asyncRef from '@/mixins/asyncRef'
@@ -49,7 +51,8 @@ export default {
   ],
   data () {
     return {
-      hibernationScheduleValid: false
+      hibernationScheduleValid: false,
+      componentKey: uuidv4()
     }
   },
   methods: {
@@ -59,6 +62,7 @@ export default {
       if (confirmed) {
         await this.updateConfiguration()
       }
+      this.componentKey = uuidv4() // force re-render
     },
     async updateConfiguration () {
       try {
