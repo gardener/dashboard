@@ -156,7 +156,10 @@ export function getCondition (type) {
   let shortName = ''
   const words = type
     .replace(/(Available|Healthy|Ready|Availability)$/, '')
-    .split(/(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/)
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // split groups of uppercase letters
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2') // split remaining groups of uppercase letters
+    .split(' ')
+
   for (const word of words) {
     if (name) {
       name += ' '
