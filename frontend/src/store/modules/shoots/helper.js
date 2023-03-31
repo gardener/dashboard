@@ -156,8 +156,10 @@ export function getCondition (type) {
   let shortName = ''
   const words = type
     .replace(/(Available|Healthy|Ready|Availability)$/, '')
-    .replace(/([a-z])([A-Z])/g, '$1 $2') // split groups of uppercase letters
-    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2') // split remaining groups of uppercase letters
+    // Cannot use lookbehind regex as not supported by all browsers (e.g. Safari)
+    // therefore need to do it in two steps
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // split before new words
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')// split after uppercase only words
     .split(' ')
 
   for (const word of words) {
