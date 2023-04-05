@@ -110,7 +110,7 @@ function getKubeApiServerHostForShoot (shoot, seed) {
 
 function getKubeApiServerHostForSeed (seed) {
   const ingressDomain = getSeedIngressDomain(seed)
-  return `k-g.${ingressDomain}`
+  return `k-d.${ingressDomain}`
 }
 
 function getGardenTerminalHostClusterRefType () {

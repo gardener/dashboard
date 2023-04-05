@@ -649,7 +649,7 @@ Array [
 exports[`api terminals garden should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "k-d.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -953,7 +953,7 @@ Array [
 exports[`api terminals garden should reuse a terminal session 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "k-d.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-1",
   },
   "imageHelpText": "Foo Image Description",

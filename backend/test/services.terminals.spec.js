@@ -415,7 +415,7 @@ describe('services', function () {
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = `k-g.${ingressDomain}`
+          const expectedKubeApiServer = `k-d.${ingressDomain}`
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
