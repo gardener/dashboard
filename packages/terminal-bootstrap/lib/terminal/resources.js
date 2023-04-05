@@ -98,7 +98,7 @@ async function replaceResource (resource, { namespace, name, body, dryRun }) {
   }
 }
 
-function replaceIngressApiServer (client, { namespace, name, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
+function replaceIngressApiServer (client, { namespace, name, host, tlsHost, serviceName, ownerReferences, annotations, secretName, ingressClassName }) {
   if (!secretName) {
     secretName = `${name}-tls`
   }
@@ -133,6 +133,10 @@ function replaceIngressApiServer (client, { namespace, name, host, tlsHost, serv
         secretName
       }
     ]
+  }
+
+  if (ingressClassName) {
+    spec.ingressClassName = ingressClassName
   }
 
   const body = toIngressResource({ name, annotations, spec, ownerReferences })

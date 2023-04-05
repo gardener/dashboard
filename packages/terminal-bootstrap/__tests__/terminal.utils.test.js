@@ -206,7 +206,7 @@ describe('terminal', () => {
         expect(logger.info).toBeCalledWith(`Bootstrapping Seed ${name} aborted as 'spec.secretRef' on the seed is missing`)
       })
 
-      it('should set the ingress class annotations', async () => {
+      it('should set the ingress class', async () => {
         const terminalConfig = fixtures.helper.createTerminalConfig({
           gardenTerminalHost: {
             seedRef: name
@@ -229,11 +229,10 @@ describe('terminal', () => {
             apiVersion: 'networking.k8s.io/v1',
             kind: 'Ingress',
             metadata: expect.objectContaining({
-              name: `dashboard-terminal-kube-apiserver-${name}`,
-              annotations: {
-                foo: 'bar',
-                'kubernetes.io/ingress.class': 'test'
-              }
+              name: `dashboard-terminal-kube-apiserver-${name}`
+            }),
+            spec: expect.objectContaining({
+              ingressClassName: 'test'
             })
           })
         ])

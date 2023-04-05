@@ -245,10 +245,7 @@ async function ensureTrustedCertForShootApiServer (client, shoot, seed) {
   const serviceName = 'kube-apiserver'
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
-  const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
-  if (ingressClass && annotations) {
-    annotations['kubernetes.io/ingress.class'] = ingressClass
-  }
+  const ingressClassName = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
 
   await replaceIngressApiServer(seedClient, {
     name: TERMINAL_KUBE_APISERVER,
@@ -256,7 +253,8 @@ async function ensureTrustedCertForShootApiServer (client, shoot, seed) {
     serviceName,
     host: apiServerIngressHost,
     tlsHost: seedWildcardIngressDomain,
-    annotations
+    annotations,
+    ingressClassName
   })
 }
 
@@ -306,10 +304,7 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
   const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
-  const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
-  if (ingressClass && annotations) {
-    annotations['kubernetes.io/ingress.class'] = ingressClass
-  }
+  const ingressClassName = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
 
   await replaceIngressApiServer(seedClient, {
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
@@ -317,7 +312,8 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
     serviceName: 'kubernetes',
     host: apiServerIngressHost,
     tlsHost: seedWildcardIngressDomain,
-    annotations
+    annotations,
+    ingressClassName
   })
 }
 

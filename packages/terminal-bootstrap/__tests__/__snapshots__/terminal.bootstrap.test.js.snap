@@ -766,7 +766,6 @@ Object {
         "metadata": Object {
           "annotations": Object {
             "foo": "bar",
-            "kubernetes.io/ingress.class": "bar",
           },
           "labels": Object {
             "component": "dashboard-terminal",
@@ -775,6 +774,7 @@ Object {
           "ownerReferences": Array [],
         },
         "spec": Object {
+          "ingressClassName": "bar",
           "rules": Array [
             Object {
               "host": "k-178qqdk.ingress.foo-east.infra1.example.org",
@@ -846,7 +846,6 @@ Object {
         "metadata": Object {
           "annotations": Object {
             "foo": "bar",
-            "kubernetes.io/ingress.class": "bar",
           },
           "labels": Object {
             "component": "dashboard-terminal",
