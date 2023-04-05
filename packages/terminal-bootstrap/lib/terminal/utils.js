@@ -71,7 +71,7 @@ function getKubeApiServerHostForShoot (shoot, seed) {
 
 function getKubeApiServerHostForSeed (seed) {
   const ingressDomain = getSeedIngressDomain(seed)
-  return `k-g.${ingressDomain}`
+  return `k-d.${ingressDomain}`
 }
 
 function getWildcardIngressDomainForSeed (seed) {
@@ -261,7 +261,7 @@ async function ensureTrustedCertForShootApiServer (client, shoot, seed) {
 }
 
 /*
- Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden terminal host cluster.
+ Make sure a browser-trusted certificate is presented for the kube-apiserver of the garden terminal host cluster.
  This cluster runs the terminal pods of garden operators for the (virtual) garden.
 */
 async function ensureTrustedCertForGardenTerminalHostApiServer (client) {
@@ -293,7 +293,6 @@ async function ensureTrustedCertForGardenTerminalHostApiServer (client) {
 
 async function ensureTrustedCertForSeedApiServer (client, seed) {
   const seedName = seed.metadata.name
-  const namespace = 'garden'
 
   if (!seed.spec.secretRef) {
     logger.info(`Bootstrapping Seed ${seedName} aborted as 'spec.secretRef' on the seed is missing`)
@@ -305,19 +304,20 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
 
   const apiServerIngressHost = getKubeApiServerHostForSeed(seed)
   const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
-  const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
+  const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
   const ingressClass = _.get(seed, 'metadata.annotations["seed.gardener.cloud/ingress-class"]')
-  if (ingressClass && ingressAnnotations) {
-    ingressAnnotations['kubernetes.io/ingress.class'] = ingressClass
+  if (ingressClass && annotations) {
+    annotations['kubernetes.io/ingress.class'] = ingressClass
   }
 
-  await ensureTrustedCertForApiServer(seedClient, {
-    namespace,
+  await replaceIngressApiServer(seedClient, {
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
-    apiServerIngressHost,
+    namespace: 'default',
+    serviceName: 'kubernetes',
+    host: apiServerIngressHost,
     tlsHost: seedWildcardIngressDomain,
-    ingressAnnotations
+    annotations
   })
 }
 
@@ -426,7 +426,6 @@ module.exports = {
   seedShootNamespaceExists,
   handleSeed,
   handleShoot,
-  ensureTrustedCertForApiServer,
   ensureTrustedCertForShootApiServer,
   ensureTrustedCertForSeedApiServer,
   ensureTrustedCertForGardenTerminalHostApiServer,

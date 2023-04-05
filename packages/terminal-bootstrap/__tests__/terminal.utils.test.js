@@ -223,7 +223,7 @@ describe('terminal', () => {
         await expect(ensureTrustedCertForSeedApiServer(client, seed)).resolves.toBeUndefined()
         expect(mockSoilIngressesMergePatch).toBeCalledTimes(1)
         expect(mockSoilIngressesMergePatch.mock.calls[0]).toEqual([
-          'garden',
+          'default',
           `dashboard-terminal-kube-apiserver-${name}`,
           expect.objectContaining({
             apiVersion: 'networking.k8s.io/v1',

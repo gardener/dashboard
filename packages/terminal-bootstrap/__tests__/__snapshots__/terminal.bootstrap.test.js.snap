@@ -1063,7 +1063,7 @@ Object {
   ],
   "mockSoilIngressesMergePatch": Array [
     Array [
-      "garden",
+      "default",
       "dashboard-terminal-kube-apiserver-soil-infra1",
       Object {
         "apiVersion": "networking.k8s.io/v1",
@@ -1081,13 +1081,13 @@ Object {
         "spec": Object {
           "rules": Array [
             Object {
-              "host": "k-g.ingress.foo-east.infra1.example.org",
+              "host": "k-d.ingress.foo-east.infra1.example.org",
               "http": Object {
                 "paths": Array [
                   Object {
                     "backend": Object {
                       "service": Object {
-                        "name": "dashboard-terminal-kube-apiserver-soil-infra1",
+                        "name": "kubernetes",
                         "port": Object {
                           "number": 443,
                         },
