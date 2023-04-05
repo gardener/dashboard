@@ -1061,6 +1061,12 @@ Object {
       "soil-infra1",
     ],
   ],
+  "mockSoilEndpointsDelete": Array [
+    Array [
+      "garden",
+      "dashboard-terminal-kube-apiserver-soil-infra1",
+    ],
+  ],
   "mockSoilIngressesMergePatch": Array [
     Array [
       "garden",
@@ -1108,6 +1114,37 @@ Object {
               "secretName": "dashboard-terminal-kube-apiserver-soil-infra1-tls",
             },
           ],
+        },
+      },
+    ],
+  ],
+  "mockSoilServicesMergePatch": Array [
+    Array [
+      "garden",
+      "dashboard-terminal-kube-apiserver-soil-infra1",
+      Object {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": Object {
+          "annotations": Object {},
+          "labels": Object {
+            "component": "dashboard-terminal",
+          },
+          "name": "dashboard-terminal-kube-apiserver-soil-infra1",
+          "namespace": "garden",
+          "ownerReferences": Array [],
+        },
+        "spec": Object {
+          "clusterIP": undefined,
+          "externalName": "kubernetes.default.svc.cluster.local.",
+          "ports": Array [
+            Object {
+              "port": 443,
+              "protocol": "TCP",
+              "targetPort": 6443,
+            },
+          ],
+          "type": "ExternalName",
         },
       },
     ],
