@@ -190,7 +190,9 @@ describe('terminal', () => {
       const {
         gardenClient: client,
         mocks: {
-          mockSoilIngressesMergePatch
+          mockSoilIngressesMergePatch,
+          mockSoilServicesMergePatch,
+          mockSoilEndpointsDelete
         }
       } = fixtures.clients
       const name = 'soil-infra1'
@@ -222,6 +224,8 @@ describe('terminal', () => {
         mockConfigTerminal.mockReturnValue(terminalConfig)
         await expect(ensureTrustedCertForSeedApiServer(client, seed)).resolves.toBeUndefined()
         expect(mockSoilIngressesMergePatch).toBeCalledTimes(1)
+        expect(mockSoilServicesMergePatch).toBeCalledTimes(1)
+        expect(mockSoilEndpointsDelete).toBeCalledTimes(1)
         expect(mockSoilIngressesMergePatch.mock.calls[0]).toEqual([
           'garden',
           `dashboard-terminal-kube-apiserver-${name}`,
@@ -234,6 +238,23 @@ describe('terminal', () => {
                 foo: 'bar',
                 'kubernetes.io/ingress.class': 'test'
               }
+            })
+          })
+        ])
+        expect(mockSoilServicesMergePatch.mock.calls[0]).toEqual([
+          'garden',
+          `dashboard-terminal-kube-apiserver-${name}`,
+          expect.objectContaining({
+            apiVersion: 'v1',
+            kind: 'Service',
+            metadata: expect.objectContaining({
+              name: 'dashboard-terminal-kube-apiserver-soil-infra1',
+              namespace: 'garden'
+            }),
+            spec: expect.objectContaining({
+              clusterIP: undefined,
+              externalName: 'kubernetes.default.svc.cluster.local.',
+              type: 'ExternalName'
             })
           })
         ])

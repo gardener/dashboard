@@ -22,7 +22,8 @@ const {
   TERMINAL_KUBE_APISERVER,
   replaceIngressApiServer,
   replaceServiceApiServer,
-  replaceEndpointApiServer
+  replaceEndpointApiServer,
+  deleteEndpointApiServer
 } = require('./resources')
 
 const { kDryRun } = require('./symbols')
@@ -345,6 +346,8 @@ async function ensureTrustedCertForApiServer (client, options) {
 
     service = await replaceServiceApiServer(client, { namespace, name, targetPort: port })
   } else {
+    await deleteEndpointApiServer(client, { namespace, name })
+
     const externalName = apiServerHostname
     service = await replaceServiceApiServer(client, { namespace, name, externalName, targetPort: port })
   }

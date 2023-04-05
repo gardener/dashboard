@@ -128,7 +128,8 @@ const hostClient = {
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
     },
     endpoints: {
-      mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
+      mergePatch: jest.fn((...args) => Promise.resolve(args[2])),
+      delete: jest.fn()
     }
   },
   'networking.k8s.io': {
@@ -150,6 +151,9 @@ const soilClient = {
   core: {
     services: {
       mergePatch: jest.fn((...args) => Promise.resolve(args[2]))
+    },
+    endpoints: {
+      delete: jest.fn()
     }
   },
   'networking.k8s.io': {
@@ -190,7 +194,9 @@ const mockShootsListAllNamespaces = gardenClient['core.gardener.cloud'].shoots.l
 const mockManagedSeedsGet = gardenClient['seedmanagement.gardener.cloud'].managedseeds.get
 const mockHostServicesCreate = hostClient.core.services.create
 const mockHostServicesMergePatch = hostClient.core.services.mergePatch
+const mockSoilServicesMergePatch = soilClient.core.services.mergePatch
 const mockHostEndpointsMergePatch = hostClient.core.endpoints.mergePatch
+const mockSoilEndpointsDelete = soilClient.core.endpoints.delete
 const mockHostIngressesCreate = hostClient['networking.k8s.io'].ingresses.create
 const mockHostIngressesMergePatch = hostClient['networking.k8s.io'].ingresses.mergePatch
 const mockSoilIngressesMergePatch = soilClient['networking.k8s.io'].ingresses.mergePatch
@@ -208,7 +214,9 @@ const mocks = {
   mockManagedSeedsGet,
   mockHostServicesCreate,
   mockHostServicesMergePatch,
+  mockSoilServicesMergePatch,
   mockHostEndpointsMergePatch,
+  mockSoilEndpointsDelete,
   mockHostIngressesCreate,
   mockHostIngressesMergePatch,
   mockSoilIngressesMergePatch,

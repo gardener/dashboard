@@ -202,6 +202,21 @@ function replaceServiceApiServer (client, { namespace, name, externalName, owner
   })
 }
 
+async function deleteEndpointApiServer (client, { namespace, name }) {
+  if (client[kDryRun] === true) {
+    logger.info('Deleting resource v1, Kind=Endpoint was skipped in dry run mode')
+    return
+  }
+
+  try {
+    await client.core.endpoints.delete(namespace, name)
+  } catch (err) {
+    if (!isHttpError(err, 404)) {
+      throw err
+    }
+  }
+}
+
 module.exports = {
   TERMINAL_KUBE_APISERVER,
   toResource,
@@ -211,5 +226,6 @@ module.exports = {
   replaceResource,
   replaceIngressApiServer,
   replaceServiceApiServer,
-  replaceEndpointApiServer
+  replaceEndpointApiServer,
+  deleteEndpointApiServer
 }
