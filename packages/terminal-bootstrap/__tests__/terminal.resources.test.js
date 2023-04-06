@@ -6,15 +6,20 @@
 
 'use strict'
 
+const createError = require('http-errors')
 const logger = require('../lib/logger')
+const { kDryRun } = require('../lib/terminal/symbols')
 
 const {
   toResource,
   toIngressResource,
   toServiceResource,
   toEndpointResource,
-  replaceResource
+  replaceResource,
+  deleteEndpointApiServer
 } = require('../lib/terminal/resources')
+
+const { soilClient, mocks } = fixtures.clients
 
 describe('terminal', () => {
   describe('resources', () => {
@@ -91,6 +96,35 @@ describe('terminal', () => {
       }
       await expect(replaceResource(resource, { namespace, name, dryRun: true })).resolves.toEqual({ metadata: { namespace, name } })
       expect(logger.info).toBeCalledWith('Replacing resource v1, Kind=Service was skipped in dry run mode')
+    })
+
+    describe('deleteEndpointApiServer', () => {
+      it('should succeed', async () => {
+        await expect(deleteEndpointApiServer(soilClient, { namespace, name })).resolves.toBeUndefined()
+      })
+
+      it('should succeed when endpoint not found', async () => {
+        const { mockSoilEndpointsDelete } = mocks
+        mockSoilEndpointsDelete.mockRejectedValueOnce(createError(404, 'Endpoint not found'))
+
+        await expect(deleteEndpointApiServer(soilClient, { namespace, name })).resolves.toBeUndefined()
+      })
+
+      it('should fail on error', async () => {
+        const { mockSoilEndpointsDelete } = mocks
+        const error = createError(500, 'Server error')
+        mockSoilEndpointsDelete.mockRejectedValueOnce(error)
+
+        await expect(deleteEndpointApiServer(soilClient, { namespace, name })).rejects.toThrow(error)
+      })
+
+      it('should skip in dryRun mode', async () => {
+        const client = {
+          [kDryRun]: true
+        }
+        await expect(deleteEndpointApiServer(client, { namespace, name })).resolves.toBeUndefined()
+        expect(logger.info).toBeCalledWith('Deleting resource v1, Kind=Endpoint was skipped in dry run mode')
+      })
     })
   })
 })

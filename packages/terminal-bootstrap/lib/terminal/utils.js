@@ -22,7 +22,8 @@ const {
   TERMINAL_KUBE_APISERVER,
   replaceIngressApiServer,
   replaceServiceApiServer,
-  replaceEndpointApiServer
+  replaceEndpointApiServer,
+  deleteEndpointApiServer
 } = require('./resources')
 
 const { kDryRun } = require('./symbols')
@@ -317,12 +318,20 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
     apiServerIngressHost,
     tlsHost: seedWildcardIngressDomain,
-    ingressAnnotations
+    ingressAnnotations,
+    apiServerHostname: 'kubernetes.default.svc.cluster.local.'
   })
 }
 
-async function ensureTrustedCertForApiServer (client, { namespace, name, apiServerIngressHost, tlsHost, ingressAnnotations }) {
-  const apiServerHostname = client.cluster.server.hostname
+async function ensureTrustedCertForApiServer (client, options) {
+  const {
+    namespace,
+    name,
+    apiServerIngressHost,
+    tlsHost,
+    ingressAnnotations,
+    apiServerHostname = client.cluster.server.hostname
+  } = options
 
   let port = parseInt(client.cluster.server.port)
   if (isNaN(port)) {
@@ -337,6 +346,8 @@ async function ensureTrustedCertForApiServer (client, { namespace, name, apiServ
 
     service = await replaceServiceApiServer(client, { namespace, name, targetPort: port })
   } else {
+    await deleteEndpointApiServer(client, { namespace, name })
+
     const externalName = apiServerHostname
     service = await replaceServiceApiServer(client, { namespace, name, externalName, targetPort: port })
   }
