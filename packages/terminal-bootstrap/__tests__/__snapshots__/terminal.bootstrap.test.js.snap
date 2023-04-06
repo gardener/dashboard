@@ -129,7 +129,7 @@ Object {
         },
         "spec": Object {
           "clusterIP": "None",
-          "externalName": undefined,
+          "externalName": "",
           "ports": Array [
             Object {
               "port": 443,
@@ -137,7 +137,7 @@ Object {
               "targetPort": 6443,
             },
           ],
-          "type": undefined,
+          "type": "ClusterIP",
         },
       },
     ],
