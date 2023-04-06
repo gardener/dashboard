@@ -172,8 +172,10 @@ function replaceEndpointApiServer (client, { namespace, name, ip, port, ownerRef
   })
 }
 
-function replaceServiceApiServer (client, { namespace, name, externalName, ownerReferences, clusterIP = 'None', targetPort }) {
-  let type
+function replaceServiceApiServer (client, { namespace, name, externalName = '', ownerReferences, targetPort }) {
+  let type = 'ClusterIP'
+  let clusterIP = 'None'
+
   if (externalName) {
     type = 'ExternalName'
     clusterIP = undefined
@@ -188,7 +190,7 @@ function replaceServiceApiServer (client, { namespace, name, externalName, owner
         targetPort
       }
     ],
-    type, // optional
+    type,
     externalName // optional
   }
 
