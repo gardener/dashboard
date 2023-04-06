@@ -172,8 +172,10 @@ function replaceEndpointApiServer (client, { namespace, name, ip, port, ownerRef
   })
 }
 
-function replaceServiceApiServer (client, { namespace, name, externalName, ownerReferences, clusterIP = 'None', targetPort }) {
-  let type
+function replaceServiceApiServer (client, { namespace, name, externalName = '', ownerReferences, targetPort }) {
+  let type = 'ClusterIP'
+  let clusterIP = 'None'
+
   if (externalName) {
     type = 'ExternalName'
     clusterIP = undefined
@@ -188,7 +190,7 @@ function replaceServiceApiServer (client, { namespace, name, externalName, owner
         targetPort
       }
     ],
-    type, // optional
+    type,
     externalName // optional
   }
 
@@ -202,6 +204,21 @@ function replaceServiceApiServer (client, { namespace, name, externalName, owner
   })
 }
 
+async function deleteEndpointApiServer (client, { namespace, name }) {
+  if (client[kDryRun] === true) {
+    logger.info('Deleting resource v1, Kind=Endpoint was skipped in dry run mode')
+    return
+  }
+
+  try {
+    await client.core.endpoints.delete(namespace, name)
+  } catch (err) {
+    if (!isHttpError(err, 404)) {
+      throw err
+    }
+  }
+}
+
 module.exports = {
   TERMINAL_KUBE_APISERVER,
   toResource,
@@ -211,5 +228,6 @@ module.exports = {
   replaceResource,
   replaceIngressApiServer,
   replaceServiceApiServer,
-  replaceEndpointApiServer
+  replaceEndpointApiServer,
+  deleteEndpointApiServer
 }
