@@ -535,5 +535,24 @@ describe('gardener-dashboard', function () {
         expect(pick(config, ['frontend.resourceQuotaHelp'])).toMatchSnapshot()
       })
     })
+    
+    describe('controlPlaneHighAvailabilityHelp', function () {
+      it('should render the template with controlPlaneHighAvailabilityHelp markdown', async function () {
+        const values = {
+          global: {
+            frontendConfig: {
+              controlPlaneHighAvailabilityHelp: {
+                text: '[foo](https://bar.baz)'
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
+      })
+    })
   })
 })

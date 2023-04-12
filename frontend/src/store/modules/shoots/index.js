@@ -5,7 +5,6 @@
 //
 
 import Vue from 'vue'
-import assign from 'lodash/assign'
 import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
 import omit from 'lodash/omit'
@@ -20,15 +19,16 @@ import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import find from 'lodash/find'
+import difference from 'lodash/difference'
 import getters from './getters'
-import { keyForShoot, findItem, constants } from './helper'
+import { keyForShoot, findItem, constants, putItem, deleteItem } from './helper'
 import {
   getShoots,
   getShoot,
   getIssues,
   getIssuesAndComments,
   getShootInfo,
-  getShootSeedInfo,
   createShoot,
   deleteShoot
 } from '@/utils/api'
@@ -46,7 +46,6 @@ import {
   isTruthyValue
 } from '@/utils'
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
-import find from 'lodash/find'
 
 const logger = Vue.logger
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -54,14 +53,19 @@ const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 // initial state
 const state = {
   shoots: {},
-  filteredShoots: [],
+  staleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
+  sortedUidsAtFreeze: [],
+  filteredShoots: [], // TODO fill
   selection: undefined,
   shootListFilters: undefined,
   newShootResource: undefined,
   initialNewShootResource: undefined,
+  focusMode: false,
   subscription: null,
   subscriptionState: constants.CLOSED,
-  subscriptionError: null
+  subscriptionError: null,
+  sortBy: undefined,
+  sortDesc: undefined
 }
 
 function clearAll ({ commit }) {
@@ -95,8 +99,8 @@ const actions = {
         getShoot(options),
         getIssuesAndComments(options)
       ])
-      // fetch shootInfo and shootSeedInfo in the background (do not await the promise)
-      assignInfoAndSeedInfo(shoot)
+      // fetch shootInfo in the background (do not await the promise)
+      assignInfo(shoot)
       logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
       return { shoots: [shoot], issues, comments }
     }
@@ -114,16 +118,11 @@ const actions = {
       return { shoots: items, issues, comments: [] }
     }
 
-    const assignInfoAndSeedInfo = async ({ metadata, spec }) => {
-      const promises = [dispatch('getInfo', metadata)]
-      const seedName = spec.seedName
-      if (rootGetters.isAdmin && !rootGetters.isSeedUnreachableByName(seedName)) {
-        promises.push(dispatch('getSeedInfo', metadata))
-      }
+    const assignInfo = async ({ metadata, spec }) => {
       try {
-        await Promise.all(promises)
+        await dispatch('getInfo', metadata)
       } catch (err) {
-        logger.error('Failed to fetch shoot or shootSeed info:', err.message)
+        logger.error('Failed to fetch shoot info:', err.message)
       }
     }
 
@@ -177,8 +176,7 @@ const actions = {
 
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
-        info.grafanaUrlUsers = `https://gu-${baseHost}`
-        info.grafanaUrlOperators = `https://go-${baseHost}`
+        info.grafanaUrl = `https://gu-${baseHost}`
 
         info.prometheusUrl = `https://p-${baseHost}`
 
@@ -188,19 +186,6 @@ const actions = {
       return info
     } catch (error) {
       // shoot info not found -> ignore if KubernetesError
-      if (isNotFound(error)) {
-        return
-      }
-      throw error
-    }
-  },
-  async getSeedInfo ({ commit, rootState }, { name, namespace }) {
-    try {
-      const { data: info } = await getShootSeedInfo({ namespace, name })
-      commit('RECEIVE_SEED_INFO', { name, namespace, info })
-      return info
-    } catch (error) {
-      // shoot seed info not found -> ignore if KubernetesError
       if (isNotFound(error)) {
         return
       }
@@ -364,6 +349,14 @@ const actions = {
 
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
     return state.newShootResource
+  },
+  setFocusMode ({ commit, getters }, value) {
+    let sortedUids
+    if (value) {
+      const sortedShoots = getters.sortItems(state.filteredShoots, state.sortBy, state.sortDesc)
+      sortedUids = map(sortedShoots, 'metadata.uid')
+    }
+    commit('SET_FOCUS_MODE', { value, sortedUids })
   }
 }
 
@@ -393,7 +386,11 @@ function getFilteredItems (state, rootState, rootGetters) {
         }
         const conditions = get(item, 'status.conditions', [])
         const allConditionCodes = errorCodesFromArray(conditions)
-        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes))
+
+        const constraints = get(item, 'status.constraints', [])
+        const allConstraintCodes = errorCodesFromArray(constraints)
+
+        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
       }
       items = filter(items, predicate)
     }
@@ -430,35 +427,37 @@ function getFilteredItems (state, rootState, rootGetters) {
   return items
 }
 
-const putItem = (state, newItem) => {
-  const item = findItem(state)(newItem.metadata)
-  if (item !== undefined) {
-    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
-    }
-  } else {
-    newItem.info = undefined // register property to ensure reactivity
-    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
-  }
-}
-
-const deleteItem = (state, deletedItem) => {
-  const item = findItem(state)(deletedItem.metadata)
-  if (item !== undefined) {
-    Vue.delete(state.shoots, keyForShoot(item.metadata))
-  }
-}
-
 // mutations
 const mutations = {
   RECEIVE (state, { rootState, rootGetters, shoots: items }) {
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, rootState)
+
     const shoots = {}
     for (const object of items) {
       if (notOnlyShootsWithIssues || shootHasIssue(object)) {
         shoots[keyForShoot(object.metadata)] = object
       }
     }
+
+    if (state.focusMode) {
+      const oldKeys = Object.keys(state.shoots)
+      const newKeys = Object.keys(shoots)
+      const removedShootKeys = difference(oldKeys, newKeys)
+      const addedShootKeys = difference(newKeys, oldKeys)
+
+      removedShootKeys.forEach(removedShootKey => {
+        const removedShoot = state.shoots[removedShootKey]
+        if (state.sortedUidsAtFreeze.includes(removedShoot.metadata.uid)) {
+          Vue.set(state.staleShoots, removedShoot.metadata.uid, { ...removedShoot, stale: true })
+        }
+      })
+
+      addedShootKeys.forEach(addedShootKey => {
+        const addedShoot = shoots[addedShootKey]
+        Vue.delete(state.staleShoots, addedShoot.metadata.uid)
+      })
+    }
+
     state.shoots = shoots
     state.filteredShoots = getFilteredItems(state, rootState, rootGetters)
   },
@@ -466,12 +465,6 @@ const mutations = {
     const item = findItem(state)({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
-    }
-  },
-  RECEIVE_SEED_INFO (state, { namespace, name, info }) {
-    const item = findItem(state)({ namespace, name })
-    if (item !== undefined) {
-      Vue.set(item, 'seedInfo', info)
     }
   },
   SET_SELECTION (state, metadata) {
@@ -505,7 +498,10 @@ const mutations = {
   },
   CLEAR_ALL (state) {
     state.shoots = {}
-    state.filteredShoots = []
+    state.staleShoots = {}
+  },
+  CLEAR_FREEZED_STALE_SHOOTS (state) {
+    state.staleShoots = {}
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, rootGetters, value }) {
     state.shootListFilters = value
@@ -522,6 +518,10 @@ const mutations = {
   RESET_NEW_SHOOT_RESOURCE (state, shootResource) {
     state.newShootResource = shootResource
     state.initialNewShootResource = cloneDeep(shootResource)
+  },
+  SET_FOCUS_MODE (state, { value, sortedUids }) {
+    state.focusMode = value
+    state.sortedUidsAtFreeze = sortedUids
   },
   SET_SUBSCRIPTION (state, value) {
     state.subscription = value
@@ -555,6 +555,12 @@ const mutations = {
     } else {
       state.subscriptionError = null
     }
+  },
+  SET_SORT_BY (state, value) {
+    state.sortBy = value
+  },
+  SET_SORT_DESC (state, value) {
+    state.sortDesc = value
   }
 }
 

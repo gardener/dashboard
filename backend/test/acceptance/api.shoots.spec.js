@@ -8,8 +8,8 @@
 
 const { mockRequest } = require('@gardener-dashboard/request')
 const kubeconfig = require('@gardener-dashboard/kube-config')
-const originalKubeconfig = jest.requireActual('@gardener-dashboard/kube-config')
 const logger = require('../../lib/logger')
+const yaml = require('js-yaml')
 
 describe('api', function () {
   let agent
@@ -25,6 +25,7 @@ describe('api', function () {
   afterEach(() => {
     mockRequest.mockReset()
     kubeconfig.cleanKubeconfig.mockClear()
+    logger.info.mockClear()
   })
 
   describe('shoots', function () {
@@ -32,9 +33,6 @@ describe('api', function () {
     const namespace = 'garden-foo'
     const user = fixtures.auth.createUser({
       id: 'foo@example.org'
-    })
-    const admin = fixtures.auth.createUser({
-      id: 'admin@example.org'
     })
 
     it('should return three shoots', async function () {
@@ -113,8 +111,9 @@ describe('api', function () {
     it('should return shoot info', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
 
       const res = await agent
@@ -123,79 +122,47 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(5)
+      expect(mockRequest).toBeCalledTimes(6)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
 
-      expect(res.body).toMatchSnapshot()
+      expect(logger.info).toBeCalledTimes(0)
+
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String),
+        kubeconfigGardenlogin: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
+      expect(yaml.load(res.body.kubeconfigGardenlogin)).toMatchSnapshot('body.kubeconfigGardenlogin')
     })
 
-    it('should return shoot seed info when no fallback is needed', async function () {
-      jest.spyOn(originalKubeconfig, 'cleanKubeconfig')
+    it('should return shoot info without gardenlogin kubeconfig', async function () {
+      const name = 'dummyShoot' // has no advertised addresses
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
-        .set('cookie', await admin.cookie)
+        .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
+        .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)
 
       expect(mockRequest).toBeCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(originalKubeconfig.cleanKubeconfig).toBeCalledTimes(1)
-      originalKubeconfig.cleanKubeconfig.mockRestore()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should return shoot seed info when need to fallback to old monitoring secret', async function () {
-      jest.spyOn(originalKubeconfig, 'cleanKubeconfig')
-
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list({ forceEmpty: true }))
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-
-      const res = await agent
-        .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
-        .set('cookie', await admin.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(5)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(originalKubeconfig.cleanKubeconfig).toBeCalledTimes(1)
-      originalKubeconfig.cleanKubeconfig.mockRestore()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should not return shoot seed info when seed.spec.secretRef missing', async function () {
-      const name = 'dummyShoot'
-
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-      const res = await agent
-        .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
-        .set('cookie', await admin.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
+      expect(kubeconfig.cleanKubeconfig).toBeCalledTimes(1)
 
       expect(logger.info).toBeCalledTimes(1)
+      expect(logger.info).lastCalledWith('failed to get gardenlogin kubeconfig', 'Shoot has no advertised addresses')
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
     })
 
     it('should replace shoot', async function () {
@@ -434,6 +401,26 @@ describe('api', function () {
               type: 'foo-provider'
             }
           ]
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should replace control plane high availablility', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/highAvailability`)
+        .set('cookie', await user.cookie)
+        .send({
+          failureTolerance: {
+            type: 'node'
+          }
         })
         .expect('content-type', /json/)
         .expect(200)

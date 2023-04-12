@@ -162,7 +162,7 @@ const validationErrors = {
   worker: {
     name: {
       required: 'Name is required',
-      maxLength: 'Name ist too long',
+      maxLength: 'Name is too long',
       resourceName: 'Name must only be lowercase letters, numbers and hyphens',
       uniqueWorkerName: 'Name is taken. Try another.',
       noStartEndHyphen: 'Name must not start or end with a hyphen'

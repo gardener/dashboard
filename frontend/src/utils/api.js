@@ -127,12 +127,6 @@ export function getShootInfo ({ namespace, name }) {
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`)
 }
 
-export function getShootSeedInfo ({ namespace, name }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return getResource(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
-}
-
 export function updateShootVersion ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -173,6 +167,12 @@ export function updateShootAddons ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
+}
+
+export function updateShootControlPlaneHighAvailability ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/highAvailability`, data)
 }
 
 export function updateShootDns ({ namespace, name, data }) {
@@ -392,7 +392,6 @@ export default {
   replaceShoot,
   addShootAnnotation,
   getShootInfo,
-  getShootSeedInfo,
   updateShootVersion,
   updateShootEnableStaticTokenKubeconfig,
   updateShootMaintenance,
@@ -428,5 +427,6 @@ export default {
   heartbeat,
   terminalConfig,
   listProjectTerminalShortcuts,
-  getGardenerExtensions
+  getGardenerExtensions,
+  updateShootControlPlaneHighAvailability
 }

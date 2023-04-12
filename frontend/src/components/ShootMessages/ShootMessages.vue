@@ -7,15 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popper
     v-if="visible"
-    :title="`Issues for Cluster ${shootName}`"
-    :toolbar-color="overallStatus"
+    :title="statusTitle"
+    :toolbar-color="overallColor"
     :popper-key="`shoot_warning_${shootName}_${shootNamespace}`"
   >
     <template v-slot:popperRef>
       <v-btn icon :x-small="small">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-icon v-on="on" :color="overallStatus" :small="small">{{icon}}</v-icon>
+            <v-icon v-on="on" :color="overallColor" :small="small">{{icon}}</v-icon>
           </template>
           <span>{{tooltip}}</span>
         </v-tooltip>
@@ -23,10 +23,10 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-list>
       <v-list-item
-        v-for="({key, icon, color, component }) in shootMessages"
+        v-for="({key, icon, severity, component }) in shootMessages"
         :key="key">
         <v-list-item-icon>
-          <v-icon :color="color">{{icon}}</v-icon>
+          <v-icon :color="colorForSeverity(severity)">{{icon}}</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
           <component :is="component.name" v-bind="component.props" class="message" />
@@ -44,7 +44,7 @@ import WorkerGroupExpirationMessage from '@/components/ShootMessages/WorkerGroup
 import NoHibernationScheduleMessage from '@/components/ShootMessages/NoHibernationScheduleMessage'
 import ClusterExpirationMessage from '@/components/ShootMessages/ClusterExpirationMessage'
 import ConstraintMessage from '@/components/ShootMessages/ConstraintMessage'
-import some from 'lodash/some'
+import MaintenanceStatusMessage from '@/components/ShootMessages/MaintenanceStatusMessage'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -63,7 +63,8 @@ export default {
     WorkerGroupExpirationMessage,
     NoHibernationScheduleMessage,
     ClusterExpirationMessage,
-    ConstraintMessage
+    ConstraintMessage,
+    MaintenanceStatusMessage
   },
   props: {
     small: {
@@ -73,6 +74,14 @@ export default {
     filter: {
       type: [String, Array],
       required: false
+    },
+    title: {
+      type: String,
+      required: false
+    },
+    showVerbose: {
+      type: Boolean,
+      default: false
     }
   },
   mixins: [shootItem],
@@ -94,7 +103,8 @@ export default {
         ...this.clusterExpirationMessage,
         ...this.hibernationConstraintMessage,
         ...this.maintenanceConstraintMessage,
-        ...this.caCertificateValiditiesConstraintMessage
+        ...this.caCertificateValiditiesConstraintMessage,
+        ...this.lastMaintenanceMessage
       ]
     },
     k8sMessage () {
@@ -110,7 +120,7 @@ export default {
       return [{
         key: 'k8sWarning',
         icon: 'mdi-update',
-        color: this.colorForSeverity(severity),
+        severity,
         component: {
           name: 'k8s-expiration-message',
           props: {
@@ -131,7 +141,7 @@ export default {
         return {
           key: `image_${workerName}_${name}`,
           icon: 'mdi-update',
-          color: this.colorForSeverity(severity),
+          severity,
           component: {
             name: 'worker-group-expiration-message',
             props: {
@@ -156,7 +166,7 @@ export default {
       return [{
         key: 'noHibernationSchedule',
         icon: 'mdi-calendar-alert',
-        color: 'info',
+        severity: 'info',
         component: {
           name: 'no-hibernation-schedule-message',
           props: {
@@ -179,7 +189,7 @@ export default {
       return [{
         key: 'clusterExpiration',
         icon: isClusterExpirationWarningState ? 'mdi-clock-alert-outline' : 'mdi-clock-outline',
-        color: isClusterExpirationWarningState ? 'warning' : 'info',
+        severity: isClusterExpirationWarningState ? 'warning' : 'info',
         component: {
           name: 'cluster-expiration-message',
           props: {
@@ -198,7 +208,7 @@ export default {
       return [{
         key: 'hibernationConstraintWarning',
         icon: 'mdi-alert-circle-outline',
-        color: 'warning',
+        severity: 'warning',
         component: {
           name: 'constraint-message',
           props: {
@@ -218,7 +228,7 @@ export default {
       return [{
         key: 'maintenanceConstraintWarning',
         icon: 'mdi-alert-circle-outline',
-        color: 'error',
+        severity: 'error',
         component: {
           name: 'constraint-message',
           props: {
@@ -238,12 +248,37 @@ export default {
       return [{
         key: 'caCertificateValiditiesConstraintWarning',
         icon: 'mdi-clock-alert-outline',
-        color: 'warning',
+        severity: 'warning',
         component: {
           name: 'constraint-message',
           props: {
             constraintCaption: 'Certificate Authorities will expire in less than one year',
             constraintMessage: this.caCertificateValiditiesAcceptableMessage
+          }
+        }
+      }]
+    },
+    lastMaintenanceMessage () {
+      if (!this.filterMatches('last-maintenance')) {
+        return []
+      }
+      if (!this.lastMaintenance.state) {
+        return []
+      }
+      if (!this.isLastMaintenanceFailed && !this.showVerbose) {
+        return []
+      }
+      return [{
+        key: 'lastMaintenanceFailedWarning',
+        icon: this.isLastMaintenanceFailed ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline',
+        severity: this.isLastMaintenanceFailed ? 'warning' : 'verbose',
+        component: {
+          name: 'maintenance-status-message',
+          props: {
+            triggeredTime: this.lastMaintenance.triggeredTime,
+            description: this.lastMaintenance.description,
+            state: this.lastMaintenance.state,
+            failureReason: this.lastMaintenance.failureReason
           }
         }
       }]
@@ -254,28 +289,36 @@ export default {
         return icons[0]
       }
 
-      if (this.overallStatus === 'info') {
+      if (this.overallSeverity === 'info' || this.overallSeverity === 'verbose') {
         return 'mdi-information-outline'
       }
       return 'mdi-alert-circle-outline'
     },
-    overallStatus () {
-      if (some(this.shootMessages, { color: 'error' })) {
-        return 'error'
-      }
-      if (some(this.shootMessages, { color: 'warning' })) {
-        return 'warning'
+    overallSeverity () {
+      for (const { severity } of this.shootMessages) {
+        if (['error', 'warning', 'verbose'].includes(severity)) {
+          return severity
+        }
       }
       return 'info'
     },
+    overallColor () {
+      return this.colorForSeverity(this.overallSeverity)
+    },
     tooltip () {
-      if (this.overallStatus === 'error') {
+      if (this.title) {
+        return this.title
+      }
+      if (this.overallSeverity === 'error') {
         return 'Cluster has issues with classification error'
       }
-      if (this.overallStatus === 'warning') {
+      if (this.overallSeverity === 'warning') {
         return 'Cluster has issues with classification warning'
       }
       return 'Cluster has notifications'
+    },
+    statusTitle () {
+      return this.title ? this.title : `Issues for Cluster ${this.shootName}`
     }
   },
   methods: {
@@ -294,6 +337,7 @@ export default {
         case 'warning':
         case 'info':
           return severity
+        case 'verbose':
         default:
           return 'primary'
       }

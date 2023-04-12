@@ -93,6 +93,16 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
+Object {
+  "frontend": Object {
+    "controlPlaneHighAvailabilityHelp": Object {
+      "text": "[foo](https://bar.baz)",
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`public.client_secret\` 1`] = `
 Object {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",

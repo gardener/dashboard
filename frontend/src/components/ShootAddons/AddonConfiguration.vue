@@ -16,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:actionComponent>
       <manage-shoot-addons
         ref="addons"
-        :is-create-mode="false"
        ></manage-shoot-addons>
     </template>
   </action-button-dialog>

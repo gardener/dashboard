@@ -16,6 +16,42 @@ SPDX-License-Identifier: Apache-2.0
           <div class="text-subtitle-1 toolbar-title--text">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-badge
+                class="mr-5"
+                bordered
+                color="primary lighten-3"
+                :content="numberOfNewItemsSinceFreeze"
+                :value="numberOfNewItemsSinceFreeze > 0"
+                overlap
+              >
+                <v-switch
+                  v-model="focusModeInternal"
+                  v-if="!projectScope && isAdmin"
+                  class="mr-3"
+                  color="primary lighten-3"
+                  hide-details>
+                  <template v-slot:label>
+                    <span class="text-subtitle-1 toolbar-title--text">Focus</span>
+                  </template>
+                </v-switch>
+              </v-badge>
+            </div>
+          </template>
+          <span class="font-weight-bold">Focus Mode</span>
+          <ul>
+            <li>Cluster list sorting is freezed</li>
+            <li>Items in the list will still be updated</li>
+            <li>New clusters will not be added to the list until you disable focus mode</li>
+            <li>Removed items will be shown as stale (greyed out)</li>
+          </ul>
+          <template v-if="numberOfNewItemsSinceFreeze > 0">
+            <v-divider color="white"></v-divider>
+            <span class="font-weight-bold">{{numberOfNewItemsSinceFreeze}}</span> new clusters were added to the list since you enabled focus mode.
+          </template>
+        </v-tooltip>
         <v-tooltip top v-if="shootSearch || items.length > 3">
           <template v-slot:activator="{ on }">
             <v-text-field
@@ -47,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
         <table-column-selection
           :headers="selectableHeaders"
           :filters="selectableFilters"
+          :filterTooltip="filterTooltip"
           @set-selected-header="setSelectedHeader"
           @reset="resetTableSettings"
           @toggle-filter="toggleFilter"
@@ -56,6 +93,8 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         :options.sync="options"
+        :sort-by.sync="sortByInternal"
+        :sort-desc.sync="sortDescInternal"
         :loading="loading || !connected"
         :footer-props="{ 'items-per-page-options': [5,10,20] }"
         :search="shootSearch"
@@ -76,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-data-table>
 
-      <v-dialog v-model="clusterAccessDialog" max-width="600">
+      <v-dialog v-model="clusterAccessDialog" max-width="850">
         <v-card>
           <v-card-title class="toolbar-background toolbar-title--text">
             <div class="text-h5">Cluster Access <code class="toolbar-background lighten-1 toolbar-title--text">{{currentName}}</code></div>
@@ -93,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions, mapMutations, mapState } from 'vuex'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -165,6 +204,13 @@ export default {
     ...mapActions([
       'subscribeShoots'
     ]),
+    ...mapActions('shoots', [
+      'setFocusMode'
+    ]),
+    ...mapMutations('shoots', {
+      setSortBy: 'SET_SORT_BY',
+      setSortDesc: 'SET_SORT_DESC'
+    }),
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -265,11 +311,20 @@ export default {
     ]),
     ...mapGetters('shoots', [
       'sortItems',
-      'searchItems'
+      'searchItems',
+      'numberOfNewItemsSinceFreeze'
     ]),
     ...mapState([
       'cfg',
-      'namespace'
+      'namespace',
+      'shoots/focusMode',
+      'shoots/sortBy',
+      'shoots/sortDesc'
+    ]),
+    ...mapState('shoots', [
+      'focusMode',
+      'sortBy',
+      'sortDesc'
     ]),
     defaultTableOptions () {
       return {
@@ -286,6 +341,30 @@ export default {
         if (!value) {
           this.hideDialog()
         }
+      }
+    },
+    focusModeInternal: {
+      get () {
+        return this.focusMode
+      },
+      set (value) {
+        this.setFocusMode(value)
+      }
+    },
+    sortByInternal: {
+      get () {
+        return this.sortBy
+      },
+      set (value) {
+        this.setSortBy(value)
+      }
+    },
+    sortDescInternal: {
+      get () {
+        return this.sortDesc
+      },
+      set (value) {
+        this.setSortDesc(value)
       }
     },
     currentName () {
@@ -308,24 +387,30 @@ export default {
       return mapTableHeader(this.customHeaders, 'defaultSelected')
     },
     standardHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
       const headers = [
         {
           text: 'PROJECT',
           value: 'project',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: !!this.projectScope
+          hidden: !!this.projectScope,
+          stalePointerEvents: true
         },
         {
           text: 'NAME',
           value: 'name',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
+          stalePointerEvents: true
         },
         {
           text: 'INFRASTRUCTURE',
           value: 'infrastructure',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: false
@@ -333,6 +418,7 @@ export default {
         {
           text: 'SEED',
           value: 'seed',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -340,6 +426,7 @@ export default {
         {
           text: 'TECHNICAL ID',
           value: 'technicalId',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.isAdmin
@@ -347,6 +434,7 @@ export default {
         {
           text: 'CREATED BY',
           value: 'createdBy',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -354,6 +442,7 @@ export default {
         {
           text: 'CREATED AT',
           value: 'createdAt',
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false
@@ -361,6 +450,7 @@ export default {
         {
           text: 'PURPOSE',
           value: 'purpose',
+          sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -368,14 +458,17 @@ export default {
         {
           text: 'STATUS',
           value: 'lastOperation',
+          sortable: isSortable(true),
           align: 'center',
           cellClass: 'pl-4',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
+          stalePointerEvents: true
         },
         {
           text: 'VERSION',
           value: 'k8sVersion',
+          sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false
@@ -383,9 +476,26 @@ export default {
         {
           text: 'READINESS',
           value: 'readiness',
-          sortable: true,
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
+          hidden: false,
+          stalePointerEvents: true
+        },
+        {
+          text: 'ISSUE SINCE',
+          value: 'issueSince',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: this.projectScope || !this.isAdmin
+        },
+        {
+          text: 'HIGH AVAILABILITY',
+          value: 'controlPlaneHighAvailability',
+          sortable: true,
+          align: 'start',
+          defaultSelected: false,
           hidden: false
         },
         {
@@ -399,7 +509,7 @@ export default {
         {
           text: 'TICKET',
           value: 'ticket',
-          sortable: true,
+          sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.isAdmin
@@ -429,6 +539,7 @@ export default {
       }))
     },
     customHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
       const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
 
       return map(customHeaders, ({
@@ -447,7 +558,7 @@ export default {
           text: upperCase(name),
           class: 'nowrap',
           value: key,
-          sortable,
+          sortable: isSortable(sortable),
           align,
           selected: get(this.selectedColumns, key, defaultSelected),
           defaultSelected,
@@ -475,42 +586,43 @@ export default {
           text: 'Show only clusters with issues',
           value: 'onlyShootsWithIssues',
           selected: this.onlyShootsWithIssues,
-          hidden: this.projectScope
+          hidden: this.projectScope,
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide progressing clusters',
           value: 'progressing',
           selected: this.isFilterActive('progressing'),
-          hidden: this.projectScope || !this.isAdmin,
-          disabled: this.filtersDisabled
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide no operator action required issues',
           value: 'noOperatorAction',
           selected: this.isFilterActive('noOperatorAction'),
-          hidden: this.projectScope || !this.isAdmin,
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
             '- Clusters with temporary issues that will be retried automatically',
             '- Clusters with annotation dashboard.gardener.cloud/ignore-issues'
           ],
-          disabled: this.filtersDisabled
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide clusters with deactivated reconciliation',
           value: 'deactivatedReconciliation',
           selected: this.isFilterActive('deactivatedReconciliation'),
-          hidden: this.projectScope || !this.isAdmin,
-          disabled: this.filtersDisabled
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled
         },
         {
           text: 'Hide clusters with configured ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
-          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length,
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
           helpTooltip: this.hideTicketsWithLabelTooltip,
-          disabled: this.filtersDisabled
+          disabled: this.changeFiltersDisabled
         }
       ]
     },
@@ -535,10 +647,17 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    filtersDisabled () {
+    changeFiltersDisabled () {
+      return this.focusModeInternal
+    },
+    showAllShoots () {
       return !this.showOnlyShootsWithIssues
     },
-
+    filterTooltip () {
+      return this.freezeSorting
+        ? 'Filters cannot be changed when focus mode is active'
+        : ''
+    },
     headlineSubtitle () {
       const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
@@ -574,11 +693,13 @@ export default {
   beforeRouteUpdate (to, from, next) {
     this.shootSearch = null
     this.updateTableSettings()
+    this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.mappedItems.slice(0)
     this.shootSearch = null
+    this.focusModeInternal = false
     next()
   }
 }

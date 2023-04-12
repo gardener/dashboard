@@ -34,10 +34,33 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon color="primary">mdi-wrench-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-title>Maintenance</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
-            {{maintenanceDescription}}
+          <v-list-item-title class="d-flex align-center">
+            Maintenance
+            <shoot-messages
+            :shoot-item="shootItem"
+            filter="last-maintenance"
+            show-verbose
+            title="Last Maintenance Status"
+            small
+            class="ml-1" />
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div class="d-flex align-center pt-1" v-on="on">
+                  <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
+                  <span v-if="isInMaintenanceWindow">
+                    Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. The maintenance time window ends <time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></time-string></span>
+                  </span>
+                  <span v-else-if="nextMaintenanceBeginTimestamp">
+                    Maintenance time window starts
+                    <time-string :date-time="nextMaintenanceBeginTimestamp" no-tooltip></time-string>
+                  </span>
+                </div>
+              </template>
+              <div>{{maintenanceTooltipBegin}}</div>
+              <div>{{maintenanceTooltipEnd}}</div>
+            </v-tooltip>
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
@@ -92,8 +115,10 @@ import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
 import ReconcileStart from '@/components/ReconcileStart'
 import ShootMessages from '@/components/ShootMessages/ShootMessages'
+import TimeString from '@/components/TimeString'
 
 import TimeWithOffset from '@/utils/TimeWithOffset'
+import moment from '@/utils/moment'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -105,7 +130,8 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    ShootMessages
+    ShootMessages,
+    TimeString
   },
   mixins: [shootItem],
   computed: {
@@ -130,7 +156,7 @@ export default {
         return 'No hibernation schedule configured'
       }
     },
-    maintenanceDescription () {
+    maintenanceTooltipBegin () {
       const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
       const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
       if (!maintenanceStartTime.isValid()) {
@@ -138,6 +164,36 @@ export default {
       }
 
       return `Start time: ${maintenanceStartTime.toString()}`
+    },
+    maintenanceTooltipEnd () {
+      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.end')
+      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+      if (!maintenanceStartTime.isValid()) {
+        return
+      }
+
+      return `End time: ${maintenanceStartTime.toString()}`
+    },
+    nextMaintenanceBeginTimestamp () {
+      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
+      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+      if (!maintenanceStartTime.isValid()) {
+        return
+      }
+
+      return maintenanceStartTime.nextDate().toISOString()
+    },
+    nextMaintenanceEndTimestamp () {
+      const maintenanceEnd = get(this.shootMaintenance, 'timeWindow.end')
+      const maintenanceEndTime = new TimeWithOffset(maintenanceEnd)
+      if (!maintenanceEndTime.isValid()) {
+        return
+      }
+
+      return maintenanceEndTime.nextDate().toISOString()
+    },
+    isInMaintenanceWindow () {
+      return moment(this.nextMaintenanceBeginTimestamp).isAfter(this.nextMaintenanceEndTimestamp)
     },
     reconcileDescription () {
       if (this.isShootReconciliationDeactivated) {
