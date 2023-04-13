@@ -1,7 +1,10 @@
 {
+  "productName": "PSKE",
+  "productSlogan": "Managed Kubernetes at Scale",
+  "documentationURL": "https://docs.pske.get-cloud.io",
+  "supportURL": "https://www.plusserver.com/ueber-uns/plusserver-kontakt",
   "landingPageUrl": "https://plusserver.com/pske",
   "landingPageName": "Plusserver Kubernetes Engine",
-  "customLandingPagePre": "Based on ",
-  "customSubheader": "Managed Kubernetes",
+  "customLandingPagePre": "Powered by",
   "loginTypes": ["token"]
 }

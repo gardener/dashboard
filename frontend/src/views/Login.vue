@@ -14,8 +14,9 @@ SPDX-License-Identifier: Apache-2.0
             <v-card class="elevation-1">
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
-                  <img src="/static/assets/logo.svg" alt="Login to PSKE" width="180" height="180">
-                  <span class="flex my-4 primary--text text-h5 font-weight-light">{{ customSubheader }}</span>
+                  <img src="/static/assets/logo.svg" alt="Product Login Logo" width="180" height="180">
+                  <span class="flex my-4 primary--text text-h4 font-weight-light">{{ productName }}</span>
+                  <span class="flex my-4 primary--text text-h5 font-weight-light">{{ productSlogan }}</span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -60,7 +61,13 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-text>
               <v-card-actions v-show="!loading" class="bt-2 pb-4">
                 <div class="d-flex justify-center flex-grow-1">
+                  <a :href="documentationURL" target="_blank" rel="noopener">Docs</a>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
                   <v-btn @click="handleLogin" color="primary">Login</v-btn>
+                </div>
+                <div class="d-flex justify-center flex-grow-1">
+                  <a :href="supportURL" target="_blank" rel="noopener">Support</a>
                 </div>
               </v-card-actions>
             </v-card>
@@ -107,12 +114,15 @@ export default {
       token: '',
       loginType: undefined,
       cfg: {
+        productName: undefined,
+        productSlogan: undefined,
+        documentationURL: undefined,
+        supportURL: undefined,
         loginTypes: undefined,
         landingPageUrl: undefined,
         landingPageName: undefined,
         customLandingPagePre: undefined,
-        customLandingPagePost: undefined,
-        customSubheader: undefined
+        customLandingPagePost: undefined
       },
       loading: false
     }
@@ -127,14 +137,23 @@ export default {
     primaryLoginType () {
       return getPrimaryLoginType(this.cfg)
     },
+    productName () {
+      return this.cfg.productName || 'PSKE'
+    },
+    productSlogan () {
+      return this.cfg.productSlogan || 'Managed Kubernetes at Scale'
+    },
+    documentationURL () {
+      return this.cfg.documentationURL || 'https://docs.pske.get-cloud.io'
+    },
+    supportURL () {
+      return this.cfg.supportURL || 'https://www.plusserver.com/ueber-uns/plusserver-kontakt'
+    },
     landingPageUrl () {
       return this.cfg.landingPageUrl || 'https://plusserver.com/pske'
     },
     landingPageName () {
       return this.cfg.landingPageName || 'PSKE'
-    },
-    customSubheader () {
-      return this.cfg.customSubheader || 'Managed Kubernetes'
     },
     customLandingPagePre () {
       return this.cfg.customLandingPagePre || 'Powered by'
@@ -156,6 +175,9 @@ export default {
       try {
         const { data } = await api.getLoginConfiguration()
         cfg = data
+        Object.keys(cfg).forEach(key => {
+          sessionStorage.setItem('wl.' + key, cfg[key])
+        })
       } catch (err) {
         logger.error('Failed to fetch login configuration: %s', err.message)
         cfg = {

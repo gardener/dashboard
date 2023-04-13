@@ -15,9 +15,9 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:caption>About</template>
     <template v-slot:message>
       <div class="d-flex flex-row align-center mt-3">
-        <img src="/static/assets/logo.svg" alt="gardener logo" class="logo mr-3">
+        <img src="/static/assets/logo.svg" alt="product logo" class="logo mr-3">
         <div>
-          <h2 class="mb-1">PSKE Dashboard</h2>
+          <h2 class="mb-1">{{ productName }} Dashboard</h2>
         </div>
       </div>
       <v-divider class="my-3"></v-divider>
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="font-weight-bold">Version Information</div>
         <div v-if="!!dashboardVersion">Dashboard<span class="ml-1 font-weight-bold">{{dashboardVersion}}</span></div>
         <template v-if="isAdmin">
-          <div v-if="!!gardenerVersion">API<span class="ml-1 font-weight-bold">{{gardenerVersion}}</span></div>
+          <div v-if="!!gardenerVersion">Gardener API<span class="ml-1 font-weight-bold">{{gardenerVersion}}</span></div>
           <v-divider v-if="extensionsList.length" class="my-3"></v-divider>
           <div v-if="extensionsList.length" class="font-weight-bold">Extensions ({{extensionsList.length}} deployed)</div>
           <div
@@ -69,6 +69,9 @@ export default {
       'isAdmin',
       'gardenerExtensionsList'
     ]),
+    productName () {
+      return sessionStorage.getItem('wl.productName') || 'PSKE'
+    },
     extensionsList () {
       return sortBy(this.gardenerExtensionsList, 'name')
     }
