@@ -11,7 +11,7 @@ COPY . .
 
 # validate zero-installs project and disable network
 RUN yarn config set enableNetwork false
-RUN yarn install --immutable --immutable-cache
+RUN yarn install --immutable
 
 # check that the constraints are met
 RUN yarn constraints
