@@ -365,12 +365,12 @@ function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
 }
 
 function decorateClassificationObject (obj) {
-  const classification = obj.classification
+  const classification = obj.classification ?? 'supported'
   const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
   return {
     ...obj,
     isPreview: classification === 'preview',
-    isSupported: !isExpired && (!classification || classification === 'supported'),
+    isSupported: classification === 'supported' && !isExpired,
     isDeprecated: classification === 'deprecated',
     isExpired,
     expirationDateString: getDateFormatted(obj.expirationDate)
@@ -801,7 +801,7 @@ const getters = {
       return find(dnsProviderList, ['type', poviderType])
     }))
   },
-  regionsWithSeedByCloudProfileName (state, getters) {
+  seedsByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (!cloudProfile) {
@@ -811,7 +811,16 @@ const getters = {
       if (!seedNames) {
         return []
       }
-      const seeds = getters.seedsByNames(seedNames)
+      return getters.seedsByNames(seedNames)
+    }
+  },
+  regionsWithSeedByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
+      const seeds = getters.seedsByCloudProfileName(cloudProfileName)
       const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
       const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
       return uniqueSeedRegionsWithZones
@@ -1358,6 +1367,9 @@ const getters = {
   resourceQuotaHelpText (state) {
     return get(state, 'cfg.resourceQuotaHelp.text')
   },
+  controlPlaneHighAvailabilityHelpText (state) {
+    return get(state, 'cfg.controlPlaneHighAvailabilityHelp.text')
+  },
   colorScheme (state, getters) {
     const colorScheme = getters['storage/colorScheme']
     return ['dark', 'light'].includes(colorScheme)
@@ -1408,12 +1420,6 @@ const actions = {
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  getShootSeedInfo ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/getSeedInfo', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })

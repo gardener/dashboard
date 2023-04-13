@@ -5,13 +5,15 @@
 //
 
 import map from 'lodash/map'
+import pick from 'lodash/pick'
 
 import { getters } from '@/store'
 import {
   canI,
   selectedImageIsNotLatest,
   isHtmlColorCode,
-  defaultCriNameByKubernetesVersion
+  defaultCriNameByKubernetesVersion,
+  getIssueSince
 } from '@/utils'
 
 describe('utils', () => {
@@ -366,34 +368,52 @@ describe('utils', () => {
         vendorName: 'Foo',
         icon: 'icon',
         version: '1.1.1',
-        expirationDate: '2119-04-05T01:02:03Z' // not expired
+        expirationDate: '2119-04-05T01:02:03Z', // not expired
+        isSupported: true
       },
       {
         name: 'FooImage2',
         vendorName: 'Foo',
         icon: 'icon',
-        version: '1.2.2'
+        version: '1.2.2',
+        isSupported: true
       },
       {
         name: 'FooImage3',
         vendorName: 'Foo',
         icon: 'icon',
-        version: '1.3.2'
+        version: '1.3.2',
+        isSupported: true
       },
       {
         name: 'FooImage4',
         vendorName: 'Foo',
         icon: 'icon',
         version: '1.3.3',
-        isPreview: true,
-        expirationDate: '2119-04-05T01:02:03Z' // not expired
+        expirationDate: '2119-04-05T01:02:03Z', // not expired
+        isPreview: true
       },
       {
         name: 'BarImage',
         vendorName: 'Bar',
         icon: 'icon',
         version: '3.3.2',
+        isSupported: true,
         expirationDate: '2019-04-05T01:02:03Z' // expired
+      },
+      {
+        name: 'FooImage5',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.3.4',
+        isDeprecated: true
+      },
+      {
+        name: 'FooImage6',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.4.4',
+        isPreview: true
       }
     ]
 
@@ -420,19 +440,19 @@ describe('utils', () => {
     })
 
     describe('#selectedImageIsNotLatest', () => {
-      it('selected image should be latest (multiple exist, preview exists)', () => {
+      it('selected image should not be be latest (one newer supported exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
+        expect(result).toBe(true)
+      })
+
+      it('selected image should be latest (only newer deprecated, preview and other vendor exists)', () => {
         const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
         expect(result).toBe(false)
       })
 
-      it('selected image should be latest (one exists)', () => {
-        const result = selectedImageIsNotLatest(sampleMachineImages[3], sampleMachineImages)
+      it('selected image should be latest (only one exists)', () => {
+        const result = selectedImageIsNotLatest(sampleMachineImages[4], sampleMachineImages)
         expect(result).toBe(false)
-      })
-
-      it('selected image should not be latest', () => {
-        const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
-        expect(result).toBe(true)
       })
     })
 
@@ -511,6 +531,7 @@ describe('utils', () => {
       })
     })
   })
+
   describe('html color code', () => {
     it('should not fail when zero', () => {
       expect(isHtmlColorCode(undefined)).toBe(false)
@@ -524,6 +545,81 @@ describe('utils', () => {
 
     it('should return false on non-html color code', () => {
       expect(isHtmlColorCode('foo')).toBe(false)
+    })
+  })
+
+  describe('getIssueSince', () => {
+    let status
+
+    beforeEach(() => {
+      status = {
+        lastOperation: {
+          state: 'False',
+          lastUpdateTime: '2000-01-01T00:00:01Z'
+        },
+        conditions: [
+          {
+            status: 'True',
+            lastTransitionTime: '2000-01-01T00:00:02Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:03Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:04Z'
+          }
+        ],
+        constraints: [
+          {
+            status: 'True',
+            lastTransitionTime: '2000-01-01T00:00:05Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:06Z'
+          },
+          {
+            status: 'False',
+            lastTransitionTime: '2000-01-01T00:00:07Z'
+          }
+        ],
+        lastErrors: [
+          {
+            lastUpdateTime: '2000-01-01T00:00:08Z'
+          }
+        ]
+      }
+    })
+
+    it('should not fail when zero', () => {
+      expect(getIssueSince()).toBeUndefined()
+    })
+
+    it('should return undefined for lastOperation == true', () => {
+      status.lastOperation.state = 'True'
+      expect(getIssueSince(pick(status, 'lastOperation'))).toBeUndefined()
+    })
+
+    it('should return issue since for lastOperation', () => {
+      expect(getIssueSince(pick(status, 'lastOperation'))).toBe('2000-01-01T00:00:01Z')
+    })
+
+    it('should return issue since for condition', () => {
+      expect(getIssueSince(pick(status, 'conditions'))).toBe('2000-01-01T00:00:03Z')
+    })
+
+    it('should return issue since for constraint', () => {
+      expect(getIssueSince(pick(status, 'constraints'))).toBe('2000-01-01T00:00:06Z')
+    })
+
+    it('should return issue since for lastError', () => {
+      expect(getIssueSince(pick(status, 'lastErrors'))).toBe('2000-01-01T00:00:08Z')
+    })
+
+    it('should return issue since for allIssues', () => {
+      expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
     })
   })
 })

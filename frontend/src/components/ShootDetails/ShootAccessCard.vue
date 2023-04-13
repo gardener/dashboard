@@ -94,48 +94,9 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <v-list-item v-if="isKubeconfigTileVisible">
-      <v-list-item-icon>
-        <v-icon color="primary">mdi-file</v-icon>
-      </v-list-item-icon>
-      <v-list-item-content>
-        <v-list-item-title>Kubeconfig</v-list-item-title>
-        <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Static token kubeconfig is disabled for this cluster</v-list-item-subtitle>
-        <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Static token kubeconfig currently not available</v-list-item-subtitle>
-      </v-list-item-content>
-      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
-              <v-icon>mdi-download</v-icon>
-            </v-btn>
-          </template>
-          <span>Download Kubeconfig</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
-        <copy-btn :clipboard-text="kubeconfig"></copy-btn>
-      </v-list-item-action>
-      <v-list-item-action class="mx-0" v-if="isKubeconfigAvailable">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig" color="action-button">
-              <v-icon>{{visibilityIconKubeconfig}}</v-icon>
-            </v-btn>
-          </template>
-          <span>{{kubeconfigVisibilityTitle}}</span>
-        </v-tooltip>
-      </v-list-item-action>
-      <!--Patch: Don't allow customer to disable static kubeconfig-->
-      <v-list-item-action class="mx-0" style="display: none;">
-        <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
-      </v-list-item-action>
-    </v-list-item>
-    <v-expand-transition>
-      <v-card v-if="expansionPanelKubeconfig" flat>
-        <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
-      </v-card>
-    </v-expand-transition>
+    <v-list v-if="isKubeconfigTileVisible">
+      <shoot-kubeconfig :shoot-item="shootItem" :showIcon="false" type="token"></shoot-kubeconfig>
+    </v-list>
 
     <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
 
@@ -146,28 +107,25 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
-import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
 import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
+import ShootKubeconfig from '@/components/ShootDetails/ShootKubeconfig'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
-import StaticTokenKubeconfigConfiguration from '@/components/StaticTokenKubeconfigConfiguration'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
-import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
     UsernamePassword,
-    CodeBlock,
     CopyBtn,
     TerminalListTile,
     LinkListTile,
+    ShootKubeconfig,
     GardenctlCommands,
-    TerminalShortcutsTile,
-    StaticTokenKubeconfigConfiguration
+    TerminalShortcutsTile
   },
   props: {
     hideTerminalShortcuts: {
@@ -177,7 +135,6 @@ export default {
   },
   data () {
     return {
-      expansionPanelKubeconfig: false,
       showToken: false
     }
   },
@@ -226,18 +183,11 @@ export default {
     hasDashboardTokenAuth () {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
-
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')
     },
-    visibilityIconKubeconfig () {
-      return this.expansionPanelKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
-    },
-    kubeconfigVisibilityTitle () {
-      return this.expansionPanelKubeconfig ? 'Hide Kubeconfig' : 'Show Kubeconfig'
-    },
-    getQualifiedName () {
-      return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
+    kubeconfigGardenlogin () {
+      return this.shootInfo?.kubeconfigGardenlogin
     },
     shootTerminalButtonDisabled () {
       return !this.isAdmin && this.isShootStatusHibernated
@@ -260,11 +210,8 @@ export default {
     isCredentialsTileVisible () {
       return !!this.username && !!this.password
     },
-    isKubeconfigAvailable () {
-      return !!this.kubeconfig
-    },
     isKubeconfigTileVisible () {
-      return this.isKubeconfigAvailable || this.canPatchShoots
+      return !!this.kubeconfigGardenlogin || this.canPatchShoots
     },
     isGardenctlTileVisible () {
       return this.canCreateShootsAdminkubeconfig
@@ -289,22 +236,8 @@ export default {
     }
   },
   methods: {
-    reset () {
-      this.expansionPanelKubeconfig = false
-    },
-    onDownload () {
-      const kubeconfig = this.kubeconfig
-      if (kubeconfig) {
-        download(kubeconfig, this.getQualifiedName, 'text/yaml')
-      }
-    },
     onAddTerminalShortcut (shortcut) {
       this.$emit('add-terminal-shortcut', shortcut)
-    }
-  },
-  watch: {
-    kubeconfig (value) {
-      this.reset()
     }
   }
 }

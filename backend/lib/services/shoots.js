@@ -7,7 +7,7 @@
 'use strict'
 
 const { isHttpError } = require('@gardener-dashboard/request')
-const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
+const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const utils = require('../utils')
 const cache = require('../cache')
@@ -170,6 +170,20 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
+exports.replaceControlPlaneHighAvailability = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const highAvailability = body
+  const payload = {
+    spec: {
+      controlPlane: {
+        highAvailability
+      }
+    }
+  }
+
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
 exports.replaceDns = async function ({ user, namespace, name, body }) {
   const client = user.client
   const dns = body
@@ -270,9 +284,16 @@ exports.info = async function ({ user, namespace, name }) {
   const data = {
     canLinkToSeed: false
   }
+
+  try {
+    data.kubeconfigGardenlogin = await getKubeconfigGardenlogin(client, shoot)
+  } catch (err) {
+    logger.info('failed to get gardenlogin kubeconfig', err.message)
+  }
+
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
+    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
     if (prefix) {
       const ingressDomain = getSeedIngressDomain(seed)
       if (ingressDomain) {
@@ -312,50 +333,110 @@ exports.info = async function ({ user, namespace, name }) {
     data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin) {
-    /*
-      We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
-      as we agreed that also project viewers should be able to see the monitoring credentials.
-      Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
-      Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
-      This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
-    */
-    await assignMonitoringSecret(dashboardClient, data, namespace, name)
-  }
+  /*
+    We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
+    as we agreed that also project viewers should be able to see the monitoring credentials.
+    Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
+    Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
+    This is only a temporary workaround until a Grafana SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
+  */
+  await assignMonitoringSecret(dashboardClient, data, namespace, name)
 
   return data
 }
 
-exports.seedInfo = async function ({ user, namespace, name }) {
-  const client = user.client
-
-  const shoot = await read({ user, namespace, name })
-
-  const data = {}
-  let seed
-  if (shoot.spec.seedName) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
-  }
-  const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin || !seed) {
-    return data
+async function getKubeconfigGardenlogin (client, shoot) {
+  if (!shoot.status?.advertisedAddresses?.length) {
+    throw new Error('Shoot has no advertised addresses')
   }
 
-  if (!seed.spec.secretRef) {
-    logger.info(`Could not fetch info from seed. 'spec.secretRef' on the seed ${seed.metadata.name} is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
-    return data
+  const { namespace, name } = shoot.metadata
+
+  const [
+    ca,
+    clusterIdentity
+  ] = await Promise.all([
+    client.core.secrets.get(namespace, `${name}.ca-cluster`),
+    dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
+  ])
+
+  const gardenClusterIdentity = clusterIdentity.data['cluster-identity']
+
+  const caData = ca.data?.['ca.crt']
+
+  const extensions = [{
+    name: 'client.authentication.k8s.io/exec',
+    extension: {
+      shootRef: { namespace, name },
+      gardenClusterIdentity
+    }
+  }]
+  const userName = `${namespace}--${name}`
+
+  const installHint = `Follow the instructions on
+- https://github.com/gardener/gardenlogin#installation to install and
+- https://github.com/gardener/gardenlogin#configure-gardenlogin to configure the gardenlogin credential plugin.
+
+The following is a sample configuration for gardenlogin as well as gardenctl. Place the file under ~/.garden/gardenctl-v2.yaml.
+
+---
+gardens:
+  - identity: ${gardenClusterIdentity}
+    kubeconfig: "<path-to-garden-cluster-kubeconfig>"
+...
+
+Alternatively, you can run the following gardenctl command:
+
+$ gardenctl config set-garden ${gardenClusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"
+
+Note that the kubeconfig refers to the path of the garden cluster kubeconfig which you can download from the Account page.`
+
+  const cfg = {
+    clusters: [],
+    contexts: [],
+    users: [{
+      name: userName,
+      user: {
+        exec: {
+          apiVersion: 'client.authentication.k8s.io/v1beta1',
+          command: 'kubectl-gardenlogin',
+          args: [
+            'get-client-certificate'
+          ],
+          provideClusterInfo: true,
+          interactiveMode: 'IfAvailable',
+          installHint
+        }
+      }
+    }]
   }
 
-  try {
-    const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
-    const seedShootNamespace = shoot.status.technicalID
-    await assignMonitoringSecret(seedClient, data, seedShootNamespace)
-  } catch (err) {
-    logger.error('Failed to retrieve information using seed core client', err)
+  for (const [i, address] of shoot.status.advertisedAddresses.entries()) {
+    const name = `${userName}-${address.name}`
+    if (i === 0) {
+      cfg['current-context'] = name
+    }
+
+    cfg.clusters.push({
+      name,
+      cluster: {
+        server: address.url,
+        'certificate-authority-data': caData,
+        extensions
+      }
+    })
+
+    cfg.contexts.push({
+      name,
+      context: {
+        cluster: name,
+        user: userName,
+        namespace: 'default'
+      }
+    })
   }
 
-  return data
+  return new Config(cfg).toYAML()
 }
 
 async function getSecret (client, { namespace, name }) {
@@ -370,37 +451,9 @@ async function getSecret (client, { namespace, name }) {
   }
 }
 
-async function getMonitoringSecret (client, namespace, shootName) {
-  let name
-  if (!shootName) {
-    try {
-      // read operator secret from seed
-      const labelSelector = 'name=observability-ingress,managed-by=secrets-manager,manager-identity=gardenlet'
-      const secretList = await client.core.secrets.list(namespace, { labelSelector })
-      const secret = _
-        .chain(secretList.items)
-        .orderBy(['metadata.creationTimestamp'], ['desc'])
-        .head()
-        .value()
-      if (secret) {
-        return secret
-      }
-      // fallback to old secret name
-      name = 'monitoring-ingress-credentials'
-    } catch (err) {
-      logger.error('failed to fetch %s secret: %s', name, err)
-      throw err
-    }
-  } else {
-    // read user secret from garden cluster
-    name = `${shootName}.monitoring`
-  }
-  return getSecret(client, { namespace, name })
-}
-
 async function assignMonitoringSecret (client, data, namespace, shootName) {
-  const secret = await getMonitoringSecret(client, namespace, shootName)
-
+  const name = `${shootName}.monitoring`
+  const secret = await getSecret(client, { namespace, name })
   if (secret) {
     _
       .chain(secret)

@@ -33,21 +33,14 @@ yarn
 ### 3. Configuration
 Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 
-A local configuration example for [minikube](https://github.com/kubernetes/minikube) and [dex](https://github.com/coreos/dex) could look like follows:
+A local configuration example could look like follows:
 
 ```yaml
 port: 3030
 logLevel: debug
 logFormat: text
-apiServerUrl: https://minkube    # garden cluster kube-apiserver url
-sessionSecret: c2VjcmV0          # symetric key used for encryption
-oidc:
-  issuer: https://minikube:32001
-  client_id: dashboard
-  client_secret: c2VjcmV0       # oauth client secret
-  redirect_uri: http://localhost:8080/auth/callback
-  scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
-  clockTolerance: 15
+apiServerUrl: https://my-local-cluster # garden cluster kube-apiserver url - kubectl config view --minify -ojsonpath='{.clusters[].cluster.server}'
+sessionSecret: c2VjcmV0                # symmetric key used for encryption
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
@@ -61,7 +54,9 @@ frontend:
 ```
 
 ### 5. Run it locally
-The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden Cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
+The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
+
+If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
 
 Concurrently run the `backend` server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) with hot reload enabled.
 

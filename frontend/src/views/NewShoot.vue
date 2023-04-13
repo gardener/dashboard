@@ -45,6 +45,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card flat class="mt-4">
         <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
+          Control Plane High Availability
+        </v-card-title>
+        <v-card-text>
+          <manage-control-plane-high-availability :user-inter-action-bus="userInterActionBus"/>
+       </v-card-text>
+      </v-card>
+      <v-card flat class="mt-4">
+        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
           DNS Configuration
         </v-card-title>
         <v-card-text>
@@ -83,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
-            :is-create-mode="true"
+            create-mode
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
@@ -146,6 +154,7 @@ import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComp
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import ManageShootDns from '@/components/ShootDns/ManageDns'
+import ManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/ManageControlPlaneHighAvailability'
 
 import asyncRef from '@/mixins/asyncRef'
 
@@ -172,7 +181,8 @@ export default {
     ManageHibernationSchedule,
     ManageWorkers,
     GMessage,
-    ConfirmDialog
+    ConfirmDialog,
+    ManageControlPlaneHighAvailability
   },
   mixins: [
     asyncRef('manageWorkers'),
@@ -196,6 +206,9 @@ export default {
     ...mapState([
       'namespace',
       'cfg'
+    ]),
+    ...mapState('shootStaging', [
+      'controlPlaneFailureToleranceType'
     ]),
     ...mapGetters('shootStaging', [
       'getDnsConfiguration',
@@ -364,6 +377,12 @@ export default {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
         unset(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]')
+      }
+
+      if (this.controlPlaneFailureToleranceType) {
+        set(shootResource, 'spec.controlPlane.highAvailability.failureTolerance.type', this.controlPlaneFailureToleranceType)
+      } else {
+        unset(shootResource, 'spec.controlPlane')
       }
 
       return shootResource

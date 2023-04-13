@@ -58,27 +58,34 @@ SPDX-License-Identifier: Apache-2.0
     </v-list>
     <v-list subheader dense v-if="filters && filters.length">
       <v-subheader>Filter Table</v-subheader>
-      <v-list-item
-        v-for="filter in filters"
-        :key="filter.value"
-        :disabled="filter.disabled"
-        :class="{ 'disabled_filter' : filter.disabled}"
-        @click.stop="onToggleFilter(filter)">
-        <v-list-item-action>
-          <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
-        </v-list-item-action>
-        <v-list-item-content class="primary--text">
-          <v-list-item-title>
-            {{filter.text}}
-            <v-tooltip top v-if="filter.helpTooltip">
-              <template v-slot:activator="{ on }">
-                <v-icon v-on="on" small>mdi-help-circle-outline</v-icon>
-              </template>
-              <div :key="line" v-for="line in filter.helpTooltip">{{line}}</div>
-            </v-tooltip>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+      <v-tooltip top :disabled="!filterTooltip">
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-list-item
+              v-for="filter in filters"
+              :key="filter.value"
+              :disabled="filter.disabled"
+              :class="{ 'disabled_filter' : filter.disabled}"
+              @click.stop="onToggleFilter(filter)">
+              <v-list-item-action>
+                <v-icon :color="checkboxColor(filter.selected)" v-text="checkboxIcon(filter.selected)"/>
+              </v-list-item-action>
+              <v-list-item-content class="primary--text">
+                <v-list-item-title>
+                  {{filter.text}}
+                  <v-tooltip top v-if="filter.helpTooltip">
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on" small>mdi-help-circle-outline</v-icon>
+                    </template>
+                    <div :key="line" v-for="line in filter.helpTooltip">{{line}}</div>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </div>
+        </template>
+        <span>{{filterTooltip}}</span>
+      </v-tooltip>
     </v-list>
   </v-menu>
 </template>
@@ -93,6 +100,9 @@ export default {
     },
     filters: {
       type: Array
+    },
+    filterTooltip: {
+      type: String
     }
   },
   data () {
