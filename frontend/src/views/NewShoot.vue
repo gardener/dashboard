@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
           Control Plane High Availability
         </v-card-title>
         <v-card-text>
-          <manage-control-plane-high-availability />
+          <manage-control-plane-high-availability :user-inter-action-bus="userInterActionBus"/>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">

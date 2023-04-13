@@ -95,7 +95,6 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <v-list v-if="isKubeconfigTileVisible">
-      <shoot-kubeconfig :shoot-item="shootItem" :showIcon="true" type="gardenlogin"></shoot-kubeconfig>
       <shoot-kubeconfig :shoot-item="shootItem" :showIcon="false" type="token"></shoot-kubeconfig>
     </v-list>
 

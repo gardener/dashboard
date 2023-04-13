@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-title>Kubeconfig - Static Token</v-list-item-title>
         <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Static token kubeconfig is disabled for this cluster</v-list-item-subtitle>
         <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Static token kubeconfig currently not available</v-list-item-subtitle>
-        <v-list-item-subtitle class="wrap-text" v-else>Contains static token credential. Not recommended, consider disabling the static token kubeconfig</v-list-item-subtitle>
+        <v-list-item-subtitle class="wrap-text" v-else>Contains static token credential for accessing the cluster API</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action v-if="isGardenloginType" class="mx-0">
         <gardenlogin-info></gardenlogin-info>
@@ -47,9 +47,6 @@ SPDX-License-Identifier: Apache-2.0
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="!isGardenloginType" class="mx-0">
-        <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
-      </v-list-item-action>
     </v-list-item>
     <v-list-item v-if="kubeconfigExpansionPanel" key="expansion-gardenlogin-kubeconfig">
       <v-list-item-icon></v-list-item-icon>
@@ -64,7 +61,6 @@ SPDX-License-Identifier: Apache-2.0
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import GardenloginInfo from '@/components/GardenloginInfo.vue'
-import StaticTokenKubeconfigConfiguration from '@/components/StaticTokenKubeconfigConfiguration'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -72,8 +68,7 @@ export default {
   components: {
     CopyBtn,
     CodeBlock,
-    GardenloginInfo,
-    StaticTokenKubeconfigConfiguration
+    GardenloginInfo
   },
   mixins: [shootItem],
   props: {

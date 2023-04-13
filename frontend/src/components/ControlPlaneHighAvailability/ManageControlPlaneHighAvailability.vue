@@ -23,28 +23,6 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <div v-else>
-      Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
-      <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
-        <template v-if="clusterIsNew">
-          <template v-if="seedName">
-            The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
-          </template>
-          <template v-else>
-            The selected cloud profile has no <code>multi-zonal</code> seed.
-          </template>
-        </template>
-        <template v-else>
-          The current seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
-        </template>
-        Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
-      </v-alert>
-      <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" dense outlined>
-        It is not possible to disable or change control plane high availability later.
-      </v-alert>
-    </div>
-    <div v-if="!!controlPlaneHighAvailabilityHelpHtml" class="wrap-text" v-html="controlPlaneHighAvailabilityHelpHtml"></div>
-    <external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</external-link>
   </div>
 </template>
 
@@ -53,12 +31,8 @@ SPDX-License-Identifier: Apache-2.0
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { transformHtml } from '@/utils'
 import some from 'lodash/some'
-import ExternalLink from '@/components/ExternalLink.vue'
 
 export default {
-  components: {
-    ExternalLink
-  },
   computed: {
     ...mapGetters([
       'seedsByCloudProfileName',
@@ -98,7 +72,8 @@ export default {
   },
   methods: {
     ...mapActions('shootStaging', [
-      'setControlPlaneFailureToleranceType'
+      'setControlPlaneFailureToleranceType',
+      'shouldHaveHighAvailableControlPlane'
     ]),
     resetToleranceType (zoneSupported) {
       if (this.controlPlaneFailureToleranceTypeChangeAllowed) {
@@ -111,6 +86,12 @@ export default {
       }
     }
   },
+  props: {
+    userInterActionBus: {
+      type: Object,
+      required: true
+    }
+  },
   watch: {
     zoneSupported (value) {
       this.resetToleranceType(value)
@@ -118,6 +99,16 @@ export default {
   },
   mounted () {
     this.resetToleranceType(this.zoneSupported)
+
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updatePurpose', purpose => {
+        if (purpose === 'production') {
+          this.setControlPlaneFailureToleranceType('node')
+        } else {
+          this.setControlPlaneFailureToleranceType()
+        }
+      })
+    }
   }
 }
 </script>
