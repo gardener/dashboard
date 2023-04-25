@@ -15,14 +15,14 @@ metadata:
 data:
   login-config.json: |
     {
-      "productName": "{{ quote .Values.global.frontendConfig.productName }}",
-      "productSlogan": "{{ quote .Values.global.frontendConfig.productSlogan }}",
-      "documentationURL": "{{ quote .Values.global.frontendConfig.documentationURL }}",
-      "supportURL": "{{ quote .Values.global.frontendConfig.supportURL }}",
-      "landingPageUrl": "{{ quote .Values.global.frontendConfig.landingPageUrl }}",
-      "landingPageName": "{{ quote .Values.global.frontendConfig.landingPageName }}",
-      "customLandingPagePre": "{{ quote .Values.global.frontendConfig.customLandingPagePre }}",
-      "customLandingPagePost": "{{ quote .Values.global.frontendConfig.customLandingPagePost }}",
+      "productName": {{ quote .Values.global.frontendConfig.productName }},
+      "productSlogan": {{ quote .Values.global.frontendConfig.productSlogan }},
+      "documentationURL": {{ quote .Values.global.frontendConfig.documentationURL }},
+      "supportURL": {{ quote .Values.global.frontendConfig.supportURL }},
+      "landingPageUrl": {{ quote .Values.global.frontendConfig.landingPageUrl }},
+      "landingPageName": {{ quote .Values.global.frontendConfig.landingPageName }},
+      "customLandingPagePre": {{ quote .Values.global.frontendConfig.customLandingPagePre }},
+      "customLandingPagePost": {{ quote .Values.global.frontendConfig.customLandingPagePost }},
 
       {{- if .Values.global.oidc.enabled }}
       "loginTypes": ["oidc", "token"]
