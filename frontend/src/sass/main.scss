@@ -71,11 +71,11 @@
   border-radius: 8px;
 }
 
-.theme--light .alternate-row-background > div:nth-of-type(even) {
+.v-theme--light .alternate-row-background > div:nth-of-type(even) {
   background-color: rgba(0, 0, 0, .02);
 }
 
-.theme--dark .alternate-row-background > div:nth-of-type(even) {
+.v-theme--dark .alternate-row-background > div:nth-of-type(even) {
   background-color: rgba(0, 0, 0, .2);
 }
 

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { nextTick } from 'vue'
+import { nextTick, unref } from 'vue'
 import semver from 'semver'
 
 // Lodash
@@ -105,21 +105,22 @@ export function getValidationErrors (vm, field) {
   return errors
 }
 
-export function setDelayedInputFocus (fieldRef, { delay = 200, ...options } = {}) {
-  setTimeout(() => setInputFocus(fieldRef, options), delay)
+export function setDelayedInputFocus (value, { delay = 200, ...options } = {}) {
+  setTimeout(() => setInputFocus(value, options), delay)
 }
 
-export function setInputFocus (fieldRef, { noSelect = false } = {}) {
-  if (fieldRef.value) {
+export function setInputFocus (value, { noSelect = false } = {}) {
+  const vm = unref(value)
+  if (vm) {
     if (noSelect) {
-      fieldRef.value.focus()
+      vm.focus()
     } else {
-      (async () => {
+      (async vm => {
         await nextTick()
         // Ensure that the input field has been rendered
-        fieldRef.value.focus()
-        fieldRef.value.select()
-      })()
+        vm.focus()
+        vm.select()
+      })(vm)
     }
   }
 }

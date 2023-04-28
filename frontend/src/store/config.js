@@ -133,7 +133,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const appVersion = computed(() => {
-    return alert.value?.appVersion ?? import.meta.env.VUE_APP_VERSION
+    return state.value?.appVersion ?? import.meta.env.VITE_APP_VERSION
   })
 
   async function fetchConfig () {

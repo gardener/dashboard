@@ -189,7 +189,7 @@ SPDX-License-Identifier: Apache-2.0
 
   watch(loginType, value => {
     if (value === 'token') {
-      setDelayedInputFocus(tokenField, 'token')
+      setDelayedInputFocus(tokenField)
     }
   })
 

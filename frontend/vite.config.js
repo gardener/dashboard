@@ -32,7 +32,7 @@ export default defineConfig(({ command, mode }) => {
       VITE_APP_VERSION = require('./package.json').version
     }
   }
-  const VITE_BASE_URL = '/ui/'
+  const VITE_BASE_URL = '/'
   const VITE_APP_TITLE = 'Gardener Dashboard'
 
   Object.assign(process.env, {

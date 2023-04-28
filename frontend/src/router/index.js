@@ -45,7 +45,7 @@ export function createRouter () {
       type: 'error',
       message: err.message,
     }
-    // router.push({ name: 'Error' })
+    router.push({ name: 'Error' })
   })
 
   return router

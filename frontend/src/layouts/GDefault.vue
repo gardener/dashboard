@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-app ref="app">
     <g-loading />
+    <g-main-navigation />
     <g-main-toolbar />
     <g-main-content ref="mainContent"/>
   </v-app>
@@ -17,6 +18,7 @@ import { ref, onMounted } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useLogger } from '@/composables/useLogger'
 import GLoading from '@/components/GLoading.vue'
+import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 
