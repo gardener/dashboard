@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
+import { nextTick } from 'vue'
 import semver from 'semver'
+
+// Lodash
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -24,8 +25,10 @@ import split from 'lodash/split'
 import join from 'lodash/join'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
-import moment from './moment'
 import forEach from 'lodash/forEach'
+
+// Local
+import moment from './moment'
 import { md5 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 
@@ -39,7 +42,7 @@ export function emailToDisplayName (value) {
   }
 }
 
-export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
+export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => {}) {
   function drop (event) {
     event.stopPropagation()
     event.preventDefault()
@@ -102,24 +105,21 @@ export function getValidationErrors (vm, field) {
   return errors
 }
 
-export function setDelayedInputFocus (vm, fieldName, { delay = 200, ...options } = {}) {
-  setTimeout(() => {
-    setInputFocus(vm, fieldName, options)
-  }, delay)
+export function setDelayedInputFocus (fieldRef, { delay = 200, ...options } = {}) {
+  setTimeout(() => setInputFocus(fieldRef, options), delay)
 }
 
-export function setInputFocus (vm, fieldName, { noSelect = false } = {}) {
-  const fieldRef = vm.$refs[fieldName]
-  if (fieldRef) {
+export function setInputFocus (fieldRef, { noSelect = false } = {}) {
+  if (fieldRef.value) {
     if (noSelect) {
-      fieldRef.focus()
+      fieldRef.value.focus()
     } else {
-      const inputRef = fieldRef.$refs.input
-      vm.$nextTick(() => {
+      (async () => {
+        await nextTick()
         // Ensure that the input field has been rendered
-        inputRef.focus()
-        inputRef.select()
-      })
+        fieldRef.value.focus()
+        fieldRef.value.select()
+      })()
     }
   }
 }
@@ -228,8 +228,8 @@ export function namespacedRoute (route, namespace) {
   return {
     name: routeName(route),
     params: {
-      namespace
-    }
+      namespace,
+    },
   }
 }
 
@@ -331,7 +331,7 @@ export function getProjectDetails (project) {
     purpose,
     staleSinceTimestamp,
     staleAutoDeleteTimestamp,
-    phase
+    phase,
   }
 }
 
@@ -441,15 +441,15 @@ export const shootAddonList = [
     title: 'Dashboard',
     description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
-    enabled: false
+    enabled: false,
   },
   {
     name: 'nginxIngress',
     title: 'Nginx Ingress',
     description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
     visible: true,
-    enabled: false
-  }
+    enabled: false,
+  },
 ]
 
 function htmlToDocumentFragment (html) {
@@ -543,26 +543,26 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) 
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'admin',
-    displayName: 'Admin'
+    displayName: 'Admin',
   },
   {
     name: 'viewer',
-    displayName: 'Viewer'
+    displayName: 'Viewer',
   },
   {
     name: 'uam',
-    displayName: 'UAM'
+    displayName: 'UAM',
   },
   {
     name: 'serviceaccountmanager',
-    displayName: 'Service Account Manager'
+    displayName: 'Service Account Manager',
   },
   {
     name: 'owner',
     displayName: 'Owner',
     notEditable: true,
-    tooltip: 'You can change the project owner on the administration page'
-  }
+    tooltip: 'You can change the project owner on the administration page',
+  },
 ]
 
 function includesNameOrAll (list, name) {
@@ -585,7 +585,7 @@ export function canI ({ resourceRules } = {}, verb, apiGroup, resouce, resourceN
 export const TargetEnum = {
   GARDEN: 'garden',
   CONTROL_PLANE: 'cp',
-  SHOOT: 'shoot'
+  SHOOT: 'shoot',
 }
 
 export function targetText (target) {

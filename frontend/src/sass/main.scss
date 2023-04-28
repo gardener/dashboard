@@ -4,18 +4,12 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-/** Gardener Styles */
-@import '~vuetify/src/styles/styles.sass';
+@forward 'vuetify/lib/styles/main.sass';
 
+/** Gardener Styles */
 [data-app] {
   .v-main > .container {
     min-height: calc(100vh - 156px)
-  }
-}
-
-.v-list-item__action {
-  .v-btn.v-btn--icon {
-    color: map-deep-get($material-theme, 'text', 'primary');
   }
 }
 

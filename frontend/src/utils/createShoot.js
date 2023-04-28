@@ -5,6 +5,8 @@
 //
 
 import { Netmask } from 'netmask'
+
+// Lodash
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
@@ -34,28 +36,28 @@ export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
             ipv4: {
               autoDetectionMethod: 'interface=lo',
               mode: 'Always',
-              pool: 'vxlan'
+              pool: 'vxlan',
             },
             typha: {
-              enabled: true
-            }
-          }
+              enabled: true,
+            },
+          },
         },
         kubernetes: {
           kubeControllerManager: {
-            nodeCIDRMaskSize: 23
+            nodeCIDRMaskSize: 23,
           },
           kubelet: {
-            maxPods: 510
-          }
-        }
+            maxPods: 510,
+          },
+        },
       }
     default:
       return {
         provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
         networking: {
-          nodes: defaultWorkerCIDR
-        }
+          nodes: defaultWorkerCIDR,
+        },
       }
   }
 }
@@ -70,14 +72,14 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           kind: 'InfrastructureConfig',
           networks: {
             vpc: {
-              cidr: defaultWorkerCIDR
-            }
-          }
+              cidr: defaultWorkerCIDR,
+            },
+          },
         },
         controlPlaneConfig: {
           apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'azure':
       return {
@@ -87,16 +89,16 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           kind: 'InfrastructureConfig',
           networks: {
             vnet: {
-              cidr: defaultWorkerCIDR
+              cidr: defaultWorkerCIDR,
             },
-            workers: defaultWorkerCIDR
+            workers: defaultWorkerCIDR,
           },
-          zoned: true
+          zoned: true,
         },
         controlPlaneConfig: {
           apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'gcp':
       return {
@@ -105,13 +107,13 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            workers: defaultWorkerCIDR
-          }
+            workers: defaultWorkerCIDR,
+          },
         },
         controlPlaneConfig: {
           apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'openstack':
       return {
@@ -120,13 +122,13 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            workers: defaultWorkerCIDR
-          }
+            workers: defaultWorkerCIDR,
+          },
         },
         controlPlaneConfig: {
           apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'alicloud':
       return {
@@ -136,34 +138,34 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           kind: 'InfrastructureConfig',
           networks: {
             vpc: {
-              cidr: defaultWorkerCIDR
-            }
-          }
+              cidr: defaultWorkerCIDR,
+            },
+          },
         },
         controlPlaneConfig: {
           apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'metal':
       return {
         type: 'metal',
         infrastructureConfig: {
           apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig'
+          kind: 'InfrastructureConfig',
         },
         controlPlaneConfig: {
           apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'vsphere':
       return {
         type: 'vsphere',
         controlPlaneConfig: {
           apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     case 'hcloud':
       return {
@@ -172,17 +174,17 @@ function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
           apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            workers: defaultWorkerCIDR
-          }
+            workers: defaultWorkerCIDR,
+          },
         },
         controlPlaneConfig: {
           apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig'
-        }
+          kind: 'ControlPlaneConfig',
+        },
       }
     default:
       return {
-        type: infrastructureKind
+        type: infrastructureKind,
       }
   }
 }
@@ -218,7 +220,7 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
         return {
           workers: workerNetwork,
           public: publicNetwork,
-          internal: internalNetwork
+          internal: internalNetwork,
         }
       })
     }
@@ -226,7 +228,7 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
       const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
         return {
-          workers: zoneNetworksAli[index]
+          workers: zoneNetworksAli[index],
         }
       })
     }
@@ -241,7 +243,7 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
   return map(zones, (zone, index) => {
     return {
       name: zone,
-      ...zoneConfigurations[index]
+      ...zoneConfigurations[index],
     }
   })
 }
@@ -293,7 +295,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
       zoneConfiguration = freeZoneNetworks.shift()
       return {
         name: zone,
-        ...zoneConfiguration
+        ...zoneConfiguration,
       }
     })
 
@@ -339,7 +341,7 @@ export function getWorkerProviderConfig (infrastructureKind) {
     case 'aws': {
       return {
         apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'WorkerConfig'
+        kind: 'WorkerConfig',
       }
     }
   }

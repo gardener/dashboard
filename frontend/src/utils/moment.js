@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
@@ -616,7 +614,7 @@ function timezoneExtension (option, dayjsClass, dayjsFactory) {
     'Universal',
     'W-SU',
     'WET',
-    'Zulu'
+    'Zulu',
   ]
   const tz = dayjsFactory.tz
   const tzGuess = tz.guess.bind(tz)

@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
 
+// Lodash
 import startsWith from 'lodash/startsWith'
 import endsWith from 'lodash/endsWith'
 import includes from 'lodash/includes'
@@ -60,7 +60,7 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
         }
 
         return false
-      }
+      },
     }
   })
 }

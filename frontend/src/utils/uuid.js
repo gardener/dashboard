@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 import { v4 as uuidv4 } from 'uuid'
 
 export const v4 = uuidv4

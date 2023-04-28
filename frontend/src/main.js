@@ -1,18 +1,20 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Polyfills
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
+// Components
+import App from './App.vue'
 
-// Import Plugins
-import '@/plugins'
+// Composables
+import { createApp } from 'vue'
 
-// Create App
-import vuetify from '@/plugins/vuetify'
-import { createApp } from '@/app'
+// Plugins
+import { registerPlugins } from '@/plugins'
 
-createApp(vuetify).$mount('#app')
+const app = createApp(App)
+
+registerPlugins(app)
+
+app.mount('#app')

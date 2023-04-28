@@ -1,7 +1,12 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
+import pTimeout from 'p-timeout'
+
+// Lodash
 import assign from 'lodash/assign'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -11,19 +16,24 @@ import intersection from 'lodash/intersection'
 import keys from 'lodash/keys'
 import includes from 'lodash/includes'
 import pick from 'lodash/pick'
-import pTimeout from 'p-timeout'
 
+// Utilities
+import { encodeBase64Url } from '@/utils'
 import {
   createTerminal,
   fetchTerminalSession,
   deleteTerminal,
-  heartbeat
+  heartbeat,
 } from '@/utils/api'
-import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
-import { encodeBase64Url } from '@/utils'
+
+// Local
+import {
+  K8sAttachAddon,
+  WsReadyStateEnum,
+} from './xterm-addon-k8s-attach'
 
 const WsCloseEventEnum = {
-  NORMAL_CLOUSURE: 1000
+  NORMAL_CLOUSURE: 1000,
 }
 
 const RETRY_TIMEOUT_SECONDS = 3
@@ -49,7 +59,7 @@ export class TerminalSession {
     this.hostNetwork = undefined
     this.container = {
       privileged: undefined,
-      image: undefined
+      image: undefined,
     }
     this.detailedConnectionStateText = undefined
   }
@@ -79,13 +89,13 @@ export class TerminalSession {
       'command',
       'args',
       'resources',
-      'privileged'
+      'privileged',
     ])
 
     let selectedConfigContainer = get(this.vm.selectedConfig, 'container')
     selectedConfigContainer = pick(selectedConfigContainer, [
       'image',
-      'privileged'
+      'privileged',
     ])
 
     const hostConfig = pick(this.vm.data, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
@@ -262,7 +272,7 @@ Object.assign(TerminalSession, {
   CREATING: 1,
   FETCHING: 2,
   CONNECTING: 3,
-  CONNECTED: 4
+  CONNECTED: 4,
 })
 
 function addBearerToken (protocols, bearer) {
@@ -435,7 +445,7 @@ export class Spinner {
   _eraseLine () {
     this.#term.write([
       CSI + '2K', // Erase complete line
-      CSI + 'H' // Set cursor to home position
+      CSI + 'H', // Set cursor to home position
     ].join(''))
   }
 

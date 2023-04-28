@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -20,9 +20,9 @@ export function shootItemTabs ({ params }) {
       get to () {
         return {
           name: 'ShootItem',
-          params
+          params,
         }
-      }
+      },
     },
     {
       key: 'shootYaml',
@@ -30,10 +30,10 @@ export function shootItemTabs ({ params }) {
       get to () {
         return {
           name: 'ShootItemEditor',
-          params
+          params,
         }
-      }
-    }
+      },
+    },
   ]
 }
 
@@ -45,9 +45,9 @@ export function newShootTabs ({ params }) {
       get to () {
         return {
           name: 'NewShoot',
-          params
+          params,
         }
-      }
+      },
     },
     {
       key: 'newShootYaml',
@@ -55,9 +55,9 @@ export function newShootTabs ({ params }) {
       get to () {
         return {
           name: 'NewShootEditor',
-          params
+          params,
         }
-      }
-    }
+      },
+    },
   ]
 }

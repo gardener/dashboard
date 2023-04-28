@@ -1,0 +1,24 @@
+/*
+ *  SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Configures Vuetify overwrites. Also see vite.config.js where this
+ * file is referenced in the vuetify plugin config.
+ */
+
+// https://vuetifyjs.com/en/features/sass-variables/#usage-in-templates
+// The parameters ($color-pack,...) are partially described here:
+//   https://github.com/vuetifyjs/vuetify/tree/master/packages/docs/src/pages/en/styles
+@forward 'vuetify/settings' with ( // if we want to use variables from here change to @use
+  $color-pack: true !default,
+  $utilities: false !default,
+  // tooltip bg and color where inverted with vue3. This reverts that change
+  //   https://vuetifyjs.com/en/api/v-tooltip/#sass-tooltip-background-color
+  $tooltip-background-color: rgba(var(--v-theme-on-surface-variant), .9),
+  $tooltip-text-color: rgb(var(--v-theme-surface-variant))
+);
+
+@forward '@/sass/variables.scss';

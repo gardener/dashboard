@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 import CodeMirror from 'codemirror'
+
+// Lodash
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
@@ -41,7 +41,7 @@ export class ShootEditorCompletions {
     return {
       list,
       from: CodeMirror.Pos(cur.line, token.start),
-      to: CodeMirror.Pos(cur.line, token.end)
+      to: CodeMirror.Pos(cur.line, token.end),
     }
   }
 
@@ -49,7 +49,7 @@ export class ShootEditorCompletions {
   editorTooltip (e, cm) {
     const pos = cm.coordsChar({
       left: e.clientX,
-      top: e.clientY
+      top: e.clientY,
     })
     const lineTokens = cm.getLineTokens(pos.line)
     const lineString = join(map(lineTokens, 'string'), '')
@@ -64,7 +64,7 @@ export class ShootEditorCompletions {
       const token = {
         start,
         end,
-        string
+        string,
       }
       if (token.start <= pos.ch && pos.ch <= token.end) {
         // Ensure that mouse pointer is on propety and not somewhere else on this line
@@ -160,7 +160,7 @@ export class ShootEditorCompletions {
 
           el.appendChild(propertyWrapper)
           el.appendChild(descriptionWrapper)
-        }
+        },
       })
     })
     if (trim(token.string).length > 0) {

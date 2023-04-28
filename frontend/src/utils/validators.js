@@ -4,9 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { withParams, regex, ref, req } from 'vuelidate/lib/validators/common'
+import { helpers } from '@vuelidate/validators'
+
+// Lodash
 import includes from 'lodash/includes'
 import get from 'lodash/get'
+
+const { withParams, regex, ref, req } = helpers
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const uppercaseAlphaNumPattern = /^[A-Z0-9]+$/
@@ -41,13 +45,13 @@ const unique = key => withParams({ type: 'unique', key },
   function (value, parentVm) {
     const keys = ref(key, this, parentVm)
     return !includes(keys, value)
-  }
+  },
 )
 
 const uniqueWorkerName = withParams({ type: 'uniqueWorkerName' },
   function unique (value) {
     return this.workers.filter(item => item.name === value).length === 1
-  }
+  },
 )
 
 const requiresCostObjectIfEnabled = withParams({ type: 'requiresCostObjectIfEnabled' },
@@ -56,7 +60,7 @@ const requiresCostObjectIfEnabled = withParams({ type: 'requiresCostObjectIfEnab
       return true
     }
     return get(infrastructureSecret, 'metadata.hasCostObject', false)
-  }
+  },
 )
 
 const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
@@ -68,20 +72,20 @@ const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
       }
     } catch (err) { /* ignore error */ }
     return false
-  }
+  },
 )
 
 const includesIfAvailable = (key, reference) => withParams({ type: 'includesIfAvailable', key },
   function (selectedKeys, parentVm) {
     const availableKeys = ref(reference, this, parentVm)
     return includes(availableKeys, key) ? includes(selectedKeys, key) : true
-  }
+  },
 )
 
 const nilUnless = key => withParams({ type: 'nilUnless', key },
   function (value, parentVm) {
     return !ref(key, this, parentVm) ? !req(value) : true
-  }
+  },
 )
 
 export {
@@ -101,5 +105,5 @@ export {
   numberOrPercentage,
   requiresCostObjectIfEnabled,
   isTimezone,
-  nilUnless
+  nilUnless,
 }

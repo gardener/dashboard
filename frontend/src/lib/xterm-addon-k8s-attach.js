@@ -1,12 +1,14 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
 export const WsReadyStateEnum = {
   CONNECTING: 0,
   OPEN: 1,
   CLOSING: 2,
-  CLOSED: 3
+  CLOSED: 3,
 }
 
 const ChannelEnum = {
@@ -14,12 +16,12 @@ const ChannelEnum = {
   STD_OUT: 1,
   STD_ERR: 2,
   ERR: 3,
-  RESIZE: 4
+  RESIZE: 4,
 }
 
 const BufferEnum = {
   CHANNEL_INDEX: 0,
-  DATA_INDEX: 1
+  DATA_INDEX: 1,
 }
 
 export class K8sAttachAddon {
@@ -37,7 +39,7 @@ export class K8sAttachAddon {
     this._disposables.push(
       addSocketListener(this._socket, 'message', ev => {
         this._messageHandler(terminal, ev)
-      })
+      }),
     )
 
     if (this._bidirectional) {
@@ -136,6 +138,6 @@ function addSocketListener (socket, type, handler) {
         return
       }
       socket.removeEventListener(type, handler)
-    }
+    },
   }
 }

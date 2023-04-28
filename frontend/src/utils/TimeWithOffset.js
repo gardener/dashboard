@@ -15,7 +15,7 @@ class TimeWithOffset {
       minutes,
       offsetSign,
       offsetHours,
-      offsetMinutes
+      offsetMinutes,
     })
   }
 

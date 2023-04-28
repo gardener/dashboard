@@ -1,21 +1,26 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
-import Vue from 'vue'
+import SymbolTree from 'symbol-tree'
+
+// Lodash
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import keys from 'lodash/keys'
 import compact from 'lodash/compact'
 import values from 'lodash/values'
-import SymbolTree from 'symbol-tree'
+
+// Utilities
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 export const PositionEnum = {
   TOP: 'top',
   BOTTOM: 'bottom',
   LEFT: 'left',
-  RIGHT: 'right'
+  RIGHT: 'right',
 }
 
 export class Leaf {
@@ -27,7 +32,7 @@ export class Leaf {
   toJSON () {
     return {
       uuid: this.uuid,
-      data: this.data
+      data: this.data,
     }
   }
 }
@@ -39,7 +44,7 @@ export class SplitpaneTree {
 
   toJSON () {
     return {
-      horizontal: this.horizontal
+      horizontal: this.horizontal,
     }
   }
 }
@@ -169,14 +174,14 @@ export class GSymbolTree extends SymbolTree {
   _addToItemMap (newItem) {
     if (newItem instanceof Leaf) {
       const key = newItem.uuid
-      Vue.set(this.itemMap, key, newItem)
+      this.itemMap[key] = newItem
     }
   }
 
   _removeFromItemMap (removeObject) {
     if (removeObject instanceof Leaf) {
       const key = removeObject.uuid
-      Vue.delete(this.itemMap, key)
+      delete this.itemMap[key]
     }
   }
 

@@ -9,14 +9,14 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat dense class="toolbar-background toolbar-title--text">
+          <v-toolbar flat dense class="bg-toolbar-background text-toolbar-title">
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
-          <v-list dense>
+          <v-list density="compact">
             <v-list-item>
-              <v-list-item-avatar>
+              <v-list-item-icon>
                 <v-icon color="primary">{{icon}}</v-icon>
-              </v-list-item-avatar>
+              </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title class="label pb-2">User</v-list-item-title>
                 <v-list-item-subtitle class="content pb-2">
@@ -94,9 +94,9 @@ SPDX-License-Identifier: Apache-2.0
                   <v-list-item-subtitle class="line-clamp-2">Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action class="mx-0">
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="onDownload" color="action-button">
+                      <v-btn v-on="on" icon @click.stop="onDownload" color="action-button">
                         <v-icon>mdi-download</v-icon>
                       </v-btn>
                     </template>
@@ -107,9 +107,9 @@ SPDX-License-Identifier: Apache-2.0
                   <copy-btn :clipboard-text="kubeconfigYaml" tooltip-text="Copy kubeconfig to clipboard"></copy-btn>
                 </v-list-item-action>
                 <v-list-item-action class="mx-0">
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" icon @click.native.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel" color="action-button">
+                      <v-btn v-on="on" icon @click.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel" color="action-button">
                         <v-icon>{{kubeconfigExpansionPanelIcon}}</v-icon>
                       </v-btn>
                     </template>
@@ -141,9 +141,12 @@ SPDX-License-Identifier: Apache-2.0
                       <v-tab-item class="pa-4">
                         <v-row>
                           <v-col cols="12">
+                            <!-- TODO: v-select used the no longer existing item-color=primary attr.
+                                This changed the color of the selected item. Check if this can be achieved somehow with Vuetify3
+                                or if we e.g. also want to display a "check"-icon similiar to the project selection on the left menu.
+                            -->
                             <v-select
                               color="primary"
-                              item-color="primary"
                               v-model="projectName"
                               :items="projectNames"
                               label="Project"
@@ -152,9 +155,12 @@ SPDX-License-Identifier: Apache-2.0
                             ></v-select>
                           </v-col>
                           <v-col cols="12">
+                            <!-- TODO: v-select used the no longer existing item-color=primary attr.
+                                  This changed the color of the selected item. Check if this can be achieved somehow with Vuetify3
+                                  or if we e.g. also want to display a "check"-icon similiar to the project selection on the left menu.
+                            -->
                             <v-select
                               color="primary"
-                              item-color="primary"
                               v-model="grantType"
                               :items="grantTypes"
                               label="Grant Type"
@@ -195,10 +201,10 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import get from 'lodash/get'
 
-import CopyBtn from '@/components/CopyBtn'
-import CodeBlock from '@/components/CodeBlock'
-import ExternalLink from '@/components/ExternalLink'
-import AccountAvatar from '@/components/AccountAvatar'
+import CopyBtn from '@/components/CopyBtn.vue'
+import CodeBlock from '@/components/CodeBlock.vue'
+import ExternalLink from '@/components/ExternalLink.vue'
+import AccountAvatar from '@/components/AccountAvatar.vue'
 import { getToken } from '@/utils/api'
 import moment from '@/utils/moment'
 
@@ -207,7 +213,7 @@ export default {
     CopyBtn,
     CodeBlock,
     ExternalLink,
-    AccountAvatar
+    AccountAvatar,
   },
   name: 'profile',
   data () {
@@ -220,7 +226,7 @@ export default {
       idToken: undefined,
       showToken: false,
       showMessage: false,
-      kubeconfigYaml: ''
+      kubeconfigYaml: '',
     }
   },
 
@@ -229,7 +235,7 @@ export default {
       'user',
       'namespace',
       'cfg',
-      'kubeconfigData'
+      'kubeconfigData',
     ]),
     ...mapGetters([
       'username',
@@ -237,7 +243,7 @@ export default {
       'fullDisplayName',
       'isAdmin',
       'canCreateProject',
-      'isKubeconfigEnabled'
+      'isKubeconfigEnabled',
     ]),
     kubeconfigExpansionPanelIcon () {
       return this.expansionPanelIcon(this.kubeconfigExpansionPanel)
@@ -276,10 +282,10 @@ export default {
         server,
         certificateAuthorityData,
         insecureSkipTlsVerify,
-        oidc = {}
+        oidc = {},
       } = this.kubeconfigData || {}
       const cluster = {
-        server
+        server,
       }
       if (certificateAuthorityData) {
         cluster['certificate-authority-data'] = certificateAuthorityData
@@ -288,7 +294,7 @@ export default {
       }
       const context = {
         cluster: name,
-        user: 'oidc-login'
+        user: 'oidc-login',
       }
       if (namespace) {
         context.namespace = namespace
@@ -297,7 +303,7 @@ export default {
         'oidc-login',
         'get-token',
         '--oidc-issuer-url=' + oidc.issuerUrl,
-        '--oidc-client-id=' + oidc.clientId
+        '--oidc-client-id=' + oidc.clientId,
       ]
       if (oidc.clientSecret) {
         args.push('--oidc-client-secret=' + oidc.clientSecret)
@@ -323,28 +329,28 @@ export default {
         exec: {
           apiVersion: 'client.authentication.k8s.io/v1beta1',
           command: 'kubectl',
-          args
-        }
+          args,
+        },
       }
       return {
         kind: 'Config',
         apiVersion: 'v1',
         clusters: [{
           name,
-          cluster
+          cluster,
         }],
         contexts: [{
           context,
-          name
+          name,
         }],
         'current-context': name,
         users: [{
           name: 'oidc-login',
-          user
+          user,
         }],
-        preferences: {}
+        preferences: {},
       }
-    }
+    },
   },
   methods: {
     async onDownload () {
@@ -360,7 +366,7 @@ export default {
     },
     expansionPanelTooltip (value) {
       return value ? 'Hide advanced options' : 'Show advanced options'
-    }
+    },
   },
   async mounted () {
     try {
@@ -376,8 +382,8 @@ export default {
   watch: {
     kubeconfig (value) {
       this.updateKubeconfigYaml(value)
-    }
-  }
+    },
+  },
 }
 </script>
 

@@ -10,95 +10,73 @@ SPDX-License-Identifier: Apache-2.0
     :type="type"
     v-model="alertVisible"
     :color="color"
-    :transition="transition"
-    @input="closeBanner"
-    dismissible
+    closable
   >
     <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
     <slot v-else name="message"></slot>
   </v-alert>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
+<script setup>
+import { inject, computed, useSlots, toRefs } from 'vue'
 import { transformHtml } from '@/utils'
+import { useLocalStorage } from '@vueuse/core'
 
-const LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES = 'global/alert-banner/hidden-messages'
+const slots = useSlots()
+const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {})
 
-export default {
-  props: {
-    message: { // alternatively, use message slot
-      type: String
-    },
-    type: {
-      type: String,
-      default: 'error'
-    },
-    identifier: { // pass identifier to permanently hide the message on close
-      type: String
-    },
-    color: {
-      type: String
-    },
-    transition: {
-      type: String
-    }
+// props
+const props = defineProps({
+  message: { // alternatively, use message slot
+    type: String,
   },
-  data () {
-    return {
-      alertVisible: false
-    }
+  type: {
+    type: String,
+    default: 'error',
   },
-  computed: {
-    messageHtml () {
-      return transformHtml(this.message)
-    }
+  identifier: { // pass identifier to permanently hide the message on close
+    type: String,
   },
-  methods: {
-    ...mapActions([
-      'setAlertBanner'
-    ]),
-    async closeBanner () {
-      if (this.identifier) { // hide permanently
-        this.hidePermanently(this.identifier)
-      }
+  color: {
+    type: String,
+  },
+  transition: {
+    type: String,
+  },
+})
 
-      this.setAlertVisibility(false)
-    },
-    hidePermanently (identifier) {
-      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
-      permanentlyHiddenIds[identifier] = true
-      this.$localStorage.setObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES, permanentlyHiddenIds)
-    },
-    isPermanentlyHidden (identifier) {
-      if (!identifier) {
-        return false
-      }
+const notify = inject('notify')
+const { message, type, color } = toRefs(props)
 
-      const permanentlyHiddenIds = this.$localStorage.getObject(LOCAL_STORE_ALERT_BANNER_HIDDEN_MESSAGES) || {}
-      return permanentlyHiddenIds[this.identifier] === true
-    },
-    updateAlertVisibility () {
-      const visible = (this.$slots.message || !!this.message) && !this.isPermanentlyHidden(this.identifier)
-      this.setAlertVisibility(visible)
-    },
-    setAlertVisibility (visible) {
-      this.alertVisible = visible
+// computed
+const hasMessage = computed(() => {
+  return !!(slots.message || props.message)
+})
+const permanentlyHidden = computed({
+  get () {
+    if (props.identifier) {
+      return hiddenMessages.value[props.identifier] === true
+    }
+    return false
+  },
+  set (value) {
+    if (props.identifier) {
+      hiddenMessages.value[props.identifier] = value
     }
   },
-  mounted () {
-    this.updateAlertVisibility()
+})
+const alertVisible = computed({
+  get () {
+    return hasMessage.value && !permanentlyHidden.value
   },
-  watch: {
-    identifier (value) {
-      this.updateAlertVisibility()
+  set (value) {
+    if (!value) {
+      notify({
+        text: 'test',
+      })
+      permanentlyHidden.value = true
     }
-  }
-}
+  },
+})
+const messageHtml = computed(() => transformHtml(props.message))
 </script>
-
-<style lang="scss" scoped>
-  .alertBanner {
-    margin-top: 0px;
-  }
-</style>

@@ -1,7 +1,10 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
+// Lodash
 import get from 'lodash/get'
 import set from 'lodash/set'
 import forEach from 'lodash/forEach'
@@ -14,7 +17,7 @@ const DragAndDropEventsEnum = {
   DRAG_ENTER: 'drag-enter',
   DRAG_OVER: 'drag-over',
   DRAG_LEAVE: 'drag-leave',
-  DROPPED: 'dropped'
+  DROPPED: 'dropped',
 }
 
 const initialDragState = {
@@ -32,7 +35,7 @@ const initialDragState = {
   anyDroppableBelow: undefined,
   sourceDragAndDropId: undefined,
   animation: undefined,
-  disposables: []
+  disposables: [],
 }
 const dragState = {}
 Object.assign(dragState, initialDragState)
@@ -159,8 +162,8 @@ function getCustomEventInit ({ mouseOverId, mouseOverDropzoneId, source, binding
       mouseOverDropzoneId,
       sourceElementDropzoneId: source.getAttribute(ATTRIBUTE_DRAG_AND_DROP_ID),
       arg: binding.arg,
-      modifiers: binding.modifiers
-    }
+      modifiers: binding.modifiers,
+    },
   }
 }
 
@@ -201,7 +204,7 @@ function dispatchEvent (binding, dragState, event, eventType) {
     mouseOverId,
     mouseOverDropzoneId,
     source: dragState.source,
-    binding
+    binding,
   })
 
   const mouseOverOtherDropzone = !!mouseOverDropzoneId && mouseOverDropzoneId !== dragState.sourceDragAndDropId
@@ -221,11 +224,11 @@ function dispatchEvent (binding, dragState, event, eventType) {
     }
     if (dragState.clone.animate) { // animate not supported by safari
       dragState.animation = dragState.clone.animate({
-        transform: ['scale(1)', 'scale(0.3)']
+        transform: ['scale(1)', 'scale(0.3)'],
       }, {
         easing: 'ease-in-out',
         fill: 'forwards',
-        duration: 150
+        duration: 150,
       })
     }
   }
@@ -262,7 +265,7 @@ function addElementEventListener (el, type, handler, useCapture) {
         return
       }
       el.removeEventListener(type, handler, useCapture)
-    }
+    },
   }
 }
 
@@ -280,7 +283,7 @@ export const gDraggable = {
   bind (el, binding, vnode) {
     gDraggable.update(el, binding, vnode)
   },
-  update (el, binding, vnode) {
+  update (el, binding) {
     const handler = get(binding, 'value.handle.$el') || get(binding, 'value.handle') || el
     if (!handler.getAttribute('draggable')) {
       el.removeEventListener('mousedown', el._listener)
@@ -293,5 +296,5 @@ export const gDraggable = {
   },
   unbind () {
     dispose()
-  }
+  },
 }
