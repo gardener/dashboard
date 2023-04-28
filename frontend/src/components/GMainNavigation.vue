@@ -67,12 +67,12 @@ SPDX-License-Identifier: Apache-2.0
             <template v-slot:prepend>
               <v-icon icon="mdi-grid-large" />
             </template>
-            <div style="width: 134px;" class="ml-6 text-left" :class="{ placeholder: !selectedProject }" >
+            <div style="width: 132px;" class="ml-6 text-left" :class="{ placeholder: !selectedProject }" >
               {{ selectedProjectName }}
-              <!-- TODO template v-if="selectedProject">
-                <stale-project-warning :project="selectedProject" small></stale-project-warning>
-                <not-ready-project-warning :project="selectedProject" small></not-ready-project-warning>
-              </template -->
+              <template v-if="selectedProject">
+                <g-stale-project-warning :project="selectedProject" size="small" />
+                <g-not-ready-project-warning :project="selectedProject" size="small" />
+              </template>
             </div>
           </v-btn>
         </template>
@@ -81,23 +81,25 @@ SPDX-License-Identifier: Apache-2.0
           <template v-if="projectList.length > 3">
             <v-card-title class="pa-0">
               <v-text-field
-                clearable
+                ref="refProjectFilter"
+                v-model="projectFilter"
                 label="Filter projects"
-                variant="flat"
+                variant="plain"
+                clear-icon="mdi-close"
+                clearable
+                autofocus
                 single-line
                 hide-details
-                prepend-icon="mdi-magnify"
-                class="pl-4"
-                color="primary"
-                v-model="projectFilter"
-                ref="refProjectFilter"
+                class="project-filter"
                 @keyup.esc="projectFilter = ''"
                 @keyup.enter="navigateToHighlightedProject"
                 @update:model-value="onInputProjectFilter"
                 @keydown.down="highlightProjectWithKeys('down')"
                 @keydown.up="highlightProjectWithKeys('up')"
-                autofocus
               >
+              <template v-slot:prepend>
+                <v-icon icon="mdi-magnify" class="mx-2"></v-icon>
+              </template>
               </v-text-field>
             </v-card-title>
             <v-divider></v-divider>
@@ -124,8 +126,8 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="project-owner">{{ getProjectOwner(project) }}</div>
               </template>
               <template v-slot:append>
-                <stale-project-warning :project="project" small></stale-project-warning>
-                <not-ready-project-warning :project="project" small></not-ready-project-warning>
+                <g-stale-project-warning :project="project" size="small" />
+                <g-not-ready-project-warning :project="project" size="small" />
               </template>
             </v-list-item>
           </v-list>
@@ -190,8 +192,8 @@ SPDX-License-Identifier: Apache-2.0
   import { useRouter, useRoute } from 'vue-router'
 
   // import ProjectCreateDialog from '@/components/dialogs/ProjectDialog.vue'
-  // import StaleProjectWarning from '@/components/StaleProjectWarning.vue'
-  // import NotReadyProjectWarning from '@/components/NotReadyProjectWarning.vue'
+  import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
+  import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 
   import {
     emailToDisplayName,
@@ -600,6 +602,11 @@ $teaserHeight: 200px;
 
       .project-filter {
         font-weight: normal;
+
+        :deep(.v-field__input) {
+          padding-top: 16px;
+          padding-bottom: 12px;
+        }
       }
 
       .project-add>div {
