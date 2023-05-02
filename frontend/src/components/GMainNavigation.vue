@@ -78,7 +78,6 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </v-btn>
         </template>
-
         <v-card>
           <template v-if="projectList.length > 3">
             <v-card-title class="pa-0">
@@ -86,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
                 ref="refProjectFilter"
                 v-model="projectFilter"
                 label="Filter projects"
-                variant="plain"
+                variant="text"
                 clear-icon="mdi-close"
                 clearable
                 autofocus
@@ -100,7 +99,7 @@ SPDX-License-Identifier: Apache-2.0
                 @keydown.up="highlightProjectWithKeys('up')"
               >
               <template v-slot:prepend>
-                <v-icon icon="mdi-magnify" class="mx-2"></v-icon>
+                <v-icon icon="mdi-magnify" color="primary" class="ml-4"></v-icon>
               </template>
               </v-text-field>
             </v-card-title>
@@ -112,6 +111,7 @@ SPDX-License-Identifier: Apache-2.0
               ref="refProjectListItems"
               @click="onProjectClick($event, project)"
               class="project-list-tile"
+              :height="48"
               :class="{ 'highlighted-item': isHighlightedProject(project) }"
               :key="project.metadata.name"
               :data-g-project-name="project.metadata.name"
@@ -121,12 +121,8 @@ SPDX-License-Identifier: Apache-2.0
                   {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
                 </v-icon>
               </template>
-              <template v-slot:title>
-                <div class="project-name">{{ project.metadata.name }}</div>
-              </template>
-              <template v-slot:subtitle>
-                <div class="project-owner">{{ getProjectOwner(project) }}</div>
-              </template>
+              <v-list-item-title class="project-name text-uppercase">{{ project.metadata.name }}</v-list-item-title>
+              <v-list-item-subtitle class="project-owner">{{ getProjectOwner(project) }}</v-list-item-subtitle>
               <template v-slot:append>
                 <g-stale-project-warning :project="project" size="small" />
                 <g-not-ready-project-warning :project="project" size="small" />
@@ -624,21 +620,20 @@ $teaserHeight: 200px;
           padding-top: 16px;
           padding-bottom: 12px;
         }
+        :deep(.v-input__prepend > .v-icon) {
+          opacity: 0.9;
+        }
       }
 
-      .project-add>div {
+      .project-add > div {
         justify-content: left;
       }
 
       .project-list {
         height: auto;
-        max-height: (4 * 54px) + (2 * 8px);
+        max-height: (4 * 48px) + (2 * 8px);
         overflow-y: auto;
-        max-width: 300px;
-
-        div>a {
-          height: 54px;
-        }
+        max-width: 255px;
 
         .project-name {
           font-size: 14px;
@@ -646,6 +641,10 @@ $teaserHeight: 200px;
 
         .project-owner {
           font-size: 11px;
+        }
+
+        :deep(.v-list-item__prepend > .v-icon) {
+          opacity: 0.9;
         }
 
         .highlighted-item {
