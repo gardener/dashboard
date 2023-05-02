@@ -9,7 +9,6 @@ import { ref } from 'vue'
 import moment from '@/utils/moment'
 
 export const useAppStore = defineStore('app', () => {
-  const kubeconfigData = ref(null)
   const ready = ref(false)
   const sidebar = ref(true)
   const redirectPath = ref(null)
@@ -24,7 +23,6 @@ export const useAppStore = defineStore('app', () => {
   const fromRoute = ref(null)
 
   return {
-    kubeconfigData,
     ready,
     sidebar,
     redirectPath,

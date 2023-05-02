@@ -117,6 +117,7 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   return {
+    list,
     isInitial,
     namespace,
     namespaces,

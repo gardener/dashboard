@@ -17,18 +17,14 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return list.value === null
   })
 
-  const gardenerExtensionList = computed(() => {
-    return list.value ?? []
-  })
-
   async function fetchGardenerExtensions () {
     const response = await api.getGardenerExtensions()
     list.value = response.data
   }
 
   return {
+    list,
     isInitial,
-    gardenerExtensionList,
     fetchGardenerExtensions,
   }
 })

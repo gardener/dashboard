@@ -17,18 +17,14 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value === null
   })
 
-  const cloudProfileList = computed(() => {
-    return list.value ?? []
-  })
-
   async function fetchCloudProfiles () {
     const response = await api.getCloudprofiles()
     list.value = response.data
   }
 
   return {
+    list,
     isInitial,
-    cloudProfileList,
     fetchCloudProfiles,
   }
 })

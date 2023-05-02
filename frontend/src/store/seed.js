@@ -17,18 +17,14 @@ export const useSeedStore = defineStore('seed', () => {
     return list.value === null
   })
 
-  const seedList = computed(() => {
-    return list.value ?? []
-  })
-
   async function fetchSeeds () {
     const response = await api.getSeeds()
     list.value = response.data
   }
 
   return {
+    list,
     isInitial,
-    seedList,
     fetchSeeds,
   }
 })

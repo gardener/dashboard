@@ -58,22 +58,24 @@ SPDX-License-Identifier: Apache-2.0
             rounded="0"
             elevation="4"
             variant="flat"
-            class="project-selector text-main-navigation-title px-0"
-            :append-icon="projectMenuIcon"
+            class="project-selector text-main-navigation-title"
             @keydown.down="highlightProjectWithKeys('down')"
             @keydown.up="highlightProjectWithKeys('up')"
             @keyup.enter="navigateToHighlightedProject"
           >
             <template v-slot:prepend>
-              <v-icon icon="mdi-grid-large" />
+              <v-icon icon="mdi-grid-large" :size="24"/>
             </template>
-            <div style="width: 132px;" class="ml-6 text-left" :class="{ placeholder: !selectedProject }" >
+            <div class="text-left" :class="{ placeholder: !selectedProject }" >
               {{ selectedProjectName }}
               <template v-if="selectedProject">
                 <g-stale-project-warning :project="selectedProject" size="small" />
                 <g-not-ready-project-warning :project="selectedProject" size="small" />
               </template>
             </div>
+            <template v-slot:append>
+              <v-icon :icon="projectMenuIcon" :size="18"/>
+            </template>
           </v-btn>
         </template>
 
@@ -153,13 +155,23 @@ SPDX-License-Identifier: Apache-2.0
         </v-card>
       </v-menu>
     </template>
-    <v-list ref="refMainMenu" class="main-menu" variant="flat">
-      <v-list-item :to="{ name: 'Home' }" exact v-if="hasNoProjects">
+
+    <v-list ref="refMainMenu" variant="flat" class="main-menu">
+      <v-list-item v-if="hasNoProjects"
+        exact
+        :to="{ name: 'Home' }"
+        class="bg-main-background"
+        active-class="active-item"
+      >
+        <template v-slot:append>
+          <v-icon
+            size="x-small"
+            color="main-navigation-title"
+            icon="mdi-home-outline"
+          />
+        </template>
         <template v-slot:title>
           <div class="text-subtitle-1 text-main-navigation-title">Home</div>
-        </template>
-        <template v-slot:append>
-          <v-icon size="small" color="main-navigation-title">mdi-home-outline</v-icon>
         </template>
       </v-list-item>
       <template v-if="namespace">
@@ -170,12 +182,14 @@ SPDX-License-Identifier: Apache-2.0
             class="bg-main-background"
             active-class="active-item"
           >
-            <template v-slot:title>
-              <div class="text-subtitle-1 text-main-navigation-title" >{{ route.meta.menu.title }}</div>
+            <template v-slot:prepend>
+              <v-icon
+                size="x-small"
+                color="main-navigation-title"
+                :icon="route.meta.menu.icon"
+              />
             </template>
-            <template v-slot:append>
-              <v-icon size="small" color="main-navigation-title">{{ route.meta.menu.icon }}</v-icon>
-            </template>
+            <v-list-item-title class="text-uppercase text-main-navigation-title">{{ route.meta.menu.title }}</v-list-item-title>
           </v-list-item>
         </template>
       </template>
@@ -579,23 +593,21 @@ $teaserHeight: 200px;
     font-weight: 700;
     font-size: 16px;
 
+    :deep(.v-btn__prepend) {
+      margin: 0 24px 0 0 !important;
+    }
+    :deep(.v-btn__content > div) {
+      min-width: 153px !important;
+      text-align: left !important;
+    }
+    :deep(.v-btn__append) {
+      margin: 0 0 0 4px !important;
+    }
+
     .placeholder::before {
       content: 'Project';
       font-weight: 400;
       text-transform: none;
-    }
-  }
-
-  .v-footer {
-    background-color: transparent;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .v-list {
-    .v-list-item__title {
-      text-transform: uppercase !important;
-      max-width: 180px;
     }
   }
 
