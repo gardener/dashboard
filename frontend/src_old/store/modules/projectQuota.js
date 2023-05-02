@@ -44,7 +44,7 @@ function getProjectQuotaStatus (projectQuota) {
       limitValue,
       usedValue,
       percentage,
-      progressColor
+      progressColor,
     }
   })
 
@@ -76,7 +76,7 @@ const getters = {
     return quota
       ? getProjectQuotaStatus(quota)
       : []
-  }
+  },
 }
 
 // actions
@@ -84,7 +84,7 @@ const actions = {
   async fetchProjectQuota ({ commit }, namespace) {
     const { data } = await getResourceQuotas({ namespace })
     commit('SET_RESOURCE_QUOTAS', [namespace, data])
-  }
+  },
 }
 
 // mutations
@@ -92,7 +92,7 @@ const mutations = {
   SET_RESOURCE_QUOTAS (state, [key, quotas]) {
     const value = aggregateResourceQuotaStatus(map(quotas, 'status'))
     Vue.set(state, key, value)
-  }
+  },
 }
 
 export default {
@@ -100,5 +100,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

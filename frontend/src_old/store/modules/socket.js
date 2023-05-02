@@ -17,8 +17,8 @@ const state = {
     max: 5000,
     factor: 2,
     jitter: 0.5,
-    attempts: 0
-  }
+    attempts: 0,
+  },
 }
 
 // getters
@@ -33,7 +33,7 @@ const getters = {
     const sign = Math.sign(rand - 0.5)
     const deviation = Math.floor(rand * jitter * duration)
     return Math.min(duration + sign * deviation, max)
-  }
+  },
 }
 
 // actions
@@ -55,7 +55,7 @@ const actions = {
     commit('SET_CONNECTED', socket.connected)
     commit('SET_ACTIVE', socket.active)
     commit('SET_ERROR', err)
-  }
+  },
 }
 
 // mutations
@@ -91,7 +91,7 @@ const mutations = {
   },
   CONNECT () {
     // only used to trigger `socket.connect()`
-  }
+  },
 }
 
 export default {
@@ -99,5 +99,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

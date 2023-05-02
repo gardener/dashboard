@@ -20,7 +20,7 @@ const getters = {
   },
   autoLoginEnabled (state) {
     return state['global/auto-login'] === 'enabled'
-  }
+  },
 }
 
 // actions
@@ -33,7 +33,7 @@ const actions = {
   },
   setAutoLogin ({ commit }, value) {
     commit('SET_ITEM', ['global/auto-login', value ? 'enabled' : 'disabled'])
-  }
+  },
 }
 
 // mutations
@@ -48,7 +48,7 @@ const mutations = {
   },
   REMOVE_ITEM (state, key) {
     delete state[key]
-  }
+  },
 }
 
 export default {
@@ -56,5 +56,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

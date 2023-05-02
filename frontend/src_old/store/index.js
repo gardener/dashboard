@@ -22,14 +22,14 @@ import {
   selectedImageIsNotLatest,
   availableKubernetesUpdatesCache,
   defaultCriNameByKubernetesVersion,
-  UNKNOWN_EXPIRED_TIMESTAMP
+  UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { hash } from '@/utils/crypto'
 import {
   getSubjectRules,
   getKubeconfigData,
-  listProjectTerminalShortcuts
+  listProjectTerminalShortcuts,
 } from '@/utils/api'
 import map from 'lodash/map'
 import mapKeys from 'lodash/mapKeys'
@@ -103,7 +103,7 @@ const state = {
     resourceRules: null,
     nonResourceRules: null,
     incomplete: false,
-    evaluationError: null
+    evaluationError: null,
   },
   sidebar: true,
   user: null,
@@ -116,16 +116,16 @@ const state = {
   splitpaneResize: null,
   splitpaneLayouts: {},
   projectTerminalShortcuts: null,
-  prefersColorScheme: null
+  prefersColorScheme: null,
 }
 class Shortcut {
   constructor (shortcut, unverified = true) {
     Object.assign(this, shortcut)
     Object.defineProperty(this, 'id', {
-      value: hash(shortcut)
+      value: hash(shortcut),
     })
     Object.defineProperty(this, 'unverified', {
-      value: unverified
+      value: unverified,
     })
   }
 }
@@ -212,7 +212,7 @@ function mapOptionForInput (optionValue, shootResource) {
   const value = inputInverted ? !rawValue : rawValue
 
   const option = {
-    value
+    value,
   }
   return [key, option]
 }
@@ -235,7 +235,7 @@ function mapAccessRestrictionForInput (accessRestrictionDefinition, shootResourc
 
   const accessRestriction = {
     value,
-    options
+    options,
   }
   return [key, accessRestriction]
 }
@@ -246,8 +246,8 @@ function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
     display: {
       visibleIf = false,
       title = key,
-      description
-    }
+      description,
+    },
   } = optionDefinition
 
   const optionVisible = visibleIf === value
@@ -258,7 +258,7 @@ function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
   return {
     key,
     title,
-    description
+    description,
   }
 }
 
@@ -268,9 +268,9 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
     display: {
       visibleIf = false,
       title = key,
-      description
+      description,
     },
-    options: optionDefinitions
+    options: optionDefinitions,
   } = definition
 
   const accessRestrictionVisible = visibleIf === value
@@ -284,7 +284,7 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
     key,
     title,
     description,
-    options: optionsList
+    options: optionsList,
   }
 }
 
@@ -324,7 +324,7 @@ function decorateClassificationObject (obj) {
     isSupported: classification === 'supported' && !isExpired,
     isDeprecated: classification === 'deprecated',
     isExpired,
-    expirationDateString: getDateFormatted(obj.expirationDate)
+    expirationDateString: getDateFormatted(obj.expirationDate),
   }
 }
 
@@ -417,7 +417,7 @@ const getters = {
       let machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegion({
         type: 'machineTypes',
         cloudProfileName,
-        region
+        region,
       })
       machineTypes = map(machineTypes, item => {
         const machineType = { ...item }
@@ -433,7 +433,7 @@ const getters = {
       const machineTypes = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegion({
         type: 'machineTypes',
         cloudProfileName,
-        region
+        region,
       })
       const architectures = uniq(map(machineTypes, 'architecture'))
       return architectures.sort()
@@ -484,7 +484,7 @@ const getters = {
             vendorName,
             icon: vendorName,
             vendorHint,
-            architectures
+            architectures,
           })
         })
       }
@@ -508,7 +508,7 @@ const getters = {
       const compiled = template(noItemsText)
       return compiled({
         region,
-        cloudProfile
+        cloudProfile,
       })
     }
   },
@@ -592,7 +592,7 @@ const getters = {
     return map(getters.shootCustomFields, (customFields, key) => {
       return {
         ...customFields,
-        key
+        key,
       }
     })
   },
@@ -624,13 +624,13 @@ const getters = {
       columnSelectedByDefault: true,
       showDetails: true,
       sortable: true,
-      searchable: true
+      searchable: true,
     }
     shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
     shootCustomFields = mapValues(shootCustomFields, customField => {
       return {
         ...defaultProperties,
-        ...customField
+        ...customField,
       }
     })
     return shootCustomFields
@@ -650,7 +650,7 @@ const getters = {
       regex,
       title,
       description,
-      errorMessage
+      errorMessage,
     }
   },
   memberList (state, getters) {
@@ -839,7 +839,7 @@ const getters = {
         return {
           key,
           value,
-          text: `${key} [${value}]`
+          text: `${key} [${value}]`,
         }
       })
     }
@@ -1115,26 +1115,26 @@ const getters = {
         machine: {
           type: machineType.name,
           image: pick(machineImage, ['name', 'version']),
-          architecture
+          architecture,
         },
         zones,
         cri: {
-          name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion)
+          name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion),
         },
-        isNew: true
+        isNew: true,
       }
       if (volumeType.name) {
         worker.volume = {
           type: volumeType.name,
-          size: defaultVolumeSize
+          size: defaultVolumeSize,
         }
       } else if (!machineType.storage) {
         worker.volume = {
-          size: defaultVolumeSize
+          size: defaultVolumeSize,
         }
       } else if (machineType.storage.type !== 'fixed') {
         worker.volume = {
-          size: machineType.storage.size
+          size: machineType.storage.size,
         }
       }
       return worker
@@ -1194,7 +1194,7 @@ const getters = {
           version: shootK8sVersion,
           expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
           isValidTerminationDate: false,
-          severity: 'warning'
+          severity: 'warning',
         }
       }
       if (!version.expirationDate) {
@@ -1218,7 +1218,7 @@ const getters = {
       return {
         expirationDate: version.expirationDate,
         isValidTerminationDate: isValidTerminationDate(version.expirationDate),
-        severity
+        severity,
       }
     }
   },
@@ -1235,7 +1235,7 @@ const getters = {
             expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
             workerName: worker.name,
             isValidTerminationDate: false,
-            severity: 'warning'
+            severity: 'warning',
           }
         }
 
@@ -1254,7 +1254,7 @@ const getters = {
           ...workerImageDetails,
           isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
           workerName: worker.name,
-          severity
+          severity,
         }
       })
       return filter(workerGroups, 'expirationDate')
@@ -1274,7 +1274,7 @@ const getters = {
     return ['dark', 'light'].includes(colorScheme)
       ? colorScheme
       : state.prefersColorScheme
-  }
+  },
 }
 
 // actions
@@ -1503,7 +1503,7 @@ const actions = {
         const { data: items } = await listProjectTerminalShortcuts({ namespace })
         commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
           namespace,
-          items
+          items,
         })
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -1537,7 +1537,7 @@ const actions = {
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SET_SPLITPANE_RESIZE', value)
     return state.splitpaneResize
-  }
+  },
 }
 
 // mutations
@@ -1585,7 +1585,7 @@ const mutations = {
   },
   SET_PREFERS_COLOR_SCHEME (state, value) {
     state.prefersColorScheme = value
-  }
+  },
 }
 
 const modules = {
@@ -1601,7 +1601,7 @@ const modules = {
   tickets,
   shootStaging,
   storage,
-  socket
+  socket,
 }
 
 // TODO: clean this up
@@ -1618,11 +1618,11 @@ export {
   modules,
   plugins,
   mapAccessRestrictionForInput,
-  firstItemMatchingVersionClassification
+  firstItemMatchingVersionClassification,
 }
 
 export const createStore = (app) => {
-  const { $logger, $localStorage, $vuetify, $auth } = app.config.globalProperties;
+  const { $logger, $localStorage, $vuetify, $auth } = app.config.globalProperties
   // plugins
   plugins.push(createSocketPlugin($auth, $logger))
   // localStorage can be undefined in some unit tests
@@ -1641,7 +1641,7 @@ export const createStore = (app) => {
     mutations,
     modules,
     strict,
-    plugins
+    plugins,
   })
 
   return store

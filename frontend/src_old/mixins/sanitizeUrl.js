@@ -8,6 +8,6 @@ import { sanitizeUrl } from '@braintree/sanitize-url'
 
 export default {
   methods: {
-    sanitizeUrl
-  }
+    sanitizeUrl,
+  },
 }

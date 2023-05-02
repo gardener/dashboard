@@ -15,7 +15,7 @@ import find from 'lodash/find'
 
 // initial state
 const state = {
-  all: []
+  all: [],
 }
 
 // getters
@@ -36,7 +36,7 @@ const getters = {
     const dnsProviderList = map(supportedProviderTypes, type => {
       return {
         type,
-        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false)
+        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false),
       }
     })
 
@@ -46,7 +46,7 @@ const getters = {
     }
     // return only primary DNS Providers backed by DNSRecord
     return filter(dnsProviderList, 'primary')
-  }
+  },
 }
 
 // actions
@@ -55,14 +55,14 @@ const actions = {
     const { data } = await getGardenerExtensions()
     commit('RECEIVE', data)
     return state.all
-  }
+  },
 }
 
 // mutations
 const mutations = {
   RECEIVE (state, items) {
     state.all = items
-  }
+  },
 }
 
 export default {
@@ -70,5 +70,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

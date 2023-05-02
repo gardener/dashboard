@@ -45,7 +45,7 @@ const state = {
   cloudProfileName: null,
   controlPlaneFailureToleranceType: null,
   initialControlPlaneFailureToleranceType: null,
-  seedName: null
+  seedName: null,
 }
 
 // getters
@@ -93,13 +93,13 @@ const getters = {
         excludeDomains,
         includeDomains,
         excludeZones,
-        includeZones
+        includeZones,
       } = state.dnsProviders[id]
       const primary = state.dnsPrimaryProviderId === id
       const provider = {
         type,
         secretName,
-        primary
+        primary,
       }
       if (!isEmpty(excludeDomains)) {
         set(provider, 'domains.exclude', [...excludeDomains])
@@ -117,7 +117,7 @@ const getters = {
     }
     return () => {
       const dns = {
-        providers: map(state.dnsProviderIds, providerById)
+        providers: map(state.dnsProviderIds, providerById),
       }
       const domain = state.dnsDomain
       if (domain && domain.length) {
@@ -131,7 +131,7 @@ const getters = {
   },
   controlPlaneFailureToleranceTypeChangeAllowed (state, getters) {
     return getters.clusterIsNew || !state.initialControlPlaneFailureToleranceType
-  }
+  },
 }
 
 // actions
@@ -161,7 +161,7 @@ const actions = {
       excludeZones: [],
       includeZones: [],
       valid: isDnsProviderValid({ type, secretName }),
-      readonly: false
+      readonly: false,
     })
   },
   setCloudProfileName ({ commit }, value) {
@@ -180,8 +180,8 @@ const actions = {
         dns = {},
         cloudProfileName,
         controlPlane = {},
-        seedName
-      }
+        seedName,
+      },
     } = value
     // metadata
     commit('setMetadata', metadata)
@@ -196,12 +196,12 @@ const actions = {
         primary = false,
         domains: {
           exclude: excludeDomains = [],
-          include: includeDomains = []
+          include: includeDomains = [],
         } = {},
         zones: {
           exclude: excludeZones = [],
-          include: includeZones = []
-        } = {}
+          include: includeZones = [],
+        } = {},
       } = provider
       if (primary) {
         primaryProviderId = id
@@ -225,20 +225,20 @@ const actions = {
         excludeZones: [...excludeZones],
         includeZones: [...includeZones],
         valid: isDnsProviderValid({ type, secretName }),
-        readonly
+        readonly,
       }
     })
     commit('setDns', {
       domain,
       providers,
-      primaryProviderId
+      primaryProviderId,
     })
 
     commit('setCloudProfileName', cloudProfileName)
     commit('setControlPlaneFailureToleranceType', controlPlane.highAvailability?.failureTolerance?.type)
     commit('setInitialControlPlaneFailureToleranceType', controlPlane.highAvailability?.failureTolerance?.type)
     commit('setSeedName', seedName)
-  }
+  },
 }
 
 // mutations
@@ -309,7 +309,7 @@ const mutations = {
   },
   setSeedName (state, value) {
     state.seedName = value
-  }
+  },
 }
 
 export default {
@@ -317,5 +317,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

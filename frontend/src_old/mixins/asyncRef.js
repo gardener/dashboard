@@ -46,10 +46,10 @@ export function asyncRef (key) {
         },
         hooks: {
           'hook:mounted': () => this[id].resolve(this.$refs[key]),
-          'hook:beforeDestroy': () => setup(this[id])
-        }
+          'hook:beforeDestroy': () => setup(this[id]),
+        },
       }
-    }
+    },
   }
 }
 

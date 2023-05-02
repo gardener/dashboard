@@ -23,7 +23,7 @@ import {
   getCreatedBy,
   isShootStatusHibernated,
   isReconciliationDeactivated,
-  getIssueSince
+  getIssueSince,
 } from '@/utils'
 import { findItem, parseSearch, constants, getCondition } from './helper'
 import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
@@ -51,7 +51,7 @@ export function getRawVal (rootGetters, item, column) {
     case 'ticketLabels': {
       const labels = rootGetters['tickets/labels']({
         projectName: rootGetters.projectNameByNamespace(metadata),
-        name: metadata.name
+        name: metadata.name,
       })
       return join(map(labels, 'name'), ' ')
     }
@@ -128,7 +128,7 @@ export function getSortVal (rootGetters, item, sortBy) {
       const metadata = item.metadata
       return rootGetters['tickets/latestUpdated']({
         projectName: rootGetters.projectNameByNamespace(metadata),
-        name: metadata.name
+        name: metadata.name,
       })
     }
     default:
@@ -222,7 +222,7 @@ export default {
         getRawVal(rootGetters, item, 'ticketLabels'),
         getRawVal(rootGetters, item, 'errorCodes'),
         getRawVal(rootGetters, item, 'controlPlaneHighAvailability'),
-        ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key))
+        ...map(searchableCustomFields, ({ key }) => getRawVal(rootGetters, item, key)),
       ]
 
       if (search !== lastSearchString) {
@@ -277,13 +277,13 @@ export default {
               if (!isErrorCondition) {
                 return {
                   sortOrder: `${Number.MAX_SAFE_INTEGER}`,
-                  lastTransitionTime: itemCondition.lastTransitionTime
+                  lastTransitionTime: itemCondition.lastTransitionTime,
                 }
               }
               const condition = getters.conditionForType(itemCondition.type)
               return {
                 sortOrder: condition.sortOrder,
-                lastTransitionTime: itemCondition.lastTransitionTime
+                lastTransitionTime: itemCondition.lastTransitionTime,
               }
             })
             const { sortOrder, lastTransitionTime } = head(orderBy(errorGroups, ['sortOrder']))
@@ -309,5 +309,5 @@ export default {
     return (type) => {
       return get(rootState.cfg, ['knownConditions', type], getCondition(type))
     }
-  }
+  },
 }

@@ -35,7 +35,7 @@ const eqIssue = issue => {
 // initial state
 const state = {
   all: [],
-  allComments: {}
+  allComments: {},
 }
 
 const getOpenIssues = ({ state, name, projectName }) => {
@@ -63,7 +63,7 @@ const getters = {
       const issues = getters.issues({ name, projectName })
       return uniqBy(flatMap(issues, 'data.labels'), 'id')
     }
-  }
+  },
 }
 
 // actions
@@ -75,7 +75,7 @@ const actions = {
   clearComments ({ commit, state }) {
     commit('CLEAR_COMMENTS')
     return state.comments
-  }
+  },
 }
 
 const orderByUpdatedAt = items => {
@@ -127,7 +127,7 @@ const mutations = {
   },
   CLEAR_COMMENTS (state) {
     state.allComments = {}
-  }
+  },
 }
 
 const deleteItem = (state, deletedItem) => {
@@ -182,5 +182,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

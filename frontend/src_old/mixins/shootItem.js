@@ -20,21 +20,21 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTypeDelete,
-  isTruthyValue
+  isTruthyValue,
 } from '@/utils'
 
 export const shootItem = {
   props: {
     shootItem: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     ...mapGetters([
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
       'isSeedUnreachableByName',
-      'projectNameByNamespace'
+      'projectNameByNamespace',
     ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
@@ -201,7 +201,7 @@ export const shootItem = {
       })
       return [
         ...this.shootConditions,
-        ...shootConstraintsWithErrorCode
+        ...shootConstraintsWithErrorCode,
       ]
     },
     shootObservedGeneration () {
@@ -262,7 +262,7 @@ export const shootItem = {
     },
     isStaleShoot () {
       return this.shootItem?.stale
-    }
+    },
   },
   methods: {
     shootActionToolTip (tooltip) {
@@ -270,8 +270,8 @@ export const shootItem = {
         return tooltip
       }
       return 'Actions disabled for cluster with purpose infrastructure'
-    }
-  }
+    },
+  },
 }
 
 export default shootItem

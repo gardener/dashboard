@@ -6,12 +6,12 @@
 
 // initial state
 const state = {
-  draggingDragAndDropId: undefined
+  draggingDragAndDropId: undefined,
 }
 
 // getters
 const getters = {
-  draggingDragAndDropId: state => state.draggingDragAndDropId
+  draggingDragAndDropId: state => state.draggingDragAndDropId,
 }
 
 // actions
@@ -19,14 +19,14 @@ const actions = {
   setDraggingDragAndDropId: ({ commit, state }, draggingDragAndDropId) => {
     commit('SET_DRAGGING_DRAG_AND_DROP_ID', draggingDragAndDropId)
     return state.draggingDragAndDropId
-  }
+  },
 }
 
 // mutations
 const mutations = {
   SET_DRAGGING_DRAG_AND_DROP_ID (state, draggingDragAndDropId) {
     state.draggingDragAndDropId = draggingDragAndDropId
-  }
+  },
 }
 
 export default {
@@ -34,5 +34,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

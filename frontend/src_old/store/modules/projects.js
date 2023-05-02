@@ -10,14 +10,14 @@ import { getProjects, createProject, patchProject, updateProject, deleteProject 
 
 // initial state
 const state = {
-  all: []
+  all: [],
 }
 
 // getters
 const getters = {
   namespaces (state) {
     return state.all
-  }
+  },
 }
 
 // actions
@@ -49,7 +49,7 @@ const actions = {
     const namespace = metadata.namespace
     await deleteProject({ namespace })
     // do not remove project from store as it will stay in termininating phase for a while
-  }
+  },
 }
 
 // mutations
@@ -66,7 +66,7 @@ const mutations = {
     } else {
       state.all.push(newItem)
     }
-  }
+  },
 }
 
 export default {
@@ -74,5 +74,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

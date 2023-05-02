@@ -8,6 +8,10 @@
 import { configureCompat } from '@vue/compat'
 import App from '@/App.vue'
 import '@/sass/main.scss'
+import { createApp } from 'vue'
+
+// Plugins
+import { registerPlugins } from '@/plugins'
 
 // TODO: remove @vue/compat and this config
 configureCompat({
@@ -15,12 +19,8 @@ configureCompat({
   // vuetify sets aria-hidden="false" on some elements such the "clear"-icon in a v-text-field
   // with "clearable" enabled. This should not be an issue for accessability so ignore it for now to
   // not spam console. 'suppress-warning' will silence warning but mimic vue2 behavior.
-  ATTR_FALSE_VALUE: 'suppress-warning'
+  ATTR_FALSE_VALUE: 'suppress-warning',
 })
-import { createApp } from 'vue'
-
-// Plugins
-import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
 

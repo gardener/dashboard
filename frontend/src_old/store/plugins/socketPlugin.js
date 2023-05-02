@@ -12,7 +12,7 @@ function createSocket (store, userManager, logger) {
   const socket = io({
     path: '/api/events',
     transports: ['websocket'],
-    autoConnect: false
+    autoConnect: false,
   })
 
   const manager = socket.io
@@ -117,7 +117,7 @@ function createSocket (store, userManager, logger) {
         statusCode = 500,
         code = 'ERR_SOCKET_MIDDLEWARE',
         ...data
-      } = {}
+      } = {},
     } = err
     logger.error('socket connect error: %s (%d %s)', message, statusCode, code)
     switch (code) {
@@ -157,7 +157,7 @@ function createSocket (store, userManager, logger) {
       store.commit('shoots/HANDLE_EVENT', {
         rootState: store.state,
         rootGetters: store.getters,
-        event
+        event,
       })
     }
   })

@@ -42,6 +42,8 @@ import ShootItemEditor from '@/views/ShootItemEditor.vue'
 import Account from '@/views/Account.vue'
 import Settings from '@/views/Settings.vue'
 
+import RouterView from '@/components/RouterView.vue'
+
 const Members = () => import('@/views/Members.vue')
 const Home = () => import('@/views/Home.vue')
 const Secrets = () => import('@/views/Secrets.vue')
@@ -51,8 +53,6 @@ const NewShoot = () => import('@/views/NewShoot.vue')
 const ShootList = () => import('@/views/ShootList.vue')
 const ShootItem = () => import('@/views/ShootItem.vue')
 const ShootItemTerminal = () => import('@/views/ShootItemTerminal.vue')
-
-import RouterView from '@/components/RouterView.vue'
 
 function createRoutes (store) {
   return [

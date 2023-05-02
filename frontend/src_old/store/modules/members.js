@@ -8,7 +8,7 @@ import { getMembers, addMember, updateMember, deleteMember, resetServiceAccount 
 
 // initial state
 const state = {
-  all: []
+  all: [],
 }
 
 // getters
@@ -46,7 +46,7 @@ const actions = {
     const namespace = rootState.namespace
     const res = await resetServiceAccount({ namespace, name })
     commit('RECEIVE', res.data)
-  }
+  },
 }
 
 // mutations
@@ -56,7 +56,7 @@ const mutations = {
   },
   CLEAR (state) {
     state.all = []
-  }
+  },
 }
 
 export default {
@@ -64,5 +64,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

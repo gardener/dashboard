@@ -5,18 +5,18 @@
 //
 
 const state = {
-  manageDns: {}
+  manageDns: {},
 }
 
 // mutations
 const mutations = {
   SET_MANAGE_DNS (state, data) {
     state.manageDns = data
-  }
+  },
 }
 
 export default {
   namespaced: true,
   state,
-  mutations
+  mutations,
 }

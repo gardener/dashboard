@@ -12,20 +12,20 @@ export const shootSubscription = {
   computed: {
     ...mapState('shoots', [
       'subscriptionState',
-      'subscriptionError'
+      'subscriptionError',
     ]),
     ...mapGetters('shoots', [
       'loading',
       'subscription',
       'subscribed',
-      'unsubscribed'
+      'unsubscribed',
     ]),
     ...mapState('socket', [
       'readyState',
-      'connected'
+      'connected',
     ]),
     ...mapGetters('socket', [
-      'active'
+      'active',
     ]),
     kind () {
       if (this.loading) {
@@ -92,14 +92,14 @@ export const shootSubscription = {
         default:
           return ''
       }
-    }
+    },
   },
   methods: {
     ...mapActions('shoots', {
-      reload: 'synchronize'
+      reload: 'synchronize',
     }),
     ...mapMutations('socket', {
-      reconnect: 'CONNECT'
+      reconnect: 'CONNECT',
     }),
     retry () {
       if (!this.connected && !this.active) {
@@ -107,8 +107,8 @@ export const shootSubscription = {
       } else {
         this.reload()
       }
-    }
-  }
+    },
+  },
 }
 
 export default shootSubscription

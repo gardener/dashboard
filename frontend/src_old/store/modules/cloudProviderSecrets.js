@@ -16,14 +16,14 @@ const eqlNameAndNamespace = ({ namespace, name }) => {
 
 // initial state
 const state = {
-  all: []
+  all: [],
 }
 
 // getters
 const getters = {
   getCloudProviderSecretByName (state) {
     return ({ name, namespace }) => find(state.all, eqlNameAndNamespace({ name, namespace }))
-  }
+  },
 }
 
 // actions
@@ -63,7 +63,7 @@ const actions = {
         commit('ITEM_DELETED', res.data)
         return res.data
       })
-  }
+  },
 }
 
 // mutations
@@ -77,7 +77,7 @@ const mutations = {
   ITEM_PUT (state, newItem) {
     const index = findIndex(state.all, eqlNameAndNamespace({
       name: newItem.metadata.name,
-      namespace: newItem.metadata.namespace
+      namespace: newItem.metadata.namespace,
     }))
     if (index !== -1) {
       const item = state.all[index]
@@ -89,12 +89,12 @@ const mutations = {
   ITEM_DELETED (state, deletedItem) {
     const index = findIndex(state.all, eqlNameAndNamespace({
       name: deletedItem.metadata.name,
-      namespace: deletedItem.metadata.namespace
+      namespace: deletedItem.metadata.namespace,
     }))
     if (index !== -1) {
       state.all.splice(index, 1)
     }
-  }
+  },
 }
 
 export default {
@@ -102,5 +102,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

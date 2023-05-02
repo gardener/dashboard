@@ -9,7 +9,7 @@ import find from 'lodash/find'
 
 // initial state
 const state = {
-  all: []
+  all: [],
 }
 
 // getters
@@ -19,7 +19,7 @@ const getters = {
   },
   seedByName (state) {
     return name => find(state.all, ['metadata.name', name])
-  }
+  },
 }
 
 // actions
@@ -28,14 +28,14 @@ const actions = {
     const { data } = await getSeeds()
     commit('RECEIVE', data)
     return state.all
-  }
+  },
 }
 
 // mutations
 const mutations = {
   RECEIVE (state, items) {
     state.all = items
-  }
+  },
 }
 
 export default {
@@ -43,5 +43,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }

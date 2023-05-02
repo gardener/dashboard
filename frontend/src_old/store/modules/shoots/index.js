@@ -30,7 +30,7 @@ import {
   getIssuesAndComments,
   getShootInfo,
   createShoot,
-  deleteShoot
+  deleteShoot,
 } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
@@ -43,7 +43,7 @@ import {
   shootAddonList,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
-  isTruthyValue
+  isTruthyValue,
 } from '@/utils'
 import { globalLogger } from '@/utils/logger'
 import { isUserError, isTemporaryError, errorCodesFromArray } from '@/utils/errorCodes'
@@ -70,7 +70,7 @@ const state = {
   subscriptionState: constants.CLOSED,
   subscriptionError: null,
   sortBy: undefined,
-  sortDesc: undefined
+  sortDesc: undefined,
 }
 
 function clearAll ({ commit }) {
@@ -99,10 +99,10 @@ const actions = {
     const fetchShoot = async options => {
       const [
         { data: shoot },
-        { data: { issues = [], comments = [] } }
+        { data: { issues = [], comments = [] } },
       ] = await Promise.all([
         getShoot(options),
-        getIssuesAndComments(options)
+        getIssuesAndComments(options),
       ])
       // fetch shootInfo in the background (do not await the promise)
       assignInfo(shoot)
@@ -114,10 +114,10 @@ const actions = {
       const { namespace } = options
       const [
         { data: { items } },
-        { data: { issues = [] } }
+        { data: { issues = [] } },
       ] = await Promise.all([
         getShoots(options),
-        getIssues({ namespace })
+        getIssues({ namespace }),
       ])
       logger.debug('Fetched shoots and tickets in namespace %s', options.namespace)
       return { shoots: items, issues, comments: [] }
@@ -229,8 +229,8 @@ const actions = {
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
       metadata: {
-        namespace: rootState.namespace
-      }
+        namespace: rootState.namespace,
+      },
     }
 
     if (!rootGetters.sortedCloudProviderKindList.length) {
@@ -275,7 +275,7 @@ const actions = {
         ? 'default'
         : head(allLoadBalancerClassNames)
       const loadBalancerClasses = [{
-        name: defaultLoadBalancerClassName
+        name: defaultLoadBalancerClassName,
       }]
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
     }
@@ -339,12 +339,12 @@ const actions = {
     const maintenance = {
       timeWindow: {
         begin,
-        end
+        end,
       },
       autoUpdate: {
         kubernetesVersion: true,
-        machineImageVersion: true
-      }
+        machineImageVersion: true,
+      },
     }
     set(shootResource, 'spec.maintenance', maintenance)
 
@@ -352,7 +352,7 @@ const actions = {
     hibernationSchedule = map(hibernationSchedule, schedule => {
       return {
         ...schedule,
-        location: rootState.location
+        location: rootState.location,
       }
     })
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
@@ -367,7 +367,7 @@ const actions = {
       sortedUids = map(sortedShoots, 'metadata.uid')
     }
     commit('SET_FOCUS_MODE', { value, sortedUids })
-  }
+  },
 }
 
 function onlyAllShootsWithIssues (state, rootState) {
@@ -571,7 +571,7 @@ const mutations = {
   },
   SET_SORT_DESC (state, value) {
     state.sortDesc = value
-  }
+  },
 }
 
 export default {
@@ -579,5 +579,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 }
