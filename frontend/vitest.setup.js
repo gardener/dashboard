@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-
 import { vi } from 'vitest'
 import createFetchMock from 'vitest-fetch-mock'
 
@@ -17,7 +16,7 @@ global.document.createRange = vi.fn().mockImplementation(() => {
     return {
       item: () => null,
       length: 0,
-      [Symbol.iterator]: vi.fn()
+      [Symbol.iterator]: vi.fn(),
     }
   }
   return range
@@ -28,7 +27,7 @@ global.window.matchMedia = vi.fn().mockImplementation(query => {
     matches: false,
     media: query,
     addEventListener: vi.fn(),
-    removeEventListener: vi.fn()
+    removeEventListener: vi.fn(),
   }
 })
 
@@ -38,7 +37,7 @@ global.console = {
     globalConsole.log(...args)
   },
   warn: vi.fn(),
-  error: vi.fn()
+  error: vi.fn(),
 }
 
 // see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358

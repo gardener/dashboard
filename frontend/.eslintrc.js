@@ -11,10 +11,11 @@ module.exports = {
     vi: 'readonly',
   },
   extends: [
+    'eslint:recommended',
+    'standard',
     'plugin:vue/vue3-essential',
     'plugin:vitest/recommended',
     'plugin:vuetify/base',
-    'eslint:recommended',
   ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],

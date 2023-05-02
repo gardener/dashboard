@@ -5,9 +5,31 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { toRef } from 'vue'
-import { useAppStore } from '@/store/app'
-import { useLogger } from '@/composables/useLogger'
+import { useAppStore, useAuthzStore, useProjectStore } from '@/store'
+import { useLogger, useUser } from '@/composables'
+
+import {
+  newShootTabs,
+  shootItemTabs,
+} from './tabs'
+
+import {
+  homeBreadcrumbs,
+  newProjectBreadcrumbs,
+  accountBreadcrumbs,
+  settingsBreadcrumbs,
+  shootListBreadcrumbs,
+  shootItemBreadcrumbs,
+  shootItemTerminalBreadcrumbs,
+  secretItemBreadcrumbs,
+  secretsBreadcrumbs,
+  newShootBreadcrumbs,
+  newShootEditorBreadcrumbs,
+  administrationBreadcrumbs,
+  membersBreadcrumbs,
+  terminalBreadcrumbs,
+  notFoundBreadcrumbs,
+} from './breadcrumbs'
 
 /* Layouts */
 import GLogin from '@/layouts/GLogin.vue'
@@ -15,144 +37,458 @@ import GDefault from '@/layouts/GDefault.vue'
 
 /* Views */
 import GError from '@/views/GError.vue'
-import GHome from '@/views/GHome.vue'
 import GNotFound from '@/views/GNotFound.vue'
+import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
+import GNewShootEditor from '@/views/GNewShootEditor.vue'
+import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
+import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
-import {
-  notFoundBreadcrumbs,
-  homeBreadcrumbs,
-  settingsBreadcrumbs,
-  accountBreadcrumbs,
-} from './breadcrumbs'
+/* Components */
+import GRouterView from '@/components/GRouterView.vue'
+
+const GMembers = () => import('@/views/GMembers.vue')
+const GHome = () => import('@/views/GHome.vue')
+const GSecrets = () => import('@/views/GSecrets.vue')
+const GAdministration = () => import('@/views/GAdministration.vue')
+
+const GNewShoot = () => import('@/views/GNewShoot.vue')
+const GShootList = () => import('@/views/GShootList.vue')
+const GShootItem = () => import('@/views/GShootItem.vue')
+const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
 export function createRoutes () {
+  const appStore = useAppStore()
+  const projectStore = useProjectStore()
+  const authzStore = useAuthzStore()
+  const user = useUser()
+  const logger = useLogger() // eslint-disable-line no-unused-vars
+
   return [
     loginRoute('/login'),
     errorRoute('/error'),
     defaultHierarchy('/'),
   ]
-}
 
-export function loginRoute (path) {
-  const store = useAppStore()
-  const logger = useLogger() // eslint-disable-line no-unused-vars
-  const alert = toRef(store, 'alert')
+  /* Default Hierachy "/" */
+  function defaultHierarchy (path) {
+    const children = [
+      homeRoute(''),
+      accountRoute('account'),
+      settingsRoute('settings'),
+      projectsRoute('namespace'),
+      newProjectRoute('namespace/+'),
+      projectHierarchy('namespace/:namespace'),
+      {
+        path: '*',
+        component: GNotFound,
+        meta: {
+          namespaced: false,
+          projectScope: false,
+          breadcrumbs: notFoundBreadcrumbs,
+        },
+      },
+    ]
+    return {
+      path,
+      component: GDefault,
+      children,
+    }
+  }
 
-  return {
-    path,
-    name: 'Login',
-    component: GLogin,
-    async beforeEnter (to) {
-      if (/^#.+/.test(to.hash)) {
-        const searchParams = new URLSearchParams(to.hash.substring(1))
-        if (searchParams.has('error')) {
-          alert.value = {
-            type: 'error',
-            title: searchParams.get('title') ?? 'Login Error',
-            message: searchParams.get('error'),
-          }
-          return {
-            ...to,
-            hash: '',
+  /* Project Hierachy "/namespace/:namespace" */
+  function projectHierarchy (path) {
+    return {
+      path,
+      component: GProjectPlaceholder,
+      children: [
+        { path: '', redirect: 'shoots' },
+        shootListHierarchy('shoots'),
+        secretListRoute('secrets'),
+        secretItemRoute('secrets/:name'),
+        membersRoute('members'),
+        administrationRoute('administration'),
+        { path: 'term', redirect: 'term/garden' },
+        gardenTerminalRoute('term/garden'),
+        {
+          path: '*',
+          component: GNotFound,
+          meta: {
+            breadcrumbs: notFoundBreadcrumbs,
+          },
+        },
+      ],
+    }
+  }
+
+  /* Shoot List Hierachy "/namespace/:namespace/shoots" */
+  function shootListHierarchy (path) {
+    return {
+      path,
+      component: GRouterView,
+      children: [
+        shootListRoute(''),
+        newShootRoute('+'),
+        newShootEditorRoute('+/yaml'),
+        shootItemHierarchy(':name'),
+      ],
+    }
+  }
+
+  /* Shoot Item Hierachy "/namespace/:namespace/shoots/:name" */
+  function shootItemHierarchy (path) {
+    return {
+      path,
+      component: GShootItemPlaceholder,
+      children: [
+        shootItemRoute(''),
+        shootItemEditorRoute('yaml'),
+        shootItemHibernationRoute('hibernation'),
+        shootItemTerminalRoute('term'),
+        {
+          path: '*',
+          component: GNotFound,
+          meta: {
+            breadcrumbs: shootItemBreadcrumbs,
+          },
+        },
+      ],
+    }
+  }
+
+  /**
+     * Route Meta fields type definition
+     * @typedef {Object} RouteMeta
+     * @prop {boolean} [public]                   - Determines whether route needs authorization
+     * @prop {boolean} [namespaced]               - Determines whether route is namespace specific and has namespace in path
+     * @prop {boolean} [projectScope]             - Determines whether route can be accessed in store of mutiple projects (_all)
+     * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
+     * @prop {string}  [title]                    - Main menu title
+     * @prop {string}  [icon]                     - Main menu icon
+     * @prop {RouteFn} [breadcrumbText]           - Property or function that returns the breadcrumb title
+     * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
+     */
+
+  function loginRoute (path) {
+    return {
+      path,
+      name: 'Login',
+      component: GLogin,
+      async beforeEnter (to) {
+        if (/^#.+/.test(to.hash)) {
+          const searchParams = new URLSearchParams(to.hash.substring(1))
+          if (searchParams.has('error')) {
+            appStore.alert = {
+              type: 'error',
+              title: searchParams.get('title') ?? 'Login Error',
+              message: searchParams.get('error'),
+            }
+            return {
+              ...to,
+              hash: '',
+            }
           }
         }
-      }
-    },
-    meta: {
-      public: true,
-    },
+      },
+      meta: {
+        public: true,
+      },
+    }
   }
-}
 
-export function errorRoute (path) {
-  return {
-    path,
-    name: 'Error',
-    component: GError,
-    meta: {
-      public: true,
-    },
+  function errorRoute (path) {
+    return {
+      path,
+      name: 'Error',
+      component: GError,
+      meta: {
+        public: true,
+      },
+    }
   }
-}
 
-/* Default Hierachy "/" */
-function defaultHierarchy (path) {
-  const children = [
-    homeRoute(''),
-    accountRoute('account'),
-    settingsRoute('settings'),
-    {
-      path: '*',
-      component: GNotFound,
+  function homeRoute (path) {
+    return {
+      path,
+      name: 'Home',
+      component: GHome,
       meta: {
         namespaced: false,
         projectScope: false,
-        breadcrumbs: notFoundBreadcrumbs,
+        breadcrumbs: homeBreadcrumbs,
       },
-    },
-  ]
-  return {
-    path,
-    component: GDefault,
-    children,
-  }
-}
-
-export function homeRoute (path) {
-  return {
-    path,
-    name: 'Home',
-    component: GHome,
-    meta: {
-      namespaced: false,
-      projectScope: false,
-      breadcrumbs: homeBreadcrumbs,
-    },
-  }
-}
-
-export function accountRoute (path) {
-  return {
-    path,
-    name: 'Account',
-    component: GAccount,
-    meta: {
-      namespaced: false,
-      projectScope: false,
-      breadcrumbs: accountBreadcrumbs,
-    },
-    beforeEnter (to, from) {
-      const namespace = from.params.namespace ?? from.query.namespace ?? 'garden'
-      if (!to.query.namespace && namespace) {
-        return {
-          name: 'Account',
-          query: { namespace, ...to.query },
+      async beforeEnter (to, from, next) {
+        const namespace = projectStore.defaultNamespace
+        if (namespace) {
+          return next({
+            name: 'ShootList',
+            params: { namespace },
+          })
         }
-      }
-    },
+        next()
+      },
+    }
   }
-}
 
-export function settingsRoute (path) {
-  return {
-    path,
-    name: 'Settings',
-    component: GSettings,
-    meta: {
-      namespaced: false,
-      projectScope: false,
-      breadcrumbs: settingsBreadcrumbs,
-    },
-    beforeEnter (to, from) {
-      const namespace = from.params.namespace ?? from.query.namespace ?? 'garden'
-      if (!to.query.namespace && namespace) {
-        return {
-          name: 'Settings',
-          query: { namespace, ...to.query },
+  function newProjectRoute (path) {
+    return {
+      path,
+      name: 'NewProject',
+      component: GHome,
+      meta: {
+        namespaced: false,
+        projectScope: false,
+        breadcrumbs: newProjectBreadcrumbs,
+      },
+      beforeEnter (to, from, next) {
+        const defaultNamespace = projectStore.defaultNamespace
+        if (!projectStore.namespace && defaultNamespace) {
+          projectStore.namespace = defaultNamespace
         }
-      }
-    },
+        next()
+      },
+    }
+  }
+
+  function projectsRoute (path) {
+    return {
+      path,
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (namespace) {
+          return next({
+            name: 'ShootList',
+            params: { namespace },
+          })
+        }
+        next()
+      },
+    }
+  }
+
+  function accountRoute (path) {
+    return {
+      path,
+      name: 'Account',
+      component: GAccount,
+      meta: {
+        namespaced: false,
+        projectScope: false,
+        breadcrumbs: accountBreadcrumbs,
+      },
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (!to.query.namespace && namespace) {
+          return next({
+            name: 'Account',
+            query: { namespace, ...to.query },
+          })
+        }
+        next()
+      },
+    }
+  }
+
+  function settingsRoute (path) {
+    return {
+      path,
+      name: 'Settings',
+      component: GSettings,
+      meta: {
+        namespaced: false,
+        projectScope: false,
+        breadcrumbs: settingsBreadcrumbs,
+      },
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (!to.query.namespace && namespace) {
+          return next({
+            name: 'Settings',
+            query: { namespace, ...to.query },
+          })
+        }
+        next()
+      },
+    }
+  }
+
+  function shootListRoute (path) {
+    return {
+      path,
+      name: 'ShootList',
+      component: GShootList,
+      meta: {
+        menu: {
+          title: 'Clusters',
+          icon: 'mdi-hexagon-multiple',
+        },
+        projectScope: false,
+        breadcrumbs: shootListBreadcrumbs,
+      },
+    }
+  }
+
+  function newShootRoute (path) {
+    return {
+      path,
+      name: 'NewShoot',
+      component: GNewShoot,
+      meta: {
+        breadcrumbs: newShootBreadcrumbs,
+        tabs: newShootTabs,
+      },
+    }
+  }
+
+  function newShootEditorRoute (path) {
+    return {
+      path,
+      name: 'NewShootEditor',
+      component: GNewShootEditor,
+      meta: {
+        breadcrumbs: newShootEditorBreadcrumbs,
+        tabs: newShootTabs,
+      },
+    }
+  }
+
+  function shootItemRoute (path) {
+    return {
+      path,
+      name: 'ShootItem',
+      component: GShootItem,
+      meta: {
+        breadcrumbs: shootItemBreadcrumbs,
+        tabs: shootItemTabs,
+      },
+    }
+  }
+
+  function shootItemEditorRoute (path) {
+    return {
+      path,
+      name: 'ShootItemEditor',
+      component: GShootItemEditor,
+      meta: {
+        breadcrumbs: shootItemBreadcrumbs,
+        tabs: shootItemTabs,
+      },
+    }
+  }
+
+  function shootItemHibernationRoute (path) {
+    return {
+      path,
+      name: 'ShootItemHibernationSettings',
+      component: GShootItem,
+      meta: {
+        breadcrumbs: shootItemBreadcrumbs,
+        tabs: shootItemTabs,
+      },
+    }
+  }
+
+  function shootItemTerminalRoute (path) {
+    return {
+      path,
+      name: 'ShootItemTerminal',
+      component: GShootItemTerminal,
+      meta: {
+        breadcrumbs: shootItemTerminalBreadcrumbs,
+      },
+      beforeEnter (to, from, next) {
+        if (authzStore.hasShootTerminalAccess) {
+          next()
+        } else {
+          next('/')
+        }
+      },
+    }
+  }
+
+  function secretListRoute (path) {
+    return {
+      path,
+      name: 'Secrets',
+      component: GSecrets,
+      meta: {
+        menu: {
+          title: 'Secrets',
+          icon: 'mdi-key',
+          get hidden () {
+            return !authzStore.canGetSecrets
+          },
+        },
+        breadcrumbs: secretsBreadcrumbs,
+      },
+    }
+  }
+
+  function secretItemRoute (path) {
+    return {
+      path,
+      name: 'Secret',
+      component: GSecrets,
+      meta: {
+        breadcrumbs: secretItemBreadcrumbs,
+      },
+    }
+  }
+
+  function membersRoute (path) {
+    return {
+      path,
+      name: 'Members',
+      component: GMembers,
+      meta: {
+        menu: {
+          title: 'Members',
+          icon: 'mdi-account-multiple-outline',
+        },
+        breadcrumbs: membersBreadcrumbs,
+      },
+    }
+  }
+
+  function administrationRoute (path) {
+    return {
+      path,
+      name: 'Administration',
+      component: GAdministration,
+      meta: {
+        menu: {
+          title: 'Administration',
+          icon: 'mdi-cog',
+        },
+        breadcrumbs: administrationBreadcrumbs,
+      },
+    }
+  }
+
+  function gardenTerminalRoute (path) {
+    return {
+      path,
+      name: 'GardenTerminal',
+      component: GShootItemTerminal,
+      meta: {
+        menu: {
+          title: 'Garden Cluster',
+          icon: 'mdi-console',
+          get hidden () {
+            return !(authzStore.hasGardenTerminalAccess && user.isAdmin.value)
+          },
+        },
+        breadcrumbs: terminalBreadcrumbs,
+      },
+      beforeEnter (to, from, next) {
+        if (authzStore.hasGardenTerminalAccess) {
+          to.params.target = 'garden'
+          next()
+        } else {
+          next('/')
+        }
+      },
+    }
   }
 }

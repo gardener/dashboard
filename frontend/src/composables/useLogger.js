@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed, markRaw  } from 'vue'
+import { computed, markRaw } from 'vue'
 import { createGlobalState, useLocalStorage } from '@vueuse/core'
 
 const LEVELS = {

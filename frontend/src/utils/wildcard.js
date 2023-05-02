@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-
 // Lodash
 import startsWith from 'lodash/startsWith'
 import endsWith from 'lodash/endsWith'

@@ -900,6 +900,10 @@ __metadata:
     codemirror: ^6.0.1
     dayjs: ^1.11.7
     eslint: ^8.22.0
+    eslint-config-standard: ^17.0.0
+    eslint-plugin-import: ^2.27.5
+    eslint-plugin-n: ^15.6.1
+    eslint-plugin-promise: ^6.1.1
     eslint-plugin-vitest: ^0.0.57
     eslint-plugin-vue: ^9.3.0
     eslint-plugin-vuetify: ^2.0.0-beta.4

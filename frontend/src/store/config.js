@@ -122,14 +122,14 @@ export const useConfigStore = defineStore('config', () => {
     if (!alertBannerMessage.value) {
       return
     }
-      let identifier = alert.value?.identifier
-      if (identifier) {
-        identifier = camelCase(identifier)
-      } else {
-        identifier = hash(alertBannerMessage.value)
-      }
-      // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
-      return `cfg.${identifier}`
+    let identifier = alert.value?.identifier
+    if (identifier) {
+      identifier = camelCase(identifier)
+    } else {
+      identifier = hash(alertBannerMessage.value)
+    }
+    // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
+    return `cfg.${identifier}`
   })
 
   const appVersion = computed(() => {

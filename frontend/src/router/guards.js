@@ -4,17 +4,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useAppStore } from '@/store/app'
-import { useConfigStore } from '@/store/config'
-import { useAuthnzStore } from '@/store/authz'
-import { useProjectStore } from '@/store/project'
+import {
+  useAppStore,
+  useConfigStore,
+  useAuthzStore,
+  useProjectStore,
+  useCloudProfileStore,
+  useSeedStore,
+  useGardenerExtensionStore,
+  useKubeconfigStore,
+} from '@/store'
 import { useToken, useLogger, useUser } from '@/composables'
 
 export function createGuards () {
   const appStore = useAppStore()
   const configStore = useConfigStore()
   const projectStore = useProjectStore()
-  const authzStore = useAuthnzStore()
+  const cloudProfileStore = useCloudProfileStore()
+  const seedStore = useSeedStore()
+  const gardenerExtensionsStore = useGardenerExtensionStore()
+  const kubeconfigStore = useKubeconfigStore()
+  const authzStore = useAuthzStore()
   const logger = useLogger()
   const token = useToken()
   const user = useUser()
@@ -48,6 +58,10 @@ export function createGuards () {
         await Promise.all([
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
+          ensureCloudProfilesLoaded(cloudProfileStore),
+          ensureSeedsLoaded(seedStore),
+          ensureGardenerExtensionsLoaded(gardenerExtensionsStore),
+          ensureKubeconfigLoaded(kubeconfigStore),
           refreshRules(authzStore, namespace),
         ])
 
@@ -81,7 +95,6 @@ export function createGuards () {
   }
 }
 
-
 async function ensureConfigLoaded (store) {
   if (store.isInitial) {
     return store.fetchConfig()
@@ -98,3 +111,26 @@ async function refreshRules (store, ...args) {
   return store.fetchRules(...args)
 }
 
+function ensureCloudProfilesLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchCloudProfiles()
+  }
+}
+
+function ensureSeedsLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchSeeds()
+  }
+}
+
+function ensureGardenerExtensionsLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchGardenerExtensions()
+  }
+}
+
+function ensureKubeconfigLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchKubeconfig()
+  }
+}

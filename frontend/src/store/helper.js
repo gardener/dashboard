@@ -35,7 +35,7 @@ export class Shortcut {
   }
 }
 
-export function vendorNameFromImageName  (imageName) {
+export function vendorNameFromImageName (imageName) {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
     return 'coreos'

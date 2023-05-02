@@ -30,34 +30,34 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-  import { computed, toRef } from 'vue'
-  import GTimeString from '@/components/GTimeString.vue'
-  import { getProjectDetails } from '@/utils'
+import { computed, toRef } from 'vue'
+import GTimeString from '@/components/GTimeString.vue'
+import { getProjectDetails } from '@/utils'
 
-  const props = defineProps({
-    project: {
-      type: Object,
-      default: null,
-    },
-    size: {
-      type: String,
-      default: 'default',
-    },
-    color: {
-      type: String,
-      default: 'primary',
-    },
-  })
+const props = defineProps({
+  project: {
+    type: Object,
+    default: null,
+  },
+  size: {
+    type: String,
+    default: 'default',
+  },
+  color: {
+    type: String,
+    default: 'primary',
+  },
+})
 
-  const { size, color } = toRef(props, 'color')
+const { size, color } = toRef(props, 'color')
 
-  const projectDetails = computed(() => {
-    return getProjectDetails(props.project)
-  })
+const projectDetails = computed(() => {
+  return getProjectDetails(props.project)
+})
 
-  const icon = computed(() => {
-    return projectDetails.value.staleAutoDeleteTimestamp
-      ? 'mdi-delete-clock'
-      : 'mdi-clock-alert-outline'
-  })
+const icon = computed(() => {
+  return projectDetails.value.staleAutoDeleteTimestamp
+    ? 'mdi-delete-clock'
+    : 'mdi-clock-alert-outline'
+})
 </script>

@@ -164,7 +164,12 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <template v-if="namespace">
         <template v-for="(route, index) in routes">
-          <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index" active-class="active-item">
+          <v-list-item v-if="!route.meta.menu.hidden"
+            :to="namespacedRoute(route)"
+            :key="index"
+            class="bg-main-background"
+            active-class="active-item"
+          >
             <template v-slot:title>
               <div class="text-subtitle-1 text-main-navigation-title" >{{ route.meta.menu.title }}</div>
             </template>
@@ -182,332 +187,332 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-  import { ref, computed, nextTick, watch, toRef } from 'vue'
-  import {
-    useAppStore,
-    useConfigStore,
-    useAuthnzStore,
-    useProjectStore,
-  } from '@/store'
-  import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, nextTick, watch, toRef } from 'vue'
+import {
+  useAppStore,
+  useConfigStore,
+  useAuthzStore,
+  useProjectStore,
+} from '@/store'
+import { useRouter, useRoute } from 'vue-router'
 
-  // import ProjectCreateDialog from '@/components/dialogs/ProjectDialog.vue'
-  import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
-  import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
+// import ProjectCreateDialog from '@/components/dialogs/ProjectDialog.vue'
+import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
+import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 
-  import {
-    emailToDisplayName,
-    setDelayedInputFocus,
-    routes as getRoutes,
-    namespacedRoute as getNamespacedRoute,
-    routeName as getRouteName,
-  } from '@/utils'
+import {
+  emailToDisplayName,
+  setDelayedInputFocus,
+  routes as getRoutes,
+  namespacedRoute as getNamespacedRoute,
+  routeName as getRouteName,
+} from '@/utils'
 
-  import find from 'lodash/find'
-  import findIndex from 'lodash/findIndex'
-  import filter from 'lodash/filter'
-  import sortBy from 'lodash/sortBy'
-  import toLower from 'lodash/toLower'
-  import includes from 'lodash/includes'
-  import replace from 'lodash/replace'
-  import get from 'lodash/get'
-  import has from 'lodash/has'
-  import head from 'lodash/head'
-  import slice from 'lodash/slice'
-  import last from 'lodash/last'
+import find from 'lodash/find'
+import findIndex from 'lodash/findIndex'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
+import toLower from 'lodash/toLower'
+import includes from 'lodash/includes'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
+import has from 'lodash/has'
+import head from 'lodash/head'
+import slice from 'lodash/slice'
+import last from 'lodash/last'
 
-  const allProjectsItem = {
-    metadata: {
-      name: 'All Projects',
-      namespace: '_all',
-    },
-    data: {
-      phase: 'Ready',
-    },
+const allProjectsItem = {
+  metadata: {
+    name: 'All Projects',
+    namespace: '_all',
+  },
+  data: {
+    phase: 'Ready',
+  },
+}
+const initialVisibleProjects = 10
+
+const projectStore = useProjectStore()
+const appStore = useAppStore()
+const configStore = useConfigStore()
+const authzStore = useAuthzStore()
+const router = useRouter()
+const route = useRoute()
+
+// eslint-disable-next-line no-unused-vars
+const projectDialog = ref(false)
+const projectFilter = ref('')
+const projectMenu = ref(false)
+const highlightedProjectName = ref()
+const numberOfVisibleProjects = ref(initialVisibleProjects)
+
+const refProjectFilter = ref(null)
+const refProjectList = ref(null)
+const refProjectListItems = ref(null)
+const refMainMenu = ref(null)
+
+const namespace = toRef(projectStore, 'namespace')
+const projectList = toRef(projectStore, 'projectList')
+const sidebar = toRef(appStore, 'sidebar')
+const version = toRef(configStore, 'appVersion')
+const canCreateProject = toRef(authzStore, 'canCreateProject')
+
+const selectedProject = computed({
+  get () {
+    if (namespace.value === allProjectsItem.metadata.namespace) {
+      return allProjectsItem
+    }
+    return find(projectList.value, ['metadata.namespace', namespace.value])
+  },
+  set ({ metadata = {} } = {}) {
+    router.push(getProjectMenuTargetRoute(metadata.namespace))
+  },
+})
+
+const hasNoProjects = computed(() => {
+  return !projectList.value.length
+})
+
+const routes = computed(() => {
+  const hasProjectScope = get(selectedProject.value, 'metadata.namespace') !== allProjectsItem.metadata.namespace
+  return getRoutes(router, hasProjectScope)
+})
+
+const projectMenuIcon = computed(() => {
+  return projectMenu.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
+})
+
+const selectedProjectName = computed(() => {
+  const project = selectedProject.value
+  return project ? project.metadata.name : ''
+})
+
+const sortedAndFilteredProjectList = computed(() => {
+  const predicate = item => {
+    if (!projectFilter.value) {
+      return true
+    }
+    const filter = toLower(projectFilter.value)
+    const name = toLower(item.metadata.name)
+    const owner = toLower(replace(item.data.owner, /@.*$/, ''))
+    return includes(name, filter) || includes(owner, filter)
   }
-  const initialVisibleProjects = 10
+  const filteredList = filter(projectList.value, predicate)
 
-  const projectStore = useProjectStore()
-  const appStore = useAppStore()
-  const configStore = useConfigStore()
-  const authzStore = useAuthnzStore()
-  const router = useRouter()
-  const route = useRoute()
-
-  // eslint-disable-next-line no-unused-vars
-  const projectDialog = ref( false)
-  const projectFilter = ref( '')
-  const projectMenu = ref(false)
-  const highlightedProjectName = ref()
-  const numberOfVisibleProjects = ref(initialVisibleProjects)
-
-  const refProjectFilter = ref(null)
-  const refProjectList = ref(null)
-  const refProjectListItems = ref(null)
-  const refMainMenu = ref(null)
-
-  const namespace = toRef(projectStore, 'namespace')
-  const projectList = toRef(projectStore, 'projectList')
-  const sidebar = toRef(appStore, 'sidebar')
-  const version = toRef(configStore, 'appVersion')
-  const canCreateProject = toRef(authzStore, 'canCreateProject')
-
-  const selectedProject = computed({
-    get () {
-      if (namespace.value === allProjectsItem.metadata.namespace) {
-        return allProjectsItem
-      }
-      return find(projectList.value, ['metadata.namespace', namespace.value])
-    },
-    set ({ metadata = {} } = {}) {
-      router.push(getProjectMenuTargetRoute(metadata.namespace))
-    },
-  })
-
-  const hasNoProjects = computed(() => {
-    return !projectList.value.length
-  })
-
-  const routes = computed(() => {
-    const hasProjectScope = get(selectedProject.value, 'metadata.namespace') !== allProjectsItem.metadata.namespace
-    return getRoutes(router, hasProjectScope)
-  })
-
-  const projectMenuIcon = computed(() => {
-    return projectMenu.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
-  })
-
-  const selectedProjectName = computed(() => {
-    const project = selectedProject.value
-    return project ? project.metadata.name : ''
-  })
-
-  const sortedAndFilteredProjectList = computed(() => {
-    const predicate = item => {
-      if (!projectFilter.value) {
-        return true
-      }
-      const filter = toLower(projectFilter.value)
-      const name = toLower(item.metadata.name)
-      const owner = toLower(replace(item.data.owner, /@.*$/, ''))
-      return includes(name, filter) || includes(owner, filter)
-    }
-    const filteredList = filter(projectList.value, predicate)
-
-    const exactMatch = item => {
-      return isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
-    }
-    const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
-    return sortedList
-  })
-
-  const sortedAndFilteredProjectListWithAllProjects = computed(() => {
-    if (projectList.value.length > 1) {
-      return [
-        allProjectsItem,
-        ...sortedAndFilteredProjectList.value,
-      ]
-    }
-    return sortedAndFilteredProjectList.value
-  })
-
-  const visibleProjectList = computed(() => {
-    const projectList = sortedAndFilteredProjectListWithAllProjects.value
-    const endIndex = numberOfVisibleProjects.value
-    return slice(projectList, 0, endIndex)
-  })
-
-  const getProjectOwner = computed(() => {
-    return (project) => {
-      return emailToDisplayName(get(project, 'data.owner'))
-    }
-  })
-
-  const namespacedRoute = computed(() => {
-    return (route) => {
-      return getNamespacedRoute(route, namespace.value)
-    }
-  })
-
-  const projectFilterHasExactMatch = computed(() => {
-    const project = head(sortedAndFilteredProjectList.value)
-    const projectName = get(project, 'metadata.name')
-    return isProjectNameMatchingFilter(projectName)
-  })
-
-  function findProjectCaseInsensitive (projectName) {
-    return find(sortedAndFilteredProjectListWithAllProjects.value, project => {
-      return toLower(projectName) === toLower(project.metadata.name)
-    })
+  const exactMatch = item => {
+    return isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
   }
+  const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
+  return sortedList
+})
 
-  function findProjectIndexCaseInsensitive (projectName) {
-    return findIndex(sortedAndFilteredProjectListWithAllProjects.value, project => {
-      return toLower(projectName) === toLower(project.metadata.name)
-    })
+const sortedAndFilteredProjectListWithAllProjects = computed(() => {
+  if (projectList.value.length > 1) {
+    return [
+      allProjectsItem,
+      ...sortedAndFilteredProjectList.value,
+    ]
   }
+  return sortedAndFilteredProjectList.value
+})
 
-  function highlightedProject () {
-    if (!highlightedProjectName.value) {
-      return head(sortedAndFilteredProjectListWithAllProjects.value)
+const visibleProjectList = computed(() => {
+  const projectList = sortedAndFilteredProjectListWithAllProjects.value
+  const endIndex = numberOfVisibleProjects.value
+  return slice(projectList, 0, endIndex)
+})
+
+const getProjectOwner = computed(() => {
+  return (project) => {
+    return emailToDisplayName(get(project, 'data.owner'))
+  }
+})
+
+const namespacedRoute = computed(() => {
+  return (route) => {
+    return getNamespacedRoute(route, namespace.value)
+  }
+})
+
+const projectFilterHasExactMatch = computed(() => {
+  const project = head(sortedAndFilteredProjectList.value)
+  const projectName = get(project, 'metadata.name')
+  return isProjectNameMatchingFilter(projectName)
+})
+
+function findProjectCaseInsensitive (projectName) {
+  return find(sortedAndFilteredProjectListWithAllProjects.value, project => {
+    return toLower(projectName) === toLower(project.metadata.name)
+  })
+}
+
+function findProjectIndexCaseInsensitive (projectName) {
+  return findIndex(sortedAndFilteredProjectListWithAllProjects.value, project => {
+    return toLower(projectName) === toLower(project.metadata.name)
+  })
+}
+
+function highlightedProject () {
+  if (!highlightedProjectName.value) {
+    return head(sortedAndFilteredProjectListWithAllProjects.value)
+  }
+  return findProjectCaseInsensitive(highlightedProjectName.value)
+}
+
+function navigateToHighlightedProject () {
+  navigateToProject(highlightedProject())
+}
+
+function onProjectClick (event, project) {
+  if (event.isTrusted) {
+    // skip untrusted events - e.g. events triggered via enter key
+    navigateToProject(project)
+  }
+}
+
+function navigateToProject (project) {
+  projectMenu.value = false
+
+  if (project !== selectedProject.value) {
+    selectedProject.value = project
+  }
+}
+
+function openProjectDialog () {
+  projectMenu.value = false
+  projectDialog.value = true
+}
+
+function getProjectMenuTargetRoute (namespace) {
+  const fallbackToShootList = route => {
+    if (namespace === '_all' && get(route, 'meta.projectScope') !== false) {
+      return true
     }
-    return findProjectCaseInsensitive(highlightedProjectName.value)
-  }
-
-  function navigateToHighlightedProject () {
-    navigateToProject(highlightedProject())
-  }
-
-  function onProjectClick (event, project) {
-    if (event.isTrusted) {
-      // skip untrusted events - e.g. events triggered via enter key
-      navigateToProject(project)
+    if (has(route, 'params.name')) {
+      return true
     }
-  }
-
-  function navigateToProject (project) {
-    projectMenu.value = false
-
-    if (project !== selectedProject.value) {
-      selectedProject.value = project
+    if (get(route, 'name') === 'GardenTerminal') {
+      return true
     }
+    return false
   }
-
-  function openProjectDialog () {
-    projectMenu.value = false
-    projectDialog.value = true
-  }
-
-  function getProjectMenuTargetRoute (namespace) {
-    const fallbackToShootList = route => {
-      if (namespace === '_all' && get(route, 'meta.projectScope') !== false) {
-        return true
-      }
-      if (has(route, 'params.name')) {
-        return true
-      }
-      if (get(route, 'name') === 'GardenTerminal') {
-        return true
-      }
-      return false
-    }
-    if (fallbackToShootList(route)) {
-      return {
-        name: 'ShootList',
-        params: {
-          namespace,
-        },
-      }
-    }
-    const name = getRouteName(route)
-    const key = get(route, 'meta.namespaced') === false
-      ? 'query'
-      : 'params'
+  if (fallbackToShootList(route)) {
     return {
-      name,
-      [key]: {
+      name: 'ShootList',
+      params: {
         namespace,
       },
     }
   }
+  const name = getRouteName(route)
+  const key = get(route, 'meta.namespaced') === false
+    ? 'query'
+    : 'params'
+  return {
+    name,
+    [key]: {
+      namespace,
+    },
+  }
+}
 
-  function onInputProjectFilter () {
-    highlightedProjectName.value = undefined
-    numberOfVisibleProjects.value = initialVisibleProjects
-    if (projectFilterHasExactMatch.value) {
-      highlightedProjectName.value = projectFilter.value
-    }
-
-    nextTick(() => scrollHighlightedProjectIntoView())
+function onInputProjectFilter () {
+  highlightedProjectName.value = undefined
+  numberOfVisibleProjects.value = initialVisibleProjects
+  if (projectFilterHasExactMatch.value) {
+    highlightedProjectName.value = projectFilter.value
   }
 
-  function highlightProjectWithKeys (keyDirection) {
-    let currentHighlightedIndex = 0
-    if (highlightedProjectName.value) {
-      currentHighlightedIndex = findProjectIndexCaseInsensitive(highlightedProjectName.value)
+  nextTick(() => scrollHighlightedProjectIntoView())
+}
+
+function highlightProjectWithKeys (keyDirection) {
+  let currentHighlightedIndex = 0
+  if (highlightedProjectName.value) {
+    currentHighlightedIndex = findProjectIndexCaseInsensitive(highlightedProjectName.value)
+  }
+
+  if (keyDirection === 'up') {
+    if (currentHighlightedIndex > 0) {
+      currentHighlightedIndex--
     }
-
-    if (keyDirection === 'up') {
-      if (currentHighlightedIndex > 0) {
-        currentHighlightedIndex--
-      }
-    } else if (keyDirection === 'down') {
-      if (currentHighlightedIndex < sortedAndFilteredProjectListWithAllProjects.value.length - 1) {
-        currentHighlightedIndex++
-      }
+  } else if (keyDirection === 'down') {
+    if (currentHighlightedIndex < sortedAndFilteredProjectListWithAllProjects.value.length - 1) {
+      currentHighlightedIndex++
     }
+  }
 
-    const newHighlightedProject = sortedAndFilteredProjectListWithAllProjects.value[currentHighlightedIndex]
-    highlightedProjectName.value = newHighlightedProject.metadata.name
+  const newHighlightedProject = sortedAndFilteredProjectListWithAllProjects.value[currentHighlightedIndex]
+  highlightedProjectName.value = newHighlightedProject.metadata.name
 
-    if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {
+  if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {
+    numberOfVisibleProjects.value++
+  }
+
+  scrollHighlightedProjectIntoView()
+}
+
+function scrollHighlightedProjectIntoView () {
+  if (refProjectListItems.value) {
+    return
+  }
+  const projectListItem = refProjectListItems.value.find(child => {
+    return child.$attrs['data-g-project-name'] === highlightedProjectName.value
+  })
+  if (!projectListItem) {
+    return
+  }
+
+  const projectListElement = projectListItem.$el
+  if (projectListElement) {
+    scrollIntoView(projectListElement, false)
+  }
+}
+
+function scrollIntoView (element, ...args) {
+  element.scrollIntoView(...args)
+}
+
+function handleProjectListScroll () {
+  const projectListElement = refProjectList.value.$el
+  if (!projectListElement) {
+    return
+  }
+  const projectListBottomPosY = projectListElement.getBoundingClientRect().top + projectListElement.getBoundingClientRect().height
+  const projectListChildren = refProjectListItems.value
+  if (!projectListChildren) {
+    return
+  }
+  const lastProjectElement = last(projectListChildren).$el
+  if (!lastProjectElement) {
+    return
+  }
+
+  const lastProjectElementPosY = projectListBottomPosY - lastProjectElement.getBoundingClientRect().top
+  const scrolledToLastElement = lastProjectElementPosY > 0
+  if (scrolledToLastElement) {
+    // scrolled last element into view
+    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectListWithAllProjects.value.length) {
       numberOfVisibleProjects.value++
     }
-
-    scrollHighlightedProjectIntoView()
   }
+}
 
-  function scrollHighlightedProjectIntoView () {
-    if (refProjectListItems.value) {
-      return
-    }
-    const projectListItem = refProjectListItems.value.find(child => {
-      return child.$attrs['data-g-project-name'] === highlightedProjectName.value
+function isProjectNameMatchingFilter (projectName) {
+  return toLower(projectName) === toLower(projectFilter.value)
+}
+
+function isHighlightedProject (project) {
+  return project.metadata.name === highlightedProjectName.value
+}
+
+watch(projectMenu, value => {
+  if (value) {
+    requestAnimationFrame(() => {
+      setDelayedInputFocus(refProjectFilter)
     })
-    if (!projectListItem) {
-      return
-    }
-
-    const projectListElement = projectListItem.$el
-    if (projectListElement) {
-      scrollIntoView(projectListElement, false)
-    }
   }
-
-  function scrollIntoView (element, ...args) {
-    element.scrollIntoView(...args)
-  }
-
-  function handleProjectListScroll () {
-    const projectListElement = refProjectList.value.$el
-    if (!projectListElement) {
-      return
-    }
-    const projectListBottomPosY = projectListElement.getBoundingClientRect().top + projectListElement.getBoundingClientRect().height
-    const projectListChildren = refProjectListItems.value
-    if (!projectListChildren) {
-      return
-    }
-    const lastProjectElement = last(projectListChildren).$el
-    if (!lastProjectElement) {
-      return
-    }
-
-    const lastProjectElementPosY = projectListBottomPosY - lastProjectElement.getBoundingClientRect().top
-    const scrolledToLastElement = lastProjectElementPosY > 0
-    if (scrolledToLastElement) {
-      // scrolled last element into view
-      if (numberOfVisibleProjects.value <= sortedAndFilteredProjectListWithAllProjects.value.length) {
-        numberOfVisibleProjects.value++
-      }
-    }
-  }
-
-  function isProjectNameMatchingFilter (projectName) {
-    return toLower(projectName) === toLower(projectFilter.value)
-  }
-
-  function isHighlightedProject (project) {
-    return project.metadata.name === highlightedProjectName.value
-  }
-
-  watch(projectMenu, value => {
-    if (value) {
-      requestAnimationFrame(() => {
-        setDelayedInputFocus(refProjectFilter)
-      })
-    }
-  })
+})
 
 </script>
 

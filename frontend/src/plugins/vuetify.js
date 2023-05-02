@@ -72,7 +72,7 @@ export default createVuetify({
   icons: {
     defaultSet: 'mdi',
   },
-  theme:{
+  theme: {
     defaultTheme: 'light',
     themes: { light, dark },
     variations,

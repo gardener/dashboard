@@ -10,7 +10,7 @@ import { useApi, useUser } from '@/composables'
 import { useConfigStore } from './config'
 import { canI } from '@/utils'
 
-export const useAuthnzStore = defineStore('authz', () => {
+export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()
   const { isAdmin } = useUser()
   const { isTerminalEnabled, isProjectTerminalShortcutsEnabled } = useConfigStore()
@@ -87,27 +87,27 @@ export const useAuthnzStore = defineStore('authz', () => {
   })
 
   const canUseProjectTerminalShortcuts = computed(() => {
-    return isProjectTerminalShortcutsEnabled.value
-      && canGetProjectTerminalShortcuts.value
-      && canCreateTerminals.value
+    return isProjectTerminalShortcutsEnabled.value &&
+      canGetProjectTerminalShortcuts.value &&
+      canCreateTerminals.value
   })
 
   const hasGardenTerminalAccess = computed(() => {
-    return isTerminalEnabled.value
-    && canCreateTerminals.value
-    && canPatchServiceAccounts.value
-    && canCreateServiceAccounts.value
+    return isTerminalEnabled.value &&
+    canCreateTerminals.value &&
+    canPatchServiceAccounts.value &&
+    canCreateServiceAccounts.value
   })
 
   const hasControlPlaneTerminalAccess = computed(() => {
-    return isTerminalEnabled.value
-      && canCreateTerminals.value
-      && isAdmin.value
+    return isTerminalEnabled.value &&
+      canCreateTerminals.value &&
+      isAdmin.value
   })
 
   const hasShootTerminalAccess = computed(() => {
-    return isTerminalEnabled.value
-      && canCreateTerminals.value
+    return isTerminalEnabled.value &&
+      canCreateTerminals.value
   })
 
   async function fetchRules (namespace) {

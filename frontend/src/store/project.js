@@ -7,7 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, toRef } from 'vue'
 import { useApi } from '@/composables'
-import { useAuthnzStore } from './authz'
+import { useAuthzStore } from './authz'
 
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
@@ -16,7 +16,7 @@ import get from 'lodash/get'
 
 export const useProjectStore = defineStore('project', () => {
   const api = useApi()
-  const authzStore = useAuthnzStore()
+  const authzStore = useAuthzStore()
 
   const list = ref(null)
 

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
- export async function loadFonts () {
+export async function loadFonts () {
   const webFontLoader = await import('webfontloader')
 
   webFontLoader.load({
