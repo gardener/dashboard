@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
                 ref="refProjectFilter"
                 v-model="projectFilter"
                 label="Filter projects"
-                variant="text"
+                variant="plain"
                 clear-icon="mdi-close"
                 clearable
                 autofocus

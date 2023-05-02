@@ -570,7 +570,8 @@ function includesNameOrAll (list, name) {
   return includes(list, name) || includes(list, '*')
 }
 
-export function canI ({ resourceRules } = {}, verb, apiGroup, resouce, resourceName) {
+export function canI (subjectRules, verb, apiGroup, resouce, resourceName) {
+  let { resourceRules } = unref(subjectRules) ?? {}
   if (isEmpty(resourceRules)) {
     return false
   }

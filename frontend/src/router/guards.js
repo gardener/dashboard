@@ -67,8 +67,7 @@ export function createGuards () {
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
-          const username = user.username.value
-          throw new Error(`User ${username} has no authorization for namespace ${namespace}`)
+          logger.error('User %s has no authorization for namespace %s', user.username.value, namespace)
         }
         next()
       } catch (err) {
