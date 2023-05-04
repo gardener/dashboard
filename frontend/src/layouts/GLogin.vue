@@ -116,92 +116,77 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-  import { ref, computed, watch } from 'vue'
-  import { useRouter } from 'vue-router'
-  import { useRouteQuery } from '@vueuse/router'
-  import { useFetch } from '@vueuse/core'
+import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useRouteQuery } from '@vueuse/router'
 
-  import { useAuthn } from '@/composables/useAuthn'
-  import { useApi } from '@/composables/useApi'
-  import { useAppStore } from '@/store/app'
-  import { setDelayedInputFocus } from '@/utils'
+import { useApi } from '@/composables'
+import { useAppStore, useAuthnStore, useLoginStore } from '@/store'
+import { setDelayedInputFocus } from '@/utils'
 
-  const router = useRouter()
-  const store = useAppStore()
-  const auth = useAuthn()
-  const api = useApi()
+const router = useRouter()
+const appStore = useAppStore()
+const authnStore = useAuthnStore()
+const loginStore = useLoginStore()
+const api = useApi()
 
-  const { isFetching, data } = useFetch(import.meta.env.BASE_URL + 'login-config.json').get().json()
+const showToken = ref(false)
+const token = ref('')
+const tokenField = ref(null)
+const { isFetching, loginType, loginTypes, landingPageUrl } = storeToRefs(loginStore)
 
-  const showToken = ref(false)
-  const token = ref('')
-  const tokenField = ref(null)
-  const loginType = ref('token')
-  const landingPageUrl = ref()
+const redirectPath = useRouteQuery('redirectPath', '/')
 
-  const redirectPath = useRouteQuery('redirectPath', '/')
+function handleLogin () {
+  switch (loginType.value) {
+    case 'oidc':
+      oidcLogin()
+      break
+    case 'token':
+      tokenLogin()
+      break
+  }
+}
 
-  const loginTypes = computed(() => data.value?.loginTypes ?? ['token'])
-
-  function handleLogin () {
-    switch (loginType.value) {
-      case 'oidc':
-        oidcLogin()
-        break
-      case 'token':
-        tokenLogin()
-        break
+function oidcLogin () {
+  try {
+    authnStore.signinWithOidc(redirectPath.value)
+  } catch (err) {
+    appStore.alert = {
+      type: 'error',
+      title: 'OIDC Login Error',
+      message: err.message,
     }
   }
+}
 
-  function oidcLogin () {
+async function tokenLogin () {
+  try {
+    const value = token.value
+    token.value = undefined
+    await api.createTokenReview({ token: value })
     try {
-      auth.signinWithOidc(redirectPath.value)
+      await router.push(redirectPath.value)
     } catch (err) {
-      store.alert = {
-        type: 'error',
-        title: 'OIDC Login Error',
-        message: err.message,
-      }
-    }
-  }
-
-  async function tokenLogin () {
-    try {
-      const value = token.value
-      token.value = undefined
-      await api.createTokenReview({ token: value })
-      try {
-        await router.push(redirectPath.value)
-      } catch (err) {
-        /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards
+      /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards
         * (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort).
         */
-      }
-    } catch (err) {
-      store.alert = {
-        message: err.message,
-        title: 'Token Login Error',
-        type: 'error',
-      }
+    }
+  } catch (err) {
+    appStore.alert = {
+      message: err.message,
+      title: 'Token Login Error',
+      type: 'error',
     }
   }
+}
 
-  watch(loginType, value => {
-    if (value === 'token') {
-      setDelayedInputFocus(tokenField)
-    }
-  })
-
-  const unwatch = watch(isFetching, value => {
-    if (!value) {
-      unwatch()
-      if (data.value) {
-        loginType.value = data.value.loginTypes[0]
-        landingPageUrl.value = data.value.landingPageUrl
-      }
-    }
-  })
+watch(loginType, value => {
+  if (value === 'token') {
+    setDelayedInputFocus(tokenField)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

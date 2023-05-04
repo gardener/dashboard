@@ -4,14 +4,14 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <component :is="componentName" v-bind="componentProperties"></component>
+  <component :is="componentName" v-bind="componentProperties"/>
 </template>
 
 <script>
 import { ref, computed, watch, onMounted, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
-import GProjectError from '@/views/GProjectError.vue'
 import { useAuthzStore, useProjectStore } from '@/store'
+import GProjectError from '@/views/GProjectError.vue'
 
 export default defineComponent({
   components: {

@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { ref, onMounted } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
-import { useLogger } from '@/composables/useLogger'
+import { useLogger } from '@/composables'
 import GLoading from '@/components/GLoading.vue'
 import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'

@@ -6,8 +6,8 @@
 
 import { createRouter as createVueRouter, createWebHistory } from 'vue-router'
 
-import { useAppStore } from '@/store/app'
-import { useLogger } from '@/composables/useLogger'
+import { useAppStore } from '@/store'
+import { useLogger } from '@/composables'
 
 import { createRoutes } from './routes'
 import { createGuards } from './guards'

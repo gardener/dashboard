@@ -6,13 +6,14 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useApi, useUser } from '@/composables'
+import { useApi } from '@/composables'
 import { useConfigStore } from './config'
+import { useAuthnStore } from './authn'
 import { canI } from '@/utils'
 
 export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()
-  const { isAdmin } = useUser()
+  const authnStore = useAuthnStore()
   const { isTerminalEnabled, isProjectTerminalShortcutsEnabled } = useConfigStore()
 
   const spec = ref(null)
@@ -102,7 +103,7 @@ export const useAuthzStore = defineStore('authz', () => {
   const hasControlPlaneTerminalAccess = computed(() => {
     return isTerminalEnabled.value &&
       canCreateTerminals.value &&
-      isAdmin.value
+      authnStore.isAdmin
   })
 
   const hasShootTerminalAccess = computed(() => {

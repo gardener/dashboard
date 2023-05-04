@@ -7,7 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useFetch, useLocalStorage } from '@vueuse/core'
-import { useLogger } from '@/composables/useLogger'
+import { useLogger } from '@/composables'
 
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()
@@ -41,6 +41,7 @@ export const useLoginStore = defineStore('login', () => {
   })
 
   return {
+    isFetching,
     loginError,
     loginType,
     loginTypes,

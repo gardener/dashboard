@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-export { useApi } from './useApi'
-export { useAuthn } from './useAuthn'
+export { useApi, useInterceptors } from './useApi'
 export { useLogger } from './useLogger'
-export { useNav } from './useNav'
+export { useNamespace } from './useNamespace'
 export { useTheme } from './useTheme'
-export { useToken } from './useToken'
-export { useUser } from './useUser'

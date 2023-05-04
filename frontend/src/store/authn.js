@@ -4,12 +4,23 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createSharedComposable, useBrowserLocation } from '@vueuse/core'
-import { useToken, useLogger } from '@/composables'
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { useBrowserLocation } from '@vueuse/core'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import { useLogger, useInterceptors } from '@/composables'
 
-// Local
+import decode from 'jwt-decode'
+
+import {
+  gravatarUrlGeneric,
+  displayName as getDisplayName,
+  fullDisplayName as getFullDisplayName,
+} from '@/utils'
+
 import {
   createError,
+  createAbortError,
   createNoUserError,
   createClockSkewError,
   isUnauthorizedError,
@@ -17,14 +28,111 @@ import {
   isClockSkewError,
 } from '@/utils/errors'
 
+const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+const CLOCK_TOLERANCE = 3500
+
+function now () {
+  return Math.floor(Date.now() / 1000)
+}
+
+function secondsUntil (val) {
+  if (val) {
+    const t = Number(val)
+    if (!Number.isNaN(t)) {
+      return t - now()
+    }
+  }
+}
+
 function delay (duration = 0) {
   return new Promise(resolve => setTimeout(resolve, duration))
 }
 
-export const useAuthn = createSharedComposable(() => {
+export const useAuthnStore = defineStore('authn', () => {
   const logger = useLogger()
   const location = useBrowserLocation()
-  const token = useToken()
+  const interceptors = useInterceptors()
+  const cookies = useCookies([COOKIE_HEADER_PAYLOAD])
+
+  interceptors.register({
+    async requestFulfilled (...args) {
+      const url = args[0] ?? ''
+      if (url.startsWith('/api')) {
+        try {
+          await ensureValidToken()
+        } catch (err) {
+          logger.error(err)
+          throw createAbortError('Request aborted')
+        }
+      }
+      return args
+    },
+  })
+
+  const user = ref(null)
+
+  const isAdmin = computed(() => {
+    return user.value?.isAdmin === true
+  })
+
+  const username = computed(() => {
+    return user.value?.email ?? user.value?.id ?? ''
+  })
+
+  const displayName = computed(() => {
+    return user.value?.name ?? getDisplayName(user.value?.id) ?? ''
+  })
+
+  const fullDisplayName = computed(() => {
+    return user.value?.name ?? getFullDisplayName(user.value?.id) ?? ''
+  })
+
+  const userExpiresAt = computed(() => {
+    return (user.value?.exp ?? 0) * 1000
+  })
+
+  const avatarUrl = computed(() => {
+    return gravatarUrlGeneric(username.value)
+  })
+
+  const avatarTitle = computed(() => {
+    return `${displayName.value} (${username.value})`
+  })
+
+  function $reset () {
+    try {
+      user.value = decode(cookies.get(COOKIE_HEADER_PAYLOAD))
+    } catch (err) {
+      logger.error(err.message)
+      user.value = null
+    }
+  }
+
+  function isUserEmpty () {
+    return !user.value
+  }
+
+  function isExpired () {
+    const expiresAt = user.value?.exp
+    if (!expiresAt) {
+      return true
+    }
+    const t = secondsUntil(expiresAt)
+    return typeof t === 'number' && t < CLOCK_TOLERANCE
+  }
+
+  function isRefreshRequired (value) {
+    if (typeof value === 'boolean') {
+      return value
+    }
+    const rti = user.value?.rti
+    const refreshAt = user.value?.refresh_at
+    if (!rti || !refreshAt) {
+      return false
+    }
+    const t = secondsUntil(refreshAt)
+    return typeof t === 'number' && t < CLOCK_TOLERANCE
+  }
 
   let refreshTokenPromise
 
@@ -43,12 +151,13 @@ export const useAuthn = createSharedComposable(() => {
 
     const statusCode = response.status
     if (statusCode >= 200 && statusCode < 300) {
-      if (token.isEmpty()) {
+      if (isUserEmpty()) {
         throw createNoUserError()
       }
-      if (token.isRefreshRequired()) {
+      if (isRefreshRequired(false)) {
         throw createClockSkewError()
       }
+      return $reset()
     }
 
     if (statusCode >= 400) {
@@ -79,32 +188,28 @@ export const useAuthn = createSharedComposable(() => {
     throw createError(statusCode, 'Token refresh failed', { response })
   }
 
-  function getUser () {
-    return token.payload.value
-  }
-
   async function refreshToken () {
     try {
-      if (token.isEmpty()) {
+      if (isUserEmpty()) {
         throw createNoUserError()
       }
-      if (!token.isRefreshRequired()) {
+      if (!isRefreshRequired()) {
         return
       }
-      const user = getUser()
-      logger.debug('Acquiring token refresh lock (%s)', user.rti)
+      const rti = user.value?.rti
+      logger.debug('Acquiring token refresh lock (%s)', rti)
       await navigator.locks.request('token-refresh-request', async () => {
-        if (token.isEmpty()) {
+        if (isUserEmpty()) {
           throw createNoUserError()
         }
-        if (!token.isRefreshRequired()) {
+        if (!isRefreshRequired()) {
           return
         }
-        const oldUser = getUser()
-        logger.debug('Refreshing token (%s)', oldUser.rti)
+        const rtiBefore = user.value?.rti
+        logger.debug('Refreshing token (%s)', rtiBefore)
         await createTokenRefreshRequest()
-        const user = getUser()
-        logger.debug('Token has been refreshed (%s <- %s)', user.rti, oldUser.rti)
+        const rtiAfter = user.value?.rti
+        logger.debug('Token has been refreshed (%s <- %s)', rtiAfter, rtiBefore)
       })
     } catch (err) {
       logger.error('Token refresh failed: %s - %s', err.name, err.message)
@@ -124,7 +229,7 @@ export const useAuthn = createSharedComposable(() => {
   }
 
   function signout (err) {
-    token.remove()
+    cookies.remove(COOKIE_HEADER_PAYLOAD)
     const url = new URL('/auth/logout', location.value.origin)
     if (err) {
       url.searchParams.set('error[name]', err.name)
@@ -147,22 +252,26 @@ export const useAuthn = createSharedComposable(() => {
 
   function ensureValidToken () {
     if (!refreshTokenPromise) {
-      refreshTokenPromise = refreshToken(token.payload).finally(() => {
+      refreshTokenPromise = refreshToken().finally(() => {
         refreshTokenPromise = undefined
       })
     }
     return refreshTokenPromise
   }
 
-  function isSessionExpired () {
-    return token.isExpired()
-  }
-
   return {
-    signin,
+    user,
+    isAdmin,
+    username,
+    displayName,
+    fullDisplayName,
+    userExpiresAt,
+    avatarUrl,
+    avatarTitle,
+    isExpired,
     signout,
+    signin,
     signinWithOidc,
-    ensureValidToken,
-    isSessionExpired,
+    $reset,
   }
 })

@@ -7,7 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
-import { useApi } from '@/composables/useApi'
+import { useApi } from '@/composables'
 import { hash } from '@/utils/crypto'
 
 import camelCase from 'lodash/camelCase'

@@ -5,8 +5,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useAppStore, useAuthzStore, useProjectStore } from '@/store'
-import { useLogger, useUser } from '@/composables'
+import {
+  useAppStore,
+  useAuthnStore,
+  useAuthzStore,
+  useProjectStore,
+} from '@/store'
+import { useLogger } from '@/composables'
 
 import {
   newShootTabs,
@@ -61,8 +66,8 @@ const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 export function createRoutes () {
   const appStore = useAppStore()
   const projectStore = useProjectStore()
+  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
-  const user = useUser()
   const logger = useLogger() // eslint-disable-line no-unused-vars
 
   return [
@@ -476,7 +481,7 @@ export function createRoutes () {
           title: 'Garden Cluster',
           icon: 'mdi-console',
           get hidden () {
-            return !(authzStore.hasGardenTerminalAccess && user.isAdmin.value)
+            return !(authzStore.hasGardenTerminalAccess && authnStore.isAdmin)
           },
         },
         breadcrumbs: terminalBreadcrumbs,

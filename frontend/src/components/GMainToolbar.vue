@@ -197,22 +197,35 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { ref, computed, toRef } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
-import { useAppStore, useConfigStore } from '@/store'
-import { useAuthn, useUser, useTheme, useNav } from '@/composables'
+import { useTheme, useNamespace } from '@/composables'
+import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
+
+const route = useRoute()
 
 const appStore = useAppStore()
+const authnStore = useAuthnStore()
 const configStore = useConfigStore()
-const auth = useAuthn()
+
 const { colorMode } = useTheme()
-const { isAdmin, username, displayName, avatarUrl, avatarTitle } = useUser()
-const { namespace, tabs } = useNav()
+const namespace = useNamespace(route)
 const autoLogin = useLocalStorage('global/auto-login')
 
 const help = ref(false)
 const infoDialog = ref(false)
 const sidebar = toRef(appStore, 'sidebar')
 const helpMenuItems = toRef(configStore, 'helpMenuItems')
+const { isAdmin, username, displayName, avatarUrl, avatarTitle } = storeToRefs(authnStore)
+
+const tabs = computed(() => {
+  const meta = route.meta ?? {}
+  if (typeof meta.tabs === 'function') {
+    return meta.tabs(route)
+  }
+  return meta.tabs
+})
 
 const accountLink = computed(() => {
   return targetRoute('Account')
@@ -235,7 +248,7 @@ function handleLogout () {
   if (autoLogin.value === 'enabled') {
     err = new Error('NoAutoLogin')
   }
-  auth.signout(err)
+  authnStore.signout(err)
 }
 
 function helpTarget (item) {

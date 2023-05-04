@@ -8,11 +8,13 @@ import { createPinia } from 'pinia'
 
 export { useAppStore } from './app'
 export { useConfigStore } from './config'
-export { useProjectStore } from './project'
+export { useAuthnStore } from './authn'
 export { useAuthzStore } from './authz'
+export { useProjectStore } from './project'
 export { useCloudProfileStore } from './cloudProfile'
 export { useSeedStore } from './seed'
 export { useGardenerExtensionStore } from './gardenerExtension'
 export { useKubeconfigStore } from './kubeconfig'
+export { useLoginStore } from './login'
 
 export default createPinia()

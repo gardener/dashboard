@@ -102,8 +102,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { useLogger } from '@/composables/useLogger'
-import { useTheme } from '@/composables/useTheme'
+import { useLogger, useTheme } from '@/composables'
 import { useLocalStorage } from '@vueuse/core'
 
 const logLevels = [

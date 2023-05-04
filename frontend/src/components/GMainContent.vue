@@ -21,8 +21,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useAppStore } from '@/store/app'
-import { useLogger } from '@/composables/useLogger'
+import { useAppStore } from '@/store'
+import { useLogger } from '@/composables'
 
 import GAlert from '@/components/GAlert.vue'
 

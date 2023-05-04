@@ -7,6 +7,7 @@
 import {
   useAppStore,
   useConfigStore,
+  useAuthnStore,
   useAuthzStore,
   useProjectStore,
   useCloudProfileStore,
@@ -14,25 +15,25 @@ import {
   useGardenerExtensionStore,
   useKubeconfigStore,
 } from '@/store'
-import { useToken, useLogger, useUser } from '@/composables'
+import { useLogger } from '@/composables'
 
 export function createGuards () {
   const appStore = useAppStore()
   const configStore = useConfigStore()
+  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const seedStore = useSeedStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
-  const authzStore = useAuthzStore()
   const logger = useLogger()
-  const token = useToken()
-  const user = useUser()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return (to) => {
       const { meta = {}, path } = to
-      if (!meta.public && token.isExpired()) {
+      authnStore.$reset()
+      if (!meta.public && authnStore.isExpired()) {
         logger.info('User not found or session has expired --> Redirecting to login page')
         const query = path !== '/'
           ? { redirectPath: path }
@@ -67,8 +68,9 @@ export function createGuards () {
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
-          logger.error('User %s has no authorization for namespace %s', user.username.value, namespace)
+          logger.error('User %s has no authorization for namespace %s', authnStore.username, namespace)
         }
+
         next()
       } catch (err) {
         logger.error(err.message)
