@@ -18,6 +18,7 @@ import {
   useKubeconfigStore,
   useMemberStore,
   useShootStore,
+  useSecretStore,
 } from '@/store'
 
 export function createGuards () {
@@ -33,6 +34,7 @@ export function createGuards () {
   const gardenerExtensionsStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
   const memberStore = useMemberStore()
+  const secretStore = useSecretStore()
   const shootStore = useShootStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
@@ -78,6 +80,14 @@ export function createGuards () {
         }
 
         switch (to.name) {
+          case 'Secrets':
+          case 'Secret': {
+            await Promise.all([
+              secretStore.fetchSecrets(),
+              shootStore.subscribe(),
+            ])
+            break
+          }
           case 'Members':
           case 'Administration': {
             await Promise.all([

@@ -8,9 +8,7 @@
 import '@/sass/main.scss'
 
 import pinia from '@/store'
-import { createRouter } from '@/router'
-
-// Plugins
+import router from './router'
 import notify from './notify'
 import yaml from './yaml'
 import utils from './utils'
@@ -21,7 +19,7 @@ export function registerPlugins (app) {
   loadFonts()
   app
     .use(pinia)
-    .use(createRouter())
+    .use(router)
     .use(vuetify)
     .use(notify)
     .use(yaml)
