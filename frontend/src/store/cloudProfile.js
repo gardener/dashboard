@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useApi } from '@/composables'
 
-export const useCloudProfileStore = defineStore('cloudProfile', () => {
+export const useCloudprofileStore = defineStore('cloudprofile', () => {
   const api = useApi()
 
   const list = ref(null)
@@ -17,7 +17,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value === null
   })
 
-  async function fetchCloudProfiles () {
+  async function fetchCloudprofiles () {
     const response = await api.getCloudprofiles()
     list.value = response.data
   }
@@ -25,6 +25,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   return {
     list,
     isInitial,
-    fetchCloudProfiles,
+    fetchCloudprofiles,
   }
 })

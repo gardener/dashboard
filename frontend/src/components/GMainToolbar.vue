@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-app-bar>
     <v-app-bar-nav-icon v-if="!sidebar" @click.stop="sidebar = !sidebar"></v-app-bar-nav-icon>
-    <!--breadcrumb/-->
+    <g-breadcrumb/>
     <v-spacer></v-spacer>
 
     <!-- connection status -->
@@ -202,6 +202,7 @@ import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 import { useTheme, useNamespace } from '@/composables'
 import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
+import GBreadcrumb from '@/components/GBreadcrumb.vue'
 
 const route = useRoute()
 
