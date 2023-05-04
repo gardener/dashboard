@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useLogger } from '@/composables'
+
 import {
   useAppStore,
   useConfigStore,
@@ -14,10 +16,13 @@ import {
   useSeedStore,
   useGardenerExtensionStore,
   useKubeconfigStore,
+  useMemberStore,
+  useShootStore,
 } from '@/store'
-import { useLogger } from '@/composables'
 
 export function createGuards () {
+  const logger = useLogger()
+
   const appStore = useAppStore()
   const configStore = useConfigStore()
   const authnStore = useAuthnStore()
@@ -27,7 +32,8 @@ export function createGuards () {
   const seedStore = useSeedStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
-  const logger = useLogger()
+  const memberStore = useMemberStore()
+  const shootStore = useShootStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return (to) => {
@@ -50,7 +56,7 @@ export function createGuards () {
     return async (to, from, next) => {
       const { meta = {} } = to
       if (meta.public || to.name === 'Error') {
-        // TODO unsubscribeShoots
+        await shootStore.unsubscribe()
         return next()
       }
 
@@ -71,6 +77,21 @@ export function createGuards () {
           logger.error('User %s has no authorization for namespace %s', authnStore.username, namespace)
         }
 
+        switch (to.name) {
+          case 'Members':
+          case 'Administration': {
+            await Promise.all([
+              memberStore.fetchMembers(),
+              shootStore.subscribe(),
+            ])
+            break
+          }
+          case 'Account':
+          case 'Settings': {
+            await shootStore.unsubscribe()
+            break
+          }
+        }
         next()
       } catch (err) {
         logger.error(err.message)
