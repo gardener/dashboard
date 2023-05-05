@@ -18,5 +18,8 @@ export default {
     app.provide('$authn', useAuthnStore())
     app.provide('$authz', useAuthzStore())
     app.provide('$project', useProjectStore())
+    app.provide('store', {
+      $app: useAppStore(),
+    })
   },
 }

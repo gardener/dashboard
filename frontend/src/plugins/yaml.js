@@ -7,13 +7,14 @@
 const jsYaml = import('js-yaml')
 
 const yaml = {
-  dump (obj) {
+  dump (obj, options) {
     return jsYaml.then(({ dump }) => dump(obj, {
       skipInvalid: true,
+      ...options,
     }))
   },
-  load (data) {
-    return jsYaml.then(({ load }) => load(data))
+  load (data, options) {
+    return jsYaml.then(({ load }) => load(data, options))
   },
 }
 

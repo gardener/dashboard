@@ -1,8 +1,8 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
 <template>
   <svg v-show="isDraggingOtherId" @dropped="dropped" @drag-over="dragOver" @drag-leave="dragLeaveZone" class="g-droppable-zone positional-dropzone fill-height full-width" :data-g-id="uuid" id="dropzone" preserveAspectRatio="none" width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

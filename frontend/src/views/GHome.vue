@@ -19,22 +19,35 @@ SPDX-License-Identifier: Apache-2.0
                 @click.stop="projectDialog = true"
               >
                 <v-icon>mdi-plus</v-icon>
-                <span class="ml-2">{{ createProjectBtnText }}</span>
+                <span class="ml-2">{{createProjectBtnText}}</span>
               </v-btn>
             </div>
           </template>
           <span>You are not authorized to create projects</span>
         </v-tooltip>
       </v-card-text>
+      <g-project-dialog v-model="projectDialog">
+      </g-project-dialog>
     </v-card>
   </v-container>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+import {
+  useAuthzStore,
+  useProjectStore,
+} from '@/store'
+
 import isEmpty from 'lodash/isEmpty'
 
-export default {
+import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
+
+export default defineComponent({
+  components: {
+    GProjectDialog,
+  },
   data () {
     return {
       projectDialog: false,
@@ -42,15 +55,8 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'user',
-    ]),
-    ...mapGetters([
-      'username',
-      'canCreateProject',
-      'namespaces',
-      'projectList',
-    ]),
+    ...mapState(useAuthzStore, ['canCreateProject']),
+    ...mapState(useProjectStore, ['projectList']),
     hasProjects () {
       return !isEmpty(this.projectList)
     },
@@ -63,5 +69,5 @@ export default {
       this.projectDialog = true
     }
   },
-}
+})
 </script>

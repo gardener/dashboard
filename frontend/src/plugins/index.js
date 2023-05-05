@@ -7,7 +7,7 @@
 // Styles
 import '@/sass/main.scss'
 
-import pinia from '@/store'
+import store from './store'
 import router from './router'
 import notify from './notify'
 import yaml from './yaml'
@@ -18,7 +18,7 @@ import { loadFonts } from './webfontloader'
 export function registerPlugins (app) {
   loadFonts()
   app
-    .use(pinia)
+    .use(store)
     .use(router)
     .use(vuetify)
     .use(notify)

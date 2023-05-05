@@ -15,10 +15,6 @@
 @forward 'vuetify/settings' with ( // if we want to use variables from here change to @use
   $color-pack: true !default,
   $utilities: false !default,
-  // tooltip bg and color where inverted with vue3. This reverts that change
-  //   https://vuetifyjs.com/en/api/v-tooltip/#sass-tooltip-background-color
-  $tooltip-background-color: rgba(var(--v-theme-on-surface-variant), .9),
-  $tooltip-text-color: rgb(var(--v-theme-surface-variant))
 );
 
 @forward '@/sass/variables.scss';

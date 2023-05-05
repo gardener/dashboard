@@ -9,13 +9,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-  import { onKeyStroke, useEventBus } from '@vueuse/core'
-  import GNotify from '@/components/GNotify.vue';
+import { onKeyStroke, useEventBus } from '@vueuse/core'
+import GNotify from '@/components/GNotify.vue'
 
-  const bus = useEventBus('esc-pressed')
+const bus = useEventBus('esc-pressed')
 
-  onKeyStroke('Escape', e => {
-    bus.emit()
-    e.preventDefault()
-  })
+onKeyStroke('Escape', e => {
+  bus.emit()
+  e.preventDefault()
+})
 </script>

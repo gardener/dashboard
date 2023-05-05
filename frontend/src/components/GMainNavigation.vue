@@ -191,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-list>
 
-    <!-- TODO project-create-dialog v-model:value="projectDialog"></project-create-dialog -->
+    <g-project-dialog v-model="projectDialog"></g-project-dialog>
 
   </v-navigation-drawer>
 </template>
@@ -206,7 +206,7 @@ import {
 } from '@/store'
 import { useRouter, useRoute } from 'vue-router'
 
-// import ProjectCreateDialog from '@/components/dialogs/ProjectDialog.vue'
+import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 

@@ -212,10 +212,10 @@ export function firstItemMatchingVersionClassification (items) {
   return head(items)
 }
 
-export function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
-  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && getters.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
-  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && getters.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
-  shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && getters.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
+export function filterShortcuts (authzStore, { shortcuts, targetsFilter }) {
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && authzStore.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && authzStore.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
+  shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && authzStore.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
   shortcuts = filter(shortcuts, ({ target }) => includes(targetsFilter, target))
   return shortcuts
 }

@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <v-card-title class="toolbar-background">
-        <v-icon size="large" class="toolbar-title--text">mdi-cube</v-icon>
-        <span class="text-h5 ml-5 toolbar-title--text">Create Project</span>
+      <v-card-title class="bg-toolbar-background">
+        <v-icon size="large" class="text-toolbar-title">mdi-cube</v-icon>
+        <span class="text-h5 ml-5 text-toolbar-title">Create Project</span>
       </v-card-title>
       <v-card-text class="dialog-content">
         <form>
@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
                   label="Name"
                   v-model.trim="projectName"
                   :error-messages="getFieldValidationErrors('projectName')"
-                  @update:model-value="$v.projectName.$touch()"
-                  @blur="$v.projectName.$touch()"
+                  @update:model-value="v$.projectName.$touch()"
+                  @blur="v$.projectName.$touch()"
                   counter="10"
                   ></v-text-field>
               </v-col>
@@ -37,11 +37,11 @@ SPDX-License-Identifier: Apache-2.0
                   :label="costObjectTitle"
                   v-model="costObject"
                   :error-messages="getFieldValidationErrors('costObject')"
-                  @update:model-value="$v.costObject.$touch()"
-                  @blur="$v.costObject.$touch()"
+                  @update:model-value="v$.costObject.$touch()"
+                  @blur="v$.costObject.$touch()"
                   >
                 </v-text-field>
-                <v-alert v-if="!!costObjectDescriptionHtml" dense type="info" variant="outlined" color="primary">
+                <v-alert v-if="!!costObjectDescriptionHtml" density="compact" type="info" variant="outlined" color="primary">
                   <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
               </v-col>
@@ -98,34 +98,50 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex'
-import { maxLength, required } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
+import { maxLength, required } from '@vuelidate/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccountUsername, transformHtml, getProjectDetails } from '@/utils'
+import {
+  getValidationErrors,
+  setInputFocus,
+  setDelayedInputFocus,
+  isServiceAccountUsername,
+  transformHtml,
+  getProjectDetails,
+} from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
+
 import get from 'lodash/get'
 import map from 'lodash/map'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
+
 import GMessage from '@/components/GMessage.vue'
+import { useAuthnStore, useConfigStore, useMemberStore, useProjectStore } from '@/store'
 
 const defaultProjectName = ''
 
-export default {
-  name: 'project-dialog',
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   components: {
-    GMessage
+    GMessage,
   },
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     project: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   data () {
     return {
@@ -136,7 +152,7 @@ export default {
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      loading: false
+      loading: false,
     }
   },
   validations () {
@@ -144,22 +160,17 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapGetters([
-      'memberList',
-      'username',
-      'projectNamesFromProjectList',
-      'costObjectSettings'
-    ]),
-    ...mapState([
-      'cfg'
-    ]),
+    ...mapState(useMemberStore, ['memberList']),
+    ...mapState(useAuthnStore, ['username']),
+    ...mapState(useProjectStore, ['projectNamesFromProjectList']),
+    ...mapState(useConfigStore, ['costObjectSettings']),
     visible: {
       get () {
-        return this.value
+        return this.modelValue
       },
       set (value) {
-        this.$emit('input', value)
-      }
+        this.$emit('update:modelValue', value)
+      },
     },
     projectNames () {
       return this.projectNamesFromProjectList
@@ -208,12 +219,12 @@ export default {
       return members
     },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     validators () {
       const validators = {
         owner: {
-          required
+          required,
         },
         costObject: {
           validCostObject: value => {
@@ -221,8 +232,8 @@ export default {
               return true
             }
             return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
-          }
-        }
+          },
+        },
       }
       validators.projectName = {
         required,
@@ -230,7 +241,7 @@ export default {
         noConsecutiveHyphen,
         noStartEndHyphen, // Order is important for UI hints
         resourceName,
-        unique: unique('projectNames')
+        unique: unique('projectNames'),
       }
       return validators
     },
@@ -242,21 +253,25 @@ export default {
           resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
           unique: 'Name is already in use',
           noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
-          noStartEndHyphen: 'Name must not start or end with a hyphen'
+          noStartEndHyphen: 'Name must not start or end with a hyphen',
         },
         owner: {
-          required: 'Owner is required'
+          required: 'Owner is required',
         },
         costObject: {
-          validCostObject: this.costObjectErrorMessage
-        }
+          validCostObject: this.costObjectErrorMessage,
+        },
       }
-    }
+    },
   },
+  emits: [
+    'update:modelValue',
+    'cancel',
+  ],
   methods: {
-    ...mapActions([
+    ...mapActions(useProjectStore, [
       'createProject',
-      'updateProject'
+      'updateProject',
     ]),
     getFieldValidationErrors (field) {
       return getValidationErrors(this, field)
@@ -265,7 +280,7 @@ export default {
       this.visible = false
     },
     async submit () {
-      this.$v.$touch()
+      this.v$.$touch()
       if (this.valid) {
         try {
           this.loading = true
@@ -275,8 +290,8 @@ export default {
           this.$router.push({
             name: 'Secrets',
             params: {
-              namespace: project.metadata.namespace
-            }
+              namespace: project.metadata.namespace,
+            },
           })
         } catch (err) {
           this.loading = false
@@ -313,7 +328,7 @@ export default {
       return this.createProject({ metadata, data })
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
       this.errorMessage = undefined
       this.detailedMessage = undefined
 
@@ -323,17 +338,17 @@ export default {
       this.owner = this.username
       this.costObject = undefined
 
-      setDelayedInputFocus(this, 'projectName')
-    }
+      setDelayedInputFocus(this.$refs.projectName)
+    },
   },
   watch: {
     value (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

@@ -8,13 +8,21 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useApi } from '@/composables'
+import { useAuthzStore } from './authz'
+import { Shortcut, filterShortcuts } from './helper'
+
+import { TargetEnum } from '@/utils'
 import { hash } from '@/utils/crypto'
 
 import camelCase from 'lodash/camelCase'
+import get from 'lodash/get'
+import map from 'lodash/map'
+import uniqBy from 'lodash/uniqBy'
 
 export const useConfigStore = defineStore('config', () => {
   const api = useApi()
   const location = useBrowserLocation()
+  const authzStore = useAuthzStore()
 
   const state = ref(null)
 
@@ -132,6 +140,25 @@ export const useConfigStore = defineStore('config', () => {
     return `cfg.${identifier}`
   })
 
+  const costObjectSettings = computed(() => {
+    const costObject = state.value?.costObject
+    if (!costObject) {
+      return undefined
+    }
+
+    const title = costObject.title || ''
+    const description = costObject.description || ''
+    const regex = costObject.regex
+    const errorMessage = costObject.errorMessage
+
+    return {
+      regex,
+      title,
+      description,
+      errorMessage,
+    }
+  })
+
   const appVersion = computed(() => {
     return state.value?.appVersion ?? import.meta.env.VITE_APP_VERSION
   })
@@ -143,6 +170,13 @@ export const useConfigStore = defineStore('config', () => {
 
   async function $reset () {
     state.value = null
+  }
+
+  function getTerminalShortcuts (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) {
+    let shortcuts = get(state.value, 'terminal.shortcuts', [])
+    shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, false))
+    shortcuts = uniqBy(shortcuts, 'id')
+    return filterShortcuts(authzStore, { shortcuts, targetsFilter })
   }
 
   return {
@@ -173,6 +207,8 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerMessage,
     alertBannerType,
     alertBannerIdentifier,
+    costObjectSettings,
+    getTerminalShortcuts,
     fetchConfig,
     $reset,
   }

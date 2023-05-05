@@ -78,7 +78,7 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
 
 export function getValidationErrors (vm, field) {
   const errors = []
-  const validationForField = get(vm.$v, field)
+  const validationForField = get(vm.v$, field)
   if (!validationForField.$dirty) {
     return errors
   }
