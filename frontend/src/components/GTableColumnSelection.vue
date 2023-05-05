@@ -129,12 +129,12 @@ const { headers, filters, filterTooltip } = toRefs(props)
 // emits
 const emit = defineEmits([
   'reset',
-  'set-selected-header',
-  'toggle-filter',
+  'setSelectedHeader',
+  'toggleFilter',
 ])
 
 function onSetSelectedHeader (header) {
-  emit('set-selected-header', header)
+  emit('setSelectedHeader', header)
 }
 
 function onReset () {
@@ -142,7 +142,7 @@ function onReset () {
 }
 
 function onToggleFilter (filter) {
-  emit('toggle-filter', filter)
+  emit('toggleFilter', filter)
 }
 
 function checkboxColor (selected) {

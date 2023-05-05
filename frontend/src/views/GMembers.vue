@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, unref, computed, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
@@ -265,19 +265,34 @@ const serviceAccountUpdateDialog = ref(false)
 const userHelpDialog = ref(false)
 const serviceAccountHelpDialog = ref(false)
 const kubeconfigDialog = ref(false)
-const memberName = ref(undefined)
-const memberRoles = ref(undefined)
-const serviceAccountDescription = ref(undefined)
+const memberName = ref()
+const memberRoles = ref()
+const serviceAccountDescription = ref()
 const orphaned = ref(false)
 const userFilter = ref('')
 const serviceAccountFilter = ref('')
-const currentServiceAccountName = ref(undefined)
-const currentServiceAccountKubeconfig = ref(undefined)
+const currentServiceAccountName = ref()
+const currentServiceAccountKubeconfig = ref()
 
-const { namespace, projectFromProjectList, projectList } = storeToRefs(projectStore)
-const { canManageMembers, canManageServiceAccountMembers, canCreateServiceAccounts } = storeToRefs(authzStore)
-const { username: currentUsername, isAdmin } = storeToRefs(authnStore)
-const { list: memberList, deleteMember, resetServiceAccount } = storeToRefs(memberStore)
+const {
+  namespace,
+  projectFromProjectList: project,
+  projectList,
+} = storeToRefs(projectStore)
+const {
+  canManageMembers,
+  canManageServiceAccountMembers,
+  canCreateServiceAccounts,
+} = storeToRefs(authzStore)
+const {
+  username: currentUsername,
+  isAdmin,
+} = storeToRefs(authnStore)
+const {
+  list: memberList,
+  deleteMember,
+  resetServiceAccount,
+} = storeToRefs(memberStore)
 
 const userAccountSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {})
 const userAccountTableOptions = useLocalStorage('members/useraccount-list/options', defaultUserAccountTableOptions)
@@ -286,12 +301,8 @@ const serviceAccountTableOptions = useLocalStorage('members/serviceaccount-list/
 
 const confirmDialog = ref(null)
 
-const project = computed(() => {
-  return projectFromProjectList.value
-})
-
 const projectDetails = computed(() => {
-  return getProjectDetails(project)
+  return getProjectDetails(project.value)
 })
 
 const owner = computed(() => {
@@ -435,6 +446,11 @@ const visibleServiceAccountTableHeaders = computed(() => {
 
 function setError () {
   // TODO
+  /*
+  appStore.alert = {
+    type: 'error',
+    message: 'test',
+  } */
 }
 
 function openUserAddDialog () {
@@ -638,38 +654,26 @@ function getSortVal (item, sortBy) {
 function sortAccounts (items, sortByArr, sortDescArr) {
   const sortBy = head(sortByArr)
   const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
-  const sortedItems = orderBy(items.value, [item => getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
+  const sortedItems = orderBy(unref(items), [item => getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
   return sortedItems
 }
 
 function setSelectedHeaderUserAccount (header) {
   userAccountSelectedColumns.value[header.value] = !header.selected
-  saveSelectedColumnsUserAccount()
 }
 
 function resetTableSettingsUserAccount () {
   userAccountSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'defaultSelected')
   userAccountTableOptions.value = defaultUserAccountTableOptions
-  saveSelectedColumnsUserAccount()
-}
-
-function saveSelectedColumnsUserAccount () {
-  userAccountSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'selected')
 }
 
 function setSelectedHeaderServiceAccount (header) {
   serviceAccountSelectedColumns.value[header.value] = !header.selected
-  saveSelectedColumnsServiceAccount()
 }
 
 function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
   serviceAccountTableOptions.value = defaultServiceAccountTableOptions
-  saveSelectedColumnsServiceAccount()
-}
-
-function saveSelectedColumnsServiceAccount () {
-  serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'selected')
 }
 
 // TODO REMOVE?

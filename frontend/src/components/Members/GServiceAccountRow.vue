@@ -140,15 +140,9 @@ import {
   mapTableHeader,
 } from '@/utils'
 
-import {
-  useProjectStore,
-  useAuthzStore,
-} from '@/store'
+import { useAuthzStore } from '@/store'
 
-const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
-
-const namespace = toRef(projectStore, 'namespace')
 
 const canManageServiceAccountMembers = toRef(authzStore, 'canManageServiceAccountMembers')
 const canCreateServiceAccounts = toRef(authzStore, 'canCreateServiceAccounts')
@@ -173,7 +167,7 @@ const { item, headers } = toRefs(props)
 const emit = defineEmits([
   'download',
   'kubeconfig',
-  'reset-serviceaccount',
+  'resetServiceaccount',
   'edit',
   'delete',
 ])
@@ -184,7 +178,7 @@ const orphaned = computed(() => {
 })
 
 const foreign = computed(() => {
-  return isForeignServiceAccount(namespace.value, item.value.username)
+  return isForeignServiceAccount(authzStore.namespace, item.value.username)
 })
 
 const canDelete = computed(() => {
@@ -202,10 +196,6 @@ const deleteTooltip = computed(() => {
     return 'Remove foreign Service Account from Project'
   }
   return 'Delete Service Account'
-})
-
-const createdByClasses = computed(() => {
-  return item.value.createdBy ? ['font-weight-bold'] : ['grey--text']
 })
 
 const serviceAccountNamespace = computed(() => {
@@ -227,7 +217,7 @@ function onKubeconfig () {
 }
 
 function onResetServiceAccount () {
-  emit('reset-serviceaccount', item.value)
+  emit('resetServiceaccount', item.value)
 }
 
 function onEdit () {
