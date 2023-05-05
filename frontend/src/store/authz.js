@@ -15,7 +15,8 @@ import { canI } from '@/utils'
 export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()
   const authnStore = useAuthnStore()
-  const { isTerminalEnabled, isProjectTerminalShortcutsEnabled } = useConfigStore()
+  const configStore = useConfigStore()
+  const projectStore = useProjectStore()
 
   const projectStore = useProjectStore()
   const projectFromProjectList = toRef(projectStore, 'projectFromProjectList')
@@ -92,12 +93,28 @@ export const useAuthzStore = defineStore('authz', () => {
     return canPatchProject.value || canManageMembers.value
   })
 
+  const canPatchProject = computed(() => {
+    return canI(status.value, 'patch', 'core.gardener.cloud', 'projects', projectStore.projectName)
+  })
+
+  const canManageMembers = computed(() => {
+    return canI(status.value, 'manage-members', 'core.gardener.cloud', 'projects', projectStore.projectName)
+  })
+
+  const canManageServiceAccountMembers = computed(() => {
+    return canPatchProject.value || canManageMembers.value
+  })
+
+  const canDeleteProject = computed(() => {
+    return canI(status.value, 'delete', 'core.gardener.cloud', 'projects', projectStore.projectName)
+  })
+
   const canGetProjectTerminalShortcuts = computed(() => {
     return canGetSecrets.value
   })
 
   const canUseProjectTerminalShortcuts = computed(() => {
-    return isProjectTerminalShortcutsEnabled.value &&
+    return configStore.isProjectTerminalShortcutsEnabled &&
       canGetProjectTerminalShortcuts.value &&
       canCreateTerminals.value
   })
@@ -115,20 +132,20 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const hasGardenTerminalAccess = computed(() => {
-    return isTerminalEnabled.value &&
+    return configStore.isTerminalEnabled &&
     canCreateTerminals.value &&
     canPatchServiceAccounts.value &&
     canCreateServiceAccounts.value
   })
 
   const hasControlPlaneTerminalAccess = computed(() => {
-    return isTerminalEnabled.value &&
+    return configStore.isTerminalEnabled &&
       canCreateTerminals.value &&
       authnStore.isAdmin
   })
 
   const hasShootTerminalAccess = computed(() => {
-    return isTerminalEnabled.value &&
+    return configStore.isTerminalEnabled &&
       canCreateTerminals.value
   })
 

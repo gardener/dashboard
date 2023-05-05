@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useLocalStorage } from '@vueuse/core'
 import { useLogger } from '@/composables'
 
 import {
@@ -18,10 +19,13 @@ import {
   // useKubeconfigStore,
   useMemberStore,
   useShootStore,
+  useSecretStore,
+  useTerminalStore,
 } from '@/store'
 
 export function createGuards () {
   const logger = useLogger()
+  const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
 
   const appStore = useAppStore()
   const configStore = useConfigStore()
@@ -33,7 +37,9 @@ export function createGuards () {
   const gardenerExtensionsStore = useGardenerExtensionStore()
   // const kubeconfigStore = useKubeconfigStore()
   const memberStore = useMemberStore()
+  const secretStore = useSecretStore()
   const shootStore = useShootStore()
+  const terminalStore = useTerminalStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return (to) => {
@@ -78,6 +84,54 @@ export function createGuards () {
         }
 
         switch (to.name) {
+          case 'Secrets':
+          case 'Secret': {
+            await Promise.all([
+              secretStore.fetchSecrets(),
+              shootStore.subscribe(),
+            ])
+            break
+          }
+          case 'NewShoot':
+          case 'NewShootEditor': {
+            const promises = [
+              shootStore.subscribe(),
+            ]
+            if (authzStore.canGetSecrets) {
+              promises.push(secretStore.fetchSecrets())
+            }
+            await Promise.all(promises)
+
+            const namespaceChanged = from.params.namespace !== to.params.namespace
+            const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
+            if (namespaceChanged || toNewShoot) {
+              await shootStore.resetNewShootResource()
+            }
+            break
+          }
+          case 'ShootList': {
+            const isAdmin = authnStore.isAdmin
+
+            // filter has to be set before subscribing shoots
+            shootStore.setShootListFilters({
+              onlyShootsWithIssues: isAdmin,
+              progressing: true,
+              noOperatorAction: isAdmin,
+              deactivatedReconciliation: isAdmin,
+              hideTicketsWithLabel: isAdmin,
+              ...shootListFilter.value,
+            })
+
+            const promises = [
+              shootStore.subscribe(),
+            ]
+
+            if (authzStore.canUseProjectTerminalShortcuts) {
+              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
+            }
+            await Promise.all(promises)
+            break
+          }
           case 'Members':
           case 'Administration': {
             await Promise.all([

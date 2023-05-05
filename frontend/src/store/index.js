@@ -13,10 +13,13 @@ export { useAuthzStore } from './authz'
 export { useProjectStore } from './project'
 export { useMemberStore } from './member'
 export { useShootStore } from './shoot'
+export { useSecretStore } from './secret'
+export { useTerminalStore } from './terminal'
 export { useCloudprofileStore } from './cloudprofile'
 export { useSeedStore } from './seed'
 export { useGardenerExtensionStore } from './gardenerExtension'
 // export { useKubeconfigStore } from './kubeconfig'
 export { useLoginStore } from './login'
+export { useQuotaStore } from './quota'
 
 export default createPinia()
