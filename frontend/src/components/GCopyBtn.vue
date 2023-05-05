@@ -57,7 +57,7 @@ const props = defineProps({
 // reactive state
 const snackbar = ref(false)
 const copySucceeded = ref(false)
-const timeoutId = ref(undefined)
+const timeoutId = ref()
 
 // computed
 const snackbarText = computed(() => props.copyFailedText)

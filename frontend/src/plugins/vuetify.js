@@ -10,6 +10,7 @@ import 'vuetify/styles'
 
 // Composables
 import { createVuetify } from 'vuetify'
+import { VDataTable } from 'vuetify/labs/VDataTable'
 
 import colors from 'vuetify/lib/util/colors'
 
@@ -76,5 +77,8 @@ export default createVuetify({
     defaultTheme: 'light',
     themes: { light, dark },
     variations,
+  },
+  components: {
+    VDataTable,
   },
 })

@@ -1483,6 +1483,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.0.2"],\
             ["codemirror", "npm:6.0.1"],\
             ["dayjs", "npm:1.11.7"],\
+            ["downloadjs", "npm:1.4.7"],\
             ["eslint", "npm:8.37.0"],\
             ["eslint-config-standard", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:17.0.0"],\
             ["eslint-plugin-import", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.27.5"],\
@@ -5094,6 +5095,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["dom-serializer", "npm:2.0.0"],\
             ["domelementtype", "npm:2.3.0"],\
             ["domhandler", "npm:5.0.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["downloadjs", [\
+        ["npm:1.4.7", {\
+          "packageLocation": "./.yarn/cache/downloadjs-npm-1.4.7-952a4ef987-4c546a28e7.zip/node_modules/downloadjs/",\
+          "packageDependencies": [\
+            ["downloadjs", "npm:1.4.7"]\
           ],\
           "linkType": "HARD"\
         }]\

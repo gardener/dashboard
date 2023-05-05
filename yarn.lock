@@ -899,6 +899,7 @@ __metadata:
     "@vueuse/router": ^10.0.2
     codemirror: ^6.0.1
     dayjs: ^1.11.7
+    downloadjs: ^1.4.7
     eslint: ^8.22.0
     eslint-config-standard: ^17.0.0
     eslint-plugin-import: ^2.27.5
@@ -3828,6 +3829,13 @@ __metadata:
     domelementtype: ^2.3.0
     domhandler: ^5.0.1
   checksum: 23aa7a840572d395220e173cb6263b0d028596e3950100520870a125af33ff819e6f609e1606d6f7d73bd9e7feb03bb404286e57a39063b5384c62b724d987b3
+  languageName: node
+  linkType: hard
+
+"downloadjs@npm:^1.4.7":
+  version: 1.4.7
+  resolution: "downloadjs@npm:1.4.7"
+  checksum: 4c546a28e7adcb1c290685f923add84e89582549f93502fa1b028194492522f716abb95a70f6ae464067a767e967806970d2a03e6262f8ccbcf3dd68e950d1da
   languageName: node
   linkType: hard
 
