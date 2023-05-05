@@ -39,6 +39,16 @@ export const useProjectStore = defineStore('project', () => {
     return ''
   })
 
+  const currentNamespaces = computed(() => {
+    if (namespace.value === '_all') {
+      return namespaces.value
+    }
+    if (namespace.value) {
+      return [namespace.value]
+    }
+    return []
+  })
+
   const projectList = computed(() => {
     return list.value ?? []
   })
@@ -62,6 +72,10 @@ export const useProjectStore = defineStore('project', () => {
     } else {
       list.value.push(obj)
     }
+  }
+
+  function isCurrentNamespace (namespace) {
+    return currentNamespaces.value.includes(namespace)
   }
 
   async function fetchProjects () {
@@ -121,11 +135,13 @@ export const useProjectStore = defineStore('project', () => {
     isInitial,
     namespace,
     namespaces,
+    currentNamespaces,
     defaultNamespace,
     projectName,
     projectList,
     projectFromProjectList,
     projectNamesFromProjectList,
+    isCurrentNamespace,
     fetchProjects,
     createProject,
     patchProject,

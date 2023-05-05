@@ -20,14 +20,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+import { useTerminalStore } from '@/store'
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
-export default {
+export default defineComponent({
   props: {
     uuid: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
@@ -37,20 +39,18 @@ export default {
         top: undefined,
         left: undefined,
         right: undefined,
-        bottom: undefined
+        bottom: undefined,
       },
       strokeRect: {
         top: undefined,
         left: undefined,
         right: undefined,
-        bottom: undefined
-      }
+        bottom: undefined,
+      },
     }
   },
   computed: {
-    ...mapGetters([
-      'draggingDragAndDropId'
-    ]),
+    ...mapState(useTerminalStore, ['draggingDragAndDropId']),
     isDraggingOtherId () {
       return this.draggingDragAndDropId && this.draggingDragAndDropId !== this.uuid
     },
@@ -77,8 +77,9 @@ export default {
     },
     strokeRectBottom () {
       return this.strokeRectOnPosition(PositionEnum.BOTTOM)
-    }
+    },
   },
+  emits: ['droppedAt'],
   methods: {
     fillOnPosition (position) {
       return this.mouseDown ? this.rect[position] : undefined
@@ -108,11 +109,10 @@ export default {
     dropped () {
       this.mouseDown = false
 
-      this.$emit('dropped-at', this.currentPosition)
-    }
-  }
-}
-
+      this.$emit('droppedAt', this.currentPosition)
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

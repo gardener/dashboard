@@ -330,9 +330,6 @@ function decorateClassificationObject (obj) {
 
 // getters
 const getters = {
-  apiServerUrl (state) {
-    return get(state.cfg, 'apiServerUrl', window.location.origin)
-  },
   cloudProfileList (state) {
     return state.cloudProfiles.all
   },
@@ -683,12 +680,6 @@ const getters = {
       return getters['cloudProviderSecrets/getCloudProviderSecretByName']({ namespace, name })
     }
   },
-  namespaces (state) {
-    return map(state.projects.all, 'metadata.namespace')
-  },
-  defaultNamespace (state, getters) {
-    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
-  },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
@@ -877,164 +868,6 @@ const getters = {
       const k8sVersions = getters.sortedKubernetesVersions(cloudProfileName)
       return firstItemMatchingVersionClassification(k8sVersions)
     }
-  },
-  isAdmin (state) {
-    return get(state.user, 'isAdmin', false)
-  },
-  username (state) {
-    const user = state.user
-    return user ? user.email || user.id : ''
-  },
-  userExpiresAt (state) {
-    const user = state.user
-    return user ? user.exp * 1000 : 0
-  },
-  avatarUrl (state, getters) {
-    return gravatarUrlGeneric(getters.username)
-  },
-  displayName (state) {
-    const user = state.user
-    return user ? user.name || displayName(user.id) : ''
-  },
-  fullDisplayName (state) {
-    const user = state.user
-    return user ? user.name || fullDisplayName(user.id) : ''
-  },
-  alert (state) {
-    return state.alert || null
-  },
-  alertBannerMessage (state) {
-    return get(state, 'cfg.alert.message')
-  },
-  alertBannerType (state) {
-    return get(state, 'cfg.alert.type', 'error')
-  },
-  alertBannerIdentifier (state, getters) {
-    if (!getters.alertBannerMessage) {
-      return
-    }
-    const defaultIdentifier = hash(getters.alertBannerMessage)
-    const configIdentifier = get(state, 'cfg.alert.identifier')
-    const identifier = camelCase(configIdentifier) || defaultIdentifier
-    // we prefix the identifier coming from the configuration so that they do not clash with our internal identifiers (e.g. for the shoot editor warning)
-    return `cfg.${identifier}`
-  },
-  currentNamespaces (state, getters) {
-    if (state.namespace === '_all') {
-      return getters.namespaces
-    }
-    if (state.namespace) {
-      return [state.namespace]
-    }
-    return []
-  },
-  isCurrentNamespace (state, getters) {
-    return namespace => includes(getters.currentNamespaces, namespace)
-  },
-  getShootListFilters (state, getters) {
-    return getters['shoots/getShootListFilters']
-  },
-  newShootResource (state, getters) {
-    return getters['shoots/newShootResource']
-  },
-  initialNewShootResource (state, getters) {
-    return getters['shoots/initialNewShootResource']
-  },
-  hasGardenTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled &&
-      getters.canCreateTerminals &&
-      getters.canPatchServiceAccounts &&
-      getters.canCreateServiceAccounts
-  },
-  hasControlPlaneTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
-  },
-  hasShootTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.canCreateTerminals
-  },
-  isTerminalEnabled (state, getters) {
-    return get(state, 'cfg.features.terminalEnabled', false)
-  },
-  isTerminalShortcutsFeatureEnabled (state, getters) {
-    return !isEmpty(getters.terminalShortcutsByTargetsFilter()) || getters.isProjectTerminalShortcutsEnabled
-  },
-  isProjectTerminalShortcutsEnabled (state, getters) {
-    return get(state, 'cfg.features.projectTerminalShortcutsEnabled', false)
-  },
-  canCreateTerminals (state) {
-    return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
-  },
-  canCreateShoots (state) {
-    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots')
-  },
-  canPatchShoots (state) {
-    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'shoots')
-  },
-  canDeleteShoots (state) {
-    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'shoots')
-  },
-  canPatchShootsBinding (state) {
-    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'shoots/binding')
-  },
-  canGetSecrets (state) {
-    return canI(state.subjectRules, 'list', '', 'secrets')
-  },
-  canCreateSecrets (state) {
-    return canI(state.subjectRules, 'create', '', 'secrets')
-  },
-  canCreateShootsAdminkubeconfig (state) {
-    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots/adminkubeconfig')
-  },
-  canPatchSecrets (state) {
-    return canI(state.subjectRules, 'patch', '', 'secrets')
-  },
-  canDeleteSecrets (state) {
-    return canI(state.subjectRules, 'delete', '', 'secrets')
-  },
-  canCreateTokenRequest (state) {
-    return canI(state.subjectRules, 'create', '', 'serviceaccounts/token')
-  },
-  canCreateServiceAccounts (state) {
-    return canI(state.subjectRules, 'create', '', 'serviceaccounts')
-  },
-  canPatchServiceAccounts (state) {
-    return canI(state.subjectRules, 'patch', '', 'serviceaccounts')
-  },
-  canDeleteServiceAccounts (state) {
-    return canI(state.subjectRules, 'delete', '', 'serviceaccounts')
-  },
-  canGetProjectTerminalShortcuts (state, getters) {
-    return getters.canGetSecrets
-  },
-  canUseProjectTerminalShortcuts (state, getters) {
-    return getters.isProjectTerminalShortcutsEnabled && getters.canGetProjectTerminalShortcuts && getters.canCreateTerminals
-  },
-  canCreateProject (state) {
-    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
-  },
-  canPatchProject (state, getters) {
-    const name = getters.projectName
-    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'projects', name)
-  },
-  canManageMembers (state, getters) {
-    const name = getters.projectName
-    return canI(state.subjectRules, 'manage-members', 'core.gardener.cloud', 'projects', name)
-  },
-  canManageServiceAccountMembers (state, getters) {
-    return getters.canPatchProject || getters.canManageMembers
-  },
-  canDeleteProject (state, getters) {
-    const name = getters.projectName
-    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'projects', name)
-  },
-  draggingDragAndDropId (state, getters) {
-    return getters['draggable/draggingDragAndDropId']
-  },
-  focusedElementId (state) {
-    return state.focusedElementId
-  },
-  splitpaneResize (state) {
-    return state.splitpaneResize
   },
   terminalShortcutsByTargetsFilter (state, getters) {
     return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {

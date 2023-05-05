@@ -29,7 +29,7 @@ import {
 } from '@/utils/errors'
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
-const CLOCK_TOLERANCE = 3500
+const CLOCK_TOLERANCE = 15
 
 function now () {
   return Math.floor(Date.now() / 1000)
