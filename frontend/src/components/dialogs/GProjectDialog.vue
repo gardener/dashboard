@@ -342,7 +342,7 @@ export default defineComponent({
     },
   },
   watch: {
-    value (value) {
+    modelValue (value) {
       if (value) {
         this.reset()
       }

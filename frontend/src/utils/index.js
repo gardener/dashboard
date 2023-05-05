@@ -87,7 +87,7 @@ export function getValidationErrors (vm, field) {
   Object
     .keys(get(validators, field))
     .forEach(key => {
-      if (!validationForField[key]) {
+      if (validationForField[key]?.$invalid) {
         let validationErrorMessage = get(vm.validationErrors, field)[key]
         if (typeof validationErrorMessage === 'function') {
           validationErrorMessage = validationErrorMessage(get(validationForField.$params, key))
@@ -96,7 +96,7 @@ export function getValidationErrors (vm, field) {
           errors.push(validationErrorMessage)
         } else {
           /* Fallback logic with generic error message.
-          This should not happen as for each validation there must be a corresponding text */
+            This should not happen as for each validation there must be a corresponding text */
           errors.push('Invalid input')
           console.error('validation error message for ' + field + '.' + key + ' not found')
         }

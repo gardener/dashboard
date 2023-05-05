@@ -10,7 +10,7 @@ import { helpers } from '@vuelidate/validators'
 import includes from 'lodash/includes'
 import get from 'lodash/get'
 
-const { withParams, regex, ref, req } = helpers
+const { withParams, regex, req } = helpers
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const uppercaseAlphaNumPattern = /^[A-Z0-9]+$/
@@ -22,11 +22,11 @@ const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
-const base64 = regex('base64', base64Pattern)
-const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
-const alphaNumUnderscore = regex('alphaNumUnderscore', alphaNumUnderscorePattern)
-const alphaNumUnderscoreHyphen = regex('alphaNumUnderscoreHyphen', alphaNumUnderscoreHyphenPattern)
-const resourceName = regex('resourceName', resourceNamePattern)
+const base64 = regex(base64Pattern)
+const uppercaseAlphaNum = regex(uppercaseAlphaNumPattern)
+const alphaNumUnderscore = regex(alphaNumUnderscorePattern)
+const alphaNumUnderscoreHyphen = regex(alphaNumUnderscoreHyphenPattern)
+const resourceName = regex(resourceNamePattern)
 const noConsecutiveHyphen = (value) => {
   return !consecutiveHyphenPattern.test(value)
 }
@@ -41,21 +41,24 @@ const isTimezone = (value) => {
   return timezonePattern.test(value)
 }
 
-const unique = key => withParams({ type: 'unique', key },
-  function (value, parentVm) {
-    const keys = ref(key, this, parentVm)
+const unique = key => withParams(
+  { type: 'unique', key },
+  function unique (value) {
+    const keys = this[key]
     return !includes(keys, value)
   },
 )
 
-const uniqueWorkerName = withParams({ type: 'uniqueWorkerName' },
+const uniqueWorkerName = withParams(
+  { type: 'uniqueWorkerName' },
   function unique (value) {
     return this.workers.filter(item => item.name === value).length === 1
   },
 )
 
-const requiresCostObjectIfEnabled = withParams({ type: 'requiresCostObjectIfEnabled' },
-  function (infrastructureSecret) {
+const requiresCostObjectIfEnabled = withParams(
+  { type: 'requiresCostObjectIfEnabled' },
+  function requiresCostObjectIfEnabled (infrastructureSecret) {
     if (!this.costObjectSettingEnabled) {
       return true
     }
@@ -63,8 +66,9 @@ const requiresCostObjectIfEnabled = withParams({ type: 'requiresCostObjectIfEnab
   },
 )
 
-const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
-  function (value) {
+const serviceAccountKey = withParams(
+  { type: 'serviceAccountKey' },
+  function serviceAccountKey (value) {
     try {
       const key = JSON.parse(value)
       if (key.project_id && alphaNumUnderscoreHyphen(key.project_id)) {
@@ -75,16 +79,18 @@ const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
   },
 )
 
-const includesIfAvailable = (key, reference) => withParams({ type: 'includesIfAvailable', key },
-  function (selectedKeys, parentVm) {
-    const availableKeys = ref(reference, this, parentVm)
+const includesIfAvailable = (key, reference) => withParams(
+  { type: 'includesIfAvailable', key },
+  function includesIfAvailable (selectedKeys) {
+    const availableKeys = this[reference]
     return includes(availableKeys, key) ? includes(selectedKeys, key) : true
   },
 )
 
-const nilUnless = key => withParams({ type: 'nilUnless', key },
-  function (value, parentVm) {
-    return !ref(key, this, parentVm) ? !req(value) : true
+const nilUnless = key => withParams(
+  { type: 'nilUnless', key },
+  function nilUnless (value) {
+    return !this[key] ? !req(value) : true
   },
 )
 
