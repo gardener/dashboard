@@ -16,7 +16,7 @@ export { useShootStore } from './shoot'
 export { useCloudprofileStore } from './cloudprofile'
 export { useSeedStore } from './seed'
 export { useGardenerExtensionStore } from './gardenerExtension'
-export { useKubeconfigStore } from './kubeconfig'
+// export { useKubeconfigStore } from './kubeconfig'
 export { useLoginStore } from './login'
 
 export default createPinia()

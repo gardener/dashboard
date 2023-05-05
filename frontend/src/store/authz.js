@@ -5,16 +5,21 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, toRef, computed } from 'vue'
 import { useApi } from '@/composables'
 import { useConfigStore } from './config'
 import { useAuthnStore } from './authn'
+import { useProjectStore } from './project'
 import { canI } from '@/utils'
 
 export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()
   const authnStore = useAuthnStore()
   const { isTerminalEnabled, isProjectTerminalShortcutsEnabled } = useConfigStore()
+
+  const projectStore = useProjectStore()
+  const projectFromProjectList = toRef(projectStore, 'projectFromProjectList')
+  const projectName = projectFromProjectList.value?.metadata.name
 
   const spec = ref(null)
   const status = ref(null)
@@ -67,20 +72,24 @@ export const useAuthzStore = defineStore('authz', () => {
     return canI(status.value, 'create', '', 'serviceaccounts/token')
   })
 
-  const canCreateServiceAccounts = computed(() => {
-    return canI(status.value, 'create', '', 'serviceaccounts')
-  })
-
-  const canPatchServiceAccounts = computed(() => {
-    return canI(status.value, 'patch', '', 'serviceaccounts')
-  })
-
-  const canDeleteServiceAccounts = computed(() => {
-    return canI(status.value, 'delete', '', 'serviceaccounts')
-  })
-
   const canCreateProject = computed(() => {
     return canI(status.value, 'create', 'core.gardener.cloud', 'projects')
+  })
+
+  const canPatchProject = computed(() => {
+    return canI(status.value, 'patch', 'core.gardener.cloud', 'projects', projectName)
+  })
+
+  const canDeleteProject = computed(() => {
+    return canI(status.value, 'delete', 'core.gardener.cloud', 'projects', projectName)
+  })
+
+  const canManageMembers = computed(() => {
+    return canI(status.value, 'manage-members', 'core.gardener.cloud', 'projects', projectName)
+  })
+
+  const canManageServiceAccountMembers = computed(() => {
+    return canPatchProject.value || canManageMembers.value
   })
 
   const canGetProjectTerminalShortcuts = computed(() => {
@@ -91,6 +100,18 @@ export const useAuthzStore = defineStore('authz', () => {
     return isProjectTerminalShortcutsEnabled.value &&
       canGetProjectTerminalShortcuts.value &&
       canCreateTerminals.value
+  })
+
+  const canCreateServiceAccounts = computed(() => {
+    return canI(status.value, 'create', '', 'serviceaccounts')
+  })
+
+  const canPatchServiceAccounts = computed(() => {
+    return canI(status.value, 'patch', '', 'serviceaccounts')
+  })
+
+  const canDeleteServiceAccounts = computed(() => {
+    return canI(status.value, 'delete', '', 'serviceaccounts')
   })
 
   const hasGardenTerminalAccess = computed(() => {
@@ -143,6 +164,10 @@ export const useAuthzStore = defineStore('authz', () => {
     canPatchServiceAccounts,
     canDeleteServiceAccounts,
     canCreateProject,
+    canPatchProject,
+    canDeleteProject,
+    canManageMembers,
+    canManageServiceAccountMembers,
     canGetProjectTerminalShortcuts,
     canUseProjectTerminalShortcuts,
     hasGardenTerminalAccess,

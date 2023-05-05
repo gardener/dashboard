@@ -15,7 +15,7 @@ import {
   useCloudprofileStore,
   useSeedStore,
   useGardenerExtensionStore,
-  useKubeconfigStore,
+  // useKubeconfigStore,
   useMemberStore,
   useShootStore,
 } from '@/store'
@@ -31,7 +31,7 @@ export function createGuards () {
   const cloudProfileStore = useCloudprofileStore()
   const seedStore = useSeedStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
-  const kubeconfigStore = useKubeconfigStore()
+  // const kubeconfigStore = useKubeconfigStore()
   const memberStore = useMemberStore()
   const shootStore = useShootStore()
 
@@ -68,7 +68,7 @@ export function createGuards () {
           ensureCloudProfilesLoaded(cloudProfileStore),
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionsStore),
-          ensureKubeconfigLoaded(kubeconfigStore),
+          // ensureKubeconfigLoaded(kubeconfigStore),
           refreshRules(authzStore, namespace),
         ])
 
