@@ -1,7 +1,8 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
 import { vi } from 'vitest'
 import createFetchMock from 'vitest-fetch-mock'
