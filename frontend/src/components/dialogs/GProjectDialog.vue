@@ -126,13 +126,13 @@ import { useAuthnStore, useConfigStore, useMemberStore, useProjectStore } from '
 const defaultProjectName = ''
 
 export default defineComponent({
+  components: {
+    GMessage,
+  },
   setup () {
     return {
       v$: useVuelidate(),
     }
-  },
-  components: {
-    GMessage,
   },
   props: {
     modelValue: {
@@ -338,7 +338,7 @@ export default defineComponent({
       this.owner = this.username
       this.costObject = undefined
 
-      setDelayedInputFocus(this.$refs.projectName)
+      setDelayedInputFocus(this, 'projectName')
     },
   },
   watch: {
