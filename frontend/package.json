@@ -27,6 +27,7 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@braintree/sanitize-url": "^6.0.2",
     "@kyvg/vue3-notification": "^2.9.0",
     "@mdi/font": "7.0.96",
     "@vuelidate/core": "^2.0.2",
@@ -38,6 +39,7 @@
     "dayjs": "^1.11.7",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.0",
+    "highlight.js": "^11.8.0",
     "js-cookie": "^3.0.1",
     "js-yaml": "^4.1.0",
     "jwt-decode": "^3.1.2",

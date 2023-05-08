@@ -17,4 +17,4 @@
   $utilities: false !default,
 );
 
-@forward '@/sass/variables.scss';
+@forward './variables.scss';

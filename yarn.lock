@@ -441,6 +441,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@braintree/sanitize-url@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "@braintree/sanitize-url@npm:6.0.2"
+  checksum: 6a9dfd4081cc96516eeb281d1a83d3b5f1ad3d2837adf968fcc2ba18889ee833554f9c641b4083c36d3360a932e4504ddf25b0b51e9933c3742622df82cf7c9a
+  languageName: node
+  linkType: hard
+
 "@codemirror/autocomplete@npm:^6.0.0":
   version: 6.4.2
   resolution: "@codemirror/autocomplete@npm:6.4.2"
@@ -888,6 +895,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
+    "@braintree/sanitize-url": ^6.0.2
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
     "@vitejs/plugin-vue": ^3.0.3
@@ -909,6 +917,7 @@ __metadata:
     eslint-plugin-vue: ^9.3.0
     eslint-plugin-vuetify: ^2.0.0-beta.4
     eventemitter3: ^5.0.0
+    highlight.js: ^11.8.0
     js-cookie: ^3.0.1
     js-yaml: ^4.1.0
     jwt-decode: ^3.1.2
@@ -5624,6 +5633,13 @@ __metadata:
   version: 1.0.0
   resolution: "hexoid@npm:1.0.0"
   checksum: 27a148ca76a2358287f40445870116baaff4a0ed0acc99900bf167f0f708ffd82e044ff55e9949c71963852b580fc024146d3ac6d5d76b508b78d927fa48ae2d
+  languageName: node
+  linkType: hard
+
+"highlight.js@npm:^11.8.0":
+  version: 11.8.0
+  resolution: "highlight.js@npm:11.8.0"
+  checksum: d2578a57aee7315946ff19379053fd0a28b127baabf7617ab1d28d62cdc4eaf3d75053569cb8479a5afdc7a68f1ba9a6c1d612d8ae399b4b9aa43093b4fb6831
   languageName: node
   linkType: hard
 

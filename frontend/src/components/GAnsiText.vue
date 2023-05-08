@@ -9,31 +9,30 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import ansiHTML from 'ansi-html'
 import escape from 'lodash/escape'
 
-export default {
+export default defineComponent({
   props: {
     text: {
       type: String,
-      default: ''
-    }
+      default: '',
+    },
   },
   computed: {
     escapedAnsiHTML () {
       return ansiHTML(escape(this.text))
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-
 .ansi-text {
   text-align: left;
   min-width: 250px;
   white-space: pre-wrap;
   max-height: inherit;
 }
-
 </style>

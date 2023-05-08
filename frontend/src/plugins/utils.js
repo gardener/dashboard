@@ -5,6 +5,7 @@
 //
 
 import { createApp } from 'vue'
+import { useApi } from '@/composables'
 
 function renderComponent (name, props) {
   return createApp({
@@ -18,5 +19,7 @@ export default {
   install (app) {
     app.config.globalProperties.$renderComponent = renderComponent
     app.provide('renderComponent', renderComponent)
+    app.config.globalProperties.$api = useApi()
+    app.provide('api', app.config.globalProperties.$api)
   },
 }

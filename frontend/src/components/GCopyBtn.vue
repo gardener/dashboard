@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-snackbar
       v-if="userFeedback"
-      :location="true && 'bottom'"
       v-model="snackbar"
+      location="bottom"
       :success="true"
       :absolute="true"
       :timeout="2000"
@@ -18,12 +18,18 @@ SPDX-License-Identifier: Apache-2.0
       {{snackbarText}}
     </v-snackbar>
     <v-tooltip location="top">
-      <template v-slot:activator="{ on }">
-        <v-btn v-on="on" icon :color="btnColor" @click="copyText">
-          <v-icon :size="true && 'small'">{{icon}}</v-icon>
+      <template v-slot:activator="{ props }">
+        <v-btn
+          v-bind="props"
+          :icon="icon"
+          :color="btnColor"
+          variant="text"
+          size="small"
+          @click="copyText"
+        >
         </v-btn>
       </template>
-      <span>{{tooltipText}}</span>
+      {{tooltipText}}
     </v-tooltip>
   </div>
 </template>

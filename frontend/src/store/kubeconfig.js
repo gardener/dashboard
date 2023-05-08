@@ -17,6 +17,11 @@ export const useKubeconfigStore = defineStore('kubeconfig', () => {
     return data.value === null
   })
 
+  const isKubeconfigEnabled = computed(() => {
+    const { clientId, clientSecret, usePKCE = false } = data.value?.oidc ?? {}
+    return !!(clientId && (clientSecret || usePKCE))
+  })
+
   async function fetchKubeconfig () {
     const response = await api.getKubeconfigData()
     data.value = response.data
@@ -24,6 +29,8 @@ export const useKubeconfigStore = defineStore('kubeconfig', () => {
 
   return {
     data,
+    kubeconfigData: data,
+    isKubeconfigEnabled,
     isInitial,
     fetchKubeconfig,
   }

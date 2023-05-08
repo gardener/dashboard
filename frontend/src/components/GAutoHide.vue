@@ -17,17 +17,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   props: {
     left: {
-      type: Boolean
+      type: Boolean,
+      default: false,
     },
     right: {
-      type: Boolean
-    }
-  }
-}
+      type: Boolean,
+      default: false,
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

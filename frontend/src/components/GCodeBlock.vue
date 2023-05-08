@@ -10,18 +10,19 @@ SPDX-License-Identifier: Apache-2.0
       <pre><code :class="lang" ref="block"></code></pre>
       <span class="copied" :class="{ 'active': showMessage }">Copied!</span>
     </div>
-    <copy-btn
+    <g-copy-btn
       v-if="showCopyButton"
       class="copy-button"
       :clipboard-text="clipboardText"
       @copy="onCopy"
       :user-feedback="false"
-    ></copy-btn>
+    ></g-copy-btn>
   </div>
 </template>
 
 <script>
-import CopyBtn from '@/components/CopyBtn.vue'
+import { defineComponent } from 'vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
@@ -41,37 +42,36 @@ hljs.registerLanguage('json', json)
 hljs.registerLanguage('javascript', javascript)
 hljs.registerLanguage('yaml', yaml)
 
-export default {
+export default defineComponent({
   components: {
-    CopyBtn
+    GCopyBtn,
   },
   props: {
     lang: String,
     height: {
       type: [Number, String],
-      default: '450px'
+      default: '450px',
     },
     content: {
       type: String,
-      default: ''
+      default: '',
     },
     clipboard: {
       type: String,
-      default: ''
+      default: '',
     },
     showCopyButton: {
       type: Boolean,
-      default: true
-    }
-
+      default: true,
+    },
   },
   data: () => ({
-    showMessage: false
+    showMessage: false,
   }),
   computed: {
     clipboardText () {
       return this.clipboard ? this.clipboard : this.content
-    }
+    },
   },
   methods: {
     prettyPrint (textContent) {
@@ -101,7 +101,7 @@ export default {
       window.setTimeout(() => {
         this.showMessage = false
       }, 2000)
-    }
+    },
   },
   mounted () {
     this.prettyPrint(this.content)
@@ -109,9 +109,9 @@ export default {
   watch: {
     content (textContent) {
       this.prettyPrint(textContent)
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

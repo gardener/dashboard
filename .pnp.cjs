@@ -904,6 +904,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@braintree/sanitize-url", [\
+        ["npm:6.0.2", {\
+          "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-6.0.2-a8e98c2fde-6a9dfd4081.zip/node_modules/@braintree/sanitize-url/",\
+          "packageDependencies": [\
+            ["@braintree/sanitize-url", "npm:6.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@codemirror/autocomplete", [\
         ["npm:6.4.2", {\
           "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.4.2-e230a7fe53-c6cc4edb1c.zip/node_modules/@codemirror/autocomplete/",\
@@ -1472,6 +1481,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./frontend/",\
           "packageDependencies": [\
             ["@gardener-dashboard/frontend", "workspace:frontend"],\
+            ["@braintree/sanitize-url", "npm:6.0.2"],\
             ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.9.0"],\
             ["@mdi/font", "npm:7.0.96"],\
             ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.0"],\
@@ -1493,6 +1503,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.10.0"],\
             ["eslint-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.0-beta.4"],\
             ["eventemitter3", "npm:5.0.0"],\
+            ["highlight.js", "npm:11.8.0"],\
             ["js-cookie", "npm:3.0.1"],\
             ["js-yaml", "npm:4.1.0"],\
             ["jwt-decode", "npm:3.1.2"],\
@@ -7305,6 +7316,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/hexoid-npm-1.0.0-2274609209-27a148ca76.zip/node_modules/hexoid/",\
           "packageDependencies": [\
             ["hexoid", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["highlight.js", [\
+        ["npm:11.8.0", {\
+          "packageLocation": "./.yarn/cache/highlight.js-npm-11.8.0-6ff1e42749-d2578a57ae.zip/node_modules/highlight.js/",\
+          "packageDependencies": [\
+            ["highlight.js", "npm:11.8.0"]\
           ],\
           "linkType": "HARD"\
         }]\
