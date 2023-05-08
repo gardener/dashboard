@@ -71,12 +71,22 @@
   border-radius: 8px;
 }
 
-.v-theme--light .alternate-row-background > div:nth-of-type(even) {
-  background-color: rgba(0, 0, 0, .02);
+.v-application {
+  a {
+    color: rgb(var(--v-theme-anchor));
+  }
 }
 
-.v-theme--dark .alternate-row-background > div:nth-of-type(even) {
-  background-color: rgba(0, 0, 0, .2);
+.v-theme--light {
+  .alternate-row-background > div:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, .02);
+  }
+}
+
+.v-theme--dark {
+  .alternate-row-background > div:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, .2);
+  }
 }
 
 .inherit-color {

@@ -15,8 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <slot>{{url}}</slot>
     </span>
     <v-icon
-      :size="12"
-      end
+      :size="14"
       icon="mdi-open-in-new"
       class="inherit-color"
     />

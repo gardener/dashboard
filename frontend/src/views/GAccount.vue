@@ -151,55 +151,57 @@ SPDX-License-Identifier: Apache-2.0
                       <br>
                       Below you can configure and preview the <span class="font-family-monospace">kubeconfig</span> file before download.
                     </div>
-                    <v-tabs v-model="kubeconfigTab" slider-color="primary" class="mt-2 elevation-1">
-                      <v-tab :value="'configure'">Configure</v-tab>
-                      <v-tab :value="'preview'">Preview</v-tab>
-                    </v-tabs>
-                    <v-window v-model="kubeconfigTab">
-                      <v-window-item :value="'configure'" class="pa-4">
-                        <v-row>
-                          <v-col cols="12">
-                            <v-select
-                              color="primary"
-                              v-model="projectName"
-                              :items="projectNames"
-                              variant="underlined"
-                              label="Project"
-                              hint="The namespace of the selected project will be the default namespace in the kubeconfig"
-                              persistent-hint
-                            ></v-select>
-                          </v-col>
-                          <v-col cols="12">
-                            <v-select
-                              color="primary"
-                              v-model="grantType"
-                              :items="grantTypes"
-                              variant="underlined"
-                              label="Grant Type"
-                              hint="The authorization grant type to use"
-                              persistent-hint
-                            ></v-select>
-                          </v-col>
-                          <v-col cols="12">
-                            <v-switch
-                              color="primary"
-                              v-model="skipOpenBrowser"
-                              variant="underlined"
-                              label="Skip Open Browser"
-                              hint="If true, it does not open the browser on authentication"
-                              persistent-hint
-                            ></v-switch>
-                          </v-col>
-                        </v-row>
-                      </v-window-item>
-                      <v-window-item :value="'preview'">
-                        <g-code-block
-                          lang="yaml"
-                          :content="kubeconfigYaml"
-                          :show-copy-button="false"
-                        />
-                      </v-window-item>
-                    </v-window>
+                    <v-sheet elevation="1" class="mt-3">
+                      <v-tabs v-model="kubeconfigTab" color="primary" slider-color="primary">
+                        <v-tab :value="'configure'">Configure</v-tab>
+                        <v-tab :value="'preview'">Preview</v-tab>
+                      </v-tabs>
+                      <v-window v-model="kubeconfigTab">
+                        <v-window-item :value="'configure'" class="pa-4">
+                          <v-row>
+                            <v-col cols="12">
+                              <v-select
+                                color="primary"
+                                v-model="projectName"
+                                :items="projectNames"
+                                variant="underlined"
+                                label="Project"
+                                hint="The namespace of the selected project will be the default namespace in the kubeconfig"
+                                persistent-hint
+                              ></v-select>
+                            </v-col>
+                            <v-col cols="12">
+                              <v-select
+                                color="primary"
+                                v-model="grantType"
+                                :items="grantTypes"
+                                variant="underlined"
+                                label="Grant Type"
+                                hint="The authorization grant type to use"
+                                persistent-hint
+                              ></v-select>
+                            </v-col>
+                            <v-col cols="12">
+                              <v-switch
+                                color="primary"
+                                v-model="skipOpenBrowser"
+                                variant="underlined"
+                                label="Skip Open Browser"
+                                hint="If true, it does not open the browser on authentication"
+                                persistent-hint
+                              ></v-switch>
+                            </v-col>
+                          </v-row>
+                        </v-window-item>
+                        <v-window-item :value="'preview'">
+                          <g-code-block
+                            lang="yaml"
+                            :content="kubeconfigYaml"
+                            :show-copy-button="false"
+                          />
+                        </v-window-item>
+                      </v-window>
+                    </v-sheet>
                   </v-card-text>
                 </v-card>
               </v-expand-transition>

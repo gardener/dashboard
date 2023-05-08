@@ -7,12 +7,10 @@
 /**
  * Configures Vuetify overwrites. Also see vite.config.js where this
  * file is referenced in the vuetify plugin config.
+ * https: //vuetifyjs.com/en/features/sass-variables/#usage-in-templates
  */
 
-// https://vuetifyjs.com/en/features/sass-variables/#usage-in-templates
-// The parameters ($color-pack,...) are partially described here:
-//   https://github.com/vuetifyjs/vuetify/tree/master/packages/docs/src/pages/en/styles
-@forward 'vuetify/settings' with ( // if we want to use variables from here change to @use
+@forward 'vuetify/settings' with (
   $color-pack: true !default,
   $utilities: false !default,
 );

@@ -17,30 +17,31 @@ SPDX-License-Identifier: Apache-2.0
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  color="primary"
                   ref="projectName"
-                  label="Name"
                   v-model.trim="projectName"
+                  variant="underlined"
+                  color="primary"
+                  label="Name"
+                  counter="10"
                   :error-messages="getFieldValidationErrors('projectName')"
                   @update:model-value="v$.projectName.$touch()"
                   @blur="v$.projectName.$touch()"
-                  counter="10"
-                  ></v-text-field>
+                />
               </v-col>
             </v-row>
 
             <v-row v-if="costObjectSettingEnabled">
               <v-col cols="12">
                 <v-text-field
-                  color="primary"
                   ref="costObject"
-                  :label="costObjectTitle"
                   v-model="costObject"
+                  variant="underlined"
+                  color="primary"
+                  :label="costObjectTitle"
                   :error-messages="getFieldValidationErrors('costObject')"
                   @update:model-value="v$.costObject.$touch()"
                   @blur="v$.costObject.$touch()"
-                  >
-                </v-text-field>
+                />
                 <v-alert v-if="!!costObjectDescriptionHtml" density="compact" type="info" variant="outlined" color="primary">
                   <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
                 </v-alert>
@@ -50,26 +51,38 @@ SPDX-License-Identifier: Apache-2.0
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  color="primary"
                   ref="description"
-                  label="Description"
                   v-model="description"
-                  ></v-text-field>
+                  variant="underlined"
+                  color="primary"
+                  label="Description"
+                />
               </v-col>
             </v-row>
             <v-row >
               <v-col cols="12">
                 <v-text-field
+                  ref="purpose"
+                  v-model="purpose"
+                  variant="underlined"
                   color="primary"
                   label="Purpose"
-                  v-model="purpose"
-                  ></v-text-field>
+                />
               </v-col>
             </v-row>
-            <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+            <g-message
+              color="error"
+              v-model:message="errorMessage"
+              v-model:detailed-message="detailedErrorMessage"
+            />
           </v-container>
         </form>
-        <v-snackbar :model-value="loading" location="bottom right" absolute :timeout="-1">
+        <v-snackbar
+          :model-value="loading"
+          location="bottom right"
+          absolute
+          :timeout="-1"
+        >
           <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>
@@ -84,11 +97,11 @@ SPDX-License-Identifier: Apache-2.0
           Cancel
         </v-btn>
         <v-btn
+          color="primary"
           variant="text"
           :loading="loading"
           :disabled="!valid || loading"
           @click.stop="submit"
-          color="primary"
         >
           Create
         </v-btn>

@@ -115,12 +115,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  /* @use 'vuetify/src/styles/styles.sass' as *; */
-  /* @use 'vuetify/lib/styles/main.sass' as * with (
-    $color-pack: true,
-    $utilities: false,
-  ); */
-  @use '@/sass/settings.scss' as *;
+  @import '@/sass/settings';
 
   $grey-lighten-4: map-get($grey, 'lighten-4');
 
@@ -215,11 +210,11 @@ export default defineComponent({
     }
   }
 
-  .theme--light .code-block {
+  .v-theme--light .code-block {
     background-color: rgba(0, 0, 0, .02);
   }
 
-  .theme--dark .code-block {
+  .v-theme--dark .code-block {
     background-color: rgba(0, 0, 0, .2);
 
     &:after {
