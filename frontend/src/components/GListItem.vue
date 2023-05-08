@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     role="list-item"
-    class="d-flex align-center px-4 py-3 g-list-item"
+    class="d-flex align-center px-4 py-2 g-list-item"
   >
     <div
-      class="d-inline-flex align-self-center flex-nowrap mr-6 g-list-item__prepend"
+      class="d-inline-flex align-self-center justify-center flex-nowrap mr-4 g-list-item__prepend"
     >
       <slot name="prepend"></slot>
     </div>
@@ -32,11 +32,13 @@ SPDX-License-Identifier: Apache-2.0
   .g-list-item {
     letter-spacing: normal;
     text-decoration: none;
-    min-height: 48px;
     position: relative;
+    min-height: 48px;
 
     .g-list-item__prepend {
-      min-width: 24px;
+      height: 40px;
+      min-width: 40px;
+      width: 40px;
     }
 
     .g-list-item__content {
