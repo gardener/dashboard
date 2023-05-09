@@ -20,12 +20,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GDialog from '@/components/dialogs/GDialog.vue'
+import { defineComponent } from 'vue'
+import GDialog from '@/components/Dialogs/GDialog.vue'
 
-export default {
-  name: 'confirm-dialog',
+export default defineComponent({
   components: {
-    GDialog
+    GDialog,
   },
   data () {
     return {
@@ -34,7 +34,7 @@ export default {
       captionText: undefined,
       messageHtml: undefined,
       width: undefined,
-      confirmValue: undefined
+      confirmValue: undefined,
     }
   },
   methods: {
@@ -47,7 +47,7 @@ export default {
       this.confirmValue = confirmValue
 
       return this.$refs.gDialog.confirmWithDialog()
-    }
-  }
-}
+    },
+  },
+})
 </script>

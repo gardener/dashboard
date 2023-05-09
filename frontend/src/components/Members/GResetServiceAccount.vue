@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -14,8 +14,8 @@ export default {
   props: {
     name: {
       type: String,
-      required: true
-    }
-  }
+      required: true,
+    },
+  },
 }
 </script>

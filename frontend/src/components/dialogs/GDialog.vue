@@ -5,19 +5,17 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw">
+  <v-dialog v-model="visible" persistent :width="width" scrollable max-width="90vw">
     <v-card>
-      <v-toolbar flat class="toolbar-background toolbar-title--text">
-        <v-toolbar-title class="dialog-title align-center justify-start">
-          <slot name="caption">
-            Confirm Dialog
-          </slot>
-          <template v-if="$slots.affectedObjectName">
-            &nbsp;
-            <span class="font-family-monospace font-weight-bold"><slot name="affectedObjectName"></slot></span>
-          </template>
-        </v-toolbar-title>
-      </v-toolbar>
+      <v-card-title class="bg-toolbar-background text-toolbar-title">
+        <slot name="caption">
+          Confirm Dialog
+        </slot>
+        <template v-if="$slots.affectedObjectName">
+          &nbsp;
+          <span class="font-family-monospace font-weight-bold"><slot name="affectedObjectName"></slot></span>
+        </template>
+      </v-card-title>
       <slot name="top"></slot>
       <div :style="{ 'max-height': maxHeight }" ref="cardContent" class="card-content">
         <slot name="card"></slot>
@@ -42,13 +40,13 @@ SPDX-License-Identifier: Apache-2.0
           type="text"
           variant="outlined"
           color="primary"
-          dense>
+          density="compact">
         </v-text-field>
         <v-btn variant="text" @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
         <v-tooltip location="top" :disabled="valid">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn variant="text" @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+              <v-btn variant="text" @click="resolveAction(true)" :disabled="!valid" class="bg-toolbar-background--text">{{confirmButtonText}}</v-btn>
             </div>
           </template>
           <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
@@ -60,55 +58,55 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { setDelayedInputFocus } from '@/utils'
 import GMessage from '@/components/GMessage.vue'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
 
-export default {
-  name: 'gdialog',
+export default defineComponent({
   components: {
-    GMessage
+    GMessage,
   },
   props: {
     confirmValue: {
-      type: String
+      type: String,
     },
     confirmDisabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     errorMessage: {
-      type: String
+      type: String,
     },
     detailedErrorMessage: {
-      type: String
+      type: String,
     },
     confirmButtonText: {
       type: String,
-      default: 'Confirm'
+      default: 'Confirm',
     },
     cancelButtonText: {
       type: String,
-      default: 'Cancel'
+      default: 'Cancel',
     },
     width: {
       type: String,
-      default: '500'
+      default: '500',
     },
     maxHeight: {
       type: String,
-      default: '50vh'
+      default: '50vh',
     },
     disableConfirmInputFocus: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data () {
     return {
       userInput: '',
       visible: false,
-      resolve: noop
+      resolve: noop,
     }
   },
   computed: {
@@ -129,7 +127,7 @@ export default {
       },
       set (value) {
         this.$emit('update:error-message', value)
-      }
+      },
     },
     detailedMessage: {
       get () {
@@ -137,12 +135,17 @@ export default {
       },
       set (value) {
         this.$emit('update:detailed-error-message', value)
-      }
+      },
     },
     valid () {
       return !this.confirmDisabled && !this.notConfirmed
-    }
+    },
   },
+  emits: [
+    'update:error-message',
+    'update:detailed-error-message',
+    'dialog-closed',
+  ],
   methods: {
     confirmWithDialog (confirmationInterceptor) {
       this.showDialog()
@@ -200,16 +203,16 @@ export default {
       const scrollTopVal = cardContentRef.scrollTop
       cardContentRef.scrollTop = scrollTopVal + 10
       cardContentRef.scrollTop = scrollTopVal - 10
-    }
+    },
   },
   watch: {
     visible (value) {
       if (value) {
         this.showScrollBar()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
@@ -219,5 +222,6 @@ export default {
 
   .card-content {
     overflow: scroll;
+    height: auto;
   }
 </style>

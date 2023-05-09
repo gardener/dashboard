@@ -149,36 +149,38 @@ SPDX-License-Identifier: Apache-2.0
             @download="onDownload"
             @kubeconfig="onKubeconfig"
             @reset-serviceaccount="onResetServiceAccount"
-            @delete="onDeleteServiceAccount"
+            @delete="onGDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></g-service-account-row>
         </template>
       </v-data-table>
     </v-card>
 
-    <!--- TODO
-    <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
-    <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" :orphaned="orphaned" v-model="serviceAccountUpdateDialog"></member-dialog>
-    <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
-    <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
+    <g-member-dialog type="adduser" v-model="userAddDialog"></g-member-dialog>
+    <g-member-dialog type="addservice" v-model="serviceAccountAddDialog"></g-member-dialog>
+    <g-member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></g-member-dialog>
+    <g-member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" :orphaned="orphaned" v-model="serviceAccountUpdateDialog"></g-member-dialog>
+    <g-member-help-dialog type="service" v-model="serviceAccountHelpDialog"></g-member-help-dialog>
+    <g-member-help-dialog type="user" v-model="userHelpDialog"></g-member-help-dialog>
+    <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
+
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
       <v-card>
-        <v-card-title class="toolbar-background toolbar-title--text">
-          <div class="text-h5">Kubeconfig <code class="toolbar-background lighten-1 toolbar-title--text">{{ currentServiceAccountDisplayName }}</code></div>
+        <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">
+          <div class="text-h5">Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code></div>
           <v-spacer></v-spacer>
-          <v-btn icon @click="kubeconfigDialog = false">
-            <v-icon color="toolbar-title">mdi-close</v-icon>
-          </v-btn>
+          <v-btn
+            icon="mdi-close"
+            @click="kubeconfigDialog = false"
+            density="compact"
+            variant="text"
+          />
         </v-card-title>
         <v-card-text>
-          <code-block lang="yaml" :content="currentServiceAccountKubeconfig"></code-block>
+          <g-code-block lang="yaml" :content="currentServiceAccountKubeconfig"></g-code-block>
         </v-card-text>
       </v-card>
     </v-dialog>
-    <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  -->
   </v-container>
 </template>
 
@@ -201,12 +203,20 @@ import head from 'lodash/head'
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
+import GMemberDialog from '@/components/Members/GMemberDialog.vue'
+import GMemberHelpDialog from '@/components/Members/GMemberHelpDialog.vue'
+import GConfirmDialog from '@/components/Dialogs/GConfirmDialog.vue'
+import GRemoveProjectMember from '@/components/Members/GRemoveProjectMember.vue'
+import GDeleteServiceAccount from '@/components/Members/GDeleteServiceAccount.vue'
+import GResetServiceAccount from '@/components/Members/GResetServiceAccount.vue'
+import GCodeBlock from '@/components/GCodeBlock.vue'
 
 import {
   useAuthzStore,
   useProjectStore,
   useAuthnStore,
   useMemberStore,
+  useAppStore,
 } from '@/store'
 
 import {
@@ -225,26 +235,12 @@ import { useLocalStorage } from '@vueuse/core'
 import { useApi } from '@/composables'
 const renderComponent = inject('renderComponent')
 
-/* TODO
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue'
-import RemoveProjectMember from '@/components/messages/RemoveProjectMember.vue'
-import DeleteServiceAccount from '@/components/messages/DeleteServiceAccount.vue'
-import ResetServiceAccount from '@/components/messages/ResetServiceAccount.vue'
-import CodeBlock from '@/components/CodeBlock.vue'
-import MemberDialog from '@/components/dialogs/MemberDialog.vue'
-import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog.vue'
-*/
-
-// TODO ADD COMPONENTS
-const RemoveProjectMember = undefined
-const DeleteServiceAccount = undefined
-const ResetServiceAccount = undefined
-
 const api = useApi()
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
 const authnStore = useAuthnStore()
 const memberStore = useMemberStore()
+const appStore = useAppStore()
 const router = useRouter()
 
 const defaultUserAccountTableOptions = {
@@ -288,11 +284,7 @@ const {
   username: currentUsername,
   isAdmin,
 } = storeToRefs(authnStore)
-const {
-  list: memberList,
-  deleteMember,
-  resetServiceAccount,
-} = storeToRefs(memberStore)
+const { list: memberList } = storeToRefs(memberStore)
 
 const userAccountSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {})
 const userAccountTableOptions = useLocalStorage('members/useraccount-list/options', defaultUserAccountTableOptions)
@@ -444,13 +436,12 @@ const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
 
-function setError () {
-  // TODO
-  /*
+function setKubeconfigError (err) {
   appStore.alert = {
     type: 'error',
-    message: 'test',
-  } */
+    title: 'Kubeconfig Error',
+    message: err.message,
+  }
 }
 
 function openUserAddDialog () {
@@ -485,12 +476,12 @@ async function downloadKubeconfig (name) {
   try {
     const { data } = await api.getMember({ namespace: namespace.value, name })
     if (!data.kubeconfig) {
-      setError({ message: 'Failed to fetch Kubeconfig' })
+      setKubeconfigError({ message: 'Failed to fetch Kubeconfig' })
     } else {
       return data.kubeconfig
     }
   } catch (err) {
-    setError(err)
+    setKubeconfigError(err)
   }
 }
 
@@ -515,7 +506,7 @@ async function onRemoveUser ({ username }) {
   if (!removalConfirmed) {
     return
   }
-  await deleteMember(username)
+  await memberStore.deleteMember(username)
   if (isCurrentUser(username) && !isAdmin.value) {
     if (projectList.value.length > 0) {
       const p1 = projectList.value[0]
@@ -530,11 +521,11 @@ function confirmRemoveUser (name) {
   const { projectName } = projectDetails.value
   let message
   if (isCurrentUser(name)) {
-    message = renderComponent(RemoveProjectMember, {
+    message = renderComponent(GRemoveProjectMember, {
       projectName,
     })
   } else {
-    message = renderComponent(RemoveProjectMember, {
+    message = renderComponent(GRemoveProjectMember, {
       projectName,
       memberName: displayName(name),
     })
@@ -546,29 +537,29 @@ function confirmRemoveUser (name) {
   })
 }
 
-async function onDeleteServiceAccount ({ username }) {
+async function onGDeleteServiceAccount ({ username }) {
   let deletionConfirmed
   if (isForeignServiceAccount(namespace.value, username)) {
     deletionConfirmed = await confirmRemoveForeignServiceAccount(username)
   } else {
-    deletionConfirmed = await confirmDeleteServiceAccount(username)
+    deletionConfirmed = await confirmGDeleteServiceAccount(username)
   }
   if (deletionConfirmed) {
-    return deleteMember(username)
+    return memberStore.deleteMember(username)
   }
 }
 
 async function onResetServiceAccount ({ username }) {
   const resetConfirmed = await confirmResetServiceAccount(username)
   if (resetConfirmed) {
-    return resetServiceAccount(username)
+    return memberStore.resetServiceAccount(username)
   }
 }
 
 function confirmRemoveForeignServiceAccount (serviceAccountName) {
   const { projectName } = projectDetails.value
   const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
-  const message = renderComponent(RemoveProjectMember, {
+  const message = renderComponent(GRemoveProjectMember, {
     projectName,
     memberName: name,
     namespace,
@@ -580,9 +571,9 @@ function confirmRemoveForeignServiceAccount (serviceAccountName) {
   })
 }
 
-function confirmDeleteServiceAccount (name) {
+function confirmGDeleteServiceAccount (name) {
   name = displayName(name)
-  const message = renderComponent(DeleteServiceAccount, {
+  const message = renderComponent(GDeleteServiceAccount, {
     name,
   })
   return confirmDialog.value.waitForConfirmation({
@@ -596,7 +587,7 @@ function confirmDeleteServiceAccount (name) {
 
 function confirmResetServiceAccount (name) {
   name = displayName(name)
-  const message = renderComponent(ResetServiceAccount, {
+  const message = renderComponent(GResetServiceAccount, {
     name,
   })
   return confirmDialog.value.waitForConfirmation({
@@ -626,7 +617,6 @@ function isCurrentUser (username) {
 }
 
 function getSortVal (item, sortBy) {
-  console.log(item)
   const roles = item.roles
   switch (sortBy) {
     case 'roles':
@@ -675,34 +665,5 @@ function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
   serviceAccountTableOptions.value = defaultServiceAccountTableOptions
 }
-
-// TODO REMOVE?
-/*
-function closeDialogs () {
-  userAddDialog.value = false
-  userHelpDialog.value = false
-  userUpdateDialog.value = false
-  serviceAccountAddDialog.value = false
-  serviceAccountHelpDialog.value = false
-  serviceAccountUpdateDialog.value = false
-  kubeconfigDialog.value = false
-}
-
-  created () {
-    this.$bus.on('esc-pressed', this.closeDialogs)
-  },
-  beforeUnmount () {
-    this.$bus.off('esc-pressed', this.closeDialogs)
-  },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.updateTableSettings()
-    })
-  },
-  beforeRouteUpdate (to, from, next) {
-    this.updateTableSettings()
-    next()
-  },
-  */
 
 </script>

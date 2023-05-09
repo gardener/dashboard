@@ -409,6 +409,7 @@ export default {
   updateMember,
   getMember,
   deleteMember,
+  resetServiceAccount,
   createTokenReview,
   getSubjectRules,
   getToken,
