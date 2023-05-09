@@ -208,8 +208,6 @@ export default defineComponent({
               if (isServiceAccountUsername(value)) {
                 return unique('serviceAccountUsernames')(value, this)
               }
-              const f = unique('serviceAccountNames')
-              console.log(f, f.$validator(value))
               return unique('serviceAccountNames')(value, this)
             },
           }
