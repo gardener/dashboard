@@ -9,21 +9,21 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex align-center px-4 py-2 g-list-item"
   >
     <div
-      class="d-inline-flex align-self-center justify-center flex-nowrap mr-4 g-list-item__prepend"
+      class="d-inline-flex align-self-center align-center justify-center flex-nowrap mr-4 g-list-item__prepend"
     >
-      <slot name="prepend"></slot>
+      <slot name="prepend"/>
     </div>
 
     <div
-      class="d-block align-self-center align-center mr-auto g-list-item__content "
+      class="d-block align-self-center align-center flex-grow-1 g-list-item__content "
     >
       <slot/>
     </div>
 
-    <div
+    <div v-if="slots.append"
       class="d-inline-flex align-self-center flex-nowrap ml-3 g-list-item__append"
     >
-      <slot name="append"></slot>
+      <slot name="append"/>
     </div>
   </div>
 </template>
@@ -46,3 +46,8 @@ SPDX-License-Identifier: Apache-2.0
     }
   }
 </style>
+
+<script setup>
+import { useSlots } from 'vue'
+const slots = useSlots()
+</script>
