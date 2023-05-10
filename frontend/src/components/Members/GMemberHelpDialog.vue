@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650">
     <v-card>
-      <v-card-title class="bg-toolbar-background text-toolbar-title">
-        <v-icon size="large">mdi-account-plus</v-icon>
-        <span class="text-h5 ml-5">{{ title}}</span>
-      </v-card-title>
+      <g-toolbar
+        prepend-icon="mdi-account-plus"
+        :title="title"
+      />
       <v-card-text class="help-class pt-0">
         <template v-if="isUserDialog">
           <div class="text-h6 text-grey-darken-1 my-4">Add users to your project.</div>
@@ -59,8 +59,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
+import GToolbar from '@/components/GToolbar.vue'
 
 export default defineComponent({
+  components: {
+    GToolbar,
+  },
   props: {
     modelValue: {
       type: Boolean,

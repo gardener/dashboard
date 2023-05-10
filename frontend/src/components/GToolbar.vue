@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon v-if="prependIcon"
         :icon="prependIcon"
         color="toolbar-title"
+        class="ml-3"
       />
     </slot>
     <v-toolbar-title class="text-subtitle-1 text-toolbar-title">

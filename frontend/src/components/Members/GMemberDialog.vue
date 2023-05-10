@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650" persistent>
     <v-card>
-      <v-card-title class="bg-toolbar-background text-toolbar-title">
-        <v-icon size="large">mdi-account-plus</v-icon>
-        <span class="text-h5 ml-5">{{ title }}</span>
-      </v-card-title>
+      <g-toolbar
+        prepend-icon="mdi-account-plus"
+        :title="title"
+      />
       <v-card-text>
         <v-container class="px-0">
           <v-row >
@@ -68,8 +68,8 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
           <v-row class="mt-3">
             <v-alert
-              v-if=" isUpdateDialog && orphaned "
-              :value=" true "
+              v-if="isUpdateDialog && orphaned"
+              :value="true"
               type="info"
               color="primary"
               variant="outlined"
@@ -98,6 +98,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, requiredIf } from '@vuelidate/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GMessage from '@/components/GMessage.vue'
+import GToolbar from '@/components/GToolbar.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import toLower from 'lodash/toLower'
@@ -121,6 +122,7 @@ export default defineComponent({
   },
   components: {
     GMessage,
+    GToolbar,
   },
   props: {
     modelValue: {
