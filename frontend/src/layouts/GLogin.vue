@@ -112,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
         >Gardener Landing Page</a></span>
       </div>
     </v-main>
+    <g-notify/>
   </v-app>
 </template>
 
@@ -124,6 +125,7 @@ import { useRouteQuery } from '@vueuse/router'
 import { useApi } from '@/composables'
 import { useAppStore, useAuthnStore, useLoginStore } from '@/store'
 import { setDelayedInputFocus } from '@/utils'
+import GNotify from '@/components/GNotify.vue'
 
 const router = useRouter()
 const appStore = useAppStore()

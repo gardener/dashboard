@@ -5,12 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <template>
   <router-view />
-  <g-notify />
 </template>
 
 <script setup>
 import { onKeyStroke, useEventBus } from '@vueuse/core'
-import GNotify from '@/components/GNotify.vue'
 
 const bus = useEventBus('esc-pressed')
 
