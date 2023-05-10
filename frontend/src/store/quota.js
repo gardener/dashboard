@@ -66,7 +66,7 @@ export const useQuotaStore = defineStore('quota', () => {
 
   const quotas = ref({})
 
-  const status = computed(() => {
+  const projectQuotaStatus = computed(() => {
     const namespace = authzStore.namespace
     const quota = quotas[namespace]
     return quota
@@ -81,7 +81,7 @@ export const useQuotaStore = defineStore('quota', () => {
 
   return {
     quotas,
-    status,
+    projectQuotaStatus,
     fetchQuotas,
   }
 })

@@ -25,6 +25,10 @@ export const useShootStore = defineStore('shoot', () => {
     return list.value === null
   })
 
+  const shootList = computed(() => {
+    return list.value ?? []
+  })
+
   function subscribe () {
     logger.debug('subscribed shoots')
   }
@@ -65,6 +69,7 @@ export const useShootStore = defineStore('shoot', () => {
     newShootResource,
     shootListFilters,
     isInitial,
+    shootList,
     fetchShoots,
     subscribe,
     unsubscribe,

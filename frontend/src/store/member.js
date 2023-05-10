@@ -19,6 +19,10 @@ export const useMemberStore = defineStore('member', () => {
     return list.value === null
   })
 
+  const memberList = computed(() => {
+    return list.value ?? []
+  })
+
   async function fetchMembers () {
     const namespace = authzStore.namespace
     try {
@@ -61,6 +65,7 @@ export const useMemberStore = defineStore('member', () => {
   return {
     list,
     isInitial,
+    memberList,
     fetchMembers,
     addMember,
     updateMember,

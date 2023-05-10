@@ -6,15 +6,22 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed, toRef } from 'vue'
-import { useApi } from '@/composables'
+import { useApi, useLogger } from '@/composables'
 import { useAuthzStore } from './authz'
 
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import pickBy from 'lodash/pickBy'
+import some from 'lodash/some'
+import isEmpty from 'lodash/isEmpty'
+import isObject from 'lodash/isObject'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 
 export const useProjectStore = defineStore('project', () => {
+  const logger = useLogger()
   const api = useApi()
   const authzStore = useAuthzStore()
 
@@ -63,6 +70,55 @@ export const useProjectStore = defineStore('project', () => {
 
   const projectNamesFromProjectList = computed(() => {
     return map(list.value, 'metadata.name')
+  })
+
+  const shootCustomFieldList = computed(() => {
+    return map(shootCustomFields.value, (customFields, key) => {
+      return {
+        ...customFields,
+        key,
+      }
+    })
+  })
+
+  const shootCustomFields = computed(() => {
+    let shootCustomFields = get(projectFromProjectList.value, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    if (!shootCustomFields) {
+      return
+    }
+
+    try {
+      shootCustomFields = JSON.parse(shootCustomFields)
+    } catch (error) {
+      logger.error('could not parse custom fields', error.message)
+      return
+    }
+
+    shootCustomFields = pickBy(shootCustomFields, customField => {
+      if (isEmpty(customField)) {
+        return false // omit null values
+      }
+      if (some(customField, isObject)) {
+        return false // omit custom fields with object values
+      }
+      return customField.name && customField.path
+    })
+
+    const defaultProperties = {
+      showColumn: true,
+      columnSelectedByDefault: true,
+      showDetails: true,
+      sortable: true,
+      searchable: true,
+    }
+    shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
+    shootCustomFields = mapValues(shootCustomFields, customField => {
+      return {
+        ...defaultProperties,
+        ...customField,
+      }
+    })
+    return shootCustomFields
   })
 
   function updateList (obj) {
@@ -141,6 +197,8 @@ export const useProjectStore = defineStore('project', () => {
     projectList,
     projectFromProjectList,
     projectNamesFromProjectList,
+    shootCustomFields,
+    shootCustomFieldList,
     isCurrentNamespace,
     fetchProjects,
     createProject,

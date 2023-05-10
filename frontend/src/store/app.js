@@ -22,6 +22,17 @@ export const useAppStore = defineStore('app', () => {
 
   const fromRoute = ref(null)
 
+  function setAlert (value) {
+    alert.value = value
+  }
+
+  function setError (value) {
+    setAlert({
+      type: 'error',
+      message: value?.message ?? '',
+    })
+  }
+
   return {
     ready,
     sidebar,
@@ -34,5 +45,7 @@ export const useAppStore = defineStore('app', () => {
     splitpaneResize,
     splitpaneLayouts,
     fromRoute,
+    setAlert,
+    setError,
   }
 })

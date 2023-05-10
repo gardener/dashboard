@@ -163,6 +163,14 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.appVersion ?? import.meta.env.VITE_APP_VERSION
   })
 
+  const resourceQuotaHelpText = computed(() => {
+    return resourceQuotaHelp.value?.text
+  })
+
+  const controlPlaneHighAvailabilityHelpText = computed(() => {
+    return controlPlaneHighAvailabilityHelp.value?.text
+  })
+
   async function fetchConfig () {
     const response = await api.getConfiguration()
     state.value = response.data
@@ -189,7 +197,9 @@ export const useConfigStore = defineStore('config', () => {
     features,
     knownConditions,
     resourceQuotaHelp,
+    resourceQuotaHelpText,
     controlPlaneHighAvailabilityHelp,
+    controlPlaneHighAvailabilityHelpText,
     defaultHibernationSchedule,
     themes,
     terminal,
