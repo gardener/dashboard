@@ -196,6 +196,11 @@ export default defineComponent({
             isNoServiceAccount: value => !isServiceAccountUsername(value),
           }
         } else if (this.isServiceDialog) {
+          const serviceAccountKeyFunc = (value) => {
+            return isServiceAccountUsername(value)
+              ? 'serviceAccountUsernames'
+              : 'serviceAccountNames'
+          }
           validators.internalName = {
             required,
             serviceAccountResource: value => {
@@ -204,12 +209,7 @@ export default defineComponent({
               }
               return resourceName(value)
             },
-            unique: value => {
-              if (isServiceAccountUsername(value)) {
-                return unique('serviceAccountUsernames')(value, this)
-              }
-              return unique('serviceAccountNames')(value, this)
-            },
+            unique: unique(serviceAccountKeyFunc),
           }
         }
       }
