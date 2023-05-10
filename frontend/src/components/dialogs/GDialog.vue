@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw">
+  <v-dialog v-model="visible" persistent :width="width" scrollable max-width="90vw">
     <v-card>
       <v-toolbar flat class="bg-toolbar-background text-toolbar-title">
         <v-toolbar-title class="dialog-title align-center justify-start">
@@ -245,5 +245,6 @@ export default defineComponent({
 
   .card-content {
     overflow: scroll;
+    height: auto;
   }
 </style>

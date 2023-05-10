@@ -44,7 +44,11 @@ const isTimezone = (value) => {
 const unique = key => withParams(
   { type: 'unique', key },
   function unique (value) {
-    const keys = this[key]
+    const keys = this[
+      typeof key === 'function'
+        ? key.call(this, value)
+        : key
+    ]
     return !includes(keys, value)
   },
 )

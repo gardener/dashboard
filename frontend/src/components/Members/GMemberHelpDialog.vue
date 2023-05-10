@@ -1,17 +1,17 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
 
 <template >
   <v-dialog v-model="visible" max-width="650">
-    <v-card :class="cardClass">
-      <v-card-title class="toolbar-background">
-        <v-icon size="large" class="toolbar-title--text">mdi-account-plus</v-icon>
-        <span class="text-h5 ml-5 toolbar-title--text">{{ title}}</span>
+    <v-card>
+      <v-card-title class="bg-toolbar-background text-toolbar-title">
+        <v-icon size="large">mdi-account-plus</v-icon>
+        <span class="text-h5 ml-5">{{ title}}</span>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="help-class pt-0">
         <template v-if="isUserDialog">
           <div class="text-h6 text-grey-darken-1 my-4">Add users to your project.</div>
           <p class="text-body-1">
@@ -58,27 +58,30 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
-export default {
-  name: 'help-member-dialog',
+export default defineComponent({
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     type: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   computed: {
     visible: {
       get () {
-        return this.value
+        return this.modelValue
       },
       set (value) {
-        this.$emit('input', value)
-      }
+        this.$emit('update:modelValue', value)
+      },
     },
     title () {
       return this.isUserDialog ? 'Project Users' : 'Service Accounts'
@@ -89,19 +92,38 @@ export default {
     isServiceDialog () {
       return this.type === 'service'
     },
-    cardClass () {
-      if (this.isUserDialog) {
-        return 'help_user'
-      } else if (this.isServiceDialog) {
-        return 'help_service'
-      }
-      return ''
-    }
   },
   methods: {
     hide () {
       this.visible = false
+    },
+  },
+})
+</script>
+
+<style lang="scss" scoped>
+.v-theme--light {
+  .help-class {
+    code {
+      background-color: rgba(0,0,0,.05);
     }
   }
 }
-</script>
+
+.v-theme--dark {
+  .help-class {
+    code {
+      background-color: rgba(255,255,255,.1);
+    }
+  }
+}
+
+.help-class {
+  ul {
+    margin-left: 10px;
+  }
+  li {
+    margin-left: 10px;
+  }
+}
+</style>

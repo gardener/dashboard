@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template >
   <v-dialog v-model="visible" max-width="650" persistent>
     <v-card>
-      <v-card-title class="toolbar-background">
-        <v-icon size="large" class="toolbar-title--text">mdi-account-plus</v-icon>
-        <span class="text-h5 ml-5 toolbar-title--text">{{title}}</span>
+      <v-card-title class="bg-toolbar-background text-toolbar-title">
+        <v-icon size="large">mdi-account-plus</v-icon>
+        <span class="text-h5 ml-5">{{ title }}</span>
       </v-card-title>
       <v-card-text>
         <v-container class="px-0">
@@ -22,33 +22,33 @@ SPDX-License-Identifier: Apache-2.0
                 :label="nameLabel"
                 v-model.trim="internalName"
                 :error-messages="getErrorMessages('internalName')"
-                @update:model-value="$v.$touch()"
+                @update:model-value="v$.$touch()"
                 @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
+                variant="underlined"
               ></v-text-field>
             </v-col>
             <v-col cols="5">
               <v-select
                 color="primary"
-                item-color="primary"
                 label="Roles"
                 :items="roleItems"
                 multiple
-                small-chips
                 item-title="displayName"
                 item-value="name"
                 v-model="internalRoles"
                 :error-messages="getErrorMessages('internalRoles')"
-                @update:model-value="$v.internalRoles.$touch()"
+                @update:model-value="v$.internalRoles.$touch()"
                 :hint="rolesHint"
                 persistent-hint
                 tabindex="2"
+                variant="underlined"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small color="primary" variant="outlined" closable @update:model-value="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
-                    <span>{{ item.displayName }}</span>
+                  <v-chip size="small" color="primary" variant="outlined" closable @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()">
+                    <span>{{ item.raw.displayName }}</span>
                   </v-chip>
                 </template>
               </v-select>
@@ -59,22 +59,25 @@ SPDX-License-Identifier: Apache-2.0
               <v-text-field
                 color="primary"
                 label="Description"
-                v-model.trim="internalDescription"
-                @keyup.enter="submitAddMember()"
+                v-model.trim="internalDescription "
+                @keyup.enter="submitAddMember() "
                 tabindex="3"
+                variant="underlined"
               ></v-text-field>
             </v-col>
           </v-row>
-          <v-alert
-            v-if="isUpdateDialog && orphaned"
-            :value="true"
-            type="info"
-            color="primary"
-            variant="outlined"
-          >
-            The service account does not exist anymore and will be re-created if you update the roles.
-          </v-alert>
-          <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+          <v-row class="mt-3">
+            <v-alert
+              v-if=" isUpdateDialog && orphaned "
+              :value=" true "
+              type="info"
+              color="primary"
+              variant="outlined"
+            >
+              The service account does not exist anymore and will be re-created if you update the roles.
+            </v-alert>
+            <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+          </v-row>
         </v-container>
       </v-card-text>
       <v-divider></v-divider>
@@ -89,13 +92,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import toLower from 'lodash/toLower'
-import { mapActions, mapState, mapGetters } from 'vuex'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { mapActions, mapState, mapGetters } from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
+import { required, requiredIf } from '@vuelidate/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GMessage from '@/components/GMessage.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -103,40 +108,48 @@ import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import negate from 'lodash/negate'
 import get from 'lodash/get'
+import { useAuthnStore, useAuthzStore, useMemberStore } from '@/store'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
 
-export default {
-  name: 'member-dialog',
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   components: {
-    GMessage
+    GMessage,
   },
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     type: {
       type: String,
-      required: true
+      required: true,
     },
     name: {
-      type: String
+      type: String,
     },
     description: {
-      type: String
+      type: String,
     },
     roles: {
-      type: Array
+      type: Array,
     },
     isCurrentUser: {
-      type: Boolean
+      type: Boolean,
     },
     orphaned: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       internalName: undefined,
@@ -144,7 +157,7 @@ export default {
       internalDescription: undefined,
       unsupportedRoles: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
     }
   },
   validations () {
@@ -152,42 +165,42 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapState([
-      'namespace'
-    ]),
-    ...mapGetters([
-      'memberList',
-      'projectList',
-      'isAdmin'
-    ]),
+    ...mapState(useAuthzStore, ['namespace']),
+    ...mapGetters(useMemberStore, { memberList: 'list' }),
+    ...mapGetters(useAuthnStore, ['isAdmin']),
     visible: {
       get () {
-        return this.value
+        return this.modelValue
       },
       set (value) {
-        this.$emit('input', value)
-      }
+        this.$emit('update:modelValue', value)
+      },
     },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     validators () {
       const validators = {
         internalRoles: {
           required: requiredIf(function () {
             return this.isForeignServiceAccount || this.isUserDialog
-          })
+          }),
         },
-        internalName: {}
+        internalName: {},
       }
       if (!this.isUpdateDialog) {
         if (this.isUserDialog) {
           validators.internalName = {
             required,
             unique: unique('projectUsernames'),
-            isNoServiceAccount: value => !isServiceAccountUsername(value)
+            isNoServiceAccount: value => !isServiceAccountUsername(value),
           }
         } else if (this.isServiceDialog) {
+          const serviceAccountKeyFunc = (value) => {
+            return isServiceAccountUsername(value)
+              ? 'serviceAccountUsernames'
+              : 'serviceAccountNames'
+          }
           validators.internalName = {
             required,
             serviceAccountResource: value => {
@@ -196,12 +209,7 @@ export default {
               }
               return resourceName(value)
             },
-            unique: value => {
-              if (isServiceAccountUsername(value)) {
-                return unique('serviceAccountUsernames')(value, this)
-              }
-              return unique('serviceAccountNames')(value, this)
-            }
+            unique: unique(serviceAccountKeyFunc),
           }
         }
       }
@@ -211,22 +219,22 @@ export default {
       const validationErrors = {}
       if (this.isUserDialog) {
         validationErrors.internalRoles = {
-          required: 'You need to assign roles to this user'
+          required: 'You need to assign roles to this user',
         }
         validationErrors.internalName = {
           required: 'User is required',
           unique: `User '${this.internalName}' is already member of this project.`,
-          isNoServiceAccount: 'Please use add service account to add service accounts'
+          isNoServiceAccount: 'Please use add service account to add service accounts',
         }
       } else if (this.isServiceDialog) {
         validationErrors.internalRoles = {
-          required: 'You need to assign roles for service accounts that you want to invite to this project'
+          required: 'You need to assign roles for service accounts that you want to invite to this project',
         }
         validationErrors.internalName = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
           serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
-          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`
+          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`,
         }
       }
       return validationErrors
@@ -315,13 +323,13 @@ export default {
         return 'Create'
       }
       return 'Add'
-    }
+    },
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useMemberStore, [
       'addMember',
       'updateMember',
-      'refreshSubjectRules'
+      'refreshSubjectRules',
     ]),
     hide () {
       this.visible = false
@@ -330,7 +338,7 @@ export default {
       return getValidationErrors(this, field)
     },
     async submitAddMember () {
-      this.$v.$touch()
+      this.v$.$touch()
       if (this.valid) {
         const name = this.memberName
         const roles = this.internalRoles
@@ -354,12 +362,12 @@ export default {
       }
     },
     async submitUpdateMember () {
-      this.$v.$touch()
+      this.v$.$touch()
       if (this.valid) {
         try {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          await this.updateMember({ name, roles, description: this.internalDescription })
+          await this.updateMember(name, { roles, description: this.internalDescription })
 
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
@@ -374,11 +382,11 @@ export default {
       }
     },
     cancel () {
-      this.$v.$reset()
+      this.v$.$reset()
       this.hide()
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.internalDescription = this.description
       if (this.isUserDialog) {
@@ -430,14 +438,15 @@ export default {
       }
 
       return name
-    }
+    },
   },
   watch: {
-    value: function (value) {
+    modelValue: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
+
 </script>

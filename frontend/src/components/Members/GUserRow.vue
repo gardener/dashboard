@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRef, toRefs, onMounted } from 'vue'
+import { computed, toRef, toRefs } from 'vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import { mapTableHeader } from '@/utils'
 

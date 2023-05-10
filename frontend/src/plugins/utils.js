@@ -4,15 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createApp } from 'vue'
+import { createVNode, render } from 'vue'
 import { useApi } from '@/composables'
 
 function renderComponent (name, props) {
-  return createApp({
-    render (h) {
-      return h(name, { props })
-    },
-  }).mount().$el
+  const vNode = createVNode(name, props)
+  const element = document.createElement('div')
+  render(vNode, element)
+  return element
 }
 
 export default {
