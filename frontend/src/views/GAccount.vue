@@ -9,9 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat density="compact" class="bg-toolbar-background text-toolbar-title">
-            <v-toolbar-title>Details</v-toolbar-title>
-          </v-toolbar>
+          <g-toolbar>Details</g-toolbar>
           <g-list>
              <g-list-item>
                 <template v-slot:prepend>
@@ -70,9 +68,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar flat density="compact" class="bg-toolbar-background text-toolbar-title">
-            <v-toolbar-title>Access</v-toolbar-title>
-          </v-toolbar>
+          <g-toolbar>Access</g-toolbar>
           <g-list>
             <g-list-item>
               <template v-slot:prepend>
@@ -224,6 +220,7 @@ import get from 'lodash/get'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
+import GToolbar from '@/components/GToolbar.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
@@ -241,6 +238,7 @@ export default defineComponent({
   components: {
     GList,
     GListItem,
+    GToolbar,
     GCopyBtn,
     GCodeBlock,
     GExternalLink,

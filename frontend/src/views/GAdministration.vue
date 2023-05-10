@@ -229,13 +229,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="costObjectSettingEnabled" class="pa-3">
             <v-card>
-              <v-toolbar
-                flat
-                density="compact"
-                class="bg-toolbar-background"
-              >
-                <v-toolbar-title class="text-subtitle-1 text-toolbar-title">Billing</v-toolbar-title>
-              </v-toolbar>
+              <g-toolbar>Billing</g-toolbar>
               <g-list>
                 <g-list-item>
                   <template v-slot:prepend>
@@ -428,7 +422,6 @@ export default defineComponent({
   data () {
     return {
       color: 'primary',
-      toolbarColor: 'toolbar-background toolbar-title--text',
       edit: false,
       editOwner: false,
       ownerMessages: [],

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
-import GDialog from '@/components/Dialogs/GDialog.vue'
+import GDialog from './GDialog.vue'
 
 export default defineComponent({
   components: {

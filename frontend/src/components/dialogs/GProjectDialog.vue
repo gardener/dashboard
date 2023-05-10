@@ -1,16 +1,13 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <v-card-title class="bg-toolbar-background">
-        <v-icon size="large" class="text-toolbar-title">mdi-cube</v-icon>
-        <span class="text-h5 ml-5 text-toolbar-title">Create Project</span>
-      </v-card-title>
+      <g-toolbar density="default" prepend-icon="mdi-cube">Create Project</g-toolbar>
       <v-card-text class="dialog-content">
         <form>
           <v-container fluid >
@@ -134,6 +131,7 @@ import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
 
 import GMessage from '@/components/GMessage.vue'
+import GToolbar from '@/components/GToolbar.vue'
 import { useAuthnStore, useConfigStore, useMemberStore, useProjectStore } from '@/store'
 
 const defaultProjectName = ''
@@ -141,6 +139,7 @@ const defaultProjectName = ''
 export default defineComponent({
   components: {
     GMessage,
+    GToolbar,
   },
   setup () {
     return {
