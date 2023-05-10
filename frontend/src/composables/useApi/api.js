@@ -367,6 +367,8 @@ export function getGardenerExtensions () {
   return getResource('/api/gardenerextensions')
 }
 
+/* Resource Quotas */
+
 export function getResourceQuotas ({ namespace }) {
   return getResource(`/api/namespaces/${namespace}/resourcequotas`)
 }
@@ -422,5 +424,6 @@ export default {
   terminalConfig,
   listProjectTerminalShortcuts,
   getGardenerExtensions,
+  getResourceQuotas,
   updateShootControlPlaneHighAvailability,
 }
