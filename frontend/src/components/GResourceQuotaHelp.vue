@@ -7,15 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="resourceQuotaHelpText">
     <v-tooltip location="top">
-      <template v-slot:activator="{ on }">
+      <template v-slot:activator="{ props }">
         <v-btn
-          v-on="on"
-          icon
+          v-bind="props"
+          icon="mdi-help-circle-outline"
           color="toolbar-title"
+          variant="text"
+          size="small"
           @click="showDialog"
-        >
-          <v-icon>mdi-help-circle-outline</v-icon>
-        </v-btn>
+        />
       </template>
       Help
     </v-tooltip>
@@ -34,27 +34,28 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+import { useConfigStore } from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import { transformHtml } from '@/utils'
-import { mapGetters } from 'vuex'
 
-export default {
-  name: 'resource-quota-help',
+export default defineComponent({
   components: {
-    GDialog
+    GDialog,
   },
   computed: {
-    ...mapGetters([
-      'resourceQuotaHelpText'
+    ...mapState(useConfigStore, [
+      'resourceQuotaHelpText',
     ]),
     resourceQuotaHelpHtml () {
       return transformHtml(this.resourceQuotaHelpText, true)
-    }
+    },
   },
   methods: {
     showDialog () {
       this.$refs.gDialog.showDialog()
-    }
-  }
-}
+    },
+  },
+})
 </script>

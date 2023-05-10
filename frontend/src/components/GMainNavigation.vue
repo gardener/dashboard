@@ -5,12 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <!-- TODO: v-navigation-drawer used the no longer existing "fixed" attr. There is no such prop in vuetify 3.
-        Removed for now but need to check if the behavior is still as desired. "fixed" applied a CSS position: fixed.
-  -->
-  <!-- TODO: v-navigation-drawer used the no longer existing "app" attr. There is no such prop in vuetify 3.
-        Removed for now but need to check if the behavior is still as desired.
-  -->
   <v-navigation-drawer
     v-model="sidebar"
     :mobile-breakpoint="400"
@@ -29,14 +23,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </div>
     <template v-if="projectList.length">
-      <!-- TODO: v-menu used the no longer existing "allow-overflow" attr.
-              Removed for now but need to check if the behavior is still as desired.
-      -->
-      <!-- TODO: When placing the menu "bottom left" there is a small margin on the left.
-            Also the positioning is not consistent when opening it multiple times. There seem to be GitHub issues for
-            the vuetify "v-menu" component where the popover placement in a RTL layout is also broken. Eventually the
-            placement of the dropdown in general is buggy as of now: https://github.com/vuetifyjs/vuetify/issues/16797
-      -->
       <v-menu
         location="bottom"
         :attach="true"
@@ -47,10 +33,6 @@ SPDX-License-Identifier: Apache-2.0
         v-model="projectMenu"
       >
         <template v-slot:activator="{ props }">
-          <!-- TODO: under vuetfiy2 the button stretched across the whole available width (using flex: 1 0 auto on the span.v-btn__content).
-                Now the button content shrinks to width it actually needs. This probably will cause misalignment of the icons in the dropdown
-                and the menu items in the v-card>v-list below.
-          -->
           <v-btn
             color="main-background-darken-1"
             v-bind="props"

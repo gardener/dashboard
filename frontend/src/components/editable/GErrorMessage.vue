@@ -11,8 +11,9 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-alert
       v-else
-      @update:model-value="onInput"
-      text dense
+      @update:model-value="onUpdateModelValue"
+      variant="text"
+      density="compact"
       closable
       close-label="Dismiss error"
       border="start"
@@ -44,17 +45,18 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-export default {
-  name: 'editable-message',
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   props: {
     message: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   data () {
     return {
-      expanded: false
+      expanded: false,
     }
   },
   computed: {
@@ -64,16 +66,19 @@ export default {
         return { isAlert: true, text, description }
       } catch (err) { /* ignore error */ }
       return { isAlert: false, text: this.message }
-    }
+    },
   },
+  emits: [
+    'close',
+  ],
   methods: {
-    onInput (value) {
+    onUpdateModelValue (value) {
       if (!value) {
         this.$emit('close')
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

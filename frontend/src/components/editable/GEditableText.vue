@@ -7,51 +7,47 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <template v-if="readOnly">
-      {{value}}
+      {{modelValue}}
     </template>
     <v-menu
       v-else
       ref="menu"
-      :persistent="!(true)"
-      :close-on-content-click="false"
+      v-model="isActive"
       origin="top left"
-      location="left"
+      location="top left"
       transition="slide-x-reverse-transition"
       :max-width="contentWidth"
-      v-model="isActive"
+      :close-on-content-click="false"
     >
-      <template v-slot:activator="{ on }">
-        <v-row  no-gutters align="center" justify="space-between">
-          <v-col
+      <template #activator="{ props }">
+        <div  class="d-flex align-center justify-space-between">
+          <div
             ref="content"
-            v-on="on"
-            class="grow content cursor-pointer"
+            v-bind="props"
+            class="content cursor-pointer full-width mr-auto"
             :class="{ 'content--bounce': contentBounce }"
           >
-            <template v-if="value">{{value}}</template>
+            <template v-if="modelValue">{{ modelValue }}</template>
             <div v-else class="text-body-2 font-weight-light text--disabled">{{noValueText}}</div>
-          </v-col>
-          <v-col class="shrink">
+          </div>
+          <div>
             <v-btn
-              v-on="on"
-              icon
+              :icon="activatorIcon"
+              variant="text"
+              size="small"
               :color="activatorColor"
-            >
-              <v-icon size="18">{{activatorIcon}}</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
+              @click="props.onClick"
+            />
+          </div>
+        </div>
       </template>
       <v-card flat @keydown.esc="onCancel" @keydown.enter="onSave">
         <slot name="info"></slot>
         <v-text-field
-          :items="items"
           ref="textField"
           autocomplete="off"
           v-model="internalValue"
-          @update:error="value => error = value"
-          variant="solo"
-          flat
+          variant="plain"
           single-line
           hide-details="auto"
           :loading="loading"
@@ -61,16 +57,25 @@ SPDX-License-Identifier: Apache-2.0
         >
           <template v-slot:append>
             <v-tooltip location="top">
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
-                  <v-icon>mdi-check</v-icon>
-                </v-btn>
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  :disabled="error"
+                  icon="mdi-check"
+                  variant="text"
+                  size="small"
+                  color="success"
+                  @click="onSave"
+                />
               </template>
               <span>Save</span>
             </v-tooltip>
           </template>
           <template v-slot:message="{ message }">
-            <error-message :message="message" @close="clearMessages"/>
+            <g-error-message
+              :message="message"
+              @close="clearMessages"
+            />
           </template>
         </v-text-field>
       </v-card>
@@ -79,41 +84,38 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import ErrorMessage from './ErrorMessage.vue'
+import { defineComponent } from 'vue'
+import GErrorMessage from './GErrorMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
-export default {
-  name: 'editable-text',
+export default defineComponent({
   components: {
-    ErrorMessage
+    GErrorMessage,
   },
   props: {
-    items: {
-      type: Array
-    },
-    value: {
-      required: true
+    modelValue: {
+      required: true,
     },
     save: {
       type: Function,
-      default: () => {}
+      default: () => {},
     },
     rules: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     color: {
       type: String,
-      default: 'primary'
+      default: 'primary',
     },
     noValueText: {
       type: String,
-      default: 'Not defined'
+      default: 'Not defined',
     },
     readOnly: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data () {
     return {
@@ -124,7 +126,7 @@ export default {
       loading: false,
       messages: [],
       error: undefined,
-      lazyValue: undefined
+      lazyValue: undefined,
     }
   },
   computed: {
@@ -134,11 +136,12 @@ export default {
       },
       set (value) {
         if (this.$refs.content) {
+          console.log(this.$refs.content)
           const { width } = this.$refs.content.getBoundingClientRect()
           this.contentWidth = width - 8
         }
         this.active = value
-      }
+      },
     },
     internalValue: {
       get () {
@@ -146,7 +149,7 @@ export default {
       },
       set (value) {
         this.lazyValue = value
-      }
+      },
     },
     activatorColor () {
       if (this.contentBounce) {
@@ -162,14 +165,19 @@ export default {
         return 'mdi-close'
       }
       return 'mdi-pencil'
-    }
+    },
   },
+  emits: [
+    'update:modelValue',
+    'open',
+    'close',
+  ],
   methods: {
     clearMessages () {
       this.messages = []
     },
     onCancel () {
-      this.internalValue = this.value
+      this.internalValue = this.modelValue
       this.isActive = false
     },
     async onSave (value) {
@@ -179,7 +187,7 @@ export default {
       this.loading = this.color
       try {
         await this.save(this.internalValue)
-        this.$emit('input', this.internalValue)
+        this.$emit('update:modelValue', this.internalValue)
         setImmediate(() => {
           this.isActive = false
         })
@@ -199,28 +207,28 @@ export default {
       if (textField) {
         textField.resetValidation()
       }
-    }
+    },
   },
   watch: {
     active (value) {
       if (value) {
         clearTimeout(this.timeoutId)
-        this.internalValue = this.value
+        this.internalValue = this.modelValue
         this.$emit('open')
         setDelayedInputFocus(this, 'textField', {
-          delay: 50
+          delay: 50,
         })
       } else {
         this.reset()
         this.$emit('close')
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/src/styles/styles.sass';
+  @import 'vuetify/settings';
 
   $green-base: map-get($green, 'base');
 

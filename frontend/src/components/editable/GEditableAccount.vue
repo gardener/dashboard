@@ -6,89 +6,85 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <account-avatar
+    <g-account-avatar
       v-if="readOnly"
-      :account-name="value"
-      mail-to
+      :account-name="modelValue"
       :color="color"
-    ></account-avatar>
+      mail-to
+    />
     <v-menu
         v-else
         ref="menu"
-        :persistent="!(true)"
-        :close-on-content-click="false"
+        v-model="isActive"
         origin="top left"
-        location="left"
+        location="top left"
         transition="slide-x-reverse-transition"
         :max-width="contentWidth"
-        v-model="isActive"
+        :close-on-content-click="false"
       >
-        <template v-slot:activator="{ on }">
-          <v-row  no-gutters align="center" justify="space-between">
-            <v-col
-              ref="content"
-              class="grow content"
+        <template v-slot:activator="{ props }">
+          <div class="d-flex align-center justify-space-between">
+            <div
+              class="content full-width mr-auto"
               :class="{ 'content--bounce': contentBounce }"
             >
-              <account-avatar :account-name="value" mail-to></account-avatar>
-            </v-col>
-            <v-col class="shrink">
+              <g-account-avatar
+                :account-name="modelValue"
+                mail-to
+                :color="color"
+              />
+            </div>
+            <div class="">
               <v-btn
-                v-on="on"
-                icon
+                v-bind="props"
+                :icon="activatorIcon"
+                variant="text"
+                size="small"
                 :color="activatorColor"
-              >
-                <v-icon size="18">{{activatorIcon}}</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+              />
+            </div>
+          </div>
         </template>
         <v-card rounded="0">
           <slot name="info"></slot>
           <v-autocomplete
-            :items="items"
             ref="editable"
+            v-model="internalValue"
+            :items="items"
             autocomplete="off"
             :no-data-text="noDataText"
             :placeholder="placeholder"
             hide-selected
-            v-model="internalValue"
-            @update:error="value => error = value"
-            variant="solo"
-            chips
-            flat
+            variant="plain"
             single-line
+            chips
             hide-details="auto"
             :loading="loading"
             :messages="messages"
             :rules="rules"
             :color="color"
           >
-            <template v-slot:selection="{ item: value }">
-              <account-avatar :account-name="value"></account-avatar>
-            </template>
-            <template v-slot:item="{ item: value }">
-              <v-list-item-content>
-                <account-avatar :account-name="value"></account-avatar>
-              </v-list-item-content>
-            </template>
-            <template v-slot:append-outer>
+            <template #append>
               <v-tooltip location="top">
-                <template v-slot:activator="{ on }">
+                <template #activator="{ props }">
                   <v-btn
-                    v-on="on"
+                    v-bind="props"
                     :disabled="error"
-                    icon
+                    icon="mdi-check"
+                    variant="text"
+                    size="small"
                     color="success"
-                    @click="onSave">
-                    <v-icon>mdi-check</v-icon>
-                  </v-btn>
+                    @click="onSave"
+                  />
                 </template>
-                <div>Save</div>
+                Save
               </v-tooltip>
             </template>
             <template v-slot:message="{ message }">
-              <error-message :message="message" @close="clearMessages"/>
+              <g-error-message
+                :message="message"
+                @close="clearMessages"
+              />
             </template>
           </v-autocomplete>
         </v-card>
@@ -97,45 +93,45 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import AccountAvatar from '@/components/AccountAvatar.vue'
-import ErrorMessage from './ErrorMessage.vue'
+import { defineComponent } from 'vue'
+import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GErrorMessage from './GErrorMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
-export default {
-  name: 'editable-account',
+export default defineComponent({
   components: {
-    ErrorMessage,
-    AccountAvatar
+    GErrorMessage,
+    GAccountAvatar,
   },
   props: {
     items: {
-      type: Array
+      type: Array,
     },
-    value: {
-      required: true
+    modelValue: {
+      required: true,
     },
     save: {
       type: Function,
-      default: () => {}
+      default: () => {},
     },
     rules: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     color: {
       type: String,
-      default: 'primary'
+      default: 'primary',
     },
     placeholder: {
-      type: String
+      type: String,
     },
     noDataText: {
-      type: String
+      type: String,
     },
     readOnly: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data () {
     return {
@@ -146,7 +142,7 @@ export default {
       loading: false,
       messages: [],
       error: undefined,
-      lazyValue: undefined
+      lazyValue: undefined,
     }
   },
   computed: {
@@ -160,7 +156,7 @@ export default {
           this.contentWidth = width - 8
         }
         this.active = value
-      }
+      },
     },
     internalValue: {
       get () {
@@ -168,7 +164,7 @@ export default {
       },
       set (value) {
         this.lazyValue = value
-      }
+      },
     },
     activatorColor () {
       if (this.contentBounce) {
@@ -184,21 +180,26 @@ export default {
         return 'mdi-close'
       }
       return 'mdi-pencil'
-    }
+    },
   },
+  emits: [
+    'update:modelValue',
+    'open',
+    'close',
+  ],
   methods: {
     clearMessages () {
       this.messages = []
     },
     onCancel () {
-      this.internalValue = this.value
+      this.internalValue = this.modelValue
       this.isActive = false
     },
     async onSave (value) {
       this.loading = this.color
       try {
         await this.save(this.internalValue)
-        this.$emit('input', this.internalValue)
+        this.$emit('update:modelValue', this.internalValue)
         setImmediate(() => {
           this.isActive = false
         })
@@ -218,25 +219,25 @@ export default {
       if (editable) {
         editable.resetValidation()
       }
-    }
+    },
   },
   watch: {
     active (value) {
       if (value) {
         clearTimeout(this.timeoutId)
-        this.internalValue = this.value
+        this.internalValue = this.modelValue
         this.$emit('open')
         setDelayedInputFocus(this, 'editable', {
           delay: 50,
-          noSelect: true
+          noSelect: true,
         })
       } else {
         this.reset()
         this.$emit('close')
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
