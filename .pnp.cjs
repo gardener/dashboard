@@ -1501,7 +1501,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-promise", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.1.1"],\
             ["eslint-plugin-vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.0.57"],\
             ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.10.0"],\
-            ["eslint-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.0-beta.4"],\
             ["eventemitter3", "npm:5.0.0"],\
             ["highlight.js", "npm:11.8.0"],\
             ["js-cookie", "npm:3.0.1"],\
@@ -6190,34 +6189,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["eslint-plugin-vuetify", [\
-        ["npm:2.0.0-beta.4", {\
-          "packageLocation": "./.yarn/cache/eslint-plugin-vuetify-npm-2.0.0-beta.4-d82719c5e2-0937719ecf.zip/node_modules/eslint-plugin-vuetify/",\
-          "packageDependencies": [\
-            ["eslint-plugin-vuetify", "npm:2.0.0-beta.4"]\
-          ],\
-          "linkType": "SOFT"\
-        }],\
-        ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.0-beta.4", {\
-          "packageLocation": "./.yarn/__virtual__/eslint-plugin-vuetify-virtual-d6e605fd6b/0/cache/eslint-plugin-vuetify-npm-2.0.0-beta.4-d82719c5e2-0937719ecf.zip/node_modules/eslint-plugin-vuetify/",\
-          "packageDependencies": [\
-            ["eslint-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.0-beta.4"],\
-            ["@types/eslint", null],\
-            ["@types/vuetify", null],\
-            ["eslint", "npm:8.37.0"],\
-            ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.10.0"],\
-            ["requireindex", "npm:1.2.0"],\
-            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.3"]\
-          ],\
-          "packagePeers": [\
-            "@types/eslint",\
-            "@types/vuetify",\
-            "eslint",\
-            "vuetify"\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["eslint-scope", [\
         ["npm:5.1.1", {\
           "packageLocation": "./.yarn/cache/eslint-scope-npm-5.1.1-71fe59b18a-47e4b6a3f0.zip/node_modules/eslint-scope/",\
@@ -10353,15 +10324,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/require-from-string-npm-2.0.2-8557e0db12-a03ef68954.zip/node_modules/require-from-string/",\
           "packageDependencies": [\
             ["require-from-string", "npm:2.0.2"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["requireindex", [\
-        ["npm:1.2.0", {\
-          "packageLocation": "./.yarn/cache/requireindex-npm-1.2.0-483c52ddaf-50d8b10a1f.zip/node_modules/requireindex/",\
-          "packageDependencies": [\
-            ["requireindex", "npm:1.2.0"]\
           ],\
           "linkType": "HARD"\
         }]\

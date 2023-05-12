@@ -21,7 +21,6 @@ module.exports = {
     'standard',
     'plugin:vue/vue3-essential',
     'plugin:vitest/recommended',
-    'plugin:vuetify/base',
   ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],

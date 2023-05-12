@@ -915,7 +915,6 @@ __metadata:
     eslint-plugin-promise: ^6.1.1
     eslint-plugin-vitest: ^0.0.57
     eslint-plugin-vue: ^9.3.0
-    eslint-plugin-vuetify: ^2.0.0-beta.4
     eventemitter3: ^5.0.0
     highlight.js: ^11.8.0
     js-cookie: ^3.0.1
@@ -4531,7 +4530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-vue@npm:^9.3.0, eslint-plugin-vue@npm:^9.6.0":
+"eslint-plugin-vue@npm:^9.3.0":
   version: 9.10.0
   resolution: "eslint-plugin-vue@npm:9.10.0"
   dependencies:
@@ -4545,19 +4544,6 @@ __metadata:
   peerDependencies:
     eslint: ^6.2.0 || ^7.0.0 || ^8.0.0
   checksum: 91c6f1ab59433cfa3ade0e6003ca4a9f3ee50e1fd6b49ad9487805dc582f1865ef27796ff18b89e92f37f9ed39d7bfb8c8ccd029c2b77bb3e26ce9b705713070
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-vuetify@npm:^2.0.0-beta.4":
-  version: 2.0.0-beta.4
-  resolution: "eslint-plugin-vuetify@npm:2.0.0-beta.4"
-  dependencies:
-    eslint-plugin-vue: ^9.6.0
-    requireindex: ^1.2.0
-  peerDependencies:
-    eslint: ^8.0.0
-    vuetify: ^3.0.0
-  checksum: 0937719ecf6cae1c90baa6cbd71b04ace987e628edfb076c9271f8127d369edd1d3168144ddd23869008b0f7402c113ed0f494176ab3818711cd4ccb9cda5ccd
   languageName: node
   linkType: hard
 
@@ -8304,13 +8290,6 @@ __metadata:
   version: 2.0.2
   resolution: "require-from-string@npm:2.0.2"
   checksum: a03ef6895445f33a4015300c426699bc66b2b044ba7b670aa238610381b56d3f07c686251740d575e22f4c87531ba662d06937508f0f3c0f1ddc04db3130560b
-  languageName: node
-  linkType: hard
-
-"requireindex@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "requireindex@npm:1.2.0"
-  checksum: 50d8b10a1ff1fdf6aea7a1870bc7bd238b0fb1917d8d7ca17fd03afc38a65dcd7a8a4eddd031f89128b5f0065833d5c92c4fef67f2c04e8624057fe626c9cf94
   languageName: node
   linkType: hard
 
