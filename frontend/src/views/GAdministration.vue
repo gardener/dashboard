@@ -186,7 +186,7 @@ SPDX-License-Identifier: Apache-2.0
                           :searchable="searchable"
                           :sortable="sortable"
                         ></g-shoot-custom-field>
-                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text--disabled">Not defined</span>
+                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text-disabled">Not defined</span>
                       </div>
                   </g-list-item>
                 </template>
