@@ -8,48 +8,48 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-card class="ma-3">
-      <v-toolbar flat class="bg-toolbar-background text-toolbar-title" density="compact">
-        <v-icon icon="mdi-account-multiple" class="ml-2" />
-        <v-toolbar-title>
-          Project Users
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-text-field v-if="userList.length > 3"
-          class="mr-3"
-          prepend-inner-icon="mdi-magnify"
-          color="primary"
-          label="Search"
-          hide-details
-          variant="solo"
-          clearable
-          density="compact"
-          v-model="userFilter"
-          @keyup.esc="userFilter = ''"
-        ></v-text-field>
-        <v-tooltip location="top" v-if="allEmails" >
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-email-outline" :href="`mailto:${allEmails}`" />
-          </template>
-          <span>Mail to all Members</span>
-        </v-tooltip>
-        <v-tooltip location="top" v-if="canManageMembers" >
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-plus" @click.stop="openUserAddDialog" />
-          </template>
-          <span>Add Member</span>
-        </v-tooltip>
-        <v-tooltip location="top" v-if="canManageMembers" >
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-help-circle-outline" @click.stop="openUserHelpDialog" />
-          </template>
-          <span>Help</span>
-        </v-tooltip>
-        <g-table-column-selection
-          :headers="userAccountTableHeaders"
-          @set-selected-header="setSelectedHeaderUserAccount"
-          @reset="resetTableSettingsUserAccount"
-        ></g-table-column-selection>
-      </v-toolbar>
+      <g-toolbar
+        prepend-icon="mdi-account-multiple"
+        title="Project Users"
+      >
+        <template #append>
+          <v-text-field v-if="userList.length > 3"
+            class="mr-3"
+            prepend-inner-icon="mdi-magnify"
+            color="primary"
+            label="Search"
+            hide-details
+            variant="solo"
+            clearable
+            density="compact"
+            v-model="userFilter"
+            @keyup.esc="userFilter = ''"
+          ></v-text-field>
+          <v-tooltip location="top" v-if="allEmails" >
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-email-outline" :href="`mailto:${allEmails}`" />
+            </template>
+            <span>Mail to all Members</span>
+          </v-tooltip>
+          <v-tooltip location="top" v-if="canManageMembers" >
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openUserAddDialog" />
+            </template>
+            <span>Add Member</span>
+          </v-tooltip>
+          <v-tooltip location="top" v-if="canManageMembers" >
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-help-circle-outline" @click.stop="openUserHelpDialog" />
+            </template>
+            <span>Help</span>
+          </v-tooltip>
+          <g-table-column-selection
+            :headers="userAccountTableHeaders"
+            @set-selected-header="setSelectedHeaderUserAccount"
+            @reset="resetTableSettingsUserAccount"
+          ></g-table-column-selection>
+        </template>
+      </g-toolbar>
 
       <v-card-text v-if="!userList.length">
         <div class="text-h6 text-grey-darken-1 my-4">Add users to your project.</div>
@@ -82,42 +82,42 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
 
     <v-card class="ma-3 mt-6">
-      <v-toolbar flat class="bg-toolbar-background text-toolbar-title" density="compact">
-        <v-icon icon="mdi-monitor-multiple" class="ml-2" />
-        <v-toolbar-title>
-          Service Accounts
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-text-field v-if="serviceAccountList.length > 3"
-          class="mr-3"
-          prepend-inner-icon="mdi-magnify"
-          color="primary"
-          label="Search"
-          hide-details
-          variant="solo"
-          clearable
-          density="compact"
-          v-model="serviceAccountFilter"
-          @keyup.esc="serviceAccountFilter = ''"
-        ></v-text-field>
-        <v-tooltip location="top" v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-plus" @click.stop="openServiceAccountAddDialog" />
-          </template>
-          <span>Create Service Account</span>
-        </v-tooltip>
-        <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon ="mdi-help-circle-outline" @click.stop="openServiceAccountHelpDialog" />
-          </template>
-          <span>Help</span>
-        </v-tooltip>
-        <g-table-column-selection
-          :headers="serviceAccountTableHeaders"
-          @set-selected-header="setSelectedHeaderServiceAccount"
-          @reset="resetTableSettingsServiceAccount"
-        ></g-table-column-selection>
-      </v-toolbar>
+      <g-toolbar
+        prepend-icon="mdi-monitor-multiple"
+        title="Service Accounts"
+      >
+        <template #append>
+          <v-text-field v-if="serviceAccountList.length > 3"
+            class="mr-3"
+            prepend-inner-icon="mdi-magnify"
+            color="primary"
+            label="Search"
+            hide-details
+            variant="solo"
+            clearable
+            density="compact"
+            v-model="serviceAccountFilter"
+            @keyup.esc="serviceAccountFilter = ''"
+          ></v-text-field>
+          <v-tooltip location="top" v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openServiceAccountAddDialog" />
+            </template>
+            <span>Create Service Account</span>
+          </v-tooltip>
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon ="mdi-help-circle-outline" @click.stop="openServiceAccountHelpDialog" />
+            </template>
+            <span>Help</span>
+          </v-tooltip>
+          <g-table-column-selection
+            :headers="serviceAccountTableHeaders"
+            @set-selected-header="setSelectedHeaderServiceAccount"
+            @reset="resetTableSettingsServiceAccount"
+          ></g-table-column-selection>
+        </template>
+      </g-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
         <div class="text-h6 text-grey-darken-1 my-4">Add service accounts to your project.</div>
@@ -210,6 +210,7 @@ import GRemoveProjectMember from '@/components/Members/GRemoveProjectMember.vue'
 import GDeleteServiceAccount from '@/components/Members/GDeleteServiceAccount.vue'
 import GResetServiceAccount from '@/components/Members/GResetServiceAccount.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
+import GToolbar from '@/components/GToolbar.vue'
 
 import {
   useAuthzStore,
