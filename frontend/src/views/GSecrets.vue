@@ -115,6 +115,7 @@ SPDX-License-Identifier: Apache-2.0
             hide-details
             variant="solo"
             clearable
+            density="compact"
             v-model="dnsSecretFilter"
             @keyup.esc="dnsSecretFilter = ''"
           ></v-text-field>

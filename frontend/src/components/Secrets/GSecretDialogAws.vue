@@ -118,7 +118,7 @@ export default defineComponent({
     GExternalLink,
   },
   props: {
-    modelmodelValue: {
+    modelValue: {
       type: Boolean,
       required: true,
     },
