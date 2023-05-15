@@ -56,7 +56,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
-    "vuetify": "^3.1.15",
+    "vuetify": "^3.2.3",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
@@ -69,7 +69,6 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-vitest": "^0.0.57",
     "eslint-plugin-vue": "^9.3.0",
-    "eslint-plugin-vuetify": "^2.0.0-beta.4",
     "rollup-plugin-visualizer": "^5.9.0",
     "sass": "^1.62.0",
     "vite": "^3.1.9",
