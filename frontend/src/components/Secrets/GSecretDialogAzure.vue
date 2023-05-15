@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
  <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    @input="onInput">
+  >
 
     <template v-slot:secret-slot>
       <div>
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
           ref="clientId"
           label="Client Id"
           :error-messages="getErrorMessages('clientId')"
-          @update:model-value="$v.clientId.$touch()"
-          @blur="$v.clientId.$touch()"
+          @update:model-value="v$.clientId.$touch()"
+          @blur="v$.clientId.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -36,8 +36,8 @@ SPDX-License-Identifier: Apache-2.0
           label="Client Secret"
           :error-messages="getErrorMessages('clientSecret')"
           @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="$v.clientSecret.$touch()"
-          @blur="$v.clientSecret.$touch()"
+          @update:model-value="v$.clientSecret.$touch()"
+          @blur="v$.clientSecret.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -46,8 +46,8 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantId"
           label="Tenant Id"
           :error-messages="getErrorMessages('tenantId')"
-          @update:model-value="$v.tenantId.$touch()"
-          @blur="$v.tenantId.$touch()"
+          @update:model-value="v$.tenantId.$touch()"
+          @blur="v$.tenantId.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -56,8 +56,8 @@ SPDX-License-Identifier: Apache-2.0
           v-model="subscriptionId"
           label="Subscription Id"
           :error-messages="getErrorMessages('subscriptionId')"
-          @update:model-value="$v.subscriptionId.$touch()"
-          @blur="$v.subscriptionId.$touch()"
+          @update:model-value="v$.subscriptionId.$touch()"
+          @blur="v$.subscriptionId.$touch()"
         ></v-text-field>
       </div>
     </template>
@@ -70,63 +70,73 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Ensure that the service principal has the permissions defined
-          <external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
-          here</external-link> within your subscription assigned.
+          <g-external-link  url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
+          here</g-external-link> within your subscription assigned.
           If no fine-grained permissions are required then assign the <strong>Contributor</strong> role.
         </p>
         <p>
           Read the
-          <external-link url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
-          IAM Console help section</external-link> on how to manage your credentials and subscriptions.
+          <g-external-link  url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
+          IAM Console help section</g-external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
       <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
-        <p>Follow the steps as described in the Azure documentation to <external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
+        <p>Follow the steps as described in the Azure documentation to <g-external-link  url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import { required } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 
 const validationErrors = {
   clientId: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty.',
   },
   clientSecret: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty.',
   },
   tenantId: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty.',
   },
   subscriptionId: {
-    required: 'You can\'t leave this empty.'
-  }
+    required: 'You can\'t leave this empty.',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GExternalLink,
+  },
+  props: {
+    modelmodelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       clientId: undefined,
@@ -134,7 +144,7 @@ export default {
       tenantId: undefined,
       subscriptionId: undefined,
       hideSecret: true,
-      validationErrors
+      validationErrors,
     }
   },
   validations () {
@@ -142,31 +152,39 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
         clientID: this.clientId,
         clientSecret: this.clientSecret,
         subscriptionID: this.subscriptionId,
-        tenantID: this.tenantId
+        tenantID: this.tenantId,
       }
     },
     validators () {
       const validators = {
         clientId: {
-          required
+          required,
         },
         clientSecret: {
-          required
+          required,
         },
         tenantId: {
-          required
+          required,
         },
         subscriptionId: {
-          required
-        }
+          required,
+        },
       }
       return validators
     },
@@ -184,14 +202,11 @@ export default {
         return 'Azure Private DNS'
       }
       return undefined
-    }
+    },
   },
   methods: {
-    onInput (value) {
-      this.$emit('input', value)
-    },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.clientId = ''
       this.clientSecret = ''
@@ -204,14 +219,14 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

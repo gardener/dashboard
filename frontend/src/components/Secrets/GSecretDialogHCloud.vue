@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     vendor="hcloud"
     create-title="Add new Hetzner Cloud Secret"
     replace-title="Replace Hetzner Cloud Secret"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
         ref="hcloudToken"
         label="Hetzner Cloud Token"
         :error-messages="getErrorMessages('hcloudToken')"
-        @update:model-value="$v.hcloudToken.$touch()"
-        @blur="$v.hcloudToken.$touch()"
+        @update:model-value="v$.hcloudToken.$touch()"
+        @blur="v$.hcloudToken.$touch()"
         ></v-text-field>
       </div>
     </template>
@@ -44,39 +44,49 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import { required } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   hcloudToken: {
-    required: 'You can\'t leave this empty.'
-  }
+    required: 'You can\'t leave this empty.',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       hcloudToken: undefined,
       hideHcloudToken: true,
-      validationErrors
+      validationErrors,
     }
   },
   validations () {
@@ -84,32 +94,40 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
-        hcloudToken: this.hcloudToken
+        hcloudToken: this.hcloudToken,
       }
     },
     validators () {
       const validators = {
         hcloudToken: {
-          required
-        }
+          required,
+        },
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    }
+    },
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.hcloudToken = ''
 
@@ -122,14 +140,14 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

@@ -5,23 +5,24 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <component v-if="visibleDialog" :is="componentName" v-bind="{ secret: selectedSecret, vendor: visibleDialog }" v-model="visibleDialogState"></component>
+  <component v-if="visibleDialog" :is="componentName" v-model="visibleDialogState" v-bind="{ secret: selectedSecret, vendor: visibleDialog  }"></component>
 </template>
 
 <script>
-import GcpDialog from '@/components/dialogs/SecretDialogGcp.vue'
-import AwsDialog from '@/components/dialogs/SecretDialogAws.vue'
-import AzureDialog from '@/components/dialogs/SecretDialogAzure.vue'
-import OpenstackDialog from '@/components/dialogs/SecretDialogOpenstack.vue'
-import AlicloudDialog from '@/components/dialogs/SecretDialogAlicloud.vue'
-import MetalDialog from '@/components/dialogs/SecretDialogMetal.vue'
-import VsphereDialog from '@/components/dialogs/SecretDialogVSphere.vue'
-import CloudflareDialog from '@/components/dialogs/SecretDialogCloudflare.vue'
-import InfobloxDialog from '@/components/dialogs/SecretDialogInfoblox.vue'
-import NetlifyDialog from '@/components/dialogs/SecretDialogNetlify.vue'
-import DeleteDialog from '@/components/dialogs/SecretDialogDelete.vue'
-import HcloudDialog from '@/components/dialogs/SecretDialogHCloud.vue'
-import GenericDialog from '@/components/dialogs/SecretDialogGeneric.vue'
+import { defineComponent } from 'vue'
+import GcpDialog from '@/components/Secrets/GSecretDialogGcp'
+import AwsDialog from '@/components/Secrets/GSecretDialogAws'
+import AzureDialog from '@/components/Secrets/GSecretDialogAzure'
+import OpenstackDialog from '@/components/Secrets/GSecretDialogOpenstack'
+import AlicloudDialog from '@/components/Secrets/GSecretDialogAlicloud'
+import MetalDialog from '@/components/Secrets/GSecretDialogMetal'
+import VsphereDialog from '@/components/Secrets/GSecretDialogVSphere'
+import CloudflareDialog from '@/components/Secrets/GSecretDialogCloudflare'
+import InfobloxDialog from '@/components/Secrets/GSecretDialogInfoblox'
+import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
+import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
+import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
+import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
 
 import upperFirst from 'lodash/upperFirst'
 import split from 'lodash/split'
@@ -40,26 +41,29 @@ const components = {
   NetlifyDialog,
   HcloudDialog,
   GenericDialog,
-  DeleteDialog
+  DeleteDialog,
 }
 
-export default {
+export default defineComponent({
   components,
   data () {
     return {
-      visibleDialogState: false
+      visibleDialogState: false,
     }
   },
   props: {
     selectedSecret: {
       type: Object,
-      required: false
+      required: false,
     },
     visibleDialog: {
       type: String,
-      required: false
-    }
+      required: false,
+    },
   },
+  emits: [
+    'dialog-closed',
+  ],
   computed: {
     componentName () {
       switch (this.visibleDialog) {
@@ -75,7 +79,7 @@ export default {
           return 'GenericDialog'
         }
       }
-    }
+    },
   },
   watch: {
     visibleDialog (visibleDialog) {
@@ -87,7 +91,7 @@ export default {
       if (!visibleDialogState) {
         this.$emit('dialog-closed')
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

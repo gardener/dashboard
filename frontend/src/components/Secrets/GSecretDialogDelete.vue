@@ -23,38 +23,42 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="hide">Cancel</v-btn>
-        <v-btn variant="text" @click="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
+        <v-btn variant="text" @click.native="hide">Cancel</v-btn>
+        <v-btn variant="text" @click.native="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
 import get from 'lodash/get'
-import GMessage from '@/components/GMessage.vue'
+import GMessage from '@/components/GMessage'
 import { errorDetailsFromError } from '@/utils/error'
+import { useSecretStore } from '@/store'
 
-export default {
-  name: 'secret-dialog-delete',
+export default defineComponent({
   components: {
-    GMessage
+    GMessage,
   },
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     secret: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
     }
   },
   computed: {
@@ -64,16 +68,14 @@ export default {
       },
       set (value) {
         this.$emit('input', value)
-      }
+      },
     },
     name () {
       return get(this.secret, 'metadata.name', '')
-    }
+    },
   },
   methods: {
-    ...mapActions({
-      deleteSecret: 'deleteCloudProviderSecret'
-    }),
+    ...mapActions(useSecretStore, ['deleteSecret']),
     hide () {
       this.visible = false
     },
@@ -92,16 +94,16 @@ export default {
     reset () {
       this.errorMessage = undefined
       this.detailedMessage = undefined
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

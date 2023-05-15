@@ -10,10 +10,10 @@ SPDX-License-Identifier: Apache-2.0
     style="max-height: 80%"
     v-model="columnSelectionMenu"
     absolute>
-    <template v-slot:activator="{ props: tooltipProps }">
+    <template v-slot:activator="{ props: menuProps }">
       <v-tooltip location="top">
-        <template v-slot:activator="{ props: menuProps }">
-          <v-btn v-bind="{...tooltipProps, ...menuProps}" icon>
+        <template v-slot:activator="{ props: tooltipProps }">
+          <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon>
             <v-icon color="toolbar-title">mdi-dots-vertical</v-icon>
           </v-btn>
         </template>

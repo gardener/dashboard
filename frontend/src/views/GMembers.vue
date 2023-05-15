@@ -58,6 +58,11 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
+      <!--- TODO v-data-table
+        - sort currently not working (custom-sort has been removed)
+        - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
+        - options property has been removed (need to set options individually)
+      --->
       <v-data-table
         v-else
         :headers="visibleUserAccountTableHeaders"

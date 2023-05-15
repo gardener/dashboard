@@ -7,6 +7,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useApi } from '@/composables'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
+import some from 'lodash/some'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
@@ -22,9 +27,30 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     list.value = response.data
   }
 
+  const sortedDnsProviderList = computed(() => {
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const resources = flatMap(list.value, 'resources')
+    const dnsProvidersFromDnsRecords = filter(resources, ['kind', 'DNSRecord'])
+
+    const dnsProviderList = map(supportedProviderTypes, type => {
+      return {
+        type,
+        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false),
+      }
+    })
+
+    const dnsServiceExtensionDeployed = some(list.value, ['name', 'extension-shoot-dns-service'])
+    if (dnsServiceExtensionDeployed) {
+      return dnsProviderList
+    }
+    // return only primary DNS Providers backed by DNSRecord
+    return filter(dnsProviderList, 'primary')
+  })
+
   return {
     list,
     isInitial,
     fetchGardenerExtensions,
+    sortedDnsProviderList,
   }
 })

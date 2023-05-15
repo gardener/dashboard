@@ -8,37 +8,29 @@ SPDX-License-Identifier: Apache-2.0
   <span v-if="title">{{ titleText }}</span>
   <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
   <v-tooltip v-else location="top" color="rgba(0, 0, 0, 1)" content-class="tooltip">
-    <template v-slot:activator="{ on }">
-      <div class="d-flex align-center" v-on="on">
-        <infra-icon :value="cloudProviderKind" class="mr-2"></infra-icon>
+    <template v-slot:activator="{ props }">
+      <div class="d-flex align-center" v-bind="props">
+        <g-vendor-icon :value="cloudProviderKind" class="mr-2"></g-vendor-icon>
         {{ description }}
       </div>
     </template>
     <v-card>
       <v-list>
         <v-list-item>
-          <v-list-item-content class="pa-0">
-            <v-list-item-subtitle>Provider</v-list-item-subtitle>
-            <v-list-item-title class="d-flex"><infra-icon :value="cloudProviderKind" class="mr-2"></infra-icon>{{ cloudProviderKind }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-subtitle>Provider</v-list-item-subtitle>
+          <v-list-item-title class="d-flex"><g-vendor-icon :value="cloudProviderKind" class="mr-2"></g-vendor-icon>{{ cloudProviderKind }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="cloudProfileName">
-          <v-list-item-content class="pa-0">
-            <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-            <v-list-item-title>{{ cloudProfileName }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
+          <v-list-item-title>{{ cloudProfileName }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="region">
-          <v-list-item-content class="pa-0">
-            <v-list-item-subtitle>Region</v-list-item-subtitle>
-            <v-list-item-title>{{ region }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-subtitle>Region</v-list-item-subtitle>
+          <v-list-item-title>{{ region }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="zones.length">
-          <v-list-item-content class="pa-0">
-            <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
-            <v-list-item-title>{{zoneText}}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
+          <v-list-item-title>{{zoneText}}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card>
@@ -46,35 +38,36 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import join from 'lodash/join'
-import InfraIcon from '@/components/VendorIcon.vue'
+import GVendorIcon from '@/components/GVendorIcon'
 
-export default {
+export default defineComponent({
   components: {
-    InfraIcon
+    GVendorIcon,
   },
   props: {
     zones: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     cloudProviderKind: {
-      type: String
+      type: String,
     },
     cloudProfileName: {
-      type: String
+      type: String,
     },
     region: {
-      type: String
+      type: String,
     },
     title: {
       type: Boolean,
-      default: false
+      default: false,
     },
     extended: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     zoneText () {
@@ -118,9 +111,9 @@ export default {
         titles.push(this.zoneTitle)
       }
       return join(titles, ' / ')
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

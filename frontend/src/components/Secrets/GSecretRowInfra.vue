@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{item.name}}
         <v-tooltip v-if="!item.isOwnSecret" location="top">
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" size="small" class="mx-1">mdi-account-arrow-left</v-icon>
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" size="small" class="mx-1">mdi-account-arrow-left</v-icon>
           </template>
           <span>Secret shared by {{item.secretNamespace}}</span>
         </v-tooltip>
@@ -20,15 +20,11 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.secret">
       <span v-if="!item.isOwnSecret">{{item.secretNamespace}}: </span>{{item.secretName}}
     </td>
-    <td v-if="selectedHeaders.dnsProvider">
-      <vendor extended :cloud-provider-kind="item.dnsProvider"></vendor>
+    <td v-if="selectedHeaders.infrastructure">
+      <g-vendor extended :cloud-provider-kind="item.infrastructureName" :cloud-profile-name="item.cloudProfileName"></g-vendor>
     </td>
     <td v-if="selectedHeaders.details">
-      <v-list color="transparent">
-        <v-list-item class="pa-0">
-          <secret-details-item-content dns :secret="item.secret"></secret-details-item-content>
-        </v-list-item>
-      </v-list>
+      <g-secret-details-item-content infra :secret="item.secret"></g-secret-details-item-content>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
       <div class="d-flex" :class="{'font-weight-light text--disabled' : !item.relatedShootCount}">
@@ -36,25 +32,33 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.actions">
-      <div class="d-flex flex-row justify-end">
+      <div class="d-flex justify-end">
         <v-tooltip location="top" v-if="canPatchSecrets">
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider" icon @click="onUpdate">
-                <v-icon class="action-button--text">mdi-pencil</v-icon>
-              </v-btn>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <v-btn
+                :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
+                icon="mdi-pencil"
+                density="compact"
+                variant="text"
+                @click="onUpdate"
+              />
             </div>
           </template>
           <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
-          <span v-else-if="!item.isSupportedCloudProvider">This DNS Provider is currently not supported by the dashboard</span>
+          <span v-else-if="!item.isSupportedCloudProvider">This infrastructure type is currently not supported by the dashboard</span>
           <span v-else>Edit Secret</span>
         </v-tooltip>
         <v-tooltip location="top" v-if="canDeleteSecrets">
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn :disabled="item.relatedShootCount > 0 || !item.isOwnSecret" icon @click="onDelete">
-                <v-icon class="text-error">mdi-delete</v-icon>
-              </v-btn>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <v-btn
+                :disabled="item.relatedShootCount > 0 || !item.isOwnSecret"
+                icon="mdi-delete"
+                density="compact"
+                variant="text"
+                @click="onDelete"
+              />
             </div>
           </template>
           <span v-if="!item.isOwnSecret">You can only delete secrets that are owned by you</span>
@@ -67,35 +71,33 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-
+import { defineComponent } from 'vue'
 import { mapTableHeader } from '@/utils'
-import Vendor from '@/components/Vendor.vue'
-import SecretDetailsItemContent from '@/components/SecretDetailsItemContent.vue'
-import { mapGetters } from 'vuex'
+import GVendor from '@/components/GVendor'
+import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import { mapGetters } from 'pinia'
+import { useAuthzStore } from '@/store'
 
-export default {
+export default defineComponent({
   components: {
-    Vendor,
-    SecretDetailsItemContent
+    GVendor,
+    GSecretDetailsItemContent,
   },
   props: {
     item: {
       type: Object,
-      required: true
+      required: true,
     },
     headers: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
+    ...mapGetters(useAuthzStore, ['canPatchSecrets', 'canDeleteSecrets']),
     selectedHeaders () {
       return mapTableHeader(this.headers, 'selected')
     },
-    ...mapGetters([
-      'canDeleteSecrets',
-      'canPatchSecrets'
-    ])
   },
   methods: {
     onUpdate () {
@@ -103,7 +105,7 @@ export default {
     },
     onDelete () {
       this.$emit('delete', this.item.secret)
-    }
-  }
-}
+    },
+  },
+})
 </script>

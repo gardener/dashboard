@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
  <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
           v-model="serviceAccountKey"
           label="Service Account Key"
           :error-messages="getErrorMessages('serviceAccountKey')"
-          @update:model-value="$v.serviceAccountKey.$touch()"
-          @blur="$v.serviceAccountKey.$touch()"
+          @update:model-value="v$.serviceAccountKey.$touch()"
+          @blur="v$.serviceAccountKey.$touch()"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
         ></v-textarea>
@@ -57,8 +57,8 @@ SPDX-License-Identifier: Apache-2.0
 
         <p>
           Read the
-          <external-link url="https://cloud.google.com/compute/docs/access/service-accounts">
-            Service Account Documentation</external-link> on how to apply for credentials
+          <g-external-link  url="https://cloud.google.com/compute/docs/access/service-accounts">
+            Service Account Documentation</g-external-link> on how to apply for credentials
           to service accounts.
         </p>
       </div>
@@ -67,54 +67,64 @@ SPDX-License-Identifier: Apache-2.0
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
         <p>
-          For details on Cloud DNS see <external-link url="https://cloud.google.com/dns/docs/zones"></external-link>, and on Service Accounts see <external-link url="https://cloud.google.com/iam/docs/service-accounts"></external-link>
+          For details on Cloud DNS see <g-external-link  url="https://cloud.google.com/dns/docs/zones"></g-external-link>, and on Service Accounts see <g-external-link  url="https://cloud.google.com/iam/docs/service-accounts"></g-external-link>
         </p>
         <p>
-          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <external-link url="https://cloud.google.com/dns/docs/access-control"></external-link>. A possible role is roles/dns.admin "DNS Administrator".
+          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link  url="https://cloud.google.com/dns/docs/access-control"></g-external-link>. A possible role is roles/dns.admin "DNS Administrator".
         </p>
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import { required } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import { serviceAccountKey } from '@/utils/validators'
 import { handleTextFieldDrop, getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   serviceAccountKey: {
     required: 'You can\'t leave this empty.',
-    serviceAccountKey: 'Not a valid Service Account Key'
-  }
+    serviceAccountKey: 'Not a valid Service Account Key',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GExternalLink,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       serviceAccountKey: undefined,
       validationErrors,
-      dropHandlerInitialized: false
+      dropHandlerInitialized: false,
     }
   },
   validations () {
@@ -122,20 +132,28 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
-        'serviceaccount.json': this.serviceAccountKey
+        'serviceaccount.json': this.serviceAccountKey,
       }
     },
     validators () {
       const validators = {
         serviceAccountKey: {
           required,
-          serviceAccountKey
-        }
+          serviceAccountKey,
+        },
       }
       return validators
     },
@@ -150,14 +168,14 @@ export default {
         return 'Google Cloud DNS'
       }
       return undefined
-    }
+    },
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.serviceAccountKey = ''
 
@@ -178,7 +196,7 @@ export default {
         this.serviceAccountKey = value
       }
       handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
-    }
+    },
   },
   watch: {
     value: function (value) {
@@ -193,14 +211,14 @@ export default {
           this.initializeDropHandlerOnce()
         })
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
 
-  :deep(.v-input__control textarea) {
+  ::v-deep .v-input__control textarea {
     font-family: monospace;
     font-size: 14px;
   }

@@ -5,27 +5,27 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
  <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${vendor} Secret`"
     :replace-title="`Replace ${vendor} Secret`"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
         <v-textarea
           ref="data"
           color="primary"
-          filled
+          variant="filled"
           v-model="data"
           label="Secret Data"
           :error-messages="getErrorMessages('data')"
-          @input="onInputSecretData"
-          @blur="$v.data.$touch()"
+          @update:model-value="onInputSecretData"
+          @blur="v$.data.$touch()"
         ></v-textarea>
       </div>
     </template>
@@ -40,44 +40,54 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog'
-import { required } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import isObject from 'lodash/isObject'
 
 const validationErrors = {
   data: {
     required: 'You can\'t leave this empty.',
-    isYAML: 'You need to enter secret data as YAML key-value pairs'
-  }
+    isYAML: 'You need to enter secret data as YAML key-value pairs',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       data: undefined,
       secretData: {},
-      validationErrors
+      validationErrors,
     }
   },
   validations () {
@@ -85,21 +95,29 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     validators () {
       const validators = {
         data: {
           required,
-          isYAML: () => Object.keys(this.secretData).length > 0
-        }
+          isYAML: () => Object.keys(this.secretData).length > 0,
+        },
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    }
+    },
   },
   methods: {
     onInput (value) {
@@ -118,10 +136,10 @@ export default {
         }
       }
 
-      this.$v.data.$touch()
+      this.v$.data.$touch()
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.data = ''
       this.secretData = {}
@@ -132,9 +150,9 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

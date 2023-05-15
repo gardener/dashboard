@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div v-if="vendor==='openstack-designate'">
@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
           v-model="authURL"
           label="Auth URL"
           :error-messages="getErrorMessages('authURL')"
-          @update:model-value="$v.authURL.$touch()"
-          @blur="$v.authURL.$touch()"
+          @update:model-value="v$.authURL.$touch()"
+          @blur="v$.authURL.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -33,8 +33,8 @@ SPDX-License-Identifier: Apache-2.0
           ref="domainName"
           label="Domain Name"
           :error-messages="getErrorMessages('domainName')"
-          @update:model-value="$v.domainName.$touch()"
-          @blur="$v.domainName.$touch()"
+          @update:model-value="v$.domainName.$touch()"
+          @blur="v$.domainName.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -43,8 +43,8 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantName"
           label="Project / Tenant Name"
           :error-messages="getErrorMessages('tenantName')"
-          @update:model-value="$v.tenantName.$touch()"
-          @blur="$v.tenantName.$touch()"
+          @update:model-value="v$.tenantName.$touch()"
+          @blur="v$.tenantName.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -73,8 +73,8 @@ SPDX-License-Identifier: Apache-2.0
             v-model="applicationCredentialID"
             label="ID"
             :error-messages="getErrorMessages('applicationCredentialID')"
-            @update:model-value="$v.applicationCredentialID.$touch()"
-            @blur="$v.applicationCredentialID.$touch()"
+            @update:model-value="v$.applicationCredentialID.$touch()"
+            @blur="v$.applicationCredentialID.$touch()"
             ></v-text-field>
           </div>
           <div>
@@ -83,8 +83,8 @@ SPDX-License-Identifier: Apache-2.0
             v-model="applicationCredentialName"
             label="Name"
             :error-messages="getErrorMessages('applicationCredentialName')"
-            @update:model-value="$v.applicationCredentialName.$touch()"
-            @blur="$v.applicationCredentialName.$touch()"
+            @update:model-value="v$.applicationCredentialName.$touch()"
+            @blur="v$.applicationCredentialName.$touch()"
             ></v-text-field>
           </div>
           <div>
@@ -96,27 +96,27 @@ SPDX-License-Identifier: Apache-2.0
               :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideApplicationCredentialSecret ? 'password' : 'text'"
               @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
-              @update:model-value="$v.applicationCredentialSecret.$touch()"
-              @blur="$v.applicationCredentialSecret.$touch()"
+              @update:model-value="v$.applicationCredentialSecret.$touch()"
+              @blur="v$.applicationCredentialSecret.$touch()"
             ></v-text-field>
           </div>
         </template>
         <template v-else>
           <div>
-            <hint-colorizer hint-color="primary">
+            <!--<hint-colorizer hint-color="primary">-->
               <v-text-field
               color="primary"
               v-model="username"
               label="Technical User"
               :error-messages="getErrorMessages('username')"
-              @update:model-value="$v.username.$touch()"
-              @blur="$v.username.$touch()"
+              @update:model-value="v$.username.$touch()"
+              @blur="v$.username.$touch()"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
               ></v-text-field>
-            </hint-colorizer>
+            <!--</hint-colorizer>-->
           </div>
           <div>
-            <hint-colorizer hint-color="warning">
+            <!--<hint-colorizer hint-color="warning">-->
               <v-text-field
                 color="primary"
                 v-model="password"
@@ -125,11 +125,11 @@ SPDX-License-Identifier: Apache-2.0
                 :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="hideSecret ? 'password' : 'text'"
                 @click:append="() => (hideSecret = !hideSecret)"
-                @update:model-value="$v.password.$touch()"
-                @blur="$v.password.$touch()"
+                @update:model-value="v$.password.$touch()"
+                @blur="v$.password.$touch()"
                 hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
               ></v-text-field>
-            </hint-colorizer>
+            <!--</hint-colorizer>-->
           </div>
         </template>
       </v-container>
@@ -151,71 +151,82 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <p>
         Read the
-        <external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</external-link> on how to create and manage roles.
+        <g-external-link  url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</g-external-link> on how to create and manage roles.
       </p>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { mapActions } from 'pinia'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, requiredIf } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import HintColorizer from '@/components/HintColorizer.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-
+// TODO import HintColorizer from '@/components/HintColorizer'
+import GExternalLink from '@/components/GExternalLink'
+import {
+  useCloudprofileStore,
+} from '@/store'
 const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserMessage = 'Required for technical user authentication'
 const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
 
 const validationErrors = {
   domainName: {
-    required: requiredMessage
+    required: requiredMessage,
   },
   tenantName: {
-    required: requiredMessage
+    required: requiredMessage,
   },
   username: {
-    required: requiredUserMessage
+    required: requiredUserMessage,
   },
   password: {
-    required: requiredUserMessage
+    required: requiredUserMessage,
   },
   authURL: {
-    required: 'Required for Secret Type DNS.'
+    required: 'Required for Secret Type DNS.',
   },
   applicationCredentialID: {
-    required: requiredApplicationCredentialsMessage
+    required: requiredApplicationCredentialsMessage,
   },
   applicationCredentialName: {
-    required: requiredApplicationCredentialsMessage
+    required: requiredApplicationCredentialsMessage,
   },
   applicationCredentialSecret: {
-    required: requiredApplicationCredentialsMessage
-  }
+    required: requiredApplicationCredentialsMessage,
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    HintColorizer,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GExternalLink,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       domainName: undefined,
@@ -229,7 +240,7 @@ export default {
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       validationErrors,
-      authenticationMethod: 'USER'
+      authenticationMethod: 'USER',
     }
   },
   validations () {
@@ -237,11 +248,16 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapGetters([
-      'cloudProfileByName'
-    ]),
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       const data = {
@@ -251,7 +267,7 @@ export default {
         applicationCredentialName: this.applicationCredentialName,
         applicationCredentialSecret: this.applicationCredentialSecret,
         username: this.username,
-        password: this.password
+        password: this.password,
       }
       if (this.authURL) {
         data.OS_AUTH_URL = this.authURL
@@ -262,41 +278,41 @@ export default {
     validators () {
       const validators = {
         domainName: {
-          required
+          required,
         },
         tenantName: {
-          required
+          required,
         },
         username: {
           required: requiredIf(function () {
             return this.authenticationMethod === 'USER'
-          })
+          }),
         },
         password: {
           required: requiredIf(function () {
             return this.authenticationMethod === 'USER'
-          })
+          }),
         },
         authURL: {
           required: requiredIf(function () {
             return this.vendor === 'openstack-designate'
-          })
+          }),
         },
         applicationCredentialID: {
           required: requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          })
+          }),
         },
         applicationCredentialName: {
           required: requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          })
+          }),
         },
         applicationCredentialSecret: {
           required: requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          })
-        }
+          }),
+        },
       }
       return validators
     },
@@ -311,14 +327,15 @@ export default {
         return 'OpenStack Designate'
       }
       return undefined
-    }
+    },
   },
   methods: {
+    ...mapActions(useCloudprofileStore, ['cloudProfileByName']),
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.domainName = ''
       this.tenantName = ''
@@ -339,7 +356,7 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
@@ -353,8 +370,8 @@ export default {
       this.applicationCredentialID = undefined
       this.applicationCredentialName = undefined
       this.applicationCredentialSecret = undefined
-      this.$v.$reset()
-    }
-  }
-}
+      this.v$.$reset()
+    },
+  },
+})
 </script>

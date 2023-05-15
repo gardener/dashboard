@@ -7,18 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="850">
     <v-card>
-      <v-card-title class="toolbar-background">
-        <span class="text-h5 toolbar-title--text">{{title}}</span>
-        <v-spacer></v-spacer>
-        <v-btn
-          light
-          icon
-          :class="helpVisible ? 'toolbar-title toolbar--text' : 'toolbar toolbar-title--text'"
-          @click="helpVisible=!helpVisible"
-        >
-          <v-icon>mdi-help</v-icon>
-        </v-btn>
-      </v-card-title>
+      <g-toolbar
+        prepend-icon="mdi-account-plus"
+        :title="title"
+      >
+        <template #append>
+          <v-btn
+            variant="text"
+            size="small"
+            icon="mdi-help"
+            :class="helpVisible ? 'toolbar-title text-toolbar' : 'toolbar text-toolbar-title'"
+            @click="helpVisible = !helpVisible"
+          />
+        </template>
+      </g-toolbar>
       <v-card-text>
         <div class="d-flex flex-row pa-3">
           <div class="d-flex flex-column flex-grow-1" ref="secretDetails">
@@ -30,8 +32,9 @@ SPDX-License-Identifier: Apache-2.0
                   v-model.trim="name"
                   label="Secret Name"
                   :error-messages="getErrorMessages('name')"
-                  @update:model-value="$v.name.$touch()"
-                  @blur="$v.name.$touch()"
+                  @update:model-value="v$.name.$touch()"
+                  @blur="v$.name.$touch()"
+                  variant="underlined"
                 ></v-text-field>
               </template>
               <template v-else>
@@ -40,12 +43,12 @@ SPDX-License-Identifier: Apache-2.0
               </div>
 
             <div v-show="cloudProfiles.length !== 1 && isInfrastructureSecret">
-              <cloud-profile
+              <g-cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
                 :create-mode="isCreateMode"
                 :cloud-profiles="cloudProfiles">
-              </cloud-profile>
+              </g-cloud-profile>
             </div>
 
             <slot name="secret-slot"></slot>
@@ -58,10 +61,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-slide-x-reverse-transition>
        </div>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0">
+      <v-alert :model-value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0" class="mb-2">
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
-       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0">
+       <v-alert :model-value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0" class="mb-2">
         Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
       </v-alert>
       <v-divider></v-divider>
@@ -75,11 +78,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
-import { required, maxLength } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { mapActions, mapState, mapGetters } from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
+import { required, maxLength } from '@vuelidate/validators'
 import { unique, resourceName } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
-import CloudProfile from '@/components/CloudProfile.vue'
+import GCloudProfile from '@/components/GCloudProfile'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -87,53 +92,72 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
-import GMessage from '@/components/GMessage.vue'
+import GMessage from '@/components/GMessage'
+import GToolbar from '@/components/GToolbar.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
+import {
+  useSecretStore,
+  useAuthzStore,
+  useCloudprofileStore,
+  useGardenerExtensionStore,
+} from '@/store'
 
 const validationErrors = {
   name: {
     required: 'You can\'t leave this empty.',
     maxLength: 'It exceeds the maximum length of 128 characters.',
     resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-    unique: 'Name is taken. Try another.'
-  }
+    unique: 'Name is taken. Try another.',
+  },
 }
 
-export default {
-  name: 'secret-dialog',
-  components: {
-    CloudProfile,
-    GMessage
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
+  components: {
+    GCloudProfile,
+    GMessage,
+    GToolbar,
+  },
+  emits: [
+    'update:modelValue',
+    'cloud-profile-name',
+  ],
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     data: {
       type: Object,
-      required: true
+      required: true,
     },
     dataValid: {
       type: Boolean,
-      required: true
+      required: true,
     },
     vendor: {
       type: String,
-      required: true
+      required: true,
     },
     createTitle: {
       type: String,
-      required: true
+      required: true,
     },
     replaceTitle: {
       type: String,
-      required: true
+      required: true,
     },
     secret: {
-      type: Object
-    }
+      type: Object,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       selectedCloudProfile: undefined,
@@ -141,7 +165,7 @@ export default {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       validationErrors,
-      helpVisible: false
+      helpVisible: false,
     }
   },
   validations () {
@@ -149,18 +173,14 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapState([
-      'namespace'
-    ]),
-    ...mapGetters([
-      'infrastructureSecretList',
-      'cloudProfilesByCloudProviderKind',
-      'shootList',
-      'sortedCloudProviderKindList'
-    ]),
-    ...mapGetters('gardenerExtensions', [
-      'sortedDnsProviderList'
-    ]),
+    ...mapState(useAuthzStore, ['namespace']),
+    ...mapGetters(useSecretStore, ['infrastructureSecretList', 'dnsSecretList']),
+    ...mapGetters(useCloudprofileStore, ['sortedInfrastructureKindList']),
+    ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    shootList () {
+      // TODO
+      return []
+    },
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
@@ -171,18 +191,18 @@ export default {
       set (cloudProfileName) {
         this.selectedCloudProfile = cloudProfileName
         this.$emit('cloud-profile-name', cloudProfileName)
-      }
+      },
     },
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.vendor), [(item) => item.metadata.name])
     },
     visible: {
       get () {
-        return this.value
+        return this.modelValue
       },
-      set (value) {
-        this.$emit('input', value)
-      }
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
     },
     valid () {
       let isCloudProfileValid = true
@@ -198,13 +218,16 @@ export default {
           required,
           maxLength: maxLength(128),
           resourceName,
-          unique: unique('infrastructureSecretNames')
+          unique: unique(this.isDnsProviderSecret ? 'infrastructureSecretNames' : 'dnsSecretNames'),
         }
       }
       return validators
     },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)
+    },
+    dnsSecretNames () {
+      return this.dnsSecretList.map(item => item.metadata.name)
     },
     isCreateMode () {
       return !this.secret
@@ -229,25 +252,28 @@ export default {
         detailsHeight = detailsRef.getBoundingClientRect().height
       }
       return {
-        maxHeight: `${detailsHeight}px`
+        maxHeight: `${detailsHeight}px`,
       }
     },
     isInfrastructureSecret () {
-      return includes(this.sortedCloudProviderKindList, this.vendor)
+      return includes(this.sortedInfrastructureKindList, this.vendor)
     },
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.vendor)
-    }
+    },
   },
   methods: {
-    ...mapActions([
-      'createCloudProviderSecret',
-      'updateCloudProviderSecret'
+    ...mapActions(useSecretStore, [
+      'createSecret',
+      'updateSecret',
+    ]),
+    ...mapActions(useCloudprofileStore, [
+      'cloudProfilesByCloudProviderKind',
     ]),
     isValid (component) {
       let isValid = true
       if (component) {
-        isValid = !component.$v.$invalid
+        isValid = !component.v$.$invalid
       }
       return isValid
     },
@@ -258,7 +284,7 @@ export default {
       this.hide()
     },
     async submit () {
-      this.$v.$touch()
+      this.v$.$touch()
       if (this.valid) {
         try {
           await this.save()
@@ -287,8 +313,8 @@ export default {
           namespace: this.namespace,
           secretRef: {
             name: this.name,
-            namespace: this.namespace
-          }
+            namespace: this.namespace,
+          },
         }
 
         if (this.isInfrastructureSecret) {
@@ -300,18 +326,18 @@ export default {
           metadata.dnsProviderName = this.vendor
         }
 
-        return this.createCloudProviderSecret({ metadata, data: this.data })
+        return this.createSecret({ metadata, data: this.data })
       } else {
         const metadata = cloneDeep(this.secret.metadata)
 
-        return this.updateCloudProviderSecret({ metadata, data: this.data })
+        return this.updateSecret({ metadata, data: this.data })
       }
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
       const cloudProfileRef = this.$refs.cloudProfile
       if (cloudProfileRef) {
-        cloudProfileRef.$v.$reset()
+        cloudProfileRef.v$.$reset()
       }
 
       if (this.isCreateMode) {
@@ -334,12 +360,12 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   mounted () {
     this.reset()
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>

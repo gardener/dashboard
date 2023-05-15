@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
           ref="accessKeyId"
           label="Access Key Id"
           :error-messages="getErrorMessages('accessKeyId')"
-          @update:model-value="$v.accessKeyId.$touch()"
-          @blur="$v.accessKeyId.$touch()"
+          @update:model-value="v$.accessKeyId.$touch()"
+          @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
         ></v-text-field>
@@ -38,8 +38,8 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="$v.accessKeySecret.$touch()"
-          @blur="$v.accessKeySecret.$touch()"
+          @update:model-value="v$.accessKeySecret.$touch()"
+          @blur="v$.accessKeySecret.$touch()"
           counter="30"
           hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
         ></v-text-field>
@@ -50,73 +50,83 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
-          <external-link url="https://ram.console.aliyun.com/overview">RAM Console</external-link>.
+          <g-external-link  url="https://ram.console.aliyun.com/overview">RAM Console</g-external-link>.
           The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
-          (<external-link url="https://www.alibabacloud.com/help/doc-detail/59643.htm">official
-          documentation</external-link>).
+          (<g-external-link  url="https://www.alibabacloud.com/help/doc-detail/59643.htm">official
+          documentation</g-external-link>).
         </p>
         <p>
           Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
-          (<external-link url="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp">official
-          documentation</external-link>). Alternatively, you can assign following permissions to the RAM
+          (<g-external-link  url="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp">official
+          documentation</g-external-link>). Alternatively, you can assign following permissions to the RAM
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>
-        <code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+        <g-code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></g-code-block>
       </div>
       <div v-if="vendor==='alicloud-dns'">
         <p>
           You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
         </p>
         <p>
-          For details see <external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">AccessKey Client</external-link>. Currently the regionId is fixed to cn-shanghai.
+          For details see <g-external-link  url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">AccessKey Client</g-external-link>. Currently the regionId is fixed to cn-shanghai.
         </p>
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import CodeBlock from '@/components/CodeBlock.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GCodeBlock from '@/components/GCodeBlock'
+import GExternalLink from '@/components/GExternalLink'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, minLength, maxLength } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   accessKeyId: {
     required: 'You can\'t leave this empty.',
     minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.'
+    maxLength: 'It exceeds the maximum length of 128 characters.',
   },
   accessKeySecret: {
     required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 30 characters.'
-  }
+    minLength: 'It must contain at least 30 characters.',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    CodeBlock,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GCodeBlock,
+    GExternalLink,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       accessKeyId: undefined,
@@ -128,35 +138,35 @@ export default {
           {
             Action: 'vpc:*',
             Effect: 'Allow',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Action: 'ecs:*',
             Effect: 'Allow',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Action: 'slb:*',
             Effect: 'Allow',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Action: [
               'ram:GetRole',
               'ram:CreateRole',
-              'ram:CreateServiceLinkedRole'
+              'ram:CreateServiceLinkedRole',
             ],
             Effect: 'Allow',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Action: 'ros:*',
             Effect: 'Allow',
-            Resource: '*'
-          }
+            Resource: '*',
+          },
         ],
-        Version: '1'
-      }
+        Version: '1',
+      },
     }
   },
   validations () {
@@ -164,8 +174,16 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     name () {
       if (this.vendor === 'alicloud') {
@@ -179,7 +197,7 @@ export default {
     secretData () {
       return {
         accessKeyID: this.accessKeyId,
-        accessKeySecret: this.accessKeySecret
+        accessKeySecret: this.accessKeySecret,
       }
     },
     validators () {
@@ -187,25 +205,25 @@ export default {
         accessKeyId: {
           required,
           minLength: minLength(16),
-          maxLength: maxLength(128)
+          maxLength: maxLength(128),
         },
         accessKeySecret: {
           required,
-          minLength: minLength(30)
-        }
+          minLength: minLength(30),
+        },
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    }
+    },
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.accessKeyId = ''
       this.accessKeySecret = ''
@@ -216,14 +234,14 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

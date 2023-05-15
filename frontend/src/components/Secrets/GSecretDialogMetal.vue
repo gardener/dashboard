@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     vendor="metal"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
           ref="apiUrl"
           label="API URL"
           :error-messages="getErrorMessages('apiUrl')"
-          @update:model-value="$v.apiUrl.$touch()"
-          @blur="$v.apiUrl.$touch()"
+          @update:model-value="v$.apiUrl.$touch()"
+          @blur="v$.apiUrl.$touch()"
         ></v-text-field>
       </div>
       <div>
@@ -36,8 +36,8 @@ SPDX-License-Identifier: Apache-2.0
           :type="hideSecret ? 'password' : 'text'"
           @click:append="() => (hideSecret = !hideSecret)"
           :error-messages="getErrorMessages('apiHmac')"
-          @update:model-value="$v.apiHmac.$touch()"
-          @blur="$v.apiHmac.$touch()"
+          @update:model-value="v$.apiHmac.$touch()"
+          @blur="v$.apiHmac.$touch()"
         ></v-text-field>
       </div>
     </template>
@@ -50,44 +50,54 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import { required, url } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, url } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
   apiHmac: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty.',
   },
   apiUrl: {
     required: 'You can\'t leave this empty.',
-    url: 'You must enter a valid URL'
-  }
+    url: 'You must enter a valid URL',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       apiHmac: undefined,
       apiUrl: undefined,
       hideSecret: true,
-      validationErrors
+      validationErrors,
     }
   },
   validations () {
@@ -95,37 +105,45 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
         metalAPIHMac: this.apiHmac,
-        metalAPIURL: this.apiUrl
+        metalAPIURL: this.apiUrl,
       }
     },
     validators () {
       const validators = {
         apiHmac: {
-          required
+          required,
         },
         apiUrl: {
           required,
-          url
-        }
+          url,
+        },
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    }
+    },
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.apiHmac = ''
       this.apiUrl = ''
@@ -136,14 +154,14 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

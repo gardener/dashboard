@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     vendor="cloudflare-dns"
     create-title="Add new Cloudflare Secret"
     replace-title="Replace Cloudflare Secret"
-    @input="onInput">
+    >
 
     <template v-slot:secret-slot>
       <div>
@@ -25,8 +25,8 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
           @click:append="() => (hideApiToken = !hideApiToken)"
-          @update:model-value="$v.apiToken.$touch()"
-          @blur="$v.apiToken.$touch()"
+          @update:model-value="v$.apiToken.$touch()"
+          @blur="v$.apiToken.$touch()"
         ></v-text-field>
       </div>
     </template>
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:help-slot>
       <div>
         <p>
-          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys"></external-link>.
+          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys"></g-external-link>.
         </p>
         <p class="font-weight-bold">
           Note: You need to generate an API token and not an API key.
@@ -57,41 +57,51 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import { required } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
   apiToken: {
-    required: 'You can\'t leave this empty.'
-  }
+    required: 'You can\'t leave this empty.',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GExternalLink,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       apiToken: undefined,
       hideApiToken: true,
-      validationErrors
+      validationErrors,
     }
   },
   validations () {
@@ -99,45 +109,53 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
-        apiToken: this.apiToken
+        apiToken: this.apiToken,
       }
     },
     validators () {
       const validators = {
         apiToken: {
-          required
-        }
+          required,
+        },
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    }
+    },
   },
   methods: {
     onInput (value) {
       this.$emit('input', value)
     },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.apiToken = ''
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

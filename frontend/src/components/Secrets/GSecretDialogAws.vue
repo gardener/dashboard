@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <secret-dialog
-    :value=value
+  <g-secret-dialog
+    v-model=visible
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    @input="onInput">
+  >
 
     <template v-slot:secret-slot>
       <div>
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
           ref="accessKeyId"
           label="Access Key Id"
           :error-messages="getErrorMessages('accessKeyId')"
-          @update:model-value="$v.accessKeyId.$touch()"
-          @blur="$v.accessKeyId.$touch()"
+          @update:model-value="v$.accessKeyId.$touch()"
+          @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. AKIAIOSFODNN7EXAMPLE"
         ></v-text-field>
@@ -38,8 +38,8 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="$v.secretAccessKey.$touch()"
-          @blur="$v.secretAccessKey.$touch()"
+          @update:model-value="v$.secretAccessKey.$touch()"
+          @blur="v$.secretAccessKey.$touch()"
           counter="40"
           hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
         ></v-text-field>
@@ -64,29 +64,31 @@ SPDX-License-Identifier: Apache-2.0
       <p>
         To manage
         credentials for AWS Identity and Access Management (IAM), use the
-        <external-link url="https://console.aws.amazon.com/iam/home">IAM Console</external-link>.
+        <g-external-link  url="https://console.aws.amazon.com/iam/home">IAM Console</g-external-link>.
       </p>
       <p>
         Copy the AWS IAM policy document below and attach it to the IAM user
-        (<external-link url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">official
-        documentation</external-link>).
+        (<g-external-link  url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">official
+        documentation</g-external-link>).
       </p>
-      <code-block v-if="vendor==='aws'" height="100%" lang="json" :content="JSON.stringify(templateAws, undefined, 2)"></code-block>
+      <g-code-block v-if="vendor==='aws'" height="100%" lang="json" :content="JSON.stringify(templateAws, undefined, 2)"></g-code-block>
       <div v-if="vendor==='aws-route53'">
         <p>In this example, the placeholder for the hosted zone is Z2XXXXXXXXXXXX</p>
-        <code-block height="100%" lang="json" :content="JSON.stringify(templateAwsRoute53, undefined, 2)"></code-block>
+        <g-code-block height="100%" lang="json" :content="JSON.stringify(templateAwsRoute53, undefined, 2)"></g-code-block>
       </div>
     </template>
 
-  </secret-dialog>
+  </g-secret-dialog>
 
 </template>
 
 <script>
-import SecretDialog from '@/components/dialogs/SecretDialog.vue'
-import CodeBlock from '@/components/CodeBlock.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GCodeBlock from '@/components/GCodeBlock'
+import GExternalLink from '@/components/GExternalLink'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, minLength, maxLength } from '@vuelidate/validators'
 import { alphaNumUnderscore, base64 } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
@@ -95,33 +97,41 @@ const validationErrors = {
     required: 'You can\'t leave this empty.',
     minLength: 'It must contain at least 16 characters.',
     maxLength: 'It exceeds the maximum length of 128 characters.',
-    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
+    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.',
   },
   secretAccessKey: {
     required: 'You can\'t leave this empty.',
     minLength: 'It must contain at least 40 characters.',
-    base64: 'Invalid secret access key.'
-  }
+    base64: 'Invalid secret access key.',
+  },
 }
 
-export default {
-  components: {
-    SecretDialog,
-    CodeBlock,
-    ExternalLink
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    secret: {
-      type: Object
-    },
-    vendor: {
-      type: String
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
     }
   },
+  components: {
+    GSecretDialog,
+    GCodeBlock,
+    GExternalLink,
+  },
+  props: {
+    modelmodelValue: {
+      type: Boolean,
+      required: true,
+    },
+    secret: {
+      type: Object,
+    },
+    vendor: {
+      type: String,
+    },
+  },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       accessKeyId: undefined,
@@ -135,17 +145,17 @@ export default {
           {
             Effect: 'Allow',
             Action: 'autoscaling:*',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Effect: 'Allow',
             Action: 'ec2:*',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Effect: 'Allow',
             Action: 'elasticloadbalancing:*',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Action: [
@@ -174,12 +184,12 @@ export default {
               'iam:DeleteInstanceProfile',
               'iam:PutRolePolicy',
               'iam:PassRole',
-              'iam:UpdateAssumeRolePolicy'
+              'iam:UpdateAssumeRolePolicy',
             ],
             Effect: 'Allow',
-            Resource: '*'
-          }
-        ]
+            Resource: '*',
+          },
+        ],
       },
       templateAwsRoute53: {
         Version: '2012-10-17',
@@ -188,28 +198,28 @@ export default {
             Sid: 'VisualEditor0',
             Effect: 'Allow',
             Action: 'route53:ListResourceRecordSets',
-            Resource: 'arn:aws:route53:::hostedzone/*'
+            Resource: 'arn:aws:route53:::hostedzone/*',
           },
           {
             Sid: 'VisualEditor1',
             Effect: 'Allow',
             Action: 'route53:GetHostedZone',
-            Resource: 'arn:aws:route53:::hostedzone/Z2XXXXXXXXXXXX'
+            Resource: 'arn:aws:route53:::hostedzone/Z2XXXXXXXXXXXX',
           },
           {
             Sid: 'VisualEditor2',
             Effect: 'Allow',
             Action: 'route53:ListHostedZones',
-            Resource: '*'
+            Resource: '*',
           },
           {
             Sid: 'VisualEditor3',
             Effect: 'Allow',
             Action: 'route53:ChangeResourceRecordSets',
-            Resource: 'arn:aws:route53:::hostedzone/Z2XXXXXXXXXXXX'
-          }
-        ]
-      }
+            Resource: 'arn:aws:route53:::hostedzone/Z2XXXXXXXXXXXX',
+          },
+        ],
+      },
     }
   },
   validations () {
@@ -217,14 +227,22 @@ export default {
     return this.validators
   },
   computed: {
+    visible: {
+      get () {
+        return this.modelValue
+      },
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     secretData () {
       return {
         accessKeyID: this.accessKeyId,
         secretAccessKey: this.secretAccessKey,
-        AWS_REGION: this.awsRegion
+        AWS_REGION: this.awsRegion,
       }
     },
     validators () {
@@ -233,13 +251,13 @@ export default {
           required,
           minLength: minLength(16),
           maxLength: maxLength(128),
-          alphaNumUnderscore
+          alphaNumUnderscore,
         },
         secretAccessKey: {
           required,
           minLength: minLength(40),
-          base64
-        }
+          base64,
+        },
       }
       return validators
     },
@@ -254,14 +272,11 @@ export default {
         return 'Amazon Route 53'
       }
       return undefined
-    }
+    },
   },
   methods: {
-    onInput (value) {
-      this.$emit('input', value)
-    },
     reset () {
-      this.$v.$reset()
+      this.v$.$reset()
 
       this.accessKeyId = ''
       this.secretAccessKey = ''
@@ -273,14 +288,14 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
