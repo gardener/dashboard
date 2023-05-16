@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('clientId')"
           @update:model-value="v$.clientId.$touch()"
           @blur="v$.clientId.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -38,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.clientSecret.$touch()"
           @blur="v$.clientSecret.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -48,6 +50,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('tenantId')"
           @update:model-value="v$.tenantId.$touch()"
           @blur="v$.tenantId.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -58,6 +61,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('subscriptionId')"
           @update:model-value="v$.subscriptionId.$touch()"
           @blur="v$.subscriptionId.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

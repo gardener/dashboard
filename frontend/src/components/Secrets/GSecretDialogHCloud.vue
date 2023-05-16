@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('hcloudToken')"
         @update:model-value="v$.hcloudToken.$touch()"
         @blur="v$.hcloudToken.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -42,6 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.accessKeySecret.$touch()"
           counter="30"
           hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

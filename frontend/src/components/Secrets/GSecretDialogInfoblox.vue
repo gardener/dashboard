@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('infobloxUsername')"
         @update:model-value="v$.infobloxUsername.$touch()"
         @blur="v$.infobloxUsername.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -38,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideInfobloxPassword = !hideInfobloxPassword)"
           @update:model-value="v$.infobloxPassword.$touch()"
           @blur="v$.infobloxPassword.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

@@ -24,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('authURL')"
           @update:model-value="v$.authURL.$touch()"
           @blur="v$.authURL.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -35,6 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('domainName')"
           @update:model-value="v$.domainName.$touch()"
           @blur="v$.domainName.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -45,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('tenantName')"
           @update:model-value="v$.tenantName.$touch()"
           @blur="v$.tenantName.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -75,7 +78,8 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages('applicationCredentialID')"
             @update:model-value="v$.applicationCredentialID.$touch()"
             @blur="v$.applicationCredentialID.$touch()"
-            ></v-text-field>
+              variant="underlined"
+        ></v-text-field>
           </div>
           <div>
             <v-text-field
@@ -85,7 +89,8 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages('applicationCredentialName')"
             @update:model-value="v$.applicationCredentialName.$touch()"
             @blur="v$.applicationCredentialName.$touch()"
-            ></v-text-field>
+              variant="underlined"
+        ></v-text-field>
           </div>
           <div>
             <v-text-field
@@ -98,7 +103,8 @@ SPDX-License-Identifier: Apache-2.0
               @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
               @update:model-value="v$.applicationCredentialSecret.$touch()"
               @blur="v$.applicationCredentialSecret.$touch()"
-            ></v-text-field>
+              variant="underlined"
+        ></v-text-field>
           </div>
         </template>
         <template v-else>
@@ -112,7 +118,8 @@ SPDX-License-Identifier: Apache-2.0
               @update:model-value="v$.username.$touch()"
               @blur="v$.username.$touch()"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              ></v-text-field>
+                variant="underlined"
+        ></v-text-field>
             <!--</hint-colorizer>-->
           </div>
           <div>
@@ -128,7 +135,8 @@ SPDX-License-Identifier: Apache-2.0
                 @update:model-value="v$.password.$touch()"
                 @blur="v$.password.$touch()"
                 hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              ></v-text-field>
+                variant="underlined"
+        ></v-text-field>
             <!--</hint-colorizer>-->
           </div>
         </template>

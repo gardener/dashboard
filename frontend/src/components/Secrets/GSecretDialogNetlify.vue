@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideApiToken = !hideApiToken)"
           @update:model-value="v$.apiToken.$touch()"
           @blur="v$.apiToken.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>
