@@ -47,10 +47,17 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return filter(dnsProviderList, 'primary')
   })
 
+  const networkingTypes = computed(() => {
+    const resources = flatMap(list.value, 'resources')
+    const networkingResources = filter(resources, ['kind', 'Network'])
+    return map(networkingResources, 'type')
+  })
+
   return {
     list,
     isInitial,
     fetchGardenerExtensions,
     sortedDnsProviderList,
+    networkingTypes,
   }
 })
