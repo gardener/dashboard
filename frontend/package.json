@@ -35,7 +35,7 @@
     "@vueuse/core": "^10.0.2",
     "@vueuse/integrations": "^10.0.2",
     "@vueuse/router": "^10.0.2",
-    "codemirror": "^6.0.1",
+    "codemirror": "^5.65.13",
     "dayjs": "^1.11.7",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.0",

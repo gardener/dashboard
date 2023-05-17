@@ -19,6 +19,7 @@ import isEmpty from 'lodash/isEmpty'
 import isObject from 'lodash/isObject'
 import mapKeys from 'lodash/mapKeys'
 import mapValues from 'lodash/mapValues'
+import replace from 'lodash/replace'
 
 export const useProjectStore = defineStore('project', () => {
   const logger = useLogger()
@@ -134,6 +135,11 @@ export const useProjectStore = defineStore('project', () => {
     return currentNamespaces.value.includes(namespace)
   }
 
+  function projectNameByNamespace (namespace) {
+    const project = find(list.value, ['metadata.namespace', namespace])
+    return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
+  }
+
   async function fetchProjects () {
     const response = await api.getProjects()
     list.value = response.data
@@ -205,6 +211,7 @@ export const useProjectStore = defineStore('project', () => {
     patchProject,
     updateProject,
     deleteProject,
+    projectNameByNamespace,
     $reset,
   }
 })
