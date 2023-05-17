@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useApi } from '@/composables'
 import find from 'lodash/find'
+import get from 'lodash/get'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -27,10 +28,16 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
+  function isSeedUnreachableByName (name) {
+    const seed = seedByName(name)
+    return get(seed, 'metadata.unreachable')
+  }
+
   return {
     list,
     isInitial,
     fetchSeeds,
     seedByName,
+    isSeedUnreachableByName,
   }
 })

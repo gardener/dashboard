@@ -11,6 +11,7 @@ import { useAuthzStore } from './authz'
 import { useCloudprofileStore } from './cloudprofile'
 import { useConfigStore } from './config'
 import { useSecretStore } from './secret'
+import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
 
 import cloneDeep from 'lodash/cloneDeep'
@@ -50,6 +51,7 @@ export const useShootStore = defineStore('shoot', () => {
   const configStore = useConfigStore()
   const secretStore = useSecretStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
+  const appStore = useAppStore()
 
   const list = ref(null)
   const newShootResource = ref(null)
@@ -87,7 +89,6 @@ export const useShootStore = defineStore('shoot', () => {
     const volumeType = head(volumeTypesForZone) || {}
     const machineImage = cloudprofileStore.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
     const minVolumeSize = cloudprofileStore.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
-    console.log(minVolumeSize)
 
     const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
@@ -235,7 +236,7 @@ export const useShootStore = defineStore('shoot', () => {
 
     set(shootResource, 'spec.addons', addons)
 
-    const { begin, end } = maintenanceWindowWithBeginAndTimezone(randomMaintenanceBegin(), configStore.timezone)
+    const { begin, end } = maintenanceWindowWithBeginAndTimezone(randomMaintenanceBegin(), appStore.timezone)
     const maintenance = {
       timeWindow: {
         begin,
@@ -252,12 +253,10 @@ export const useShootStore = defineStore('shoot', () => {
     hibernationSchedule = map(hibernationSchedule, schedule => {
       return {
         ...schedule,
-        location: configStore.location,
+        location: appStore.location,
       }
     })
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
-
-    console.log(shootResource)
 
     newShootResource.value = shootResource
     initialNewShootResource.value = cloneDeep(shootResource)

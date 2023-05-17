@@ -626,5 +626,6 @@ export const useCloudprofileStore = defineStore('cloudprofile', () => {
     volumeTypesByCloudProfileNameAndRegion,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByCloudProfileNameAndRegion,
+    selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
   }
 })

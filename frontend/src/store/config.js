@@ -19,8 +19,6 @@ import get from 'lodash/get'
 import map from 'lodash/map'
 import uniqBy from 'lodash/uniqBy'
 
-import moment from '@/utils/moment'
-
 export const useConfigStore = defineStore('config', () => {
   const api = useApi()
   const browserLocation = useBrowserLocation()
@@ -173,14 +171,6 @@ export const useConfigStore = defineStore('config', () => {
     return controlPlaneHighAvailabilityHelp.value?.text
   })
 
-  const location = computed(() => {
-    return moment.tz.guess()
-  })
-
-  const timezone = computed(() => {
-    return moment().format('Z')
-  })
-
   async function fetchConfig () {
     const response = await api.getConfiguration()
     state.value = response.data
@@ -230,8 +220,6 @@ export const useConfigStore = defineStore('config', () => {
     costObjectSettings,
     getTerminalShortcuts,
     fetchConfig,
-    location,
-    timezone,
     $reset,
   }
 })

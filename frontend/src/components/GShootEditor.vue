@@ -33,8 +33,8 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
                 <v-btn icon :disabled="untouched" @click="reload">
                   <v-icon small>mdi-reload</v-icon>
                 </v-btn>
@@ -46,8 +46,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
                 <v-btn icon :disabled="!historySize.undo" @click="undo">
                   <v-icon small>mdi-undo</v-icon>
                 </v-btn>
@@ -58,8 +58,8 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
                 <v-btn icon :disabled="!historySize.redo" @click="redo">
                   <v-icon small>mdi-redo</v-icon>
                 </v-btn>
@@ -71,8 +71,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
                 <v-btn icon @click="downloadContent">
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
@@ -95,8 +95,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
                 <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
                   <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
                 </v-btn>
@@ -115,9 +115,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip
       right
       absolute
-      :value="helpTooltip.visible"
-      :position-x="helpTooltip.posX"
-      :position-y="helpTooltip.posY"
+      :model-value="helpTooltip.visible"
+      :style="`left: ${helpTooltip.posX}px; top: ${helpTooltip.posY}px`"
       max-width="800px"
       >
       <span class="font-weight-bold">{{helpTooltip.property}}</span><span class="font-style-italic ml-2">{{helpTooltip.type}}</span><br />
@@ -139,10 +138,10 @@ import { mapGetters } from 'pinia'
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import download from 'downloadjs'
 import {
-  useProjectStore,
   useAuthzStore,
 } from '@/store'
 import { useTheme, useApi } from '@/composables'
+import { shootItem } from '@/mixins/shootItem'
 
 // codemirror
 import CodeMirror from 'codemirror'
@@ -194,9 +193,6 @@ export default defineComponent({
     animateOnAppear: {
       type: Boolean,
     },
-    shootItem: {
-      type: Object,
-    },
   },
   data () {
     return {
@@ -225,11 +221,12 @@ export default defineComponent({
       },
       showManagedFields: false,
       containerClass: undefined,
+      cmInstance: undefined,
     }
   },
+  mixins: [shootItem],
   computed: {
-    ...mapGetters(useAuthzStore, ['canPatchShoots', 'namespace']),
-    ...mapGetters(useProjectStore, ['projectNameByNamespace']),
+    ...mapGetters(useAuthzStore, ['canPatchShoots']),
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {
@@ -285,25 +282,24 @@ export default defineComponent({
   methods: {
     getQualifiedName () {
       const name = get(this, 'value.metadata.name', 'unnamed')
-      const namespace = this.namespace
-      const projectName = this.projectNameByNamespace({ namespace })
+      const projectName = this.shootProjectName
       return `shoot--${projectName}--${name}.yaml`
     },
     undo () {
-      if (this.$instance) {
-        this.$instance.execCommand('undo')
-        this.$instance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.execCommand('undo')
+        this.cmInstance.focus()
       }
     },
     redo () {
-      if (this.$instance) {
-        this.$instance.execCommand('redo')
-        this.$instance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.execCommand('redo')
+        this.cmInstance.focus()
       }
     },
     focus () {
-      if (this.$instance) {
-        this.$instance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.focus()
       }
     },
     setClean (clean) {
@@ -336,8 +332,8 @@ export default defineComponent({
       this.$nextTick(() => this.refreshInstance())
     },
     refreshInstance () {
-      if (this.$instance) {
-        this.$instance.refresh()
+      if (this.cmInstance) {
+        this.cmInstance.refresh()
       }
     },
     createInstance (element) {
@@ -372,8 +368,8 @@ export default defineComponent({
         extraKeys,
         theme: this.theme,
       }
-      this.$instance = CodeMirror(element, options)
-      this.$instance.setSize('100%', '100%')
+      this.cmInstance = CodeMirror(element, options)
+      this.cmInstance.setSize('100%', '100%')
       const onChange = ({ doc }) => {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
@@ -381,7 +377,7 @@ export default defineComponent({
         this.errorMessageInternal = undefined
         this.detailedErrorMessageInternal = undefined
       }
-      this.$instance.on('change', onChange)
+      this.cmInstance.on('change', onChange)
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
@@ -393,7 +389,7 @@ export default defineComponent({
       })
 
       let cmTooltipFnTimerID
-      const cm = this.$instance
+      const cm = this.cmInstance
       CodeMirror.on(element, 'mouseover', (e) => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
@@ -415,18 +411,18 @@ export default defineComponent({
       })
     },
     destroyInstance () {
-      if (this.$instance) {
-        const element = this.$instance.doc.cm.getWrapperElement()
+      if (this.cmInstance) {
+        const element = this.cmInstance.doc.cm.getWrapperElement()
         if (element && element.remove) {
           element.remove()
         }
       }
-      this.$instance = undefined
+      this.cmInstance = undefined
     },
     clearHistory () {
-      if (this.$instance) {
-        this.$instance.doc.clearHistory()
-        this.generation = this.$instance.doc.changeGeneration()
+      if (this.cmInstance) {
+        this.cmInstance.doc.clearHistory()
+        this.generation = this.cmInstance.doc.changeGeneration()
         this.setClean(true)
         this.untouched = true
         this.setConflictPath(null)
@@ -435,14 +431,14 @@ export default defineComponent({
       }
     },
     getContent () {
-      if (this.$instance) {
-        return this.$instance.doc.getValue()
+      if (this.cmInstance) {
+        return this.cmInstance.doc.getValue()
       }
       return ''
     },
     setContent (value) {
-      if (this.$instance) {
-        const editor = this.$instance
+      if (this.cmInstance) {
+        const editor = this.cmInstance
         const doc = editor.doc
         const cursor = doc.getCursor()
         const { left, top } = editor.getScrollInfo() || {}
@@ -492,15 +488,15 @@ export default defineComponent({
 
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    const indentUnit = get(this.$instance, 'options.indentUnit', 2)
+    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
   },
   watch: {
     canPatchShoots (value) {
-      this.$instance.setOption('readOnly', this.isReadOnly)
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
     },
     shootPurpose (value) {
-      this.$instance.setOption('readOnly', this.isReadOnly)
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
     },
     value: {
       deep: true,
@@ -519,7 +515,7 @@ export default defineComponent({
       },
     },
     theme (value) {
-      this.$instance.setOption('theme', value)
+      this.cmInstance.setOption('theme', value)
     },
   },
   beforeUnmount () {
