@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model:detailed-error-message="detailedErrorMessage"
       :shoot-item="newShootResource"
       ref="shootEditor"
+      v-on="_shootEditor.hooks"
     >
       <template v-slot:modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
@@ -36,6 +37,7 @@ import { mapState, mapActions } from 'pinia'
 import { errorDetailsFromError } from '@/utils/error'
 import { useShootStore, useAuthzStore, useAppStore } from '@/store'
 import { useApi } from '@/composables'
+import asyncRef from '@/mixins/asyncRef'
 
 // lodash
 import get from 'lodash/get'
@@ -50,12 +52,19 @@ export default defineComponent({
     GShootEditor,
     GConfirmDialog,
   },
+  mixins: [
+    asyncRef('shootEditor'),
+  ],
   data () {
     return {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
     }
+  },
+  async mounted () {
+    // TODO async ref currentl does not work
+    console.log(await this.getShootResource())
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -72,7 +81,7 @@ export default defineComponent({
       })
     },
     async getShootResource () {
-      const content = await this.$shootEditor.dispatch('getContent')
+      const content = await this._shootEditor.dispatch('getContent')
       return this.$yaml.load(content)
     },
     async createClicked () {
@@ -130,7 +139,7 @@ export default defineComponent({
     }
     if (!this.isShootCreated && await this.isShootContentDirty()) {
       if (!await this.confirmEditorNavigation()) {
-        this.$shootEditor.dispatch('focus')
+        this._shootEditor.dispatch('focus')
         return next(false)
       }
     }
