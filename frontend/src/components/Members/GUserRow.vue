@@ -22,39 +22,29 @@ SPDX-License-Identifier: Apache-2.0
         <g-account-roles :role-display-names="item.roleDisplayNames"></g-account-roles>
       </div>
     </td>
-    <td v-if="selectedHeaders.actions" class="text-action-button">
+    <td v-if="selectedHeaders.actions">
       <div class="d-flex justify-end">
         <div v-if="canManageMembers" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                density="compact"
-                variant="text"
-                icon="mdi-pencil"
-                @click.stop="onEdit"
-              />
+          <g-action-button
+            icon="mdi-pencil"
+            @click="onEdit"
+          >
+            <template #tooltip>
+              <span>Edit User Roles</span>
             </template>
-            <span>Edit User Roles</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
         <div v-if="canManageMembers" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <div v-bind="props">
-                <v-btn
-                  density="compact"
-                  variant="text"
-                  :disabled="item.isOwner"
-                  icon="mdi-close"
-                  color="action-button"
-                  @click.stop="onDelete"
-                />
-              </div>
+          <g-action-button
+            icon="mdi-close"
+            :disabled="item.isOwner"
+            @click="onDelete"
+          >
+            <template #tooltip>
+              <span v-if="item.isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
+              <span v-else>Remove User From Project</span>
             </template>
-            <span v-if="item.isOwner">You can't remove project owners from the project. You can change the project owner on the administration page.</span>
-            <span v-else>Remove User From Project</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
       </div>
     </td>
@@ -64,6 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { computed, toRef, toRefs } from 'vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
+import GActionButton from '@/components/GActionButton.vue'
 import { mapTableHeader } from '@/utils'
 
 import {

@@ -48,81 +48,60 @@ SPDX-License-Identifier: Apache-2.0
         <g-account-roles :role-display-names="item.roleDisplayNames"></g-account-roles>
       </div>
     </td>
-    <td v-if="selectedHeaders.actions" class="text-action-button">
+    <td v-if="selectedHeaders.actions">
       <div class="d-flex justify-end">
         <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                density="compact"
-                variant="text"
-                icon="mdi-download"
-                @click.stop="onDownload"
-                :disabled="orphaned"
-              />
+          <g-action-button
+            icon="mdi-download"
+            :disabled="orphaned"
+            @click="onDownload"
+          >
+            <template #tooltip>
+              <span>Download Kubeconfig</span>
             </template>
-            <span>Download Kubeconfig</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
         <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                density="compact"
-                variant="text"
-                icon="mdi-eye"
-                @click="onKubeconfig"
-                :disabled="orphaned"
-              />
+          <g-action-button
+            icon="mdi-eye"
+            :disabled="orphaned"
+            @click="onKubeconfig"
+          >
+            <template #tooltip>
+              <span>Show Kubeconfig</span>
             </template>
-            <span>Show Kubeconfig</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
         <div v-if="!foreign && canDeleteServiceAccounts && canCreateServiceAccounts" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                density="compact"
-                variant="text"
-                icon="mdi-refresh"
-                @click="onResetServiceAccount"
-              />
+          <g-action-button
+            icon="mdi-refresh"
+            @click="onResetServiceAccount"
+          >
+            <template #tooltip>
+              <span>Reset Service Account</span>
             </template>
-            <span>Reset Service Account</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
         <div v-if="canManageServiceAccountMembers" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                density="compact"
-                variant="text"
-                icon="mdi-pencil"
-                @click.stop="onEdit"
-              />
+          <g-action-button
+            icon="mdi-pencil"
+            @click="onEdit"
+          >
+            <template #tooltip>
+              <span>Edit Service Account</span>
             </template>
-            <span>Edit Service Account</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
         <div v-if="canManageServiceAccountMembers && canDeleteServiceAccounts" class="ml-1">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-               <div v-bind="props">
-                <v-btn
-                  :icon="foreign || orphaned ? 'mdi-close' : 'mdi-delete'"
-                  density="compact"
-                  variant="text"
-                  @click.stop="onDelete"
-                  :disabled="!canDelete"
-                />
-               </div>
+          <g-action-button
+            :icon="foreign || orphaned ? 'mdi-close' : 'mdi-delete'"
+            :disabled="!canDelete"
+            @click="onDelete"
+          >
+            <template #tooltip>
+              <span>{{ deleteTooltip }}</span>
             </template>
-            <span>{{ deleteTooltip }}</span>
-          </v-tooltip>
+          </g-action-button>
         </div>
       </div>
     </td>
@@ -134,6 +113,7 @@ import { computed, toRef, toRefs } from 'vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GTimeString from '@/components/GTimeString.vue'
+import GActionButton from '@/components/GActionButton.vue'
 import {
   isForeignServiceAccount,
   parseServiceAccountUsername,

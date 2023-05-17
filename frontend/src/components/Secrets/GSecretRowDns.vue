@@ -37,38 +37,30 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.actions" class="text-action-button">
       <div class="d-flex justify-end">
-        <v-tooltip location="top" v-if="canPatchSecrets">
-          <template v-slot:activator="{ props }">
-            <div v-bind="props">
-              <v-btn
-                :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
-                icon="mdi-pencil"
-                density="compact"
-                variant="text"
-                @click="onUpdate"
-              />
-            </div>
+        <g-action-button
+          v-if="canPatchSecrets"
+          icon="mdi-pencil"
+          :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
+          @click="onUpdate"
+        >
+          <template #tooltip>
+            <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
+            <span v-else-if="!item.isSupportedCloudProvider">This DNS Provider is currently not supported by the dashboard</span>
+            <span v-else>Edit Secret</span>
           </template>
-          <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
-          <span v-else-if="!item.isSupportedCloudProvider">This DNS Provider is currently not supported by the dashboard</span>
-          <span v-else>Edit Secret</span>
-        </v-tooltip>
-        <v-tooltip location="top" v-if="canDeleteSecrets">
-          <template v-slot:activator="{ props }">
-            <div v-bind="props">
-              <v-btn
-                :disabled="item.relatedShootCount > 0 || !item.isOwnSecret"
-                icon="mdi-delete"
-                density="compact"
-                variant="text"
-                @click="onDelete"
-              />
-            </div>
+        </g-action-button>
+        <g-action-button
+          v-if="canDeleteSecrets"
+          icon="mdi-delete"
+          :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
+          @click="onDelete"
+        >
+          <template #tooltip>
+            <span v-if="!item.isOwnSecret">You can only delete secrets that are owned by you</span>
+            <span v-else-if="item.relatedShootCount > 0">You can only delete secrets that are currently unused</span>
+            <span v-else>Delete Secret</span>
           </template>
-          <span v-if="!item.isOwnSecret">You can only delete secrets that are owned by you</span>
-          <span v-else-if="item.relatedShootCount > 0">You can only delete secrets that are currently unused</span>
-          <span v-else>Delete Secret</span>
-        </v-tooltip>
+        </g-action-button>
       </div>
     </td>
   </tr>
@@ -79,12 +71,14 @@ import { defineComponent } from 'vue'
 import { mapTableHeader } from '@/utils'
 import GVendor from '@/components/GVendor'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GActionButton from '@/components/GActionButton.vue'
 import { mapGetters } from 'pinia'
 import { useAuthzStore } from '@/store'
 export default defineComponent({
   components: {
     GVendor,
     GSecretDetailsItemContent,
+    GActionButton,
   },
   props: {
     item: {

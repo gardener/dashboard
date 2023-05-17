@@ -97,36 +97,26 @@ SPDX-License-Identifier: Apache-2.0
                   Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)
                 </div>
                 <template v-slot:append>
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        v-bind="props"
-                        icon="mdi-download"
-                        color="action-button"
-                        variant="text"
-                        size="small"
-                        @click.stop="onDownload"
-                      />
+                  <g-action-button
+                    icon="mdi-download"
+                    @click="onDownload"
+                  >
+                    <template #tooltip>
+                      <span>Download kubeconfig</span>
                     </template>
-                    <span>Download kubeconfig</span>
-                  </v-tooltip>
+                  </g-action-button>
                   <g-copy-btn
                     :clipboard-text="kubeconfigYaml"
                     tooltip-text="Copy kubeconfig to clipboard"
                   />
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        v-bind="props"
-                        :icon="kubeconfigExpansionPanelIcon"
-                        color="action-button"
-                        variant="text"
-                        size="small"
-                        @click.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
-                      />
+                  <g-action-button
+                    :icon="kubeconfigExpansionPanelIcon"
+                    @click="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
+                  >
+                    <template #tooltip>
+                      <span>{{ kubeconfigExpansionPanelTooltip }}</span>
                     </template>
-                    <span>{{kubeconfigExpansionPanelTooltip}}</span>
-                  </v-tooltip>
+                  </g-action-button>
                 </template>
               </g-list-item>
               <v-expand-transition>
@@ -225,6 +215,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GActionButton from '@/components/GActionButton.vue'
 
 import {
   useAuthnStore,
@@ -243,6 +234,7 @@ export default defineComponent({
     GCodeBlock,
     GExternalLink,
     GAccountAvatar,
+    GActionButton,
   },
   data () {
     return {
