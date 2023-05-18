@@ -130,7 +130,7 @@ const wellKnownConditions = {
   ObservabilityComponentsHealthy: {
     name: 'Observability Components',
     shortName: 'OC',
-    description: 'Indicates whether all observability components like Prometheus, Loki, Grafana, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
+    description: 'Indicates whether all observability components like Prometheus, Vali, Plutono, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
     sortOrder: '4'
   },
   MaintenancePreconditionsSatisfied: {
