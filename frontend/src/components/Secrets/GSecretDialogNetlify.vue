@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideApiToken = !hideApiToken)"
           @update:model-value="v$.apiToken.$touch()"
           @blur="v$.apiToken.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

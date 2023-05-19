@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-card-title class="toolbar-background">
-        <v-icon size="x-large" class="toolbar-title--text icon">mdi-alert-outline</v-icon>
-        <span class="text-h5 ml-5 toolbar-title--text">Confirm Delete</span>
-      </v-card-title>
+      <g-toolbar
+        prepend-icon="mdi-alert-outline"
+        title="Confirm Delete"
+      />
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click.native="hide">Cancel</v-btn>
-        <v-btn variant="text" @click.native="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
+        <v-btn variant="text" @click="hide">Cancel</v-btn>
+        <v-btn variant="text" @click="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -35,12 +35,14 @@ import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 import get from 'lodash/get'
 import GMessage from '@/components/GMessage'
+import GToolbar from '@/components/GToolbar.vue'
 import { errorDetailsFromError } from '@/utils/error'
 import { useSecretStore } from '@/store'
 
 export default defineComponent({
   components: {
     GMessage,
+    GToolbar,
   },
   props: {
     modelValue: {
@@ -64,10 +66,10 @@ export default defineComponent({
   computed: {
     visible: {
       get () {
-        return this.value
+        return this.modelValue
       },
       set (value) {
-        this.$emit('input', value)
+        this.$emit('update:modelValue', value)
       },
     },
     name () {
@@ -97,8 +99,8 @@ export default defineComponent({
     },
   },
   watch: {
-    value: function (value) {
-      if (value) {
+    modelValue: function (modelValue) {
+      if (modelValue) {
         this.reset()
       }
     },

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('apiUrl')"
           @update:model-value="v$.apiUrl.$touch()"
           @blur="v$.apiUrl.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -38,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages('apiHmac')"
           @update:model-value="v$.apiHmac.$touch()"
           @blur="v$.apiHmac.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

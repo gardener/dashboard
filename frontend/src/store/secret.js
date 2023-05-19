@@ -88,12 +88,12 @@ export const useSecretStore = defineStore('secret', () => {
     return find(list.value, eqlNameAndNamespace({ name, namespace }))
   }
 
+  function infrastructureSecretsByCloudProfileName (cloudProfileName) {
+    return filter(list.value, ['metadata.cloudProfileName', cloudProfileName])
+  }
+
   /*
-  infrastructureSecretsByCloudProfileName(state) {
-    return (cloudProfileName) => {
-      return filter(state.cloudProviderSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
-    }
-  },
+
   dnsSecretList(state) {
     return filter(state.cloudProviderSecrets.all, secret => {
       return !!secret.metadata.dnsProviderName && isOwnSecret(secret) // secret binding not supported
@@ -139,6 +139,7 @@ export const useSecretStore = defineStore('secret', () => {
     infrastructureSecretList,
     dnsSecretList,
     getCloudProviderSecretByName,
+    infrastructureSecretsByCloudProfileName,
     $reset,
   }
 })

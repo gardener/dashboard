@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('vsphereUsername')"
         @update:model-value="v$.vsphereUsername.$touch()"
         @blur="v$.vsphereUsername.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -38,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideVspherePassword = !hideVspherePassword)"
           @update:model-value="v$.vspherePassword.$touch()"
           @blur="v$.vspherePassword.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -48,6 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('nsxtUsername')"
         @update:model-value="v$.nsxtUsername.$touch()"
         @blur="v$.nsxtUsername.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -61,6 +64,7 @@ SPDX-License-Identifier: Apache-2.0
           @click:append="() => (hideNsxtPassword = !hideNsxtPassword)"
           @update:model-value="v$.nsxtPassword.$touch()"
           @blur="v$.nsxtPassword.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

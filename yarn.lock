@@ -448,89 +448,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/autocomplete@npm:^6.0.0":
-  version: 6.4.2
-  resolution: "@codemirror/autocomplete@npm:6.4.2"
-  dependencies:
-    "@codemirror/language": ^6.0.0
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.6.0
-    "@lezer/common": ^1.0.0
-  peerDependencies:
-    "@codemirror/language": ^6.0.0
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-    "@lezer/common": ^1.0.0
-  checksum: c6cc4edb1c412153e6f6f27926674d7f1d386d1f30d6d4f60c5b52bfa0105870b0c70449b69891937bcf082340d8b0fa6d1f9f28f5eb60adc2974ed4c73aadc1
-  languageName: node
-  linkType: hard
-
-"@codemirror/commands@npm:^6.0.0":
-  version: 6.2.2
-  resolution: "@codemirror/commands@npm:6.2.2"
-  dependencies:
-    "@codemirror/language": ^6.0.0
-    "@codemirror/state": ^6.2.0
-    "@codemirror/view": ^6.0.0
-    "@lezer/common": ^1.0.0
-  checksum: d3aa1ca8cbd7b9434eedba6b6d783411670796bf6ab61990afc4fd0c04645189fe4dd55bb95e23b943e9089f9739bc7e92aa4b2ac3eac09cfa2b91a45f608d3e
-  languageName: node
-  linkType: hard
-
-"@codemirror/language@npm:^6.0.0":
-  version: 6.6.0
-  resolution: "@codemirror/language@npm:6.6.0"
-  dependencies:
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-    "@lezer/common": ^1.0.0
-    "@lezer/highlight": ^1.0.0
-    "@lezer/lr": ^1.0.0
-    style-mod: ^4.0.0
-  checksum: bb9411620e2f231653a3f0c4429e0d19a3843bff5dbc117df4649d7bf783ec4ad809c0add8bc0887a4ec3f48b4f8f941621168e47d76101d5383f0d670af1722
-  languageName: node
-  linkType: hard
-
-"@codemirror/lint@npm:^6.0.0":
-  version: 6.2.0
-  resolution: "@codemirror/lint@npm:6.2.0"
-  dependencies:
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-    crelt: ^1.0.5
-  checksum: b97e55a07bca9f7e357e495853ba189ae0ff7dfe7e7ae445d7a0d6c6926ec792c7f5c6b6c13a1f137fd9fedf44a6624e9d500f76d0d46a3c3e9d19c2cda9d28a
-  languageName: node
-  linkType: hard
-
-"@codemirror/search@npm:^6.0.0":
-  version: 6.3.0
-  resolution: "@codemirror/search@npm:6.3.0"
-  dependencies:
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-    crelt: ^1.0.5
-  checksum: b757eebbb541c9d74fe36ccfdd03bc3e4e7aebb08b491e207d5898f24aaa612558c393ba49de5bf375972f5774de817fcfbad1ac551dda1a34badb41cf130d36
-  languageName: node
-  linkType: hard
-
-"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.1.4, @codemirror/state@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@codemirror/state@npm:6.2.0"
-  checksum: fdc99c773dc09c700dd02bf918f06132aa8d3069c262cc4eb6ca5c810ce24ae2d7e90719ae7630a8158fd263018de6d40bd78f312e6bfba754e737b64e6c6b3d
-  languageName: node
-  linkType: hard
-
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.6.0":
-  version: 6.9.3
-  resolution: "@codemirror/view@npm:6.9.3"
-  dependencies:
-    "@codemirror/state": ^6.1.4
-    style-mod: ^4.0.0
-    w3c-keyname: ^2.2.4
-  checksum: 718ecbb021ca75eb89003f73c846a07d36a708dcfec8345f0f0dbcfc0d0df5ea6f114918694b2730a6d49e5e50502bcce79ce7ff94ce55748e068e5a35073755
-  languageName: node
-  linkType: hard
-
 "@esbuild/android-arm64@npm:0.17.15":
   version: 0.17.15
   resolution: "@esbuild/android-arm64@npm:0.17.15"
@@ -905,7 +822,7 @@ __metadata:
     "@vueuse/core": ^10.0.2
     "@vueuse/integrations": ^10.0.2
     "@vueuse/router": ^10.0.2
-    codemirror: ^6.0.1
+    codemirror: ^5.65.13
     dayjs: ^1.11.7
     downloadjs: ^1.4.7
     eslint: ^8.22.0
@@ -939,7 +856,7 @@ __metadata:
     vitest: ^0.29.8
     vue: ^3.2.47
     vue-router: ^4.1.6
-    vuetify: ^3.2.3
+    vuetify: ^3.2.5
     webfontloader: ^1.6.28
   languageName: unknown
   linkType: soft
@@ -1407,31 +1324,6 @@ __metadata:
   peerDependencies:
     vue: ^3.0.0
   checksum: a6fba14472d41e3a010ffb3873a87041d8948e13d3d7b7b10cfe60f05a24b15b08eaf55b46a5220a123428bf876998e6c2ab964fd4817e0d3a6637e5b245d02a
-  languageName: node
-  linkType: hard
-
-"@lezer/common@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "@lezer/common@npm:1.0.2"
-  checksum: bbcc58e07be02652bf0700d2856042ec089d5be0b95893d628b3e18192ade864fac83b61b19653e10b9f1472261a178b12318d934e9004edd5483a577c0db56b
-  languageName: node
-  linkType: hard
-
-"@lezer/highlight@npm:^1.0.0":
-  version: 1.1.4
-  resolution: "@lezer/highlight@npm:1.1.4"
-  dependencies:
-    "@lezer/common": ^1.0.0
-  checksum: 30e848c02839bfcd9472fcd6e74d71cba12379cef38f27d0c6cab0e6831f92150cfc629d267a40cc31f84cf46ac0a935400163fdf931b2672c516bec29417485
-  languageName: node
-  linkType: hard
-
-"@lezer/lr@npm:^1.0.0":
-  version: 1.3.3
-  resolution: "@lezer/lr@npm:1.3.3"
-  dependencies:
-    "@lezer/common": ^1.0.0
-  checksum: 1804074c794005a31c54d80ab72127f19ae5be29bb627c52bc001a57b1af97a9e62732ff13e3aeb7bc53b330202b6bd3747272c64d87f257dbba533e75a183a3
   languageName: node
   linkType: hard
 
@@ -3294,18 +3186,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"codemirror@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "codemirror@npm:6.0.1"
-  dependencies:
-    "@codemirror/autocomplete": ^6.0.0
-    "@codemirror/commands": ^6.0.0
-    "@codemirror/language": ^6.0.0
-    "@codemirror/lint": ^6.0.0
-    "@codemirror/search": ^6.0.0
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-  checksum: 1a78f7077ac5801bdbff162aa0c61bf2b974603c7e9a477198c3ce50c789af674a061d7c293c58b73807eda345c2b5228c38ad2aabb9319d552d5486f785cbef
+"codemirror@npm:^5.65.13":
+  version: 5.65.13
+  resolution: "codemirror@npm:5.65.13"
+  checksum: 47060461edaebecd03b3fba4e73a30cdccc0c51ce3a3a05bafae3c9cafd682101383e94d77d54081eaf1ae18da5b74343e98343c637c52cea409956469039098
   languageName: node
   linkType: hard
 
@@ -3500,13 +3384,6 @@ __metadata:
     object-assign: ^4
     vary: ^1
   checksum: ced838404ccd184f61ab4fdc5847035b681c90db7ac17e428f3d81d69e2989d2b680cc254da0e2554f5ed4f8a341820a1ce3d1c16b499f6e2f47a1b9b07b5006
-  languageName: node
-  linkType: hard
-
-"crelt@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "crelt@npm:1.0.5"
-  checksum: 04a618c5878e12a14a9a328a49ff6e37bed76abb88b72e661c56b5f161d8a9aca133650da6bcbc5224ad1f7f43a69325627f209e92a21002986d52a8f844b367
   languageName: node
   linkType: hard
 
@@ -9082,13 +8959,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"style-mod@npm:^4.0.0":
-  version: 4.0.2
-  resolution: "style-mod@npm:4.0.2"
-  checksum: 4bac8877e039c61481fc729981378791979c3ebb2f827a54240e95ccca5bca92a6d660566cacb87a8d7cc1ffb26bcd5eafa10c697e131adb5ca9541f3a9cbff6
-  languageName: node
-  linkType: hard
-
 "superagent@npm:^8.0.5":
   version: 8.0.9
   resolution: "superagent@npm:8.0.9"
@@ -9880,9 +9750,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:^3.2.3":
-  version: 3.2.3
-  resolution: "vuetify@npm:3.2.3"
+"vuetify@npm:^3.2.5":
+  version: 3.2.5
+  resolution: "vuetify@npm:3.2.5"
   peerDependencies:
     vite-plugin-vuetify: ^1.0.0-alpha.12
     vue: ^3.2.0
@@ -9895,7 +9765,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: e5ff2b4c39b7a2509be9a3527923e5075d9bf5cde70abe74d47f56c101ee46ddc601f1432897d7c1dcf703737506e66f0e38d0dd33851ec2f6140a7962534f57
+  checksum: b974f87165b66eaf13ad86fb717f3f8673092be7d0fb7842ea650cdc02eb0091729593464b825d91cd0b86843a65acc240ddb7649d2049cac3544afb7072d09c
   languageName: node
   linkType: hard
 
@@ -9905,13 +9775,6 @@ __metadata:
   dependencies:
     browser-process-hrtime: ^1.0.0
   checksum: ec3c2dacbf8050d917bbf89537a101a08c2e333b4c19155f7d3bedde43529d4339db6b3d049d9610789cb915f9515f8be037e0c54c079e9d4735c50b37ed52b9
-  languageName: node
-  linkType: hard
-
-"w3c-keyname@npm:^2.2.4":
-  version: 2.2.6
-  resolution: "w3c-keyname@npm:2.2.6"
-  checksum: 59a31d23ca9953c01c99ed6695fee5b6ea36eb2412d76a21fe4302ab33a3f5cd96c006a763940b6115c3d042c16d3564eeee1156832217d028af0518098b3a42
   languageName: node
   linkType: hard
 

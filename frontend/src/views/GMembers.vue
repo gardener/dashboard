@@ -174,11 +174,10 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">
           <div class="text-h5">Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code></div>
           <v-spacer></v-spacer>
-          <v-btn
+          <g-action-button
             icon="mdi-close"
             @click="kubeconfigDialog = false"
-            density="compact"
-            variant="text"
+            color="toolbar-title"
           />
         </v-card-title>
         <v-card-text>
@@ -216,6 +215,7 @@ import GDeleteServiceAccount from '@/components/Members/GDeleteServiceAccount.vu
 import GResetServiceAccount from '@/components/Members/GResetServiceAccount.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
+import GActionButton from '@/components/GActionButton.vue'
 
 import {
   useAuthzStore,

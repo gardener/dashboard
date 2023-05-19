@@ -5,20 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="resourceQuotaHelpText">
-    <v-tooltip location="top">
-      <template v-slot:activator="{ props }">
-        <v-btn
-          v-bind="props"
-          icon="mdi-help-circle-outline"
-          color="toolbar-title"
-          variant="text"
-          size="small"
-          @click="showDialog"
-        />
+  <div v-if="resourceQuotaHelpText" class="mr-2">
+    <g-action-button
+      icon="mdi-help-circle-outline"
+      color="toolbar-title"
+      @click="showDialog"
+    >
+      <template #tooltip>
+        <span>Help</span>
       </template>
-      Help
-    </v-tooltip>
+    </g-action-button>
     <g-dialog
       ref="gDialog"
       confirm-button-text="Ok"
@@ -38,11 +34,13 @@ import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import { useConfigStore } from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
+import GActionButton from '@/components/GActionButton.vue'
 import { transformHtml } from '@/utils'
 
 export default defineComponent({
   components: {
     GDialog,
+    GActionButton,
   },
   computed: {
     ...mapState(useConfigStore, [

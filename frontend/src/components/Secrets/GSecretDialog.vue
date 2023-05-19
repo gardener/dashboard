@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               </div>
 
-            <div v-show="cloudProfiles.length !== 1 && isInfrastructureSecret">
+            <div v-if="cloudProfiles.length !== 1 && isInfrastructureSecret">
               <g-cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
@@ -155,9 +155,6 @@ export default defineComponent({
       type: Object,
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       selectedCloudProfile: undefined,
@@ -218,7 +215,7 @@ export default defineComponent({
           required,
           maxLength: maxLength(128),
           resourceName,
-          unique: unique(this.isDnsProviderSecret ? 'infrastructureSecretNames' : 'dnsSecretNames'),
+          unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
         }
       }
       return validators

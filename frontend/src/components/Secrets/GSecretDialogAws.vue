@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. AKIAIOSFODNN7EXAMPLE"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div>
@@ -42,6 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.secretAccessKey.$touch()"
           counter="40"
           hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
+          variant="underlined"
         ></v-text-field>
       </div>
       <div v-if="vendor === 'aws-route53'">
@@ -50,6 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="awsRegion"
           label="Region (optional)"
           hint="Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('hcloudToken')"
         @update:model-value="v$.hcloudToken.$touch()"
         @blur="v$.hcloudToken.$touch()"
+          variant="underlined"
         ></v-text-field>
       </div>
     </template>

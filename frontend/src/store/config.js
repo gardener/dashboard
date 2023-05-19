@@ -21,7 +21,7 @@ import uniqBy from 'lodash/uniqBy'
 
 export const useConfigStore = defineStore('config', () => {
   const api = useApi()
-  const location = useBrowserLocation()
+  const browserLocation = useBrowserLocation()
   const authzStore = useAuthzStore()
 
   const state = ref(null)
@@ -95,7 +95,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const apiServerUrl = computed(() => {
-    return state.value?.apiServerUrl ?? location.origin
+    return state.value?.apiServerUrl ?? browserLocation.origin
   })
 
   const clusterIdentity = computed(() => {

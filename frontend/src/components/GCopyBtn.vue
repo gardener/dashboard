@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -17,25 +17,23 @@ SPDX-License-Identifier: Apache-2.0
     >
       {{snackbarText}}
     </v-snackbar>
-    <v-tooltip location="top">
-      <template v-slot:activator="{ props }">
-        <v-btn
-          v-bind="props"
-          :icon="icon"
-          :color="btnColor"
-          variant="text"
-          size="small"
-          @click="copyText"
-        >
-        </v-btn>
+    <g-action-button
+      :icon="icon"
+      :color="btnColor"
+      size="small"
+      @click="copyText"
+    >
+      <template #tooltip>
+        <span>{{ tooltipText }}</span>
       </template>
-      {{tooltipText}}
-    </v-tooltip>
+    </g-action-button>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+
+import GActionButton from '@/components/GActionButton.vue'
 
 // props
 const props = defineProps({

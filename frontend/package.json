@@ -35,7 +35,7 @@
     "@vueuse/core": "^10.0.2",
     "@vueuse/integrations": "^10.0.2",
     "@vueuse/router": "^10.0.2",
-    "codemirror": "^6.0.1",
+    "codemirror": "^5.65.13",
     "dayjs": "^1.11.7",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.0",
@@ -56,7 +56,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
-    "vuetify": "^3.2.3",
+    "vuetify": "^3.2.5",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
