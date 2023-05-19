@@ -7,15 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td class="pa-0" v-if="selectedHeaders.username">
-      <v-list-item
-        :prepend-avatar="item.avatarUrl"
-      >
-        <v-list-item-title>{{ item.displayName }}</v-list-item-title>
-        <v-list-item-subtitle>
-          <a v-if="item.isEmail" :href="`mailto:${item.username}`">{{ item.username }}</a>
-          <span v-else>{{ item.username }}</span>
-        </v-list-item-subtitle>
-      </v-list-item>
+      <v-list class="g-username">
+        <v-list-item
+          :prepend-avatar="item.avatarUrl"
+          :title="item.displayName"
+        >
+          <v-list-item-subtitle :class="{ 'g-opacity-1': item.isEmail }">
+            <a v-if="item.isEmail" :href="`mailto:${item.username}`">{{ item.username }}</a>
+            <span v-else>{{ item.username }}</span>
+          </v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
     </td>
     <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
@@ -77,7 +79,7 @@ const props = defineProps({
   },
 })
 
-const { item, headers } = toRefs(props)
+const { item } = toRefs(props)
 
 // emits
 const emit = defineEmits([
@@ -86,7 +88,7 @@ const emit = defineEmits([
 ])
 
 const selectedHeaders = computed(() => {
-  return mapTableHeader(headers.value, 'selected')
+  return mapTableHeader(props.headers, 'selected')
 })
 
 function onEdit () {
@@ -98,3 +100,9 @@ function onDelete () {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  .g-opacity-1 {
+    opacity: 1 !important;
+  }
+</style>
