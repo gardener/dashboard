@@ -157,7 +157,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 
-  ::v-deep .v-input__control textarea {
+  :deep(.v-input__control textarea) {
     font-family: monospace;
     font-size: 14px;
   }
