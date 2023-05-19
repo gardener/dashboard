@@ -5,92 +5,104 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <template v-if="readOnly">
-      {{modelValue}}
-    </template>
-    <v-menu
-      v-else
-      ref="menu"
-      v-model="isActive"
-      origin="top left"
-      location="top left"
-      transition="slide-x-reverse-transition"
-      :max-width="contentWidth"
-      :close-on-content-click="false"
-    >
-      <template #activator="{ props }">
-        <div  class="d-flex align-center justify-space-between">
-          <div
-            ref="content"
-            v-bind="props"
-            class="content cursor-pointer full-width mr-auto"
-            :class="{ 'content--bounce': contentBounce }"
-          >
-            <template v-if="modelValue">{{ modelValue }}</template>
-            <div v-else class="text-body-2 font-weight-light text--disabled">{{noValueText}}</div>
-          </div>
-          <div>
-            <v-btn
-              :icon="activatorIcon"
-              variant="text"
-              size="small"
-              :color="activatorColor"
-              @click="props.onClick"
-            />
-          </div>
-        </div>
-      </template>
-      <v-card flat @keydown.esc="onCancel" @keydown.enter="onSave">
-        <slot name="info"></slot>
-        <v-text-field
-          ref="textField"
-          autocomplete="off"
-          v-model="internalValue"
-          variant="plain"
-          single-line
-          hide-details="auto"
-          :loading="loading"
-          :messages="messages"
-          :rules="rules"
-          :color="color"
+  <span v-if="readOnly">
+    {{modelValue}}
+  </span>
+  <v-menu v-else
+    ref="menu"
+    v-model="isActive"
+    location="top start"
+    origin="overlap"
+    transition="slide-x-reverse-transition"
+    :max-width="contentWidth"
+    :close-on-content-click="false"
+  >
+    <template #activator="{ props }">
+      <div class="d-flex align-center justify-space-between">
+        <div
+          ref="content"
+          v-bind="props"
+          class="content cursor-pointer full-width mr-auto"
+          :class="{ 'content--bounce': contentBounce }"
         >
-          <template v-slot:append>
-            <v-tooltip location="top">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  :disabled="error"
-                  icon="mdi-check"
-                  variant="text"
-                  size="small"
-                  color="success"
-                  @click="onSave"
-                />
-              </template>
-              <span>Save</span>
-            </v-tooltip>
-          </template>
-          <template v-slot:message="{ message }">
-            <g-error-message
-              :message="message"
-              @close="clearMessages"
-            />
-          </template>
-        </v-text-field>
-      </v-card>
-    </v-menu>
-  </div>
+          <template v-if="modelValue">{{ modelValue }}</template>
+          <div v-else class="text-body-2 font-weight-light text-disabled">{{noValueText}}</div>
+        </div>
+        <div>
+          <v-btn
+            :icon="activatorIcon"
+            variant="text"
+            size="small"
+            :color="activatorColor"
+            @click.stop="isActive = !isActive"
+          />
+        </div>
+      </div>
+    </template>
+    <v-card
+      flat
+      @keydown.esc.prevent="onCancel"
+      @keydown.enter.prevent="onSave"
+    >
+      <slot name="info"></slot>
+      <v-text-field
+        ref="textField"
+        v-model="internalValue"
+        variant="solo"
+        flat
+        density="comfortable"
+        single-line
+        hide-details="auto"
+        autocomplete="off"
+        :color="color"
+        :loading="loading"
+        :messages="messages"
+        :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        @input="v$.internalValue.$touch"
+        @blur="v$.internalValue.$touch"
+        class="g-field"
+      >
+        <template v-slot:append>
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                :disabled="!valid"
+                icon="mdi-check"
+                variant="text"
+                density="comfortable"
+                color="success"
+                @click="onSave"
+              />
+            </template>
+            <span>Save</span>
+          </v-tooltip>
+        </template>
+        <template v-slot:message="{ message }">
+          <g-error-message
+            :message="message"
+            @close="clearMessages"
+          />
+        </template>
+      </v-text-field>
+    </v-card>
+  </v-menu>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
 import GErrorMessage from './GErrorMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
 export default defineComponent({
   components: {
     GErrorMessage,
+  },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   props: {
     modelValue: {
@@ -101,8 +113,8 @@ export default defineComponent({
       default: () => {},
     },
     rules: {
-      type: Array,
-      default: () => [],
+      type: Object,
+      default: () => ({}),
     },
     color: {
       type: String,
@@ -125,18 +137,26 @@ export default defineComponent({
       active: false,
       loading: false,
       messages: [],
-      error: undefined,
       lazyValue: undefined,
     }
   },
+  validations () {
+    return {
+      internalValue: {
+        ...this.rules,
+      },
+    }
+  },
   computed: {
+    valid () {
+      return !this.v$.$invalid
+    },
     isActive: {
       get () {
         return this.active
       },
       set (value) {
         if (this.$refs.content) {
-          console.log(this.$refs.content)
           const { width } = this.$refs.content.getBoundingClientRect()
           this.contentWidth = width - 8
         }
@@ -180,33 +200,33 @@ export default defineComponent({
       this.internalValue = this.modelValue
       this.isActive = false
     },
-    async onSave (value) {
-      if (this.error) {
+    async onSave () {
+      if (!this.valid) {
         return
       }
       this.loading = this.color
       try {
         await this.save(this.internalValue)
         this.$emit('update:modelValue', this.internalValue)
-        setImmediate(() => {
+        setTimeout(() => {
           this.isActive = false
-        })
+        }, 0)
         this.contentBounce = true
         this.timeoutId = setTimeout(() => {
           this.contentBounce = false
         }, 1000)
       } catch (err) {
-        this.messages.push(JSON.stringify([err.message, err.detailedMessage]))
+        this.messages.push(JSON.stringify([
+          err.message,
+          err.detailedMessage,
+        ]))
       } finally {
         this.loading = false
       }
     },
     reset () {
-      this.messages = []
-      const textField = this.$refs.textField
-      if (textField) {
-        textField.resetValidation()
-      }
+      this.clearMessages()
+      this.v$.$reset()
     },
   },
   watch: {
@@ -229,6 +249,21 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   @import 'vuetify/settings';
+
+  .g-field {
+    :deep(.v-input__details .v-messages) {
+      opacity: 1 !important;
+      padding-bottom: 6px;
+    }
+    :deep(.v-input__append),
+    :deep(.v-field__append-inner) {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center !important;
+      padding-top: 0;
+      margin-inline-start: 4px;
+    }
+  }
 
   $green-base: map-get($green, 'base');
 

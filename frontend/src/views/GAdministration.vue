@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
                       color="action-button"
                       :model-value="owner"
                       :items="userList"
-                      :rules="[rules.owner]"
+                      :rules="ownerRules"
                       placeholder="Select the owner"
                       no-data-text="No project member available"
                       :save="updateOwner"
@@ -233,20 +233,27 @@ SPDX-License-Identifier: Apache-2.0
               <g-list>
                 <g-list-item>
                   <template v-slot:prepend>
-                    <v-icon :color="color">mdi-credit-card-outline</v-icon>
+                    <v-icon icon="mdi-credit-card-outline" :color="color"></v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">{{costObjectTitle}}</div>
-                  <div class="text-body-1">
+                  <div class="text-body-2 text-medium-emphasis">Cost Object</div>
+                  <div class="text-body-1 wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
                       color="action-button"
                       :model-value="costObject"
-                      :rules="[rules.costObject]"
+                      :rules="costObjectRules"
                       :save="updateCostObject"
                     >
                       <template v-if="costObjectDescriptionHtml" v-slot:info>
-                        <v-alert icon="mdi-information-outline" density="compact" text rounded="0" :color="color" class="mb-0" >
-                          <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"></div>
+                        <v-alert
+                          icon="mdi-information-outline"
+                          density="compact"
+                          variant="tonal"
+                          rounded="0"
+                          :color="color"
+                          class="mb-0"
+                        >
+                          <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"/>
                         </v-alert>
                       </template>
                     </g-editable-text>
@@ -283,8 +290,7 @@ SPDX-License-Identifier: Apache-2.0
                   <g-resource-quota-help/>
                 </template>
               </g-toolbar>
-              <v-skeleton-loader
-                v-if="!projectQuotaStatus"
+              <v-skeleton-loader v-if="!projectQuotaStatus"
                 height="400"
                 type="table: table-heading, table-thead, table-tbody"
                 :types="{ 'table-thead': 'heading@3', 'table-row': 'table-cell@3' }"
@@ -367,6 +373,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
+import { required, helpers } from '@vuelidate/validators'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -427,23 +434,6 @@ export default defineComponent({
       ownerMessages: [],
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      rules: {
-        owner: value => {
-          if (!value) {
-            return 'Owner is required'
-          }
-          if (!includes(this.userList, value)) {
-            return 'Owner must be a project member'
-          }
-          return true
-        },
-        costObject: (value = '') => {
-          if (!this.costObjectRegExp) {
-            return true
-          }
-          return this.costObjectRegExp.test(value) || this.costObjectErrorMessage
-        },
-      },
     }
   },
   computed: {
@@ -498,22 +488,32 @@ export default defineComponent({
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
     },
-    costObjectRegExp () {
-      const pattern = get(this.costObjectSettings, 'regex')
-      return pattern ? RegExp(pattern) : null
-    },
-    costObjectErrorMessage () {
-      return get(this.costObjectSettings, 'errorMessage')
-    },
     costObjectDescriptionHtml () {
       const description = get(this.costObjectSettings, 'description')
       return transformHtml(description)
+    },
+    costObjectRules () {
+      return {
+        costObject: this.getCostObjectValidator(),
+      }
     },
     projectName () {
       return this.projectDetails.projectName
     },
     owner () {
       return this.projectDetails.owner
+    },
+    ownerRules () {
+      const userListIncludesValidator = helpers.withParams(
+        { type: 'userListIncludes' },
+        value => {
+          return includes(this.userList, value)
+        },
+      )
+      return {
+        required: helpers.withMessage('Owner is required', required),
+        userListIncludes: helpers.withMessage('Owner must be a project member', userListIncludesValidator),
+      }
     },
     ownerAvatarUrl () {
       return gravatarUrlGeneric(this.owner, 48)
@@ -566,6 +566,13 @@ export default defineComponent({
     ...mapActions(useQuotaStore, [
       'fetchQuotas',
     ]),
+    getCostObjectValidator () {
+      const pattern = get(this.costObjectSettings, 'regex', '[^]*')
+      return helpers.withMessage(
+        () => get(this.costObjectSettings, 'errorMessage'),
+        helpers.regex(new RegExp(pattern)),
+      )
+    },
     onEditOwner () {
       this.editOwner = !this.editOwner
       if (this.editOwner) {
