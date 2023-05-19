@@ -68,7 +68,7 @@ export const useQuotaStore = defineStore('quota', () => {
 
   const projectQuotaStatus = computed(() => {
     const namespace = authzStore.namespace
-    const quota = quotas[namespace]
+    const quota = quotas.value[namespace]
     return quota
       ? getProjectQuotaStatus(quota)
       : []
