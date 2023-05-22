@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -23,30 +23,31 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { isHtmlColorCode } from '@/utils'
 
-export default {
+export default defineComponent({
   props: {
     iconName: {
       type: String,
-      default: 'box'
+      default: 'box',
     },
     width: {
       type: [Number, String],
-      default: 24
+      default: 24,
     },
     height: {
       type: [Number, String],
-      default: 24
+      default: 24,
     },
     viewBox: {
       type: [Array, String],
-      default: '0 0 25 25'
+      default: '0 0 25 25',
     },
     iconColor: {
       type: String,
-      default: '#FFF'
-    }
+      default: '#FFF',
+    },
   },
   computed: {
     iconColorCode () {
@@ -55,7 +56,7 @@ export default {
         return iconColor
       }
       return this.$vuetify.theme.current.colors[iconColor]
-    }
-  }
-}
+    },
+  },
+})
 </script>
