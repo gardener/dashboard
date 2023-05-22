@@ -73,6 +73,7 @@
 
 .v-application {
   a.v-breadcrumbs-item,
+  a[href^="mailto:"],
   a[rel="noopener"] {
     color: rgb(var(--v-theme-anchor));
     text-decoration: none;
