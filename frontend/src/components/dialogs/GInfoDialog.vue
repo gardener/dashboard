@@ -1,10 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
- <template>
+<template>
   <g-dialog
     ref="gDialog"
     confirm-button-text="Ok"
@@ -43,48 +43,55 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import GDialog from '@/components/dialogs/GDialog.vue'
-import { getInfo } from '@/utils/api'
+import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
+
+import { useAppStore, useAuthnStore, useGardenerExtensionStore } from '@/store'
+import GDialog from './GDialog.vue'
+
 import sortBy from 'lodash/sortBy'
 
-export default {
-  name: 'info-dialog',
+export default defineComponent({
   components: {
-    GDialog
+    GDialog,
   },
   props: {
-    value: {
-      type: Boolean
-    }
+    modelValue: {
+      type: Boolean,
+    },
   },
   data () {
     return {
       gardenerVersion: undefined,
-      dashboardVersion: undefined
+      dashboardVersion: undefined,
     }
   },
   computed: {
-    ...mapGetters([
+    ...mapState(useGardenerExtensionStore, {
+      gardenerExtensionsList: 'list',
+    }),
+    ...mapState(useAuthnStore, [
       'isAdmin',
-      'gardenerExtensionsList'
     ]),
     extensionsList () {
       return sortBy(this.gardenerExtensionsList, 'name')
-    }
+    },
   },
+  emits: [
+    'dialogClosed',
+  ],
   methods: {
-    ...mapActions([
-      'setError'
+    ...mapActions(useAppStore, [
+      'setError',
     ]),
     async fetchVersions () {
       try {
         const {
           data: {
             gardenerVersion,
-            version
-          } = {}
-        } = await getInfo()
+            version,
+          } = {},
+        } = await this.$api.getInfo()
         if (gardenerVersion) {
           this.gardenerVersion = gardenerVersion.gitVersion
         }
@@ -93,24 +100,23 @@ export default {
         }
       } catch (err) {
         this.setError({
-          message: `Failed to fetch version information. ${err.message}`
+          message: `Failed to fetch version information. ${err.message}`,
         })
       }
     },
     onDialogClosed () {
-      this.$emit('dialog-closed')
-    }
+      this.$emit('dialogClosed')
+    },
   },
   watch: {
-    value (value) {
+    modelValue (value) {
       if (value) {
         this.$refs.gDialog.showDialog()
         this.fetchVersions()
       }
-    }
-  }
-}
-
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

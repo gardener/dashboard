@@ -202,18 +202,22 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab>
       </v-tabs>
     </template>
-    <!--info-dialog v-model="infoDialog" @dialog-closed="infoDialog=false"/-->
+    <g-info-dialog
+      v-model="infoDialog"
+      @dialog-closed="infoDialog = false"
+    />
   </v-app-bar>
 </template>
 
 <script setup>
 import { ref, computed, toRef } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 import { useTheme, useNamespace } from '@/composables'
-import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
+import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
 
 const route = useRoute()
 
