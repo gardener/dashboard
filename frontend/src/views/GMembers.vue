@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-sort="sortAccounts"
         :search="userFilter"
         density="compact"
+        class="g-table"
       >
         <template v-slot:item="{ item }">
           <g-user-row
@@ -145,6 +146,7 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         :custom-sort="sortAccounts"
         :search="serviceAccountFilter"
+        class="g-table"
       >
         <template v-slot:item="{ item }">
           <g-service-account-row
@@ -209,7 +211,7 @@ import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GMemberDialog from '@/components/Members/GMemberDialog.vue'
 import GMemberHelpDialog from '@/components/Members/GMemberHelpDialog.vue'
-import GConfirmDialog from '@/components/Dialogs/GConfirmDialog.vue'
+import GConfirmDialog from '@/components/dialogs/GConfirmDialog.vue'
 import GRemoveProjectMember from '@/components/Members/GRemoveProjectMember.vue'
 import GDeleteServiceAccount from '@/components/Members/GDeleteServiceAccount.vue'
 import GResetServiceAccount from '@/components/Members/GResetServiceAccount.vue'
@@ -673,3 +675,12 @@ function resetTableSettingsServiceAccount () {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  .g-table {
+    font-size: 14px;
+    :deep(.v-data-table-header__content) {
+      white-space: nowrap !important;
+    }
+  }
+</style>

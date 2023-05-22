@@ -7,26 +7,44 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr>
     <td class="pa-0" v-if="selectedHeaders.displayName">
-      <v-list-item
-        :prepend-avatar="item.avatarUrl"
-      >
-        <v-list-item-title class="d-flex align-center">
-          <span class="text-subtitle-1">{{ item.displayName }}</span>
-          <v-tooltip location="top" v-if="foreign">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" size="small" class="ml-1">mdi-account-arrow-left</v-icon>
-            </template>
-            <span>Service Account invited from namespace {{ serviceAccountNamespace }}</span>
-          </v-tooltip>
-          <v-tooltip location="top" v-if="orphaned">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" size="small" class="ml-1" color="warning">mdi-alert-circle-outline</v-icon>
-            </template>
-            <span>Associated Service Account does not exists</span>
-          </v-tooltip>
-        </v-list-item-title>
-        <v-list-item-subtitle>{{ item.username }}</v-list-item-subtitle>
-      </v-list-item>
+      <v-list>
+        <v-list-item
+          :prepend-avatar="item.avatarUrl"
+        >
+          <v-list-item-title>
+            {{ item.displayName }}
+            <v-tooltip v-if="foreign"
+              location="top"
+            >
+              <template v-slot:activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon="mdi-account-arrow-left"
+                  end
+                  size="small"
+                  color="medium-emphasis"
+                />
+              </template>
+              Service Account invited from namespace {{ serviceAccountNamespace }}
+            </v-tooltip>
+            <v-tooltip v-if="orphaned"
+              location="top"
+            >
+              <template v-slot:activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon="mdi-alert-circle-outline"
+                  end
+                  size="small"
+                  color="warning"
+                />
+              </template>
+              Associated Service Account does not exists
+            </v-tooltip>
+          </v-list-item-title>
+          <v-list-item-subtitle style="flex: 1 0 100%;">{{ item.username }}</v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
     </td>
     <td v-if="selectedHeaders.createdBy">
       <g-account-avatar :account-name="item.createdBy" :size="16"></g-account-avatar>

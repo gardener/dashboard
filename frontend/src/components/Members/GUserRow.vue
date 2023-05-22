@@ -10,8 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-list class="g-username">
         <v-list-item
           :prepend-avatar="item.avatarUrl"
-          :title="item.displayName"
         >
+          <v-list-item-title>
+            {{ item.displayName }}
+          </v-list-item-title>
           <v-list-item-subtitle :class="{ 'g-opacity-1': item.isEmail }">
             <a v-if="item.isEmail" :href="`mailto:${item.username}`">{{ item.username }}</a>
             <span v-else>{{ item.username }}</span>
