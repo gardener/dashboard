@@ -98,7 +98,7 @@ import { errorDetailsFromError, isConflict } from '@/utils/error'
 import {
   useSecretStore,
   useAuthzStore,
-  useCloudprofileStore,
+  useCloudProfileStore,
   useGardenerExtensionStore,
 } from '@/store'
 
@@ -172,7 +172,7 @@ export default defineComponent({
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
     ...mapGetters(useSecretStore, ['infrastructureSecretList', 'dnsSecretList']),
-    ...mapGetters(useCloudprofileStore, ['sortedInfrastructureKindList']),
+    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
     ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
     shootList () {
       // TODO
@@ -264,7 +264,7 @@ export default defineComponent({
       'createSecret',
       'updateSecret',
     ]),
-    ...mapActions(useCloudprofileStore, [
+    ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
     ]),
     isValid (component) {

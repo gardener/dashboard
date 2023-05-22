@@ -177,7 +177,7 @@ import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 // TODO import HintColorizer from '@/components/HintColorizer'
 import GExternalLink from '@/components/GExternalLink'
 import {
-  useCloudprofileStore,
+  useCloudProfileStore,
 } from '@/store'
 const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserMessage = 'Required for technical user authentication'
@@ -338,7 +338,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useCloudprofileStore, ['cloudProfileByName']),
+    ...mapActions(useCloudProfileStore, ['cloudProfileByName']),
     onInput (value) {
       this.$emit('input', value)
     },

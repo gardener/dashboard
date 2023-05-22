@@ -217,7 +217,7 @@ import filter from 'lodash/filter'
 import some from 'lodash/some'
 import includes from 'lodash/includes'
 import {
-  useCloudprofileStore,
+  useCloudProfileStore,
   useGardenerExtensionStore,
   useSecretStore,
   useAuthzStore,
@@ -260,7 +260,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters(useCloudprofileStore, ['sortedInfrastructureKindList']),
+    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
     ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
     ...mapGetters(useSecretStore,
       [
@@ -416,7 +416,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useCloudprofileStore, ['cloudProfilesByCloudProviderKind']),
+    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
       this.visibleSecretDialog = infrastructureKind
