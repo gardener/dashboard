@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row align="center" justify="center">
         <v-card rounded="0" flat class="title-background">
           <v-card-title class="text-subtitle-1">
-            Loading cluster {{$route.params.name}}
+            Loading cluster {{ clusterName }}
           </v-card-title>
           <v-card-text>
             <v-progress-linear
@@ -23,14 +23,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
-export default {
-  name: 'shoot-item-loading'
-}
+export default defineComponent({
+  computed: {
+    clusterName () {
+      return this.$route.params.name
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-  .theme--light .title-background {
-    background-color: rgba(0, 0, 0, .02);
+  .v-theme--light {
+    .title-background {
+      background-color: rgba(0, 0, 0, .02);
+    }
   }
 </style>

@@ -13,7 +13,7 @@ import {
   useAuthnStore,
   useAuthzStore,
   useProjectStore,
-  useCloudprofileStore,
+  useCloudProfileStore,
   useSeedStore,
   useGardenerExtensionStore,
   useKubeconfigStore,
@@ -32,7 +32,7 @@ export function createGuards () {
   const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
-  const cloudProfileStore = useCloudprofileStore()
+  const cloudProfileStore = useCloudProfileStore()
   const seedStore = useSeedStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
@@ -189,7 +189,7 @@ async function refreshRules (store, ...args) {
 
 function ensureCloudProfilesLoaded (store) {
   if (store.isInitial) {
-    return store.fetchCloudprofiles()
+    return store.fetchCloudProfiles()
   }
 }
 

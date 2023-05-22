@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useApi, useLogger } from '@/composables'
 import { useAuthzStore } from './authz'
-import { useCloudprofileStore } from './cloudprofile'
+import { useCloudProfileStore } from './cloudProfile'
 import { useConfigStore } from './config'
 import { useSecretStore } from './secret'
 import { useAppStore } from './app'
@@ -47,7 +47,7 @@ export const useShootStore = defineStore('shoot', () => {
   const api = useApi()
   const logger = useLogger()
   const authzStore = useAuthzStore()
-  const cloudprofileStore = useCloudprofileStore()
+  const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
   const secretStore = useSecretStore()
   const gardenerExtensionsStore = useGardenerExtensionStore()
@@ -55,6 +55,8 @@ export const useShootStore = defineStore('shoot', () => {
 
   const list = ref(null)
   const newShootResource = ref(null)
+  const subscriptionState = ref(null)
+  const subscriptionError = ref(null)
   const initialNewShootResource = ref(null)
   const shootListFilters = ref(null)
 
@@ -82,13 +84,13 @@ export const useShootStore = defineStore('shoot', () => {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
     const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-    const architecture = head(cloudprofileStore.machineArchitecturesByCloudProfileNameAndRegion({ cloudProfileName, region }))
-    const machineTypesForZone = cloudprofileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture })
+    const architecture = head(cloudProfileStore.machineArchitecturesByCloudProfileNameAndRegion({ cloudProfileName, region }))
+    const machineTypesForZone = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture })
     const machineType = head(machineTypesForZone) || {}
-    const volumeTypesForZone = cloudprofileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const volumeTypesForZone = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const volumeType = head(volumeTypesForZone) || {}
-    const machineImage = cloudprofileStore.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
-    const minVolumeSize = cloudprofileStore.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const machineImage = cloudProfileStore.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
+    const minVolumeSize = cloudProfileStore.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
 
     const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
@@ -134,25 +136,25 @@ export const useShootStore = defineStore('shoot', () => {
       },
     }
 
-    if (!cloudprofileStore.sortedInfrastructureKindList.length) {
+    if (!cloudProfileStore.sortedInfrastructureKindList.length) {
       logger.warn('Could not reset new shoot resource as there is no supported cloud profile')
       return
     }
 
-    const infrastructureKind = head(cloudprofileStore.sortedInfrastructureKindList)
+    const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
     set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.defaultNodesCIDR))
 
-    const cloudProfileName = get(head(cloudprofileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
+    const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
     const secret = head(secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
 
-    let region = head(cloudprofileStore.regionsWithSeedByCloudProfileName(cloudProfileName))
+    let region = head(cloudProfileStore.regionsWithSeedByCloudProfileName(cloudProfileName))
     if (!region) {
       const seedDeterminationStrategySameRegion = configStore.seedCandidateDeterminationStrategy === 'SameRegion'
       if (!seedDeterminationStrategySameRegion) {
-        region = head(cloudprofileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName))
+        region = head(cloudProfileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName))
       }
     }
     set(shootResource, 'spec.region', region)
@@ -163,11 +165,11 @@ export const useShootStore = defineStore('shoot', () => {
     const purpose = head(purposesForSecret(secret))
     set(shootResource, 'spec.purpose', purpose)
 
-    const kubernetesVersion = cloudprofileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
+    const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
     set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', false)
 
-    const allZones = cloudprofileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const zones = allZones.length ? [sample(allZones)] : undefined
     const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
     if (zonesNetworkConfiguration) {
@@ -182,17 +184,17 @@ export const useShootStore = defineStore('shoot', () => {
     const networkingType = head(gardenerExtensionsStore.networkingTypes)
     set(shootResource, 'spec.networking.type', networkingType)
 
-    const loadBalancerProviderName = head(cloudprofileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))
+    const loadBalancerProviderName = head(cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))
     if (!isEmpty(loadBalancerProviderName)) {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
     }
     const secretDomain = get(secret, 'data.domainName')
-    const floatingPoolName = head(cloudprofileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }))
+    const floatingPoolName = head(cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }))
     if (!isEmpty(floatingPoolName)) {
       set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
     }
 
-    const allLoadBalancerClassNames = cloudprofileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
+    const allLoadBalancerClassNames = cloudProfileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
     if (!isEmpty(allLoadBalancerClassNames)) {
       const defaultLoadBalancerClassName = includes(allLoadBalancerClassNames, 'default')
         ? 'default'
@@ -203,22 +205,22 @@ export const useShootStore = defineStore('shoot', () => {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
     }
 
-    const partitionIDs = cloudprofileStore.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const partitionIDs = cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
     const partitionID = head(partitionIDs)
     if (!isEmpty(partitionID)) {
       set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
     }
-    const firewallImages = cloudprofileStore.firewallImagesByCloudProfileName(cloudProfileName)
+    const firewallImages = cloudProfileStore.firewallImagesByCloudProfileName(cloudProfileName)
     const firewallImage = head(firewallImages)
     if (!isEmpty(firewallImage)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
     }
-    const firewallSizes = map(cloudprofileStore.firewallSizesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: newWorker.machine.architecture }), 'name')
+    const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: newWorker.machine.architecture }), 'name')
     const firewallSize = head(firewallSizes)
     if (!isEmpty(firewallSize)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
     }
-    const allFirewallNetworks = cloudprofileStore.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
+    const allFirewallNetworks = cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
     const firewallNetworks = find(allFirewallNetworks, { key: 'internet' })
     if (!isEmpty(firewallNetworks)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
@@ -266,6 +268,10 @@ export const useShootStore = defineStore('shoot', () => {
     shootListFilters.value = value
   }
 
+  function handleEvent () {
+
+  }
+
   async function fetchShoots () {
     const namespace = authzStore.namespace
     try {
@@ -285,9 +291,12 @@ export const useShootStore = defineStore('shoot', () => {
     list,
     newShootResource,
     shootListFilters,
+    subscriptionState,
+    subscriptionError,
     isInitial,
     shootList,
     fetchShoots,
+    handleEvent,
     subscribe,
     unsubscribe,
     setNewShootResource,

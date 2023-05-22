@@ -210,7 +210,7 @@ const firstItemMatchingVersionClassification = (items) => {
   return head(items)
 }
 
-export const useCloudprofileStore = defineStore('cloudprofile', () => {
+export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
 
@@ -222,8 +222,8 @@ export const useCloudprofileStore = defineStore('cloudprofile', () => {
     return list.value === null
   })
 
-  async function fetchCloudprofiles () {
-    const response = await api.getCloudprofiles()
+  async function fetchCloudProfiles () {
+    const response = await api.getCloudProfiles()
     list.value = response.data
   }
 
@@ -441,6 +441,8 @@ export const useCloudprofileStore = defineStore('cloudprofile', () => {
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
+  // TODO: check later
+  // eslint-disable-next-line no-unused-vars
   function machineTypesByCloudProfileName (cloudProfileName) {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
@@ -516,6 +518,8 @@ export const useCloudprofileStore = defineStore('cloudprofile', () => {
     return flatMap(machineImages, mapMachineImages)
   }
 
+  // TODO: check later
+  // eslint-disable-next-line no-unused-vars
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
     const noItemsText = get(configStore, 'accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
 
@@ -606,7 +610,7 @@ export const useCloudprofileStore = defineStore('cloudprofile', () => {
   return {
     list,
     isInitial,
-    fetchCloudprofiles,
+    fetchCloudProfiles,
     cloudProfilesByCloudProviderKind,
     sortedInfrastructureKindList,
     cloudProfileByName,

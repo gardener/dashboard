@@ -185,8 +185,19 @@ SPDX-License-Identifier: Apache-2.0
 
     <!-- terminals -->
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="primary darken-3" class="tabs-bar-background">
-        <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
+      <v-tabs
+        color="primary"
+        slider-color="secondary"
+        class="tabs-bar-background"
+      >
+        <v-tab v-for="tab in tabs"
+          :to="tab.to"
+          :key="tab.key"
+          :value="tab.key"
+          :rounded="0"
+          exact
+          ripple
+        >
           {{tab.title}}
         </v-tab>
       </v-tabs>
@@ -270,18 +281,22 @@ function helpTarget (item) {
     font-weight: bold;
   }
 
+  .tabs-bar-background {
+    width: 100%;
+  }
+
   .v-theme--light {
     &.v-app-bar {
       background-color: map-get($grey, 'lighten-4');
     }
     .tabs-bar-background {
-      background-color: white;
+      background-color: white !important;
     }
   }
 
   .v-theme--dark {
     .tabs-bar-background {
-      background-color: black;
+      background-color: black !important;
     }
   }
 </style>

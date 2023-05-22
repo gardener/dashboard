@@ -4,15 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import uniq from 'lodash/uniq'
-import flatMap from 'lodash/flatMap'
-import cloneDeep from 'lodash/cloneDeep'
-import find from 'lodash/find'
-import some from 'lodash/some'
-import filter from 'lodash/filter'
 import { mapActions } from 'pinia'
 
+import { useCloudProfileStore, useProjectStore, useSeedStore } from '@/store'
 import {
   getTimestampFormatted,
   getCreatedBy,
@@ -21,7 +15,15 @@ import {
   isTypeDelete,
   isTruthyValue,
 } from '@/utils'
-import { useCloudprofileStore, useProjectStore, useSeedStore } from '@/store'
+
+import get from 'lodash/get'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
+import cloneDeep from 'lodash/cloneDeep'
+import find from 'lodash/find'
+import some from 'lodash/some'
+import filter from 'lodash/filter'
+import compact from 'lodash/compact'
 
 export const shootItem = {
   props: {
@@ -260,9 +262,15 @@ export const shootItem = {
     },
   },
   methods: {
-    ...mapActions(useCloudprofileStore, ['selectedAccessRestrictionsForShootByCloudProfileNameAndRegion']),
-    ...mapActions(useSeedStore, ['isSeedUnreachableByName']),
-    ...mapActions(useProjectStore, ['projectNameByNamespace']),
+    ...mapActions(useCloudProfileStore, [
+      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
+    ]),
+    ...mapActions(useSeedStore, [
+      'isSeedUnreachableByName',
+    ]),
+    ...mapActions(useProjectStore, [
+      'projectNameByNamespace',
+    ]),
     shootActionToolTip (tooltip) {
       if (!this.isShootActionsDisabledForPurpose) {
         return tooltip

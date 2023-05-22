@@ -72,8 +72,10 @@
 }
 
 .v-application {
-  a {
+  a.v-breadcrumbs-item,
+  a[rel="noopener"] {
     color: rgb(var(--v-theme-anchor));
+    text-decoration: none;
   }
 }
 

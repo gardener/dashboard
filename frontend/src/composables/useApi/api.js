@@ -195,7 +195,7 @@ export function updateShootSeedName ({ namespace, name, data }) {
 
 /* Cloud Profiles */
 
-export function getCloudprofiles () {
+export function getCloudProfiles () {
   return getResource('/api/cloudprofiles')
 }
 
@@ -399,7 +399,7 @@ export default {
   getShootSchemaDefinition,
   updateShootPurpose,
   updateShootSeedName,
-  getCloudprofiles,
+  getCloudProfiles,
   getSeeds,
   getProjects,
   createProject,

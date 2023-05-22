@@ -1,8 +1,9 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
+
 <template>
   <g-error
     :code="code"
@@ -14,47 +15,54 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+
+import { useProjectStore } from '@/store'
 import GError from '@/components/GError.vue'
+
 import get from 'lodash/get'
 
-export default {
+export default defineComponent({
   components: {
-    GError
+    GError,
   },
   props: {
     code: {
       type: [String, Number],
-      default: '404'
+      default: '404',
     },
     text: {
       type: String,
-      default: 'Cluster not found'
+      default: 'Cluster not found',
     },
     message: {
       type: String,
-      default: 'The cluster you are looking for doesn\'t exist or an other error occured!'
+      default: 'The cluster you are looking for doesn\'t exist or an other error occured!',
     },
     buttonText: {
       type: String,
-      default: 'Back to cluster list'
-    }
+      default: 'Back to cluster list',
+    },
   },
   computed: {
+    ...mapState(useProjectStore, [
+      'defaultNamespace',
+    ]),
     fallbackRoute () {
-      const defaultNamespace = this.$store.getters.defaultNamespace
-      const namespace = get(this.$route, 'params.namespace', defaultNamespace)
+      const namespace = get(this.$route, 'params.namespace', this.defaultNamespace)
       if (namespace) {
         return {
           name: 'ShootList',
           params: {
-            namespace
-          }
+            namespace,
+          },
         }
       }
       return {
-        name: 'Home'
+        name: 'Home',
       }
-    }
+    },
   },
   methods: {
     async onClick () {
@@ -63,7 +71,7 @@ export default {
       } catch (err) {
         /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
