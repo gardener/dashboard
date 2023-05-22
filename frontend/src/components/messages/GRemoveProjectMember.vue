@@ -21,7 +21,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-export default {
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   props: {
     projectName: {
       type: String,
@@ -30,5 +32,5 @@ export default {
     memberName: String,
     namespace: String,
   },
-}
+})
 </script>
