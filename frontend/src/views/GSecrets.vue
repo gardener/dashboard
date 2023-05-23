@@ -221,6 +221,7 @@ import {
   useGardenerExtensionStore,
   useSecretStore,
   useAuthzStore,
+  useShootStore,
 } from '@/store'
 import { useLocalStorage } from '@vueuse/core'
 
@@ -269,10 +270,7 @@ export default defineComponent({
         'dnsSecretList',
       ]),
     ...mapGetters(useAuthzStore, ['canCreateSecrets']),
-    shootList () {
-      // TODO
-      return []
-    },
+    ...mapGetters(useShootStore, ['shootList']),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
