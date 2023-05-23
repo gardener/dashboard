@@ -159,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <p>
         Read the
-        <g-external-link  url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</g-external-link> on how to create and manage roles.
+        <g-external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</g-external-link> on how to create and manage roles.
       </p>
     </template>
 

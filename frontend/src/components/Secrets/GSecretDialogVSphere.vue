@@ -80,13 +80,13 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Please read the
-          <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
-            target="_blank" rel="noopener">
-            VMware vSphere Documentation</a>
-            and the
-          <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
-            target="_blank" rel="noopener">
-          VMware NSX-T Data Center Documentation</a>.
+          <g-external-link url="https://docs.vmware.com/de/VMware-vSphere/index.html">
+            VMware vSphere Documentation
+          </g-external-link>
+          and the
+          <g-external-link url="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html">
+            VMware NSX-T Data Center Documentation
+          </g-external-link>.
         </p>
       </div>
     </template>
@@ -97,6 +97,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink.vue'
 import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -125,6 +126,7 @@ export default defineComponent({
   },
   components: {
     GSecretDialog,
+    GExternalLink,
   },
   props: {
     modelValue: {
@@ -195,9 +197,6 @@ export default defineComponent({
     },
   },
   methods: {
-    onInput (value) {
-      this.$emit('input', value)
-    },
     reset () {
       this.v$.$reset()
 

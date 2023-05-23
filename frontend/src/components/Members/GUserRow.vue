@@ -14,8 +14,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title>
             {{ item.displayName }}
           </v-list-item-title>
-          <v-list-item-subtitle :class="{ 'g-opacity-1': item.isEmail }">
-            <a v-if="item.isEmail" :href="`mailto:${item.username}`">{{ item.username }}</a>
+          <v-list-item-subtitle :class="{ 'text-high-emphasis': item.isEmail }">
+            <a v-if="item.isEmail"
+              :href="`mailto:${item.username}`"
+              class="text-anchor"
+            >{{ item.username }}</a>
             <span v-else>{{ item.username }}</span>
           </v-list-item-subtitle>
         </v-list-item>
@@ -102,9 +105,3 @@ function onDelete () {
 }
 
 </script>
-
-<style lang="scss" scoped>
-  .g-opacity-1 {
-    opacity: 1 !important;
-  }
-</style>

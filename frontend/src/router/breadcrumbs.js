@@ -10,7 +10,7 @@ import pick from 'lodash/pick'
 export function homeBreadcrumbs () {
   return [
     {
-      text: 'Home',
+      title: 'Home',
     },
   ]
 }
@@ -18,7 +18,7 @@ export function homeBreadcrumbs () {
 export function newProjectBreadcrumbs () {
   return [
     {
-      text: 'Create Project',
+      title: 'Create Project',
     },
   ]
 }
@@ -26,7 +26,7 @@ export function newProjectBreadcrumbs () {
 export function accountBreadcrumbs () {
   return [
     {
-      text: 'Account',
+      title: 'Account',
     },
   ]
 }
@@ -34,7 +34,7 @@ export function accountBreadcrumbs () {
 export function settingsBreadcrumbs () {
   return [
     {
-      text: 'Settings',
+      title: 'Settings',
     },
   ]
 }
@@ -42,7 +42,7 @@ export function settingsBreadcrumbs () {
 export function membersBreadcrumbs () {
   return [
     {
-      text: 'Members',
+      title: 'Members',
     },
   ]
 }
@@ -50,7 +50,7 @@ export function membersBreadcrumbs () {
 export function administrationBreadcrumbs () {
   return [
     {
-      text: 'Administration',
+      title: 'Administration',
     },
   ]
 }
@@ -58,7 +58,7 @@ export function administrationBreadcrumbs () {
 export function newShootBreadcrumbs () {
   return [
     {
-      text: 'Create Cluster',
+      title: 'Create Cluster',
     },
   ]
 }
@@ -66,7 +66,7 @@ export function newShootBreadcrumbs () {
 export function newShootEditorBreadcrumbs () {
   return [
     {
-      text: 'Create Cluster Editor',
+      title: 'Create Cluster Editor',
     },
   ]
 }
@@ -74,7 +74,7 @@ export function newShootEditorBreadcrumbs () {
 export function terminalBreadcrumbs () {
   return [
     {
-      text: 'Garden Cluster Terminal',
+      title: 'Garden Cluster Terminal',
     },
   ]
 }
@@ -82,7 +82,7 @@ export function terminalBreadcrumbs () {
 export function shootListBreadcrumbs () {
   return [
     {
-      text: 'Project Clusters',
+      title: 'Project Clusters',
     },
   ]
 }
@@ -90,7 +90,7 @@ export function shootListBreadcrumbs () {
 export function secretsBreadcrumbs () {
   return [
     {
-      text: 'Secrets',
+      title: 'Secrets',
     },
   ]
 }
@@ -98,7 +98,7 @@ export function secretsBreadcrumbs () {
 export function notFoundBreadcrumbs () {
   return [
     {
-      text: 'Oops …',
+      title: 'Oops …',
     },
   ]
 }
@@ -106,7 +106,7 @@ export function notFoundBreadcrumbs () {
 export function shootItemBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Project Clusters',
+      title: 'Project Clusters',
       get to () {
         return {
           name: 'ShootList',
@@ -115,7 +115,7 @@ export function shootItemBreadcrumbs ({ params }) {
       },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
       },
     },
@@ -125,7 +125,7 @@ export function shootItemBreadcrumbs ({ params }) {
 export function secretItemBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Secrets',
+      title: 'Secrets',
       get to () {
         return {
           name: 'Secrets',
@@ -134,7 +134,7 @@ export function secretItemBreadcrumbs ({ params }) {
       },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
       },
     },
@@ -144,7 +144,7 @@ export function secretItemBreadcrumbs ({ params }) {
 export function shootItemTerminalBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Project Clusters',
+      title: 'Project Clusters',
       get to () {
         return {
           name: 'ShootList',
@@ -153,7 +153,7 @@ export function shootItemTerminalBreadcrumbs ({ params }) {
       },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
       },
       get to () {
@@ -164,7 +164,7 @@ export function shootItemTerminalBreadcrumbs ({ params }) {
       },
     },
     {
-      text: 'Terminal',
+      title: 'Terminal',
     },
   ]
 }

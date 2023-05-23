@@ -273,9 +273,10 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="text-body-1">Command Line Interface Access</div>
                   <div class="text-body-2 text-medium-emphasis">
                     Go to
-                    <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">
-                      My Account
-                    </router-link>
+                    <router-link
+                      :to="{ name: 'Account', query: { namespace: this.namespace } }"
+                      class="text-anchor"
+                    >My Account</router-link>
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                   </div>
                 </g-list-item>
