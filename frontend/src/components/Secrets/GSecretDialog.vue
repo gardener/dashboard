@@ -100,6 +100,7 @@ import {
   useAuthzStore,
   useCloudProfileStore,
   useGardenerExtensionStore,
+  useShootStore,
 } from '@/store'
 
 const validationErrors = {
@@ -174,10 +175,7 @@ export default defineComponent({
     ...mapGetters(useSecretStore, ['infrastructureSecretList', 'dnsSecretList']),
     ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
     ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    shootList () {
-      // TODO
-      return []
-    },
+    ...mapGetters(useShootStore, ['shootList']),
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
