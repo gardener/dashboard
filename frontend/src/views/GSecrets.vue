@@ -79,8 +79,7 @@ SPDX-License-Identifier: Apache-2.0
         - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
         - options property has been removed (need to set options individually)
       --->
-      <v-data-table
-        v-else
+      <v-data-table v-else
         :headers="visibleInfraSecretTableHeaders"
         :items="infrastructureSecretItems"
         :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
@@ -88,6 +87,7 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         :search="infraSecretFilter"
         density="compact"
+        class="g-table"
       >
         <template v-slot:item="{ item }">
           <g-secret-row-infra
@@ -167,8 +167,7 @@ SPDX-License-Identifier: Apache-2.0
         - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
         - options property has been removed (need to set options individually)
       --->
-      <v-data-table
-        v-else
+      <v-data-table v-else
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretItems"
         :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
@@ -176,6 +175,7 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         :search="dnsSecretFilter"
         density="compact"
+        class="g-table"
       >
         <template v-slot:item="{ item }">
           <g-secret-row-dns

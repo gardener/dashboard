@@ -67,11 +67,11 @@ SPDX-License-Identifier: Apache-2.0
       <p>
         To manage
         credentials for AWS Identity and Access Management (IAM), use the
-        <g-external-link  url="https://console.aws.amazon.com/iam/home">IAM Console</g-external-link>.
+        <g-external-link url="https://console.aws.amazon.com/iam/home">IAM Console</g-external-link>.
       </p>
       <p>
         Copy the AWS IAM policy document below and attach it to the IAM user
-        (<g-external-link  url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">official
+        (<g-external-link url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">official
         documentation</g-external-link>).
       </p>
       <g-code-block v-if="vendor==='aws'" height="100%" lang="json" :content="JSON.stringify(templateAws, undefined, 2)"></g-code-block>

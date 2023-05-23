@@ -27,7 +27,11 @@ SPDX-License-Identifier: Apache-2.0
           ></v-text-field>
           <v-tooltip location="top" v-if="allEmails" >
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-email-outline" :href="`mailto:${allEmails}`" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-email-outline"
+                :href="`mailto:${allEmails}`"
+              />
             </template>
             <span>Mail to all Members</span>
           </v-tooltip>
@@ -98,9 +102,12 @@ SPDX-License-Identifier: Apache-2.0
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
+            single-line
             hide-details
             variant="solo"
+            flat
             clearable
+            clear-icon="mdi-close"
             density="compact"
             v-model="serviceAccountFilter"
             @keyup.esc="serviceAccountFilter = ''"
@@ -675,12 +682,3 @@ function resetTableSettingsServiceAccount () {
 }
 
 </script>
-
-<style lang="scss" scoped>
-  .g-table {
-    font-size: 14px;
-    :deep(.v-data-table-header__content) {
-      white-space: nowrap !important;
-    }
-  }
-</style>

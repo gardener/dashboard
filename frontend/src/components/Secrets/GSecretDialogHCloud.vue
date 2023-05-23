@@ -38,9 +38,9 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Please read the
-          <a href="https://www.hetzner.com/cloud"
-            target="_blank" rel="noopener">
-            Hetzner Cloud Documentation</a>.
+          <g-external-link
+            url="https://www.hetzner.com/cloud"
+          >Hetzner Cloud Documentation</g-external-link>.
         </p>
       </div>
     </template>
@@ -51,6 +51,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink.vue'
 import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -70,6 +71,7 @@ export default defineComponent({
   },
   components: {
     GSecretDialog,
+    GExternalLink,
   },
   props: {
     modelValue: {

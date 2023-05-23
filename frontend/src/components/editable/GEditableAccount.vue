@@ -46,6 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <v-card
         flat
+        v-click-outside="onCancel"
         @keydown.esc.prevent="onCancel"
         @keydown.enter.prevent="onSave"
       >
@@ -65,6 +66,7 @@ SPDX-License-Identifier: Apache-2.0
           :color="color"
           :loading="loading"
           :messages="messages"
+          :menu-props="{ offset: [1, 0] }"
           :error-messages="v$.internalValue.$errors.map(e => e.$message)"
           @input="v$.internalValue.$touch"
           @blur="v$.internalValue.$touch"

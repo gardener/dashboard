@@ -100,16 +100,18 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </v-row>
       </v-container>
-      <div
-        v-if="landingPageUrl"
+      <div v-if="landingPageUrl"
         class="footer text-caption"
       >
-        <span class="text-primary">Discover what our service is about at the <a
+        <span class="text-primary">
+          Discover what our service is about at the
+        </span>
+        <a
           :href="landingPageUrl"
           target="_blank"
           rel="noopener"
-          class="text-primary"
-        >Gardener Landing Page</a></span>
+          class="text-anchor"
+        >Gardener Landing Page</a>
       </div>
     </v-main>
     <g-notify/>

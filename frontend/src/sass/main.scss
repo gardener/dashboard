@@ -29,6 +29,16 @@
   }
 }
 
+.g-table {
+  font-size: 14px;
+  .v-data-table-header__content {
+    white-space: nowrap !important;
+  }
+  .v-data-table-footer__items-per-page .v-field {
+    font-size: 14px !important;
+  }
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -69,15 +79,6 @@
 
 .rounded-3 {
   border-radius: 8px;
-}
-
-.v-application {
-  a.v-breadcrumbs-item,
-  a[href^="mailto:"],
-  a[rel="noopener"] {
-    color: rgb(var(--v-theme-anchor));
-    text-decoration: none;
-  }
 }
 
 .v-theme--light {

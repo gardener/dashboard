@@ -74,18 +74,18 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Ensure that the service principal has the permissions defined
-          <g-external-link  url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
+          <g-external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
           here</g-external-link> within your subscription assigned.
           If no fine-grained permissions are required then assign the <strong>Contributor</strong> role.
         </p>
         <p>
           Read the
-          <g-external-link  url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
+          <g-external-link url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
           IAM Console help section</g-external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
       <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
-        <p>Follow the steps as described in the Azure documentation to <g-external-link  url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
+        <p>Follow the steps as described in the Azure documentation to <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
       </div>
     </template>
 

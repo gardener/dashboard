@@ -9,13 +9,11 @@ SPDX-License-Identifier: Apache-2.0
     :href="sanitizeUrl(url)"
     target="_blank"
     rel="noopener"
-    class="text-decoration-none text-no-wrap"
+    class="text-anchor text-decoration-none text-no-wrap"
   >
-    <span class="text-decoration-underline">
-      <slot>{{url}}</slot>
-    </span>
+    <span class="text-decoration-underline"><slot>{{ defaultTitle }}</slot></span>
     <v-icon
-      :size="14"
+      :size="iconSize"
       icon="mdi-open-in-new"
       class="inherit-color"
     />
@@ -31,6 +29,18 @@ export default defineComponent({
     url: {
       type: String,
       required: true,
+    },
+    title: {
+      type: String,
+    },
+    iconSize: {
+      type: [Number, String],
+      default: 14,
+    },
+  },
+  computed: {
+    defaultTitle () {
+      return this.title ?? this.url
     },
   },
   methods: {

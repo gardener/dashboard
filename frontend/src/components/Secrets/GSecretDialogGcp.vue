@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 
         <p>
           Read the
-          <g-external-link  url="https://cloud.google.com/compute/docs/access/service-accounts">
+          <g-external-link url="https://cloud.google.com/compute/docs/access/service-accounts">
             Service Account Documentation</g-external-link> on how to apply for credentials
           to service accounts.
         </p>
@@ -67,10 +67,10 @@ SPDX-License-Identifier: Apache-2.0
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
         <p>
-          For details on Cloud DNS see <g-external-link  url="https://cloud.google.com/dns/docs/zones"></g-external-link>, and on Service Accounts see <g-external-link  url="https://cloud.google.com/iam/docs/service-accounts"></g-external-link>
+          For details on Cloud DNS see <g-external-link url="https://cloud.google.com/dns/docs/zones"></g-external-link>, and on Service Accounts see <g-external-link url="https://cloud.google.com/iam/docs/service-accounts"></g-external-link>
         </p>
         <p>
-          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link  url="https://cloud.google.com/dns/docs/access-control"></g-external-link>. A possible role is roles/dns.admin "DNS Administrator".
+          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link url="https://cloud.google.com/dns/docs/access-control"></g-external-link>. A possible role is roles/dns.admin "DNS Administrator".
         </p>
       </div>
     </template>
