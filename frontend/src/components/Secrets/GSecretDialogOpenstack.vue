@@ -109,21 +109,21 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template v-else>
           <div>
-            <!--<hint-colorizer hint-color="primary">-->
+            <g-hint-colorizer hint-color="primary">
               <v-text-field
-              color="primary"
-              v-model="username"
-              label="Technical User"
-              :error-messages="getErrorMessages('username')"
-              @update:model-value="v$.username.$touch()"
-              @blur="v$.username.$touch()"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-                variant="underlined"
-        ></v-text-field>
-            <!--</hint-colorizer>-->
+                color="primary"
+                v-model="username"
+                label="Technical User"
+                :error-messages="getErrorMessages('username')"
+                @update:model-value="v$.username.$touch()"
+                @blur="v$.username.$touch()"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+                  variant="underlined"
+              ></v-text-field>
+            </g-hint-colorizer>
           </div>
           <div>
-            <!--<hint-colorizer hint-color="warning">-->
+            <g-hint-colorizer hint-color="warning">
               <v-text-field
                 color="primary"
                 v-model="password"
@@ -136,8 +136,8 @@ SPDX-License-Identifier: Apache-2.0
                 @blur="v$.password.$touch()"
                 hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
                 variant="underlined"
-        ></v-text-field>
-            <!--</hint-colorizer>-->
+              ></v-text-field>
+            </g-hint-colorizer>
           </div>
         </template>
       </v-container>
@@ -174,7 +174,7 @@ import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, requiredIf } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-// TODO import HintColorizer from '@/components/HintColorizer'
+import GHintColorizer from '@/components/GHintColorizer'
 import GExternalLink from '@/components/GExternalLink'
 import {
   useCloudProfileStore,
@@ -219,6 +219,7 @@ export default defineComponent({
   components: {
     GSecretDialog,
     GExternalLink,
+    GHintColorizer,
   },
   props: {
     modelValue: {
