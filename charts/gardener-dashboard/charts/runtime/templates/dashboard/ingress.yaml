@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   annotations: {{ toYaml .Values.global.dashboard.ingress.annotations | nindent 4 }}
 spec:
+  ingressClassName: {{ .Values.global.dashboard.ingress.ingressClassName }}
 {{- if .Values.global.dashboard.ingress.tls }}
   tls:
   - secretName: {{ required ".Values.global.dashboard.ingress.tls.secretName is required" .Values.global.dashboard.ingress.tls.secretName }}

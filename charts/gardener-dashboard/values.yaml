@@ -65,6 +65,7 @@ global:
     nodeOptions: [--max-old-space-size=920]
 
     ingress:
+      ingressClassName: nginx
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
