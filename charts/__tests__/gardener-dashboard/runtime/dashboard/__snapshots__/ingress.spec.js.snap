@@ -21,6 +21,7 @@ Object {
     "namespace": "garden",
   },
   "spec": Object {
+    "ingressClassName": "nginx",
     "rules": Array [
       Object {
         "host": "dashboard.garden.example.org",

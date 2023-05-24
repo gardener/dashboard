@@ -44,6 +44,6 @@ const breadcrumbItems = computed(() => {
 
 <style lang="scss" scoped>
   :deep(.v-breadcrumbs-item--disabled) {
-    opacity: 1x;
+    opacity: 1 !important;
   }
 </style>

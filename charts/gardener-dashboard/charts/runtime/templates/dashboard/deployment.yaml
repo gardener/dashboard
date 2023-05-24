@@ -4,12 +4,19 @@ kind: Deployment
 metadata:
   name: gardener-dashboard
   namespace: {{ .Release.Namespace }}
+  {{- if .Values.global.dashboard.deploymentAnnotations }}
+  annotations:
+    {{- toYaml .Values.global.dashboard.deploymentAnnotations | nindent 4 }}
+  {{- end }}
   labels:
     app.kubernetes.io/name: gardener-dashboard
     app.kubernetes.io/component: dashboard
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    {{- if .Values.global.dashboard.deploymentLabels }}
+    {{- toYaml .Values.global.dashboard.deploymentLabels | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ .Values.global.dashboard.replicaCount }}
   selector:
@@ -39,6 +46,9 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+        networking.gardener.cloud/to-dns: allowed
+        networking.gardener.cloud/to-public-networks: allowed
+        networking.resources.gardener.cloud/to-virtual-garden-kube-apiserver-tcp-443: allowed
         {{- if .Values.global.dashboard.podLabels }}
         {{- toYaml .Values.global.dashboard.podLabels | nindent 8 }}
         {{- end }}
