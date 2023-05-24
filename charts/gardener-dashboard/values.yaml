@@ -13,6 +13,10 @@ global:
       repository: eu.gcr.io/gardener-project/gardener/dashboard
       tag: latest
       pullPolicy: IfNotPresent
+    # additional labels to add to the dashboard deployment
+    deploymentLabels: {}
+    # additional annotations to add to the dashboard deployment
+    deploymentAnnotations: {}
     # additional labels to add to all dashboard pods (e.g. security policies)
     podLabels: {}
     # additional annotations to add to all dashboard pods
