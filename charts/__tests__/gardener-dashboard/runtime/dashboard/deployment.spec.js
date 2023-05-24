@@ -109,6 +109,38 @@ describe('gardener-dashboard', function () {
       expect(deployment.spec.replicas).toBe(values.global.dashboard.replicaCount)
     })
 
+    it('should render the template with deployment labels', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            deploymentLabels: {
+              a: 'b'
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.metadata.labels).toEqual(expect.objectContaining(values.global.dashboard.deploymentLabels))
+    })
+
+    it('should render the template with deployment annotations', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            deploymentAnnotations: {
+              a: 'b'
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.metadata.annotations).toEqual(expect.objectContaining(values.global.dashboard.deploymentAnnotations))
+    })
+
     describe('kubeconfig', function () {
       it('should render the template', async function () {
         const values = {
