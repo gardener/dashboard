@@ -21,5 +21,6 @@ export { useGardenerExtensionStore } from './gardenerExtension'
 export { useKubeconfigStore } from './kubeconfig'
 export { useLoginStore } from './login'
 export { useQuotaStore } from './quota'
+export { useShootStagingStore } from './shootStaging'
 
 export default createPinia()

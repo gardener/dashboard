@@ -518,8 +518,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return flatMap(machineImages, mapMachineImages)
   }
 
-  // TODO: check later
-  // eslint-disable-next-line no-unused-vars
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
     const noItemsText = get(configStore, 'accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
 
@@ -607,6 +605,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return firstItemMatchingVersionClassification(k8sVersions)
   }
 
+  function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
+    const allVersions = kubernetesVersions(cloudProfileName)
+    return some(allVersions, ({ version, isPreview }) => {
+      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+    })
+  }
+
   return {
     list,
     isInitial,
@@ -631,5 +636,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByCloudProfileNameAndRegion,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
+    labelsByCloudProfileNameAndRegion,
+    accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
+    sortedKubernetesVersions,
+    kubernetesVersionIsNotLatestPatch,
+    seedsByCloudProfileName,
   }
 })

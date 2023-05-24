@@ -92,19 +92,18 @@ export const useSecretStore = defineStore('secret', () => {
     return filter(list.value, ['metadata.cloudProfileName', cloudProfileName])
   }
 
+  function dnsSecretsByProviderKind (dnsProviderName) {
+    return filter(list.value, secret => {
+      return secret.metadata.dnsProviderName === dnsProviderName && isOwnSecret(secret) // secret binding not supported
+    })
+  }
+
   /*
 
   dnsSecretList(state) {
     return filter(state.cloudProviderSecrets.all, secret => {
       return !!secret.metadata.dnsProviderName && isOwnSecret(secret) // secret binding not supported
     })
-  },
-  dnsSecretsByProviderKind(state) {
-    return (dnsProviderName) => {
-      return filter(state.cloudProviderSecrets.all, secret => {
-        return secret.metadata.dnsProviderName === dnsProviderName && isOwnSecret(secret) // secret binding not supported
-      })
-    }
   },
 
   */
@@ -140,6 +139,7 @@ export const useSecretStore = defineStore('secret', () => {
     dnsSecretList,
     getCloudProviderSecretByName,
     infrastructureSecretsByCloudProfileName,
+    dnsSecretsByProviderKind,
     $reset,
   }
 })

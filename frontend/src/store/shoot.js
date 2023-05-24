@@ -41,6 +41,8 @@ import {
   maintenanceWindowWithBeginAndTimezone,
   randomMaintenanceBegin,
 } from '@/utils'
+import { keyForShoot, findItem, constants, putItem, deleteItem } from './shootHelpers'
+
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 export const useShootStore = defineStore('shoot', () => {
@@ -268,6 +270,10 @@ export const useShootStore = defineStore('shoot', () => {
     shootListFilters.value = value
   }
 
+  function shootByNamespaceAndName ({ namespace, name }) {
+    return findItem(list.value)
+  }
+
   function handleEvent () {
 
   }
@@ -302,6 +308,7 @@ export const useShootStore = defineStore('shoot', () => {
     setNewShootResource,
     resetNewShootResource,
     setShootListFilters,
+    shootByNamespaceAndName,
     $reset,
   }
 })
