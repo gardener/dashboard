@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title>
             {{ item.displayName }}
           </v-list-item-title>
-          <v-list-item-subtitle :class="{ 'text-high-emphasis': item.isEmail }">
+          <v-list-item-subtitle :class="{ 'inherit-opacity': item.isEmail }">
             <a v-if="item.isEmail"
               :href="`mailto:${item.username}`"
               class="text-anchor"
