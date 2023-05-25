@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
           ref="purpose"
-          v-on="$purpose.hooks"
+          v-on="_purpose.hooks"
         ></g-purpose>
       </v-col>
     </v-row>
@@ -82,6 +82,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength } from '@vuelidate/validators'
 
 import GHintColorizer from '@/components/GHintColorizer'
+import GPurpose from '@/components/GPurpose'
 
 import asyncRef from '@/mixins/asyncRef'
 
@@ -96,8 +97,6 @@ import {
   useShootStore,
   useCloudProfileStore,
 } from '@/store'
-
-const GPurpose = () => import('@/components/GPurpose')
 
 const validationErrors = {
   name: {
@@ -269,7 +268,7 @@ export default defineComponent({
       this.updateK8sMaintenance = updateK8sMaintenance
       this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
 
-      await this.$purpose.dispatch('setPurpose', purpose)
+      await this._purpose.dispatch('setPurpose', purpose)
 
       this.validateInput()
     },
@@ -287,7 +286,7 @@ export default defineComponent({
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.$purpose.dispatch('resetPurpose')
+      this._purpose.dispatch('resetPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName

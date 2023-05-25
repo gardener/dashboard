@@ -88,6 +88,7 @@ export default defineComponent({
       set (value) {
         this.k8sUpdatesInternal = value
         if (this.userInterActionBus) {
+          console.log(this.userInterActionBus)
           this.userInterActionBus.emit('updateK8sMaintenance', value)
         }
       },

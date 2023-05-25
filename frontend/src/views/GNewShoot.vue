@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
             :user-inter-action-bus="userInterActionBus"
             @valid="onWorkersValid"
             ref="manageWorkers"
-            v-on="$manageWorkers.hooks"
+            v-on="_manageWorkers.hooks"
           ></g-manage-workers>
        </v-card-text>
       </v-card>
@@ -121,7 +121,7 @@ SPDX-License-Identifier: Apache-2.0
             :user-inter-action-bus="userInterActionBus"
             @valid="onHibernationScheduleValid"
             ref="hibernationSchedule"
-            v-on="$hibernationSchedule.hooks"
+            v-on="_hibernationSchedule.hooks"
           ></g-manage-hibernation-schedule>
        </v-card-text>
       </v-card>
@@ -151,6 +151,7 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+import mitt from 'mitt'
 
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
@@ -170,9 +171,8 @@ import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 
-import EventEmitter from 'events'
-
 import { useApi } from '@/composables'
+
 import {
   useCloudProfileStore,
   useShootStagingStore,
@@ -211,7 +211,6 @@ export default defineComponent({
   ],
   data () {
     return {
-      userInterActionBus: new EventEmitter(),
       infrastructureValid: false,
       infrastructureDetailsValid: false,
       detailsValid: false,
@@ -221,6 +220,7 @@ export default defineComponent({
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
+      userInterActionBus: new mitt(),
     }
   },
   computed: {
@@ -354,7 +354,7 @@ export default defineComponent({
       set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', enableStaticTokenKubeconfig)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = await this.$manageWorkers.dispatch('getWorkers')
+      const workers = await this._manageWorkers.dispatch('getWorkers')
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -389,9 +389,9 @@ export default defineComponent({
 
       set(shootResource, 'spec.maintenance', maintenance)
 
-      const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
+      const scheduleCrontab = await this._hibernationSchedule.dispatch('getScheduleCrontab')
       set(shootResource, 'spec.hibernation.schedules', scheduleCrontab)
-      const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
+      const noHibernationSchedule = await this._hibernationSchedule.dispatch('getNoHibernationSchedule')
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
@@ -466,6 +466,7 @@ export default defineComponent({
       const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
+      console.log('SET!')
       await this.$refs.clusterDetails.setDetailsData({
         name,
         kubernetesVersion,
@@ -480,7 +481,7 @@ export default defineComponent({
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
-      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
+      await this._manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)
@@ -488,7 +489,7 @@ export default defineComponent({
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
 
-      await this.$hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
+      await this._hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createShoot (shootResource) {
       try {

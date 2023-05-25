@@ -125,7 +125,6 @@ export default defineComponent({
   computed: {
     ...mapState(useConfigStore, ['costObjectSettings']),
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useSecretStore, ['dnsSecretsByProviderKind']),
     projectName () {
       return this.projectNameByNamespace(this.namespace)
     },
@@ -189,11 +188,14 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'infrastructureSecretsByCloudProfileName',
       'cloudProfileByName',
     ]),
     ...mapActions(useProjectStore, [
       'projectNameByNamespace',
+    ]),
+    ...mapActions(useSecretStore, [
+      'infrastructureSecretsByCloudProfileName',
+      'dnsSecretsByProviderKind',
     ]),
     get,
     isOwnSecret,

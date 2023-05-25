@@ -1402,6 +1402,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["jwt-decode", "npm:3.1.2"],\
             ["lodash", "npm:4.17.21"],\
             ["md5", "npm:2.3.0"],\
+            ["mitt", "npm:3.0.0"],\
             ["netmask", "npm:2.0.2"],\
             ["p-timeout", "npm:6.1.1"],\
             ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.33"],\
@@ -9012,6 +9013,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minizlib", "npm:2.1.2"],\
             ["minipass", "npm:3.3.6"],\
             ["yallist", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["mitt", [\
+        ["npm:3.0.0", {\
+          "packageLocation": "./.yarn/cache/mitt-npm-3.0.0-ea651563b7-f7be5049d2.zip/node_modules/mitt/",\
+          "packageDependencies": [\
+            ["mitt", "npm:3.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\

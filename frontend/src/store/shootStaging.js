@@ -278,5 +278,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     controlPlaneFailureToleranceTypeChangeAllowed,
     getDnsConfiguration,
     dnsConfigurationValid,
+    setClusterConfiguration,
   }
 })
