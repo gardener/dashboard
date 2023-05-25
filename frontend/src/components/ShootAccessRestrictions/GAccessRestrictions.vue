@@ -16,13 +16,11 @@ SPDX-License-Identifier: Apache-2.0
               inset
             ></v-switch>
           </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
-            <v-list-item-subtitle v-if="definition.input.description"
-              class="wrap-text pt-1"
-              v-html="transformHtml(definition.input.description)"
-            />
-          </v-list-item-content>
+          <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
+          <v-list-item-subtitle v-if="definition.input.description"
+            class="wrap-text pt-1"
+            v-html="transformHtml(definition.input.description)"
+          />
         </v-list-item>
         <template v-if="definition">
           <v-list-item v-for="optionValue in definition.options" :key="optionValue.key">
@@ -33,16 +31,14 @@ SPDX-License-Identifier: Apache-2.0
                 color="primary"
               ></v-checkbox>
             </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title class="wrap-text" :class="textClass(definition)">
-                {{optionValue.input.title}}
-              </v-list-item-title>
-              <v-list-item-subtitle v-if="optionValue.input.description"
-                class="wrap-text pt-1"
-                :class="textClass(definition)"
-                v-html="transformHtml(optionValue.input.description)"
-              />
-            </v-list-item-content>
+            <v-list-item-title class="wrap-text" :class="textClass(definition)">
+              {{optionValue.input.title}}
+            </v-list-item-title>
+            <v-list-item-subtitle v-if="optionValue.input.description"
+              class="wrap-text pt-1"
+              :class="textClass(definition)"
+              v-html="transformHtml(optionValue.input.description)"
+            />
           </v-list-item>
         </template>
       </v-list>

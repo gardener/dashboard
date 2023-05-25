@@ -32,9 +32,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-action>
                   <g-vendor-icon :value="item"></g-vendor-icon>
                 </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>{{item}}</v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>{{item}}</v-list-item-title>
               </template>
               <template v-slot:selection="{ item }">
                 <g-vendor-icon :value="item"></g-vendor-icon>

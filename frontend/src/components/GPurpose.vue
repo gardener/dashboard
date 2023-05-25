@@ -20,12 +20,10 @@ SPDX-License-Identifier: Apache-2.0
       @input="onInputPurpose"
       @blur="v$.internalPurpose.$touch()">
       <template v-slot:item="{ item }">
-        <v-list-item-content>
-          <v-list-item-title>{{item.purpose}}</v-list-item-title>
-          <v-list-item-subtitle>
-            {{item.description}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
+        <v-list-item-title>{{item.purpose}}</v-list-item-title>
+        <v-list-item-subtitle>
+          {{item.description}}
+        </v-list-item-subtitle>
       </template>
     </v-select>
   </div>

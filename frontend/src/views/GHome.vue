@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <h3>Let's get started</h3>
         <v-tooltip location="top" :disabled="canCreateProject">
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
               <v-btn
                 variant="text"
                 class="text-left text-primary"

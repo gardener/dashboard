@@ -12,9 +12,9 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!description"
         max-width="600px"
       >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
           <v-chip
-            v-on="on"
+            v-bind="props"
             small
             outlined
             color="primary"
@@ -30,9 +30,9 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!description"
         max-width="600px"
       >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
           <v-chip
-            v-on="on"
+            v-bind="props"
             small
             outlined
             color="primary"

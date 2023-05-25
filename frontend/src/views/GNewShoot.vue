@@ -8,9 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="sortedInfrastructureKindList.length" class="newshoot-container">
     <v-container fluid class="newshoot-cards">
       <v-card flat>
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Infrastructure
-        </v-card-title>
+        <g-toolbar title="Infrastructure" />
         <v-card-text>
           <g-new-shoot-select-infrastructure
             ref="infrastructure"
@@ -20,9 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Cluster Details
-        </v-card-title>
+        <g-toolbar title="Cluster Details" />
         <v-card-text>
           <g-new-shoot-details
             ref="clusterDetails"
@@ -32,9 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Infrastructure Details
-        </v-card-title>
+        <g-toolbar title="Infrastructure Details" />
         <v-card-text>
           <g-new-shoot-infrastructure-details
             ref="infrastructureDetails"
@@ -44,25 +38,19 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Control Plane High Availability
-        </v-card-title>
+        <g-toolbar title="Control Plane High Availability" />
         <v-card-text>
           <g-manage-control-plane-high-availability />
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          DNS Configuration
-        </v-card-title>
+        <g-toolbar title="DNS Configuration" />
         <v-card-text>
           <g-manage-shoot-dns/>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4" v-if="accessRestriction">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-         Access Restrictions
-        </v-card-title>
+        <g-toolbar title="Access Restrictions" />
         <v-card-text>
           <g-access-restrictions
             ref="accessRestrictions"
@@ -72,9 +60,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <!--
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Worker
-        </v-card-title>
+        <g-toolbar title="Worker" />
         <v-card-text>
           <g-manage-workers
             :user-inter-action-bus="userInterActionBus"
@@ -86,9 +72,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       -->
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Add-Ons (not actively monitored and provided on a best-effort basis only)
-        </v-card-title>
+        <g-toolbar title="Add-Ons (not actively monitored and provided on a best-effort basis only)" />
         <v-card-text>
           <g-manage-shoot-addons
             ref="addons"
@@ -97,9 +81,7 @@ SPDX-License-Identifier: Apache-2.0
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Maintenance
-        </v-card-title>
+        <g-toolbar title="Maintenance" />
         <v-card-text>
           <g-maintenance-time
             ref="maintenanceTime"
@@ -113,9 +95,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <!--
       <v-card flat class="mt-4">
-        <v-card-title class="text-subtitle-1 toolbar-title--text toolbar-background cardTitle">
-          Hibernation
-        </v-card-title>
+        <g-toolbar title="Hibernation" />
         <v-card-text>
           <g-manage-hibernation-schedule
             :user-inter-action-bus="userInterActionBus"
@@ -164,6 +144,7 @@ import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
+import GToolbar from '@/components/GToolbar.vue'
 
 import asyncRef from '@/mixins/asyncRef'
 
@@ -204,6 +185,7 @@ export default defineComponent({
     GMessage,
     GConfirmDialog,
     GManageControlPlaneHighAvailability,
+    GToolbar,
   },
   mixins: [
     asyncRef('manageWorkers'),
@@ -466,7 +448,6 @@ export default defineComponent({
       const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
-      console.log('SET!')
       await this.$refs.clusterDetails.setDetailsData({
         name,
         kubernetesVersion,

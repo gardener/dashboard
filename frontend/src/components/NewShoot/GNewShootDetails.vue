@@ -37,12 +37,10 @@ SPDX-License-Identifier: Apache-2.0
             persistent-hint
             >
             <template v-slot:item="{ item }">
-              <v-list-item-content>
-                <v-list-item-title>{{item.version}}</v-list-item-title>
-                <v-list-item-subtitle v-if="versionItemDescription(item).length">
-                  {{versionItemDescription(item)}}
-                </v-list-item-subtitle>
-              </v-list-item-content>
+              <v-list-item-title>{{item.version}}</v-list-item-title>
+              <v-list-item-subtitle v-if="versionItemDescription(item).length">
+                {{versionItemDescription(item)}}
+              </v-list-item-subtitle>
             </template>
           </v-select>
         </g-hint-colorizer>

@@ -22,15 +22,13 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-list class="pa-0">
       <v-list-item v-for="({title, value, description, to}) in dnsProviderDescriptions" :key="title" class="px-0">
-        <v-list-item-content class="pt-1">
-          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-          <v-list-item-title v-if="to">
-            <router-link :to="to">
-              {{value}} {{description}}
-            </router-link>
-          </v-list-item-title>
-          <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
-        </v-list-item-content>
+        <v-list-item-subtitle class="pt-1">{{title}}</v-list-item-subtitle>
+        <v-list-item-title v-if="to">
+          <router-link :to="to">
+            {{value}} {{description}}
+          </router-link>
+        </v-list-item-title>
+        <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
       </v-list-item>
       <v-list-item v-if="secret" class="px-0">
         <g-secret-details-item-content

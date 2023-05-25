@@ -53,18 +53,16 @@ SPDX-License-Identifier: Apache-2.0
         </v-text-field>
       </template>
       <template v-slot:item="{ item }">
-        <v-list-item-content>
-          <v-list-item-title>
-            <template v-if="item.value.length">
-              <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
-              <span>{{item.value}}</span>
-              <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
-            </template>
-            <template v-else>
-              Custom {{wildcardSelectLabel}}
-            </template>
-          </v-list-item-title>
-        </v-list-item-content>
+        <v-list-item-title>
+          <template v-if="item.value.length">
+            <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
+            <span>{{item.value}}</span>
+            <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
+          </template>
+          <template v-else>
+            Custom {{wildcardSelectLabel}}
+          </template>
+        </v-list-item-title>
       </template>
     </v-select>
   </div>

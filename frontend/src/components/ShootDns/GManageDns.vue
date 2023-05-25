@@ -36,12 +36,10 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-action>
                 <g-vendor-icon :value="item.type"></g-vendor-icon>
               </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>{{item.secretName}}</v-list-item-title>
-                <v-list-item-subtitle>
-                  Type: {{item.type}}
-                </v-list-item-subtitle>
-              </v-list-item-content>
+              <v-list-item-title>{{item.secretName}}</v-list-item-title>
+              <v-list-item-subtitle>
+                Type: {{item.type}}
+              </v-list-item-subtitle>
             </template>
             <template v-slot:selection="{ item }">
               <g-vendor-icon :value="item.type"></g-vendor-icon>
@@ -92,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 
-import { mapGetters, mapActions } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
@@ -114,8 +112,10 @@ const validations = {
 
 export default defineComponent({
   setup () {
+    const shootStagingStore = useShootStagingStore
     return {
       v$: useVuelidate(),
+      shootStagingStore,
     }
   },
   components: {
@@ -129,7 +129,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters(useShootStagingStore, [
+    ...mapState(useShootStagingStore, [
       'dnsDomain',
       'dnsProviderIds',
       'clusterIsNew',
@@ -162,7 +162,7 @@ export default defineComponent({
         return this.dnsPrimaryProvider
       },
       set (value) {
-        this.dnsPrimaryProvider = value
+        this.shootStagingStore.dnsPrimaryProvider = value
       },
     },
     primaryProviderVisible () {
@@ -183,7 +183,7 @@ export default defineComponent({
   },
   watch: {
     'v$.primaryProvider.$invalid' (value) {
-      this.dnsPrimaryProvider = !value
+      this.shootStagingStore.dnsPrimaryProvider = !value
     },
   },
 })

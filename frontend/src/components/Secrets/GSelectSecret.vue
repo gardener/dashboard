@@ -116,17 +116,22 @@ export default defineComponent({
       },
     }
   },
-  validations: {
-    secret: {
-      required,
-      requiresCostObjectIfEnabled,
-    },
+  validations () {
+    return this.validators
   },
   computed: {
     ...mapState(useConfigStore, ['costObjectSettings']),
     ...mapState(useAuthzStore, ['namespace']),
     projectName () {
       return this.projectNameByNamespace(this.namespace)
+    },
+    validators () {
+      return {
+        secret: {
+          required,
+          requiresCostObjectIfEnabled,
+        },
+      }
     },
     secret: {
       get () {

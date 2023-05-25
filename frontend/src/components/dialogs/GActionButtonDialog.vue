@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="canPatchShoots">
     <v-tooltip top max-width="600px" :disabled="disableToolTip">
-      <template v-slot:activator="{ on }">
-        <div v-on="on">
+      <template v-slot:activator="{ props }">
+        <div v-bind="props">
           <v-btn
             :icon="isIconButton"
             :text="isTextButton"

@@ -14,10 +14,8 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>
       </v-list-item-action>
-      <v-list-item-content  class="align-self-start">
-        <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
-        <v-list-item-subtitle class="d-flex flex-column g-subtitle">{{addonDefinition.description}}</v-list-item-subtitle>
-      </v-list-item-content>
+      <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
+      <v-list-item-subtitle class="d-flex flex-column g-subtitle">{{addonDefinition.description}}</v-list-item-subtitle>
     </v-list-item>
   </v-list>
 </template>

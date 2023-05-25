@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container  class="px-0 mx-0">
+  <v-container class="px-0 mx-0">
     <v-row >
       <v-col v-show="cloudProfiles.length > 1" cols="3">
         <g-cloud-profile
@@ -163,12 +163,10 @@ SPDX-License-Identifier: Apache-2.0
             multiple
           >
             <template v-slot:item="{ item }">
-                <v-list-item-action >
-                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
-                </v-list-item-action>
-                <v-list-item-content :class="{ 'grey--text': item.disabled }">
-                  <v-list-item-title>{{ item.text }}</v-list-item-title>
-                </v-list-item-content>
+              <v-list-item-action >
+                <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
+              </v-list-item-action>
+              <v-list-item-title :class="{ 'grey--text': item.disabled }">{{ item.text }}</v-list-item-title>
             </template>
           </v-select>
         </v-col>
@@ -200,6 +198,7 @@ import {
   useCloudProfileStore,
   useConfigStore,
   useGardenerExtensionStore,
+  useSecretStore,
   useShootStagingStore,
 } from '@/store'
 
@@ -250,8 +249,10 @@ const validations = {
 
 export default defineComponent({
   setup () {
+    const shootStagingStore = useShootStagingStore
     return {
       v$: useVuelidate(),
+      shootStagingStore,
     }
   },
   components: {
@@ -403,7 +404,6 @@ export default defineComponent({
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
-      'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
       'loadBalancerProviderNamesByCloudProfileNameAndRegion',
@@ -414,6 +414,9 @@ export default defineComponent({
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegion',
+    ]),
+    ...mapActions(useSecretStore, [
+      'infrastructureSecretsByCloudProfileName',
     ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -448,7 +451,7 @@ export default defineComponent({
       this.projectID = undefined
     },
     setDefaultCloudProfile () {
-      this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
+      this.shootStagingStore.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
     },
     isLoadBalancerClassSelected ({ value }) {
@@ -567,7 +570,7 @@ export default defineComponent({
       firewallNetworks,
     }) {
       this.infrastructureKind = infrastructureKind
-      this.cloudProfileName = cloudProfileName
+      this.shootStagingStore.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
       this.networkingType = networkingType

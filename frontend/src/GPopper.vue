@@ -88,7 +88,7 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits([
+const emit = defineEmits([
   'input',
 ])
 
@@ -102,12 +102,12 @@ const maxHeight = ref(null)
 
 const closePopper = () => {
   isOpen.value = false
-  emits('input', false)
+  emit('input', false)
 }
 
 const togglePopper = () => {
   isOpen.value = !isOpen.value
-  emits('input', isOpen.value)
+  emit('input', isOpen.value)
 }
 
 const clippingBoundaryEl = computed(() => {

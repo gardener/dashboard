@@ -9,7 +9,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-card
       v-for="infrastructureKind in sortedInfrastructureKindList"
       class="select_infra_card cursor-pointer"
-      :class="{ 'select_infra_card_active elevation-8' : infrastructureKind == selectedInfrastructure }"
+      :class="{
+        'select_infra_card_active elevation-8' : infrastructureKind === selectedInfrastructure,
+        'elevation-3': infrastructureKind !== selectedInfrastructure,
+      }"
       @click.stop="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
       hover
@@ -44,6 +47,9 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: [
+    'valid',
+  ],
   data () {
     return {
       selectedInfrastructure: undefined,

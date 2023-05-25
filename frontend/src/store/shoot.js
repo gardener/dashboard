@@ -217,7 +217,7 @@ export const useShootStore = defineStore('shoot', () => {
     if (!isEmpty(firewallImage)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
     }
-    const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: newWorker.machine.architecture }), 'name')
+    const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region }), 'name')
     const firewallSize = head(firewallSizes)
     if (!isEmpty(firewallSize)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)

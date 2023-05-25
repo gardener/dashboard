@@ -13,45 +13,37 @@ SPDX-License-Identifier: Apache-2.0
           <v-checkbox v-if="selectable" color="primary" v-model="osUpdates"></v-checkbox>
           <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
         </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-title>Operating System</v-list-item-title>
-          <v-list-item-subtitle>
-            Update the operating system of the workers<br />
-            (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-          </v-list-item-subtitle>
-        </v-list-item-content>
+        <v-list-item-title>Operating System</v-list-item-title>
+        <v-list-item-subtitle>
+          Update the operating system of the workers<br />
+          (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
+        </v-list-item-subtitle>
       </v-list-item>
       <v-list-item v-if="selectable || k8sUpdates">
         <v-list-item-action>
           <v-checkbox v-if="selectable" color="primary" v-model="k8sUpdates"></v-checkbox>
           <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
         </v-list-item-action>
-        <v-list-item-content>
           <v-list-item-title >Kubernetes Patch Version</v-list-item-title>
-          <v-list-item-subtitle>
-            Update the control plane of the cluster and the worker components<br />
-            (control plane, most notably the API server, will be briefly unavailable during switch-over)
-          </v-list-item-subtitle>
-        </v-list-item-content>
+        <v-list-item-subtitle>
+          Update the control plane of the cluster and the worker components<br />
+          (control plane, most notably the API server, will be briefly unavailable during switch-over)
+        </v-list-item-subtitle>
       </v-list-item>
       <v-list-item v-if="selectable">
         <v-list-item-action>
           <v-icon>mdi-information-outline</v-icon>
         </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-title >Automatic updates will not update to preview versions</v-list-item-title>
-        </v-list-item-content>
+        <v-list-item-title >Automatic updates will not update to preview versions</v-list-item-title>
       </v-list-item>
       <v-list-item v-if="showNoUpdates">
         <v-list-item-action>
           <v-icon>mdi-close-circle-outline</v-icon>
         </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-title >Updates disabled</v-list-item-title>
-          <v-list-item-subtitle>
-            All automatic updates have been disabled for this cluster
-          </v-list-item-subtitle>
-        </v-list-item-content>
+        <v-list-item-title >Updates disabled</v-list-item-title>
+        <v-list-item-subtitle>
+          All automatic updates have been disabled for this cluster
+        </v-list-item-subtitle>
       </v-list-item>
     </v-list>
   </div>
@@ -88,7 +80,6 @@ export default defineComponent({
       set (value) {
         this.k8sUpdatesInternal = value
         if (this.userInterActionBus) {
-          console.log(this.userInterActionBus)
           this.userInterActionBus.emit('updateK8sMaintenance', value)
         }
       },
