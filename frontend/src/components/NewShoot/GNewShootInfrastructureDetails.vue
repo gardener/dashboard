@@ -21,9 +21,9 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <g-select-secret
          :cloudProfileName="cloudProfileName"
-         :value="secret"
+         v-model="secret"
          @input="onUpdateSecret"
-         :valid="secretValid"
+         v-model:valid="secretValid"
          @update:valid="onSecretValid"></g-select-secret>
       </v-col>
       <v-col cols="3">

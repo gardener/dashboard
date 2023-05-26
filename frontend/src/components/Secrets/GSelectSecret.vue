@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="disabled"
       :items="secretList"
       item-value="metadata.name"
+      item-title="metadata.name"
       return-object
       v-model="secret"
       :error-messages="getErrorMessages('secret')"
@@ -21,14 +22,17 @@ SPDX-License-Identifier: Apache-2.0
       @blur="v$.secret.$touch()"
       persistent-hint
       :hint="secretHint"
+      variant="underlined"
       >
-      <template #item="{ item }">
-        {{get(item, 'metadata.name')}}
-        <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
+      <template #item="{ item, props }">
+        <v-list-item v-bind="omit(props, 'title')" :subtitle="item.raw.description">
+          {{ get(item.raw, 'metadata.name') }}
+          <v-icon v-if="!isOwnSecret(item.raw)">mdi-share</v-icon>
+        </v-list-item>
       </template>
       <template #selection="{ item }">
-        {{get(item, 'metadata.name')}}
-        <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
+        {{get(item.raw, 'metadata.name')}}
+        <v-icon v-if="!isOwnSecret(item.raw)">mdi-share</v-icon>
       </template>
       <template #append-item>
         <v-divider class="mb-2"></v-divider>
@@ -54,6 +58,7 @@ import isEqual from 'lodash/isEqual'
 import isEmpty from 'lodash/isEmpty'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import omit from 'lodash/omit'
 import toUpper from 'lodash/toUpper'
 import { mapState, mapActions } from 'pinia'
 import { getValidationErrors, isOwnSecret, selfTerminationDaysForSecret } from '@/utils'
@@ -79,7 +84,7 @@ export default defineComponent({
     GSecretDialogWrapper,
   },
   props: {
-    value: {
+    modelValue: {
       type: Object,
     },
     valid: {
@@ -97,6 +102,10 @@ export default defineComponent({
       type: String,
     },
   },
+  emits: [
+    'update:valid',
+    'update:modelValue',
+  ],
   data () {
     return {
       secretItemsBeforeAdd: undefined,
@@ -135,10 +144,10 @@ export default defineComponent({
     },
     secret: {
       get () {
-        return this.value
+        return this.modelValue
       },
-      set (value) {
-        this.$emit('input', value)
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
       },
     },
     secretValid: {
@@ -204,6 +213,7 @@ export default defineComponent({
     ]),
     get,
     isOwnSecret,
+    omit,
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -224,7 +234,7 @@ export default defineComponent({
     this.secretValid = !this.v$.secret.$invalid
   },
   watch: {
-    value () {
+    modelValue () {
       this.v$.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
     },
     'v$.secret.$invalid' (value) {
