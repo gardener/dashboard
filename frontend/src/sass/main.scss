@@ -96,3 +96,11 @@
 .inherit-color {
   color: inherit !important;
 }
+
+/*
+ This fixes the missing margin for multi-line hints
+ TODO Maybe we can remove this whith future vuetify version
+*/
+.v-input__details {
+  padding-top: 5px !important;
+}

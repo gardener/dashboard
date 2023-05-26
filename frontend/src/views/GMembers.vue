@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-user-row
-            :item="item.value"
+            :item="item.raw"
             :headers="userAccountTableHeaders"
-            :key="item.value.username"
+            :key="item.raw.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
           ></g-user-row>
@@ -157,9 +157,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-service-account-row
-            :item="item.value"
+            :item="item.raw"
             :headers="serviceAccountTableHeaders"
-            :key="`${item.value.namespace}_${item.value.username}`"
+            :key="`${item.raw.namespace}_${item.raw.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
             @reset-serviceaccount="onResetServiceAccount"

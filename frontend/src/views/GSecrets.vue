@@ -91,9 +91,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
-            :item="item.value"
+            :item="item.raw"
             :headers="infraSecretTableHeaders"
-            :key="`${item.value.cloudProfileName}/${item.value.name}`"
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
           ></g-secret-row-infra>
@@ -179,9 +179,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
-            :item="item.value"
+            :item="item.raw"
             :headers="dnsSecretTableHeaders"
-            :key="`${item.value.cloudProfileName}/${item.value.name}`"
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
           ></g-secret-row-dns>
