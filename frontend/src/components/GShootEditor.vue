@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         transition="slide-y-transition"
       >
-        <template v-slot:message>
+        <template #message>
           <slot name="modificationWarning"></slot>
         </template>
       </g-alert>
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-btn icon :disabled="untouched" @click="reload">
                   <v-icon small>mdi-reload</v-icon>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-btn icon :disabled="!historySize.undo" @click="undo">
                   <v-icon small>mdi-undo</v-icon>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-btn icon :disabled="!historySize.redo" @click="redo">
                   <v-icon small>mdi-redo</v-icon>
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-btn icon @click="downloadContent">
                   <v-icon small>mdi-download</v-icon>
@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical></v-divider>
         <div class="px-2">
           <v-tooltip top>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
                   <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>

@@ -21,8 +21,8 @@ SPDX-License-Identifier: Apache-2.0
       cancel-button-text=""
       width="600"
       >
-      <template v-slot:caption>Quota Help</template>
-      <template v-slot:message>
+      <template #caption>Quota Help</template>
+      <template #message>
         <div class="wrap-text" v-html="resourceQuotaHelpHtml"></div>
       </template>
     </g-dialog>

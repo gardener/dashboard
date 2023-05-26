@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${name} Secret`"
   >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
     </template>
-    <template v-slot:help-slot>
+    <template #help-slot>
       <p v-if="vendor==='aws'">
         Before you can provision and access a Kubernetes cluster, you need to add account credentials. Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
       </p>

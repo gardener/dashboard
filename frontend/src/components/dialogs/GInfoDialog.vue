@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
     width="600"
     @dialog-closed="onDialogClosed()"
     >
-    <template v-slot:caption>About</template>
-    <template v-slot:message>
+    <template #caption>About</template>
+    <template #message>
       <div class="d-flex flex-row align-center mt-3">
         <img src="/static/assets/logo.svg" alt="gardener logo" class="logo mr-3">
         <div>

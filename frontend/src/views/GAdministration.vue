@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -15,14 +15,14 @@ SPDX-License-Identifier: Apache-2.0
               <g-toolbar title="Details"/>
               <g-list>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-information-outline</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Name</div>
                   <div class="text-body-1">
                     {{projectName}}
                   </div>
-                  <template v-slot:append>
+                  <template #append>
                     <g-copy-btn
                       color="action-button"
                       :clipboard-text="projectName"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
                   </template>
                 </g-list-item>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-text-subject</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Description</div>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
                 <template v-if="staleSinceTimestamp">
                   <v-divider inset></v-divider>
                   <g-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <v-icon v-if="staleAutoDeleteTimestamp" :color="color">mdi-delete-clock</v-icon>
                       <v-icon v-else :color="color">mdi-clock-alert-outline</v-icon>
                     </template>
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
                       <span v-if="staleAutoDeleteTimestamp">
                         This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project on
                         <v-tooltip location="right">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <span class="font-weight-bold" v-bind="props">{{staleAutoDeleteDate}}</span>
                           </template>
                           <g-time-string
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                 </template>
                 <v-divider inset/>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-account-cog-outline</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Owner</div>
@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0
                 </g-list-item>
                 <v-divider inset/>
                 <g-list-item v-if="createdBy">
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-account-clock-outline</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Created By</div>
@@ -107,13 +107,13 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </g-list-item>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon v-if="!createdBy" :color="color">mdi-clock-outline</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Created At</div>
                   <div class="text-body-1">
                     <v-tooltip location="right">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <span v-bind="props" class="text-subtitle-1">{{createdAt}}</span>
                       </template>
                       <g-time-string
@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
                 </g-list-item>
                 <v-divider inset/>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-label-outline</v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Purpose</div>
@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
                 <template v-if="slaDescriptionHtml">
                   <v-divider inset/>
                   <g-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <v-icon :color="color">mdi-file-document-outline</v-icon>
                     </template>
                     <div class="text-body-2 text-medium-emphasis">{{slaTitle}}</div>
@@ -151,7 +151,7 @@ SPDX-License-Identifier: Apache-2.0
                 <template v-if="shootCustomFieldList">
                   <v-divider inset/>
                   <g-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <v-icon :color="color">mdi-playlist-star</v-icon>
                     </template>
                       <div class="text-body-2 text-medium-emphasis">Custom Fields for Shoots</div>
@@ -202,13 +202,13 @@ SPDX-License-Identifier: Apache-2.0
               <g-toolbar>Lifecycle</g-toolbar>
               <g-list>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-delete-circle-outline</v-icon>
                   </template>
                   <div class="text-body-1">Delete Project</div>
-                  <template v-slot:append>
+                  <template #append>
                     <v-tooltip v-if="canDeleteProject" location="top">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <div v-bind="props">
                           <v-btn
                             color="action-button"
@@ -232,7 +232,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-toolbar>Billing</g-toolbar>
               <g-list>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon icon="mdi-credit-card-outline" :color="color"></v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">Cost Object</div>
@@ -267,7 +267,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-toolbar title="Access"/>
               <g-list>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-file</v-icon>
                   </template>
                   <div class="text-body-1">Command Line Interface Access</div>
@@ -297,7 +297,7 @@ SPDX-License-Identifier: Apache-2.0
                 :types="{ 'table-thead': 'heading@3', 'table-row': 'table-cell@3' }"
               ></v-skeleton-loader>
               <v-table v-else-if="projectQuotaStatus.length">
-                <template v-slot:default>
+                <template #default>
                   <thead>
                     <tr>
                       <th class="text-left">
@@ -318,7 +318,7 @@ SPDX-License-Identifier: Apache-2.0
                     >
                       <td>
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <span v-bind="props">{{ resourceQuota.caption }}</span>
                           </template>
                           {{ resourceQuota.resourceName }}
@@ -326,7 +326,7 @@ SPDX-License-Identifier: Apache-2.0
                       </td>
                       <td class="text-center">
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-progress-linear v-bind="props" :model-value="resourceQuota.percentage" :color="resourceQuota.progressColor"></v-progress-linear>
                           </template>
                           {{ resourceQuota.percentage }}%
@@ -339,7 +339,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-table>
               <g-list v-else>
                 <g-list-item>
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <v-icon :color="color">mdi-information-outline</v-icon>
                   </template>
                   <div class="text-body-2">
@@ -358,10 +358,10 @@ SPDX-License-Identifier: Apache-2.0
       v-model:detailed-error-message="detailedErrorMessage"
       ref="gDialog"
       width="600">
-      <template v-slot:caption>
+      <template #caption>
         Confirm Delete
       </template>
-      <template v-slot:message>
+      <template #message>
         Are you sure to delete the project <span class="font-weight-bold">{{projectName}}</span>?
         <br />
         <span class="text-error font-weight-bold">The operation can not be undone.</span>

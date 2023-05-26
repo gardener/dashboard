@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -162,7 +162,7 @@ SPDX-License-Identifier: Apache-2.0
             deletable-chips
             multiple
           >
-            <template v-slot:item="{ item }">
+            <template #item="{ item }">
               <v-list-item-action >
                 <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
               </v-list-item-action>

@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${name} Secret`"
   >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-text-field>
       </div>
     </template>
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div v-if="vendor==='azure'">
         <p>
           Before you can provision and access a Kubernetes cluster on Azure, you need to add account/subscription credentials.

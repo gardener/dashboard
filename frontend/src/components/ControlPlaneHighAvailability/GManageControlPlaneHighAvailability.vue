@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-tooltip top :disabled="controlPlaneFailureToleranceTypeChangeAllowed" max-width="400px">
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <div v-bind="props">
           <v-checkbox
             v-model="controlPlaneHighAvailability"

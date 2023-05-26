@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
             @keyup.esc="userFilter = ''"
           ></v-text-field>
           <v-tooltip location="top" v-if="allEmails" >
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 icon="mdi-email-outline"
@@ -36,13 +36,13 @@ SPDX-License-Identifier: Apache-2.0
             <span>Mail to all Members</span>
           </v-tooltip>
           <v-tooltip location="top" v-if="canManageMembers" >
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn v-bind="props" icon="mdi-plus" @click.stop="openUserAddDialog" />
             </template>
             <span>Add Member</span>
           </v-tooltip>
           <v-tooltip location="top" v-if="canManageMembers" >
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn v-bind="props" icon="mdi-help-circle-outline" @click.stop="openUserHelpDialog" />
             </template>
             <span>Help</span>
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table"
       >
-        <template v-slot:item="{ item }">
+        <template #item="{ item }">
           <g-user-row
             :item="item.value"
             :headers="userAccountTableHeaders"
@@ -113,13 +113,13 @@ SPDX-License-Identifier: Apache-2.0
             @keyup.esc="serviceAccountFilter = ''"
           ></v-text-field>
           <v-tooltip location="top" v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn v-bind="props" icon="mdi-plus" @click.stop="openServiceAccountAddDialog" />
             </template>
             <span>Create Service Account</span>
           </v-tooltip>
           <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn v-bind="props" icon ="mdi-help-circle-outline" @click.stop="openServiceAccountHelpDialog" />
             </template>
             <span>Help</span>
@@ -155,7 +155,7 @@ SPDX-License-Identifier: Apache-2.0
         :search="serviceAccountFilter"
         class="g-table"
       >
-        <template v-slot:item="{ item }">
+        <template #item="{ item }">
           <g-service-account-row
             :item="item.value"
             :headers="serviceAccountTableHeaders"

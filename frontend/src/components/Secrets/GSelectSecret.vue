@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -22,15 +22,15 @@ SPDX-License-Identifier: Apache-2.0
       persistent-hint
       :hint="secretHint"
       >
-      <template v-slot:item="{ item }">
+      <template #item="{ item }">
         {{get(item, 'metadata.name')}}
         <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
       </template>
-      <template v-slot:selection="{ item }">
+      <template #selection="{ item }">
         {{get(item, 'metadata.name')}}
         <v-icon v-if="!isOwnSecret(item)">mdi-share</v-icon>
       </template>
-      <template v-slot:append-item>
+      <template #append-item>
         <v-divider class="mb-2"></v-divider>
         <v-btn text @click="openSecretDialog" class="mx-2 primary--text">
           <v-icon class="mr-2">mdi-plus</v-icon>

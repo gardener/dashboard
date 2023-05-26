@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!description"
         max-width="600px"
       >
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-chip
             v-bind="props"
             small
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!description"
         max-width="600px"
       >
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-chip
             v-bind="props"
             small

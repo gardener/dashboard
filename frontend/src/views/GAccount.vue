@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-toolbar>Details</g-toolbar>
           <g-list>
              <g-list-item>
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon color="primary" :icon="icon"></v-icon>
                 </template>
                 <div class="label text-medium-emphasis">
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-divider inset/>
           <g-list>
             <g-list-item>
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary" icon="mdi-timelapse"></v-icon>
               </template>
               <div class="label text-medium-emphasis">
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-toolbar>Access</g-toolbar>
           <g-list>
             <g-list-item>
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary" icon="mdi-key"></v-icon>
               </template>
               <div class="text-body-1">
@@ -80,14 +80,14 @@ SPDX-License-Identifier: Apache-2.0
               <div class="text-body-2 text-medium-emphasis">
                 Personal bearer token for API authentication
               </div>
-              <template v-slot:append>
+              <template #append>
                 <g-copy-btn :clipboard-text="idToken"></g-copy-btn>
               </template>
             </g-list-item>
             <template v-if="isKubeconfigEnabled">
               <v-divider inset class="my-2"/>
               <g-list-item>
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon color="primary" icon="mdi-file"></v-icon>
                 </template>
                 <div class="text-body-1">
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="text-body-2 text-medium-emphasis line-clamp-2">
                   Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)
                 </div>
-                <template v-slot:append>
+                <template #append>
                   <g-action-button
                     icon="mdi-download"
                     @click="onDownload"

@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     width="600"
     max-height="60vh"
     >
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <g-manage-control-plane-high-availability :key="componentKey" />
     </template>
   </g-action-button-dialog>

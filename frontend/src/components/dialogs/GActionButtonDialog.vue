@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="canPatchShoots">
     <v-tooltip top max-width="600px" :disabled="disableToolTip">
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <div v-bind="props">
           <v-btn
             :icon="isIconButton"
@@ -42,12 +42,12 @@ SPDX-License-Identifier: Apache-2.0
       :disable-confirm-input-focus="disableConfirmInputFocus"
       ref="gDialog"
     >
-      <template v-slot:caption>{{caption}}</template>
-      <template v-slot:affectedObjectName>{{shootName}}</template>
-      <template v-slot:top><slot name="top"></slot></template>
-      <template v-slot:card><slot name="card"></slot></template>
-      <template v-slot:message><slot name="actionComponent"></slot></template>
-      <template v-slot:errorMessage><slot name="errorMessage"></slot></template>
+      <template #caption>{{caption}}</template>
+      <template #affectedObjectName>{{shootName}}</template>
+      <template #top><slot name="top"></slot></template>
+      <template #card><slot name="card"></slot></template>
+      <template #message><slot name="actionComponent"></slot></template>
+      <template #errorMessage><slot name="errorMessage"></slot></template>
     </g-dialog>
   </div>
   <div v-else style="width: 36px"></div>

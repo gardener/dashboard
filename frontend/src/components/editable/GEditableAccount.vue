@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       :max-width="contentWidth"
       :close-on-content-click="false"
     >
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <div class="d-flex align-center justify-space-between">
           <div
             ref="content"
@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0
               Save
             </v-tooltip>
           </template>
-          <template v-slot:message="{ message }">
+          <template #message="{ message }">
             <g-error-message
               :message="message"
               @close="clearMessages"

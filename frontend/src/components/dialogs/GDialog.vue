@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
           {{cancelButtonText}}
         </v-btn>
         <v-tooltip location="top" :disabled="valid">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <div v-bind="props">
               <v-btn
                 variant="text"

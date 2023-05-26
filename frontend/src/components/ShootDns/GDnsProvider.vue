@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :title="secretName"
     :popper-key="`worker_group_${type}_${secretName}`"
   >
-    <template v-slot:popperRef>
+    <template #popperRef>
       <v-chip
         small
         color="primary"

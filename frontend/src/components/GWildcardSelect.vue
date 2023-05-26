@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       :hint="wildcardSelectHint"
       persistent-hint
     >
-      <template v-slot:selection="{ item }">
+      <template #selection="{ item }">
         <v-text-field
           v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
           @click.stop
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           >
         </v-text-field>
       </template>
-      <template v-slot:item="{ item }">
+      <template #item="{ item }">
         <v-list-item-title>
           <template v-if="item.value.length">
             <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>

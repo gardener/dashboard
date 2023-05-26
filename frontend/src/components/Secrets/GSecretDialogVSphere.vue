@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     replace-title="Replace VMware vSphere Secret"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
         color="primary"
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div>
         <p>
           Before you can provision and access a Kubernetes cluster on VMware vSphere, you need to add vSphere and NSX-T account credentials.

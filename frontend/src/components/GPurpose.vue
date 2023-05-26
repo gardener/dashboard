@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -12,14 +12,14 @@ SPDX-License-Identifier: Apache-2.0
       item-color="primary"
       label="Purpose"
       :items="purposes"
-      item-text="purpose"
+      item-title="purpose"
       item-value="purpose"
       v-model="internalPurpose"
       persistent-hint
       :error-messages="getErrorMessages('internalPurpose')"
       @input="onInputPurpose"
       @blur="v$.internalPurpose.$touch()">
-      <template v-slot:item="{ item }">
+      <template #item="{ item }">
         <v-list-item-title>{{item.purpose}}</v-list-item-title>
         <v-list-item-subtitle>
           {{item.description}}

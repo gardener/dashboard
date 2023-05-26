@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip v-if="foreign"
               location="top"
             >
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-icon
                   v-bind="props"
                   icon="mdi-account-arrow-left"
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip v-if="orphaned"
               location="top"
             >
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-icon
                   v-bind="props"
                   icon="mdi-alert-circle-outline"

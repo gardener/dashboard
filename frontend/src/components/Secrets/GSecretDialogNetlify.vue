@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     replace-title="Replace Netlify Secret"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div>
         <p>
           You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate to Netlify DNS API.

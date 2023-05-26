@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0
     active-class="text-decoration-none"
     exact
   >
-    <template v-slot:divider>
+    <template #divider>
       <v-icon icon="mdi-chevron-right" size="large"/>
     </template>
-    <template v-slot:title="{ item }">
+    <template #title="{ item }">
       <span v-if="item.to">
         {{ item.title }}
       </span>

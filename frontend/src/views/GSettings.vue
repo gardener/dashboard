@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
                   class="mt-1 h-75"
                 >
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="light" v-bind="props" variant="tonal" min-width="36">
                         <v-icon icon="mdi-white-balance-sunny" />
                       </v-btn>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
                     <span>Light Mode</span>
                   </v-tooltip>
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="dark" v-bind="props" variant="tonal" min-width="36">
                         <v-icon icon="mdi-weather-night" />
                       </v-btn>
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
                     <span>Dark Mode</span>
                   </v-tooltip>
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="auto" v-bind="props" variant="tonal" min-width="36">
                         <v-icon icon="mdi-brightness-auto" />
                       </v-btn>
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
                     variant="tonal"
                     :prepend-icon="icon"
                   >
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <v-icon :color="color"></v-icon>
                     </template>
                     <span class="text-lowercase text-caption">{{ text }}</span>

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :popper-key="`cp_ha_tag_${shootControlPlaneHighAvailabilityFailureTolerance}`"
     :toolbar-color="color"
   >
-    <template v-slot:popperRef>
+    <template #popperRef>
       <v-chip
         outlined
         :small="!xSmall"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         {{shootControlPlaneHighAvailabilityFailureTolerance}}
       </v-chip>
     </template>
-    <template v-slot:card>
+    <template #card>
       <v-list class="text-left" style="max-width: 600px;">
         <v-list-item>
           <v-list-item-icon>

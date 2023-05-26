@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     icon="mdi-refresh"
     :button-text="buttonText"
     confirm-button-text="Trigger now">
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
       <g-maintenance-components
         title="The following updates will be performed"

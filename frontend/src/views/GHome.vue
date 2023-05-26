@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <h3>Let's get started</h3>
         <v-tooltip location="top" :disabled="canCreateProject">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <div v-bind="props">
               <v-btn
                 variant="text"

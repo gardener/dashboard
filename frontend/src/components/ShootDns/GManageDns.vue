@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             :disabled="!clusterIsNew"
           >
-            <template v-slot:item="{ item }">
+            <template #item="{ item }">
               <v-list-item-action>
                 <g-vendor-icon :value="item.type"></g-vendor-icon>
               </v-list-item-action>
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
                 Type: {{item.type}}
               </v-list-item-subtitle>
             </template>
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               <g-vendor-icon :value="item.type"></g-vendor-icon>
               <span class="ml-2">
                 {{item.secretName}}

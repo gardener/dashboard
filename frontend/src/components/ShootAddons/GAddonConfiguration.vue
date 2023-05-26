@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     width="900"
     max-height="60vh"
     >
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <g-manage-shoot-addons
         ref="addons"
        ></g-manage-shoot-addons>
