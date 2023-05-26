@@ -112,10 +112,8 @@ const validations = {
 
 export default defineComponent({
   setup () {
-    const shootStagingStore = useShootStagingStore
     return {
       v$: useVuelidate(),
-      shootStagingStore,
     }
   },
   components: {
@@ -162,7 +160,7 @@ export default defineComponent({
         return this.dnsPrimaryProvider
       },
       set (value) {
-        this.shootStagingStore.dnsPrimaryProvider = value
+        this.setDnsPrimaryProvider(value)
       },
     },
     primaryProviderVisible () {
@@ -172,6 +170,8 @@ export default defineComponent({
   methods: {
     ...mapActions(useShootStagingStore, [
       'addDnsProvider',
+      'setDnsPrimaryProvider',
+      'setDnsPrimaryProviderValid',
     ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -183,7 +183,7 @@ export default defineComponent({
   },
   watch: {
     'v$.primaryProvider.$invalid' (value) {
-      this.shootStagingStore.dnsPrimaryProvider = !value
+      this.setDnsPrimaryProviderValid(!value)
     },
   },
 })

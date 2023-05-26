@@ -41,7 +41,7 @@ export default defineComponent({
         return this.modelValue
       },
       set (val) {
-        this.$emit('update:mdodelValue', val)
+        this.$emit('update:modelValue', val)
       },
     },
   },

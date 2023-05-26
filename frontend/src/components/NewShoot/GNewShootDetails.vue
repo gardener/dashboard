@@ -279,7 +279,7 @@ export default defineComponent({
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this._purpose.dispatch('resetPurpose')
+      this.$refs.purpose.resetPurpose()
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName

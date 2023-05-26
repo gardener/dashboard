@@ -202,57 +202,10 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-const validations = {
-  region: {
-    required,
-  },
-  networkingType: {
-    required,
-  },
-  loadBalancerProviderName: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'openstack'
-    }),
-  },
-  loadBalancerClassNames: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'vsphere'
-    }),
-    includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames'),
-  },
-  partitionID: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
-    }),
-  },
-  firewallImage: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
-    }),
-  },
-  firewallSize: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
-    }),
-  },
-  firewallNetworks: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
-    }),
-  },
-  projectID: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
-    }),
-  },
-}
-
 export default defineComponent({
   setup () {
-    const shootStagingStore = useShootStagingStore
     return {
       v$: useVuelidate(),
-      shootStagingStore,
     }
   },
   components: {
@@ -269,6 +222,7 @@ export default defineComponent({
   data () {
     return {
       infrastructureKind: undefined,
+      cloudProfileName: undefined,
       secret: undefined,
       region: undefined,
       networkingType: undefined,
@@ -288,11 +242,58 @@ export default defineComponent({
       valid: false,
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
     ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
-    ...mapState(useShootStagingStore, ['cloudProfileName']),
+    validators () {
+      return {
+        region: {
+          required,
+        },
+        networkingType: {
+          required,
+        },
+        loadBalancerProviderName: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'openstack'
+          }),
+        },
+        loadBalancerClassNames: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'vsphere'
+          }),
+          includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames'),
+        },
+        partitionID: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'metal'
+          }),
+        },
+        firewallImage: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'metal'
+          }),
+        },
+        firewallSize: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'metal'
+          }),
+        },
+        firewallNetworks: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'metal'
+          }),
+        },
+        projectID: {
+          required: requiredIf(function () {
+            return this.infrastructureKind === 'metal'
+          }),
+        },
+      }
+    },
     validationErrors () {
       const validationErrors = {
         region: {
@@ -418,6 +419,9 @@ export default defineComponent({
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
     ]),
+    ...mapActions(useShootStagingStore, [
+      'setCloudProfileName',
+    ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -451,7 +455,7 @@ export default defineComponent({
       this.projectID = undefined
     },
     setDefaultCloudProfile () {
-      this.shootStagingStore.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
+      this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
     },
     isLoadBalancerClassSelected ({ value }) {
@@ -520,6 +524,7 @@ export default defineComponent({
       this.validateInput()
     },
     onUpdateCloudProfileName () {
+      this.setCloudProfileName(this.cloudProfileName)
       this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
       this.validateInput()
@@ -570,7 +575,7 @@ export default defineComponent({
       firewallNetworks,
     }) {
       this.infrastructureKind = infrastructureKind
-      this.shootStagingStore.cloudProfileName = cloudProfileName
+      this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
       this.networkingType = networkingType

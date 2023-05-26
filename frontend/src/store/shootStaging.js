@@ -138,6 +138,18 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     return clusterIsNew.value || !initialControlPlaneFailureToleranceType.value
   })
 
+  function setCloudProfileName (value) {
+    cloudProfileName.value = value
+  }
+
+  function setDnsPrimaryProvider (value) {
+    dnsPrimaryProviderId.value = getId(value)
+  }
+
+  function setDnsPrimaryProviderValid (value) {
+    dnsPrimaryProviderValid.value = value
+  }
+
   function setDnsDomain (value) {
     dnsDomain.value = value
     if (!value) {
@@ -279,5 +291,8 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     getDnsConfiguration,
     dnsConfigurationValid,
     setClusterConfiguration,
+    setCloudProfileName,
+    setDnsPrimaryProvider,
+    setDnsPrimaryProviderValid,
   }
 })
