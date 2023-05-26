@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           @input="onInputName"
           @blur="v$.name.$touch()"
           hint="Maximum name length depends on project name"
+          variant="underlined"
           ></v-text-field>
       </v-col>
       <v-col cols="3">
@@ -26,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Kubernetes Version"
-            item-text="version"
+            item-title="version"
             item-value="version"
             :items="sortedKubernetesVersionsList"
             v-model="kubernetesVersion"
@@ -35,12 +36,10 @@ SPDX-License-Identifier: Apache-2.0
             @blur="v$.kubernetesVersion.$touch()"
             :hint="versionHint"
             persistent-hint
+            variant="underlined"
             >
-            <template v-slot:item="{ item }">
-              <v-list-item-title>{{item.version}}</v-list-item-title>
-              <v-list-item-subtitle v-if="versionItemDescription(item).length">
-                {{versionItemDescription(item)}}
-              </v-list-item-subtitle>
+            <template #item="{ item, props }">
+              <v-list-item v-bind="props" :subtitle="versionItemDescription(item.raw)" />
             </template>
           </v-select>
         </g-hint-colorizer>
@@ -51,7 +50,6 @@ SPDX-License-Identifier: Apache-2.0
           @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
           ref="purpose"
-          v-on="_purpose.hooks"
         ></g-purpose>
       </v-col>
     </v-row>
@@ -81,8 +79,6 @@ import { required, maxLength } from '@vuelidate/validators'
 
 import GHintColorizer from '@/components/GHintColorizer'
 import GPurpose from '@/components/GPurpose'
-
-import asyncRef from '@/mixins/asyncRef'
 
 import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -121,15 +117,15 @@ export default defineComponent({
     GPurpose,
     GStaticTokenKubeconfigSwitch,
   },
-  mixins: [
-    asyncRef('purpose'),
-  ],
   props: {
     userInterActionBus: {
       type: Object,
       required: true,
     },
   },
+  emits: [
+    'valid',
+  ],
   data () {
     return {
       validationErrors,
@@ -212,7 +208,6 @@ export default defineComponent({
     ...mapActions(useCloudProfileStore, [
       'sortedKubernetesVersions',
       'defaultKubernetesVersionForCloudProfileName',
-      'shootByNamespaceAndName',
       'kubernetesVersionIsNotLatestPatch',
     ]),
     ...mapActions(useShootStore, [
@@ -266,7 +261,7 @@ export default defineComponent({
       this.updateK8sMaintenance = updateK8sMaintenance
       this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
 
-      await this._purpose.dispatch('setPurpose', purpose)
+      this.$refs.purpose.setPurpose(purpose)
 
       this.validateInput()
     },

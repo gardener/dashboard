@@ -41,7 +41,6 @@ import {
   maintenanceWindowWithBeginAndTimezone,
   randomMaintenanceBegin,
 } from '@/utils'
-import { keyForShoot, findItem, constants, putItem, deleteItem } from './shootHelpers'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -271,11 +270,12 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   function shootByNamespaceAndName ({ namespace, name }) {
-    return findItem(list.value)
+    // TODO
+    return undefined
   }
 
   function handleEvent () {
-
+    // TODO
   }
 
   async function fetchShoots () {

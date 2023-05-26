@@ -18,12 +18,11 @@ SPDX-License-Identifier: Apache-2.0
       persistent-hint
       :error-messages="getErrorMessages('internalPurpose')"
       @input="onInputPurpose"
-      @blur="v$.internalPurpose.$touch()">
-      <template #item="{ item }">
-        <v-list-item-title>{{item.purpose}}</v-list-item-title>
-        <v-list-item-subtitle>
-          {{item.description}}
-        </v-list-item-subtitle>
+      @blur="v$.internalPurpose.$touch()"
+      variant="underlined"
+      >
+      <template #item="{ item, props }">
+        <v-list-item v-bind="props" :subtitle="item.raw.description" />
       </template>
     </v-select>
   </div>
@@ -52,6 +51,10 @@ export default {
       type: Object,
     },
   },
+  emits: [
+    'valid',
+    'update-purpose',
+  ],
   data () {
     return {
       validationErrors,
