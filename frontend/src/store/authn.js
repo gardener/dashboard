@@ -101,10 +101,10 @@ export const useAuthnStore = defineStore('authn', () => {
 
   function $reset () {
     try {
-      user.value = decode(cookies.get(COOKIE_HEADER_PAYLOAD))
+      this.SET_USER(decode(cookies.get(COOKIE_HEADER_PAYLOAD)))
     } catch (err) {
       logger.error(err.message)
-      user.value = null
+      this.SET_USER(null)
     }
   }
 
@@ -259,6 +259,11 @@ export const useAuthnStore = defineStore('authn', () => {
     return refreshTokenPromise
   }
 
+  // mutations
+  function SET_USER (value) {
+    user.value = value
+  }
+
   return {
     user,
     isAdmin,
@@ -272,6 +277,9 @@ export const useAuthnStore = defineStore('authn', () => {
     signout,
     signin,
     signinWithOidc,
+    ensureValidToken,
     $reset,
+    // mutations
+    SET_USER,
   }
 })

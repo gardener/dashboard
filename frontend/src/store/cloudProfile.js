@@ -6,10 +6,21 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useApi, useLogger } from '@/composables'
 import semver from 'semver'
+
+import { useSeedStore } from './seed'
+import { useConfigStore } from './config'
+import { useApi, useLogger } from '@/composables'
+
+import {
+  shortRandomString,
+  parseSize,
+  defaultCriNameByKubernetesVersion,
+  getDateFormatted,
+} from '@/utils'
 import moment from '@/utils/moment'
-import { getDateFormatted } from '@/utils'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
@@ -31,10 +42,8 @@ import compact from 'lodash/compact'
 import head from 'lodash/head'
 import max from 'lodash/max'
 import cloneDeep from 'lodash/cloneDeep'
-import { useSeedStore } from './seed'
-import { useConfigStore } from './config'
-
-const logger = useLogger()
+import sample from 'lodash/sample'
+import pick from 'lodash/pick'
 
 // helpers
 const matchesPropertyOrEmpty = (path, srcValue) => {
@@ -213,7 +222,7 @@ const firstItemMatchingVersionClassification = (items) => {
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
-
+  const logger = useLogger()
   const api = useApi()
 
   const list = ref(null)
@@ -607,6 +616,53 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return firstItemMatchingVersionClassification(k8sVersions)
   }
 
+  function generateWorker (availableZones, cloudProfileName, region, kubernetesVersion) {
+    const id = uuidv4()
+    const name = `worker-${shortRandomString(5)}`
+    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+    const architecture = head(machineArchitecturesByCloudProfileNameAndRegion({ cloudProfileName, region }))
+    const machineTypesForZone = machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture })
+    const machineType = head(machineTypesForZone) || {}
+    const volumeTypesForZone = volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const volumeType = head(volumeTypesForZone) || {}
+    const machineImage = defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
+    const minVolumeSize = minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+
+    const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+    const worker = {
+      id,
+      name,
+      minimum: 1,
+      maximum: 2,
+      maxSurge: 1,
+      machine: {
+        type: machineType.name,
+        image: pick(machineImage, ['name', 'version']),
+        architecture,
+      },
+      zones,
+      cri: {
+        name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion),
+      },
+      isNew: true,
+    }
+    if (volumeType.name) {
+      worker.volume = {
+        type: volumeType.name,
+        size: defaultVolumeSize,
+      }
+    } else if (!machineType.storage) {
+      worker.volume = {
+        size: defaultVolumeSize,
+      }
+    } else if (machineType.storage.type !== 'fixed') {
+      worker.volume = {
+        size: machineType.storage.size,
+      }
+    }
+    return worker
+  }
+
   return {
     list,
     isInitial,
@@ -631,5 +687,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByCloudProfileNameAndRegion,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
+    generateWorker,
   }
 })
