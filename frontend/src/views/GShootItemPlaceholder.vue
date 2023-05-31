@@ -30,10 +30,13 @@ export default defineComponent({
       name,
       after,
     }) => {
-      if (name === 'handleEvent') {
-        after(({ payload }) => {
-          this.handleShootEvent(payload.event)
-        })
+      switch (name) {
+        case 'HANDLE_EVENT': {
+          after(({ payload }) => {
+            this.handleShootEvent(payload.event)
+          })
+          break
+        }
       }
     })
 
