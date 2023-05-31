@@ -20,7 +20,6 @@ const yaml = {
 
 export default {
   install (app) {
-    app.config.globalProperties.$yaml = yaml
-    app.provide('yaml', yaml)
+    app.provide('yaml', app.config.globalProperties.$yaml = yaml)
   },
 }

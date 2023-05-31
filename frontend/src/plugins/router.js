@@ -9,7 +9,7 @@ import { createRouter } from '@/router'
 export default {
   install (app) {
     app.use(createRouter())
-    app.provide('$router', app.config.globalProperties.$router)
-    app.provide('$route', app.config.globalProperties.$route)
+    app.provide('router', app.config.globalProperties.$router)
+    app.provide('route', app.config.globalProperties.$route)
   },
 }
