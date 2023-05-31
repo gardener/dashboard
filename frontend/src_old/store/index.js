@@ -926,53 +926,6 @@ const getters = {
       return false
     }
   },
-  generateWorker (state, getters) {
-    return (availableZones, cloudProfileName, region, kubernetesVersion) => {
-      const id = uuidv4()
-      const name = `worker-${shortRandomString(5)}`
-      const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-      const architecture = head(getters.machineArchitecturesByCloudProfileNameAndRegion({ cloudProfileName, region }))
-      const machineTypesForZone = getters.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture })
-      const machineType = head(machineTypesForZone) || {}
-      const volumeTypesForZone = getters.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const volumeType = head(volumeTypesForZone) || {}
-      const machineImage = getters.defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
-      const minVolumeSize = getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
-      const worker = {
-        id,
-        name,
-        minimum: 1,
-        maximum: 2,
-        maxSurge: 1,
-        machine: {
-          type: machineType.name,
-          image: pick(machineImage, ['name', 'version']),
-          architecture,
-        },
-        zones,
-        cri: {
-          name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion),
-        },
-        isNew: true,
-      }
-      if (volumeType.name) {
-        worker.volume = {
-          type: volumeType.name,
-          size: defaultVolumeSize,
-        }
-      } else if (!machineType.storage) {
-        worker.volume = {
-          size: defaultVolumeSize,
-        }
-      } else if (machineType.storage.type !== 'fixed') {
-        worker.volume = {
-          size: machineType.storage.size,
-        }
-      }
-      return worker
-    }
-  },
   availableKubernetesUpdatesForShoot (state, getters) {
     return (shootVersion, cloudProfileName) => {
       const key = `${shootVersion}_${cloudProfileName}`

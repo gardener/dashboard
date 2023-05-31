@@ -157,7 +157,7 @@ export default {
     ShootAccessCard,
     IconBase,
     CertifiedKubernetes,
-    TableColumnSelection
+    TableColumnSelection,
   },
   data () {
     return {
@@ -165,7 +165,7 @@ export default {
       dialog: null,
       options: undefined,
       cachedItems: null,
-      selectedColumns: undefined
+      selectedColumns: undefined,
     }
   },
   watch: {
@@ -185,29 +185,29 @@ export default {
         const tableOptions = {
           ...this.defaultTableOptions,
           ...currentTableOptions,
-          itemsPerPage
+          itemsPerPage,
         }
         this.$localStorage.setObject('projects/shoot-list/options', tableOptions)
       } else {
         this.$localStorage.removeItem(`project/${this.projectName}/shoot-list/options`) // clear project specific options
         this.$localStorage.setObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
       }
-    }
+    },
   },
   methods: {
     ...mapActions([
       'setSelectedShoot',
-      'setShootListFilter'
+      'setShootListFilter',
     ]),
     ...mapActions([
-      'subscribeShoots'
+      'subscribeShoots',
     ]),
     ...mapActions('shoots', [
-      'setFocusMode'
+      'setFocusMode',
     ]),
     ...mapMutations('shoots', {
       setSortBy: 'SET_SORT_BY',
-      setSortDesc: 'SET_SORT_DESC'
+      setSortDesc: 'SET_SORT_DESC',
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -239,7 +239,7 @@ export default {
     resetTableSettings () {
       this.selectedColumns = {
         ...this.defaultStandardSelectedColumns,
-        ...this.defaultCustomSelectedColumns
+        ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
       this.options = this.defaultTableOptions
@@ -249,26 +249,26 @@ export default {
       const projectSpecificSelectedColumns = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/selected-columns`)
       this.selectedColumns = {
         ...selectedColumns,
-        ...projectSpecificSelectedColumns
+        ...projectSpecificSelectedColumns,
       }
       const projectSpecificTableOptions = this.$localStorage.getObject(`project/${this.projectName}/shoot-list/options`)
       const tableOptions = this.$localStorage.getObject('projects/shoot-list/options')
       this.options = {
         ...this.defaultTableOptions,
         ...tableOptions,
-        ...projectSpecificTableOptions
+        ...projectSpecificTableOptions,
       }
     },
     async toggleFilter ({ value }) {
       const key = value
-      await this.setShootListFilter({ filter: key, value: !this.getShootListFilters[key] })
+      await this.setShootListFilter({ filter: key, value: !this.shootListFilters[key] })
 
-      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.getShootListFilters, [
+      this.$localStorage.setObject('project/_all/shoot-list/filter', pick(this.shootListFilters, [
         'onlyShootsWithIssues',
         'progressing',
         'noOperatorAction',
         'deactivatedReconciliation',
-        'hideTicketsWithLabel'
+        'hideTicketsWithLabel',
       ]))
 
       if (key === 'onlyShootsWithIssues') {
@@ -276,21 +276,21 @@ export default {
       }
     },
     isFilterActive (key) {
-      const filters = this.getShootListFilters
+      const filters = this.shootListFilters
       return get(filters, key, false)
     },
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
-    }, 500)
+    }, 500),
   },
   computed: {
     ...mapGetters({
       mappedItems: 'shootList',
-      selectedItem: 'selectedShoot'
+      selectedItem: 'selectedShoot',
     }),
     ...mapGetters([
       'isAdmin',
-      'getShootListFilters',
+      'shootListFilters',
       'canPatchShoots',
       'canDeleteShoots',
       'canCreateShoots',
@@ -299,36 +299,36 @@ export default {
       'projectFromProjectList',
       'projectName',
       'shootCustomFieldList',
-      'shootCustomFields'
+      'shootCustomFields',
     ]),
     ...mapGetters('shoots', [
-      'loading'
+      'loading',
     ]),
     ...mapState('socket', [
-      'connected'
+      'connected',
     ]),
     ...mapGetters('shoots', [
       'sortItems',
       'searchItems',
-      'numberOfNewItemsSinceFreeze'
+      'numberOfNewItemsSinceFreeze',
     ]),
     ...mapState([
       'cfg',
       'namespace',
       'shoots/focusMode',
       'shoots/sortBy',
-      'shoots/sortDesc'
+      'shoots/sortDesc',
     ]),
     ...mapState('shoots', [
       'focusMode',
       'sortBy',
-      'sortDesc'
+      'sortDesc',
     ]),
     defaultTableOptions () {
       return {
         sortBy: ['name'],
         sortDesc: [false],
-        itemsPerPage: 10
+        itemsPerPage: 10,
       }
     },
     clusterAccessDialog: {
@@ -339,7 +339,7 @@ export default {
         if (!value) {
           this.hideDialog()
         }
-      }
+      },
     },
     focusModeInternal: {
       get () {
@@ -347,7 +347,7 @@ export default {
       },
       set (value) {
         this.setFocusMode(value)
-      }
+      },
     },
     sortByInternal: {
       get () {
@@ -355,7 +355,7 @@ export default {
       },
       set (value) {
         this.setSortBy(value)
-      }
+      },
     },
     sortDescInternal: {
       get () {
@@ -363,7 +363,7 @@ export default {
       },
       set (value) {
         this.setSortDesc(value)
-      }
+      },
     },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
@@ -394,7 +394,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !!this.projectScope,
-          stalePointerEvents: true
+          stalePointerEvents: true,
         },
         {
           text: 'NAME',
@@ -403,7 +403,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: false,
-          stalePointerEvents: true
+          stalePointerEvents: true,
         },
         {
           text: 'INFRASTRUCTURE',
@@ -411,7 +411,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'SEED',
@@ -419,7 +419,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'TECHNICAL ID',
@@ -427,7 +427,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: !this.isAdmin
+          hidden: !this.isAdmin,
         },
         {
           text: 'CREATED BY',
@@ -435,7 +435,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'CREATED AT',
@@ -443,7 +443,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'PURPOSE',
@@ -451,7 +451,7 @@ export default {
           sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'STATUS',
@@ -461,7 +461,7 @@ export default {
           cellClass: 'pl-4',
           defaultSelected: true,
           hidden: false,
-          stalePointerEvents: true
+          stalePointerEvents: true,
         },
         {
           text: 'VERSION',
@@ -469,7 +469,7 @@ export default {
           sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'READINESS',
@@ -478,7 +478,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: false,
-          stalePointerEvents: true
+          stalePointerEvents: true,
         },
         {
           text: 'ISSUE SINCE',
@@ -486,7 +486,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: this.projectScope || !this.isAdmin
+          hidden: this.projectScope || !this.isAdmin,
         },
         {
           text: 'HIGH AVAILABILITY',
@@ -494,7 +494,7 @@ export default {
           sortable: true,
           align: 'start',
           defaultSelected: false,
-          hidden: false
+          hidden: false,
         },
         {
           text: 'ACCESS RESTRICTIONS',
@@ -502,7 +502,7 @@ export default {
           sortable: false,
           align: 'start',
           defaultSelected: false,
-          hidden: !this.cfg.accessRestriction || !this.isAdmin
+          hidden: !this.cfg.accessRestriction || !this.isAdmin,
         },
         {
           text: 'TICKET',
@@ -510,7 +510,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: !this.gitHubRepoUrl || !this.isAdmin
+          hidden: !this.gitHubRepoUrl || !this.isAdmin,
         },
         {
           text: 'TICKET LABELS',
@@ -518,7 +518,7 @@ export default {
           sortable: false,
           align: 'start',
           defaultSelected: true,
-          hidden: !this.gitHubRepoUrl || !this.isAdmin
+          hidden: !this.gitHubRepoUrl || !this.isAdmin,
         },
         {
           text: 'ACTIONS',
@@ -526,14 +526,14 @@ export default {
           sortable: false,
           align: 'end',
           defaultSelected: true,
-          hidden: !(this.canDeleteShoots || this.canGetSecrets)
-        }
+          hidden: !(this.canDeleteShoots || this.canGetSecrets),
+        },
       ]
       return map(headers, (header, index) => ({
         ...header,
         class: 'nowrap',
         weight: (index + 1) * 100,
-        selected: get(this.selectedColumns, header.value, header.defaultSelected)
+        selected: get(this.selectedColumns, header.value, header.defaultSelected),
       }))
     },
     customHeaders () {
@@ -549,7 +549,7 @@ export default {
         tooltip,
         defaultValue,
         sortable,
-        weight
+        weight,
       }, index) => {
         return {
           customField: true,
@@ -564,7 +564,7 @@ export default {
           path,
           tooltip,
           defaultValue,
-          weight: weight || index
+          weight: weight || index,
         }
       })
     },
@@ -585,14 +585,14 @@ export default {
           value: 'onlyShootsWithIssues',
           selected: this.onlyShootsWithIssues,
           hidden: this.projectScope,
-          disabled: this.changeFiltersDisabled
+          disabled: this.changeFiltersDisabled,
         },
         {
           text: 'Hide progressing clusters',
           value: 'progressing',
           selected: this.isFilterActive('progressing'),
           hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
-          disabled: this.changeFiltersDisabled
+          disabled: this.changeFiltersDisabled,
         },
         {
           text: 'Hide no operator action required issues',
@@ -603,16 +603,16 @@ export default {
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
             '- Clusters with temporary issues that will be retried automatically',
-            '- Clusters with annotation dashboard.gardener.cloud/ignore-issues'
+            '- Clusters with annotation dashboard.gardener.cloud/ignore-issues',
           ],
-          disabled: this.changeFiltersDisabled
+          disabled: this.changeFiltersDisabled,
         },
         {
           text: 'Hide clusters with deactivated reconciliation',
           value: 'deactivatedReconciliation',
           selected: this.isFilterActive('deactivatedReconciliation'),
           hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
-          disabled: this.changeFiltersDisabled
+          disabled: this.changeFiltersDisabled,
         },
         {
           text: 'Hide clusters with configured ticket labels',
@@ -620,8 +620,8 @@ export default {
           selected: this.isFilterActive('hideTicketsWithLabel'),
           hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
           helpTooltip: this.hideTicketsWithLabelTooltip,
-          disabled: this.changeFiltersDisabled
-        }
+          disabled: this.changeFiltersDisabled,
+        },
       ]
     },
     selectableFilters () {
@@ -640,7 +640,7 @@ export default {
       },
       set (value) {
         this.toggleFilter('onlyShootsWithIssues')
-      }
+      },
     },
     items () {
       return this.cachedItems || this.mappedItems
@@ -680,7 +680,7 @@ export default {
     },
     hideClustersWithLabels () {
       return get(this.cfg, 'ticket.hideClustersWithLabels', [])
-    }
+    },
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
@@ -699,6 +699,6 @@ export default {
     this.shootSearch = null
     this.focusModeInternal = false
     next()
-  }
+  },
 }
 </script>
