@@ -1,12 +1,12 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-tooltip location="top" v-if="projectDetails.phase !== 'Ready'">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-icon v-bind="props" :size="size" :color="color" :icon="icon"  class="ml-1" />
     </template>
     <div>

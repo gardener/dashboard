@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{item.name}}
         <v-tooltip v-if="!item.isOwnSecret" location="top">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-icon v-bind="props" size="small" class="mx-1">mdi-account-arrow-left</v-icon>
           </template>
           <span>Secret shared by {{item.secretNamespace}}</span>

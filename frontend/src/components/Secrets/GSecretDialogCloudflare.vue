@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     replace-title="Replace Cloudflare Secret"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
           color="primary"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div>
         <p>
           To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys"></g-external-link>.

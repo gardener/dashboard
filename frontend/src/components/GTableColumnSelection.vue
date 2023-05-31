@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     style="max-height: 80%"
     v-model="columnSelectionMenu"
     absolute>
-    <template v-slot:activator="{ props: menuProps }">
+    <template #activator="{ props: menuProps }">
       <v-tooltip location="top">
-        <template v-slot:activator="{ props: tooltipProps }">
+        <template #activator="{ props: tooltipProps }">
           <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon>
             <v-icon color="toolbar-title">mdi-dots-vertical</v-icon>
           </v-btn>
@@ -27,14 +27,14 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-for="header in headers" :key="header.value" @click.stop="onSetSelectedHeader(header)">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-list-item-action>
             <v-checkbox-btn :model-value="header.selected" :color="checkboxColor(header.selected)" />
           </v-list-item-action>
         </template>
         <v-list-item-subtitle>
           <v-tooltip v-if="header.customField" location="top">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
                   inline
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item>
         <v-tooltip location="top" style="width: 100%">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               block
@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-title>
       </v-list-item>
       <v-tooltip location="top" :disabled="!filterTooltip">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <div v-bind="props">
             <v-list-item
               v-for="filter in filters"
@@ -83,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
               :disabled="filter.disabled"
               :class="{ 'disabled_filter': filter.disabled }"
               @click.stop="onToggleFilter(filter)">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-list-item-action>
                   <v-checkbox-btn :model-value="filter.selected" :color="checkboxColor(filter.selected)" />
                 </v-list-item-action>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-subtitle>
                 {{ filter.text }}
                 <v-tooltip location="top" v-if="filter.helpTooltip">
-                  <template v-slot:activator="{ props }">
+                  <template #activator="{ props }">
                     <v-icon v-bind="props" size="small">mdi-help-circle-outline</v-icon>
                   </template>
                   <div :key="line" v-for="line in filter.helpTooltip">{{ line }}</div>

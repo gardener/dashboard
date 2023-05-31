@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
     :width="width"
     :confirm-value="confirmValue"
     >
-    <template v-slot:caption>{{captionText}}</template>
-    <template v-slot:message>
+    <template #caption>{{captionText}}</template>
+    <template #message>
       <div v-html="messageHtml"></div>
     </template>
   </g-dialog>

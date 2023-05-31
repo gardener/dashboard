@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :key="displayName"
     :disabled="!tooltip"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-chip
         v-bind="props"
         :disabled="notEditable"

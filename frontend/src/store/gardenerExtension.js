@@ -12,6 +12,7 @@ import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import some from 'lodash/some'
+import find from 'lodash/find'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()

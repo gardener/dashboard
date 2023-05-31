@@ -839,6 +839,7 @@ __metadata:
     jwt-decode: ^3.1.2
     lodash: ^4.17.21
     md5: ^2.3.0
+    mitt: ^3.0.0
     netmask: ^2.0.2
     p-timeout: ^6.1.1
     pinia: ^2.0.33
@@ -857,7 +858,7 @@ __metadata:
     vitest: ^0.29.8
     vue: ^3.2.47
     vue-router: ^4.1.6
-    vuetify: ^3.2.5
+    vuetify: ^3.3.1
     webfontloader: ^1.6.28
   languageName: unknown
   linkType: soft
@@ -7170,6 +7171,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mitt@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "mitt@npm:3.0.0"
+  checksum: f7be5049d27d18b1dbe9408452d66376fa60ae4a79fe9319869d1b90ae8cbaedadc7e9dab30b32d781411256d468be5538996bb7368941c09009ef6bbfa6bfc7
+  languageName: node
+  linkType: hard
+
 "mixwith@npm:^0.1.1":
   version: 0.1.1
   resolution: "mixwith@npm:0.1.1"
@@ -9773,22 +9781,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:^3.2.5":
-  version: 3.2.5
-  resolution: "vuetify@npm:3.2.5"
+"vuetify@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "vuetify@npm:3.3.1"
   peerDependencies:
+    typescript: ">=4.7"
     vite-plugin-vuetify: ^1.0.0-alpha.12
     vue: ^3.2.0
     vue-i18n: ^9.0.0
     webpack-plugin-vuetify: ^2.0.0-alpha.11
   peerDependenciesMeta:
+    typescript:
+      optional: true
     vite-plugin-vuetify:
       optional: true
     vue-i18n:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: b974f87165b66eaf13ad86fb717f3f8673092be7d0fb7842ea650cdc02eb0091729593464b825d91cd0b86843a65acc240ddb7649d2049cac3544afb7072d09c
+  checksum: 867a37763852fb5c9ba8857f012a10a883d833e7b60b848ae94a88a2eced76bb5c9fb519437978e16f612f92dbe041a065c725a34954be561386454e5bd264cf
   languageName: node
   linkType: hard
 

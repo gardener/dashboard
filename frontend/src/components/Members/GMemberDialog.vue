@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
                 tabindex="2"
                 variant="underlined"
                 >
-                <template v-slot:selection="{ item, index }">
+                <template #selection="{ item, index }">
                   <v-chip size="small" color="primary" variant="outlined" closable @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()">
                     <span>{{ item.raw.displayName }}</span>
                   </v-chip>

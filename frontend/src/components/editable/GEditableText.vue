@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -62,9 +62,9 @@ SPDX-License-Identifier: Apache-2.0
         @blur="v$.internalValue.$touch"
         class="g-field"
       >
-        <template v-slot:append>
+        <template #append>
           <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 :disabled="!valid"
@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
             <span>Save</span>
           </v-tooltip>
         </template>
-        <template v-slot:message="{ message }">
+        <template #message="{ message }">
           <g-error-message
             :message="message"
             @close="clearMessages"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip location="top" :disabled="!this.$slots.tooltip">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <div v-bind="props" class="mx-1">
         <v-btn
           density="compact"

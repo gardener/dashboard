@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     replace-title="Replace Infoblox Secret"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-text-field
         color="primary"
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
 
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div>
         <p>Before you can use Infoblox DNS provider, you need to add account credentials.</p>
         <p>Please enter account information for a technical user.</p>

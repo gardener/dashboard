@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip location="top" v-if="projectDetails.staleSinceTimestamp">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-icon v-bind="props" :size="size" :color="color" :icon="icon"  class="ml-1" />
     </template>
     <span v-if="projectDetails.staleAutoDeleteTimestamp">

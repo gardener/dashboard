@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${vendor} Secret`"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div>
         <v-textarea
           ref="data"
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         ></v-textarea>
       </div>
     </template>
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div class="help-content">
         <p>
           This is a generic secret dialog.

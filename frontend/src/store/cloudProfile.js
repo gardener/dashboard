@@ -382,13 +382,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return partitionIDs
   }
 
-  function firewallSizesByCloudProfileNameAndRegionAndArchitecture ({ cloudProfileName, region, architecture }) {
-    // Firewall Sizes equals to list of image types for this cloud provider
+  function firewallSizesByCloudProfileNameAndRegion ({ cloudProfileName, region, architecture }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
       return
     }
-    const firewallSizes = machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture })
+    // Firewall Sizes equals to list of machine types for this cloud provider
+    const firewallSizes = machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: undefined })
     return firewallSizes
   }
 
@@ -468,7 +468,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return machineType
     })
 
-    return filter(machineTypes, { architecture })
+    if (architecture) {
+      return filter(machineTypes, { architecture })
+    }
+
+    return machineTypes
   }
 
   function machineArchitecturesByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
@@ -527,8 +531,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return flatMap(machineImages, mapMachineImages)
   }
 
-  // TODO: check later
-  // eslint-disable-next-line no-unused-vars
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
     const noItemsText = get(configStore, 'accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
 
@@ -663,6 +665,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return worker
   }
 
+  function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
+    const allVersions = kubernetesVersions(cloudProfileName)
+    return some(allVersions, ({ version, isPreview }) => {
+      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+    })
+  }
+
   return {
     list,
     isInitial,
@@ -677,7 +686,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     loadBalancerClassNamesByCloudProfileName,
     partitionIDsByCloudProfileNameAndRegion,
     firewallImagesByCloudProfileName,
-    firewallSizesByCloudProfileNameAndRegionAndArchitecture,
+    firewallSizesByCloudProfileNameAndRegion,
     firewallNetworksByCloudProfileNameAndPartitionId,
     defaultKubernetesVersionForCloudProfileName,
     zonesByCloudProfileNameAndRegion,
@@ -688,5 +697,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     minimumVolumeSizeByCloudProfileNameAndRegion,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     generateWorker,
+    labelsByCloudProfileNameAndRegion,
+    accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
+    sortedKubernetesVersions,
+    kubernetesVersionIsNotLatestPatch,
+    seedsByCloudProfileName,
+    accessRestrictionDefinitionsByCloudProfileNameAndRegion,
+    accessRestrictionsForShootByCloudProfileNameAndRegion,
+    loadBalancerClassesByCloudProfileName,
   }
 })

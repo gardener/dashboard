@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
         content-class="project-menu"
         v-model="projectMenu"
       >
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-btn
             color="main-background-darken-1"
             v-bind="props"
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
             @keydown.up="highlightProjectWithKeys('up')"
             @keyup.enter="navigateToHighlightedProject"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon icon="mdi-grid-large" :size="24"/>
             </template>
             <div class="text-left" :class="{ placeholder: !selectedProject }" >
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
                 <g-not-ready-project-warning :project="selectedProject" size="small" />
               </template>
             </div>
-            <template v-slot:append>
+            <template #append>
               <v-icon :icon="projectMenuIcon" :size="18"/>
             </template>
           </v-btn>
@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
                 @keydown.down="highlightProjectWithKeys('down')"
                 @keydown.up="highlightProjectWithKeys('up')"
               >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon icon="mdi-magnify" color="primary" class="ml-4"></v-icon>
               </template>
               </v-text-field>
@@ -98,14 +98,14 @@ SPDX-License-Identifier: Apache-2.0
               :key="project.metadata.name"
               :data-g-project-name="project.metadata.name"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon color="primary">
                   {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
                 </v-icon>
               </template>
               <v-list-item-title class="project-name text-uppercase">{{ project.metadata.name }}</v-list-item-title>
               <v-list-item-subtitle class="project-owner">{{ getProjectOwner(project) }}</v-list-item-subtitle>
-              <template v-slot:append>
+              <template #append>
                 <g-stale-project-warning :project="project" size="small" />
                 <g-not-ready-project-warning :project="project" size="small" />
               </template>
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list>
           <v-card-actions>
             <v-tooltip location="top" :disabled="canCreateProject" style="width: 100%">
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <div v-bind="{ props }">
                   <v-btn
                     variant="text"
@@ -141,14 +141,14 @@ SPDX-License-Identifier: Apache-2.0
         class="bg-main-background"
         active-class="active-item"
       >
-        <template v-slot:append>
+        <template #append>
           <v-icon
             size="x-small"
             color="main-navigation-title"
             icon="mdi-home-outline"
           />
         </template>
-        <template v-slot:title>
+        <template #title>
           <div class="text-subtitle-1 text-main-navigation-title">Home</div>
         </template>
       </v-list-item>
@@ -160,7 +160,7 @@ SPDX-License-Identifier: Apache-2.0
             class="bg-main-background"
             active-class="active-item"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon
                 size="x-small"
                 color="main-navigation-title"

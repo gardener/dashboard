@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     <!-- Help -->
     <v-btn v-if="helpMenuItems.length" color="primary" icon class="mr-4">
       <v-tooltip text="Tooltip" location="left">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-icon v-bind="props" icon="mdi-help-circle-outline"></v-icon>
         </template>
       </v-tooltip>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
       class="mr-4"
     >
       <v-tooltip location="left">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-badge v-if="isAdmin"
             color="primary"
             location="bottom right"
@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0
               class="mt-3"
             >
               <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn value="light" v-bind="props" variant="tonal" min-width="36">
                     <v-icon icon="mdi-white-balance-sunny" />
                   </v-btn>
@@ -127,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
                 <span>Light Mode</span>
               </v-tooltip>
               <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn value="dark" v-bind="props" variant="tonal" min-width="36">
                     <v-icon icon="mdi-weather-night" />
                   </v-btn>
@@ -135,7 +135,7 @@ SPDX-License-Identifier: Apache-2.0
                 <span>Dark Mode</span>
               </v-tooltip>
               <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn value="auto" v-bind="props" variant="tonal" min-width="36">
                     <v-icon icon="mdi-brightness-auto" />
                   </v-btn>

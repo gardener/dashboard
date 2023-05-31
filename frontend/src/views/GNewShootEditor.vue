@@ -14,11 +14,11 @@ SPDX-License-Identifier: Apache-2.0
       ref="shootEditor"
       v-on="_shootEditor.hooks"
     >
-      <template v-slot:modificationWarning>
+      <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
       </template>
-      <template v-slot:toolbarItemsRight>
+      <template #toolbarItemsRight>
         <v-divider vertical></v-divider>
         <v-col class="d-flex fill-height align-center" >
           <v-btn text @click.stop="createClicked()" class="primary--text">Create</v-btn>

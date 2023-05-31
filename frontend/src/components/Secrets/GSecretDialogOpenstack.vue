@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${name} Secret`"
     >
 
-    <template v-slot:secret-slot>
+    <template #secret-slot>
       <div v-if="vendor==='openstack-designate'">
         <v-text-field
           color="primary"
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="authenticationMethod"
           row
         >
-          <template v-slot:label>
+          <template #label>
             <span class="text-body-1">Authentication Method:</span>
           </template>
           <v-radio
@@ -143,7 +143,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-container>
     </template>
 
-    <template v-slot:help-slot>
+    <template #help-slot>
       <div v-if="vendor==='openstack'">
         <p>
           Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
