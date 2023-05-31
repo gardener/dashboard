@@ -49,6 +49,7 @@
     "p-timeout": "^6.1.1",
     "pinia": "^2.0.33",
     "semver": "^7.3.8",
+    "socket.io-client": "^4.6.2",
     "statuses": "^2.0.1",
     "symbol-tree": "^3.2.4",
     "toidentifier": "^1.0.1",

@@ -1408,6 +1408,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.9.0"],\
             ["sass", "npm:1.62.0"],\
             ["semver", "npm:7.3.8"],\
+            ["socket.io-client", "npm:4.6.2"],\
             ["statuses", "npm:2.0.1"],\
             ["symbol-tree", "npm:3.2.4"],\
             ["toidentifier", "npm:1.0.1"],\
@@ -10723,6 +10724,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["socket.io-parser", "npm:4.2.3"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:4.6.2", {\
+          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.6.2-f832dad301-2e0bb4518f.zip/node_modules/socket.io-client/",\
+          "packageDependencies": [\
+            ["socket.io-client", "npm:4.6.2"],\
+            ["@socket.io/component-emitter", "npm:3.1.0"],\
+            ["debug", "virtual:a51f526c2adeba537acab82695794a9d1b157226503eb6a4b845884ae37134eb991f7fe73ca28a4380b8fcf50c4baf959f57e6800dc81e7afb4b90477e3f77d2#npm:4.3.4"],\
+            ["engine.io-client", "npm:6.4.0"],\
+            ["socket.io-parser", "npm:4.2.4"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["socket.io-parser", [\
@@ -10730,6 +10742,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/socket.io-parser-npm-4.2.3-c3c994950a-f14030d09c.zip/node_modules/socket.io-parser/",\
           "packageDependencies": [\
             ["socket.io-parser", "npm:4.2.3"],\
+            ["@socket.io/component-emitter", "npm:3.1.0"],\
+            ["debug", "virtual:a51f526c2adeba537acab82695794a9d1b157226503eb6a4b845884ae37134eb991f7fe73ca28a4380b8fcf50c4baf959f57e6800dc81e7afb4b90477e3f77d2#npm:4.3.4"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:4.2.4", {\
+          "packageLocation": "./.yarn/cache/socket.io-parser-npm-4.2.4-bf87f78bcd-61540ef99a.zip/node_modules/socket.io-parser/",\
+          "packageDependencies": [\
+            ["socket.io-parser", "npm:4.2.4"],\
             ["@socket.io/component-emitter", "npm:3.1.0"],\
             ["debug", "virtual:a51f526c2adeba537acab82695794a9d1b157226503eb6a4b845884ae37134eb991f7fe73ca28a4380b8fcf50c4baf959f57e6800dc81e7afb4b90477e3f77d2#npm:4.3.4"]\
           ],\
