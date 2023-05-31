@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <!-- connection status -->
     <div class="mr-2">
-      <!--shoot-subscription-status/-->
+      <g-shoot-subscription-status/>
     </div>
 
     <!-- Help -->
@@ -216,8 +216,9 @@ import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 import { useTheme, useNamespace } from '@/composables'
-import GBreadcrumb from '@/components/GBreadcrumb.vue'
-import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
+import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
+import GBreadcrumb from './GBreadcrumb.vue'
+import GInfoDialog from './dialogs/GInfoDialog.vue'
 
 const route = useRoute()
 
