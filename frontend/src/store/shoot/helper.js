@@ -433,7 +433,7 @@ export function putItem (state, newItem) {
       delete state.staleShoots[uid]
     }
     newItem.info = undefined // register property to ensure reactivity
-    const key = keyForShoot(item.metadata)
+    const key = keyForShoot(newItem.metadata)
     state.shoots[key] = newItem
   }
 }
