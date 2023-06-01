@@ -6,12 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-main ref="main">
-    <g-alert
+    <g-alert-banner
       :message="alertBannerMessage"
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
-    >
-    </g-alert>
+    />
     <router-view :key="routerViewKey"></router-view>
   </v-main>
 </template>
@@ -21,15 +20,15 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useAppStore } from '@/store'
+import { useConfigStore } from '@/store'
 import { useLogger } from '@/composables'
 
-import GAlert from '@/components/GAlert.vue'
+import GAlertBanner from '@/components/GAlertBanner.vue'
 
 const route = useRoute()
 const logger = useLogger()
-const store = useAppStore()
-const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(store)
+const configStore = useConfigStore()
+const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(configStore)
 
 // refs
 const main = ref(null)

@@ -12,13 +12,14 @@ SPDX-License-Identifier: Apache-2.0
     :color="color"
     closable
   >
-    <div v-if="message" class="alert-banner-message" v-html="messageHtml"></div>
-    <slot v-else name="message"></slot>
+    <slot name="message">
+      <div class="alert-banner-message" v-html="messageHtml"/>
+    </slot>
   </v-alert>
 </template>
 
 <script setup>
-import { inject, computed, useSlots, toRefs } from 'vue'
+import { computed, useSlots, toRefs } from 'vue'
 import { transformHtml } from '@/utils'
 import { useLocalStorage } from '@vueuse/core'
 
@@ -45,8 +46,7 @@ const props = defineProps({
   },
 })
 
-const notify = inject('notify')
-const { message, type, color } = toRefs(props)
+const { type, color } = toRefs(props)
 
 // computed
 const hasMessage = computed(() => {
@@ -71,9 +71,6 @@ const alertVisible = computed({
   },
   set (value) {
     if (!value) {
-      notify({
-        text: 'test',
-      })
       permanentlyHidden.value = true
     }
   },

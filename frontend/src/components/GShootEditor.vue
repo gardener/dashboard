@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-column fill-height position-relative">
     <div v-if="!clean" class="flex-shrink-1">
-      <g-alert
+      <g-alert-banner
         type="warning"
         :identifier="alertBannerIdentifier"
         color="primary"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #message>
           <slot name="modificationWarning"></slot>
         </template>
-      </g-alert>
+      </g-alert-banner>
     </div>
     <div ref="container" :style="containerStyles" :class="containerClass"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
@@ -130,18 +130,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
+import { mapGetters } from 'pinia'
+import download from 'downloadjs'
+
+import { useAuthzStore } from '@/store'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GMessage from '@/components/GMessage'
-import GAlert from '@/components/GAlert'
-import { mapGetters } from 'pinia'
-import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
-import download from 'downloadjs'
-import {
-  useAuthzStore,
-} from '@/store'
-import { useTheme, useApi } from '@/composables'
+import GAlertBanner from '@/components/GAlertBanner'
+
 import { shootItem } from '@/mixins/shootItem'
+
+import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 
 // codemirror
 import CodeMirror from 'codemirror'
@@ -160,17 +160,11 @@ import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
 
 export default defineComponent({
-  setup () {
-    const api = useApi()
-    const { colorMode } = useTheme()
-    return { api, colorMode }
-  },
   components: {
     GCopyBtn,
     GMessage,
-    GAlert,
+    GAlertBanner,
   },
-  name: 'shoot-editor',
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -274,7 +268,7 @@ export default defineComponent({
       return !this.isReadOnly && !this.hideToolbar
     },
     theme () {
-      return this.colorMode === 'dark'
+      return this.$theme.colorMode === 'dark'
         ? 'seti'
         : 'default'
     },
@@ -486,7 +480,7 @@ export default defineComponent({
     this.update(this.value)
     this.refresh()
 
-    const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
+    const shootSchemaDefinition = await this.$api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)

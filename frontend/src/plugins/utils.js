@@ -5,7 +5,7 @@
 //
 
 import { createVNode, render } from 'vue'
-import { useLogger, useApi } from '@/composables'
+import { useLogger, useApi, useTheme } from '@/composables'
 
 function renderComponent (name, props) {
   const vNode = createVNode(name, props)
@@ -17,7 +17,8 @@ function renderComponent (name, props) {
 export default {
   install (app) {
     app.provide('renderComponent', app.config.globalProperties.$renderComponent = renderComponent)
-    app.provide('api', app.config.globalProperties.$api = useApi())
     app.provide('logger', app.config.globalProperties.$logger = useLogger())
+    app.provide('api', app.config.globalProperties.$api = useApi())
+    app.provide('theme', app.config.globalProperties.$theme = useTheme())
   },
 }
