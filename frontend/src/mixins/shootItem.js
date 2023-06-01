@@ -70,7 +70,6 @@ export const shootItem = {
     shootProjectName () {
       return this.projectNameByNamespace(this.shootMetadata)
     },
-
     shootAnnotations () {
       return get(this.shootMetadata, 'annotations', {})
     },
