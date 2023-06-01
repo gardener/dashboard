@@ -95,5 +95,24 @@ describe('gardener-dashboard', function () {
 
       expect(tlsSecret).toBe(null)
     })
+
+    it('should render the template nginx class', async function () {
+      templates = ['ingress']
+
+      const ingressClassName = 'my-class'
+      const values = {
+        global: {
+          dashboard: {
+            ingress: {
+              ingressClassName
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [ingress] = documents
+      expect(ingress.spec.ingressClassName).toBe(ingressClassName)
+    })
   })
 })
