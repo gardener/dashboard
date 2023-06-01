@@ -61,15 +61,15 @@ export const useProjectStore = defineStore('project', () => {
     return list.value ?? []
   })
 
-  const projectFromProjectList = computed(() => {
+  const project = computed(() => {
     return find(list.value, ['metadata.namespace', namespace.value])
   })
 
   const projectName = computed(() => {
-    return get(projectFromProjectList.value, 'metadata.name')
+    return get(project.value, 'metadata.name')
   })
 
-  const projectNamesFromProjectList = computed(() => {
+  const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
   })
 
@@ -83,7 +83,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const shootCustomFields = computed(() => {
-    let shootCustomFields = get(projectFromProjectList.value, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
+    let shootCustomFields = get(project.value, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
     if (!shootCustomFields) {
       return
     }
@@ -192,6 +192,9 @@ export const useProjectStore = defineStore('project', () => {
     list.value = null
   }
 
+  const projectFromProjectList = project // TODO: deprecated - use project instead
+  const projectNamesFromProjectList = projectNames // TODO: deprecated - use projectNames instead
+
   return {
     list,
     isInitial,
@@ -201,7 +204,9 @@ export const useProjectStore = defineStore('project', () => {
     defaultNamespace,
     projectName,
     projectList,
+    project,
     projectFromProjectList,
+    projectNames,
     projectNamesFromProjectList,
     shootCustomFields,
     shootCustomFieldList,

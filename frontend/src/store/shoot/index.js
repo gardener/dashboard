@@ -144,7 +144,7 @@ export const useShootStore = defineStore('shoot', (...args) => {
     return state.filteredShoots
   })
 
-  const selectedItem = computed(() => {
+  const selectedShoot = computed(() => {
     return state.selection
       ? shootByNamespaceAndName(state.selection)
       : null
@@ -522,7 +522,8 @@ export const useShootStore = defineStore('shoot', (...args) => {
     sortDesc,
     // getters
     shootList,
-    selectedItem,
+    selectedShoot,
+    selectedItem: selectedShoot, // TODO: deprecated - use selectedShoot
     onlyShootsWithIssues,
     loading,
     subscribed,

@@ -4,34 +4,28 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import map from 'lodash/map'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import includes from 'lodash/includes'
-import some from 'lodash/some'
-import compact from 'lodash/compact'
-import find from 'lodash/find'
-import head from 'lodash/head'
-import lowerCase from 'lodash/lowerCase'
-import fromPairs from 'lodash/fromPairs'
-import isEqual from 'lodash/isEqual'
-
 import {
   getDateFormatted,
-  TargetEnum,
 } from '@/utils'
 import moment from '@/utils/moment'
-import { hash } from '@/utils/crypto'
 
-export class Shortcut {
-  constructor (shortcut, unverified = true) {
-    Object.assign(this, shortcut)
-    Object.defineProperty(this, 'id', {
-      value: hash(shortcut),
-    })
-    Object.defineProperty(this, 'unverified', {
-      value: unverified,
-    })
+import map from 'lodash/map'
+import get from 'lodash/get'
+import find from 'lodash/find'
+import isEqual from 'lodash/isEqual'
+import fromPairs from 'lodash/fromPairs'
+import includes from 'lodash/includes'
+import lowerCase from 'lodash/lowerCase'
+import compact from 'lodash/compact'
+import head from 'lodash/head'
+
+export function matchesPropertyOrEmpty (path, srcValue) {
+  return object => {
+    const objValue = get(object, path)
+    if (!objValue) {
+      return true
+    }
+    return isEqual(objValue, srcValue)
   }
 }
 
@@ -77,30 +71,16 @@ export function findVendorHint (vendorHints, vendorName) {
   return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
-export function matchesPropertyOrEmpty (path, srcValue) {
-  return object => {
-    const objValue = get(object, path)
-    if (!objValue) {
-      return true
-    }
-    return isEqual(objValue, srcValue)
-  }
-}
-
-export function isValidRegion (getters, cloudProfileName, cloudProviderKind) {
-  return region => {
-    if (cloudProviderKind === 'azure') {
-      // Azure regions may not be zoned, need to filter these out for the dashboard
-      return !!getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
-    }
-
-    // Filter regions that are not defined in cloud profile
-    const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-    if (cloudProfile) {
-      return some(cloudProfile.data.regions, ['name', region])
-    }
-
-    return true
+export function decorateClassificationObject (obj) {
+  const classification = obj.classification ?? 'supported'
+  const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
+  return {
+    ...obj,
+    isPreview: classification === 'preview',
+    isSupported: classification === 'supported' && !isExpired,
+    isDeprecated: classification === 'deprecated',
+    isExpired,
+    expirationDateString: getDateFormatted(obj.expirationDate),
   }
 }
 
@@ -145,7 +125,7 @@ export function mapAccessRestrictionForInput (accessRestrictionDefinition, shoot
   return [key, accessRestriction]
 }
 
-function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
+export function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
   const {
     key,
     display: {
@@ -210,25 +190,4 @@ export function firstItemMatchingVersionClassification (items) {
   }
 
   return head(items)
-}
-
-export function filterShortcuts (authzStore, { shortcuts, targetsFilter }) {
-  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && authzStore.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
-  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && authzStore.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
-  shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && authzStore.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
-  shortcuts = filter(shortcuts, ({ target }) => includes(targetsFilter, target))
-  return shortcuts
-}
-
-export function decorateClassificationObject (obj) {
-  const classification = obj.classification ?? 'supported'
-  const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
-  return {
-    ...obj,
-    isPreview: classification === 'preview',
-    isSupported: classification === 'supported' && !isExpired,
-    isDeprecated: classification === 'deprecated',
-    isExpired,
-    expirationDateString: getDateFormatted(obj.expirationDate),
-  }
 }

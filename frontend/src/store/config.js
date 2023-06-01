@@ -8,21 +8,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useApi } from '@/composables'
-import { useAuthzStore } from './authz'
-import { Shortcut, filterShortcuts } from './helper'
 
-import { TargetEnum } from '@/utils'
 import { hash } from '@/utils/crypto'
 
-import camelCase from 'lodash/camelCase'
 import get from 'lodash/get'
-import map from 'lodash/map'
-import uniqBy from 'lodash/uniqBy'
+import isEmpty from 'lodash/isEmpty'
+import camelCase from 'lodash/camelCase'
 
 export const useConfigStore = defineStore('config', () => {
   const api = useApi()
   const browserLocation = useBrowserLocation()
-  const authzStore = useAuthzStore()
 
   const state = ref(null)
 
@@ -72,6 +67,10 @@ export const useConfigStore = defineStore('config', () => {
 
   const terminal = computed(() => {
     return state.value?.terminal
+  })
+
+  const terminalShortcuts = computed(() => {
+    return terminal.value?.shortcuts
   })
 
   const ticket = computed(() => {
@@ -180,12 +179,29 @@ export const useConfigStore = defineStore('config', () => {
     state.value = null
   }
 
-  function getTerminalShortcuts (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) {
-    let shortcuts = get(state.value, 'terminal.shortcuts', [])
-    shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, false))
-    shortcuts = uniqBy(shortcuts, 'id')
-    return filterShortcuts(authzStore, { shortcuts, targetsFilter })
+  function purposeRequiresHibernationSchedule (purpose) {
+    if (defaultHibernationSchedule.value) {
+      if (!purpose) {
+        return true
+      }
+      return !!defaultHibernationSchedule.value[purpose]
+    }
+    return false
   }
+
+  function isShootHasNoHibernationScheduleWarning (shoot) {
+    const purpose = get(shoot, 'spec.purpose')
+    const annotations = get(shoot, 'metadata.annotations', {})
+    if (purposeRequiresHibernationSchedule(purpose)) {
+      const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+      if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
+        return true
+      }
+    }
+    return false
+  }
+
+  const nodesCIDR = defaultNodesCIDR // TODO: remove one later
 
   return {
     isInitial,
@@ -203,11 +219,13 @@ export const useConfigStore = defineStore('config', () => {
     defaultHibernationSchedule,
     themes,
     terminal,
+    terminalShortcuts,
     ticket,
     vendorHints,
     helpMenuItems,
     externalTools,
     defaultNodesCIDR,
+    nodesCIDR,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,
@@ -218,7 +236,8 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerType,
     alertBannerIdentifier,
     costObjectSettings,
-    getTerminalShortcuts,
+    purposeRequiresHibernationSchedule,
+    isShootHasNoHibernationScheduleWarning,
     fetchConfig,
     $reset,
   }

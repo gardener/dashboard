@@ -8,17 +8,27 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import semver from 'semver'
 
-import { useSeedStore } from './seed'
-import { useConfigStore } from './config'
 import { useApi, useLogger } from '@/composables'
+import { useSeedStore } from '../seed'
+import { useConfigStore } from '../config'
+import {
+  matchesPropertyOrEmpty,
+  vendorNameFromImageName,
+  findVendorHint,
+  decorateClassificationObject,
+  firstItemMatchingVersionClassification,
+  mapAccessRestrictionForInput,
+  mapAccessRestrictionForDisplay,
+} from './helper'
 
 import {
   shortRandomString,
   parseSize,
   defaultCriNameByKubernetesVersion,
-  getDateFormatted,
+  isValidTerminationDate,
+  selectedImageIsNotLatest,
+  UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
-import moment from '@/utils/moment'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 import filter from 'lodash/filter'
@@ -30,11 +40,9 @@ import some from 'lodash/some'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
-import isEqual from 'lodash/isEqual'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import includes from 'lodash/includes'
-import lowerCase from 'lodash/lowerCase'
 import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import template from 'lodash/template'
@@ -45,185 +53,13 @@ import cloneDeep from 'lodash/cloneDeep'
 import sample from 'lodash/sample'
 import pick from 'lodash/pick'
 
-// helpers
-const matchesPropertyOrEmpty = (path, srcValue) => {
-  return object => {
-    const objValue = get(object, path)
-    if (!objValue) {
-      return true
-    }
-    return isEqual(objValue, srcValue)
-  }
-}
-
-const vendorNameFromImageName = imageName => {
-  const lowerCaseName = lowerCase(imageName)
-  if (lowerCaseName.includes('coreos')) {
-    return 'coreos'
-  } else if (lowerCaseName.includes('ubuntu')) {
-    return 'ubuntu'
-  } else if (lowerCaseName.includes('gardenlinux')) {
-    return 'gardenlinux'
-  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
-    return 'suse-jeos'
-  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
-    return 'suse-chost'
-  } else if (lowerCaseName.includes('flatcar')) {
-    return 'flatcar'
-  } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
-    return 'memoryone'
-  } else if (lowerCaseName.includes('aws-route53')) {
-    return 'aws-route53'
-  } else if (lowerCaseName.includes('azure-dns')) {
-    return 'azure-dns'
-  } else if (lowerCaseName.includes('azure-private-dns')) {
-    return 'azure-private-dns'
-  } else if (lowerCaseName.includes('google-clouddns')) {
-    return 'google-clouddns'
-  } else if (lowerCaseName.includes('openstack-designate')) {
-    return 'openstack-designate'
-  } else if (lowerCaseName.includes('alicloud-dns')) {
-    return 'alicloud-dns'
-  } else if (lowerCaseName.includes('cloudflare-dns')) {
-    return 'cloudflare-dns'
-  } else if (lowerCaseName.includes('infoblox-dns')) {
-    return 'infoblox-dns'
-  } else if (lowerCaseName.includes('netlify-dns')) {
-    return 'netlify-dns'
-  }
-  return undefined
-}
-
-const findVendorHint = (vendorHints, vendorName) => {
-  return find(vendorHints, hint => includes(hint.matchNames, vendorName))
-}
-
-const decorateClassificationObject = (obj) => {
-  const classification = obj.classification ?? 'supported'
-  const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
-  return {
-    ...obj,
-    isPreview: classification === 'preview',
-    isSupported: classification === 'supported' && !isExpired,
-    isDeprecated: classification === 'deprecated',
-    isExpired,
-    expirationDateString: getDateFormatted(obj.expirationDate),
-  }
-}
-
-const mapOptionForInput = (optionValue, shootResource) => {
-  const key = get(optionValue, 'key')
-  if (!key) {
-    return
-  }
-
-  const isSelectedByDefault = false
-  const inputInverted = get(optionValue, 'input.inverted', false)
-  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
-  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
-  const value = inputInverted ? !rawValue : rawValue
-
-  const option = {
-    value,
-  }
-  return [key, option]
-}
-
-const mapAccessRestrictionForInput = (accessRestrictionDefinition, shootResource) => {
-  const key = get(accessRestrictionDefinition, 'key')
-  if (!key) {
-    return
-  }
-
-  const isSelectedByDefault = false
-  const inputInverted = get(accessRestrictionDefinition, 'input.inverted', false)
-  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
-  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
-  const value = inputInverted ? !rawValue : rawValue
-
-  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOptionForInput(option, shootResource))
-  optionsPair = compact(optionsPair)
-  const options = fromPairs(optionsPair)
-
-  const accessRestriction = {
-    value,
-    options,
-  }
-  return [key, accessRestriction]
-}
-
-const mapOptionForDisplay = ({ optionDefinition, option: { value } }) => {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description,
-    },
-  } = optionDefinition
-
-  const optionVisible = visibleIf === value
-  if (!optionVisible) {
-    return undefined // skip
-  }
-
-  return {
-    key,
-    title,
-    description,
-  }
-}
-
-const mapAccessRestrictionForDisplay = ({ definition, accessRestriction: { value, options } }) => {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description,
-    },
-    options: optionDefinitions,
-  } = definition
-
-  const accessRestrictionVisible = visibleIf === value
-  if (!accessRestrictionVisible) {
-    return undefined // skip
-  }
-
-  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition, option: options[optionDefinition.key] })))
-
-  return {
-    key,
-    title,
-    description,
-    options: optionsList,
-  }
-}
-
-// Return first item with classification supported, if no item has classification supported
-// return first item with classifiction undefined, if no item matches these requirements,
-// return first item in list
-const firstItemMatchingVersionClassification = (items) => {
-  let defaultItem = find(items, { classification: 'supported' })
-  if (defaultItem) {
-    return defaultItem
-  }
-
-  defaultItem = find(items, machineImage => {
-    return machineImage.classification === undefined
-  })
-  if (defaultItem) {
-    return defaultItem
-  }
-
-  return head(items)
-}
-
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
   const logger = useLogger()
   const api = useApi()
+
+  const availableKubernetesUpdatesCache = new Map()
 
   const list = ref(null)
 
@@ -231,12 +67,18 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value === null
   })
 
+  const cloudProfileList = computed(() => {
+    return list.value
+  })
+
   async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
     list.value = response.data
   }
 
-  function _isValidRegion (cloudProfileName, cloudProviderKind) {
+  function isValidRegion (cloudProfile) {
+    const cloudProfileName = cloudProfile.metadata.name
+    const cloudProviderKind = cloudProfile.metadata.cloudProviderKind
     return region => {
       if (cloudProviderKind === 'azure') {
         // Azure regions may not be zoned, need to filter these out for the dashboard
@@ -244,12 +86,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       // Filter regions that are not defined in cloud profile
-      const cloudProfile = cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        return some(cloudProfile.data.regions, ['name', region])
-      }
-
-      return true
+      return some(cloudProfile.data.regions, ['name', region])
     }
   }
 
@@ -271,24 +108,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return find(list.value, ['metadata.name', cloudProfileName])
   }
 
-  function seedsByNames (seedNames) {
-    return map(seedNames, seedStore.seedByName)
-  }
-
   function seedsByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (!cloudProfile) {
-      return []
-    }
-    const seedNames = cloudProfile.data.seedNames
-    if (!seedNames) {
-      return []
-    }
-    return seedsByNames(seedNames)
+    return seedStore.seedsForCloudProfile(cloudProfile)
   }
 
   function zonesByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
-    const cloudProfile = cloudProfileByName(cloudProfileName)
+    const cloudProfile = (cloudProfileName)
     if (cloudProfile) {
       return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
     }
@@ -303,7 +129,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const seeds = seedsByCloudProfileName(cloudProfileName)
 
     const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
-    const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, _isValidRegion(cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+    const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(cloudProfile))
     return uniqueSeedRegionsWithZones
   }
 
@@ -311,7 +137,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (cloudProfile) {
       const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
-      const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, _isValidRegion(cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+      const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, isValidRegion(cloudProfile))
       const regionsWithoutSeed = difference(regionsInCloudProfileWithZones, regionsWithSeedByCloudProfileName(cloudProfileName))
       return regionsWithoutSeed
     }
@@ -324,7 +150,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!cloudProfile) {
       return defaultMinimumSize
     }
-    const seedsForCloudProfile = cloudProfile.data.seeds
+    const seedsForCloudProfile = seedStore.seedsForCloudProfile(cloudProfile)
     const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
     return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
   }
@@ -450,10 +276,47 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
-  // TODO: check later
-  // eslint-disable-next-line no-unused-vars
+  // TODO: Is this function used anywhere?
   function machineTypesByCloudProfileName (cloudProfileName) {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
+  }
+
+  // TODO: Is this function used anywhere?
+  function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
+    const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
+    const workerGroups = map(shootWorkerGroups, worker => {
+      const workerImage = get(worker, 'machine.image', {})
+      const { name, version } = workerImage
+      const workerImageDetails = find(allMachineImages, { name, version })
+      if (!workerImageDetails) {
+        return {
+          ...workerImage,
+          expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
+          workerName: worker.name,
+          isValidTerminationDate: false,
+          severity: 'warning',
+        }
+      }
+
+      const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+
+      let severity
+      if (!updateAvailable) {
+        severity = 'error'
+      } else if (!imageAutoPatch) {
+        severity = 'warning'
+      } else {
+        severity = 'info'
+      }
+
+      return {
+        ...workerImageDetails,
+        isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
+        workerName: worker.name,
+        severity,
+      }
+    })
+    return filter(workerGroups, 'expirationDate')
   }
 
   function machineTypesByCloudProfileNameAndRegionAndArchitecture ({ cloudProfileName, region, architecture }) {
@@ -618,6 +481,84 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return firstItemMatchingVersionClassification(k8sVersions)
   }
 
+  function availableKubernetesUpdatesForShoot (shootVersion, cloudProfileName) {
+    const key = `${shootVersion}_${cloudProfileName}`
+    let newerVersions = availableKubernetesUpdatesCache.get(key)
+    if (newerVersions !== undefined) {
+      return newerVersions
+    }
+    newerVersions = {}
+    const allVersions = kubernetesVersions(cloudProfileName)
+
+    const validVersions = filter(allVersions, ({ isExpired }) => !isExpired)
+    const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
+    for (const version of newerVersionsForShoot) {
+      const diff = semver.diff(version.version, shootVersion)
+      if (!newerVersions[diff]) {
+        newerVersions[diff] = []
+      }
+      newerVersions[diff].push(version)
+    }
+    newerVersions = newerVersionsForShoot.length ? newerVersions : null
+    availableKubernetesUpdatesCache.set(key, newerVersions)
+
+    return newerVersions
+  }
+
+  function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
+    const allVersions = kubernetesVersions(cloudProfileName)
+    return some(allVersions, ({ version, isPreview }) => {
+      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+    })
+  }
+
+  function kubernetesVersionUpdatePathAvailable (kubernetesVersion, cloudProfileName) {
+    const allVersions = kubernetesVersions(cloudProfileName)
+    if (kubernetesVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
+      return true
+    }
+    const versionMinorVersion = semver.minor(kubernetesVersion)
+    return some(allVersions, ({ version, isPreview }) => {
+      return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+    })
+  }
+
+  function kubernetesVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
+    const allVersions = kubernetesVersions(shootCloudProfileName)
+    const version = find(allVersions, { version: shootK8sVersion })
+    if (!version) {
+      return {
+        version: shootK8sVersion,
+        expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
+        isValidTerminationDate: false,
+        severity: 'warning',
+      }
+    }
+    if (!version.expirationDate) {
+      return undefined
+    }
+
+    const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
+    const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
+
+    let severity
+    if (!updatePathAvailable) {
+      severity = 'error'
+    } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
+      severity = 'warning'
+    } else if (k8sAutoPatch && patchAvailable) {
+      severity = 'info'
+    } else {
+      return undefined
+    }
+
+    return {
+      expirationDate: version.expirationDate,
+      isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+      severity,
+    }
+  }
+
   function generateWorker (availableZones, cloudProfileName, region, kubernetesVersion) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
@@ -665,16 +606,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return worker
   }
 
-  function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
-    const allVersions = kubernetesVersions(cloudProfileName)
-    return some(allVersions, ({ version, isPreview }) => {
-      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
-    })
-  }
-
   return {
     list,
     isInitial,
+    cloudProfileList,
     fetchCloudProfiles,
     cloudProfilesByCloudProviderKind,
     sortedInfrastructureKindList,
@@ -691,19 +626,24 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     defaultKubernetesVersionForCloudProfileName,
     zonesByCloudProfileNameAndRegion,
     machineArchitecturesByCloudProfileNameAndRegion,
+    expiringWorkerGroupsForShoot,
+    machineTypesByCloudProfileName,
     machineTypesByCloudProfileNameAndRegionAndArchitecture,
     volumeTypesByCloudProfileNameAndRegion,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByCloudProfileNameAndRegion,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
-    generateWorker,
     labelsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
+    availableKubernetesUpdatesForShoot,
+    kubernetesVersionUpdatePathAvailable,
+    kubernetesVersionExpirationForShoot,
     seedsByCloudProfileName,
     accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionsForShootByCloudProfileNameAndRegion,
     loadBalancerClassesByCloudProfileName,
+    generateWorker,
   }
 })

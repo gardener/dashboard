@@ -29,7 +29,7 @@ import forEach from 'lodash/forEach'
 
 // Local
 import moment from './moment'
-import { md5 } from './crypto'
+import { md5, hash } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -621,8 +621,6 @@ export function selectedImageIsNotLatest (machineImage, machineImages) {
   })
 }
 
-export const availableKubernetesUpdatesCache = new Map()
-
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
 
 export function sortedRoleDisplayNames (roleNames) {
@@ -640,4 +638,16 @@ export function mapTableHeader (headers, valueKey) {
 
 export function isHtmlColorCode (value) {
   return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
+}
+
+export class Shortcut {
+  constructor (shortcut, unverified = true) {
+    Object.assign(this, shortcut)
+    Object.defineProperty(this, 'id', {
+      value: hash(shortcut),
+    })
+    Object.defineProperty(this, 'unverified', {
+      value: unverified,
+    })
+  }
 }

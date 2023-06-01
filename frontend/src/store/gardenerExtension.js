@@ -13,6 +13,7 @@ import filter from 'lodash/filter'
 import get from 'lodash/get'
 import some from 'lodash/some'
 import find from 'lodash/find'
+import sortBy from 'lodash/sortBy'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
@@ -21,6 +22,10 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
 
   const isInitial = computed(() => {
     return list.value === null
+  })
+
+  const gardenerExtensionsList = computed(() => {
+    return list.value
   })
 
   async function fetchGardenerExtensions () {
@@ -54,11 +59,17 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return map(networkingResources, 'type')
   })
 
+  const networkingTypeList = computed(() => {
+    return sortBy(networkingTypes.value)
+  })
+
   return {
     list,
     isInitial,
+    gardenerExtensionsList,
     fetchGardenerExtensions,
     sortedDnsProviderList,
     networkingTypes,
+    networkingTypeList,
   }
 })

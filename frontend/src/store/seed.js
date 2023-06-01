@@ -6,9 +6,12 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+
 import { useApi } from '@/composables'
+
 import find from 'lodash/find'
 import get from 'lodash/get'
+import groupBy from 'lodash/groupBy'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -17,6 +20,10 @@ export const useSeedStore = defineStore('seed', () => {
 
   const isInitial = computed(() => {
     return list.value === null
+  })
+
+  const seedList = computed(() => {
+    return list.value
   })
 
   async function fetchSeeds () {
@@ -28,6 +35,19 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
+  function seedsForCloudProfile (cloudProfile) {
+    const seeds = []
+    const seedsByName = groupBy(list.value, 'metadata.name')
+    const names = get(cloudProfile, 'data.seedNames', [])
+    for (const name of names) {
+      const seed = seedsByName[name]
+      if (seed) {
+        seeds.push(seed)
+      }
+    }
+    return seeds
+  }
+
   function isSeedUnreachableByName (name) {
     const seed = seedByName(name)
     return get(seed, 'metadata.unreachable')
@@ -36,8 +56,10 @@ export const useSeedStore = defineStore('seed', () => {
   return {
     list,
     isInitial,
+    seedList,
     fetchSeeds,
     seedByName,
+    seedsForCloudProfile,
     isSeedUnreachableByName,
   }
 })
