@@ -73,7 +73,6 @@ global:
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
-        kubernetes.io/ingress.class: nginx
       # # configuration of hosts used for rules and tls
       # hosts:
       # - dashboard.ingress.example.org

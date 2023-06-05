@@ -26,8 +26,7 @@ const defaults = {
       ingress: {
         annotations: {
           'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
-          'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true',
-          'kubernetes.io/ingress.class': 'nginx'
+          'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true'
         },
         hosts: [
           'dashboard.garden.example.org',
