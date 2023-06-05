@@ -4,25 +4,77 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createPinia } from 'pinia'
+import { createPinia, mapStores } from 'pinia'
 
-export { useAppStore } from './app'
-export { useAuthnStore } from './authn'
-export { useAuthzStore } from './authz'
-export { useCloudProfileStore } from './cloudProfile'
-export { useConfigStore } from './config'
-export { useGardenerExtensionStore } from './gardenerExtension'
-export { useKubeconfigStore } from './kubeconfig'
-export { useLoginStore } from './login'
-export { useMemberStore } from './member'
-export { useProjectStore } from './project'
-export { useQuotaStore } from './quota'
-export { useSecretStore } from './secret'
-export { useSeedStore } from './seed'
-export { useShootStore } from './shoot'
-export { useShootStagingStore } from './shootStaging'
-export { useSocketStore } from './socket'
-export { useTerminalStore } from './terminal'
-export { useTicketStore } from './ticket'
+import { useAppStore } from './app'
+import { useAuthnStore } from './authn'
+import { useAuthzStore } from './authz'
+import { useCloudProfileStore } from './cloudProfile'
+import { useConfigStore } from './config'
+import { useGardenerExtensionStore } from './gardenerExtension'
+import { useKubeconfigStore } from './kubeconfig'
+import { useLoginStore } from './login'
+import { useMemberStore } from './member'
+import { useProjectStore } from './project'
+import { useQuotaStore } from './quota'
+import { useSecretStore } from './secret'
+import { useSeedStore } from './seed'
+import { useShootStore } from './shoot'
+import { useShootStagingStore } from './shootStaging'
+import { useSocketStore } from './socket'
+import { useTerminalStore } from './terminal'
+import { useTicketStore } from './ticket'
+
+export {
+  useAppStore,
+  useAuthnStore,
+  useAuthzStore,
+  useCloudProfileStore,
+  useConfigStore,
+  useGardenerExtensionStore,
+  useKubeconfigStore,
+  useLoginStore,
+  useMemberStore,
+  useProjectStore,
+  useQuotaStore,
+  useSecretStore,
+  useSeedStore,
+  useShootStore,
+  useShootStagingStore,
+  useSocketStore,
+  useTerminalStore,
+  useTicketStore,
+}
+
+export const useStore = mapStores(...[
+  useAppStore,
+  useAuthnStore,
+  useAuthzStore,
+  useCloudProfileStore,
+  useConfigStore,
+  useGardenerExtensionStore,
+  useKubeconfigStore,
+  useLoginStore,
+  useMemberStore,
+  useProjectStore,
+  useQuotaStore,
+  useSecretStore,
+  useSeedStore,
+  useShootStore,
+  useShootStagingStore,
+  useSocketStore,
+  useTerminalStore,
+  useTicketStore,
+])
+
+export function useStores (...args) {
+  const ids = args.flat(1)
+  const iteratee = (stores, id) => {
+    const key = `${id}Store`
+    stores[key] = useStore[key]()
+    return stores
+  }
+  return ids.reduce(iteratee, {})
+}
 
 export default createPinia()

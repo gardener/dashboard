@@ -6,14 +6,6 @@
 //
 
 import {
-  useAppStore,
-  useAuthnStore,
-  useAuthzStore,
-  useProjectStore,
-} from '@/store'
-import { useLogger } from '@/composables'
-
-import {
   newShootTabs,
   shootItemTabs,
 } from './tabs'
@@ -63,12 +55,18 @@ const GShootList = () => import('@/views/GShootList.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
-export function createRoutes () {
-  const appStore = useAppStore()
-  const projectStore = useProjectStore()
-  const authnStore = useAuthnStore()
-  const authzStore = useAuthzStore()
-  const logger = useLogger() // eslint-disable-line no-unused-vars
+export function createRoutes ({ logger, useStores }) {
+  const {
+    appStore,
+    authnStore,
+    authzStore,
+    projectStore,
+  } = useStores([
+    'app',
+    'authn',
+    'authz',
+    'project',
+  ])
 
   return [
     loginRoute('/login'),
@@ -86,7 +84,7 @@ export function createRoutes () {
       newProjectRoute('namespace/+'),
       projectHierarchy('namespace/:namespace'),
       {
-        path: '*',
+        path: ':pathMatch(.*)*',
         component: GNotFound,
         meta: {
           namespaced: false,
@@ -117,7 +115,7 @@ export function createRoutes () {
         { path: 'term', redirect: 'term/garden' },
         gardenTerminalRoute('term/garden'),
         {
-          path: '*',
+          path: ':pathMatch(.*)*',
           component: GNotFound,
           meta: {
             breadcrumbs: notFoundBreadcrumbs,
@@ -152,7 +150,7 @@ export function createRoutes () {
         shootItemHibernationRoute('hibernation'),
         shootItemTerminalRoute('term'),
         {
-          path: '*',
+          path: ':pathMatch(.*)*',
           component: GNotFound,
           meta: {
             breadcrumbs: shootItemBreadcrumbs,

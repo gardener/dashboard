@@ -8,7 +8,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { onKeyStroke, useEventBus } from '@vueuse/core'
+import { provide } from 'vue'
+import { useTheme } from 'vuetify'
+import { onKeyStroke, useEventBus, useColorMode } from '@vueuse/core'
+
+const theme = useTheme()
+const colorMode = useColorMode({
+  storageKey: 'global/color-scheme',
+  onChanged (mode) {
+    theme.global.name.value = mode === 'auto'
+      ? colorMode.system.value
+      : mode
+  },
+})
+provide('colorMode', colorMode.store)
+provide('getColorCode', value => theme.current.value?.colors[value])
 
 const bus = useEventBus('esc-pressed')
 

@@ -202,7 +202,7 @@ export default defineComponent({
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
-      userInterActionBus: new mitt(),
+      userInterActionBus: new mitt(), // eslint-disable-line new-cap
     }
   },
   computed: {
@@ -219,10 +219,10 @@ export default defineComponent({
     ]),
     ...mapState(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion',
       'sortedInfrastructureKindList',
     ]),
     ...mapState(useCloudProfileStore, [
+      'zonesByCloudProfileNameAndRegion',
       'sortedInfrastructureKindList',
     ]),
     valid () {

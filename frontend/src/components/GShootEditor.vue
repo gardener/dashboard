@@ -188,6 +188,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
+  inject: ['yaml', 'api', 'colorMode'],
   data () {
     return {
       conflictPath: null,
@@ -268,7 +269,7 @@ export default defineComponent({
       return !this.isReadOnly && !this.hideToolbar
     },
     theme () {
-      return this.$theme.colorMode === 'dark'
+      return this.colorMode === 'dark'
         ? 'seti'
         : 'default'
     },
@@ -447,7 +448,7 @@ export default defineComponent({
     },
     async update (value = this.value) {
       if (value) {
-        this.setContent(await this.$yaml.dump(value))
+        this.setContent(await this.yaml.dump(value))
       }
     },
     onCopy () {
@@ -480,7 +481,7 @@ export default defineComponent({
     this.update(this.value)
     this.refresh()
 
-    const shootSchemaDefinition = await this.$api.getShootSchemaDefinition()
+    const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)

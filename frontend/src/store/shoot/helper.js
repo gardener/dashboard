@@ -224,7 +224,7 @@ export function createShootResource (context) {
   }
 
   const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
-  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.defaultNodesCIDR))
+  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.nodesCIDR))
 
   const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
   set(shootResource, 'spec.cloudProfileName', cloudProfileName)
@@ -241,29 +241,7 @@ export function createShootResource (context) {
   }
   set(shootResource, 'spec.region', region)
 
-  const name = shortRandomString(10)
-  set(shootResource, 'metadata.name', name)
-
-  const purpose = head(purposesForSecret(secret))
-  set(shootResource, 'spec.purpose', purpose)
-
-  const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
-  set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
-  set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', false)
-
-  const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-  const zones = allZones.length ? [sample(allZones)] : undefined
-  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
-  if (zonesNetworkConfiguration) {
-    set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
-  }
-
-  const newWorker = cloudProfileStore.generateWorker(zones, cloudProfileName, region, kubernetesVersion.version)
-  const worker = omit(newWorker, ['id', 'isNew'])
-  const workers = [worker]
-  set(shootResource, 'spec.provider.workers', workers)
-
-  const networkingType = head(gardenerExtensionsStore.networkingTypes)
+  const networkingType = head(gardenerExtensionsStore.networkingTypeList)
   set(shootResource, 'spec.networking.type', networkingType)
 
   const loadBalancerProviderName = head(cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))
@@ -297,7 +275,7 @@ export function createShootResource (context) {
   if (!isEmpty(firewallImage)) {
     set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
   }
-  const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: newWorker.machine.architecture }), 'name')
+  const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region }), 'name')
   const firewallSize = head(firewallSizes)
   if (!isEmpty(firewallSize)) {
     set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
@@ -307,6 +285,28 @@ export function createShootResource (context) {
   if (!isEmpty(firewallNetworks)) {
     set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
   }
+
+  const name = shortRandomString(10)
+  set(shootResource, 'metadata.name', name)
+
+  const purpose = head(purposesForSecret(secret))
+  set(shootResource, 'spec.purpose', purpose)
+
+  const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
+  set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
+  set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', false)
+
+  const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+  const zones = allZones.length ? [sample(allZones)] : undefined
+  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
+  if (zonesNetworkConfiguration) {
+    set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+  }
+
+  const newWorker = cloudProfileStore.generateWorker(zones, cloudProfileName, region, kubernetesVersion.version)
+  const worker = omit(newWorker, ['id', 'isNew'])
+  const workers = [worker]
+  set(shootResource, 'spec.provider.workers', workers)
 
   const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind)
   if (controlPlaneZone) {

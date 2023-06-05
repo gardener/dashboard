@@ -36,7 +36,6 @@ import GShootEditor from '@/components/GShootEditor'
 import { mapState, mapActions } from 'pinia'
 import { errorDetailsFromError } from '@/utils/error'
 import { useShootStore, useAuthzStore, useAppStore } from '@/store'
-import { useApi } from '@/composables'
 import asyncRef from '@/mixins/asyncRef'
 
 // lodash
@@ -44,10 +43,6 @@ import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 
 export default defineComponent({
-  setup () {
-    const api = useApi()
-    return { api }
-  },
   components: {
     GShootEditor,
     GConfirmDialog,
@@ -55,6 +50,7 @@ export default defineComponent({
   mixins: [
     asyncRef('shootEditor'),
   ],
+  inject: ['yaml', 'api'],
   data () {
     return {
       errorMessage: undefined,
@@ -82,7 +78,7 @@ export default defineComponent({
     },
     async getShootResource () {
       const content = await this._shootEditor.dispatch('getContent')
-      return this.$yaml.load(content)
+      return this.yaml.load(content)
     },
     async createClicked () {
       try {

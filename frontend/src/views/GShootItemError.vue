@@ -67,7 +67,7 @@ export default defineComponent({
   methods: {
     async onClick () {
       try {
-        this.$router.push(this.fallbackRoute)
+        await this.$router.push(this.fallbackRoute)
       } catch (err) {
         /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
       }

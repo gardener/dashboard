@@ -90,6 +90,10 @@ export const useSocketStore = defineStore('socket', () => {
     backoff.value.attempts = 0
   }
 
+  const backoffAttempts = computed(() => {
+    return backoff.value.attempts
+  })
+
   function increaseBackoffAttempts () {
     backoff.value.attempts++
   }
@@ -113,6 +117,7 @@ export const useSocketStore = defineStore('socket', () => {
     onError,
     setReadyState,
     resetBackoffAttempts,
+    backoffAttempts,
     increaseBackoffAttempts,
     // mutations
     CONNECT,

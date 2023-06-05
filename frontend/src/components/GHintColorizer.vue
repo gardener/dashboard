@@ -11,13 +11,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, onMounted, onUpdated, watch, toRefs, ref } from 'vue'
+import { ref, computed, inject, onMounted, onUpdated, watch } from 'vue'
 import get from 'lodash/get'
-import { useTheme } from 'vuetify'
 
-const root = ref(null)
-
-const vTheme = useTheme()
+const getColorCode = inject('getColorCode')
 
 const props = defineProps({
   hintColor: {
@@ -25,15 +22,11 @@ const props = defineProps({
   },
 })
 
-const { hintColor } = toRefs(props)
+const root = ref(null)
 
 const isSelectErrorColor = computed(() => {
   const color = get(root.value, '$children[0].$children[0].color')
   return color === 'error'
-})
-
-watch(hintColor, hintColor => {
-  applyHintColor()
 })
 
 function applyHintColor () {
@@ -45,20 +38,16 @@ function applyHintColor () {
     return
   }
 
-  const colorCode = vTheme.current.value.colors[hintColor.value]
-  if (!isSelectErrorColor.value && hintColor.value !== 'default') {
+  const colorCode = getColorCode(props.hintColor)
+  if (!isSelectErrorColor.value && props.hintColor !== 'default') {
     hintElement.style = `color: ${colorCode}`
   } else {
     hintElement.style = ''
   }
 }
 
-onMounted(() => {
-  applyHintColor()
-})
-
-onUpdated(() => {
-  applyHintColor()
-})
+watch(() => props.hintColor, () => applyHintColor())
+onMounted(() => applyHintColor())
+onUpdated(() => applyHintColor())
 
 </script>

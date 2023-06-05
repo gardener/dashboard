@@ -15,12 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon icon="mdi-chevron-right" size="large"/>
     </template>
     <template #title="{ item }">
-      <span v-if="item.to">
-        {{ item.title }}
-      </span>
-      <span v-else
-        class="text-h6"
-      >
+      <span :class="{ 'text-h6': !item.to }">
         {{ item.title }}
       </span>
     </template>

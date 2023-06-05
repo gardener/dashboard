@@ -3,20 +3,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
 import { io, Manager } from 'socket.io-client'
+
+import { useLogger } from '@/composables'
+import { useStores as useStoresDefault } from '@/store'
 import { constants } from '@/store/shoot/helper'
 import { createClockSkewError } from '@/utils/errors'
 
-function createSocket (app) {
+function createSocket ({ logger, useStores }) {
   const {
-    $logger: logger,
-    $authnStore: authnStore,
-    $projectStore: projectStore,
-    $socketStore: socketStore,
-    $shootStore: shootStore,
-    $ticketStore: ticketStore,
-  } = app.config.globalProperties
+    authnStore,
+    projectStore,
+    socketStore,
+    shootStore,
+    ticketStore,
+  } = useStores([
+    'authn',
+    'project',
+    'socket',
+    'shoot',
+    'ticket',
+  ])
 
   const socket = io({
     path: '/api/events',
@@ -81,8 +88,7 @@ function createSocket (app) {
   }
 
   const reconnect = () => {
-    const attempts = socketStore.backoff.attempts
-    if (attempts < 10) {
+    if (socketStore.backoffAttempts < 10) {
       socketStore.increaseBackoffAttempts()
       const delay = socketStore.backoffDuration
       setTimeout(connect, delay)
@@ -183,17 +189,25 @@ function createSocket (app) {
 }
 
 export default {
-  install (app) {
+  install (app, options = {}) {
     const {
-      $logger: logger,
-      $authnStore: authnStore,
-      $shootStore: shootStore,
-      $socketStore: socketStore,
-    } = app.config.globalProperties
+      logger = useLogger(),
+      useStores = useStoresDefault,
+    } = options
 
-    const socket = createSocket(app)
+    const socket = createSocket({ logger, useStores })
 
-    app.provide('io', app.config.globalProperties.$io = socket.io)
+    app.provide('io', socket.io)
+
+    const {
+      authnStore,
+      shootStore,
+      socketStore,
+    } = useStores([
+      'authn',
+      'shoot',
+      'socket',
+    ])
 
     const handleSetUser = user => {
       if (user) {

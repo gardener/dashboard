@@ -60,6 +60,10 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     return state.dnsDomain
   })
 
+  const dnsProviderIds = computed(() => {
+    return state.dnsProviderIds
+  })
+
   const cloudProfileName = computed(() => {
     return state.cloudProfileName
   })
@@ -321,6 +325,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
   return {
     // state
     dnsDomain,
+    dnsProviderIds,
     cloudProfileName,
     seedName,
     // getters

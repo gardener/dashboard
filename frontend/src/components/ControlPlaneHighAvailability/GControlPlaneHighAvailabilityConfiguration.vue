@@ -38,6 +38,7 @@ export default defineComponent({
     GManageControlPlaneHighAvailability,
   },
   mixins: [shootItem],
+  inject: ['api'],
   data () {
     return {
       componentKey: uuidv4(),
@@ -66,7 +67,7 @@ export default defineComponent({
             type: this.controlPlaneFailureToleranceType,
           },
         }
-        await this.$api.updateShootControlPlaneHighAvailability({ namespace: this.shootNamespace, name: this.shootName, data: highAvailability })
+        await this.api.updateShootControlPlaneHighAvailability({ namespace: this.shootNamespace, name: this.shootName, data: highAvailability })
       } catch (err) {
         const errorMessage = 'Could not update control plane high availability'
         const errorDetails = errorDetailsFromError(err)

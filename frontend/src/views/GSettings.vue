@@ -102,7 +102,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { useLogger, useTheme } from '@/composables'
+import { inject } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 
 const logLevels = [
@@ -113,7 +113,7 @@ const logLevels = [
   { value: 'silent', text: 'silent', icon: 'mdi-pause-octagon', color: 'grey' },
 ]
 
-const { logLevel } = useLogger()
-const { colorMode } = useTheme()
+const { logLevel } = inject('logger')
+const colorMode = inject('colorMode')
 const autoLogin = useLocalStorage('global/auto-login')
 </script>

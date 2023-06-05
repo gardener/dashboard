@@ -236,6 +236,7 @@ export default defineComponent({
     GAccountAvatar,
     GActionButton,
   },
+  inject: ['yaml', 'api'],
   data () {
     return {
       kubeconfigExpansionPanel: false,
@@ -382,7 +383,7 @@ export default defineComponent({
       download(kubeconfig, filename, 'text/yaml')
     },
     async updateKubeconfigYaml (value) {
-      this.kubeconfigYaml = await this.$yaml.dump(value)
+      this.kubeconfigYaml = await this.yaml.dump(value)
     },
     expansionPanelIcon (value) {
       return value ? 'mdi-chevron-up' : 'mdi-chevron-down'
@@ -395,7 +396,7 @@ export default defineComponent({
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
       this.projectName = get(project, 'metadata.name', '')
-      const response = await this.$api.getToken()
+      const response = await this.api.getToken()
       this.idToken = response.data.token
       this.updateKubeconfigYaml(this.kubeconfig)
     } catch (err) {

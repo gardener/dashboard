@@ -2,9 +2,9 @@
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
- <template>
+<template>
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
@@ -83,6 +83,7 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  inject: ['yaml'],
   data () {
     return {
       data: undefined,
@@ -127,7 +128,7 @@ export default defineComponent({
       this.secretData = {}
 
       try {
-        this.secretData = await this.$yaml.load(this.data)
+        this.secretData = await this.yaml.load(this.data)
       } catch (err) {
         /* ignore errors */
       } finally {

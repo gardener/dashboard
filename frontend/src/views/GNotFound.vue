@@ -50,7 +50,7 @@ const fallbackRoute = computed(() => {
 
 function onClick (from) {
   if (from?.name) {
-    router.push(fallbackRoute.value)
+    router.push(fallbackRoute.value).catch(() => { /* ignore error */ })
   } else {
     router.back()
   }

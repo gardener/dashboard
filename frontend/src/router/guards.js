@@ -5,41 +5,39 @@
 //
 
 import { useLocalStorage } from '@vueuse/core'
-import { useLogger } from '@/composables'
 
-import {
-  useAppStore,
-  useConfigStore,
-  useAuthnStore,
-  useAuthzStore,
-  useProjectStore,
-  useCloudProfileStore,
-  useSeedStore,
-  useGardenerExtensionStore,
-  useKubeconfigStore,
-  useMemberStore,
-  useShootStore,
-  useSecretStore,
-  useTerminalStore,
-} from '@/store'
-
-export function createGuards () {
-  const logger = useLogger()
+export function createGuards ({ logger, useStores }) {
   const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
 
-  const appStore = useAppStore()
-  const configStore = useConfigStore()
-  const authnStore = useAuthnStore()
-  const authzStore = useAuthzStore()
-  const projectStore = useProjectStore()
-  const cloudProfileStore = useCloudProfileStore()
-  const seedStore = useSeedStore()
-  const gardenerExtensionsStore = useGardenerExtensionStore()
-  const kubeconfigStore = useKubeconfigStore()
-  const memberStore = useMemberStore()
-  const secretStore = useSecretStore()
-  const shootStore = useShootStore()
-  const terminalStore = useTerminalStore()
+  const {
+    appStore,
+    configStore,
+    authnStore,
+    authzStore,
+    projectStore,
+    cloudProfileStore,
+    seedStore,
+    gardenerExtensionStore,
+    kubeconfigStore,
+    memberStore,
+    secretStore,
+    shootStore,
+    terminalStore,
+  } = useStores([
+    'app',
+    'config',
+    'authn',
+    'authz',
+    'project',
+    'cloudProfile',
+    'seed',
+    'gardenerExtension',
+    'kubeconfig',
+    'member',
+    'secret',
+    'shoot',
+    'terminal',
+  ])
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return (to) => {
@@ -73,7 +71,7 @@ export function createGuards () {
           ensureProjectsLoaded(projectStore),
           ensureCloudProfilesLoaded(cloudProfileStore),
           ensureSeedsLoaded(seedStore),
-          ensureGardenerExtensionsLoaded(gardenerExtensionsStore),
+          ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
           refreshRules(authzStore, namespace),
         ])

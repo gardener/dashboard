@@ -11,7 +11,7 @@ import { useApi } from '@/composables'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
-import groupBy from 'lodash/groupBy'
+import keyBy from 'lodash/keyBy'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -37,7 +37,7 @@ export const useSeedStore = defineStore('seed', () => {
 
   function seedsForCloudProfile (cloudProfile) {
     const seeds = []
-    const seedsByName = groupBy(list.value, 'metadata.name')
+    const seedsByName = keyBy(list.value, 'metadata.name')
     const names = get(cloudProfile, 'data.seedNames', [])
     for (const name of names) {
       const seed = seedsByName[name]

@@ -60,6 +60,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
+  inject: ['api'],
   data () {
     return {
       gardenerVersion: undefined,
@@ -91,7 +92,7 @@ export default defineComponent({
             gardenerVersion,
             version,
           } = {},
-        } = await this.$api.getInfo()
+        } = await this.api.getInfo()
         if (gardenerVersion) {
           this.gardenerVersion = gardenerVersion.gitVersion
         }

@@ -28,13 +28,12 @@ export default defineComponent({
     const shootStore = useShootStore()
     const unsubscribe = shootStore.$onAction(({
       name,
+      args,
       after,
     }) => {
       switch (name) {
         case 'HANDLE_EVENT': {
-          after(({ payload }) => {
-            this.handleShootEvent(payload.event)
-          })
+          after(() => this.handleShootEvent(...args))
           break
         }
       }
@@ -79,10 +78,10 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useShootStore, {
-      subscribeShoot: 'subscribe',
-      unsubscribeShoot: 'unsubscribe',
-    }),
+    ...mapActions(useShootStore, [
+      'subscribe',
+      'unsubscribe',
+    ]),
     ...mapActions(useSecretStore, [
       'fetchSecrets',
     ]),
@@ -111,7 +110,7 @@ export default defineComponent({
       this.component = 'shoot-item-loading'
       try {
         const promises = [
-          this.subscribeShoot(params),
+          this.subscribe(params),
         ]
         if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
           promises.push(this.fetchSecrets()) // Required for purpose configuration
@@ -133,14 +132,14 @@ export default defineComponent({
           message = 'An unexpected error occurred. Please try again later'
         }
         this.error = Object.assign(new Error(message), { code, reason })
-        this.component = 'shoot-item-error'
+        this.component = 'g-shoot-item-error'
       }
     },
   },
   async beforeRouteLeave (to, from, next) {
     try {
       this.component = 'div'
-      await this.unsubscribeShoot()
+      await this.unsubscribe()
     } finally {
       next()
     }

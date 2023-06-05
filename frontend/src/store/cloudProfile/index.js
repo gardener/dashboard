@@ -114,7 +114,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   }
 
   function zonesByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
-    const cloudProfile = (cloudProfileName)
+    const cloudProfile = cloudProfileByName(cloudProfileName)
     if (cloudProfile) {
       return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
     }

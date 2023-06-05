@@ -7,4 +7,3 @@
 export { useApi, useInterceptors } from './useApi'
 export { useLogger } from './useLogger'
 export { useNamespace } from './useNamespace'
-export { useTheme } from './useTheme'

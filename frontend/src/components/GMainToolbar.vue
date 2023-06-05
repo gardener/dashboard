@@ -210,12 +210,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, toRef } from 'vue'
+import { ref, computed, toRef, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
-import { useTheme, useNamespace } from '@/composables'
+import { useNamespace } from '@/composables'
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 import GBreadcrumb from './GBreadcrumb.vue'
 import GInfoDialog from './dialogs/GInfoDialog.vue'
@@ -226,7 +226,7 @@ const appStore = useAppStore()
 const authnStore = useAuthnStore()
 const configStore = useConfigStore()
 
-const { colorMode } = useTheme()
+const colorMode = inject('colorMode')
 const namespace = useNamespace(route)
 const autoLogin = useLocalStorage('global/auto-login')
 
