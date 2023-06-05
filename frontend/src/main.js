@@ -15,10 +15,6 @@ import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
 
-// This is required to make injections automatically unwrap computed refs.
-// https://vuejs.org/guide/components/provide-inject.html#working-with-reactivity
-app.config.unwrapInjectedRef = true
-
 registerPlugins(app)
 
 app.mount('#app')

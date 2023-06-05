@@ -56,9 +56,9 @@
     "toidentifier": "^1.0.1",
     "universal-cookie": "^4.0.4",
     "uuid": "^9.0.0",
-    "vue": "^3.2.47",
-    "vue-router": "^4.1.6",
-    "vuetify": "^3.3.1",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.2",
+    "vuetify": "^3.3.2",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
