@@ -8,9 +8,11 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
+import decode from 'jwt-decode'
+
 import { useLogger, useInterceptors } from '@/composables'
 
-import decode from 'jwt-decode'
+import { useSocketStore } from './socket'
 
 import {
   gravatarUrlGeneric,
@@ -51,6 +53,7 @@ function delay (duration = 0) {
 export const useAuthnStore = defineStore('authn', () => {
   const logger = useLogger()
   const location = useBrowserLocation()
+  const socketStore = useSocketStore()
   const interceptors = useInterceptors()
   const cookies = useCookies([COOKIE_HEADER_PAYLOAD])
 
@@ -68,6 +71,8 @@ export const useAuthnStore = defineStore('authn', () => {
       return args
     },
   })
+
+  let refreshTokenPromise
 
   const user = ref(null)
 
@@ -99,15 +104,6 @@ export const useAuthnStore = defineStore('authn', () => {
     return `${displayName.value} (${username.value})`
   })
 
-  function $reset () {
-    try {
-      this.SET_USER(decode(cookies.get(COOKIE_HEADER_PAYLOAD)))
-    } catch (err) {
-      logger.error(err.message)
-      this.SET_USER(null)
-    }
-  }
-
   function isUserEmpty () {
     return !user.value
   }
@@ -133,8 +129,6 @@ export const useAuthnStore = defineStore('authn', () => {
     const t = secondsUntil(refreshAt)
     return typeof t === 'number' && t < CLOCK_TOLERANCE
   }
-
-  let refreshTokenPromise
 
   async function createTokenRefreshRequest () {
     const timestamp = Math.floor(Date.now() / 1000)
@@ -258,10 +252,23 @@ export const useAuthnStore = defineStore('authn', () => {
     }
     return refreshTokenPromise
   }
-
   // mutations
-  function SET_USER (value) {
+  function setUser (value) {
     user.value = value
+    if (!user.value) {
+      socketStore.disconnect()
+    } else {
+      socketStore.connect()
+    }
+  }
+
+  function $reset () {
+    try {
+      setUser(decode(cookies.get(COOKIE_HEADER_PAYLOAD)))
+    } catch (err) {
+      logger.error(err.message)
+      setUser(null)
+    }
   }
 
   return {
@@ -279,7 +286,5 @@ export const useAuthnStore = defineStore('authn', () => {
     signinWithOidc,
     ensureValidToken,
     $reset,
-    // mutations
-    SET_USER,
   }
 })

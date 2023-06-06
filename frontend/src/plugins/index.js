@@ -17,7 +17,6 @@ import vuetify from './vuetify'
 import notify from './notify'
 import yaml from './yaml'
 import utils from './utils'
-import socket from './socket'
 
 export function registerPlugins (app) {
   loadFonts()
@@ -29,5 +28,4 @@ export function registerPlugins (app) {
     .use(notify)
     .use(yaml)
     .use(utils)
-    .use(socket, { logger, useStores })
 }

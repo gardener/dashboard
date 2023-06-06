@@ -3,27 +3,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+import { unref } from 'vue'
 import { io, Manager } from 'socket.io-client'
 
-import { useLogger } from '@/composables'
-import { useStores as useStoresDefault } from '@/store'
-import { constants } from '@/store/shoot/helper'
 import { createClockSkewError } from '@/utils/errors'
 
-function createSocket ({ logger, useStores }) {
+export function createSocket (state, context) {
   const {
+    logger,
     authnStore,
     projectStore,
-    socketStore,
     shootStore,
     ticketStore,
-  } = useStores([
-    'authn',
-    'project',
-    'socket',
-    'shoot',
-    'ticket',
-  ])
+  } = context
 
   const socket = io({
     path: '/api/events',
@@ -44,18 +36,18 @@ function createSocket ({ logger, useStores }) {
   // handle manager events
   manager.open = function (fn) {
     logger.debug('manager opening')
-    socketStore.setReadyState('opening')
+    state.readyState = 'opening'
     managerOpen(fn)
   }
 
   manager.on('open', () => {
     logger.debug('manager open')
-    socketStore.setReadyState('open')
+    state.readyState = 'open'
   })
 
   manager.on('close', reason => {
     logger.debug('manager closed: %s', reason)
-    socketStore.setReadyState('closed')
+    state.readyState = 'closed'
   })
 
   manager.on('error', err => {
@@ -88,19 +80,30 @@ function createSocket ({ logger, useStores }) {
   }
 
   const reconnect = () => {
-    if (socketStore.backoffAttempts < 10) {
-      socketStore.increaseBackoffAttempts()
-      const delay = socketStore.backoffDuration
+    if (state.backoff.attempts < 10) {
+      state.backoff.attempts += 1
+      const delay = getBackoffDuration(state.backoff)
       setTimeout(connect, delay)
     } else {
       logger.error('maximum number of reconnection attempts has been reached')
-      socketStore.resetBackoffAttempts()
+      state.backoff.attempts = 0
+    }
+  }
+
+  const setConnected = value => {
+    state.connected = value
+    if (value) {
+      state.reason = null
+      state.error = null
+      state.backoff.attempts = 0
     }
   }
 
   socket.on('connect', () => {
     logger.info('socket connected')
-    socketStore.onConnect(socket)
+    state.id = socket.id
+    state.active = socket.active
+    setConnected(socket.connected)
     shootStore.synchronize()
   })
 
@@ -120,7 +123,9 @@ function createSocket ({ logger, useStores }) {
         break
       }
     }
-    socketStore.onDisconnect(socket, reason)
+    state.active = socket.active
+    setConnected(socket.connected)
+    state.reason = reason
   })
 
   const handleManagerError = err => {
@@ -160,20 +165,23 @@ function createSocket ({ logger, useStores }) {
       reconnect()
     }
   }
+
   socket.on('connect_error', err => {
     if (socket.active) {
       handleManagerError(err)
     } else {
       handleMiddlewareError(err)
     }
-    socketStore.onError(socket, err)
+    state.active = socket.active
+    setConnected(socket.connected)
+    state.error = err
   })
 
   // handle custom events
   socket.on('shoots', event => {
     const namespaces = projectStore.currentNamespaces
     if (namespaces.includes(event.object?.metadata.namespace)) {
-      shootStore.HANDLE_EVENT(event)
+      shootStore.handleEvent(event)
     }
   })
 
@@ -188,100 +196,11 @@ function createSocket ({ logger, useStores }) {
   return socket
 }
 
-export default {
-  install (app, options = {}) {
-    const {
-      logger = useLogger(),
-      useStores = useStoresDefault,
-    } = options
-
-    const socket = createSocket({ logger, useStores })
-
-    app.provide('io', socket.io)
-
-    const {
-      authnStore,
-      shootStore,
-      socketStore,
-    } = useStores([
-      'authn',
-      'shoot',
-      'socket',
-    ])
-
-    const handleSetUser = user => {
-      if (user) {
-        socket.connect()
-      } else {
-        socket.disconnect()
-      }
-    }
-
-    const handleSubscribe = options => {
-      if (socket.connected) {
-        socket.emit('subscribe', 'shoots', options, ({ statusCode, message }) => {
-          if (statusCode === 200) {
-            logger.debug('subscribed shoots')
-            shootStore.setSubscriptionState(constants.OPEN)
-          } else {
-            const err = new Error(message)
-            err.name = 'SubscribeError'
-            logger.debug('failed to subscribe shoots: %s', err.message)
-            shootStore.setSubscriptionError(err)
-          }
-        })
-      }
-    }
-
-    const handleUnsubscribe = () => {
-      socket.emit('unsubscribe', 'shoots', ({ statusCode, message }) => {
-        if (statusCode === 200) {
-          logger.debug('unsubscribed shoots')
-          shootStore.setSubscriptionState(constants.CLOSED)
-        } else {
-          const err = new Error(message)
-          err.name = 'UnsubscribeError'
-          logger.debug('failed to unsubscribe shoots: %s', err.message)
-          shootStore.setSubscriptionError(err)
-        }
-      })
-    }
-
-    const handleConnect = () => {
-      if (!socket.connected) {
-        socket.connect()
-      }
-    }
-
-    authnStore.$onAction(({ name, args, after }) => {
-      switch (name) {
-        case 'SET_USER': {
-          after(() => handleSetUser(...args))
-          break
-        }
-      }
-    })
-
-    shootStore.$onAction(({ name, args, after }) => {
-      switch (name) {
-        case 'SUBSCRIBE': {
-          after(() => handleSubscribe(...args))
-          break
-        }
-        case 'UNSUBSCRIBE': {
-          after(() => handleUnsubscribe())
-          break
-        }
-      }
-    })
-
-    socketStore.$onAction(({ name, after }) => {
-      switch (name) {
-        case 'CONNECT': {
-          after(() => handleConnect())
-          break
-        }
-      }
-    })
-  },
+export function getBackoffDuration (backoff) {
+  const { min, max, factor, jitter, attempts } = unref(backoff)
+  const duration = min * Math.pow(factor, attempts)
+  const rand = Math.random()
+  const sign = Math.sign(rand - 0.5)
+  const deviation = Math.floor(rand * jitter * duration)
+  return Math.min(duration + sign * deviation, max)
 }

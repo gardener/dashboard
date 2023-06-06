@@ -94,17 +94,17 @@ export const shootSubscription = {
     },
   },
   methods: {
-    ...mapActions(useShootStore, {
-      reload: 'synchronize',
-    }),
-    ...mapActions(useSocketStore, {
-      reconnect: 'CONNECT',
-    }),
+    ...mapActions(useShootStore, [
+      'synchronize',
+    ]),
+    ...mapActions(useSocketStore, [
+      'connect',
+    ]),
     retry () {
       if (!this.connected && !this.active) {
-        this.reconnect()
+        this.connect()
       } else {
-        this.reload()
+        this.synchronize()
       }
     },
   },

@@ -32,7 +32,7 @@ export default defineComponent({
       after,
     }) => {
       switch (name) {
-        case 'HANDLE_EVENT': {
+        case 'handleEvent': {
           after(() => this.handleShootEvent(...args))
           break
         }

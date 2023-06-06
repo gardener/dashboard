@@ -207,7 +207,7 @@ export function createShootResource (context) {
     configStore,
     secretStore,
     cloudProfileStore,
-    gardenerExtensionsStore,
+    gardenerExtensionStore,
   } = context
 
   const shootResource = {
@@ -241,7 +241,7 @@ export function createShootResource (context) {
   }
   set(shootResource, 'spec.region', region)
 
-  const networkingType = head(gardenerExtensionsStore.networkingTypeList)
+  const networkingType = head(gardenerExtensionStore.networkingTypeList)
   set(shootResource, 'spec.networking.type', networkingType)
 
   const loadBalancerProviderName = head(cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))

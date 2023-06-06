@@ -8,13 +8,7 @@ import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
 
 import { useApi, useLogger } from '@/composables'
-import { useAuthzStore } from '../authz'
-import { useCloudProfileStore } from '../cloudProfile'
-import { useConfigStore } from '../config'
-import { useSecretStore } from '../secret'
-import { useAppStore } from '../app'
-import { useGardenerExtensionStore } from '../gardenerExtension'
-import { useTicketStore } from '../ticket'
+import { useStores } from '..'
 
 import {
   uriPattern,
@@ -40,16 +34,29 @@ import replace from 'lodash/replace'
 import difference from 'lodash/difference'
 import differenceWith from 'lodash/differenceWith'
 
-export const useShootStore = defineStore('shoot', (...args) => {
+export const useShootStore = defineStore('shoot', () => {
   const api = useApi()
   const logger = useLogger()
-  const appStore = useAppStore()
-  const authzStore = useAuthzStore()
-  const cloudProfileStore = useCloudProfileStore()
-  const configStore = useConfigStore()
-  const secretStore = useSecretStore()
-  const gardenerExtensionsStore = useGardenerExtensionStore()
-  const ticketStore = useTicketStore()
+
+  const {
+    appStore,
+    authzStore,
+    cloudProfileStore,
+    configStore,
+    secretStore,
+    gardenerExtensionStore,
+    ticketStore,
+    socketStore,
+  } = useStores([
+    'app',
+    'authz',
+    'cloudProfile',
+    'config',
+    'secret',
+    'gardenerExtension',
+    'ticket',
+    'socket',
+  ])
 
   const context = {
     api,
@@ -59,8 +66,9 @@ export const useShootStore = defineStore('shoot', (...args) => {
     cloudProfileStore,
     configStore,
     secretStore,
-    gardenerExtensionsStore,
+    gardenerExtensionStore,
     ticketStore,
+    socketStore,
   }
 
   const state = reactive({
@@ -213,7 +221,7 @@ export const useShootStore = defineStore('shoot', (...args) => {
   }
 
   function unsubscribe () {
-    this.UNSUBSCRIBE()
+    closeSubscription()
     clearAll()
   }
 
@@ -264,7 +272,7 @@ export const useShootStore = defineStore('shoot', (...args) => {
         receive(shoots)
         ticketStore.receiveIssues(issues)
         ticketStore.receiveComments(comments)
-        this.SUBSCRIBE(options)
+        openSubscription(options)
       } catch (err) {
         const message = get(err, 'response.data.message', err.message)
         logger.error('Failed to fetch shoots or tickets: %s', message)
@@ -357,7 +365,7 @@ export const useShootStore = defineStore('shoot', (...args) => {
       configStore,
       secretStore,
       cloudProfileStore,
-      gardenerExtensionsStore,
+      gardenerExtensionStore,
     })
 
     state.newShootResource = value
@@ -475,18 +483,20 @@ export const useShootStore = defineStore('shoot', (...args) => {
     state.staleShoots = {}
   }
 
-  function SUBSCRIBE () {
+  function openSubscription (options) {
     state.subscriptionState = constants.OPENING
     state.subscriptionError = null
+    socketStore.emitSubscribe(options)
   }
 
-  function UNSUBSCRIBE () {
+  function closeSubscription () {
     state.subscriptionState = constants.CLOSING
     state.subscriptionError = null
     state.subscription = null
+    socketStore.emitUnsubscribe()
   }
 
-  function HANDLE_EVENT (event) {
+  function handleEvent (event) {
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
     let setFilteredItemsRequired = false
     switch (event.type) {
@@ -536,6 +546,7 @@ export const useShootStore = defineStore('shoot', (...args) => {
     synchronize,
     subscribe,
     unsubscribe,
+    handleEvent,
     createShoot,
     deleteShoot,
     fetchInfo,
@@ -553,9 +564,5 @@ export const useShootStore = defineStore('shoot', (...args) => {
     setSubscription,
     setSubscriptionState,
     setSubscriptionError,
-    // mutations
-    SUBSCRIBE,
-    UNSUBSCRIBE,
-    HANDLE_EVENT,
   }
 })
