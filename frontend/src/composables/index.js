@@ -7,3 +7,4 @@
 export { useApi, useInterceptors } from './useApi'
 export { useLogger } from './useLogger'
 export { useNamespace } from './useNamespace'
+export { useAsyncRef } from './useAsyncRef'

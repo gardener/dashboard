@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
       :shoot-item="newShootResource"
-      ref="shootEditor"
-      v-on="_shootEditor.hooks"
+      ref="shootEditorRef"
     >
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
@@ -30,13 +29,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
-import GShootEditor from '@/components/GShootEditor'
 import { mapState, mapActions } from 'pinia'
 import { errorDetailsFromError } from '@/utils/error'
 import { useShootStore, useAuthzStore, useAppStore } from '@/store'
-import asyncRef from '@/mixins/asyncRef'
+import { useAsyncRef } from '@/composables'
 
 // lodash
 import get from 'lodash/get'
@@ -44,23 +42,21 @@ import isEqual from 'lodash/isEqual'
 
 export default defineComponent({
   components: {
-    GShootEditor,
+    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GConfirmDialog,
   },
-  mixins: [
-    asyncRef('shootEditor'),
-  ],
-  inject: ['yaml', 'api'],
+  inject: ['yaml', 'api', 'logger'],
+  setup () {
+    return {
+      ...useAsyncRef('shootEditor'),
+    }
+  },
   data () {
     return {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
     }
-  },
-  async mounted () {
-    // TODO async ref currentl does not work
-    console.log(await this.getShootResource())
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -77,7 +73,7 @@ export default defineComponent({
       })
     },
     async getShootResource () {
-      const content = await this._shootEditor.dispatch('getContent')
+      const content = await this.shootEditor.dispatch('getContent')
       return this.yaml.load(content)
     },
     async createClicked () {
@@ -135,7 +131,7 @@ export default defineComponent({
     }
     if (!this.isShootCreated && await this.isShootContentDirty()) {
       if (!await this.confirmEditorNavigation()) {
-        this._shootEditor.dispatch('focus')
+        this.shootEditor.dispatch('focus')
         return next(false)
       }
     }

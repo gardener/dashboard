@@ -58,19 +58,16 @@ SPDX-License-Identifier: Apache-2.0
           ></g-access-restrictions>
         </v-card-text>
       </v-card>
-      <!--
       <v-card flat class="mt-4">
         <g-toolbar title="Worker" />
         <v-card-text>
           <g-manage-workers
             :user-inter-action-bus="userInterActionBus"
             @valid="onWorkersValid"
-            ref="manageWorkers"
-            v-on="_manageWorkers.hooks"
-          ></g-manage-workers>
+            ref="manageWorkersRef"
+          />
        </v-card-text>
       </v-card>
-      -->
       <v-card flat class="mt-4">
         <g-toolbar title="Add-Ons (not actively monitored and provided on a best-effort basis only)" />
         <v-card-text>
@@ -93,19 +90,16 @@ SPDX-License-Identifier: Apache-2.0
           ></g-maintenance-components>
        </v-card-text>
       </v-card>
-      <!--
       <v-card flat class="mt-4">
         <g-toolbar title="Hibernation" />
         <v-card-text>
           <g-manage-hibernation-schedule
             :user-inter-action-bus="userInterActionBus"
             @valid="onHibernationScheduleValid"
-            ref="hibernationSchedule"
-            v-on="_hibernationSchedule.hooks"
-          ></g-manage-hibernation-schedule>
+            ref="hibernationScheduleRef"
+          />
        </v-card-text>
       </v-card>
-      !-->
       <g-message ref="errorAlert" color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage" class="error-alert"></g-message>
     </v-container>
     <v-divider></v-divider>
@@ -121,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 
 import { mapActions, mapState } from 'pinia'
 import set from 'lodash/set'
@@ -146,13 +140,11 @@ import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
 
-import asyncRef from '@/mixins/asyncRef'
-
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 
-import { useApi } from '@/composables'
+import { useAsyncRef } from '@/composables'
 
 import {
   useCloudProfileStore,
@@ -163,14 +155,7 @@ import {
   useSecretStore,
 } from '@/store'
 
-// const GManageHibernationSchedule = () => import('@/components/ShootHibernation/GManageHibernationSchedule')
-// const GManageWorkers = () => import('@/components/ShootWorkers/GManageWorkers')
-
 export default defineComponent({
-  setup () {
-    const api = useApi()
-    return { api }
-  },
   components: {
     GNewShootSelectInfrastructure,
     GNewShootInfrastructureDetails,
@@ -180,17 +165,20 @@ export default defineComponent({
     GManageShootDns,
     GMaintenanceComponents,
     GMaintenanceTime,
-    // GManageHibernationSchedule,
-    // GManageWorkers,
+    GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
+    GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
     GMessage,
     GConfirmDialog,
     GManageControlPlaneHighAvailability,
     GToolbar,
   },
-  mixins: [
-    asyncRef('manageWorkers'),
-    asyncRef('hibernationSchedule'),
-  ],
+  inject: ['api'],
+  setup () {
+    return {
+      ...useAsyncRef('manageWorkers'),
+      ...useAsyncRef('hibernationSchedule'),
+    }
+  },
   data () {
     return {
       infrastructureValid: false,
@@ -336,7 +324,7 @@ export default defineComponent({
       set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', enableStaticTokenKubeconfig)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = await this._manageWorkers.dispatch('getWorkers')
+      const workers = await this.manageWorkers.dispatch('getWorkers')
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -371,9 +359,9 @@ export default defineComponent({
 
       set(shootResource, 'spec.maintenance', maintenance)
 
-      const scheduleCrontab = await this._hibernationSchedule.dispatch('getScheduleCrontab')
+      const scheduleCrontab = await this.hibernationSchedule.dispatch('getScheduleCrontab')
       set(shootResource, 'spec.hibernation.schedules', scheduleCrontab)
-      const noHibernationSchedule = await this._hibernationSchedule.dispatch('getNoHibernationSchedule')
+      const noHibernationSchedule = await this.hibernationSchedule.dispatch('getNoHibernationSchedule')
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
@@ -462,7 +450,7 @@ export default defineComponent({
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
-      await this._manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
+      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       this.$refs.addons.updateAddons(addons)
@@ -470,7 +458,7 @@ export default defineComponent({
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
 
-      await this._hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
+      await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createShoot (shootResource) {
       try {
