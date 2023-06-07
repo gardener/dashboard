@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 import GVendorIcon from '@/components/GVendorIcon'
-import { mapGetters, mapActions } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import {
   useCloudProfileStore,
 } from '@/store'
@@ -58,7 +58,9 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapState(useCloudProfileStore, [
+      'sortedInfrastructureKindList',
+    ]),
   },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),

@@ -352,6 +352,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'volumeTypes', cloudProfileName, region })
   }
 
+  function volumeTypesByCloudProfileName ({ cloudProfileName }) {
+    return volumeTypesByCloudProfileNameAndRegion({ cloudProfileName })
+  }
+
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
@@ -630,6 +634,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     machineTypesByCloudProfileName,
     machineTypesByCloudProfileNameAndRegionAndArchitecture,
     volumeTypesByCloudProfileNameAndRegion,
+    volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByCloudProfileNameAndRegion,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
