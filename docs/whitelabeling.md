@@ -17,7 +17,7 @@ source at `/frontend/public/static/assets/logo.svg`. This is also changed
 with by the theming capabilities.
 
 ## Customizing Product Name
-You can customize some values by providing a custom `login-config.json`.
+You can customize some values by providing a custom `branding.json`.
 Available parameters are:
 ```json
 {
@@ -32,11 +32,5 @@ Available parameters are:
   "loginTypes": ["token"]
 }
 ```
-This file is found at `frontend/public/login-config.json` and served
-as `/login-config-json`. You can see all parameters in the source at
-`frontend/src/views/Login.vue`.
-
-To avoid uneccessary network latency, the `login-config.json` is fetched
-by the Login-Page only and the values are then copied in the Browsers
-sessionStorage. This means that during development you might have to
-logout and login again to see the changes reflected on the rendered pages.
+This file is found at `frontend/public/branding.json` and served
+as `/branding-json`.
