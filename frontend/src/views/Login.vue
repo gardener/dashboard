@@ -114,7 +114,9 @@ export default {
       showToken: false,
       token: '',
       loginType: undefined,
-      cfg: {},
+      cfg: {
+        loginTypes: undefined,
+      },
       loading: false
     }
   },
