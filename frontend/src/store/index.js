@@ -1476,7 +1476,7 @@ const actions = {
       await dispatch('setError', { message: `Failed to Reset Service Account ${err.message}` })
     }
   },
-  setBranding ({ commit, getters }, value) {
+  setBranding ({ commit }, value) {
     commit('SET_BRANDING', value)
   },
   setConfiguration ({ commit, getters }, value) {
