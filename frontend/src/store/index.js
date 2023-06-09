@@ -111,6 +111,7 @@ if (debug) {
 
 // initial state
 const state = {
+  branding: null,
   cfg: null,
   kubeconfigData: null,
   ready: false,

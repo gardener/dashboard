@@ -89,7 +89,8 @@ describe('MainNavigation.vue', () => {
     vuetify = new Vuetify()
     getters = {
       canCreateProject: jest.fn().mockReturnValue(true),
-      projectList: jest.fn().mockReturnValue(createProjectList(['foo', 'bar']))
+      projectList: jest.fn().mockReturnValue(createProjectList(['foo', 'bar'])),
+      branding: jest.fn().mockReturnValue({})
     }
     actions = {
       setSidebar: jest.fn()
