@@ -221,7 +221,7 @@ export default {
       'colorScheme'
     ]),
     helpMenuItems () {
-      return this.cfg.helpMenuItems || [{}]
+      return this.cfg.helpMenuItems || {}
     },
     tabs () {
       const tabs = get(this.$route, 'meta.tabs')
