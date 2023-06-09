@@ -6,12 +6,13 @@
 
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { getConfiguration } from '@/utils/api'
+import { getBrandingConfiguration, getConfiguration } from '@/utils/api'
 
 export default function createGuards (store, userManager, localStorage, logger) {
   return {
     beforeEach: [
       setLoading(store, true),
+      ensureBrandingLoaded(store),
       ensureUserAuthenticatedForNonPublicRoutes(store, userManager, logger),
       ensureDataLoaded(store, localStorage, logger)
     ],
@@ -154,6 +155,21 @@ function ensureDataLoaded (store, localStorage, logger) {
           break
         }
       }
+      next()
+    } catch (err) {
+      next(err)
+    }
+  }
+}
+
+function ensureBrandingLoaded (store) {
+  return async (to, from, next) => {
+    try {
+      if (!store.state.branding) {
+        const { data } = await getBrandingConfiguration()
+        await store.dispatch('setBranding', data)
+      }
+
       next()
     } catch (err) {
       next(err)

@@ -346,6 +346,9 @@ function decorateClassificationObject (obj) {
 
 // getters
 const getters = {
+  branding (state) {
+    return get(state, 'branding')
+  },
   apiServerUrl (state) {
     return get(state.cfg, 'apiServerUrl', window.location.origin)
   },
@@ -1473,6 +1476,9 @@ const actions = {
       await dispatch('setError', { message: `Failed to Reset Service Account ${err.message}` })
     }
   },
+  setBranding ({ commit, getters }, value) {
+    commit('SET_BRANDING', value)
+  },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
 
@@ -1561,6 +1567,9 @@ const actions = {
 
 // mutations
 const mutations = {
+  SET_BRANDING (state, value) {
+    state.branding = value
+  },
   SET_CONFIGURATION (state, value) {
     state.cfg = value
   },

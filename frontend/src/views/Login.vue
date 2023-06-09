@@ -15,8 +15,9 @@ SPDX-License-Identifier: Apache-2.0
               <v-card-title class="pa-0">
                 <div class="layout column align-center main-background darken-1 pa-3 pt-6">
                   <img src="/static/assets/logo.svg" alt="Product Login Logo" width="180" height="180">
-                  <span v-if="productName" class="flex my-4 primary--text text-h4 font-weight-light">{{ productName }}</span>
-                  <span v-if="productSlogan" class="flex my-4 primary--text text-h5 font-weight-light">{{ productSlogan }}</span>
+                  <span v-if="productName" class="mt-4 primary--text text-h4 font-weight-light">{{ productName }}</span>
+                  <span v-if="productSlogan" class="mt-4 primary--text text-h5 font-weight-light">{{ productSlogan }}</span>
+                  <span v-if="productName || productSlogan" class="mb-4"></span>
                 </div>
                 <v-tabs
                   v-show="!loading"
@@ -76,9 +77,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-container>
       <div v-if="landingPageUrl" class="footer text-caption">
         <span class="primary--text">
-          {{ customLandingPagePre }}
+          {{ landingPagePre }}
           <a :href="landingPageUrl" target="_blank" rel="noopener">{{ landingPageName }}</a>
-          {{ customLandingPagePost }}
+          {{ landingPagePost }}
         </span>
       </div>
     </v-main>
@@ -113,17 +114,7 @@ export default {
       showToken: false,
       token: '',
       loginType: undefined,
-      cfg: {
-        productName: undefined,
-        productSlogan: undefined,
-        documentationURL: undefined,
-        supportURL: undefined,
-        loginTypes: undefined,
-        landingPageUrl: undefined,
-        landingPageName: undefined,
-        customLandingPagePre: undefined,
-        customLandingPagePost: undefined
-      },
+      cfg: {},
       loading: false
     }
   },
@@ -131,6 +122,7 @@ export default {
     ...mapGetters('storage', [
       'autoLoginEnabled'
     ]),
+    ...mapGetters(['branding']),
     redirectPath () {
       return getRedirectPath(this.$route)
     },
@@ -138,28 +130,28 @@ export default {
       return getPrimaryLoginType(this.cfg)
     },
     productName () {
-      return this.cfg.productName
+      return this.branding.productName
     },
     productSlogan () {
-      return this.cfg.productSlogan
+      return this.branding.productSlogan
     },
     documentationURL () {
-      return this.cfg.documentationURL
+      return this.branding.loginDocumentationURL
     },
     supportURL () {
-      return this.cfg.supportURL
+      return this.branding.loginSupportURL
     },
     landingPageUrl () {
-      return this.cfg.landingPageUrl
+      return this.branding.loginLandingPagePre
     },
     landingPageName () {
-      return this.cfg.landingPageName
+      return this.branding.loginLandingPageUrl
     },
-    customLandingPagePre () {
-      return this.cfg.customLandingPagePre
+    landingPagePre () {
+      return this.branding.loginLandingPageName
     },
-    customLandingPagePost () {
-      return this.cfg.customLandingPagePost
+    landingPagePost () {
+      return this.branding.loginLandingPagePost
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -175,9 +167,6 @@ export default {
       try {
         const { data } = await api.getLoginConfiguration()
         cfg = data
-        Object.keys(cfg).forEach(key => {
-          sessionStorage.setItem('wl.' + key, cfg[key])
-        })
       } catch (err) {
         logger.error('Failed to fetch login configuration: %s', err.message)
         cfg = {

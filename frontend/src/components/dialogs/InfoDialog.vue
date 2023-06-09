@@ -67,10 +67,11 @@ export default {
   computed: {
     ...mapGetters([
       'isAdmin',
-      'gardenerExtensionsList'
+      'gardenerExtensionsList',
+      'branding'
     ]),
     productName () {
-      return sessionStorage.getItem('wl.productName') || 'Gardener'
+      return this.branding.productName
     },
     extensionsList () {
       return sortBy(this.gardenerExtensionsList, 'name')

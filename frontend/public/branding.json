@@ -1,0 +1,12 @@
+{
+  "productName": "",
+  "productSlogan": "Universal Kubernetes at Scale",
+  "loginDocumentationURL": "https://gardener.cloud/docs",
+  "loginSupportURL": "https://gardener.cloud",
+  "loginLandingPagePre": "Discover what our service is about at the",
+  "loginLandingPageUrl": "https://gardener.cloud",
+  "loginLandingPageName": "Gardener Landing Page",
+  "loginLandingPagePost": "",
+  "mainNavShowVersion": true,
+  "mainNavLogoOnly": false
+}

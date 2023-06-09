@@ -213,14 +213,15 @@ export default {
       'username',
       'displayName',
       'avatarUrl',
-      'isAdmin'
+      'isAdmin',
+      'branding'
     ]),
     ...mapGetters('storage', [
       'autoLoginEnabled',
       'colorScheme'
     ]),
     helpMenuItems () {
-      return this.cfg.helpMenuItems || {}
+      return this.cfg.helpMenuItems || [{}]
     },
     tabs () {
       const tabs = get(this.$route, 'meta.tabs')
@@ -244,7 +245,7 @@ export default {
       return this.targetRoute('Settings')
     },
     productName () {
-      return sessionStorage.getItem('wl.productName') || 'Gardener'
+      return this.branding.productName
     },
     colorSchemeIndex: {
       get () {

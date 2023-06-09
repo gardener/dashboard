@@ -45,6 +45,10 @@ export function getLoginConfiguration () {
   return getResource('/login-config.json')
 }
 
+export function getBrandingConfiguration () {
+  return getResource('/branding.json')
+}
+
 /* CloudProviders Secrets */
 
 export function getCloudProviderSecrets ({ namespace }) {
