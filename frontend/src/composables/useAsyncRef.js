@@ -17,7 +17,7 @@ export const useAsyncRef = (key, options = {}) => {
   const keyRef = ref(null)
 
   const fulfiller = {
-    reject: () => {},
+    resolve: () => {},
   }
 
   const init = () => {

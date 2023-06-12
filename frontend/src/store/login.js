@@ -5,40 +5,45 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
-import { useFetch, useLocalStorage } from '@vueuse/core'
+import { ref, computed } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 import { useLogger } from '@/composables'
 
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()
   const autoLogin = useLocalStorage('global/auto-login')
 
+  const url = import.meta.env.BASE_URL + 'login-config.json'
+
+  const isFetching = ref(true)
   const loginError = ref(null)
-  const loginType = ref()
-  const loginTypes = ref([])
+  const loginType = ref('token')
+  const loginTypes = ref(['token'])
   const landingPageUrl = ref('')
 
   const autoLoginEnabled = computed(() => {
     return autoLogin.value === 'enabled'
   })
 
-  const url = import.meta.env.BASE_URL + 'login-config.json'
-  const { isFetching, error, data } = useFetch(url).get().json()
-  const unwatch = watch(isFetching, value => {
-    if (!value) {
-      unwatch()
-      if (data.value) {
-        loginTypes.value = data.value.loginTypes
-        loginType.value = loginTypes.value[0]
-        landingPageUrl.value = data.value.landingPageUrl
-      }
-      if (error.value) {
-        logger.error('Failed to fetch login configuration: %s', error.value.message)
-        loginTypes.value = ['token']
-        loginType.value = loginTypes.value[0]
-      }
+  const fetchLoginConfig = async url => {
+    try {
+      const response = await fetch(url, {
+        mode: 'no-cors',
+        cache: 'no-cache',
+      })
+      const data = await response.json()
+      loginTypes.value = data.loginTypes
+      landingPageUrl.value = data.landingPageUrl
+    } catch (err) {
+      logger.error('Failed to fetch login configuration: %s', err.message)
+      loginTypes.value = ['token']
+    } finally {
+      loginType.value = loginTypes.value[0]
+      isFetching.value = false
     }
-  })
+  }
+
+  fetchLoginConfig(url)
 
   return {
     isFetching,
