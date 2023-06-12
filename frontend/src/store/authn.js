@@ -263,12 +263,16 @@ export const useAuthnStore = defineStore('authn', () => {
   }
 
   function $reset () {
+    let user = null
     try {
-      setUser(decode(cookies.get(COOKIE_HEADER_PAYLOAD)))
+      const value = cookies.get(COOKIE_HEADER_PAYLOAD)
+      if (value) {
+        user = decode(value)
+      }
     } catch (err) {
       logger.error(err.message)
-      setUser(null)
     }
+    setUser(user)
   }
 
   return {
