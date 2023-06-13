@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
           :secret="secret"
           @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
-          ref="purpose"
+          ref="purposeRef"
         ></g-purpose>
       </v-col>
     </v-row>
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import { mapActions, mapState } from 'pinia'
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -78,11 +78,12 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength } from '@vuelidate/validators'
 
 import GHintColorizer from '@/components/GHintColorizer'
-import GPurpose from '@/components/GPurpose'
 
 import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
+
+import { useAsyncRef } from '@/composables'
 
 import {
   useAuthzStore,
@@ -110,11 +111,12 @@ export default defineComponent({
   setup () {
     return {
       v$: useVuelidate(),
+      ...useAsyncRef('purpose'),
     }
   },
   components: {
     GHintColorizer,
-    GPurpose,
+    GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
     GStaticTokenKubeconfigSwitch,
   },
   props: {
@@ -261,7 +263,7 @@ export default defineComponent({
       this.updateK8sMaintenance = updateK8sMaintenance
       this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
 
-      this.$refs.purpose.setPurpose(purpose)
+      await this.purpose.dispatch('setPurpose', purpose)
 
       this.validateInput()
     },
@@ -279,7 +281,7 @@ export default defineComponent({
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.$refs.purpose.resetPurpose()
+      this.purpose.dispatch('resetPurpose')
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName
