@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
               item-color="primary"
               v-model="type"
               @blur="v$.type.$touch()"
-              @input="v$.type.$touch()"
+              @update:modelValue="v$.type.$touch()"
               :items="dnsProviderTypes"
               :error-messages="getErrorMessages('type')"
               label="Dns Provider Type"

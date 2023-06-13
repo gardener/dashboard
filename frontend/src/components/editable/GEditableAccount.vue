@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
           :messages="messages"
           :menu-props="{ offset: [1, 0] }"
           :error-messages="v$.internalValue.$errors.map(e => e.$message)"
-          @input="v$.internalValue.$touch"
+          @update:modelValue="v$.internalValue.$touch"
           @blur="v$.internalValue.$touch"
           class="g-field"
         >

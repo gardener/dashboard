@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model="internalPurpose"
       persistent-hint
       :error-messages="getErrorMessages('internalPurpose')"
-      @input="onInputPurpose"
+      @update:modelValue="onInputPurpose"
       @blur="v$.internalPurpose.$touch()"
       variant="underlined"
       >

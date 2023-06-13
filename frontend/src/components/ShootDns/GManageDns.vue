@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             v-model="primaryProvider"
             @blur="v$.primaryProvider.$touch()"
-            @input="v$.primaryProvider.$touch()"
+            @update:modelValue="v$.primaryProvider.$touch()"
             :items="dnsProvidersWithPrimarySupport"
             :error-messages="getErrorMessages('primaryProvider')"
             label="Primary DNS Provider"
