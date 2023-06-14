@@ -26,27 +26,28 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
 import { getTimestampFormatted } from '@/utils'
 
-export default {
+export default defineComponent({
   props: {
     triggeredTime: {
       type: String,
-      required: true
+      required: true,
     },
     description: {
       type: String,
-      required: true
+      required: true,
     },
     state: {
       type: String,
-      required: true
+      required: true,
     },
     failureReason: {
       type: String,
-      required: false
-    }
+      required: false,
+    },
   },
   computed: {
     stateColorClass () {
@@ -57,7 +58,7 @@ export default {
     },
     timeString () {
       return getTimestampFormatted(this.triggeredTime)
-    }
-  }
-}
+    },
+  },
+})
 </script>

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     @dialog-opened="onDeleteDialogOpened"
     ref="actionDialog"
@@ -19,14 +19,12 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template v-slot:actionComponent>
       <v-list>
-        <v-list-item-content>
-          <v-list-item-subtitle>
-            Created By
-          </v-list-item-subtitle>
-          <v-list-item-title>
-            <account-avatar :account-name="shootCreatedBy" :size="22"></account-avatar>
-          </v-list-item-title>
-        </v-list-item-content>
+        <v-list-item-subtitle>
+          Created By
+        </v-list-item-subtitle>
+        <v-list-item-title>
+          <g-account-avatar :account-name="shootCreatedBy" :size="22"/>
+        </v-list-item-title>
       </v-list>
       <p>
         Type <span class="font-weight-bold">{{shootName}}</span> below and confirm the deletion of the cluster and all of its content.
@@ -41,36 +39,41 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </p>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import AccountAvatar from '@/components/AccountAvatar.vue'
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog.vue'
-import { mapActions } from 'vuex'
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
+
+import { useShootStore } from '@/store'
+
+import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
+
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 
-export default {
+export default defineComponent({
   components: {
-    ActionButtonDialog,
-    AccountAvatar
+    GActionButtonDialog,
+    GAccountAvatar,
   },
   props: {
     small: {
       type: Boolean,
-      default: false
+      default: false,
     },
     text: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   mixins: [shootItem],
   data () {
     return {
       renderDialog: false,
       errorMessage: null,
-      detailedErrorMessage: null
+      detailedErrorMessage: null,
     }
   },
   computed: {
@@ -90,9 +93,12 @@ export default {
         return
       }
       return this.buttonTitle
-    }
+    },
   },
   methods: {
+    ...mapActions(useShootStore, [
+      'deleteShoot',
+    ]),
     async onDeleteDialogOpened () {
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
@@ -110,11 +116,9 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    ...mapActions([
-      'deleteShoot'
-    ])
-  }
-}
+
+  },
+})
 </script>
 
 <style lang="scss" scoped>

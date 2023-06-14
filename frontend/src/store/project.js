@@ -135,7 +135,10 @@ export const useProjectStore = defineStore('project', () => {
     return currentNamespaces.value.includes(namespace)
   }
 
-  function projectNameByNamespace (namespace) {
+  function projectNameByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
     const project = find(list.value, ['metadata.namespace', namespace])
     return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
   }

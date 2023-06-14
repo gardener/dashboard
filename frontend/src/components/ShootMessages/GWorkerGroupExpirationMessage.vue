@@ -1,3 +1,4 @@
+import { defineComponent } from 'vue'
 <!--
 SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
@@ -8,7 +9,12 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span>
     <span v-if="isValidTerminationDate">expires
-      <time-string :date-time="expirationDate" mode="future" date-tooltip content-class="font-weight-bold"></time-string>
+      <g-time-string
+        :date-time="expirationDate"
+        mode="future"
+        date-tooltip
+        content-class="font-weight-bold"
+      />
       <span>. </span>
     </span>
     <span v-else>is expired. </span>
@@ -22,44 +28,45 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
 import { getDateFormatted } from '@/utils'
-import TimeString from '@/components/TimeString.vue'
+import GTimeString from '@/components/GTimeString.vue'
 
-export default {
+export default defineComponent({
   components: {
-    TimeString
+    GTimeString,
   },
   props: {
     expirationDate: {
       type: String,
-      required: true
+      required: true,
     },
     isValidTerminationDate: {
       type: Boolean,
-      required: true
+      required: true,
     },
     version: {
       type: String,
-      required: true
+      required: true,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     workerName: {
       type: String,
-      required: true
+      required: true,
     },
     severity: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     getDateFormatted (date) {
       return getDateFormatted(date)
-    }
-  }
-}
+    },
+  },
+})
 </script>

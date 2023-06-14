@@ -6,21 +6,37 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-card-title class="text-subtitle-1 mt-4 ticket-toolbar toolbar-background toolbar-title--text">
+    <v-card-title class="text-subtitle-1 mt-4 ticket-toolbar bg-toolbar-background text-toolbar-title">
       <div class="d-flex flex-wrap align-center">
         <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
-        <div v-if="labels.length" class="labels"><ticket-label v-for="label in labels" :key="label.id" :label="label"></ticket-label></div>
+        <div v-if="labels.length" class="labels">
+          <g-ticket-label v-for="label in labels"
+            :key="label.id"
+            :label="label"
+          />
+        </div>
       </div>
     </v-card-title>
 
     <v-container>
       <span class="font-weight-bold">{{login}}</span> created this
-      <external-link :url="ticketHtmlUrl">ticket</external-link>
-      <time-string :date-time="ticket.metadata.created_at" mode="past" content-class="ml-1"></time-string>
+      <g-external-link :url="ticketHtmlUrl">
+        ticket
+      </g-external-link>
+      <g-time-string
+        :date-time="ticket.metadata.created_at"
+        mode="past"
+        content-class="ml-1"
+      />
     </v-container>
     <v-list>
-      <ticket-comment :comment="ticket"></ticket-comment>
-      <ticket-comment v-for="comment in commentsForTicket" :key="comment.metadata.id" :comment="comment"></ticket-comment>
+      <g-ticket-comment
+        :comment="ticket"
+      />
+      <g-ticket-comment v-for="comment in commentsForTicket"
+        :key="comment.metadata.id"
+        :comment="comment"
+      />
     </v-list>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
@@ -34,34 +50,36 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import get from 'lodash/get'
-import { mapState, mapGetters } from 'vuex'
-import TimeString from '@/components/TimeString.vue'
-import TicketLabel from '@/components/ShootTickets/TicketLabel.vue'
-import TicketComment from '@/components/ShootTickets/TicketComment.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import sanitizeUrl from '@/mixins/sanitizeUrl'
+import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
 
-export default {
+import { useConfigStore, useTicketStore } from '@/store'
+
+import GTimeString from '@/components/GTimeString.vue'
+import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
+import GTicketComment from '@/components/ShootTickets/GTicketComment.vue'
+import GExternalLink from '@/components/GExternalLink.vue'
+
+import get from 'lodash/get'
+
+export default defineComponent({
   components: {
-    TimeString,
-    TicketLabel,
-    TicketComment,
-    ExternalLink
+    GTimeString,
+    GTicketLabel,
+    GTicketComment,
+    GExternalLink,
   },
-  mixins: [sanitizeUrl],
+  inject: ['sanitizeUrl'],
   props: {
     ticket: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
-    ...mapGetters('tickets', {
-      ticketCommentsByIssueNumber: 'comments'
+    ...mapState(useConfigStore, {
+      ticketConfig: 'ticket',
+
     }),
     ticketTitle () {
       const title = get(this.ticket, 'data.ticketTitle')
@@ -81,13 +99,18 @@ export default {
       return this.ticketCommentsByIssueNumber({ issueNumber })
     },
     gitHubRepoUrl () {
-      return get(this.cfg, 'ticket.gitHubRepoUrl')
+      return get(this.ticketConfig, 'gitHubRepoUrl')
     },
     addCommentLink () {
       return `${this.ticketHtmlUrl}#new_comment_field`
-    }
-  }
-}
+    },
+  },
+  methods: {
+    ...mapActions(useTicketStore, {
+      ticketCommentsByIssueNumber: 'comments',
+    }),
+  },
+})
 </script>
 
 <style lang="scss" scoped>

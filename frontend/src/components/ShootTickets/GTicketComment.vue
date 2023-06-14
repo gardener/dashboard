@@ -15,8 +15,18 @@ SPDX-License-Identifier: Apache-2.0
       <v-icon color="primary">mdi-comment-outline</v-icon>
     </v-list-item-icon>
     <v-list-item-content class="comment">
-      <v-list-item-title class="comment-header toolbar-background toolbar-title--text">
-        <external-link :url="htmlUrl" class="inherit-color toolbar-title--text"><span class="font-weight-bold toolbar-title--text">{{login}}</span> commented <time-string :date-time="createdAt" mode="past" content-class="toolbar-title--text"></time-string></external-link>
+      <v-list-item-title class="comment-header bg-toolbar-background text-toolbar-title">
+        <g-external-link
+          :url="htmlUrl"
+          class="inherit-color text-toolbar-title"
+        >
+          <span class="font-weight-bold text-toolbar-title">{{login}}</span> commented
+          <g-time-string
+            :date-time="createdAt"
+            mode="past"
+            content-class="text-toolbar-title"
+          />
+        </g-external-link>
       </v-list-item-title>
       <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
       <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
@@ -25,33 +35,39 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import get from 'lodash/get'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+
+import { useConfigStore } from '@/store'
+
+import GTimeString from '@/components/GTimeString.vue'
+import GExternalLink from '@/components/GExternalLink.vue'
+
 import { gravatarUrlIdenticon, transformHtml } from '@/utils'
-import TimeString from '@/components/TimeString.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
-import { mapState } from 'vuex'
+
+import get from 'lodash/get'
 
 const AvatarEnum = {
   GITHUB: 'github', // default
   GRAVATAR: 'gravatar',
-  NONE: 'none'
+  NONE: 'none',
 }
 
-export default {
+export default defineComponent({
   components: {
-    TimeString,
-    ExternalLink
+    GTimeString,
+    GExternalLink,
   },
   props: {
     comment: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
+    ...mapState(useConfigStore, {
+      ticketConfig: 'ticket',
+    }),
     commentHtml () {
       return transformHtml(get(this.comment, 'data.body', ''))
     },
@@ -62,7 +78,7 @@ export default {
       return get(this.comment, 'metadata.created_at')
     },
     avatarSource () {
-      return get(this.cfg, 'ticket.avatarSource', AvatarEnum.GITHUB)
+      return get(this.ticketConfig, 'avatarSource', AvatarEnum.GITHUB)
     },
     avatarUrl () {
       switch (this.avatarSource) {
@@ -76,13 +92,13 @@ export default {
     },
     htmlUrl () {
       return get(this.comment, 'data.html_url')
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/src/styles/styles.sass';
+  @import 'vuetify/settings';
 
   $gh-code-background-color: map-get($grey, 'lighten-4');
   $gh-code-color: map-get($grey, 'darken-4');

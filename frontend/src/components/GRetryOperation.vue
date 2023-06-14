@@ -1,32 +1,41 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <v-tooltip location="top" v-if="canRetry">
-    <template v-slot:activator="{ on }">
-      <v-btn v-on="on" icon variant="text" class="text-primary retryButton" @click="onRetryOperation">
-        <v-icon>mdi-reload</v-icon>
-      </v-btn>
+    <template v-slot:activator="{ props }">
+      <v-btn
+        v-bind="props"
+        icon="mdi-reload"
+        variant="text"
+        class="text-primary retryButton"
+        @click="onRetryOperation"
+      />
     </template>
     Retry Operation
   </v-tooltip>
 </template>
 
 <script>
-import get from 'lodash/get'
-import { addShootAnnotation } from '@/utils/api'
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
+import { useAppStore } from '@/store'
+
 import { shootItem } from '@/mixins/shootItem'
 
-export default {
+import get from 'lodash/get'
+
+export default defineComponent({
   data () {
     return {
-      retryingOperation: false
+      retryingOperation: false,
     }
   },
   mixins: [shootItem],
+  inject: ['api', 'logger'],
   computed: {
     canRetry () {
       const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration && !!this.shootObservedGeneration
@@ -35,9 +44,12 @@ export default {
           !this.isShootReconciliationDeactivated &&
           !this.retryingOperation &&
           !reconcileScheduled
-    }
+    },
   },
   methods: {
+    ...mapActions(useAppStore, [
+      'setError',
+    ]),
     async onRetryOperation () {
       this.retryingOperation = true
 
@@ -46,15 +58,14 @@ export default {
 
       const retryAnnotation = { 'gardener.cloud/operation': 'retry' }
       try {
-        await addShootAnnotation({ namespace, name, data: retryAnnotation })
+        await this.api.addShootAnnotation({ namespace, name, data: retryAnnotation })
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log('failed to retry operation', err)
+        this.logger.error('failed to retry operation', err)
 
-        this.$store.dispatch('setError', err)
+        this.setError(err)
       }
       this.retryingOperation = false
-    }
-  }
-}
+    },
+  },
+})
 </script>

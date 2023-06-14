@@ -7,18 +7,19 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="visible">
     <g-popper
-      @input="onPopperInput"
       :title="popperTitle"
       :toolbar-color="color"
       :popper-key="popperKeyWithType"
       :placement="popperPlacement"
-      :disabled="!condition.message">
+      :disabled="!condition.message"
+      @update:visible="onPopperInput"
+    >
       <template v-slot:popperRef>
         <div>
           <v-tooltip location="top" max-width="400px" :disabled="tooltipDisabled">
-            <template v-slot:activator="{ on }">
+            <template v-slot:activator="{ props }">
               <v-chip
-                v-on="on"
+                v-bind="props"
                 class="status-tag"
                 :class="{ 'cursor-pointer': condition.message }"
                 :variant="!isError && 'outlined'"
@@ -45,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-slot:card>
-        <shoot-message-details
+        <g-shoot-message-details
           :status-title="chipStatus"
           :last-message="nonErrorMessage"
           :error-descriptions="errorDescriptions"
@@ -59,51 +60,54 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
-import filter from 'lodash/filter'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
 
 import GPopper from '@/components/GPopper.vue'
-import ShootMessageDetails from '@/components/ShootMessageDetails.vue'
+import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 
 import { isUserError, objectsFromErrorCodes } from '@/utils/errorCodes'
 
-export default {
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
+import { useAuthnStore } from '@/store'
+
+export default defineComponent({
   components: {
     GPopper,
-    ShootMessageDetails
+    GShootMessageDetails,
   },
   props: {
     condition: {
       type: Object,
-      required: true
+      required: true,
     },
     secretBindingName: {
-      type: String
+      type: String,
     },
     namespace: {
-      type: String
+      type: String,
     },
     popperKey: {
       type: String,
-      required: true
+      required: true,
     },
     popperPlacement: {
-      type: String
+      type: String,
     },
     staleShoot: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data () {
     return {
-      popperVisible: false
+      popperVisible: false,
     }
   },
   computed: {
-    ...mapGetters([
-      'isAdmin'
+    ...mapState(useAuthnStore, [
+      'isAdmin',
     ]),
     popperTitle () {
       if (this.staleShoot) {
@@ -132,7 +136,7 @@ export default {
         title: this.condition.name,
         status: this.chipStatus,
         description: this.condition.description,
-        userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true })
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true }),
       }
     },
     chipIcon () {
@@ -177,8 +181,8 @@ export default {
         return [
           {
             description: this.condition.message,
-            errorCodeObjects: objectsFromErrorCodes(this.condition.codes)
-          }
+            errorCodeObjects: objectsFromErrorCodes(this.condition.codes),
+          },
         ]
       }
       return undefined
@@ -218,14 +222,14 @@ export default {
     },
     tooltipDisabled () {
       return this.popperVisible
-    }
+    },
   },
   methods: {
     onPopperInput (value) {
       this.popperVisible = value
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

@@ -11,15 +11,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 import contrast from 'get-contrast'
 import get from 'lodash/get'
 
-export default {
+export default defineComponent({
   props: {
     label: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     labelStyle () {
@@ -28,9 +30,9 @@ export default {
         const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
         return `background-color: ${bgColor}; color: ${textColor};`
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

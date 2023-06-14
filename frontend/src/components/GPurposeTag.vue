@@ -6,21 +6,32 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip location="top">
-    <template v-slot:activator="{ on }">
-      <v-chip v-on="on" class="purpose-tag" v-if="!!shortPurpose" :variant="!isCritical && 'outlined'" :text-color="textColor" color="primary" small>{{ shortPurpose }}</v-chip>
+    <template v-slot:activator="{ props }">
+      <v-chip v-if="!!shortPurpose"
+        :variant="!isCritical ? 'outlined' : undefined"
+        v-bind="props"
+        :text-color="textColor"
+        color="primary"
+        small
+        class="purpose-tag"
+      >
+        {{ shortPurpose }}
+      </v-chip>
     </template>
     <span>{{ purpose }}</span>
   </v-tooltip>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 import toUpper from 'lodash/toUpper'
 
-export default {
+export default defineComponent({
   props: {
     purpose: {
-      type: String
-    }
+      type: String,
+    },
   },
   computed: {
     shortPurpose () {
@@ -48,9 +59,9 @@ export default {
       } else {
         return 'white'
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

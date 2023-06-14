@@ -4,20 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createVNode, render } from 'vue'
-import { useLogger, useApi } from '@/composables'
-
-function renderComponent (name, props) {
-  const vNode = createVNode(name, props)
-  const element = document.createElement('div')
-  render(vNode, element)
-  return element
-}
+import {
+  useLogger,
+  useApi,
+  useSanitizeUrl,
+  useRenderComponent,
+} from '@/composables'
 
 export default {
   install (app) {
-    app.provide('renderComponent', renderComponent)
     app.provide('logger', useLogger())
     app.provide('api', useApi())
+    app.provide('sanitizeUrl', useSanitizeUrl())
+    app.provide('renderComponent', useRenderComponent())
   },
 }

@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     :loading="showLoadingIndicator"
     :disabled="isDisabled"
@@ -43,38 +43,44 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
       </v-row>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog.vue'
-import { addShootAnnotation } from '@/utils/api'
+import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
+
+import { useAppStore, useAuthnStore } from '@/store'
+
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
+
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { mapGetters, mapActions } from 'vuex'
+
 import includes from 'lodash/includes'
 import compact from 'lodash/compact'
 
-export default {
-  name: 'rotate-credentials',
+export default defineComponent({
   components: {
-    ActionButtonDialog
+    GActionButtonDialog,
   },
+  inject: ['api', 'logger'],
+  mixins: [shootStatusCredentialRotation],
   props: {
     text: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data () {
     return {
       actionTriggered: false,
-      maintenance: false
+      maintenance: false,
     }
   },
-  mixins: [shootStatusCredentialRotation],
   computed: {
-    ...mapGetters([
-      'isAdmin'
+    ...mapState(useAuthnStore, [
+      'isAdmin',
     ]),
     mode () {
       if (!this.completionOperation) {
@@ -218,8 +224,8 @@ export default {
           heading: 'Do you want to start the rotation of kubeconfig credentials?',
           actions: [
             'The current kubeconfig credentials will be revoked',
-            'New kubeconfig credentials will be generated'
-          ]
+            'New kubeconfig credentials will be generated',
+          ],
         },
         'rotate-ca-start': {
           caption: this.showLoadingIndicator
@@ -229,8 +235,8 @@ export default {
           successMessage: `Preparing rotation of certificate authorities for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of certificate authorities?',
           actions: [
-            'New Certificate Authorities will be created and added to the bundle (old Certificate Authorities will remain in the bundle)'
-          ]
+            'New Certificate Authorities will be created and added to the bundle (old Certificate Authorities will remain in the bundle)',
+          ],
         },
         'rotate-ca-complete': {
           caption: this.showLoadingIndicator
@@ -241,8 +247,8 @@ export default {
           heading: 'Do you want to complete the rotation of certificate authorities?',
           actions: [
             'Old Certificate Authorities will be dropped from the bundle',
-            'Ensure that all parties (end-users, CD pipelines etc.) have updated their kubeconfig for this Shoot cluster since the rotation was prepared. Otherwise the client requests will fail as the old Certificate Authorities will be dropped from the bundle'
-          ]
+            'Ensure that all parties (end-users, CD pipelines etc.) have updated their kubeconfig for this Shoot cluster since the rotation was prepared. Otherwise the client requests will fail as the old Certificate Authorities will be dropped from the bundle',
+          ],
         },
         'rotate-observability-credentials': {
           caption: this.showLoadingIndicator
@@ -256,8 +262,8 @@ export default {
             'New observability passwords will be generated',
             this.isAdmin
               ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually'
-              : undefined
-          ])
+              : undefined,
+          ]),
         },
         'rotate-ssh-keypair': {
           caption: this.showLoadingIndicator
@@ -268,8 +274,8 @@ export default {
           heading: 'Do you want to start the rotation of SSH key pair for worker nodes?',
           actions: [
             'The current SSH key pair will be revoked.',
-            'A new SSH key pair will be generated'
-          ]
+            'A new SSH key pair will be generated',
+          ],
         },
         'rotate-etcd-encryption-key-start': {
           caption: this.showLoadingIndicator
@@ -280,8 +286,8 @@ export default {
           heading: 'Do you want to prepare the rotation of etcd encryption key?',
           actions: [
             'A new encryption key will be created and added to the bundle (old encryption key will remain in the bundle).',
-            'All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key.'
-          ]
+            'All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key.',
+          ],
         },
         'rotate-etcd-encryption-key-complete': {
           caption: this.showLoadingIndicator
@@ -291,8 +297,8 @@ export default {
           successMessage: `Completing rotation of etcd encryption key for ${this.shootName}`,
           heading: 'Do you want to complete the rotation of etcd encryption key?',
           actions: [
-            'The old encryption will be dropped from the bundle.'
-          ]
+            'The old encryption will be dropped from the bundle.',
+          ],
         },
         'rotate-serviceaccount-key-start': {
           caption: this.showLoadingIndicator
@@ -302,8 +308,8 @@ export default {
           successMessage: `Preparing rotation of ServiceAccount token signing key for ${this.shootName}`,
           heading: 'Do you want to prepare the rotation of ServiceAccount token signing key?',
           actions: [
-            'A new signing key will be created and added to the bundle (old signing key will remain in the bundle)'
-          ]
+            'A new signing key will be created and added to the bundle (old signing key will remain in the bundle)',
+          ],
         },
         'rotate-serviceaccount-key-complete': {
           caption: this.showLoadingIndicator
@@ -314,9 +320,9 @@ export default {
           heading: 'Do you want to complete the rotation of ServiceAccount token signing key?',
           actions: [
             'Old signing key will be dropped from the bundle',
-            'Ensure that all parties (end-users, CD pipelines etc.) have updated their ServiceAccount kubeconfigs for this Shoot cluster since the rotation was prepared. Otherwise the client requests will fail as the old signing key will be dropped from the bundle'
-          ]
-        }
+            'Ensure that all parties (end-users, CD pipelines etc.) have updated their ServiceAccount kubeconfigs for this Shoot cluster since the rotation was prepared. Otherwise the client requests will fail as the old signing key will be dropped from the bundle',
+          ],
+        },
       }
       componentTexts['rotate-credentials-start'] = {
         caption: this.showLoadingIndicator
@@ -332,8 +338,8 @@ export default {
           ...componentTexts['rotate-observability-credentials'].actions,
           ...componentTexts['rotate-ssh-keypair'].actions,
           ...componentTexts['rotate-etcd-encryption-key-start'].actions,
-          ...componentTexts['rotate-serviceaccount-key-start'].actions
-        ]
+          ...componentTexts['rotate-serviceaccount-key-start'].actions,
+        ],
       }
       componentTexts['rotate-credentials-complete'] = {
         caption: this.showLoadingIndicator
@@ -348,15 +354,15 @@ export default {
         actions: [
           ...componentTexts['rotate-ca-complete'].actions,
           ...componentTexts['rotate-etcd-encryption-key-complete'].actions,
-          ...componentTexts['rotate-serviceaccount-key-complete'].actions
-        ]
+          ...componentTexts['rotate-serviceaccount-key-complete'].actions,
+        ],
       }
       return componentTexts[this.operation]
-    }
+    },
   },
   methods: {
-    ...mapActions([
-      'setAlert'
+    ...mapActions(useAppStore, [
+      'setAlert',
     ]),
     async startDialogOpened () {
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -377,17 +383,17 @@ export default {
         data = { 'gardener.cloud/operation': this.operation }
       }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
+        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
         const errorMessage = this.componentTexts.errorMessage
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.actionTriggered = false
       }
-    }
+    },
   },
   watch: {
     isActionToBeScheduled (actionToBeScheduled) {
@@ -402,12 +408,12 @@ export default {
       }
 
       this.setAlert({
-        message: this.componentTexts.successMessage
+        message: this.componentTexts.successMessage,
       })
-    }
+    },
   },
   mounted () {
     this.maintenance = this.isScheduledForMaintenance
-  }
-}
+  },
+})
 </script>

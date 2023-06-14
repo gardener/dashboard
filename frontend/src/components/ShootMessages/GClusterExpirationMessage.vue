@@ -6,30 +6,38 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span v-if="isValidTerminationDate">This cluster will self terminate <time-string :date-time="shootExpirationTimestamp" mode="future" no-tooltip class="font-weight-bold"></time-string></span>
+    <span v-if="isValidTerminationDate">This cluster will self terminate
+      <g-time-string
+        :date-time="shootExpirationTimestamp"
+        mode="future"
+        no-tooltip
+        class="font-weight-bold"
+      />
+    </span>
     <span v-else>This cluster is about to self terminate</span>
   </div>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
 import { isValidTerminationDate } from '@/utils'
-import TimeString from '@/components/TimeString.vue'
+import GTimeString from '@/components/GTimeString.vue'
 
-export default {
+export default defineComponent({
   components: {
-    TimeString
+    GTimeString,
   },
   props: {
     shootExpirationTimestamp: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     isValidTerminationDate () {
       return isValidTerminationDate(this.shootExpirationTimestamp)
-    }
-  }
-}
+    },
+  },
+})
 </script>

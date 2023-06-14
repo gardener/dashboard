@@ -16,25 +16,26 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   props: {
     purposeText: {
       type: String,
-      required: true
+      required: true,
     },
     shootName: {
       type: String,
-      required: true
+      required: true,
     },
     shootNamespace: {
       type: String,
-      required: true
+      required: true,
     },
     showNavigationLink: {
       type: Boolean,
-      required: true
-    }
-  }
-}
+      required: true,
+    },
+  },
+})
 </script>

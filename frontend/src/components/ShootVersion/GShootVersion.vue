@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-tooltip location="top">
-      <template v-slot:activator="{ on: tooltip }">
-        <div v-on="tooltip">
+      <template v-slot:activator="{ props }">
+        <div v-bind="props">
           <v-btn
             v-if="chip"
             class="update_btn"
@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
             @click="showUpdateDialog"
             :variant="!k8sPatchAvailable && 'outlined'"
             :ripple="canUpdate"
-            variant="flat"
             color="primary"
           >
             <v-icon size="small" v-if="availableK8sUpdates">mdi-menu-up</v-icon>
@@ -50,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-slot:caption>Update Cluster</template>
       <template v-slot:affectedObjectName>{{shootName}}</template>
       <template v-slot:message>
-        <shoot-version-update
+        <g-shoot-version-update
           :available-k8s-updates="availableK8sUpdates"
           :current-k8s-version="kubernetesVersion"
           @selected-version="onSelectedVersion"
@@ -58,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           @selected-version-invalid="onSelectedVersionInvalid"
           @confirm-required="onConfirmRequired"
           ref="shootVersionUpdate"
-        ></shoot-version-update>
+        />
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           <p>
             You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
@@ -88,24 +87,30 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate.vue'
+import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
+
+import { useAuthzStore, useCloudProfileStore } from '@/store'
+
+import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
-import { updateShootVersion } from '@/utils/api'
+
 import { shootItem } from '@/mixins/shootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { mapGetters } from 'vuex'
+
 import get from 'lodash/get'
 import find from 'lodash/find'
 
-export default {
+export default defineComponent({
   components: {
-    ShootVersionUpdate,
-    GDialog
+    GShootVersionUpdate,
+    GDialog,
   },
   props: {
     chip: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data () {
     return {
@@ -114,15 +119,14 @@ export default {
       selectedVersionInvalid: true,
       confirmRequired: false,
       updateErrorMessage: null,
-      updateDetailedErrorMessage: null
+      updateDetailedErrorMessage: null,
     }
   },
+  inject: ['api', 'logger'],
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
+    ...mapState(useAuthzStore, [
       'canPatchShoots',
-      'kubernetesVersions',
-      'availableKubernetesUpdatesForShoot'
     ]),
     kubernetesVersion () {
       const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
@@ -157,9 +161,13 @@ export default {
       } else {
         return 'Kubernetes version up to date'
       }
-    }
+    },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'kubernetesVersions',
+      'availableKubernetesUpdatesForShoot',
+    ]),
     onSelectedVersion (value) {
       this.selectedVersion = value
     },
@@ -185,12 +193,12 @@ export default {
         const confirmed = await this.$refs.gDialog.confirmWithDialog()
         if (confirmed) {
           try {
-            await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
+            await this.api.updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
           } catch (err) {
             const errorDetails = errorDetailsFromError(err)
             this.updateErrorMessage = 'Update Kubernetes version failed'
             this.updateDetailedErrorMessage = errorDetails.detailedMessage
-            console.error(this.updateErrorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.logger.error(this.updateErrorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
             this.showUpdateDialog(false)
           }
         }
@@ -204,9 +212,9 @@ export default {
       this.updateDetailedErrorMessage = undefined
 
       this.$refs.shootVersionUpdate.reset()
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

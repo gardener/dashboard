@@ -7,15 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="d-flex align-center">
-      <g-popper :title="toolbarTitle" :toolbar-color="color" :popper-key="popperKeyWithType" :placement="popperPlacement">
+      <g-popper
+        :title="toolbarTitle"
+        :toolbar-color="color"
+        :popper-key="popperKeyWithType"
+        :placement="popperPlacement"
+      >
         <template v-slot:popperRef>
           <div class="d-flex align-center">
             <v-tooltip location="top">
-              <template v-slot:activator="{ on }">
-                <v-btn v-if="isUserError" icon v-on="on">
+              <template v-slot:activator="{ props }">
+                <v-btn v-if="isUserError" icon v-bind="props">
                   <v-icon color="error">mdi-account-alert</v-icon>
                 </v-btn>
-                <v-btn icon v-on="on">
+                <v-btn icon v-bind="props">
                   <v-progress-circular v-if="showProgress" :size="27" :width="3" :model-value="shootLastOperation.progress" :color="color" :rotate="-90">
                     <v-icon v-if="isShootStatusHibernated" size="small" :color="color">mdi-sleep</v-icon>
                     <v-icon v-else-if="isShootLastOperationTypeDelete" size="small" :color="color">mdi-delete</v-icon>
@@ -47,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </template>
         <template v-slot:card>
-          <shoot-message-details
+          <g-shoot-message-details
             :status-title="statusTitle"
             :last-message="lastMessage"
             :error-descriptions="errorDescriptions"
@@ -58,54 +63,63 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-popper>
       <div>
-        <retry-operation :shoot-item="shootItem"></retry-operation>
+        <g-retry-operation :shoot-item="shootItem"/>
       </div>
       <span v-if="showStatusText" class="ml-2">{{statusTitle}}</span>
     </div>
     <template v-if="showStatusText">
       <div v-for="({ description, link }) in tooltip.errorCodeObjects" :key="description">
         <div class="font-weight-bold text-error wrap-text">{{description}}</div>
-        <div v-if="link"><external-link :url="link.url" class="font-weight-bold text-error">{{link.text}}</external-link></div>
+        <div v-if="link">
+          <g-external-link
+            :url="link.url"
+            class="font-weight-bold text-error"
+          >
+            {{link.text}}
+          </g-external-link>
+        </div>
       </div>
     </template>
   </div>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 import join from 'lodash/join'
 import map from 'lodash/map'
 
 import GPopper from '@/components/GPopper.vue'
-import RetryOperation from '@/components/RetryOperation.vue'
-import ShootMessageDetails from '@/components/ShootMessageDetails.vue'
-import ExternalLink from '@/components/ExternalLink.vue'
+import GRetryOperation from '@/components/GRetryOperation.vue'
+import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
+import GExternalLink from '@/components/GExternalLink.vue'
 
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 import { shootItem } from '@/mixins/shootItem'
 
-export default {
+export default defineComponent({
   components: {
     GPopper,
-    RetryOperation,
-    ShootMessageDetails,
-    ExternalLink
+    GRetryOperation,
+    GShootMessageDetails,
+    GExternalLink,
   },
   props: {
     popperKey: {
       type: String,
-      required: true
+      required: true,
     },
     popperPlacement: {
-      type: String
+      type: String,
     },
     showStatusText: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data () {
     return {
-      retryingOperation: false
+      retryingOperation: false,
     }
   },
   mixins: [shootItem],
@@ -170,7 +184,7 @@ export default {
       return {
         title: this.statusTitle,
         progress: this.showProgress ? this.shootLastOperation.progress : undefined,
-        errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes)
+        errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes),
       }
     },
     operationType () {
@@ -191,7 +205,7 @@ export default {
     errorDescriptions () {
       return map(this.shootLastErrors, lastError => ({
         description: lastError.description,
-        errorCodeObjects: objectsFromErrorCodes(lastError.codes)
+        errorCodeObjects: objectsFromErrorCodes(lastError.codes),
       }))
     },
     lastMessage () {
@@ -201,9 +215,9 @@ export default {
         return undefined
       }
       return message
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

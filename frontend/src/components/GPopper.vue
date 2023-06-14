@@ -5,71 +5,68 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span ref="reference">
-    <slot
-      name="activator"
-      :on="{
-        'click': togglePopper
-      }"
-    />
-  </span>
-  <div
-    ref="floating"
-    :class="{
-        floating: true,
-        hidden: !isOpen,
-      }"
-    :style="floatingStyle"
-  >
-    <div
-      ref="floatingArrow"
-      :class="{
-          floatingArrow: true,
-          hidden: !isOpen,
-        }"
-      :style="floatingArrowStyle"
-    />
-    <v-card class="inner-card">
-      <v-toolbar
-        ref="toolbar"
-        :height="30"
-        :color="props.toolbarColor"
-        flat
-      >
-        <v-toolbar-title class="text-subtitle-1 toolbar-title--text">
-          {{ props.title }}
-        </v-toolbar-title>
-        <v-spacer />
-        <v-btn
-          size="small"
-          icon
-          @click.stop="closePopper"
+  <span v-if="!disabled" :key="popperKey">
+    <span ref="anchorRef">
+      <slot
+        name="activator"
+        @click="togglePopper"
+      />
+    </span>
+    <div v-if="visible"
+      ref="floatingRef"
+      class="floating"
+      :style="floatingStyle"
+    >
+      <div v-if="visible"
+        ref="floatingArrowRef"
+        class="floatingArrow"
+        :style="floatingArrowStyle"
+      />
+      <v-card class="inner-card">
+        <v-toolbar
+          ref="toolbarRef"
+          :height="30"
+          :color="toolbarColor"
+          flat
         >
-          <v-icon
-            color="toolbar-title"
+          <v-toolbar-title class="text-subtitle-1 text-toolbar-title">
+            {{ title }}
+          </v-toolbar-title>
+          <v-spacer />
+          <v-btn
+            size="small"
+            icon="mdi-close"
+            icon-color="toolbar-title"
             class="text-subtitle-1"
-          >
-            mdi-close
-          </v-icon>
-        </v-btn>
-      </v-toolbar>
-      <slot name="card" />
-      <v-card-text v-if="$slots.default">
-        <slot />
-      </v-card-text>
-    </v-card>
-  </div>
+            @click.stop="closePopper"
+          />
+        </v-toolbar>
+        <slot name="card" />
+        <v-card-text v-if="$slots.default">
+          <slot />
+        </v-card-text>
+      </v-card>
+    </div>
+  </span>
 </template>
 
 <script setup>
-import { toRef, ref, unref, onBeforeUnmount, onMounted, inject, computed } from 'vue'
+import { ref, computed, toRefs, onBeforeUnmount, onMounted } from 'vue'
 import { useFloating, autoUpdate, arrow, shift, autoPlacement, size, offset } from '@floating-ui/vue'
-import useOnOutsidePress from '@/composables/useOnOutsidePress'
+import { useEventBus, onClickOutside } from '@vueuse/core'
 
 const ARROW_SIZE = 10 // px
-const bus = inject('bus')
+const bus = useEventBus('esc-pressed')
 
 const props = defineProps({
+  popperKey: {
+    type: String,
+    required: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
   toolbarColor: {
     type: String,
     default: 'primary',
@@ -88,33 +85,42 @@ const props = defineProps({
   },
 })
 
+const {
+  popperKey,
+  disabled,
+  toolbarColor,
+  title,
+  placement,
+  boundariesSelector,
+} = toRefs(props)
+
 const emit = defineEmits([
-  'input',
+  'update:visible',
 ])
 
-const reference = ref(null)
-const floating = ref(null)
-const floatingArrow = ref(null)
-const toolbar = ref(null)
-const isOpen = ref(false)
+const anchorRef = ref(null)
+const floatingRef = ref(null)
+const floatingArrowRef = ref(null)
+const toolbarRef = ref(null)
+const visible = ref(false)
 const maxWidth = ref(null)
 const maxHeight = ref(null)
 
 const closePopper = () => {
-  isOpen.value = false
-  emit('input', false)
+  visible.value = false
+  emit('update:visible', false)
 }
 
 const togglePopper = () => {
-  isOpen.value = !isOpen.value
-  emit('input', isOpen.value)
+  visible.value = !visible.value
+  emit('update:visible', visible.value)
 }
 
 const clippingBoundaryEl = computed(() => {
-  if (typeof props.boundariesSelector === 'string') {
-    return document.querySelector(props.boundariesSelector)
+  if (typeof boundariesSelector.value === 'string') {
+    return document.querySelector(boundariesSelector.value)
   }
-  return unref(props.boundariesSelector)
+  return boundariesSelector.value
 })
 
 // The floating uis "size"-middleware does not accept a ref for the boundary.
@@ -146,10 +152,10 @@ const {
   strategy,
   middlewareData,
   placement: finalPlacement,
-} = useFloating(reference, floating, {
-  placement: toRef(props.placement), // preferred placement (if space available)
+} = useFloating(anchorRef, floatingRef, {
+  placement,
   strategy: 'fixed',
-  open: isOpen,
+  open: visible,
   whileElementsMounted (...args) {
     return autoUpdate(...args, { animationFrame: true })
   },
@@ -159,16 +165,16 @@ const {
     autoPlacement(autoPlacementOptions),
     size(sizeOptions),
     arrow({
-      element: floatingArrow,
+      element: floatingArrowRef,
     }),
   ],
 })
 
-const removeOnOutsidePress = useOnOutsidePress([floating, reference], () => {
-  if (isOpen.value) {
+const removeOnOutsidePress = onClickOutside(floatingRef, () => {
+  if (visible.value) {
     closePopper()
   }
-})
+}, { ignore: [anchorRef] })
 
 const overflowOffsetVariables = computed(() => {
   const overflows = middlewareData.value?.autoPlacement?.overflows || []
@@ -215,8 +221,8 @@ const floatingArrowStyle = computed(() => {
     left: 'right',
   }[side]
   let backgroundColor
-  if (finalPlacement.value === 'bottom' && toolbar.value?.$el) {
-    const css = getComputedStyle(toolbar.value.$el, null)
+  if (finalPlacement.value === 'bottom' && toolbarRef.value?.$el) {
+    const css = getComputedStyle(toolbarRef.value.$el, null)
     backgroundColor = css['background-color']
   }
 
@@ -231,12 +237,12 @@ const floatingArrowStyle = computed(() => {
 })
 
 onBeforeUnmount(() => {
-  bus.off('esc-pressed', closePopper)
+  bus.off(closePopper)
   removeOnOutsidePress()
 })
 
 onMounted(() => {
-  bus.on('esc-pressed', closePopper)
+  bus.on(closePopper)
 })
 </script>
 

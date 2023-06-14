@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -14,8 +14,8 @@ SPDX-License-Identifier: Apache-2.0
     <template v-slot:popperRef>
       <v-btn icon :size="small && 'x-small'">
         <v-tooltip location="top">
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" :color="overallColor" :size="small && 'small'">{{icon}}</v-icon>
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" :color="overallColor" :size="small && 'small'">{{icon}}</v-icon>
           </template>
           <span>{{tooltip}}</span>
         </v-tooltip>
@@ -25,72 +25,71 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item
         v-for="({key, icon, severity, component }) in shootMessages"
         :key="key">
-        <v-list-item-icon>
-          <v-icon :color="colorForSeverity(severity)">{{icon}}</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <component :is="component.name" v-bind="component.props" class="message" />
-        </v-list-item-content>
+        <template v-slot:prepend>
+          <v-icon :color="colorForSeverity(severity)" :icon="icon"/>
+        </template>
+        <component :is="component.name" v-bind="component.props" class="message" />
       </v-list-item>
     </v-list>
   </g-popper>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
 import GPopper from '@/components/GPopper.vue'
-import K8sExpirationMessage from '@/components/ShootMessages/K8sExpirationMessage.vue'
-import WorkerGroupExpirationMessage from '@/components/ShootMessages/WorkerGroupExpirationMessage.vue'
-import NoHibernationScheduleMessage from '@/components/ShootMessages/NoHibernationScheduleMessage.vue'
-import ClusterExpirationMessage from '@/components/ShootMessages/ClusterExpirationMessage.vue'
-import ConstraintMessage from '@/components/ShootMessages/ConstraintMessage.vue'
-import MaintenanceStatusMessage from '@/components/ShootMessages/MaintenanceStatusMessage.vue'
+import GK8sExpirationMessage from '@/components/ShootMessages/GK8sExpirationMessage.vue'
+import GWorkerGroupExpirationMessage from '@/components/ShootMessages/GWorkerGroupExpirationMessage.vue'
+import GNoHibernationScheduleMessage from '@/components/ShootMessages/GNoHibernationScheduleMessage.vue'
+import GClusterExpirationMessage from '@/components/ShootMessages/GClusterExpirationMessage.vue'
+import GConstraintMessage from '@/components/ShootMessages/GConstraintMessage.vue'
+import GMaintenanceStatusMessage from '@/components/ShootMessages/GMaintenanceStatusMessage.vue'
+
+import { shootItem } from '@/mixins/shootItem'
+import {
+  isSelfTerminationWarning,
+} from '@/utils'
+import { mapState, mapActions } from 'pinia'
+import { useAuthzStore, useCloudProfileStore, useConfigStore } from '@/store'
+
 import get from 'lodash/get'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import { shootItem } from '@/mixins/shootItem'
-import {
-  isSelfTerminationWarning
-} from '@/utils'
-import { mapGetters } from 'vuex'
 
-export default {
+export default defineComponent({
   name: 'shoot-messages',
   components: {
     GPopper,
-    K8sExpirationMessage,
-    WorkerGroupExpirationMessage,
-    NoHibernationScheduleMessage,
-    ClusterExpirationMessage,
-    ConstraintMessage,
-    MaintenanceStatusMessage
+    GK8sExpirationMessage,
+    GWorkerGroupExpirationMessage,
+    GNoHibernationScheduleMessage,
+    GClusterExpirationMessage,
+    GConstraintMessage,
+    GMaintenanceStatusMessage,
   },
   props: {
     small: {
       type: Boolean,
-      default: false
+      default: false,
     },
     filter: {
       type: [String, Array],
-      required: false
+      required: false,
     },
     title: {
       type: String,
-      required: false
+      required: false,
     },
     showVerbose: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
+    ...mapState(useAuthzStore, [
       'canPatchShoots',
-      'isShootHasNoHibernationScheduleWarning',
-      'kubernetesVersionExpirationForShoot',
-      'expiringWorkerGroupsForShoot'
     ]),
     visible () {
       return !this.isShootMarkedForDeletion && this.shootMessages.length
@@ -104,7 +103,7 @@ export default {
         ...this.hibernationConstraintMessage,
         ...this.maintenanceConstraintMessage,
         ...this.caCertificateValiditiesConstraintMessage,
-        ...this.lastMaintenanceMessage
+        ...this.lastMaintenanceMessage,
       ]
     },
     k8sMessage () {
@@ -122,13 +121,13 @@ export default {
         icon: 'mdi-update',
         severity,
         component: {
-          name: 'k8s-expiration-message',
+          name: 'g-k8s-expiration-message',
           props: {
             expirationDate,
             isValidTerminationDate,
-            severity
-          }
-        }
+            severity,
+          },
+        },
       }]
     },
     machineImageMessages () {
@@ -143,16 +142,16 @@ export default {
           icon: 'mdi-update',
           severity,
           component: {
-            name: 'worker-group-expiration-message',
+            name: 'g-worker-group-expiration-message',
             props: {
               expirationDate,
               isValidTerminationDate,
               severity,
               name,
               workerName,
-              version
-            }
-          }
+              version,
+            },
+          },
         }
       })
     },
@@ -168,14 +167,14 @@ export default {
         icon: 'mdi-calendar-alert',
         severity: 'info',
         component: {
-          name: 'no-hibernation-schedule-message',
+          name: 'g-no-hibernation-schedule-message',
           props: {
             purposeText: this.shootPurpose || '',
             shootName: this.shootName || '',
             shootNamespace: this.shootNamespace || '',
-            showNavigationLink: this.canPatchShoots && !isEmpty(this.shootName) && !isEmpty(this.shootNamespace)
-          }
-        }
+            showNavigationLink: this.canPatchShoots && !isEmpty(this.shootName) && !isEmpty(this.shootNamespace),
+          },
+        },
       }]
     },
     clusterExpirationMessage () {
@@ -191,11 +190,11 @@ export default {
         icon: isClusterExpirationWarningState ? 'mdi-clock-alert-outline' : 'mdi-clock-outline',
         severity: isClusterExpirationWarningState ? 'warning' : 'info',
         component: {
-          name: 'cluster-expiration-message',
+          name: 'g-cluster-expiration-message',
           props: {
-            shootExpirationTimestamp: this.shootExpirationTimestamp
-          }
-        }
+            shootExpirationTimestamp: this.shootExpirationTimestamp,
+          },
+        },
       }]
     },
     hibernationConstraintMessage () {
@@ -210,12 +209,12 @@ export default {
         icon: 'mdi-alert-circle-outline',
         severity: 'warning',
         component: {
-          name: 'constraint-message',
+          name: 'g-constraint-message',
           props: {
             constraintCaption: 'Your hibernation schedule may not have any effect',
-            constraintMessage: this.hibernationPossibleMessage
-          }
-        }
+            constraintMessage: this.hibernationPossibleMessage,
+          },
+        },
       }]
     },
     maintenanceConstraintMessage () {
@@ -230,12 +229,12 @@ export default {
         icon: 'mdi-alert-circle-outline',
         severity: 'error',
         component: {
-          name: 'constraint-message',
+          name: 'g-constraint-message',
           props: {
             constraintCaption: 'Maintenance precondition check failed. Gardener may be unable to perform required actions during maintenance',
-            constraintMessage: this.maintenancePreconditionSatisfiedMessage
-          }
-        }
+            constraintMessage: this.maintenancePreconditionSatisfiedMessage,
+          },
+        },
       }]
     },
     caCertificateValiditiesConstraintMessage () {
@@ -250,12 +249,12 @@ export default {
         icon: 'mdi-clock-alert-outline',
         severity: 'warning',
         component: {
-          name: 'constraint-message',
+          name: 'g-constraint-message',
           props: {
             constraintCaption: 'Certificate Authorities will expire in less than one year',
-            constraintMessage: this.caCertificateValiditiesAcceptableMessage
-          }
-        }
+            constraintMessage: this.caCertificateValiditiesAcceptableMessage,
+          },
+        },
       }]
     },
     lastMaintenanceMessage () {
@@ -273,14 +272,14 @@ export default {
         icon: this.isLastMaintenanceFailed ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline',
         severity: this.isLastMaintenanceFailed ? 'warning' : 'verbose',
         component: {
-          name: 'maintenance-status-message',
+          name: 'g-maintenance-status-message',
           props: {
             triggeredTime: this.lastMaintenance.triggeredTime,
             description: this.lastMaintenance.description,
             state: this.lastMaintenance.state,
-            failureReason: this.lastMaintenance.failureReason
-          }
-        }
+            failureReason: this.lastMaintenance.failureReason,
+          },
+        },
       }]
     },
     icon () {
@@ -319,9 +318,16 @@ export default {
     },
     statusTitle () {
       return this.title ? this.title : `Issues for Cluster ${this.shootName}`
-    }
+    },
   },
   methods: {
+    ...mapActions(useConfigStore, [
+      'isShootHasNoHibernationScheduleWarning',
+    ]),
+    ...mapActions(useCloudProfileStore, [
+      'kubernetesVersionExpirationForShoot',
+      'expiringWorkerGroupsForShoot',
+    ]),
     filterMatches (value) {
       if (isEmpty(this.filter)) {
         return true
@@ -341,13 +347,12 @@ export default {
         default:
           return 'primary'
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-
   .message {
     text-align: left;
     min-width: 250px;

@@ -35,11 +35,10 @@ import { defineComponent } from 'vue'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
-import { addShootAnnotation } from '@/utils/api'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { SnotifyPosition } from 'vue-snotify'
-import get from 'lodash/get'
 import { shootItem } from '@/mixins/shootItem'
+import get from 'lodash/get'
 
 export default defineComponent({
   components: {
@@ -51,6 +50,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
+  inject: ['api', 'notify'],
   mixins: [shootItem],
   data () {
     return {
@@ -96,7 +96,7 @@ export default defineComponent({
 
       const maintain = { 'gardener.cloud/operation': 'maintain' }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
+        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
       } catch (err) {
         const errorMessage = 'Could not start maintenance'
         const errorDetails = errorDetailsFromError(err)
@@ -123,12 +123,13 @@ export default defineComponent({
       if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
-      const config = {
-        position: SnotifyPosition.rightBottom,
-        timeout: 5000,
-        showProgressBar: false,
-      }
-      this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
+
+      this.notify({
+        text: `Maintenance scheduled for ${this.shootName}`,
+        type: 'success',
+        position: 'bottom right',
+        duration: 5000,
+      })
     },
   },
 })

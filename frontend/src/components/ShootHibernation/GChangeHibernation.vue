@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
@@ -25,29 +25,29 @@ SPDX-License-Identifier: Apache-2.0
         This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
       </template>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import { updateShootHibernation } from '@/utils/api'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import { errorDetailsFromError } from '@/utils/error'
+
 import { shootItem } from '@/mixins/shootItem'
-import { SnotifyPosition } from 'vue-snotify'
 
 export default {
   components: {
-    ActionButtonDialog
+    GActionButtonDialog,
   },
   props: {
     text: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
+  inject: ['api', 'notify'],
   mixins: [shootItem],
   data () {
     return {
-      hibernationChanged: false
+      hibernationChanged: false,
     }
   },
   computed: {
@@ -86,7 +86,7 @@ export default {
         return
       }
       return this.buttonTitle
-    }
+    },
   },
   methods: {
     async onConfigurationDialogOpened () {
@@ -98,12 +98,12 @@ export default {
     async updateConfiguration () {
       this.hibernationChanged = true
       try {
-        await updateShootHibernation({
+        await this.api.updateShootHibernation({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            enabled: !this.isShootSettingHibernated
-          }
+            enabled: !this.isShootSettingHibernated,
+          },
         })
       } catch (err) {
         let errorMessage
@@ -118,7 +118,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         this.hibernationChanged = false
       }
-    }
+    },
   },
   watch: {
     isShootSettingHibernated (value) {
@@ -136,17 +136,17 @@ export default {
       if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
-      const config = {
-        position: SnotifyPosition.rightBottom,
-        timeout: 5000,
-        showProgressBar: false
-      }
-      if (this.isShootStatusHibernated) {
-        this.$snotify.success(`Cluster ${this.shootName} successfully hibernated`, config)
-      } else {
-        this.$snotify.success(`Cluster ${this.shootName} successfully started`, config)
-      }
-    }
-  }
+
+      const state = this.isShootStatusHibernated
+        ? 'hibernated'
+        : 'started'
+      this.notify({
+        text: `Cluster ${this.shootName} successfully ${state}`,
+        type: 'success',
+        position: 'bottom right',
+        duration: 5000,
+      })
+    },
+  },
 }
 </script>

@@ -7,8 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <span v-if="isValidTerminationDate">Kubernetes version of this cluster expires
-       <time-string :date-time="expirationDate" mode="future" date-tooltip content-class="font-weight-bold"></time-string>
-       <span>. </span>
+      <g-time-string
+        :date-time="expirationDate"
+        mode="future"
+        date-tooltip
+        content-class="font-weight-bold"
+      />
+      <span>. </span>
     </span>
     <span v-else>Kubernetes version of this cluster is expired.</span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
@@ -21,26 +26,27 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 
-import TimeString from '@/components/TimeString.vue'
+import GTimeString from '@/components/GTimeString.vue'
 
-export default {
+export default defineComponent({
   components: {
-    TimeString
+    GTimeString,
   },
   props: {
     expirationDate: {
       type: String,
-      required: true
+      required: true,
     },
     isValidTerminationDate: {
       type: Boolean,
-      required: true
+      required: true,
     },
     severity: {
       type: String,
-      required: true
-    }
-  }
-}
+      required: true,
+    },
+  },
+})
 </script>

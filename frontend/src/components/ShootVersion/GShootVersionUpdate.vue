@@ -1,12 +1,12 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div>
-    <hint-colorizer hint-color="warning">
+    <g-hint-colorizer hint-color="warning">
       <v-select
         :items="items"
         color="primary"
@@ -22,24 +22,28 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template v-slot:item="{ item }">
           <v-tooltip location="top" :disabled="!item.notNextMinor">
-            <template v-slot:activator="{ on }">
-              <v-list-item-content v-on="on">
-                <v-list-item-title :class="{'text--disabled': item.notNextMinor}">{{item.text}}</v-list-item-title>
+            <template v-slot:activator="{ props }">
+              <div v-bind="props">
+                <v-list-item-title :class="{'text--disabled': item.notNextMinor}">
+                  {{item.text}}
+                </v-list-item-title>
                 <v-list-item-subtitle v-if="versionItemDescription(item).length" :class="item.subtitleClass">
                   {{versionItemDescription(item)}}
                 </v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </template>
             <span>You cannot upgrade your cluster more than one minor version at a time</span>
           </v-tooltip>
         </template>
       </v-select>
-    </hint-colorizer>
+    </g-hint-colorizer>
     <v-alert type="warning" variant="outlined" v-if="currentK8sVersion.expirationDate && !selectedItem">Current Kubernetes version expires on: {{currentK8sVersion.expirationDateString}}. Kubernetes update will be enforced after that date.</v-alert>
   </div>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import upperFirst from 'lodash/upperFirst'
@@ -47,25 +51,24 @@ import head from 'lodash/head'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import semver from 'semver'
-import HintColorizer from '@/components/HintColorizer.vue'
+import GHintColorizer from '@/components/GHintColorizer.vue'
 
-export default {
-  name: 'shoot-version-update',
+export default defineComponent({
   components: {
-    HintColorizer
+    GHintColorizer,
   },
   props: {
     availableK8sUpdates: {
-      required: true
+      required: true,
     },
     currentK8sVersion: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   data () {
     return {
       snackbar: false,
-      selectedItem: undefined
+      selectedItem: undefined,
     }
   },
   computed: {
@@ -88,7 +91,7 @@ export default {
             type,
             text: `${this.currentK8sVersion.version} → ${version.version}`,
             notNextMinor,
-            subtitleClass
+            subtitleClass,
           }
         })
       }
@@ -176,7 +179,7 @@ export default {
         return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
       return undefined
-    }
+    },
   },
   methods: {
     itemIsNotNextMinor (version, type) {
@@ -203,7 +206,7 @@ export default {
     },
     reset () {
       this.selectedItem = undefined
-    }
+    },
   },
   watch: {
     selectedItem (value) {
@@ -211,7 +214,7 @@ export default {
       const type = get(value, 'type')
       this.$emit('selected-version', version)
       this.$emit('selected-version-type', type)
-    }
-  }
-}
+    },
+  },
+})
 </script>

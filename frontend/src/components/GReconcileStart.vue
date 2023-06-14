@@ -1,11 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     :loading="isReconcileToBeScheduled"
     @dialog-opened="startDialogOpened"
@@ -24,33 +24,37 @@ SPDX-License-Identifier: Apache-2.0
         <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
       </v-row>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog.vue'
-import { addShootAnnotation } from '@/utils/api'
-import get from 'lodash/get'
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
+
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
-import { mapActions } from 'vuex'
 
-export default {
+import get from 'lodash/get'
+import { useAppStore } from '@/store'
+
+export default defineComponent({
   components: {
-    ActionButtonDialog
+    GActionButtonDialog,
   },
+  inject: ['api', 'logger'],
+  mixins: [shootItem],
   props: {
     text: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data () {
     return {
       reconcileTriggered: false,
-      currentGeneration: null
+      currentGeneration: null,
     }
   },
-  mixins: [shootItem],
   computed: {
     isReconcileToBeScheduled () {
       return this.shootGenerationValue === this.currentGeneration
@@ -74,11 +78,11 @@ export default {
     },
     lastOperationFailed () {
       return get(this.shootLastOperation, 'state') === 'Failed'
-    }
+    },
   },
   methods: {
-    ...mapActions([
-      'setAlert'
+    ...mapActions(useAppStore, [
+      'setAlert',
     ]),
     async startDialogOpened () {
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -93,18 +97,18 @@ export default {
       const operation = this.lastOperationFailed ? 'retry' : 'reconcile'
       const annotation = { 'gardener.cloud/operation': operation }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: annotation })
+        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: annotation })
       } catch (err) {
         const errorMessage = 'Could not trigger reconcile'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.reconcileTriggered = false
         this.currentGeneration = null
       }
-    }
+    },
   },
   watch: {
     isReconcileToBeScheduled (reconcileToBeScheduled) {
@@ -120,11 +124,11 @@ export default {
       }
 
       this.setAlert({
-        message: `Reconcile triggered for ${this.shootName}`
+        message: `Reconcile triggered for ${this.shootName}`,
       })
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
