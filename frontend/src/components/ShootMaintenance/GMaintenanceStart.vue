@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         :selectable="false"
         ref="maintenanceComponents"
       ></g-maintenance-components>
-      <v-alert type="warning" outlined :value="!isMaintenancePreconditionSatisfied">
+      <v-alert type="warning" variant="outlined" :value="!isMaintenancePreconditionSatisfied">
         <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
         {{maintenancePreconditionSatisfiedMessage}}
       </v-alert>

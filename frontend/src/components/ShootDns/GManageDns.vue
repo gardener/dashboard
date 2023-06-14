@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             small
             @click="addDnsProvider"
-            outlined
+            variant="outlined"
             fab
             icon
             color="primary">

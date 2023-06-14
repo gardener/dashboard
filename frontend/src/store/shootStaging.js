@@ -114,6 +114,10 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     return clusterIsNew.value || !state.initialControlPlaneFailureToleranceType
   })
 
+  const controlPlaneFailureToleranceType = computed(() => {
+    return state.controlPlaneFailureToleranceType
+  })
+
   // actions
   function getDnsProviderSecrets (type) {
     return secretStore.dnsSecretsByProviderKind(type)
@@ -322,12 +326,17 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     state.dnsPrimaryProviderValid = value
   }
 
+  function setControlPlaneFailureToleranceType (value) {
+    state.controlPlaneFailureToleranceType = value
+  }
+
   return {
     // state
     dnsDomain,
     dnsProviderIds,
     cloudProfileName,
     seedName,
+    controlPlaneFailureToleranceType,
     // getters
     clusterIsNew,
     dnsProviderTypes,
@@ -354,5 +363,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setDnsPrimaryProvider,
     setDnsPrimaryProviderId,
     setDnsPrimaryProviderValid,
+    setControlPlaneFailureToleranceType,
   }
 })

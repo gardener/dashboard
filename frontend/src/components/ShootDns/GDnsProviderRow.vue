@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           :disabled="readonly || primaryReadonly"
           small
-          outlined
+          variant="outlined"
           icon
           color="grey"
           @click="onDelete">

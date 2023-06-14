@@ -26,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
             v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
             @click.stop="$refs.wildCardStart.focus()"
             @mousedown.stop="$refs.wildCardStart.focus()"
-            outlined
             density="compact"
             class="mb-1 mr-1 text-field"
             flat
@@ -43,7 +42,6 @@ SPDX-License-Identifier: Apache-2.0
             @click.stop="$refs.wildCardEnd.focus()"
             @mousedown.stop="$refs.wildCardEnd.focus()"
             @input="onInput"
-            outlined
             density="compact"
             class="mb-1 ml-1 text-field"
             flat
