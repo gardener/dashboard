@@ -7,9 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-row">
     <v-select
-      :class="{ 'mt-5' : !wildcardSelectedValue.isWildcard}"
-      class="selectClass"
-      dense
       color="primary"
       item-color="primary"
       :label="wildcardSelectLabel"
@@ -28,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-text-field
             v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
             @click.stop="$refs.wildCardStart.focus()"
+            @mousedown.stop="$refs.wildCardStart.focus()"
             outlined
             density="compact"
             class="mb-1 mr-1 text-field"
@@ -43,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-text-field
             v-if="wildcardSelectedValue.endsWithWildcard"
             @click.stop="$refs.wildCardEnd.focus()"
+            @mousedown.stop="$refs.wildCardEnd.focus()"
             @input="onInput"
             outlined
             density="compact"
