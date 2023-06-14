@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             :items="sortedKubernetesVersionsList"
             v-model="kubernetesVersion"
             :error-messages="getErrorMessages('kubernetesVersion')"
-            @input="onInputKubernetesVersion"
+            @update:modelValue="onInputKubernetesVersion"
             @blur="v$.kubernetesVersion.$touch()"
             :hint="versionHint"
             persistent-hint
@@ -133,7 +133,7 @@ export default defineComponent({
       validationErrors,
       name: undefined,
       kubernetesVersion: undefined,
-      purpose: undefined,
+      purposeValue: undefined,
       valid: false,
       purposeValid: false,
       cloudProfileName: undefined,
@@ -228,8 +228,8 @@ export default defineComponent({
       this.validateInput()
     },
     onUpdatePurpose (purpose) {
-      this.purpose = purpose
-      this.userInterActionBus.emit('updatePurpose', this.purpose)
+      this.purposeValue = purpose
+      this.userInterActionBus.emit('updatePurpose', this.purposeValue)
       this.validateInput()
     },
     onPurposeValid (value) {
@@ -251,7 +251,7 @@ export default defineComponent({
       return {
         name: this.name,
         kubernetesVersion: this.kubernetesVersion,
-        purpose: this.purpose,
+        purpose: this.purposeValue,
         enableStaticTokenKubeconfig: this.enableStaticTokenKubeconfig,
       }
     },

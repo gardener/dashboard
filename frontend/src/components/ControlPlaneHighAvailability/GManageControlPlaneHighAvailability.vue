@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-expand-transition :appear="animateOnAppear" v-else>
       <div>
         Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
-        <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" dense outlined>
+        <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" variant="outlined">
           <template v-if="clusterIsNew">
             <template v-if="seedName">
               The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
         </v-alert>
-        <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" dense outlined>
+        <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" variant="outlined">
           It is not possible to disable or change control plane high availability later.
         </v-alert>
       </div>
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 
-import { mapGetters, mapActions } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import { transformHtml } from '@/utils'
 import some from 'lodash/some'
 import GExternalLink from '@/components/GExternalLink.vue'
@@ -74,10 +74,10 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters(useConfigStore, [
+    ...mapState(useConfigStore, [
       'controlPlaneHighAvailabilityHelpText',
     ]),
-    ...mapGetters(useShootStagingStore, [
+    ...mapState(useShootStagingStore, [
       'clusterIsNew',
       'controlPlaneFailureToleranceTypeChangeAllowed',
       'cloudProfileName',
@@ -96,9 +96,9 @@ export default defineComponent({
       },
       set (value) {
         if (!value) {
-          this.controlPlaneFailureToleranceType = undefined
+          this.setControlPlaneFailureToleranceType(undefined)
         } else {
-          this.controlPlaneFailureToleranceType = this.zoneSupported ? 'zone' : 'node'
+          this.setControlPlaneFailureToleranceType(this.zoneSupported ? 'zone' : 'node')
         }
       },
     },
@@ -113,13 +113,16 @@ export default defineComponent({
     ...mapActions(useSeedStore, [
       'seedByName',
     ]),
+    ...mapActions(useShootStagingStore, [
+      'setControlPlaneFailureToleranceType',
+    ]),
     resetToleranceType (zoneSupported) {
       if (this.controlPlaneFailureToleranceTypeChangeAllowed) {
         if (!zoneSupported && this.controlPlaneFailureToleranceType === 'zone') {
-          this.controlPlaneFailureToleranceType = 'node'
+          this.setControlPlaneFailureToleranceType('node')
         }
         if (zoneSupported && this.controlPlaneFailureToleranceType === 'node') {
-          this.controlPlaneFailureToleranceType = 'zone'
+          this.setControlPlaneFailureToleranceType('zone')
         }
       }
     },

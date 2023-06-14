@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           create-mode
           :cloud-profiles="cloudProfiles"
           @valid="onCloudProfileNameValid"
-          @input="onUpdateCloudProfileName"
+          @update:modelValue="onUpdateCloudProfileName"
           color="primary">
         </g-cloud-profile>
       </v-col>
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-secret
          :cloudProfileName="cloudProfileName"
          v-model="secret"
-         @input="onUpdateSecret"
+         @update:modelValue="onUpdateSecret"
          v-model:valid="secretValid"
          @update:valid="onSecretValid"></g-select-secret>
       </v-col>
@@ -36,9 +36,16 @@ SPDX-License-Identifier: Apache-2.0
           persistent-hint
           v-model="region"
           :error-messages="getErrorMessages('region')"
-          @input="onInputRegion"
+          @update:modelValue="onInputRegion"
           @blur="v$.region.$touch()"
-          ></v-select>
+          variant="underlined"
+          >
+          <template #item="{ item, props }">
+            <!-- Divider / header in items not implemented yet in Vuetify 3: https://github.com/vuetifyjs/vuetify/issues/15721 -->
+            <span class="text-subtitle-1 text-disabled pa-3" v-if="!!item.raw.header">{{item.raw.header}}</span>
+            <v-list-item v-else v-bind="props" />
+          </template>
+        </v-select>
       </v-col>
       <v-col cols="3">
         <v-select
@@ -49,8 +56,9 @@ SPDX-License-Identifier: Apache-2.0
           persistent-hint
           v-model="networkingType"
           :error-messages="getErrorMessages('networkingType')"
-          @input="v$.networkingType.$touch()"
+          @update:modelValue="v$.networkingType.$touch()"
           @blur="v$.networkingType.$touch()"
+          variant="underlined"
           ></v-select>
       </v-col>
       <template v-if="infrastructureKind === 'openstack'">
@@ -70,9 +78,10 @@ SPDX-License-Identifier: Apache-2.0
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
           :error-messages="getErrorMessages('loadBalancerProviderName')"
-          @input="onInputLoadBalancerProviderName"
+          @update:modelValue="onInputLoadBalancerProviderName"
           @blur="v$.loadBalancerProviderName.$touch()"
           persistent-hint
+          variant="underlined"
           ></v-select>
         </v-col>
       </template>
@@ -84,10 +93,11 @@ SPDX-License-Identifier: Apache-2.0
             label="Project ID"
             v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
-            @input="onInputProjectID"
+            @update:modelValue="onInputProjectID"
             @blur="v$.projectID.$touch()"
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
+            variant="underlined"
             ></v-text-field>
         </v-col>
         <v-col cols="3">
@@ -98,10 +108,11 @@ SPDX-License-Identifier: Apache-2.0
             :items="partitionIDs"
             v-model="partitionID"
             :error-messages="getErrorMessages('partitionID')"
-            @input="onInputPartitionID"
+            @update:modelValue="onInputPartitionID"
             @blur="v$.partitionID.$touch()"
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
+            variant="underlined"
           ></v-select>
         </v-col>
         <v-col cols="3">
@@ -112,8 +123,9 @@ SPDX-License-Identifier: Apache-2.0
             :items="firewallImages"
             v-model="firewallImage"
             :error-messages="getErrorMessages('firewallImage')"
-            @input="onInputFirewallImage"
+            @update:modelValue="onInputFirewallImage"
             @blur="v$.firewallImage.$touch()"
+            variant="underlined"
           ></v-select>
         </v-col>
         <v-col cols="3">
@@ -124,8 +136,9 @@ SPDX-License-Identifier: Apache-2.0
             :items="firewallSizes"
             v-model="firewallSize"
             :error-messages="getErrorMessages('firewallSize')"
-            @input="onInputFirewallSize"
+            @update:modelValue="onInputFirewallSize"
             @blur="v$.firewallImage.$touch()"
+            variant="underlined"
           ></v-select>
         </v-col>
         <v-col cols="3">
@@ -136,12 +149,13 @@ SPDX-License-Identifier: Apache-2.0
             :items="allFirewallNetworks"
             v-model="firewallNetworks"
             :error-messages="getErrorMessages('firewallNetworks')"
-            @input="onInputFirewallNetworks"
+            @update:modelValue="onInputFirewallNetworks"
             @blur="v$.firewallNetworks.$touch()"
             chips
             small-chips
             deletable-chips
             multiple
+            variant="underlined"
           ></v-select>
         </v-col>
       </template>
@@ -154,13 +168,14 @@ SPDX-License-Identifier: Apache-2.0
             :items="allLoadBalancerClasses"
             v-model="loadBalancerClassNames"
             :error-messages="getErrorMessages('loadBalancerClassNames')"
-            @input="onInputLoadBalancerClassNames"
+            @update:modelValue="onInputLoadBalancerClassNames"
             @blur="v$.loadBalancerClassNames.$touch()"
             attach
             chips
             small-chips
             deletable-chips
             multiple
+            variant="underlined"
           >
             <template #item="{ item }">
               <v-list-item-action >
@@ -219,6 +234,9 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: [
+    'valid',
+  ],
   data () {
     return {
       infrastructureKind: undefined,
@@ -348,12 +366,12 @@ export default defineComponent({
         regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
       }
       forEach(this.regionsWithSeed, region => {
-        regionItems.push({ text: region })
+        regionItems.push(region)
       })
       if (this.showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
         regionItems.push({ header: 'Supported Regions (API servers in another region)' })
         forEach(this.regionsWithoutSeed, region => {
-          regionItems.push({ text: region })
+          regionItems.push(region)
         })
       }
       return regionItems

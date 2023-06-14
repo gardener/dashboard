@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
           <template v-slot:action>
             <v-btn v-show="index > 0 || internalWorkers.length > 1"
               small
-              outlined
+              variant="outlined"
               icon
               color="grey"
               @click.stop="onRemoveWorker(index)">
@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="!(allMachineTypes.length > 0)"
           small
           @click="addWorker"
-          outlined
+          variant="outlined"
           fab
           icon
           class="ml-1"

@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         small
         color="primary"
-        outlined
+        variant="outlined"
         class="cursor-pointer my-0 ml-0">
           <g-vendor-icon :value="type" :size="20"></g-vendor-icon>
           <span class="px-1">{{secretName}}</span>

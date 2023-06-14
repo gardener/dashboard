@@ -7,9 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-row">
     <v-select
-      :class="{ 'mt-5' : !wildcardSelectedValue.isWildcard}"
-      class="selectClass"
-      dense
       color="primary"
       item-color="primary"
       :label="wildcardSelectLabel"
@@ -17,52 +14,57 @@ SPDX-License-Identifier: Apache-2.0
       return-object
       v-model="wildcardSelectedValue"
       :error-messages="getErrorMessages('wildcardSelectedValue')"
-      @input="onInput"
+      @update:modelValue="onInput"
       @blur="v$.wildcardSelectedValue.$touch()"
       :hint="wildcardSelectHint"
       persistent-hint
+      variant="underlined"
     >
       <template #selection="{ item }">
-        <v-text-field
-          v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
-          @click.stop
-          outlined
-          dense
-          class="mb-1 mr-1 text-field"
-          flat
-          solo
-          color="primary"
-          hide-details
-          v-model="wildcardVariablePartPrefix"
-          >
-        </v-text-field>
-        <span>{{item.value}}</span>
-        <v-text-field
-          v-if="wildcardSelectedValue.endsWithWildcard"
-          @click.stop
-          @input="onInput"
-          outlined
-          dense
-          class="mb-1 ml-1 text-field"
-          flat
-          solo
-          color="primary"
-          hide-details
-          v-model="wildcardVariablePartSuffix"
-          >
-        </v-text-field>
+        <div class="d-flex align-center">
+          <v-text-field
+            v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
+            @click.stop="$refs.wildCardStart.focus()"
+            @mousedown.stop="$refs.wildCardStart.focus()"
+            density="compact"
+            class="mb-1 mr-1 text-field"
+            flat
+            variant="outlined"
+            color="primary"
+            hide-details
+            v-model="wildcardVariablePartPrefix"
+            ref="wildCardStart"
+            >
+          </v-text-field>
+          <span>{{item.raw.value}}</span>
+          <v-text-field
+            v-if="wildcardSelectedValue.endsWithWildcard"
+            @click.stop="$refs.wildCardEnd.focus()"
+            @mousedown.stop="$refs.wildCardEnd.focus()"
+            @input="onInput"
+            density="compact"
+            class="mb-1 ml-1 text-field"
+            flat
+            variant="outlined"
+            color="primary"
+            hide-details
+            v-model="wildcardVariablePartSuffix"
+            ref="wildCardEnd"
+            >
+          </v-text-field>
+        </div>
       </template>
-      <template #item="{ item }">
-        <v-list-item-title>
-          <template v-if="item.value.length">
-            <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
-            <span>{{item.value}}</span>
-            <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
+      <template #item="{ item, props }">
+        <v-list-item v-bind="omit(props, 'title')">
+          <template v-if="item.raw.value.length">
+            <span v-if="item.raw.startsWithWildcard">&lt;prefix&gt;</span>
+            <span>{{item.raw.value}}</span>
+            <span v-if="item.raw.endsWithWildcard">&lt;suffix&gt;</span>
           </template>
           <template v-else>
             Custom {{wildcardSelectLabel}}
           </template>
-        </v-list-item-title>
+        </v-list-item>
       </template>
     </v-select>
   </div>
@@ -75,6 +77,7 @@ import { getValidationErrors } from '@/utils'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
+import omit from 'lodash/omit'
 
 export default defineComponent({
   setup () {
@@ -89,10 +92,14 @@ export default defineComponent({
     wildcardSelectLabel: {
       type: String,
     },
-    value: {
+    modelValue: {
       type: String,
     },
   },
+  emits: [
+    'valid',
+    'update:modelValue',
+  ],
   data () {
     return {
       wildcardVariablePartPrefix: undefined,
@@ -151,6 +158,7 @@ export default defineComponent({
     },
   },
   methods: {
+    omit,
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -160,7 +168,7 @@ export default defineComponent({
         this.valid = !this.v$.$invalid
         this.$emit('valid', this.valid)
       }
-      this.$emit('input', this.internalValue)
+      this.$emit('update:modelValue', this.internalValue)
     },
     setInternalValue (newValue) {
       const bestMatch = bestMatchForString(this.wildcardSelectItemObjects, newValue)
@@ -190,12 +198,12 @@ export default defineComponent({
     return this.validators
   },
   watch: {
-    value (value) {
+    modelValue (value) {
       this.setInternalValue(value)
     },
   },
   mounted () {
-    this.setInternalValue(this.value)
+    this.setInternalValue(this.modelValue)
   },
 })
 </script>

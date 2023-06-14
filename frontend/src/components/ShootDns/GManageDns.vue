@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             v-model="primaryProvider"
             @blur="v$.primaryProvider.$touch()"
-            @input="v$.primaryProvider.$touch()"
+            @update:modelValue="v$.primaryProvider.$touch()"
             :items="dnsProvidersWithPrimarySupport"
             :error-messages="getErrorMessages('primaryProvider')"
             label="Primary DNS Provider"
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             small
             @click="addDnsProvider"
-            outlined
+            variant="outlined"
             fab
             icon
             color="primary">

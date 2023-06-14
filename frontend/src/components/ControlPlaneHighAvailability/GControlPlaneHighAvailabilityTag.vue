@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #popperRef>
       <v-chip
-        outlined
+        variant="outlined"
         :small="!xSmall"
         :x-small="xSmall"
         :color="color"

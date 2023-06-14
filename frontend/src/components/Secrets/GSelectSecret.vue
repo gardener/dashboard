@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       return-object
       v-model="secret"
       :error-messages="getErrorMessages('secret')"
-      @input="v$.secret.$touch()"
+      @update:modelValue="v$.secret.$touch()"
       @blur="v$.secret.$touch()"
       persistent-hint
       :hint="secretHint"
