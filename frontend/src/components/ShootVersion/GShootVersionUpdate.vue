@@ -20,24 +20,37 @@ SPDX-License-Identifier: Apache-2.0
         return-object
         placeholder="Please select version..."
       >
-        <template v-slot:item="{ item }">
-          <v-tooltip location="top" :disabled="!item.notNextMinor">
-            <template v-slot:activator="{ props }">
-              <div v-bind="props">
-                <v-list-item-title :class="{'text--disabled': item.notNextMinor}">
-                  {{item.text}}
-                </v-list-item-title>
-                <v-list-item-subtitle v-if="versionItemDescription(item).length" :class="item.subtitleClass">
-                  {{versionItemDescription(item)}}
-                </v-list-item-subtitle>
+        <template v-slot:item="{ props }">
+          <v-list-subheader v-if="props.value.type === 'subheader'"
+            v-bind="props"
+          />
+          <v-list-item v-else
+            v-bind="props"
+            :subtitle="versionItemDescription(props)"
+            :disabled="props.value.notNextMinor"
+          >
+            <v-tooltip v-if="props.value.notNextMinor"
+              activator="parent"
+              location="top"
+            >
+              You cannot upgrade your cluster more than one minor version at a time
+            </v-tooltip>
+            <template #subtitle="{ subtitle }">
+              <div :class="props.value.subtitleClass">
+                {{ subtitle }}
               </div>
             </template>
-            <span>You cannot upgrade your cluster more than one minor version at a time</span>
-          </v-tooltip>
+          </v-list-item>
         </template>
       </v-select>
     </g-hint-colorizer>
-    <v-alert type="warning" variant="outlined" v-if="currentK8sVersion.expirationDate && !selectedItem">Current Kubernetes version expires on: {{currentK8sVersion.expirationDateString}}. Kubernetes update will be enforced after that date.</v-alert>
+    <v-alert v-if="currentK8sVersion.expirationDate && !selectedItem"
+      type="warning"
+      variant="outlined"
+    >
+      Current Kubernetes version expires on: {{currentK8sVersion.expirationDateString}}.
+      Kubernetes update will be enforced after that date.
+    </v-alert>
   </div>
 </template>
 
@@ -71,41 +84,51 @@ export default defineComponent({
       selectedItem: undefined,
     }
   },
+  emits: [
+    'selectedVersion',
+    'selectedVersionInvalid',
+    'selectedVersionType',
+    'confirmRequired',
+  ],
   computed: {
     items () {
-      const selectionItemsForType = (versions, type) => {
+      const selectionItemsForType = (versions, updateType) => {
         return map(versions, version => {
-          const notNextMinor = this.itemIsNotNextMinor(version.version, type)
+          const notNextMinor = this.itemIsNotNextMinor(version.version, updateType)
           let subtitleClass = ''
           if (version.isSupported) {
-            subtitleClass = 'success--text'
+            subtitleClass = 'text-success'
           }
           if (version.isDeprecated) {
-            subtitleClass = 'warning--text'
+            subtitleClass = 'text-warning'
           }
           if (notNextMinor) {
-            subtitleClass = 'text--disabled'
+            subtitleClass = 'text-disabled'
           }
           return {
             ...version,
-            type,
-            text: `${this.currentK8sVersion.version} → ${version.version}`,
+            updateType,
+            title: `${this.currentK8sVersion.version} → ${version.version}`,
             notNextMinor,
             subtitleClass,
           }
         })
       }
-      const allVersionGroups = map(this.availableK8sUpdates, (versions, type) => selectionItemsForType(versions, type))
-      const allItems = flatMap(allVersionGroups, (versionGroup) => {
-        const type = head(versionGroup).type
-        versionGroup.unshift({ header: upperFirst(type), type })
+      const allVersionGroups = map(this.availableK8sUpdates, selectionItemsForType)
+      const allItems = flatMap(allVersionGroups, versionGroup => {
+        const updateType = head(versionGroup).updateType
+        versionGroup.unshift({
+          title: upperFirst(updateType),
+          type: 'subheader',
+          updateType,
+        })
         return versionGroup
       })
       allItems.sort((a, b) => {
-        if (a.type === b.type) {
-          if (a.header) {
+        if (a.updateType === b.updateType) {
+          if (a.type === 'subheader') {
             return -1
-          } else if (b.header) {
+          } else if (b.type === 'subheader') {
             return 1
           }
           if (semver.diff(a.version, b.version) === 'patch') {
@@ -124,8 +147,8 @@ export default defineComponent({
             return -1
           }
         } else {
-          const sortValForType = function (type) {
-            switch (type) {
+          const sortValForType = updateType => {
+            switch (updateType) {
               case 'patch':
                 return 0
               case 'minor':
@@ -136,26 +159,25 @@ export default defineComponent({
                 return 3
             }
           }
-          if (sortValForType(a.type) === sortValForType(b.type)) {
+          if (sortValForType(a.updateType) === sortValForType(b.updateType)) {
             return 0
           } else {
-            return sortValForType(a.type) < sortValForType(b.type) ? -1 : 1
+            return sortValForType(a.updateType) < sortValForType(b.updateType) ? -1 : 1
           }
         }
       })
-
       return allItems
     },
     selectedVersionIsPatch () {
-      const isPatch = get(this.selectedItem, 'type') === 'patch'
-      this.$emit('confirm-required', !isPatch)
+      const isPatch = get(this.selectedItem, 'updateType') === 'patch'
+      this.$emit('confirmRequired', !isPatch)
       return isPatch
     },
     selectedMinorVersionIsNotNextMinor () {
       const version = get(this, 'selectedItem.version')
-      const type = get(this, 'selectedItem.type')
-      const invalid = !version || this.itemIsNotNextMinor(version, type)
-      this.$emit('selected-version-invalid', invalid)
+      const updateType = get(this, 'selectedItem.updateType')
+      const invalid = !version || this.itemIsNotNextMinor(version, updateType)
+      this.$emit('selectedVersionInvalid', invalid)
       return invalid
     },
     isError () {
@@ -182,19 +204,20 @@ export default defineComponent({
     },
   },
   methods: {
-    itemIsNotNextMinor (version, type) {
+    itemIsNotNextMinor (version, updateType) {
       if (!this.currentK8sVersion.version) {
         return false
       }
       let invalid = false
-      if (version && type === 'minor') {
+      if (version && updateType === 'minor') {
         const currentMinorVersion = semver.minor(this.currentK8sVersion.version)
         const selectedItemMinorVersion = semver.minor(version)
         invalid = selectedItemMinorVersion - currentMinorVersion !== 1
       }
       return invalid
     },
-    versionItemDescription (version) {
+    versionItemDescription (props) {
+      const version = props.value
       const itemDescription = []
       if (version.classification) {
         itemDescription.push(`Classification: ${version.classification}`)
@@ -202,7 +225,9 @@ export default defineComponent({
       if (version.expirationDate) {
         itemDescription.push(`Expiration Date: ${version.expirationDateString}`)
       }
-      return join(itemDescription, ' | ')
+      return itemDescription.length
+        ? join(itemDescription, ' | ')
+        : undefined
     },
     reset () {
       this.selectedItem = undefined
@@ -210,10 +235,8 @@ export default defineComponent({
   },
   watch: {
     selectedItem (value) {
-      const version = get(value, 'version')
-      const type = get(value, 'type')
-      this.$emit('selected-version', version)
-      this.$emit('selected-version-type', type)
+      this.$emit('selectedVersion', value?.version)
+      this.$emit('selectedVersionType', value?.updateType)
     },
   },
 })

@@ -11,28 +11,28 @@ SPDX-License-Identifier: Apache-2.0
         <div v-bind="props">
           <v-btn
             v-if="chip"
-            class="update_btn"
-            :class="buttonInactive"
             size="small"
             rounded
-            @click="showUpdateDialog"
-            :variant="!k8sPatchAvailable && 'outlined'"
+            :variant="!k8sPatchAvailable ? 'outlined' : undefined"
             :ripple="canUpdate"
             color="primary"
+            class="update_btn"
+            :class="{ 'update_btn_inactive': !canUpdate }"
+            @click="showUpdateDialog"
           >
-            <v-icon size="small" v-if="availableK8sUpdates">mdi-menu-up</v-icon>
+            <v-icon v-if="availableK8sUpdates"
+              icon="mdi-menu-up"
+              size="small"
+            />
             {{shootK8sVersion}}
           </v-btn>
           <v-btn
             v-else-if="!!availableK8sUpdates"
-            @click="showUpdateDialog"
-            icon
+            :icon="k8sPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
             :disabled="!canUpdate"
             color="action-button"
-          >
-            <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
-            <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-          </v-btn>
+            @click="showUpdateDialog"
+          />
         </div>
       </template>
       <span>{{tooltipText}}</span>
@@ -140,9 +140,6 @@ export default defineComponent({
         return true
       }
       return false
-    },
-    buttonInactive () {
-      return this.canUpdate ? '' : 'update_btn_inactive'
     },
     canUpdate () {
       return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion && !this.isShootActionsDisabledForPurpose && this.canPatchShoots
