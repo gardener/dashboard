@@ -7,41 +7,45 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="definitions" class="alternate-row-background">
     <v-row v-for="(definition) in definitions" :key="definition.key" class="my-0">
-      <v-list color="transparent">
-        <v-list-item v-if="definition">
-          <v-list-item-action class="action-select">
-            <v-switch
-              v-model="accessRestrictions[definition.key].value"
-              color="primary"
-              inset
-            ></v-switch>
-          </v-list-item-action>
-          <v-list-item-title class="wrap-text">{{definition.input.title}}</v-list-item-title>
-          <v-list-item-subtitle v-if="definition.input.description"
-            class="wrap-text pt-1"
+      <div v-if="definition" class="d-flex ma-3">
+        <div class="action-select">
+          <v-switch
+            v-model="accessRestrictions[definition.key].value"
+            color="primary"
+            inset
+            density="compact"
+          ></v-switch>
+        </div>
+        <div>
+          <span class="wrap-text text-subtitle-2">{{definition.input.title}}</span>
+          <span v-if="definition.input.description"
+            class="wrap-text pt-1 text-body-2"
             v-html="transformHtml(definition.input.description)"
           />
-        </v-list-item>
-        <template v-if="definition">
-          <v-list-item v-for="optionValue in definition.options" :key="optionValue.key">
-            <v-list-item-action class="action-select">
-              <v-checkbox
-                v-model="accessRestrictions[definition.key].options[optionValue.key].value"
-                :disabled="!enabled(definition)"
-                color="primary"
-              ></v-checkbox>
-            </v-list-item-action>
-            <v-list-item-title class="wrap-text" :class="textClass(definition)">
+        </div>
+      </div>
+      <template v-if="definition">
+        <div v-for="optionValue in definition.options" :key="optionValue.key" class="d-flex ma-3">
+          <div class="action-select">
+            <v-checkbox
+              v-model="accessRestrictions[definition.key].options[optionValue.key].value"
+              :disabled="!enabled(definition)"
+              color="primary"
+              density="compact"
+            ></v-checkbox>
+          </div>
+          <div>
+            <span class="wrap-text text-subtitle-2" :class="textClass(definition)">
               {{optionValue.input.title}}
-            </v-list-item-title>
-            <v-list-item-subtitle v-if="optionValue.input.description"
-              class="wrap-text pt-1"
+            </span>
+            <span v-if="optionValue.input.description"
+              class="wrap-text pt-1 text-body-2"
               :class="textClass(definition)"
               v-html="transformHtml(optionValue.input.description)"
             />
-          </v-list-item>
-        </template>
-      </v-list>
+          </div>
+        </div>
+      </template>
     </v-row>
   </div>
   <div v-else class="pt-4">
@@ -111,7 +115,7 @@ export default defineComponent({
     },
     textClass (definition) {
       return this.enabled(definition)
-        ? 'text--secondary'
+        ? 'text-secondary'
         : 'text-disabled'
     },
     applyTo (shootResource) {
@@ -166,8 +170,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 
   .action-select {
-    align-self: flex-start;
-    min-width: 48px;
+    min-width: 68px;
   }
 
 </style>

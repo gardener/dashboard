@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
             <v-select
               :disabled="readonly || primaryReadonly"
               color="primary"
-              item-color="primary"
               v-model="type"
               @blur="v$.type.$touch()"
               @update:modelValue="v$.type.$touch()"
@@ -27,18 +26,20 @@ SPDX-License-Identifier: Apache-2.0
               label="Dns Provider Type"
               :hint="typeHint"
               persistent-hint
+              variant="underlined"
             >
-              <template #item="{ item }">
-                <v-list-item-action>
-                  <g-vendor-icon :icon="item"/>
-                </v-list-item-action>
-                <v-list-item-title>{{item}}</v-list-item-title>
+              <template #item="{ props }">
+                <v-list-item v-bind="props">
+                  <template #prepend>
+                    <g-vendor-icon :icon="props.value"/>
+                  </template>
+                </v-list-item>
               </template>
               <template #selection="{ item }">
-                <g-vendor-icon :icon="item"/>
-                <span class="ml-2">
-                {{item}}
-                </span>
+                <div class="d-flex">
+                  <g-vendor-icon :icon="item.value" class="mr-2"/>
+                  {{ item.title }}
+                </div>
               </template>
             </v-select>
           </div>
@@ -58,6 +59,7 @@ SPDX-License-Identifier: Apache-2.0
               multiple
               small-chips
               deletable-chips
+              variant="underlined"
             >
             </v-combobox>
           </div>
@@ -69,6 +71,7 @@ SPDX-License-Identifier: Apache-2.0
               multiple
               small-chips
               deletable-chips
+              variant="underlined"
             >
             </v-combobox>
           </div>
@@ -80,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
               multiple
               small-chips
               deletable-chips
+              variant="underlined"
             >
             </v-combobox>
           </div>
@@ -91,6 +95,7 @@ SPDX-License-Identifier: Apache-2.0
               multiple
               small-chips
               deletable-chips
+              variant="underlined"
             >
             </v-combobox>
           </div>
@@ -99,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="1">
         <v-btn
           :disabled="readonly || primaryReadonly"
-          small
+          size="x-small"
           variant="outlined"
           icon
           color="grey"
@@ -132,12 +137,6 @@ import {
   useGardenerExtensionStore,
 } from '@/store'
 
-const validations = {
-  type: {
-    required,
-  },
-}
-
 const validationErrors = {
   type: {
     required: 'DNS Provider Type is required',
@@ -154,7 +153,9 @@ export default defineComponent({
     GSelectSecret,
     GVendorIcon,
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   props: {
     dnsProviderId: {
       type: String,
@@ -173,12 +174,16 @@ export default defineComponent({
       'dnsPrimaryProviderId',
       'clusterIsNew',
     ]),
-    ...mapGetters(useSecretStore, [
-      'dnsSecretsByProviderKind',
-    ]),
     ...mapGetters(useGardenerExtensionStore, [
       'sortedDnsProviderList',
     ]),
+    validators () {
+      return {
+        type: {
+          required,
+        },
+      }
+    },
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
@@ -270,6 +275,10 @@ export default defineComponent({
     ...mapActions(useShootStagingStore, [
       'patchDnsProvider',
       'deleteDnsProvider',
+      'getDnsProviderSecrets',
+    ]),
+    ...mapGetters(useSecretStore, [
+      'dnsSecretsByProviderKind',
     ]),
     setData (data) {
       this.patchDnsProvider({

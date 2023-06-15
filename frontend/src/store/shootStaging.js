@@ -85,7 +85,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
   })
 
   const dnsProviders = computed(() => {
-    return map(state.dnsProviderIds, id => state.dnsProviders[id])
+    return state.dnsProviders
   })
 
   const dnsProvidersWithPrimarySupport = computed(() => {

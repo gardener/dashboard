@@ -14,8 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #popperRef>
       <v-chip
         variant="outlined"
-        :small="!xSmall"
-        :x-small="xSmall"
+        :size="size"
         :color="color"
         class="cursor-pointer ml-1"
       >
@@ -65,9 +64,8 @@ export default defineComponent({
     GPopper,
   },
   props: {
-    xSmall: {
-      type: Boolean,
-      default: false,
+    size: {
+      type: [String, Number],
     },
   },
   mixins: [shootItem],
