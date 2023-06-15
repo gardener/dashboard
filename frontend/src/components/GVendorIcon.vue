@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :class="{ 'icon-background' : !noBackground }" small :size="size" class="rounded-lg" tile>
+  <v-avatar :class="{ 'icon-background' : !noBackground }" :size="size" class="rounded-lg" tile>
     <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" :alt="`${value} logo`" class="rounded-0">
     <v-icon v-else-if="isMdiIcon" class="text-primary" style="font-size:1.5em">{{value}}</v-icon>
     <v-icon v-else class="text-primary" style="font-size:1.5em">mdi-blur-radial</v-icon>

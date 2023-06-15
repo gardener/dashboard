@@ -35,9 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <v-btn icon :disabled="untouched" @click="reload">
-                  <v-icon small>mdi-reload</v-icon>
-                </v-btn>
+                <g-action-button size="x-small" icon="mdi-reload" @click="reload" :disabled="untouched" />
               </div>
             </template>
             <span>Discard and Reload</span>
@@ -48,9 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <v-btn icon :disabled="!historySize.undo" @click="undo">
-                  <v-icon small>mdi-undo</v-icon>
-                </v-btn>
+                <g-action-button size="x-small" icon="mdi-undo" @click="undo" :disabled="historySize.undo" />
               </div>
             </template>
             <span>Undo</span>
@@ -60,9 +56,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <v-btn icon :disabled="!historySize.redo" @click="redo">
-                  <v-icon small>mdi-redo</v-icon>
-                </v-btn>
+                <g-action-button size="x-small" icon="mdi-redo" @click="redo" :disabled="historySize.redo" />
               </div>
             </template>
             <span>Redo</span>
@@ -73,9 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <v-btn icon @click="downloadContent">
-                  <v-icon small>mdi-download</v-icon>
-                </v-btn>
+                <g-action-button size="x-small" icon="mdi-download" @click="downloadContent" />
               </div>
             </template>
             <span>Download</span>
@@ -97,9 +89,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <v-btn icon @click="showManagedFields = !showManagedFields" :disabled="!untouched">
-                  <v-icon small>{{showManagedFields ? 'mdi-text-short' : 'mdi-text-subject'}}</v-icon>
-                </v-btn>
+                <g-action-button size="x-small" :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'" @click="showManagedFields = !showManagedFields" :disabled="!untouched" />
               </div>
             </template>
             <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
@@ -136,6 +126,7 @@ import download from 'downloadjs'
 import { useAuthzStore } from '@/store'
 
 import GCopyBtn from '@/components/GCopyBtn'
+import GActionButton from '@/components/GActionButton'
 import GMessage from '@/components/GMessage'
 import GAlertBanner from '@/components/GAlertBanner'
 
@@ -162,6 +153,7 @@ import isEqual from 'lodash/isEqual'
 export default defineComponent({
   components: {
     GCopyBtn,
+    GActionButton,
     GMessage,
     GAlertBanner,
   },

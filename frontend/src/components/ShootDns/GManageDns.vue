@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             :disabled="!clusterIsNew"
             :persistent-hint="!clusterIsNew"
             :hint="domainHint"
+            variant="underlined"
           ></v-text-field>
         </v-col>
         <v-col cols="4" v-show="primaryProviderVisible">
@@ -31,6 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Primary DNS Provider"
             clearable
             :disabled="!clusterIsNew"
+            variant="underlined"
           >
             <template #item="{ item }">
               <v-list-item-action>
@@ -67,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-row key="addProvider" class="list-item pt-2">
         <v-col>
           <v-btn
-            small
+            size="small"
             @click="addDnsProvider"
             variant="outlined"
             fab
@@ -78,6 +80,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             @click="addDnsProvider"
             text
+            variant="text"
             color="primary">
             Add DNS Provider
           </v-btn>
@@ -103,13 +106,6 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-const validations = {
-  primaryProvider: {
-    required: requiredIf('domain'),
-    nil: nilUnless('domain'),
-  },
-}
-
 export default defineComponent({
   setup () {
     return {
@@ -120,7 +116,9 @@ export default defineComponent({
     GDnsProviderRow,
     GVendorIcon,
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   data () {
     return {
       animateOnAppear: false,
@@ -134,6 +132,14 @@ export default defineComponent({
       'dnsProvidersWithPrimarySupport',
       'dnsPrimaryProvider',
     ]),
+    validators () {
+      return {
+        primaryProvider: {
+          required: requiredIf('domain'),
+          nil: nilUnless('domain'),
+        },
+      }
+    },
     validationErrors () {
       return {
         primaryProvider: {

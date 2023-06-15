@@ -12,7 +12,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             :icon="isIconButton"
             :text="isTextButton"
-            :small="smallIcon"
             :color="iconColor"
             :loading="loading"
             :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
@@ -21,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
             class="text-none font-weight-regular pa-0"
           >
             <div>
-              <v-icon :medium="!smallIcon">{{icon}}</v-icon>
+              <v-icon>{{icon}}</v-icon>
             </div>
             <div v-if="isTextButton" class="ml-3 d-flex flex-grow-1">
               {{buttonText}}
@@ -107,10 +106,6 @@ export default {
     iconColor: {
       type: String,
       default: 'action-button',
-    },
-    smallIcon: {
-      type: Boolean,
-      default: false,
     },
     disabled: {
       type: Boolean,
