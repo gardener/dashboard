@@ -630,7 +630,7 @@ export function sortedRoleDisplayNames (roleNames) {
 
 export function mapTableHeader (headers, valueKey) {
   const obj = {}
-  for (const { value: key, [valueKey]: value } of headers) {
+  for (const { key, [valueKey]: value } of headers) {
     obj[key] = value
   }
   return obj

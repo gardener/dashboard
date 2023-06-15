@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="visibleUserAccountTableHeaders"
         :items="userList"
-        :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
+        :items-per-page-options="itemsPerPageOptions"
         v-model:options="userAccountTableOptions"
         must-sort
         :custom-sort="sortAccounts"
@@ -198,7 +198,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, unref, computed, inject } from 'vue'
+import { ref, unref, computed, markRaw, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
@@ -316,6 +316,12 @@ const owner = computed(() => {
   return projectDetails.value.owner
 })
 
+const itemsPerPageOptions = markRaw([
+  { value: 5, title: '5' },
+  { value: 10, title: '10' },
+  { value: 20, title: '20' },
+])
+
 const userList = computed(() => {
   const users = filter(memberList.value, ({ username }) => !isServiceAccountUsername(username))
   return map(users, user => {
@@ -347,21 +353,21 @@ const userAccountTableHeaders = computed(() => {
     {
       title: 'NAME',
       align: 'start',
-      value: 'username',
+      key: 'username',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'ROLES',
       align: 'end',
-      value: 'roles',
+      key: 'roles',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'ACTIONS',
       align: 'end',
-      value: 'actions',
+      key: 'actions',
       sortable: false,
       defaultSelected: true,
     },
@@ -400,42 +406,42 @@ const serviceAccountTableHeaders = computed(() => {
     {
       title: 'NAME',
       align: 'start',
-      value: 'displayName',
+      key: 'displayName',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'CREATED BY',
       align: 'start',
-      value: 'createdBy',
+      key: 'createdBy',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'CREATED AT',
       align: 'start',
-      value: 'creationTimestamp',
+      key: 'creationTimestamp',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'DESCRIPTION',
       align: 'start',
-      value: 'description',
+      key: 'description',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'ROLES',
       align: 'end',
-      value: 'roles',
+      key: 'roles',
       sortable: true,
       defaultSelected: true,
     },
     {
       title: 'ACTIONS',
       align: 'end',
-      value: 'actions',
+      key: 'actions',
       sortable: false,
       defaultSelected: true,
     },

@@ -76,13 +76,12 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
         - options property has been removed (need to set options individually)
       --->
       <v-data-table v-else
         :headers="visibleInfraSecretTableHeaders"
         :items="infrastructureSecretItems"
-        :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
+        :items-per-page-options="itemsPerPageOptions"
         v-model:options="infraSecretTableOptions"
         must-sort
         :search="infraSecretFilter"
@@ -164,13 +163,12 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
         - options property has been removed (need to set options individually)
       --->
       <v-data-table v-else
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretItems"
-        :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
+        :items-per-page-options="itemsPerPageOptions"
         v-model:options="dnsSecretTableOptions"
         must-sort
         :search="dnsSecretFilter"
@@ -258,6 +256,11 @@ export default defineComponent({
       dnsSecretFilter: '',
       createDnsSecretMenu: false,
       visibleSecretDialog: undefined,
+      itemsPerPageOptions: [
+        { value: 5, title: '5' },
+        { value: 10, title: '10' },
+        { value: 20, title: '20' },
+      ],
     }
   },
   computed: {
@@ -281,41 +284,41 @@ export default defineComponent({
         {
           title: 'NAME',
           align: 'start',
-          value: 'name',
+          key: 'name',
           sortable: true,
           defaultSelected: true,
         },
         {
-          title: 'Secret',
+          title: 'SECRET',
           align: 'start',
-          value: 'secret',
+          key: 'secret',
           sortable: true,
           defaultSelected: true,
         },
         {
           title: 'INFRASTRUCTURE',
           align: 'start',
-          value: 'infrastructure',
+          key: 'infrastructure',
           sortable: true,
           defaultSelected: true,
         },
         {
           title: 'DETAILS',
           align: 'start',
-          value: 'details',
+          key: 'details',
           sortable: false,
           defaultSelected: true,
         },
         {
           title: 'USED BY',
           align: 'start',
-          value: 'relatedShootCount',
+          key: 'relatedShootCount',
           defaultSelected: true,
         },
         {
           title: 'ACTIONS',
           align: 'end',
-          value: 'actions',
+          key: 'actions',
           sortable: false,
           defaultSelected: true,
         },
@@ -323,7 +326,7 @@ export default defineComponent({
       return map(headers, header => ({
         ...header,
         class: 'nowrap',
-        selected: get(this.infraSecretSelectedColumns, header.value, header.defaultSelected),
+        selected: get(this.infraSecretSelectedColumns, header.key, header.defaultSelected),
       }))
     },
     visibleInfraSecretTableHeaders () {
@@ -351,41 +354,41 @@ export default defineComponent({
         {
           title: 'NAME',
           align: 'start',
-          value: 'name',
+          key: 'name',
           sortable: true,
           defaultSelected: true,
         },
         {
           title: 'Secret',
           align: 'start',
-          value: 'secret',
+          key: 'secret',
           sortable: true,
           defaultSelected: true,
         },
         {
           title: 'DNS Provider',
           align: 'start',
-          value: 'dnsProvider',
+          key: 'dnsProvider',
           sortable: true,
           defaultSelected: true,
         },
         {
           title: 'DETAILS',
           align: 'start',
-          value: 'details',
+          key: 'details',
           sortable: false,
           defaultSelected: true,
         },
         {
           title: 'USED BY',
           align: 'start',
-          value: 'relatedShootCount',
+          key: 'relatedShootCount',
           defaultSelected: true,
         },
         {
           title: 'ACTIONS',
           align: 'end',
-          value: 'actions',
+          key: 'actions',
           sortable: false,
           defaultSelected: true,
         },
@@ -393,7 +396,7 @@ export default defineComponent({
       return map(headers, header => ({
         ...header,
         class: 'nowrap',
-        selected: get(this.dnsSecretSelectedColumns, header.value, header.defaultSelected),
+        selected: get(this.dnsSecretSelectedColumns, header.key, header.defaultSelected),
       }))
     },
     visibleDnsSecretTableHeaders () {
@@ -450,14 +453,14 @@ export default defineComponent({
       }
     },
     setSelectedInfraHeader (header) {
-      this.infraSecretSelectedColumns[header.value] = !header.selected
+      this.infraSecretSelectedColumns[header.key] = !header.selected
     },
     resetInfraTableSettings () {
       this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
       this.infraSecretTableOptions = this.defaultInfraSecretTableOptions
     },
     setSelectedDnsHeader (header) {
-      this.dnsSecretSelectedColumns[header.value] = !header.selected
+      this.dnsSecretSelectedColumns[header.key] = !header.selected
     },
     resetDnsTableSettings () {
       this.dnsSecretSelectedColumns = mapTableHeader(this.dnsSecretTableHeaders, 'defaultSelected')
