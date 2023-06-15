@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-list-item-title>
               <v-list-item v-for="infrastructure in sortedInfrastructureKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
                 <template #prepend>
-                  <g-vendor-icon :value="infrastructure" :size="24"></g-vendor-icon>
+                  <g-vendor-icon :icon="infrastructure" :size="24"/>
                 </template>
                 <v-list-item-title>
                   {{ infrastructure }}
@@ -140,7 +140,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-list-item-title>
               <v-list-item v-for="dnsProvider in dnsProviderTypes" :key="dnsProvider" @click="openSecretAddDialog(dnsProvider)">
                 <template #prepend>
-                  <g-vendor-icon :value="dnsProvider" :size="24"></g-vendor-icon>
+                  <g-vendor-icon :icon="dnsProvider" :size="24"/>
                 </template>
                 <v-list-item-title>
                     {{ dnsProvider }}
