@@ -7,16 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr :class="{ 'stale': isStaleShoot }">
     <td v-for="cell in cells"
-      :key="cell.header.value"
+      :key="cell.header.key"
       :class="cell.header.class"
       class="position-relative"
     >
-      <template v-if="cell.header.value === 'project'">
+      <template v-if="cell.header.key === 'project'">
         <router-link class="text-anchor" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
           {{ shootProjectName }}
         </router-link>
       </template>
-      <template v-if="cell.header.value === 'name'">
+      <template v-if="cell.header.key === 'name'">
         <v-row class="pa-0 ma-0 fill-height flex-nowrap align-center">
           <v-col class="grow pa-0 ma-0">
             <g-auto-hide right>
@@ -33,14 +33,14 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </v-row>
       </template>
-      <template v-if="cell.header.value === 'infrastructure'">
+      <template v-if="cell.header.key === 'infrastructure'">
         <g-vendor
           :cloud-provider-kind="shootCloudProviderKind"
           :region="shootRegion"
           :zones="shootZones"
         />
       </template>
-      <template v-if="cell.header.value === 'seed'">
+      <template v-if="cell.header.key === 'seed'">
         <g-auto-hide right>
           <template v-slot:activator>
             <g-shoot-seed-name :shoot-item="shootItem" />
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-copy-btn :clipboard-text="shootSeedName"/>
         </g-auto-hide>
       </template>
-      <template v-if="cell.header.value === 'technicalId'">
+      <template v-if="cell.header.key === 'technicalId'">
         <g-auto-hide right>
           <template v-slot:activator>
             <span>{{shootTechnicalId}}</span>
@@ -56,18 +56,18 @@ SPDX-License-Identifier: Apache-2.0
           <g-copy-btn :clipboard-text="shootTechnicalId"/>
         </g-auto-hide>
       </template>
-      <template v-if="cell.header.value === 'createdBy'">
+      <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy"/>
       </template>
-      <template v-if="cell.header.value === 'createdAt'">
+      <template v-if="cell.header.key === 'createdAt'">
         <g-time-string :date-time="shootCreationTimestamp" mode="past"/>
       </template>
-      <template v-if="cell.header.value === 'purpose'">
+      <template v-if="cell.header.key === 'purpose'">
         <div class="d-flex justify-center">
           <g-purpose-tag :purpose="shootPurpose"/>
         </div>
       </template>
-      <template v-if="cell.header.value === 'lastOperation'">
+      <template v-if="cell.header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
           <g-shoot-status
             :popper-key="`${shootNamespace}/${shootName}`"
@@ -75,22 +75,22 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
       </template>
-      <template v-if="cell.header.value === 'k8sVersion'">
+      <template v-if="cell.header.key === 'k8sVersion'">
         <div class="d-flex justify-center">
           <g-shoot-version :shoot-item="shootItem" chip/>
         </div>
       </template>
-      <template v-if="cell.header.value === 'readiness'">
+      <template v-if="cell.header.key === 'readiness'">
         <div class="d-flex">
           <g-status-tags :shoot-item="shootItem"/>
         </div>
       </template>
-      <template v-if="cell.header.value === 'controlPlaneHighAvailability'">
+      <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
           <g-control-plane-high-availability-tag :shoot-item="shootItem"/>
         </div>
       </template>
-      <template v-if="cell.header.value === 'issueSince'">
+      <template v-if="cell.header.key === 'issueSince'">
         <v-tooltip location="top">
           <template v-slot:activator="{ props }">
             <div v-bind="props">
@@ -100,16 +100,16 @@ SPDX-License-Identifier: Apache-2.0
           {{ shootIssueSince }}
         </v-tooltip>
       </template>
-      <template v-if="cell.header.value === 'accessRestrictions'">
+      <template v-if="cell.header.key === 'accessRestrictions'">
         access-restriction-chips
         <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"/>
       </template>
-      <template v-if="cell.header.value === 'ticket'">
+      <template v-if="cell.header.key === 'ticket'">
         <g-external-link v-if="shootLastUpdatedTicketUrl" :url="shootLastUpdatedTicketUrl">
           <g-time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"/>
         </g-external-link>
       </template>
-      <template v-if="cell.header.value === 'ticketLabels'">
+      <template v-if="cell.header.key === 'ticketLabels'">
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
@@ -134,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0
           {{cell.header.defaultValue}}
         </span>
       </template>
-      <template v-if="cell.header.value === 'actions'">
+      <template v-if="cell.header.key === 'actions'">
         <v-row class="fill-height" align="center" justify="end">
           <v-tooltip location="top" v-if="canGetSecrets">
             <template v-slot:activator="{ props }">

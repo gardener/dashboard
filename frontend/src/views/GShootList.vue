@@ -98,11 +98,12 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="sortByInternal"
         v-model:sort-desc="sortDescInternal"
         :loading="loading || !connected"
-        :footer-props="{ 'items-per-page-options': [5,10,20] }"
+        :items-per-page-options="itemsPerPageOptions"
         :search="shootSearch"
         :custom-filter="searchItems"
         must-sort
         :custom-sort="sortItems"
+        class="g-table"
       >
         <template v-slot:progress>
           <g-shoot-list-progress/>
@@ -182,6 +183,11 @@ export default defineComponent({
       options: undefined,
       cachedItems: null,
       selectedColumns: undefined,
+      itemsPerPageOptions: [
+        { value: 5, title: '5' },
+        { value: 10, title: '10' },
+        { value: 20, title: '20' },
+      ],
     }
   },
   watch: {
@@ -400,8 +406,8 @@ export default defineComponent({
       const isSortable = value => value && !this.focusModeInternal
       const headers = [
         {
-          text: 'PROJECT',
-          value: 'project',
+          title: 'PROJECT',
+          key: 'project',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
@@ -409,8 +415,8 @@ export default defineComponent({
           stalePointerEvents: true,
         },
         {
-          text: 'NAME',
-          value: 'name',
+          title: 'NAME',
+          key: 'name',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
@@ -418,56 +424,56 @@ export default defineComponent({
           stalePointerEvents: true,
         },
         {
-          text: 'INFRASTRUCTURE',
-          value: 'infrastructure',
+          title: 'INFRASTRUCTURE',
+          key: 'infrastructure',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: false,
         },
         {
-          text: 'SEED',
-          value: 'seed',
+          title: 'SEED',
+          key: 'seed',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false,
         },
         {
-          text: 'TECHNICAL ID',
-          value: 'technicalId',
+          title: 'TECHNICAL ID',
+          key: 'technicalId',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.isAdmin,
         },
         {
-          text: 'CREATED BY',
-          value: 'createdBy',
+          title: 'CREATED BY',
+          key: 'createdBy',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false,
         },
         {
-          text: 'CREATED AT',
-          value: 'createdAt',
+          title: 'CREATED AT',
+          key: 'createdAt',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: false,
         },
         {
-          text: 'PURPOSE',
-          value: 'purpose',
+          title: 'PURPOSE',
+          key: 'purpose',
           sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false,
         },
         {
-          text: 'STATUS',
-          value: 'lastOperation',
+          title: 'STATUS',
+          key: 'lastOperation',
           sortable: isSortable(true),
           align: 'center',
           cellClass: 'pl-4',
@@ -476,16 +482,16 @@ export default defineComponent({
           stalePointerEvents: true,
         },
         {
-          text: 'VERSION',
-          value: 'k8sVersion',
+          title: 'VERSION',
+          key: 'k8sVersion',
           sortable: isSortable(true),
           align: 'center',
           defaultSelected: true,
           hidden: false,
         },
         {
-          text: 'READINESS',
-          value: 'readiness',
+          title: 'READINESS',
+          MediaKeySystemAccess: 'readiness',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
@@ -493,48 +499,48 @@ export default defineComponent({
           stalePointerEvents: true,
         },
         {
-          text: 'ISSUE SINCE',
-          value: 'issueSince',
+          title: 'ISSUE SINCE',
+          key: 'issueSince',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
           hidden: this.projectScope || !this.isAdmin,
         },
         {
-          text: 'HIGH AVAILABILITY',
-          value: 'controlPlaneHighAvailability',
+          title: 'HIGH AVAILABILITY',
+          key: 'controlPlaneHighAvailability',
           sortable: true,
           align: 'start',
           defaultSelected: false,
           hidden: false,
         },
         {
-          text: 'ACCESS RESTRICTIONS',
-          value: 'accessRestrictions',
+          title: 'ACCESS RESTRICTIONS',
+          key: 'accessRestrictions',
           sortable: false,
           align: 'start',
           defaultSelected: false,
           hidden: !this.accessRestrictionConfig || !this.isAdmin,
         },
         {
-          text: 'TICKET',
-          value: 'ticket',
+          title: 'TICKET',
+          key: 'ticket',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.isAdmin,
         },
         {
-          text: 'TICKET LABELS',
-          value: 'ticketLabels',
+          title: 'TICKET LABELS',
+          key: 'ticketLabels',
           sortable: false,
           align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin,
         },
         {
-          text: 'ACTIONS',
-          value: 'actions',
+          title: 'ACTIONS',
+          key: 'actions',
           sortable: false,
           align: 'end',
           defaultSelected: true,
@@ -565,9 +571,9 @@ export default defineComponent({
       }, index) => {
         return {
           customField: true,
-          text: upperCase(name),
+          title: upperCase(name),
           class: 'nowrap',
-          value: key,
+          key,
           sortable: isSortable(sortable),
           align,
           selected: get(this.selectedColumns, key, defaultSelected),
@@ -581,8 +587,10 @@ export default defineComponent({
       })
     },
     allHeaders () {
-      const allHeaders = [...this.standardHeaders, ...this.customHeaders]
-      return sortBy(allHeaders, ['weight', 'text'])
+      return sortBy([
+        ...this.standardHeaders,
+        ...this.customHeaders,
+      ], ['weight', 'text'])
     },
     selectableHeaders () {
       return filter(this.allHeaders, ['hidden', false])
