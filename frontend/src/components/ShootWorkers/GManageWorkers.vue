@@ -54,13 +54,13 @@ SPDX-License-Identifier: Apache-2.0
           icon
           class="ml-1"
           color="primary">
-          <v-icon class="primary--text">mdi-plus</v-icon>
+          <v-icon class="text-primary">mdi-plus</v-icon>
         </v-btn>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           text
-          class="primary--text">
+          class="text-primary">
           Add Worker Group
         </v-btn>
       </v-col>

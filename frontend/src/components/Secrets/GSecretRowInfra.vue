@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-secret-details-item-content infra :secret="item.secret"></g-secret-details-item-content>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
-      <div class="d-flex" :class="{'font-weight-light text--disabled' : !item.relatedShootCount}">
+      <div class="d-flex" :class="{'font-weight-light text-disabled' : !item.relatedShootCount}">
         {{item.relatedShootCountLabel}}
       </div>
     </td>

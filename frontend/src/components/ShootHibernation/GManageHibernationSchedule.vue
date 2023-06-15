@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
             fab
             icon
             color="primary">
-            <v-icon class="primary--text">mdi-plus</v-icon>
+            <v-icon class="text-primary">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"

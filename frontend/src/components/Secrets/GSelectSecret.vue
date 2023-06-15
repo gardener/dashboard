@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template #append-item>
         <v-divider class="mb-2"></v-divider>
-        <v-btn text @click="openSecretDialog" class="mx-2 primary--text">
+        <v-btn text @click="openSecretDialog" class="mx-2 text-primary">
           <v-icon class="mr-2">mdi-plus</v-icon>
           Add new Secret
         </v-btn>

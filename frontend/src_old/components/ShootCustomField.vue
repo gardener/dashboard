@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="icon">
               <v-icon class="pr-1">{{icon}}</v-icon>
             </template>
-            <span v-else class="font-weight-light text--disabled">Not defined</span>
+            <span v-else class="font-weight-light text-disabled">Not defined</span>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="tooltip">
               {{tooltip}}
             </template>
-            <span v-else class="font-weight-light text--disabled">Not defined</span>
+            <span v-else class="font-weight-light text-disabled">Not defined</span>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="defaultValue">
               {{defaultValue}}
             </template>
-            <span v-else class="font-weight-light text--disabled">Not defined</span>
+            <span v-else class="font-weight-light text-disabled">Not defined</span>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
             <template v-if="weight">
               {{weight}}
             </template>
-            <span v-else class="font-weight-light text--disabled">Not defined</span>
+            <span v-else class="font-weight-light text-disabled">Not defined</span>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>

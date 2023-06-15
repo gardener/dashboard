@@ -112,7 +112,7 @@ export default defineComponent({
     textClass (definition) {
       return this.enabled(definition)
         ? 'text--secondary'
-        : 'text--disabled'
+        : 'text-disabled'
     },
     applyTo (shootResource) {
       const definitions = this.definitions || []

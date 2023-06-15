@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="text-body-2 text-no-wrap">
         <span v-for="({ value, label }, index) in secretDetails" :key="label">
           <span v-if="value">{{ value }}</span>
-          <span v-else class="font-weight-light text--disabled">unknown</span>
+          <span v-else class="font-weight-light text-disabled">unknown</span>
           <span v-if="index !== secretDetails.length - 1"> / </span>
         </span>
       </div>
