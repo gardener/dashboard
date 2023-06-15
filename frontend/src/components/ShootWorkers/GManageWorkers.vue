@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -69,6 +69,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 // import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapActions } from 'pinia'
 import { isZonedCluster } from '@/utils'
@@ -91,7 +93,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 const NO_LIMIT = -1
 
-export default {
+export default defineComponent({
   name: 'manage-workers',
   components: {
     // WorkerInputGeneric,
@@ -339,5 +341,5 @@ export default {
   updated () {
     this.animateOnAppear = true
   },
-}
+})
 </script>

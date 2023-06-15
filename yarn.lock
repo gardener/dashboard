@@ -736,6 +736,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/core@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@floating-ui/core@npm:1.3.0"
+  checksum: 51d8acc9fd720cb217cae7074f5f923bf2b6e0bb4f228e03077254d0f6e49f9753b34a14b9abb1f11671c3b61284c487ab27c4ba1843bcd4397e7d72dc7d4a59
+  languageName: node
+  linkType: hard
+
+"@floating-ui/dom@npm:^1.2.9":
+  version: 1.3.0
+  resolution: "@floating-ui/dom@npm:1.3.0"
+  dependencies:
+    "@floating-ui/core": ^1.3.0
+  checksum: 39f92b3ce6de5d60a1cea951cbee22d0a9670fe4499b0128f0868a697d9288989994394d90cb99c3d1485aa432621e064d6b3c52914042a7d8d3c05897fb185d
+  languageName: node
+  linkType: hard
+
+"@floating-ui/vue@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@floating-ui/vue@npm:1.0.1"
+  dependencies:
+    "@floating-ui/dom": ^1.2.9
+    vue-demi: ">=0.13.0"
+  checksum: 788667333aac314ee78039e2ee2c65e39ed897639f8c21fbe47af9c2343beecd90134d969a57ce121692dfc53bae9ec506a0e184e6567cdb713e9ee012e2c677
+  languageName: node
+  linkType: hard
+
 "@gar/promisify@npm:^1.1.3":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -822,6 +848,7 @@ __metadata:
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
     "@braintree/sanitize-url": ^6.0.2
+    "@floating-ui/vue": ^1.0.1
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
     "@vitejs/plugin-vue": ^3.0.3
@@ -831,6 +858,7 @@ __metadata:
     "@vueuse/core": ^10.0.2
     "@vueuse/integrations": ^10.0.2
     "@vueuse/router": ^10.0.2
+    ansi-html: ^0.0.9
     codemirror: ^5.65.13
     dayjs: ^1.11.7
     downloadjs: ^1.4.7
@@ -842,6 +870,7 @@ __metadata:
     eslint-plugin-vitest: ^0.0.57
     eslint-plugin-vue: ^9.3.0
     eventemitter3: ^5.0.0
+    get-contrast: ^3.0.0
     highlight.js: ^11.8.0
     js-cookie: ^3.0.1
     js-yaml: ^4.1.0
@@ -2558,6 +2587,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ansi-html@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "ansi-html@npm:0.0.9"
+  bin:
+    ansi-html: bin/ansi-html
+  checksum: a03754d6f66bae33938ed8bb3dd98174b7f4895ebe45226185036ed4a1388a7aaf2f2b9581608f0626432ba7add92cfc590aa6475a78bbb90d9d1e1d1af8cbe6
+  languageName: node
+  linkType: hard
+
 "ansi-regex@npm:^5.0.1":
   version: 5.0.1
   resolution: "ansi-regex@npm:5.0.1"
@@ -3532,6 +3570,29 @@ __metadata:
   version: 0.0.2
   resolution: "crypt@npm:0.0.2"
   checksum: baf4c7bbe05df656ec230018af8cf7dbe8c14b36b98726939cef008d473f6fe7a4fad906cfea4062c93af516f1550a3f43ceb4d6615329612c6511378ed9fe34
+  languageName: node
+  linkType: hard
+
+"css-color-list@npm:0.0.1":
+  version: 0.0.1
+  resolution: "css-color-list@npm:0.0.1"
+  dependencies:
+    css-color-names: 0.0.1
+  checksum: c7b01b1a1da9c8f458fb9dc7b10f36e17396cc3bf5987440d5ea2d5c7e6ffe6458ba1c55f570727f11a011e57058bc5d6cbf52c44e3cfcdcd221a3a2ae65ccef
+  languageName: node
+  linkType: hard
+
+"css-color-names@npm:0.0.1":
+  version: 0.0.1
+  resolution: "css-color-names@npm:0.0.1"
+  checksum: 7feac4c794fed881abaf84b761c44510581425387cb77aef5f090e70bffb7341b63bb21a6530240b83a6a147e53f7338f24f5156b359d63a1875d53fdab25a40
+  languageName: node
+  linkType: hard
+
+"css-color-names@npm:1.0.1":
+  version: 1.0.1
+  resolution: "css-color-names@npm:1.0.1"
+  checksum: 7a3cdeb9e3311dc508c2f59872ba40b4c0af70304e942d638956fc4103afc3d62784c17aa8703ab42180653e0079734919a6c436143f12c8baf63035bb8d187d
   languageName: node
   linkType: hard
 
@@ -4729,6 +4790,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esm@npm:^3.0.84":
+  version: 3.2.25
+  resolution: "esm@npm:3.2.25"
+  checksum: 978aabe2de83541c105605a6d60a26ed8e627ef6bb0a7605fe15a95bbdea6b8348bd045255cb22219c054dd09a81a94823df00843d9e97f42419c92015ce3a64
+  languageName: node
+  linkType: hard
+
 "espree@npm:^9.3.1, espree@npm:^9.5.1":
   version: 9.5.1
   resolution: "espree@npm:9.5.1"
@@ -5382,6 +5450,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-contrast@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "get-contrast@npm:3.0.0"
+  dependencies:
+    css-color-names: 1.0.1
+    is-blank: 2.1.0
+    is-named-css-color: 1.0.0
+    rgb: ^0.1.0
+    wcag-contrast: 3.0.0
+  bin:
+    contrast: cli.js
+  checksum: 47400e385b0185778b8a62858e1afe43d7805b1f36655d5f1feebfd1814aed0830f807dc2f640b5a8aaea9714dd06765a174a28fb45fa8a0ee05f64d084fe7f0
+  languageName: node
+  linkType: hard
+
 "get-func-name@npm:^2.0.0":
   version: 2.0.0
   resolution: "get-func-name@npm:2.0.0"
@@ -5906,6 +5989,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-blank@npm:2.1.0":
+  version: 2.1.0
+  resolution: "is-blank@npm:2.1.0"
+  dependencies:
+    is-empty: latest
+    is-whitespace: latest
+  checksum: 0b730ec124478b1d14f2124973448bf2a41f79e88ea81148b3a539d8adffcb169e6cf4a783d8bfaacf2d55a21bd09179c9fb56dde0e3e0b04f6bf77539d933fb
+  languageName: node
+  linkType: hard
+
 "is-boolean-object@npm:^1.1.0":
   version: 1.1.2
   resolution: "is-boolean-object@npm:1.1.2"
@@ -5957,6 +6050,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-empty@npm:latest":
+  version: 1.2.0
+  resolution: "is-empty@npm:1.2.0"
+  checksum: dc80e0a8ad5439d98d128d126fe69e5dcd6b474e29753107bcfe82fc7d628c9da618d48bb24878a7891f231696405ad0a854dfe3cfc955c23d24e80d9e252e62
+  languageName: node
+  linkType: hard
+
 "is-extglob@npm:^2.1.1":
   version: 2.1.1
   resolution: "is-extglob@npm:2.1.1"
@@ -5998,6 +6098,15 @@ __metadata:
   version: 1.0.1
   resolution: "is-lambda@npm:1.0.1"
   checksum: 93a32f01940220532e5948538699ad610d5924ac86093fcee83022252b363eb0cc99ba53ab084a04e4fb62bf7b5731f55496257a4c38adf87af9c4d352c71c35
+  languageName: node
+  linkType: hard
+
+"is-named-css-color@npm:1.0.0":
+  version: 1.0.0
+  resolution: "is-named-css-color@npm:1.0.0"
+  dependencies:
+    css-color-list: 0.0.1
+  checksum: a2fe1ba746a07e68c963e8865a85bac70fc6ec7854eebe845e4c1e8e8f62a9a98bd25f4ad1d83d79a8a79c92a62de7465756c28c02a168334753f70967c7cc91
   languageName: node
   linkType: hard
 
@@ -6115,6 +6224,13 @@ __metadata:
   dependencies:
     call-bind: ^1.0.2
   checksum: 95bd9a57cdcb58c63b1c401c60a474b0f45b94719c30f548c891860f051bc2231575c290a6b420c6bc6e7ed99459d424c652bd5bf9a1d5259505dc35b4bf83de
+  languageName: node
+  linkType: hard
+
+"is-whitespace@npm:latest":
+  version: 0.3.0
+  resolution: "is-whitespace@npm:0.3.0"
+  checksum: dac8fc9a9b797afeef703f625269601715552883790d1385d6bb27dd04ffdafd5fddca8f2d85ee96913850211595da2ba483dac1f166829c4078fb58ce815140
   languageName: node
   linkType: hard
 
@@ -8309,6 +8425,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"relative-luminance@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "relative-luminance@npm:2.0.1"
+  dependencies:
+    esm: ^3.0.84
+  checksum: a69398ffe30cdb61e12ea18662674654b8895a607b5f8d362a99b42d888777a5508f27f0355da143dafe46ae5a1e419a549451ba3c52e21ccc3f0c9f71e227b9
+  languageName: node
+  linkType: hard
+
 "require-directory@npm:^2.1.1":
   version: 2.1.1
   resolution: "require-directory@npm:2.1.1"
@@ -8428,6 +8553,15 @@ __metadata:
   version: 1.3.0
   resolution: "rfdc@npm:1.3.0"
   checksum: fb2ba8512e43519983b4c61bd3fa77c0f410eff6bae68b08614437bc3f35f91362215f7b4a73cbda6f67330b5746ce07db5dd9850ad3edc91271ad6deea0df32
+  languageName: node
+  linkType: hard
+
+"rgb@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "rgb@npm:0.1.0"
+  bin:
+    rgb: ./bin/rgb
+  checksum: d33da6b61be7f200043dec325d2cf359cbd5d8d85ca4c3b3db47b884fbcfbba69dc2f698e97593448a51151b322d8aad3d15254eaed2fac4f6c9c095c3936289
   languageName: node
   linkType: hard
 
@@ -9868,6 +10002,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vue-demi@npm:>=0.13.0":
+  version: 0.14.5
+  resolution: "vue-demi@npm:0.14.5"
+  peerDependencies:
+    "@vue/composition-api": ^1.0.0-rc.1
+    vue: ^3.0.0-0 || ^2.6.0
+  peerDependenciesMeta:
+    "@vue/composition-api":
+      optional: true
+  bin:
+    vue-demi-fix: bin/vue-demi-fix.js
+    vue-demi-switch: bin/vue-demi-switch.js
+  checksum: ff44b9372b8224590514252a2f73363cced6062205f9628a6b130dccb80e2023d55cd9d1da94aeb68d5539b7ea9eedcecf88ab281a3a9ff48b8db4c5366b9643
+  languageName: node
+  linkType: hard
+
 "vue-demi@npm:>=0.14.0":
   version: 0.14.0
   resolution: "vue-demi@npm:0.14.0"
@@ -9984,6 +10134,15 @@ __metadata:
   dependencies:
     makeerror: 1.0.12
   checksum: ad7a257ea1e662e57ef2e018f97b3c02a7240ad5093c392186ce0bcf1f1a60bbadd520d073b9beb921ed99f64f065efb63dfc8eec689a80e569f93c1c5d5e16c
+  languageName: node
+  linkType: hard
+
+"wcag-contrast@npm:3.0.0":
+  version: 3.0.0
+  resolution: "wcag-contrast@npm:3.0.0"
+  dependencies:
+    relative-luminance: ^2.0.0
+  checksum: 16cdc895fc7e6a07f4f63fb7c0d9616a2d02004b769c2e246795793cb8edad8ae279a1d9f28418e93bb43815d8c7ba3967b35bd92d249f3ee1f7c921c0c795b1
   languageName: node
   linkType: hard
 

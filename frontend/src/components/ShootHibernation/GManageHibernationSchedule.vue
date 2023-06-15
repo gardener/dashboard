@@ -1,10 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<!-- TODO: remove -->>
+<!-- TODO: remove -->
 <!-- eslint-disable vue/no-unused-vars -->
 <template>
   <div>
@@ -84,6 +84,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
@@ -97,8 +98,7 @@ import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents }
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { useAppStore, useConfigStore } from '@/store'
 
-export default {
-  name: 'hibernation-schedule',
+export default defineComponent({
   components: {
     // HibernationScheduleEvent,
   },
@@ -285,5 +285,5 @@ export default {
   updated () {
     this.animateOnAppear = true
   },
-}
+})
 </script>

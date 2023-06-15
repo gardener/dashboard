@@ -1,0 +1,77 @@
+<!--
+SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<template>
+  <v-tooltip location="top">
+    <template v-slot:activator="{ props }">
+      <v-chip v-if="!!shortPurpose"
+        :variant="!isCritical ? 'outlined' : undefined"
+        v-bind="props"
+        :text-color="textColor"
+        color="primary"
+        small
+        class="purpose-tag"
+      >
+        {{ shortPurpose }}
+      </v-chip>
+    </template>
+    <span>{{ purpose }}</span>
+  </v-tooltip>
+</template>
+
+<script>
+import { defineComponent } from 'vue'
+
+import toUpper from 'lodash/toUpper'
+
+export default defineComponent({
+  props: {
+    purpose: {
+      type: String,
+    },
+  },
+  computed: {
+    shortPurpose () {
+      switch (this.purpose) {
+        case 'evaluation':
+          return 'EVAL'
+        case 'development':
+          return 'DEV'
+        case 'production':
+          return 'PROD'
+        case 'infrastructure':
+          return 'INFRA'
+        case 'testing':
+          return 'TEST'
+        default:
+          return toUpper(this.purpose)
+      }
+    },
+    isCritical () {
+      return this.purpose === 'production' || this.purpose === 'infrastructure'
+    },
+    textColor () {
+      if (!this.isCritical) {
+        return 'primary'
+      } else {
+        return 'white'
+      }
+    },
+  },
+})
+</script>
+
+<style lang="scss" scoped>
+
+  .purpose-tag {
+    margin: 1px;
+  }
+
+  .purpose-tag :deep(.v-chip__content) {
+    margin: -4px;
+  }
+
+</style>
