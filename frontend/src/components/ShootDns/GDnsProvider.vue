@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         variant="outlined"
         class="cursor-pointer my-0 ml-0">
-          <g-vendor-icon :value="type" :size="20"></g-vendor-icon>
+          <g-vendor-icon :icon="type" :size="20"/>
           <span class="px-1">{{secretName}}</span>
           <v-icon v-if="primary" small>mdi-star</v-icon>
       </v-chip>

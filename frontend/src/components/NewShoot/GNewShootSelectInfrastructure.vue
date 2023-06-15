@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <g-vendor-icon :value="infrastructureKind" :size="60" no-background></g-vendor-icon>
+          <g-vendor-icon :icon="infrastructureKind" :size="60" no-background/>
         </div>
         <div class="mt-2" >
           <span class="text-subtitle-1">{{infrastructureKind}}</span>

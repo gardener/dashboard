@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           >
             <template #item="{ item }">
               <v-list-item-action>
-                <g-vendor-icon :value="item.type"></g-vendor-icon>
+                <g-vendor-icon :icon="item.type"/>
               </v-list-item-action>
               <v-list-item-title>{{item.secretName}}</v-list-item-title>
               <v-list-item-subtitle>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-list-item-subtitle>
             </template>
             <template #selection="{ item }">
-              <g-vendor-icon :value="item.type"></g-vendor-icon>
+              <g-vendor-icon :icon="item.type"/>
               <span class="ml-2">
                 {{item.secretName}}
               </span>
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             fab
             icon
             color="primary">
-            <v-icon class="primary--text">mdi-plus</v-icon>
+            <v-icon class="text-primary">mdi-plus</v-icon>
           </v-btn>
           <v-btn
             @click="addDnsProvider"

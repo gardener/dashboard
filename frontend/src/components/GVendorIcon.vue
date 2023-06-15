@@ -5,20 +5,34 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-avatar :class="{ 'icon-background' : !noBackground }" small :size="size" class="rounded-lg" tile>
-    <img v-if="iconSrc" :src="iconSrc" :style="iconStyle" :alt="`${value} logo`" class="rounded-0">
-    <v-icon v-else-if="isMdiIcon" class="text-primary" style="font-size:1.5em">{{value}}</v-icon>
-    <v-icon v-else class="text-primary" style="font-size:1.5em">mdi-blur-radial</v-icon>
+  <v-avatar
+    :size="size"
+    rounded="lg"
+    tile
+    :class="{ 'icon-background': !noBackground }"
+  >
+    <img v-if="iconSrc"
+      :src="iconSrc"
+      :style="iconStyle"
+      :alt="`${icon} logo`"
+      class="rounded-0"
+    >
+    <v-icon v-else
+      :icon="mdiIcon"
+      class="text-primary"
+      style="font-size:1.5em"
+    />
   </v-avatar>
 </template>
 
 <script setup>
-import { computed, toRefs } from 'vue'
+import { computed, toRef } from 'vue'
 import startsWith from 'lodash/startsWith'
 
 const props = defineProps({
-  value: {
+  icon: {
     type: String,
+    required: true,
   },
   size: {
     type: Number,
@@ -30,10 +44,10 @@ const props = defineProps({
   },
 })
 
-const { value, size, noBackground } = toRefs(props)
+const noBackground = toRef(props, 'noBackground')
 
 const iconSrc = computed(() => {
-  switch (value.value) {
+  switch (props.icon) {
     // infrastructures
     case 'azure':
       return new URL('/src/assets/azure.svg', import.meta.url)
@@ -90,12 +104,14 @@ const iconSrc = computed(() => {
   return undefined
 })
 
-const isMdiIcon = computed(() => {
-  return startsWith(value.value, 'mdi-')
+const mdiIcon = computed(() => {
+  return startsWith(props.icon, 'mdi-')
+    ? props.icon
+    : 'mdi-blur-radial'
 })
 
 const iconStyle = computed(() => {
-  const maxIconSize = size.value - 4
+  const maxIconSize = props.size - 4
   return {
     maxHeight: `${maxIconSize}px`,
     maxWidth: `${maxIconSize}px`,

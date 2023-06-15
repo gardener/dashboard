@@ -30,12 +30,12 @@ SPDX-License-Identifier: Apache-2.0
             >
               <template #item="{ item }">
                 <v-list-item-action>
-                  <g-vendor-icon :value="item"></g-vendor-icon>
+                  <g-vendor-icon :icon="item"/>
                 </v-list-item-action>
                 <v-list-item-title>{{item}}</v-list-item-title>
               </template>
               <template #selection="{ item }">
-                <g-vendor-icon :value="item"></g-vendor-icon>
+                <g-vendor-icon :icon="item"/>
                 <span class="ml-2">
                 {{item}}
                 </span>
