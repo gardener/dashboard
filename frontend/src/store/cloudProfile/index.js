@@ -640,6 +640,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     labelsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
+    kubernetesVersions,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     availableKubernetesUpdatesForShoot,
