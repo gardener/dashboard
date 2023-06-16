@@ -136,22 +136,15 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'actions'">
         <v-row class="fill-height" align="center" justify="end">
-          <v-tooltip location="top" v-if="canGetSecrets">
-            <template v-slot:activator="{ props }">
-              <div v-bind="props">
-                <v-btn
-                  size="small"
-                  icon="mdi-key"
-                  class="text-action-button"
-                  :disabled="isClusterAccessDialogDisabled"
-                  @click="showDialog('access')"
-                >
-                  <v-icon size="22">mdi-key</v-icon>
-                </v-btn>
-              </div>
+          <g-action-button
+            icon="mdi-key"
+            :disabled="isClusterAccessDialogDisabled"
+            @click="showDialog('access')"
+          >
+            <template #tooltip>
+              <span>{{ showClusterAccessActionTitle }}</span>
             </template>
-            <span>{{showClusterAccessActionTitle}}</span>
-          </v-tooltip>
+          </g-action-button>
           <g-shoot-list-row-actions :shoot-item="shootItem"/>
         </v-row>
       </template>
@@ -171,6 +164,7 @@ import { mapState, mapActions } from 'pinia'
 
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GVendor from '@/components/GVendor.vue'
 import GShootStatus from '@/components/GShootStatus.vue'
@@ -203,6 +197,7 @@ import { useAuthzStore, useTicketStore } from '@/store'
 export default defineComponent({
   components: {
     GAccessRestrictionChips,
+    GActionButton,
     GStatusTags,
     GPurposeTag,
     GShootStatus,
@@ -312,16 +307,16 @@ export default defineComponent({
     },
   },
   emits: [
-    'show-dialog',
+    'showDialog',
   ],
   methods: {
     ...mapActions(useTicketStore, {
       latestUpdatedTicket: 'latestUpdated',
       ticketLabels: 'labels',
     }),
-    showDialog: function (action) {
+    showDialog (action) {
       const shootItem = this.shootItem
-      this.$emit('show-dialog', { action, shootItem })
+      this.$emit('showDialog', { action, shootItem })
     },
   },
 })

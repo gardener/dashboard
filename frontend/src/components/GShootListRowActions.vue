@@ -12,15 +12,13 @@ SPDX-License-Identifier: Apache-2.0
     :nudge-bottom="20"
     :close-on-content-click="false"
   >
-    <template v-slot:activator="{ props: menuProps }">
-      <v-tooltip location="top">
-        <template v-slot:activator="{ props: tooltipProps }">
-          <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon class="text-action-button">
-            <v-icon class="cursor-pointer">mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        Cluster Actions
-      </v-tooltip>
+
+    <template v-slot:activator="{ props }">
+      <g-action-button
+        v-bind="props"
+        icon="mdi-dots-vertical"
+        tooltip="Cluster Actions"
+      />
     </template>
     <v-list subheader dense class="actionMenuItem" @click.capture="actionMenu=false">
       <v-list-item>
@@ -49,6 +47,7 @@ import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store'
 
+import GActionButton from './GActionButton.vue'
 import GChangeHibernation from '@/components/ShootHibernation/GChangeHibernation.vue'
 import GDeleteCluster from '@/components/GDeleteCluster.vue'
 import GMaintenanceStart from '@/components/ShootMaintenance/GMaintenanceStart.vue'
@@ -59,6 +58,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default defineComponent({
   components: {
+    GActionButton,
     GChangeHibernation,
     GMaintenanceStart,
     GReconcileStart,
