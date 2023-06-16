@@ -93,10 +93,6 @@ export const useShootStore = defineStore('shoot', () => {
     return state.shootListFilters
   })
 
-  const selection = computed(() => {
-    return state.selection
-  })
-
   const newShootResource = computed(() => {
     return state.newShootResource
   })
@@ -328,12 +324,12 @@ export const useShootStore = defineStore('shoot', () => {
 
   function setSelection (metadata) {
     if (!metadata) {
-      selection.value = null
+      state.selection = null
     }
     const item = findItem(state)(metadata)
     if (item) {
       const { namespace, name } = metadata
-      selection.value = { namespace, name }
+      state.selection = { namespace, name }
       if (!item.info) {
         fetchInfo({ namespace, name })
       }
