@@ -1,81 +1,88 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list>
+  <g-list>
     <template v-for="({ title, subtitle, value, displayValue }, index) in commands" :key="title">
-      <v-list-item>
-        <v-list-item-icon>
-          <v-icon v-if="index === 0" color="primary">mdi-console-line</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>{{title}}</v-list-item-title>
-          <v-list-item-subtitle>
-            {{subtitle}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
-          <gardenctl-info></gardenctl-info>
-        </v-list-item-action>
-        <v-list-item-action>
-          <copy-btn :clipboard-text="value"></copy-btn>
-        </v-list-item-action>
-        <v-list-item-action class="mx-0">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.stop="toggle(index)" color="action-button">
-                <v-icon>{{visibilityIcon(index)}}</v-icon>
-              </v-btn>
-            </template>
-            <span>{{visibilityTitle(index)}}</span>
-          </v-tooltip>
-        </v-list-item-action>
-      </v-list-item>
-      <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
-        <v-list-item-icon></v-list-item-icon>
-        <v-list-item-content class="pt-0">
-          <code-block
+      <g-list-item>
+        <template v-if="index === 0" v-slot:prepend>
+          <v-icon icon="mdi-console-line" color="primary"/>
+        </template>
+        <g-list-item-content>
+          {{ title }}
+          <template v-slot:description>
+            {{ subtitle }}
+          </template>
+        </g-list-item-content>
+        <template v-slot:append>
+          <g-gardenctl-info/>
+          <g-copy-btn :clipboard-text="value"/>
+          <g-action-button
+            :icon="visibilityIcon(index)"
+            :tooltip="visibilityTitle(index)"
+            @click="toggle(index)"
+          />
+        </template>
+      </g-list-item>
+      <g-list-item v-if="expansionPanel[index]"
+        :key="'expansion-' + title"
+      >
+        <g-list-item-content class="pt-0">
+          <g-code-block
             lang="shell"
             :content="displayValue"
             :show-copy-button="false"
-          ></code-block>
-        </v-list-item-content>
-      </v-list-item>
+          />
+        </g-list-item-content>
+      </g-list-item>
     </template>
-  </v-list>
+  </g-list>
 </template>
 
 <script>
-import CopyBtn from '@/components/CopyBtn.vue'
-import CodeBlock from '@/components/CodeBlock.vue'
-import GardenctlInfo from '@/components/GardenctlInfo.vue'
-import { shootItem } from '@/mixins/shootItem'
-import { mapState, mapGetters } from 'vuex'
-import get from 'lodash/get'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
 
-export default {
+import { useAuthnStore, useConfigStore, useProjectStore } from '@/store'
+
+import GListItem from '@/components/GListItem.vue'
+import GListItemContent from '@/components/GListItemContent.vue'
+import GActionButton from '@/components/GActionButton.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
+import GCodeBlock from '@/components/GCodeBlock.vue'
+import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
+
+import { shootItem } from '@/mixins/shootItem'
+
+import get from 'lodash/get'
+
+export default defineComponent({
   components: {
-    CopyBtn,
-    CodeBlock,
-    GardenctlInfo
+    GListItem,
+    GListItemContent,
+    GActionButton,
+    GCopyBtn,
+    GCodeBlock,
+    GGardenctlInfo,
   },
   mixins: [shootItem],
   data () {
     return {
-      expansionPanel: []
+      expansionPanel: [],
     }
   },
   computed: {
-    ...mapState([
-      'cfg'
+    ...mapState(useConfigStore, [
+      'clusterIdentity',
     ]),
-    ...mapGetters([
+    ...mapState(useAuthnStore, [
       'isAdmin',
-      'projectFromProjectList'
+    ]),
+    ...mapState(useProjectStore, [
+      'projectFromProjectList',
     ]),
     projectName () {
       const project = this.projectFromProjectList
@@ -92,8 +99,8 @@ export default {
           title: 'Target Cluster',
           subtitle: 'Gardenctl command to target the shoot cluster',
           value: this.targetShootCommand,
-          displayValue: displayValue(this.targetShootCommand)
-        }
+          displayValue: displayValue(this.targetShootCommand),
+        },
       ]
 
       if (this.isAdmin) {
@@ -101,15 +108,15 @@ export default {
           title: 'Target Control Plane',
           subtitle: 'Gardenctl command to target the control plane of the shoot cluster',
           value: this.targetControlPlaneCommand,
-          displayValue: displayValue(this.targetControlPlaneCommand)
+          displayValue: displayValue(this.targetControlPlaneCommand),
         })
       }
       return cmds
     },
     targetControlPlaneCommand () {
       const args = []
-      if (this.cfg.clusterIdentity) {
-        args.push(`--garden ${this.cfg.clusterIdentity}`)
+      if (this.clusterIdentity) {
+        args.push(`--garden ${this.clusterIdentity}`)
       }
       if (this.projectName) {
         args.push(`--project ${this.projectName}`)
@@ -124,8 +131,8 @@ export default {
     },
     targetShootCommand () {
       const args = []
-      if (this.cfg.clusterIdentity) {
-        args.push(`--garden ${this.cfg.clusterIdentity}`)
+      if (this.clusterIdentity) {
+        args.push(`--garden ${this.clusterIdentity}`)
       }
       if (this.projectName) {
         args.push(`--project ${this.projectName}`)
@@ -135,7 +142,7 @@ export default {
       }
 
       return `gardenctl target ${args.join(' ')}`
-    }
+    },
   },
   methods: {
     visibilityIcon (index) {
@@ -145,10 +152,10 @@ export default {
       return this.expansionPanel[index] ? 'Hide Command' : 'Show Command'
     },
     toggle (index) {
-      Vue.set(this.expansionPanel, index, !this.expansionPanel[index])
-    }
-  }
-}
+      this.expansionPanel[index] = !this.expansionPanel[index]
+    },
+  },
+})
 </script>
 
 <style scoped>

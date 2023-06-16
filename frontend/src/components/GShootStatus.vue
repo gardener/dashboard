@@ -86,16 +86,17 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 
-import join from 'lodash/join'
-import map from 'lodash/map'
+import { shootItem } from '@/mixins/shootItem'
 
-import GPopper from '@/components/GPopper.vue'
-import GRetryOperation from '@/components/GRetryOperation.vue'
-import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
+import GPopper from './GPopper.vue'
+import GRetryOperation from './GRetryOperation.vue'
+import GShootMessageDetails from './GShootMessageDetails.vue'
+import GExternalLink from './GExternalLink.vue'
 
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
-import { shootItem } from '@/mixins/shootItem'
+
+import join from 'lodash/join'
+import map from 'lodash/map'
 
 export default defineComponent({
   components: {

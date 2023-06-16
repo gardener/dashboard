@@ -6,27 +6,25 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div v-if="canPatchShoots">
-    <v-tooltip top max-width="600px" :disabled="disableToolTip">
+    <v-tooltip
+      top
+      max-width="600px"
+      :disabled="disableToolTip"
+    >
       <template #activator="{ props }">
-        <div v-bind="props">
-          <v-btn
-            :icon="isIconButton"
-            :text="isTextButton"
-            :color="iconColor"
-            :loading="loading"
-            :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
-            @click="showDialog"
-            :width="buttonWidth"
-            class="text-none font-weight-regular pa-0"
-          >
-            <div>
-              <v-icon>{{icon}}</v-icon>
-            </div>
-            <div v-if="isTextButton" class="ml-3 d-flex flex-grow-1">
-              {{buttonText}}
-            </div>
-          </v-btn>
-        </div>
+        <v-btn
+          v-bind="props"
+          density="default"
+          variant="text"
+          :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+          :[iconProp]="icon"
+          :text="buttonText"
+          :color="iconColor"
+          :loading="loading"
+          :width="buttonWidth"
+          class="text-none font-weight-regular pa-0"
+          @click="showDialog"
+        />
       </template>
       {{actionToolTip}}
     </v-tooltip>
@@ -53,14 +51,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GDialog from '@/components/dialogs/GDialog'
-import { shootItem } from '@/mixins/shootItem'
-import { mapGetters } from 'pinia'
-import {
-  useAuthzStore,
-} from '@/store'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
 
-export default {
+import { useAuthzStore } from '@/store'
+
+import { shootItem } from '@/mixins/shootItem'
+
+import GDialog from '@/components/dialogs/GDialog'
+
+export default defineComponent({
   components: {
     GDialog,
   },
@@ -120,7 +120,12 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters(useAuthzStore, ['canPatchShoots']),
+    ...mapState(useAuthzStore, [
+      'canPatchShoots',
+    ]),
+    iconProp () {
+      return this.isTextButton ? 'prepend-icon' : 'icon'
+    },
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
     },
@@ -146,6 +151,9 @@ export default {
       return false
     },
   },
+  emits: [
+    'dialogOpened',
+  ],
   methods: {
     showDialog (resetError = true) {
       if (resetError) {
@@ -155,7 +163,7 @@ export default {
       this.$refs.gDialog.showDialog()
       this.$nextTick(() => {
         // need to defer event until dialog has been rendered
-        this.$emit('dialog-opened')
+        this.$emit('dialogOpened')
       })
     },
     async waitForDialogClosed () {
@@ -173,5 +181,12 @@ export default {
       }
     },
   },
-}
+})
 </script>
+
+<style lang="scss" scoped>
+  :deep(.v-btn) {
+    padding-left: 16px !important;
+    justify-content: left !important;
+  }
+</style>

@@ -5,152 +5,181 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list key="accessCardList">
-    <v-list-item v-show="!isAnyTileVisible">
-      <v-list-item-icon>
-        <v-icon color="primary">mdi-alert-circle-outline</v-icon>
-      </v-list-item-icon>
-      <v-list-item-content>
-        <v-list-item-title>
-          Access information currently not available
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
+  <g-list key="accessCardList">
+    <g-list-item v-if="!isAnyTileVisible">
+      <template v-slot:prepend>
+        <v-icon color="primary" icon="mdi-alert-circle-outline"/>
+      </template>
+      <g-list-item-content>
+        Access information currently not available
+      </g-list-item-content>
+    </g-list-item>
 
-    <terminal-list-tile
-      v-if="isTerminalTileVisible"
+    <g-terminal-list-tile v-if="isTerminalTileVisible"
       :shoot-item=shootItem
       target="shoot"
       :description="shootTerminalDescription"
       :button-description="shootTerminalButtonDescription"
       :disabled="shootTerminalButtonDisabled"
-      >
-    </terminal-list-tile>
+    />
 
     <v-divider v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <terminal-shortcuts-tile
-      v-if="isTerminalShortcutsTileVisible"
+    <g-terminal-shortcuts-tile v-if="isTerminalShortcutsTileVisible"
       :shoot-item="shootItem"
-      @add-terminal-shortcut="onAddTerminalShortcut"
       popper-boundaries-selector="#accessCardList"
       class="mt-3"
-    ></terminal-shortcuts-tile>
+      @add-terminal-shortcut="onAddTerminalShortcut"
+    />
 
     <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="mdi-developer-board" app-title="Dashboard" :url="dashboardUrl" :url-text="dashboardUrlText" :is-shoot-status-hibernated="isShootStatusHibernated"></link-list-tile>
+    <g-link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth"
+      icon="mdi-developer-board"
+      app-title="Dashboard"
+      :url="dashboardUrl"
+      :url-text="dashboardUrlText"
+      :is-shoot-status-hibernated="isShootStatusHibernated"
+    />
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
-      <v-list-item>
-        <v-list-item-icon>
-          <v-icon color="primary">mdi-developer-board</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
-          <v-list-item-subtitle class="text-caption wrap-text py-2">
-            Access Dashboard using the kubectl command-line tool by running the following command:
-            <code>kubectl proxy</code>.
-            Kubectl will make Dashboard available at:
-          </v-list-item-subtitle>
-          <v-list-item-title>
-            <v-tooltip v-if="isShootStatusHibernated" location="top">
-              <template v-slot:activator="{ on }">
-                <span v-on="on" class="text-grey">{{dashboardUrlText}}</span>
-              </template>
-              Dashboard is not running for hibernated clusters
-            </v-tooltip>
-            <a v-else :href="dashboardUrl" target="_blank" rel="noopener">{{dashboardUrlText}}</a>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item v-if="token">
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>Token</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            <pre class="scroll">{{tokenText}}</pre>
-          </v-list-item-title>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
-          <copy-btn :clipboard-text="token"></copy-btn>
-        </v-list-item-action>
-        <v-list-item-action class="mx-0">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click.stop="showToken = !showToken" color="action-button">
-                <v-icon>{{visibilityIcon}}</v-icon>
-              </v-btn>
+      <g-list-item>
+        <template v-slot:prepend>
+          <v-icon color="primary" icon="mdi-developer-board"/>
+        </template>
+        <g-list-item-content>
+          <template v-slot:label>
+            Dashboard
+            <div class="text-caption wrap-text py-2">
+              Access Dashboard using the kubectl command-line tool by running the following command:
+              <code>kubectl proxy</code>.
+              Kubectl will make Dashboard available at:
+            </div>
+          </template>
+          <v-tooltip v-if="isShootStatusHibernated"
+            location="top"
+          >
+            <template v-slot:activator="{ props }">
+              <span v-bind="props" class="text-grey">{{dashboardUrlText}}</span>
             </template>
-            <span>{{tokenVisibilityTitle}}</span>
+            Dashboard is not running for hibernated clusters
           </v-tooltip>
-        </v-list-item-action>
-      </v-list-item>
+          <a v-else
+            :href="dashboardUrl"
+            target="_blank"
+            rel="noopener"
+          >
+            {{dashboardUrlText}}
+          </a>
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item v-if="token">
+        <g-list-item-content label="Token">
+          <pre class="scroll">{{tokenText}}</pre>
+        </g-list-item-content>
+        <template v-slot:append>
+          <g-copy-btn :clipboard-text="token"/>
+          <g-action-button
+            :icon="visibilityIcon"
+            :tooltip="tokenVisibilityTitle"
+            @click="showToken = !showToken"
+          />
+        </template>
+      </g-list-item>
     </template>
 
     <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
+    <g-username-password v-if="isCredentialsTileVisible"
+      :username="username"
+      :password="password"
+    />
 
     <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <v-list v-if="isKubeconfigTileVisible">
-      <shoot-kubeconfig :shoot-item="shootItem" :showIcon="true" type="gardenlogin"></shoot-kubeconfig>
-      <shoot-kubeconfig :shoot-item="shootItem" :showIcon="false" type="token"></shoot-kubeconfig>
-    </v-list>
+    <template v-if="isKubeconfigTileVisible">
+      <g-shoot-kubeconfig
+        :shoot-item="shootItem"
+        :show-list-icon="true"
+        type="gardenlogin"
+      />
+      <g-shoot-kubeconfig
+        :shoot-item="shootItem"
+        :show-list-icon="false"
+        type="token"
+      />
+    </template>
 
     <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
 
-    <gardenctl-commands v-if="isGardenctlTileVisible" :shoot-item="shootItem"></gardenctl-commands>
-  </v-list>
+    <g-gardenctl-commands v-if="isGardenctlTileVisible"
+      :shoot-item="shootItem"
+    />
+  </g-list>
 </template>
 
 <script>
-import UsernamePassword from '@/components/UsernamePasswordListTile.vue'
-import CopyBtn from '@/components/CopyBtn.vue'
-import TerminalListTile from '@/components/TerminalListTile.vue'
-import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile.vue'
-import ShootKubeconfig from '@/components/ShootDetails/ShootKubeconfig.vue'
-import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands.vue'
-import LinkListTile from '@/components/LinkListTile.vue'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+
+import { useAuthnStore, useAuthzStore, useTerminalStore } from '@/store'
+
+import GList from '@/components/GList.vue'
+import GListItem from '@/components/GListItem.vue'
+import GListItemContent from '@/components/GListItemContent.vue'
+import GActionButton from '@/components/GActionButton.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
+import GUsernamePassword from '@/components/GUsernamePasswordListTile.vue'
+import GTerminalListTile from '@/components/GTerminalListTile.vue'
+import GLinkListTile from '@/components/GLinkListTile.vue'
+
+import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
+import GShootKubeconfig from './GShootKubeconfig.vue'
+import GGardenctlCommands from './GGardenctlCommands.vue'
+
+import { shootItem } from '@/mixins/shootItem'
+
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
-import { shootItem } from '@/mixins/shootItem'
-import { mapState, mapGetters } from 'vuex'
 
-export default {
+export default defineComponent({
   components: {
-    UsernamePassword,
-    CopyBtn,
-    TerminalListTile,
-    LinkListTile,
-    ShootKubeconfig,
-    GardenctlCommands,
-    TerminalShortcutsTile
+    GList,
+    GListItem,
+    GListItemContent,
+    GActionButton,
+    GUsernamePassword,
+    GCopyBtn,
+    GTerminalListTile,
+    GLinkListTile,
+    GShootKubeconfig,
+    GGardenctlCommands,
+    GTerminalShortcutsTile,
   },
   props: {
     hideTerminalShortcuts: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data () {
     return {
-      showToken: false
+      showToken: false,
     }
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'hasShootTerminalAccess',
+    ...mapState(useAuthnStore, [
       'isAdmin',
+    ]),
+    ...mapState(useAuthzStore, [
+      'hasShootTerminalAccess',
       'canCreateShootsAdminkubeconfig',
       'hasControlPlaneTerminalAccess',
-      'isTerminalShortcutsFeatureEnabled',
-      'canPatchShoots'
+      'canPatchShoots',
     ]),
-    ...mapState([
-      'cfg'
+    ...mapState(useTerminalStore, [
+      'isTerminalShortcutsFeatureEnabled',
     ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
@@ -234,18 +263,18 @@ export default {
     },
     visibilityIcon () {
       return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
-    }
+    },
   },
+  emits: ['addTerminalShortcut'],
   methods: {
     onAddTerminalShortcut (shortcut) {
-      this.$emit('add-terminal-shortcut', shortcut)
-    }
-  }
-}
+      this.$emit('addTerminalShortcut', shortcut)
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-
   .scroll {
     overflow-x: auto;
   }
@@ -260,5 +289,4 @@ export default {
       color: black;
     }
   }
-
 </style>

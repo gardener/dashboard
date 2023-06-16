@@ -117,25 +117,39 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </v-data-table>
-
-      <!-- <v-dialog v-model="clusterAccessDialog" max-width="850">
+      <v-dialog
+        v-model="clusterAccessDialog"
+        max-width="850"
+      >
         <v-card>
-          <v-card-title class="toolbar-background text-toolbar-title">
-            <div class="text-h5">Cluster Access <code class="bg-toolbar-background bg-toolbar-background-lighten-1 text-toolbar-title">{{currentName}}</code></div>
-            <v-spacer></v-spacer>
-            <v-btn icon class="text-grey-lighten-4" @click="hideDialog">
-              <v-icon color="toolbar-title">mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <shoot-access-card ref="clusterAccess" :shoot-item="shootItem" :hide-terminal-shortcuts="true"></shoot-access-card>
+          <g-toolbar
+            density="default"
+          >
+            Cluster Access
+            <code class="text-toolbar-title">
+              {{ currentName }}
+            </code>
+            <template v-slot:append>
+              <v-btn
+                icon="mdi-close"
+                icon-color="toolbar-title"
+                class="text-grey-lighten-4"
+                @click="hideDialog"
+              />
+            </template>
+          </g-toolbar>
+          <g-shoot-access-card
+            ref="clusterAccess"
+            :shoot-item="shootItem"
+            :hide-terminal-shortcuts="true"
+          />
         </v-card>
-      </v-dialog> -->
+      </v-dialog>
     </v-card>
   </v-container>
 </template>
 
 <script>
-// eslint-disable-next-line no-unused-vars
 import { defineComponent, defineAsyncComponent } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { mapState, mapActions } from 'pinia'
@@ -148,12 +162,12 @@ import {
   useConfigStore,
 } from '@/store'
 
+import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
-
 import { mapTableHeader } from '@/utils'
 
 import filter from 'lodash/filter'
@@ -169,9 +183,10 @@ import debounce from 'lodash/debounce'
 
 export default defineComponent({
   components: {
+    GToolbar,
     GShootListRow,
     GShootListProgress,
-    // GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/ShootAccessCard.vue')),
+    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,
