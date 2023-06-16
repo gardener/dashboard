@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 
 SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <div
     role="list-item"
@@ -13,13 +14,11 @@ SPDX-License-Identifier: Apache-2.0
     >
       <slot name="prepend"/>
     </div>
-
     <div
       class="d-block align-self-center align-center flex-grow-1 g-list-item__content "
     >
       <slot/>
     </div>
-
     <div v-if="slots.append"
       class="d-inline-flex align-self-center flex-nowrap ml-3 g-list-item__append"
     >
@@ -27,6 +26,11 @@ SPDX-License-Identifier: Apache-2.0
     </div>
   </div>
 </template>
+
+<script setup>
+import { useSlots } from 'vue'
+const slots = useSlots()
+</script>
 
 <style lang="scss" scoped>
   .g-list-item {
@@ -46,8 +50,3 @@ SPDX-License-Identifier: Apache-2.0
     }
   }
 </style>
-
-<script setup>
-import { useSlots } from 'vue'
-const slots = useSlots()
-</script>
