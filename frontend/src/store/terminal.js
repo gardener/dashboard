@@ -5,7 +5,7 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import { useApi, useLogger } from '@/composables'
 import { useAuthzStore } from './authz'
@@ -17,6 +17,7 @@ import map from 'lodash/map'
 import uniqBy from 'lodash/uniqBy'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 
 export const useTerminalStore = defineStore('terminal', () => {
   const logger = useLogger()
@@ -26,6 +27,10 @@ export const useTerminalStore = defineStore('terminal', () => {
 
   const draggingDragAndDropId = ref()
   const projectTerminalShortcuts = ref(null)
+
+  const isTerminalShortcutsFeatureEnabled = computed(() => {
+    return !isEmpty(terminalShortcutsByTargetsFilter()) || configStore.isProjectTerminalShortcutsEnabled
+  })
 
   function setDraggingDragAndDropId (value) {
     draggingDragAndDropId.value = value
@@ -83,5 +88,6 @@ export const useTerminalStore = defineStore('terminal', () => {
     $reset,
     terminalShortcutsByTargetsFilter,
     projectTerminalShortcutsByTargetsFilter,
+    isTerminalShortcutsFeatureEnabled,
   }
 })
