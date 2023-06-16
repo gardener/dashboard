@@ -5,28 +5,34 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top" :disabled="!this.$slots.tooltip">
-    <template #activator="{ props }">
-      <div v-bind="props" class="mx-1">
-        <v-btn
-          density="compact"
-          variant="text"
-          :disabled="disabled"
-          :icon="icon"
-          :text="text"
-          :color="color"
-          :size="size"
-          @click.stop="emit('click')"
-        >
-        </v-btn>
-      </div>
-    </template>
-    <slot name="tooltip" />
-  </v-tooltip>
+  <div class="mx-1">
+    <v-btn
+      density="compact"
+      variant="text"
+      :disabled="disabled"
+      :icon="icon"
+      :text="text"
+      :color="color"
+      :size="size"
+      :to="to"
+      @click.stop.prevent="emit('click', $event)"
+    >
+    </v-btn>
+    <v-tooltip v-if="hasTooltip"
+      activator="parent"
+      location="top"
+    >
+      <slot name="tooltip">
+        {{ tooltip }}
+      </slot>
+    </v-tooltip>
+  </div>
 </template>
 
 <script setup>
-import { toRefs } from 'vue'
+import { computed, toRefs, useSlots } from 'vue'
+
+const slots = useSlots()
 
 const props = defineProps({
   disabled: {
@@ -48,11 +54,21 @@ const props = defineProps({
   size: {
     type: String,
   },
+  tooltip: {
+    type: String,
+  },
+  to: {
+    type: [Object, String],
+  },
 })
 
 const emit = defineEmits([
   'click',
 ])
 
-const { disabled, icon, text, color, size } = toRefs(props)
+const { disabled, icon, text, color, size, tooltip, to } = toRefs(props)
+
+const hasTooltip = computed(() => {
+  return slots.tooltip || tooltip.value
+})
 </script>
