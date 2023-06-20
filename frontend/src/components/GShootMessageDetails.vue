@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-list class="text-left">
     <v-list-item>
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon color="primary" icon="mdi-information-outline"/>
       </template>
       <v-list-item-subtitle>Status</v-list-item-subtitle>
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="!!lastMessage">
       <v-divider inset></v-divider>
       <v-list-item>
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon color="primary" icon="mdi-post-outline"/>
         </template>
         <v-list-item-subtitle>Last Message</v-list-item-subtitle>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-divider inset></v-divider>
     <v-list-item v-if="lastUpdateTime">
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon color="primary" icon="mdi-clock-outline"/>
       </template>
       <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-title>
     </v-list-item>
      <v-list-item v-if="lastTransitionTime">
-      <template v-slot:prepend>
+      <template #prepend>
         <span> </span>
       </template>
       <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="hasError">
       <v-divider inset></v-divider>
       <v-list-item>
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon color="error" icon="mdi-alert-circle-outline"/>
         </template>
         <v-list-item-subtitle>{{errorDescriptions.length > 1 ? 'Last Errors' : 'Last Error'}}</v-list-item-subtitle>

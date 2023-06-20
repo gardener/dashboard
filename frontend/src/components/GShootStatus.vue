@@ -13,10 +13,10 @@ SPDX-License-Identifier: Apache-2.0
         :popper-key="popperKeyWithType"
         :placement="popperPlacement"
       >
-        <template v-slot:popperRef>
+        <template #popperRef>
           <div class="d-flex align-center">
             <v-tooltip location="top">
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-btn v-if="isUserError" icon v-bind="props">
                   <v-icon color="error">mdi-account-alert</v-icon>
                 </v-btn>
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-tooltip>
           </div>
         </template>
-        <template v-slot:card>
+        <template #card>
           <g-shoot-message-details
             :status-title="statusTitle"
             :last-message="lastMessage"

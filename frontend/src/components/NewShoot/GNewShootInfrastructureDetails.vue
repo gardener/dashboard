@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           >
           <template #item="{ item, props }">
             <!-- Divider / header in items not implemented yet in Vuetify 3: https://github.com/vuetifyjs/vuetify/issues/15721 -->
-            <span class="text-subtitle-1 text-disabled pa-3" v-if="!!item.raw.header">{{item.raw.header}}</span>
+            <v-list-subheader v-if="!!item.raw.header">{{item.raw.header}}</v-list-subheader>
             <v-list-item v-else v-bind="props" />
           </template>
         </v-select>
@@ -152,8 +152,7 @@ SPDX-License-Identifier: Apache-2.0
             @update:modelValue="onInputFirewallNetworks"
             @blur="v$.firewallNetworks.$touch()"
             chips
-            small-chips
-            deletable-chips
+            closable-chips
             multiple
             variant="underlined"
           ></v-select>
@@ -172,8 +171,7 @@ SPDX-License-Identifier: Apache-2.0
             @blur="v$.loadBalancerClassNames.$touch()"
             attach
             chips
-            small-chips
-            deletable-chips
+            closable-chips
             multiple
             variant="underlined"
           >

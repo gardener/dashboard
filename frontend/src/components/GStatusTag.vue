@@ -14,10 +14,10 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="!condition.message"
       @update:visible="onPopperInput"
     >
-      <template v-slot:popperRef>
+      <template #popperRef>
         <div>
           <v-tooltip location="top" max-width="400px" :disabled="tooltipDisabled">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-chip
                 v-bind="props"
                 class="status-tag"
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </div>
       </template>
-      <template v-slot:card>
+      <template #card>
         <g-shoot-message-details
           :status-title="chipStatus"
           :last-message="nonErrorMessage"

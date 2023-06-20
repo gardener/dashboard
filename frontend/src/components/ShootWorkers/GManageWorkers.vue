@@ -4,8 +4,6 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<!-- TODO: remove -->
-<!-- eslint-disable vue/no-unused-vars -->
 <template>
   <div class="alternate-row-background">
     <v-expand-transition
@@ -14,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :key="worker.id"
     >
       <v-row class="list-item pt-2 my-0 mx-1" :key="worker.id">
-        <!--g-worker-input-generic
+        <g-worker-input-generic
           ref="workerInput"
           :worker="worker"
           :workers="internalWorkers"
@@ -30,9 +28,9 @@ SPDX-License-Identifier: Apache-2.0
           :kubernetes-version="kubernetesVersion"
           @valid="onWorkerValid"
           @removed-zones="onRemovedZones">
-          <template v-slot:action>
+          <template #action>
             <v-btn v-show="index > 0 || internalWorkers.length > 1"
-              size="small"
+              size="x-small"
               variant="outlined"
               icon
               color="grey"
@@ -40,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
-        </worker-input-generic-->
+        </g-worker-input-generic>
       </v-row>
     </v-expand-transition>
     <v-row key="addWorker" class="list-item mb-1 mx-1">
@@ -60,7 +58,8 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           text
-          class="text-primary">
+          variant="text"
+          color="primary">
           Add Worker Group
         </v-btn>
       </v-col>
@@ -71,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineComponent } from 'vue'
 
-// import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
+import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import { mapActions } from 'pinia'
 import { isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
@@ -96,13 +95,17 @@ const NO_LIMIT = -1
 export default defineComponent({
   name: 'manage-workers',
   components: {
-    // WorkerInputGeneric,
+    GWorkerInputGeneric,
   },
   props: {
     userInterActionBus: {
       type: Object,
     },
   },
+  emits: [
+    'additionalZonesNetworkConfiguration',
+    'valid',
+  ],
   data () {
     return {
       internalWorkers: undefined,

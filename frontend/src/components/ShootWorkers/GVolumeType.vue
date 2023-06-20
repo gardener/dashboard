@@ -6,100 +6,110 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <hint-colorizer hint-color="warning">
+    <g-hint-colorizer hint-color="warning">
       <v-select
         color="primary"
         item-color="primary"
         :items="volumeTypeItems"
-        item-text="name"
+        item-title="name"
         item-value="name"
         v-model="worker.volume.type"
         :error-messages="getErrorMessages('worker.volume.type')"
         @input="onInputVolumeType"
-        @blur="$v.worker.volume.type.$touch()"
+        @blur="v$.worker.volume.type.$touch()"
         label="Volume Type"
         :hint="hint"
-        persistent-hint>
-        <template v-slot:item="{ item }">
-          <v-list-item-content>
-            <v-list-item-title>{{item.name}}</v-list-item-title>
-            <v-list-item-subtitle v-if="item.class">Class: {{item.class}}</v-list-item-subtitle>
-          </v-list-item-content>
+        persistent-hint
+        variant="underlined"
+      >
+        <template #item="{ item, props }">
+          <v-list-item v-bind="props">
+            <v-list-item-subtitle v-if="item.raw.class">Class: {{item.raw.class}}</v-list-item-subtitle>
+          </v-list-item>
         </template>
       </v-select>
-    </hint-colorizer>
+    </g-hint-colorizer>
     <v-text-field
       v-if="isAWS"
       class="ml-1"
       color="primary"
       :error-messages="getErrorMessages('workerIops')"
       @input="onInputIops"
-      @blur="$v.workerIops.$touch()"
+      @blur="v$.workerIops.$touch()"
       v-model.number="workerIops"
       type="number"
       min="100"
-      label="IOPS">
-    </v-text-field>
+      label="IOPS"
+      variant="underlined"
+    ></v-text-field>
   </div>
 </template>
 
 <script>
-
-import { mapGetters } from 'vuex'
-import HintColorizer from '@/components/HintColorizer'
-import { required, requiredIf, minValue } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
+import GHintColorizer from '@/components/GHintColorizer'
+import { required, requiredIf, minValue } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 import { getValidationErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
 import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
+import { useCloudProfileStore } from '@/store'
 
-export default {
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   components: {
-    HintColorizer
+    GHintColorizer,
   },
   props: {
     worker: {
       type: Object,
-      required: true
+      required: true,
     },
     volumeTypes: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     cloudProfileName: {
-      type: String
-    }
+      type: String,
+    },
   },
+  emits: [
+    'updateVolumeType',
+    'valid',
+  ],
   data () {
     return {
       valid: undefined,
-      workerIops: undefined
+      workerIops: undefined,
     }
   },
   validations () {
     return this.validators
   },
   computed: {
-    ...mapGetters([
-      'cloudProfileByName'
-    ]),
     validators () {
       return {
         worker: {
           volume: {
             type: {
-              required
-            }
-          }
+              required,
+            },
+          },
         },
         workerIops: {
           required: requiredIf(() => {
             return this.isAWS && this.worker.volume.type === 'io1'
           }),
-          minValue: minValue(100)
-        }
+          minValue: minValue(100),
+        },
       }
     },
     validationErrors () {
@@ -107,21 +117,21 @@ export default {
         worker: {
           volume: {
             type: {
-              required: 'Volume Type is required'
-            }
-          }
+              required: 'Volume Type is required',
+            },
+          },
         },
         workerIops: {
           required: 'IOPS is required for volumes of type io1',
-          minValue: 'Minimum IOPS is 100'
-        }
+          minValue: 'Minimum IOPS is 100',
+        },
       }
     },
     volumeTypeItems () {
       const volumeTypes = this.volumeTypes.slice()
       if (this.notInCloudProfile) {
         volumeTypes.push({
-          name: this.worker.volume.type
+          name: this.worker.volume.type,
         })
       }
       this.onInputVolumeType()
@@ -139,15 +149,18 @@ export default {
     isAWS () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
       return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
-    }
+    },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'cloudProfileByName',
+    ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
     onInputVolumeType () {
-      this.$v.worker.volume.type.$touch()
-      this.$emit('update-volume-type')
+      this.v$.worker.volume.type.$touch()
+      this.$emit('updateVolumeType')
       this.validateInput()
     },
     onInputIops (value) {
@@ -160,21 +173,21 @@ export default {
       } else {
         unset(this.worker.providerConfig, 'volume.iops')
       }
-      this.$v.workerIops.$touch()
-      this.$emit('update-volume-type')
+      this.v$.workerIops.$touch()
+      this.$emit('updateVolumeType')
       this.validateInput()
     },
     validateInput () {
-      if (this.valid !== !this.$v.$invalid) {
-        this.valid = !this.$v.$invalid
+      if (this.valid !== !this.v$.$invalid) {
+        this.valid = !this.v$.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
-    }
+    },
   },
   mounted () {
     this.workerIops = get(this.worker, 'providerConfig.volume.iops')
-    this.$v.$touch()
+    this.v$.$touch()
     this.validateInput()
-  }
-}
+  },
+})
 </script>

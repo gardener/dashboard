@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :key="componentKey"
     :shoot-item="shootItem"
     :valid="workersValid"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Workers"
     disable-confirm-input-focus
     max-height="80vh">
-    <template v-slot:top>
+    <template #top>
       <v-tabs
         color="primary"
         v-model="tab"
@@ -35,18 +35,18 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab>
       </v-tabs>
     </template>
-    <template v-slot:card>
+    <template #card>
       <v-tabs-items v-model="tab">
         <v-tab-item id="overview" ref="overviewTab">
-          <manage-workers
+          <g-manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
             ref="manageWorkers"
             v-on="$manageWorkers.hooks"
-          ></manage-workers>
+          ></g-manage-workers>
         </v-tab-item>
         <v-tab-item id="yaml">
-          <shoot-editor
+          <g-shoot-editor
             :shoot-item="editorData"
             :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
             ref="workerEditor"
@@ -55,11 +55,11 @@ SPDX-License-Identifier: Apache-2.0
             :style="{ 'min-height': `${overviewTabHeight}px` }"
             animate-on-appear
           >
-          </shoot-editor>
+          </g-shoot-editor>
         </v-tab-item>
       </v-tabs-items>
     </template>
-    <template v-slot:errorMessage>
+    <template #errorMessage>
       <v-expand-transition appear>
         <v-alert
           type="warning"
@@ -71,22 +71,23 @@ SPDX-License-Identifier: Apache-2.0
           @input="setNetworkConfiguration(undefined)"
           class="mx-1">
           <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
-          <code-block
+          <g-code-block
             lang="yaml"
             :content="networkConfigurationYaml"
             :show-copy-button="false"
-            ></code-block>
+            ></g-code-block>
           <div class="font-weight-bold">This change cannot be undone.</div>
           <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
         </v-alert>
       </v-expand-transition>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import CodeBlock from '@/components/CodeBlock'
+import { defineComponent, defineAsyncComponent } from 'vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+import GCodeBlock from '@/components/GCodeBlock'
 import { patchShootProvider } from '@/utils/api'
 import shootItem from '@/mixins/shootItem'
 import asyncRef from '@/mixins/asyncRef'
@@ -95,16 +96,16 @@ import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import { v4 as uuidv4 } from '@/utils/uuid'
-const ManageWorkers = () => import('@/components/ShootWorkers/ManageWorkers')
-const ShootEditor = () => import('@/components/ShootEditor')
+const GManageWorkers = () => defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers'))
+const GShootEditor = () => defineAsyncComponent(() => import('@/components/GShootEditor'))
 
-export default {
+export default defineComponent({
   name: 'worker-configuration',
   components: {
-    ActionButtonDialog,
-    ManageWorkers,
-    CodeBlock,
-    ShootEditor
+    GActionButtonDialog,
+    GManageWorkers,
+    GCodeBlock,
+    GShootEditor,
   },
   data () {
     return {
@@ -115,13 +116,13 @@ export default {
       tabValue: 'overview',
       editorData: {},
       overviewTabHeight: 0,
-      componentKey: uuidv4()
+      componentKey: uuidv4(),
     }
   },
   mixins: [
     shootItem,
     asyncRef('manageWorkers'),
-    asyncRef('workerEditor')
+    asyncRef('workerEditor'),
   ],
   computed: {
     tab: {
@@ -139,8 +140,8 @@ export default {
           this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
           this.setEditorData()
         }
-      }
-    }
+      },
+    },
   },
   methods: {
     async onConfigurationDialogOpened () {
@@ -201,8 +202,8 @@ export default {
       if (zonesNetworkConfiguration) {
         data.infrastructureConfig = {
           networks: {
-            zones: zonesNetworkConfiguration
-          }
+            zones: zonesNetworkConfiguration,
+          },
         }
       }
       return data
@@ -218,9 +219,9 @@ export default {
         this.editorData = {
           spec: {
             provider: {
-              ...editorData
-            }
-          }
+              ...editorData,
+            },
+          },
         }
         this.$workerEditor.dispatch('reload')
       }
@@ -236,7 +237,7 @@ export default {
         const detailedErrorMessage = err.message
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

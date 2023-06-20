@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0
     :toolbar-color="overallColor"
     :popper-key="`shoot_warning_${shootName}_${shootNamespace}`"
   >
-    <template v-slot:popperRef>
+    <template #popperRef>
       <v-btn icon :size="small && 'x-small'">
         <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-icon v-bind="props" :color="overallColor" :size="small && 'small'">{{icon}}</v-icon>
           </template>
           <span>{{tooltip}}</span>
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item
         v-for="({key, icon, severity, component }) in shootMessages"
         :key="key">
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon :color="colorForSeverity(severity)" :icon="icon"/>
         </template>
         <component :is="component.name" v-bind="component.props" class="message" />

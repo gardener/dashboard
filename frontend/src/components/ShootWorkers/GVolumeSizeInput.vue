@@ -14,39 +14,44 @@ SPDX-License-Identifier: Apache-2.0
     type="number"
     @blur="emitBlur"
     :error-messages="errorMessages"
-    >
-  </v-text-field>
+    variant="underlined"
+  ></v-text-field>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { parseSize } from '@/utils'
 
-export default {
-  props: ['value', 'label', 'color', 'errorMessages', 'min'],
+export default defineComponent({
+  props: ['modelValue', 'label', 'color', 'errorMessages', 'min'],
+  emits: [
+    'update:modelValue',
+    'blur',
+  ],
   computed: {
     innerValue: {
       get () {
-        if (this.value) {
-          return parseSize(this.value)
+        if (this.modelValue) {
+          return parseSize(this.modelValue)
         }
         return undefined
       },
-      set (value) {
-        if (!value) {
-          this.$emit('input', undefined)
+      set (modelValue) {
+        if (!modelValue) {
+          this.$emit('update:modelValue', undefined)
         } else {
-          this.$emit('input', this.format(value))
+          this.$emit('update:modelValue', this.format(modelValue))
         }
-      }
-    }
+      },
+    },
   },
   methods: {
-    format (value) {
-      return value + 'Gi'
+    format (modelValue) {
+      return modelValue + 'Gi'
     },
     emitBlur (e) {
       this.$emit('blur', e)
-    }
-  }
-}
+    },
+  },
+})
 </script>

@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
     :button-text="buttonText"
      width="600">
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
         Type <strong>{{shootName}}</strong> below and confirm to hibernate your cluster.<br /><br />

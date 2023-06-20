@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     :button-text="componentTexts.buttonText"
     :confirm-required="true"
     :confirm-button-text="confirmButtonText">
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <v-row >
         <v-col>
           <div class="py-4 text-h5 pt-0 pb-3">{{componentTexts.heading}}</div>

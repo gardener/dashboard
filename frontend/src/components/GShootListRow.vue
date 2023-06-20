@@ -1,3 +1,4 @@
+
 <!--
 SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
@@ -20,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row class="pa-0 ma-0 fill-height flex-nowrap align-center">
           <v-col class="grow pa-0 ma-0">
             <g-auto-hide right>
-              <template v-slot:activator>
+              <template #activator>
                 <router-link class="text-anchor" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
                   {{ shootName }}
                 </router-link>
@@ -42,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'seed'">
         <g-auto-hide right>
-          <template v-slot:activator>
+          <template #activator>
             <g-shoot-seed-name :shoot-item="shootItem" />
           </template>
           <g-copy-btn :clipboard-text="shootSeedName"/>
@@ -50,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'technicalId'">
         <g-auto-hide right>
-          <template v-slot:activator>
+          <template #activator>
             <span>{{shootTechnicalId}}</span>
           </template>
           <g-copy-btn :clipboard-text="shootTechnicalId"/>
@@ -92,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'issueSince'">
         <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <div v-bind="props">
               <g-time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix/>
             </div>
@@ -123,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.customField">
         <template v-if="cell.value">
           <v-tooltip location="top" v-if="cell.header.tooltip">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <span v-bind="props">{{cell.value}}</span>
             </template>
             {{cell.header.tooltip}}
@@ -149,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </template>
       <v-tooltip location="top" v-if="isStaleShoot">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <div class="stale-overlay" v-bind="props"></div>
         </template>
         This cluster is no longer part of the list and kept as stale item

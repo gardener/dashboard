@@ -7,20 +7,29 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <hint-colorizer hint-color="warning">
+    <g-hint-colorizer hint-color="warning">
       <v-select
         color="primary"
         item-color="primary"
         :items="criItems"
         :error-messages="getErrorMessages('criName')"
         @input="onInputCriName"
-        @blur="$v.criName.$touch()"
+        @blur="v$.criName.$touch()"
         v-model="criName"
         label="Container Runtime"
         :hint="hint"
         persistent-hint
-      ></v-select>
-    </hint-colorizer>
+        variant="underlined"
+      >
+        <template #item="{ props, item }">
+          <v-list-item
+            v-bind="props"
+            :disabled="item.raw.disabled"
+          >
+          </v-list-item>
+        </template>
+      </v-select>
+    </g-hint-colorizer>
     <v-select
       v-if="criContainerRuntimeTypes.length"
       class="ml-1"
@@ -31,16 +40,18 @@ SPDX-License-Identifier: Apache-2.0
       label="Additional OCI Runtimes"
       multiple
       chips
-      small-chips
-      deletable-chips
+      closable-chips
+      variant="underlined"
     ></v-select>
   </div>
 </template>
 
 <script>
-import HintColorizer from '@/components/HintColorizer'
+import { defineComponent } from 'vue'
+import GHintColorizer from '@/components/GHintColorizer'
 import { getValidationErrors } from '@/utils'
-import { required } from 'vuelidate/lib/validators'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -51,40 +62,53 @@ import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   criName: {
-    required: 'An explicit container runtime configuration is required'
-  }
+    required: 'An explicit container runtime configuration is required',
+  },
 }
 
-export default {
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   components: {
-    HintColorizer
+    GHintColorizer,
   },
   props: {
     worker: {
       type: Object,
-      required: true
+      required: true,
     },
     machineImageCri: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     kubernetesVersion: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
+  emits: [
+    'valid',
+  ],
   data () {
     return {
       valid: undefined,
-      validationErrors
+      validationErrors,
     }
   },
-  validations: {
-    criName: {
-      required
-    }
+  validations () {
+    return this.validators
   },
   computed: {
+    validators () {
+      return {
+        criName: {
+          required,
+        },
+      }
+    },
     validCriNames () {
       return map(this.machineImageCri, 'name')
     },
@@ -92,14 +116,14 @@ export default {
       const criItems = map(this.validCriNames, name => {
         return {
           value: name,
-          text: name
+          title: name,
         }
       })
       if (this.criName && this.notInList) {
         criItems.push({
           value: this.criName,
-          text: this.criName,
-          disabled: true
+          title: this.criName,
+          disabled: true,
         })
       }
       return criItems
@@ -114,11 +138,11 @@ export default {
         return get(this.worker, 'cri.name')
       },
       set (value) {
-        this.$set(this.worker, 'cri', {
+        set(this.worker, 'cri', {
           ...this.worker.cri,
-          name: value
+          name: value,
         })
-      }
+      },
     },
     selectedCriContainerRuntimeTypes: {
       get () {
@@ -134,7 +158,7 @@ export default {
         } else {
           unset(this.worker, 'cri.containerRuntimes')
         }
-      }
+      },
     },
     notInList () {
       // notInList: selected value may have been removed from cloud profile or other worker changes do not support current selection anymore
@@ -145,7 +169,7 @@ export default {
         return 'The container runtime may not be supported by the selected machine image'
       }
       return undefined
-    }
+    },
   },
   methods: {
     getErrorMessages (field) {
@@ -153,25 +177,25 @@ export default {
     },
     onInputCriName (value) {
       this.selectedCriContainerRuntimeTypes = undefined
-      this.$v.criName.$touch()
+      this.v$.criName.$touch()
       this.validateInput()
     },
     validateInput () {
-      if (this.valid !== !this.$v.$invalid) {
-        this.valid = !this.$v.$invalid
+      if (this.valid !== !this.v$.$invalid) {
+        this.valid = !this.v$.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
-    }
+    },
   },
   mounted () {
-    this.$v.$touch()
+    this.v$.$touch()
     this.validateInput()
   },
   watch: {
     criItems (criItems) {
-      this.$v.$touch()
+      this.v$.$touch()
       this.validateInput()
-    }
-  }
-}
+    },
+  },
+})
 </script>
