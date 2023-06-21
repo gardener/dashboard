@@ -57,7 +57,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
-          text
           variant="text"
           color="primary">
           Add Worker Group

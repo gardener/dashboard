@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
           <div>
             <span class="wrap-text text-subtitle-2" :class="textClass(definition)">
-              {{optionValue.input.title}}
+              {{ optionValue.input.title }}
             </span>
             <span v-if="optionValue.input.description"
               class="wrap-text pt-1 text-body-2"

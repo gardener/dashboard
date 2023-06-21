@@ -5,47 +5,51 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <div class="text-subtitle-1 pt-4 ml-3">{{title}}</div>
-    <v-list class="pt-0" two-line>
-      <v-list-item v-if="selectable || osUpdates">
-        <v-list-item-action>
-          <v-checkbox v-if="selectable" color="primary" v-model="osUpdates"></v-checkbox>
-          <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-        </v-list-item-action>
-        <v-list-item-title>Operating System</v-list-item-title>
-        <v-list-item-subtitle>
+  <div class="ml-3">
+    <div class="text-subtitle-1 pt-4">{{title}}</div>
+    <div v-if="selectable || osUpdates" class="d-flex mt-4">
+      <div class="d-flex align-center justify-center action-select">
+        <v-checkbox hide-details v-if="selectable" color="primary" v-model="osUpdates" density="compact" class="pl-2"></v-checkbox>
+        <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
+      </div>
+      <div class="d-flex flex-column">
+        <div class="wrap-text text-subtitle-2">Operating System</div>
+        <div class="wrap-text pt-1 text-body-2">
           Update the operating system of the workers<br />
           (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-        </v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item v-if="selectable || k8sUpdates">
-        <v-list-item-action>
-          <v-checkbox v-if="selectable" color="primary" v-model="k8sUpdates"></v-checkbox>
-          <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-        </v-list-item-action>
-          <v-list-item-title >Kubernetes Patch Version</v-list-item-title>
-        <v-list-item-subtitle>
+        </div>
+      </div>
+    </div>
+    <div v-if="selectable || k8sUpdates" class="d-flex mt-4">
+      <div class="d-flex align-center justify-center action-select">
+        <v-checkbox hide-details v-if="selectable" color="primary" v-model="k8sUpdates" density="compact" class="pl-2"></v-checkbox>
+        <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
+      </div>
+      <div class="d-flex flex-column">
+        <div class="wrap-text text-subtitle-2">Kubernetes Patch Version</div>
+        <div class="wrap-text pt-1 text-body-2">
           Update the control plane of the cluster and the worker components<br />
           (control plane, most notably the API server, will be briefly unavailable during switch-over)
-        </v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item v-if="selectable">
-        <v-list-item-action>
-          <v-icon>mdi-information-outline</v-icon>
-        </v-list-item-action>
-        <v-list-item-title >Automatic updates will not update to preview versions</v-list-item-title>
-      </v-list-item>
-      <v-list-item v-if="showNoUpdates">
-        <v-list-item-action>
-          <v-icon>mdi-close-circle-outline</v-icon>
-        </v-list-item-action>
-        <v-list-item-title >Updates disabled</v-list-item-title>
-        <v-list-item-subtitle>
+        </div>
+      </div>
+    </div>
+    <div v-if="selectable" class="d-flex mt-4">
+      <div class="d-flex align-center justify-center action-select">
+        <v-icon>mdi-information-outline</v-icon>
+      </div>
+      <div class="d-flex align-center justify-center wrap-text text-subtitle-2">Automatic updates will not update to preview versions</div>
+    </div>
+    <div v-if="showNoUpdates" class="d-flex mt-4">
+      <div class="d-flex align-center justify-center action-select">
+        <v-icon>mdi-close-circle-outline</v-icon>
+      </div>
+      <div class="d-flex flex-column">
+        <div class="wrap-text text-subtitle-2">Updates disabled</div>
+        <div class="wrap-text pt-1 text-body-2">
           All automatic updates have been disabled for this cluster
-        </v-list-item-subtitle>
-      </v-list-item>
-    </v-list>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -110,3 +114,9 @@ export default defineComponent({
   },
 })
 </script>
+
+<style lang="scss" scoped>
+.action-select {
+  min-width: 48px;
+}
+</style>

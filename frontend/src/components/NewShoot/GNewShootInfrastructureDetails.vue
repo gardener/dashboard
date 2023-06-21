@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container class="px-0 mx-0">
     <v-row >
-      <v-col v-show="cloudProfiles.length > 1" cols="3">
+      <v-col v-if="cloudProfiles.length > 1" cols="3">
         <g-cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -483,10 +483,8 @@ export default defineComponent({
       this.validateInput()
     },
     onSecretValid (valid) {
-      if (this.secretValid !== valid) {
-        this.secretValid = valid
-        this.validateInput()
-      }
+      this.secretValid = valid
+      this.validateInput()
     },
     onInputRegion () {
       this.partitionID = head(this.partitionIDs)
@@ -546,10 +544,8 @@ export default defineComponent({
       this.validateInput()
     },
     onCloudProfileNameValid (valid) {
-      if (this.cloudProfileValid !== valid) {
-        this.cloudProfileValid = valid
-        this.validateInput()
-      }
+      this.cloudProfileValid = valid
+      this.validateInput()
     },
     validateInput () {
       const valid = !this.v$.$invalid && this.cloudProfileValid && this.floatingPoolValid && this.secretValid

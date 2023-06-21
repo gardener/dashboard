@@ -272,8 +272,9 @@ export default defineComponent({
       'patchDnsProvider',
       'deleteDnsProvider',
       'getDnsProviderSecrets',
+      'dnsSecretsByProviderKind',
     ]),
-    ...mapGetters(useSecretStore, [
+    ...mapActions(useSecretStore, [
       'dnsSecretsByProviderKind',
     ]),
     setData (data) {

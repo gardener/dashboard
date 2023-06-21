@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         @input="onInputmaintenanceBegin"
         @blur="v$.maintenanceBegin.$touch()"
         type="time"
+        variant="underlined"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
       ></v-text-field>
@@ -29,6 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('maintenanceTimezone')"
         @input="onInputmaintenanceTimezone"
         @blur="v$.maintenanceTimezone.$touch()"
+        variant="underlined"
       ></v-text-field>
     </v-col>
   </v-row>
