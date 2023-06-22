@@ -7,15 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     :shoot-item="shootItem"
-    @dialog-opened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-delete"
     confirm-button-text="Delete"
     confirm-required
     :button-text="buttonText"
-    :small-icon="small"
     width="600"
+    @dialog-opened="onDeleteDialogOpened"
   >
     <template #actionComponent>
       <v-list>

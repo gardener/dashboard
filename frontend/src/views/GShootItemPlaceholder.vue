@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, onBeforeUnmount } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import { useAuthzStore, useSecretStore, useShootStore, useTerminalStore } from '@/store'
 
@@ -19,37 +18,17 @@ import GShootItemError from '@/views/GShootItemError.vue'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 
-export default defineComponent({
+export default {
   components: {
     GShootItemLoading,
     GShootItemError,
-  },
-  setup () {
-    const shootStore = useShootStore()
-    const unsubscribe = shootStore.$onAction(({
-      name,
-      args,
-      after,
-    }) => {
-      switch (name) {
-        case 'handleEvent': {
-          after(() => this.handleShootEvent(...args))
-          break
-        }
-      }
-    })
-
-    onBeforeUnmount(() => {
-      unsubscribe()
-    })
-
-    return {}
   },
   data () {
     return {
       loading: false,
       component: undefined,
       error: undefined,
+      unsubscribeShootStore: () => {},
     }
   },
   computed: {
@@ -150,8 +129,23 @@ export default defineComponent({
     },
   },
   mounted () {
+    const shootStore = useShootStore()
+    this.unsubscribeShootStore = shootStore.$onAction(({
+      name,
+      args,
+      after,
+    }) => {
+      switch (name) {
+        case 'handleEvent': {
+          after(() => this.handleShootEvent(...args))
+          break
+        }
+      }
+    })
     this.load(this.$route)
   },
-
-})
+  beforeUnmount () {
+    this.unsubscribeShootStore()
+  },
+}
 </script>

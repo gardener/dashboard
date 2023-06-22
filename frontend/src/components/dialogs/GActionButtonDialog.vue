@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           :color="iconColor"
           :loading="loading"
           :width="buttonWidth"
+          class="text-none font-weight-regular justify-start"
           @click="showDialog"
         />
       </template>
@@ -182,10 +183,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-  :deep(.v-btn) {
-    padding-left: 16px !important;
-    justify-content: left !important;
-  }
-</style>
