@@ -5,118 +5,102 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list class="text-left">
-    <v-list-item>
-      <template #prepend>
+  <g-list class="text-left">
+    <g-list-item>
+      <template v-slot:prepend>
         <v-icon color="primary" icon="mdi-information-outline"/>
       </template>
-      <v-list-item-subtitle>Status</v-list-item-subtitle>
-      <v-list-item-title class="d-flex align-center pt-1">
-        {{statusTitle}}
-      </v-list-item-title>
-    </v-list-item>
+      <g-list-item-content label="Status">
+        {{ statusTitle }}
+      </g-list-item-content>
+    </g-list-item>
     <template v-if="!!lastMessage">
       <v-divider inset></v-divider>
-      <v-list-item>
-        <template #prepend>
+      <g-list-item>
+        <template v-slot:prepend>
           <v-icon color="primary" icon="mdi-post-outline"/>
         </template>
-        <v-list-item-subtitle>Last Message</v-list-item-subtitle>
-        <v-list-item-title class="d-flex align-center pt-1 message-block">
-          <g-ansi-text
-            :text="lastMessage"
-          />
-        </v-list-item-title>
-      </v-list-item>
+        <g-list-item-content label="Last Message">
+          <div class="message-block">
+            <g-ansi-text :text="lastMessage"/>
+          </div>
+        </g-list-item-content>
+      </g-list-item>
     </template>
     <v-divider inset></v-divider>
-    <v-list-item v-if="lastUpdateTime">
-      <template #prepend>
+    <g-list-item v-if="lastUpdateTime">
+      <template v-slot:prepend>
         <v-icon color="primary" icon="mdi-clock-outline"/>
       </template>
-      <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
-      <v-list-item-title class="d-flex align-center pt-1">
-        <v-lazy>
-          <g-time-string :date-time="lastUpdateTime" mode="past"></g-time-string>
-        </v-lazy>
-      </v-list-item-title>
-    </v-list-item>
-     <v-list-item v-if="lastTransitionTime">
-      <template #prepend>
-        <span> </span>
-      </template>
-      <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
-      <v-list-item-title class="d-flex align-center pt-1">
-        <v-lazy>
-          <g-time-string :date-time="lastTransitionTime" mode="past"></g-time-string>
-        </v-lazy>
-      </v-list-item-title>
-    </v-list-item>
+      <g-list-item-content label="Last Updated">
+        <g-time-string :date-time="lastUpdateTime" mode="past"></g-time-string>
+      </g-list-item-content>
+    </g-list-item>
+    <g-list-item v-if="lastTransitionTime">
+      <g-list-item-content label="Last Status Change">
+        <g-time-string :date-time="lastTransitionTime" mode="past"></g-time-string>
+      </g-list-item-content>
+    </g-list-item>
     <template v-if="hasError">
       <v-divider inset></v-divider>
-      <v-list-item>
-        <template #prepend>
+      <g-list-item>
+        <template v-slot:prepend>
           <v-icon color="error" icon="mdi-alert-circle-outline"/>
         </template>
-        <v-list-item-subtitle>{{errorDescriptions.length > 1 ? 'Last Errors' : 'Last Error'}}</v-list-item-subtitle>
-        <v-list-item-title class="d-flex flex-column align-left pt-1 message-block">
-          <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
-            <v-divider v-if="index > 0" class="my-2"></v-divider>
-            <v-alert
-              v-for="({description, link, userError, infraAccountError}) in lastErrorDescription.errorCodeObjects" :key="description"
-              type="error"
-              :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
-              :prominent="!!userError"
-            >
-              <h3 v-if="userError">Your Action is required</h3>
-              <h4 class="wrap-text font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
-              Please read the error message carefully and take action.</h4>
-              <span class="wrap-text">
-                <span v-if="infraAccountError">There is a problem with your secret
-                  <code>
-                    <router-link v-if="canLinkToSecret"
-                      :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
-                    >
-                      <span>{{secretBindingName}}</span>
-                    </router-link>
-                    <span v-else>{{secretBindingName}}</span>
-                  </code>:</span>
-                  <span>{{description}}</span>
-                  <div v-if="link">
-                    <g-external-link
-                      :url="link.url"
-                      class="inherit-color font-weight-bold"
-                    >
-                      {{link.text}}
-                    </g-external-link>
-                  </div>
-              </span>
-            </v-alert>
-            <g-ansi-text
-              :text="lastErrorDescription.description"
-              class="text-error"
-            />
+        <g-list-item-content :label="errorDescriptions.length > 1 ? 'Last Errors' : 'Last Error'">
+          <div class="message-block">
+            <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
+              <v-divider v-if="index > 0" class="my-2"></v-divider>
+              <v-alert
+                v-for="({ description, link, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
+                type="error"
+                :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
+                :prominent="!!userError"
+              >
+                <h3 v-if="userError">Your Action is required</h3>
+                <h4 class="wrap-text font-weight-bold">This error is flagged as user error which indicates that no Gardener operator action is required.
+                Please read the error message carefully and take action.</h4>
+                <span class="wrap-text">
+                  <span v-if="infraAccountError">There is a problem with your secret
+                    <code>
+                      <router-link v-if="canLinkToSecret"
+                        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
+                      >
+                        <span>{{ secretBindingName }}</span>
+                      </router-link>
+                      <span v-else>{{ secretBindingName }}</span>
+                    </code>:</span>
+                    <span>{{ description }}</span>
+                    <div v-if="link">
+                      <g-external-link
+                        :url="link.url"
+                        class="inherit-color font-weight-bold"
+                      >
+                        {{ link.text }}
+                      </g-external-link>
+                    </div>
+                </span>
+              </v-alert>
+              <g-ansi-text
+                :text="lastErrorDescription.description"
+                class="text-error"
+              />
+            </div>
           </div>
-        </v-list-item-title>
-      </v-list-item>
+        </g-list-item-content>
+      </g-list-item>
     </template>
-  </v-list>
+  </g-list>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GAnsiText from '@/components/GAnsiText.vue'
-import GTimeString from '@/components/GTimeString.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
-export default defineComponent({
+export default {
   components: {
     GAnsiText,
-    GTimeString,
-    GExternalLink,
   },
   props: {
     statusTitle: {
@@ -149,14 +133,12 @@ export default defineComponent({
       return this.secretBindingName && this.namespace
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>
-
   .message-block {
     max-height: 230px;
     overflow-y: auto;
   }
-
 </style>

@@ -5,9 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="mx-1">
+  <div class="g-action-button">
     <v-btn
-      density="compact"
+      density="comfortable"
       variant="text"
       :disabled="disabled"
       :icon="icon"
@@ -16,8 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       :size="size"
       :to="to"
       @click.stop.prevent="emit('click', $event)"
-    >
-    </v-btn>
+    />
     <v-tooltip v-if="hasTooltip"
       activator="parent"
       location="top"
@@ -69,6 +68,14 @@ const emit = defineEmits([
 const { disabled, icon, text, color, size, tooltip, to } = toRefs(props)
 
 const hasTooltip = computed(() => {
-  return slots.tooltip || tooltip.value
+  return !!slots.tooltip || !!tooltip.value
 })
 </script>
+
+<style lang="scss" scoped>
+  .g-action-button {
+    padding-left: 4px;
+    padding-right: 4px;
+    width: fit-content !important;
+  }
+</style>

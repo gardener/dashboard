@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-main ref="main">
+  <v-main ref="mainRef">
     <g-alert-banner
       :message="alertBannerMessage"
       :type="alertBannerType"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
@@ -31,7 +31,7 @@ const configStore = useConfigStore()
 const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(configStore)
 
 // refs
-const main = ref(null)
+const mainRef = ref(null)
 
 function setElementOverflowY (element, value) {
   if (element) {
@@ -46,16 +46,20 @@ const routerViewKey = computed(() => {
   return route.path
 })
 
+const mainContainer = computed(() => {
+  return mainRef.value?.$el.querySelector(':scope > .v-container')
+})
+
 function setScrollTop (top = 0) {
-  main.value.$el.scrollTop = top
+  mainRef.value.$el.scrollTop = top
 }
 
 onMounted(() => {
   try {
-    const mainElement = main.value.$el
+    const mainElement = mainRef.value.$el
     setElementOverflowY(mainElement, 'hidden')
     // Find the first direct child div element of mainElement with a class attribute ending in "wrap"
-    const element = mainElement.querySelector(':scope > div[class$="wrap"]')
+    const element = mainElement.querySelector(':scope > .v-container')
     setElementOverflowY(element, 'auto')
   } catch (err) {
     logger.error(err.message)
@@ -65,4 +69,6 @@ onMounted(() => {
 defineExpose({
   setScrollTop,
 })
+
+provide('mainContainer', mainContainer)
 </script>

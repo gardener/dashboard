@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
-          <g-control-plane-high-availability-tag :shoot-item="shootItem"/>
+          <g-control-plane-high-availability-tag :shoot-item="shootItem" size="small"/>
         </div>
       </template>
       <template v-if="cell.header.key === 'issueSince'">

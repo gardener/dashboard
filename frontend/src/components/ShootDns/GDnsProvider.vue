@@ -5,54 +5,54 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
-    :title="secretName"
-    :popper-key="`worker_group_${type}_${secretName}`"
+  <g-popover
+    :toolbar-title="secretName"
   >
-    <template #popperRef>
+    <template v-slot:activator="{ props }">
       <v-chip
-        small
+        v-bind="props"
+        size="small"
         color="primary"
         variant="outlined"
-        class="cursor-pointer my-0 ml-0">
+        class="cursor-pointer my-0 ml-0"
+      >
           <g-vendor-icon :icon="type" :size="20"/>
           <span class="px-1">{{secretName}}</span>
-          <v-icon v-if="primary" small>mdi-star</v-icon>
+          <v-icon v-if="primary" icon="mdi-star" size="small"/>
       </v-chip>
     </template>
-    <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description, to}) in dnsProviderDescriptions" :key="title" class="px-0">
-        <v-list-item-subtitle class="pt-1">{{title}}</v-list-item-subtitle>
-        <v-list-item-title v-if="to">
-          <router-link :to="to">
-            {{value}} {{description}}
-          </router-link>
-        </v-list-item-title>
-        <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
-      </v-list-item>
-      <v-list-item v-if="secret" class="px-0">
-        <g-secret-details-item-content
-          class="pb-2"
-          dns
-          :secret="secret"
-          details-title />
-      </v-list-item>
-    </v-list>
-  </g-popper>
+    <template v-slot:default>
+      <v-list class="pa-0">
+        <v-list-item v-for="({title, value, description, to}) in dnsProviderDescriptions" :key="title" class="px-0">
+          <v-list-item-subtitle class="pt-1">{{title}}</v-list-item-subtitle>
+          <v-list-item-title v-if="to">
+            <router-link :to="to">
+              {{value}} {{description}}
+            </router-link>
+          </v-list-item-title>
+          <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
+        </v-list-item>
+        <v-list-item v-if="secret" class="px-0">
+          <g-secret-details-item-content
+            class="pb-2"
+            dns
+            :secret="secret"
+            details-title />
+        </v-list-item>
+      </v-list>
+    </template>
+  </g-popover>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-import GPopper from '@/components/GPopper'
 import GVendorIcon from '@/components/GVendorIcon'
-import join from 'lodash/join'
-import get from 'lodash/get'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
 
-export default defineComponent({
+import join from 'lodash/join'
+import get from 'lodash/get'
+
+export default {
   components: {
-    GPopper,
     GVendorIcon,
     GSecretDetailsItemContent,
   },
@@ -135,11 +135,5 @@ export default defineComponent({
       return description
     },
   },
-})
+}
 </script>
-
-<style lang="scss" scoped>
-  ::v-deep .popper {
-    text-align: initial;
-  }
-</style>

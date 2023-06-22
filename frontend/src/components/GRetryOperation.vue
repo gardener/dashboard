@@ -9,8 +9,9 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
-        icon="mdi-reload"
+        density="comfortable"
         variant="text"
+        icon="mdi-reload"
         class="text-primary retryButton"
         @click="onRetryOperation"
       />

@@ -736,29 +736,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@floating-ui/core@npm:1.3.0"
-  checksum: 51d8acc9fd720cb217cae7074f5f923bf2b6e0bb4f228e03077254d0f6e49f9753b34a14b9abb1f11671c3b61284c487ab27c4ba1843bcd4397e7d72dc7d4a59
+"@floating-ui/core@npm:^1.1.0":
+  version: 1.3.1
+  resolution: "@floating-ui/core@npm:1.3.1"
+  checksum: fe3b40fcaec95b0825c01a98330ae75b60c61c395ca012055a32f9c22ab97fde8ce1bd14fce3d242beb9dbe4564c90ce4a7a767851911d4215b9ec7721440e5b
   languageName: node
   linkType: hard
 
-"@floating-ui/dom@npm:^1.2.9":
-  version: 1.3.0
-  resolution: "@floating-ui/dom@npm:1.3.0"
+"@floating-ui/dom@npm:~1.1.1":
+  version: 1.1.1
+  resolution: "@floating-ui/dom@npm:1.1.1"
   dependencies:
-    "@floating-ui/core": ^1.3.0
-  checksum: 39f92b3ce6de5d60a1cea951cbee22d0a9670fe4499b0128f0868a697d9288989994394d90cb99c3d1485aa432621e064d6b3c52914042a7d8d3c05897fb185d
-  languageName: node
-  linkType: hard
-
-"@floating-ui/vue@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@floating-ui/vue@npm:1.0.1"
-  dependencies:
-    "@floating-ui/dom": ^1.2.9
-    vue-demi: ">=0.13.0"
-  checksum: 788667333aac314ee78039e2ee2c65e39ed897639f8c21fbe47af9c2343beecd90134d969a57ce121692dfc53bae9ec506a0e184e6567cdb713e9ee012e2c677
+    "@floating-ui/core": ^1.1.0
+  checksum: 8b7f3b98ed7ec0b634e4a0b735253b0442358c5cea8302935fc185b2bd882202a053622abe9248c76d0908645dd35f93adeaed2d64371b2ab76b36725ce3f7d3
   languageName: node
   linkType: hard
 
@@ -848,7 +838,6 @@ __metadata:
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
     "@braintree/sanitize-url": ^6.0.2
-    "@floating-ui/vue": ^1.0.1
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
     "@vitejs/plugin-vue": ^3.0.3
@@ -870,6 +859,7 @@ __metadata:
     eslint-plugin-vitest: ^0.0.57
     eslint-plugin-vue: ^9.3.0
     eventemitter3: ^5.0.0
+    floating-vue: 2.0.0-beta.22
     get-contrast: ^3.0.0
     highlight.js: ^11.8.0
     js-cookie: ^3.0.1
@@ -5244,6 +5234,18 @@ __metadata:
   version: 3.2.7
   resolution: "flatted@npm:3.2.7"
   checksum: 427633049d55bdb80201c68f7eb1cbd533e03eac541f97d3aecab8c5526f12a20ccecaeede08b57503e772c769e7f8680b37e8d482d1e5f8d7e2194687f9ea35
+  languageName: node
+  linkType: hard
+
+"floating-vue@npm:2.0.0-beta.22":
+  version: 2.0.0-beta.22
+  resolution: "floating-vue@npm:2.0.0-beta.22"
+  dependencies:
+    "@floating-ui/dom": ~1.1.1
+    vue-resize: ^2.0.0-alpha.1
+  peerDependencies:
+    vue: ^3.2.0
+  checksum: 86d97e442aea7b94aaddfe0e18380f3e24f98e96a21b61d53a0022e2eff4454846b979fe56851c10cc621479c885407e3c86df80c61d7366f63b71ef329ecd99
   languageName: node
   linkType: hard
 
@@ -10002,22 +10004,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-demi@npm:>=0.13.0":
-  version: 0.14.5
-  resolution: "vue-demi@npm:0.14.5"
-  peerDependencies:
-    "@vue/composition-api": ^1.0.0-rc.1
-    vue: ^3.0.0-0 || ^2.6.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  bin:
-    vue-demi-fix: bin/vue-demi-fix.js
-    vue-demi-switch: bin/vue-demi-switch.js
-  checksum: ff44b9372b8224590514252a2f73363cced6062205f9628a6b130dccb80e2023d55cd9d1da94aeb68d5539b7ea9eedcecf88ab281a3a9ff48b8db4c5366b9643
-  languageName: node
-  linkType: hard
-
 "vue-demi@npm:>=0.14.0":
   version: 0.14.0
   resolution: "vue-demi@npm:0.14.0"
@@ -10048,6 +10034,15 @@ __metadata:
   peerDependencies:
     eslint: ">=6.0.0"
   checksum: 41b19530a2e9bde70d4ad9e95c034c90d5b7f79988dd1751c16c6ca9f5fc785852659fa8431701bc44c8b343218c56f4db0976147da029f16de3aa834582607f
+  languageName: node
+  linkType: hard
+
+"vue-resize@npm:^2.0.0-alpha.1":
+  version: 2.0.0-alpha.1
+  resolution: "vue-resize@npm:2.0.0-alpha.1"
+  peerDependencies:
+    vue: ^3.0.0
+  checksum: 574321cc4792a393fe8f698a840cd6f11c8524da7869cffa8dc17a342521ee17579e14c243510bba96ef197f9a99ef8c57c22e9320c1486f62150f01f7a17ebe
   languageName: node
   linkType: hard
 

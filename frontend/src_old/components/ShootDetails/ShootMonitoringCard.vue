@@ -9,14 +9,12 @@ SPDX-License-Identifier: Apache-2.0
     <v-toolbar flat dense color="toolbar-background toolbar-title--text">
       <v-toolbar-title class="text-subtitle-1">Logging and Monitoring</v-toolbar-title>
     </v-toolbar>
-    <v-list>
-      <v-list-item>
-        <v-list-item-icon>
-          <v-icon color="primary">mdi-tractor</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>Status</v-list-item-subtitle>
-          <v-list-item-title class="d-flex align-center pt-1">
+    <g-list>
+      <g-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-tractor" color="primary"/>
+        </template>
+        <g-list-item-content label="Status">
             <shoot-status
               class="pr-2"
               :shoot-item="shootItem"
@@ -25,9 +23,8 @@ SPDX-License-Identifier: Apache-2.0
               show-status-text
               >
             </shoot-status>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+        </g-list-item-content>
+      </g-list-item>
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
@@ -58,19 +55,34 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+import { useAuthnStore } from '@/store'
+
 import ShootStatus from '@/components/ShootStatus.vue'
 import StatusTags from '@/components/StatusTags.vue'
 import ClusterMetrics from '@/components/ClusterMetrics.vue'
 import { shootItem } from '@/mixins/shootItem'
+import { useSanitizeUrl } from '@/composables'
 
-export default {
+export default defineComponent({
+  setup () {
+    const sanitizeUrl = useSanitizeUrl()
+    return {
+      sanitizeUrl,
+    }
+  },
   components: {
     ShootStatus,
     StatusTags,
-    ClusterMetrics
+    ClusterMetrics,
   },
   mixins: [shootItem],
+  inject: ['api', 'logger'],
   computed: {
+    ...mapState(useAuthnStore, [
+      'isAdmin',
+    ]),
     metricsNotAvailableText () {
       if (this.isTestingCluster) {
         return 'Cluster Metrics not available for clusters with purpose testing'
@@ -79,7 +91,7 @@ export default {
         return 'Cluster Metrics not available'
       }
       return undefined
-    }
-  }
-}
+    },
+  },
+})
 </script>

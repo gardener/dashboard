@@ -5,41 +5,39 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list>
-    <template v-for="({ title, subtitle, value, displayValue }, index) in commands" :key="title">
-      <g-list-item>
-        <template v-if="index === 0" v-slot:prepend>
-          <v-icon icon="mdi-console-line" color="primary"/>
+  <template v-for="({ title, subtitle, value, displayValue }, index) in commands" :key="title">
+    <g-list-item>
+      <template v-if="index === 0" v-slot:prepend>
+        <v-icon icon="mdi-console-line" color="primary"/>
+      </template>
+      <g-list-item-content>
+        {{ title }}
+        <template v-slot:description>
+          {{ subtitle }}
         </template>
-        <g-list-item-content>
-          {{ title }}
-          <template v-slot:description>
-            {{ subtitle }}
-          </template>
-        </g-list-item-content>
-        <template v-slot:append>
-          <g-gardenctl-info/>
-          <g-copy-btn :clipboard-text="value"/>
-          <g-action-button
-            :icon="visibilityIcon(index)"
-            :tooltip="visibilityTitle(index)"
-            @click="toggle(index)"
-          />
-        </template>
-      </g-list-item>
-      <g-list-item v-if="expansionPanel[index]"
-        :key="'expansion-' + title"
-      >
-        <g-list-item-content class="pt-0">
-          <g-code-block
-            lang="shell"
-            :content="displayValue"
-            :show-copy-button="false"
-          />
-        </g-list-item-content>
-      </g-list-item>
-    </template>
-  </g-list>
+      </g-list-item-content>
+      <template v-slot:append>
+        <g-gardenctl-info/>
+        <g-copy-btn :clipboard-text="value"/>
+        <g-action-button
+          :icon="visibilityIcon(index)"
+          :tooltip="visibilityTitle(index)"
+          @click="toggle(index)"
+        />
+      </template>
+    </g-list-item>
+    <g-list-item v-if="expansionPanel[index]"
+      :key="'expansion-' + title"
+    >
+      <g-list-item-content class="pt-0">
+        <g-code-block
+          lang="shell"
+          :content="displayValue"
+          :show-copy-button="false"
+        />
+      </g-list-item-content>
+    </g-list-item>
+  </template>
 </template>
 
 <script>

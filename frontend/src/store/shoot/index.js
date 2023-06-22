@@ -221,6 +221,16 @@ export const useShootStore = defineStore('shoot', () => {
     clearAll()
   }
 
+  async function assignInfo (metadata) {
+    if (metadata) {
+      try {
+        await fetchInfo(metadata)
+      } catch (err) {
+        logger.error('Failed to fetch shoot info:', err.message)
+      }
+    }
+  }
+
   function synchronize () {
     const fetchShoot = async options => {
       const [
@@ -231,7 +241,7 @@ export const useShootStore = defineStore('shoot', () => {
         api.getIssuesAndComments(options),
       ])
       // fetch shootInfo in the background (do not await the promise)
-      assignInfo(shoot)
+      assignInfo(shoot?.metadata)
       logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
       return { shoots: [shoot], issues, comments }
     }
@@ -247,14 +257,6 @@ export const useShootStore = defineStore('shoot', () => {
       ])
       logger.debug('Fetched shoots and tickets in namespace %s', options.namespace)
       return { shoots: items, issues, comments: [] }
-    }
-
-    const assignInfo = async ({ metadata, spec }) => {
-      try {
-        await fetchInfo(metadata)
-      } catch (err) {
-        logger.error('Failed to fetch shoot info:', err.message)
-      }
     }
 
     // await and handle response data in the background
@@ -325,13 +327,14 @@ export const useShootStore = defineStore('shoot', () => {
   function setSelection (metadata) {
     if (!metadata) {
       state.selection = null
+      return
     }
     const item = findItem(state)(metadata)
     if (item) {
       const { namespace, name } = metadata
       state.selection = { namespace, name }
       if (!item.info) {
-        fetchInfo({ namespace, name })
+        assignInfo(metadata)
       }
     }
   }

@@ -6,46 +6,52 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div v-if="visible">
-    <g-popper
-      :title="popperTitle"
-      :toolbar-color="color"
-      :popper-key="popperKeyWithType"
+    <g-popover
       :placement="popperPlacement"
       :disabled="!condition.message"
+      :toolbar-title="popperTitle"
+      :toolbar-color="color"
       @update:visible="onPopperInput"
     >
-      <template #popperRef>
-        <div>
-          <v-tooltip location="top" max-width="400px" :disabled="tooltipDisabled">
-            <template #activator="{ props }">
-              <v-chip
-                v-bind="props"
-                class="status-tag"
-                :class="{ 'cursor-pointer': condition.message }"
-                :variant="!isError && 'outlined'"
-                :text-color="textColor"
-                small
-                :color="color">
-                <v-icon v-if="chipIcon" size="x-small" start class="chip-icon">{{chipIcon}}</v-icon>
-                {{chipText}}
-              </v-chip>
-            </template>
-            <div class="font-weight-bold">{{chipTooltip.title}}</div>
-            <div>Status: {{chipTooltip.status}}</div>
+      <template v-slot:activator="{ props }">
+        <v-chip
+          v-bind="props"
+          :class="{ 'cursor-pointer': condition.message }"
+          :variant="!isError ? 'outlined' : undefined"
+          :text-color="textColor"
+          size="small"
+          :color="color"
+          class="status-tag"
+        >
+          <v-icon v-if="chipIcon"
+            :icon="chipIcon"
+            size="x-small"
+            start
+            class="chip-icon"
+          />
+          {{chipText}}
+          <v-tooltip
+            activator="parent"
+            location="top"
+            max-width="400px"
+            :disabled="tooltipDisabled"
+          >
+            <div class="font-weight-bold">{{ chipTooltip.title }}</div>
+            <div>Status: {{ chipTooltip.status }}</div>
             <div v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects" :key="shortDescription">
               <v-icon class="mr-1" color="white" size="small">mdi-account-alert</v-icon>
-              <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
+              <span class="font-weight-bold text--lighten-2">{{ shortDescription }}</span>
             </div>
             <template v-if="chipTooltip.description">
               <v-divider color="white"></v-divider>
               <div>
-                {{chipTooltip.description}}
+                {{ chipTooltip.description }}
               </div>
             </template>
           </v-tooltip>
-        </div>
+        </v-chip>
       </template>
-      <template #card>
+      <template v-slot:default>
         <g-shoot-message-details
           :status-title="chipStatus"
           :last-message="nonErrorMessage"
@@ -55,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
           :namespace="namespace"
         />
       </template>
-    </g-popper>
+    </g-popover>
   </div>
 </template>
 
@@ -63,7 +69,6 @@ SPDX-License-Identifier: Apache-2.0
 import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
-import GPopper from '@/components/GPopper.vue'
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 
 import { isUserError, objectsFromErrorCodes } from '@/utils/errorCodes'
@@ -75,7 +80,6 @@ import { useAuthnStore } from '@/store'
 
 export default defineComponent({
   components: {
-    GPopper,
     GShootMessageDetails,
   },
   props: {
@@ -88,10 +92,6 @@ export default defineComponent({
     },
     namespace: {
       type: String,
-    },
-    popperKey: {
-      type: String,
-      required: true,
     },
     popperPlacement: {
       type: String,
