@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template #item="{ item, props }">
-        <v-list-item v-bind="omit(props, 'title')">
+        <v-list-item v-bind="props" :title=undefined>
           <template v-if="item.raw.value.length">
             <span v-if="item.raw.startsWithWildcard">&lt;prefix&gt;</span>
             <span>{{item.raw.value}}</span>
@@ -77,7 +77,6 @@ import { getValidationErrors } from '@/utils'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
-import omit from 'lodash/omit'
 
 export default defineComponent({
   setup () {
@@ -158,7 +157,6 @@ export default defineComponent({
     },
   },
   methods: {
-    omit,
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },

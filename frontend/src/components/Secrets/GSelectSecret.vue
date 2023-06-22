@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       variant="underlined"
       >
       <template #item="{ item, props }">
-        <v-list-item v-bind="omit(props, 'title')" :subtitle="item.raw.description">
+        <v-list-item v-bind="props" :title="undefined" :subtitle="item.raw.description">
           {{ get(item.raw, 'metadata.name') }}
           <v-icon v-if="!isOwnSecret(item.raw)">mdi-share</v-icon>
         </v-list-item>
@@ -58,7 +58,6 @@ import isEqual from 'lodash/isEqual'
 import isEmpty from 'lodash/isEmpty'
 import head from 'lodash/head'
 import get from 'lodash/get'
-import omit from 'lodash/omit'
 import toUpper from 'lodash/toUpper'
 import { mapState, mapActions } from 'pinia'
 import { getValidationErrors, isOwnSecret, selfTerminationDaysForSecret } from '@/utils'
@@ -213,7 +212,6 @@ export default defineComponent({
     ]),
     get,
     isOwnSecret,
-    omit,
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },

@@ -90,7 +90,9 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
 
   const dnsProvidersWithPrimarySupport = computed(() => {
     const types = dnsProviderTypesWithPrimarySupport.value
-    return filter(dnsProviders.value, ({ type }) => includes(types, type))
+    return filter(dnsProviders.value, ({ type, secretName }) => {
+      return includes(types, type) && !!secretName
+    })
   })
 
   const dnsProvidersValid = computed(() => {

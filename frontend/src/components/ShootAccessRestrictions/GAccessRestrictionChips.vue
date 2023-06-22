@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #activator="{ props }">
           <v-chip
             v-bind="props"
-            small
+            size="small"
             variant="outlined"
             color="primary"
             class="mr-2 my-0"
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #activator="{ props }">
           <v-chip
             v-bind="props"
-            small
+            size="small"
             variant="outlined"
             color="primary"
             class="mr-2"

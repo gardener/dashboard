@@ -6,12 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="alternate-row-background">
-    <v-expand-transition
-      :appear="animateOnAppear"
-      v-for="(worker, index) in internalWorkers"
-      :key="worker.id"
-    >
-      <v-row class="list-item pt-2 my-0 mx-1" :key="worker.id">
+    <v-slide-y-transition group>
+      <v-row
+        class="list-item pt-2 my-0 mx-1"
+        :key="worker.id"
+        v-for="(worker, index) in internalWorkers"
+        >
         <g-worker-input-generic
           ref="workerInput"
           :worker="worker"
@@ -32,34 +32,24 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn v-show="index > 0 || internalWorkers.length > 1"
               size="x-small"
               variant="outlined"
-              icon
+              icon="mdi-close"
               color="grey"
-              @click.stop="onRemoveWorker(index)">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+              @click.stop="onRemoveWorker(index)"
+            />
           </template>
         </g-worker-input-generic>
       </v-row>
-    </v-expand-transition>
+    </v-slide-y-transition>
     <v-row key="addWorker" class="list-item mb-1 mx-1">
       <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
-          size="small"
-          @click="addWorker"
-          variant="outlined"
-          fab
-          icon
-          class="ml-1"
-          color="primary">
-          <v-icon class="text-primary">mdi-plus</v-icon>
-        </v-btn>
-        <v-btn
-          :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           variant="text"
-          color="primary">
-          Add Worker Group
+          color="primary"
+        >
+          <v-icon class="text-primary">mdi-plus</v-icon>
+          <span class="ml-2">Add Worker Group</span>
         </v-btn>
       </v-col>
     </v-row>
@@ -119,7 +109,6 @@ export default defineComponent({
       existingWorkerCIDR: undefined,
       kubernetesVersion: undefined,
       initialZones: undefined,
-      animateOnAppear: false,
     }
   },
   computed: {
@@ -339,9 +328,6 @@ export default defineComponent({
         this.kubernetesVersion = updatedVersion
       })
     }
-  },
-  updated () {
-    this.animateOnAppear = true
   },
 })
 </script>
