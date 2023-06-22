@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { mergeProps } from 'vue'
 import {
   useLogger,
   useApi,
@@ -17,5 +18,6 @@ export default {
     app.provide('api', useApi())
     app.provide('sanitizeUrl', useSanitizeUrl())
     app.provide('renderComponent', useRenderComponent())
+    app.provide('mergeProps', mergeProps)
   },
 }

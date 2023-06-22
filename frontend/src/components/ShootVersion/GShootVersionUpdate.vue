@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           />
           <v-list-item v-else
             v-bind="props"
-            :subtitle="versionItemDescription(props)"
+            :subtitle="versionItemDescription(props.value)"
             :disabled="props.value.notNextMinor"
           >
             <v-tooltip v-if="props.value.notNextMinor"
@@ -56,6 +56,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
+import semver from 'semver'
+
+import GHintColorizer from '@/components/GHintColorizer.vue'
 
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -63,8 +66,6 @@ import upperFirst from 'lodash/upperFirst'
 import head from 'lodash/head'
 import get from 'lodash/get'
 import join from 'lodash/join'
-import semver from 'semver'
-import GHintColorizer from '@/components/GHintColorizer.vue'
 
 export default defineComponent({
   components: {
@@ -216,8 +217,7 @@ export default defineComponent({
       }
       return invalid
     },
-    versionItemDescription (props) {
-      const version = props.value
+    versionItemDescription (version) {
       const itemDescription = []
       if (version.classification) {
         itemDescription.push(`Classification: ${version.classification}`)

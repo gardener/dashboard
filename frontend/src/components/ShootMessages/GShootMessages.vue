@@ -5,39 +5,49 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
+  <g-popover
     v-if="visible"
-    :title="statusTitle"
+    :toolbar-title="statusTitle"
     :toolbar-color="overallColor"
-    :popper-key="`shoot_warning_${shootName}_${shootNamespace}`"
+    :container-props="{ class: 'pa-0' }"
   >
-    <template v-slot:popperRef>
-      <v-btn icon :size="small && 'x-small'">
-        <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" :color="overallColor" :size="small && 'small'">{{icon}}</v-icon>
-          </template>
-          <span>{{tooltip}}</span>
-        </v-tooltip>
-      </v-btn>
+    <template v-slot:activator="{ props }">
+      <g-action-button
+        v-bind="props"
+        :icon="icon"
+        :color="overallColor"
+        :size="size"
+        :tooltip="tooltip"
+      />
     </template>
-    <v-list>
-      <v-list-item
-        v-for="({key, icon, severity, component }) in shootMessages"
-        :key="key">
-        <template v-slot:prepend>
-          <v-icon :color="colorForSeverity(severity)" :icon="icon"/>
-        </template>
-        <component :is="component.name" v-bind="component.props" class="message" />
-      </v-list-item>
-    </v-list>
-  </g-popper>
+    <template v-slot:text>
+      <v-list
+        density="compact"
+        class="py-1"
+      >
+        <v-list-item
+          v-for="({key, icon, severity, component }) in shootMessages"
+          :key="key"
+        >
+          <template v-slot:prepend>
+            <v-icon :icon="icon" :color="colorForSeverity(severity)"/>
+          </template>
+          <component
+            :is="component.name"
+            v-bind="component.props"
+            class="message"
+          />
+        </v-list-item>
+      </v-list>
+    </template>
+  </g-popover>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
+import { mapState, mapActions } from 'pinia'
+import { useAuthzStore, useCloudProfileStore, useConfigStore } from '@/store'
 
-import GPopper from '@/components/GPopper.vue'
 import GK8sExpirationMessage from '@/components/ShootMessages/GK8sExpirationMessage.vue'
 import GWorkerGroupExpirationMessage from '@/components/ShootMessages/GWorkerGroupExpirationMessage.vue'
 import GNoHibernationScheduleMessage from '@/components/ShootMessages/GNoHibernationScheduleMessage.vue'
@@ -46,11 +56,7 @@ import GConstraintMessage from '@/components/ShootMessages/GConstraintMessage.vu
 import GMaintenanceStatusMessage from '@/components/ShootMessages/GMaintenanceStatusMessage.vue'
 
 import { shootItem } from '@/mixins/shootItem'
-import {
-  isSelfTerminationWarning,
-} from '@/utils'
-import { mapState, mapActions } from 'pinia'
-import { useAuthzStore, useCloudProfileStore, useConfigStore } from '@/store'
+import { isSelfTerminationWarning } from '@/utils'
 
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -58,9 +64,7 @@ import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 
 export default defineComponent({
-  name: 'shoot-messages',
   components: {
-    GPopper,
     GK8sExpirationMessage,
     GWorkerGroupExpirationMessage,
     GNoHibernationScheduleMessage,
@@ -68,6 +72,8 @@ export default defineComponent({
     GConstraintMessage,
     GMaintenanceStatusMessage,
   },
+  inject: ['mainContainer', 'logger'],
+  mixins: [shootItem],
   props: {
     small: {
       type: Boolean,
@@ -86,7 +92,6 @@ export default defineComponent({
       default: false,
     },
   },
-  mixins: [shootItem],
   computed: {
     ...mapState(useAuthzStore, [
       'canPatchShoots',
@@ -316,6 +321,9 @@ export default defineComponent({
       }
       return 'Cluster has notifications'
     },
+    size () {
+      return this.small ? 'small' : 'default'
+    },
     statusTitle () {
       return this.title ? this.title : `Issues for Cluster ${this.shootName}`
     },
@@ -360,12 +368,15 @@ export default defineComponent({
     white-space: normal;
     overflow-y: auto;
   }
+  :deep(.v-card .v-card-text) {
+      padding: 0px !important;
+  }
 
   :deep(.v-card) {
-    .v-card__text {
+
+    .v-card-text {
       padding: 0px;
     }
-
     .v-list-item__icon {
       padding: 8px 16px 8px 0px;
       margin: 0px !important;
@@ -379,5 +390,4 @@ export default defineComponent({
       min-height: 0px;
     }
   }
-
 </style>

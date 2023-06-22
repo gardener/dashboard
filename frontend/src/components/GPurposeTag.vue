@@ -8,11 +8,11 @@ SPDX-License-Identifier: Apache-2.0
   <v-tooltip location="top">
     <template v-slot:activator="{ props }">
       <v-chip v-if="!!shortPurpose"
-        :variant="!isCritical ? 'outlined' : undefined"
         v-bind="props"
+        :variant="!isCritical ? 'outlined' : undefined"
         :text-color="textColor"
         color="primary"
-        small
+        size="small"
         class="purpose-tag"
       >
         {{ shortPurpose }}

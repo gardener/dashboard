@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               v-bind="props"
               icon="mdi-plus"
-              icon-color="toolbar-title"
+              color="toolbar-title"
               :to="{ name: 'NewShoot', params: { namespace } }"
             />
           </template>
@@ -131,10 +131,11 @@ SPDX-License-Identifier: Apache-2.0
             </code>
             <template v-slot:append>
               <v-btn
+                variant="text"
+                density="comfortable"
                 icon="mdi-close"
-                icon-color="toolbar-title"
-                class="text-grey-lighten-4"
-                @click="hideDialog"
+                color="toolbar-title"
+                @click.stop="hideDialog"
               />
             </template>
           </g-toolbar>
@@ -506,7 +507,7 @@ export default defineComponent({
         },
         {
           title: 'READINESS',
-          MediaKeySystemAccess: 'readiness',
+          key: 'readiness',
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,

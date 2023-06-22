@@ -7,27 +7,36 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="d-flex align-center">
-      <g-popper
-        :title="toolbarTitle"
+      <g-popover
+        :toolbar-title="toolbarTitle"
         :toolbar-color="color"
-        :popper-key="popperKeyWithType"
         :placement="popperPlacement"
       >
-        <template v-slot:popperRef>
+        <template v-slot:activator="{ props: activatorProps }">
           <div class="d-flex align-center">
             <v-tooltip location="top">
-              <template v-slot:activator="{ props }">
-                <v-btn v-if="isUserError" icon v-bind="props">
-                  <v-icon color="error">mdi-account-alert</v-icon>
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-btn v-if="isUserError"
+                  v-bind="mergeProps(activatorProps, tooltipProps)"
+                  density="comfortable"
+                  variant="text"
+                  icon="mdi-account-alert"
+                  color="error"
+                >
                 </v-btn>
-                <v-btn icon v-bind="props">
+                <v-btn
+                  v-bind="mergeProps(activatorProps, tooltipProps)"
+                  density="comfortable"
+                  variant="text"
+                  :icon="true"
+                >
                   <v-progress-circular v-if="showProgress" :size="27" :width="3" :model-value="shootLastOperation.progress" :color="color" :rotate="-90">
                     <v-icon v-if="isShootStatusHibernated" size="small" :color="color">mdi-sleep</v-icon>
                     <v-icon v-else-if="isShootLastOperationTypeDelete" size="small" :color="color">mdi-delete</v-icon>
                     <v-icon v-else-if="isShootMarkedForDeletion" size="small" :color="color">mdi-delete-clock</v-icon>
                     <v-icon v-else-if="isTypeCreate" size="small" :color="color">mdi-plus</v-icon>
                     <v-icon v-else-if="isTypeReconcile && !isError" size="small" :color="color">mdi-check</v-icon>
-                    <span v-else-if="isError" small>!</span>
+                    <span v-else-if="isError">!</span>
                     <template v-else>{{shootLastOperation.progress}}</template>
                   </v-progress-circular>
                   <v-icon v-else-if="isShootStatusHibernated" :color="color">mdi-sleep</v-icon>
@@ -43,15 +52,22 @@ SPDX-License-Identifier: Apache-2.0
               <div>
                 <span class="font-weight-bold">{{tooltip.title}}</span>
                 <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
-                <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects" :key="shortDescription">
-                  <v-icon v-if="userError" class="mr-1" color="white" size="small">{{ userError ? 'mdi-account-alert' : 'mdi-alert' }}</v-icon>
+                <div v-for="({ shortDescription, userError }) in tooltip.errorCodeObjects"
+                  :key="shortDescription"
+                >
+                  <v-icon v-if="userError"
+                    color="white"
+                    size="small"
+                    :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
+                    class="mr-1"
+                  />
                   <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
                 </div>
               </div>
             </v-tooltip>
           </div>
         </template>
-        <template v-slot:card>
+        <template v-slot:default>
           <g-shoot-message-details
             :status-title="statusTitle"
             :last-message="lastMessage"
@@ -61,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
             :namespace="shootNamespace"
           />
         </template>
-      </g-popper>
+      </g-popover>
       <div>
         <g-retry-operation :shoot-item="shootItem"/>
       </div>
@@ -84,26 +100,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { shootItem } from '@/mixins/shootItem'
 
-import GPopper from './GPopper.vue'
 import GRetryOperation from './GRetryOperation.vue'
 import GShootMessageDetails from './GShootMessageDetails.vue'
-import GExternalLink from './GExternalLink.vue'
 
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 import join from 'lodash/join'
 import map from 'lodash/map'
 
-export default defineComponent({
+export default {
   components: {
-    GPopper,
     GRetryOperation,
     GShootMessageDetails,
-    GExternalLink,
   },
   props: {
     popperKey: {
@@ -123,6 +133,7 @@ export default defineComponent({
       retryingOperation: false,
     }
   },
+  inject: ['mergeProps'],
   mixins: [shootItem],
   computed: {
     showProgress () {
@@ -210,15 +221,14 @@ export default defineComponent({
       }))
     },
     lastMessage () {
-      let message = this.shootLastOperation.description
-      message = message || 'No description'
-      if (message === this.lastErrorDescription) {
+      const message = this.shootLastOperation.description || 'No description'
+      if (map(this.errorDescriptions, 'description').includes(message)) {
         return undefined
       }
       return message
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

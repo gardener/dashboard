@@ -48,9 +48,10 @@ SPDX-License-Identifier: Apache-2.0
         <g-action-button
           :icon="kubeconfigVisibilityIcon"
           :tooltip="kubeconfigVisibilityTitle"
-          @click.stop="onDownload"
+          @click.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
         />
       </template>
+
       <g-static-token-kubeconfig-configuration v-if="!isGardenloginType"
         :shootItem="shootItem"
       />

@@ -5,17 +5,18 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
-    title="Gardenctl Info"
-    popper-key="gardenctl_info"
-    placement="bottom"
-  >
-    <template v-slot:popperRef>
+    <g-popover
+      placement="bottom"
+      toolbar-title="Gardenctl Info"
+    >
+    <template v-slot:activator="{ props }">
       <g-action-button
+        v-bind="props"
         icon="mdi-information-outline"
         tooltip="Show information about gardenctl"
       />
     </template>
+    <template v-slot:text>
       <div class="text-h6 text-grey-darken-1 mb-4">Gardenctl</div>
       <p>
         <span class="font-family-monospace">gardenctl</span>
@@ -32,27 +33,16 @@ SPDX-License-Identifier: Apache-2.0
         it accordingly.
       </p>
       <g-gardenctl-config-example/>
-  </g-popper>
+    </template>
+  </g-popover>
 </template>
 
 <script>
-import GPopper from '@/components/GPopper.vue'
 import GGardenctlConfigExample from '@/components/GGardenctlConfigExample.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
-import GActionButton from './GActionButton.vue'
 
 export default {
   components: {
-    GPopper,
     GGardenctlConfigExample,
-    GExternalLink,
-    GActionButton,
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  :deep(.popper) {
-    text-align: initial;
-  }
-</style>

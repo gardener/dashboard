@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div v-if="canPatchShoots">
+  <template v-if="canPatchShoots">
     <v-tooltip
       top
       max-width="600px"
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props }">
         <v-btn
           v-bind="props"
-          density="default"
+          density="comfortable"
           variant="text"
           :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
           :[iconProp]="icon"
@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
           :color="iconColor"
           :loading="loading"
           :width="buttonWidth"
-          class="text-none font-weight-regular pa-0"
           @click="showDialog"
         />
       </template>
@@ -46,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #message><slot name="actionComponent"></slot></template>
       <template #errorMessage><slot name="errorMessage"></slot></template>
     </g-dialog>
-  </div>
+  </template>
   <div v-else style="width: 36px"></div>
 </template>
 

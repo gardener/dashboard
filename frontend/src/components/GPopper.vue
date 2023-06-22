@@ -5,13 +5,24 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <span>
+    <slot
+      name="popperRef"
+    ></slot>
+  </span>
+</template>
+
+<!--//
+<template>
   <span v-if="!disabled" :key="popperKey">
-    <span ref="anchorRef">
-      <slot
-        name="activator"
-        @click="togglePopper"
-      />
-    </span>
+    <slot
+      name="popperRef"
+      :props="{
+        id: 'my-slot-id',
+        ref: 'anchorRef',
+        onClick: togglePopper,
+      }"
+    />
     <div v-if="visible"
       ref="floatingRef"
       class="floating"
@@ -25,24 +36,25 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="inner-card">
         <v-toolbar
           ref="toolbarRef"
-          :height="30"
+          :height="32"
           :color="toolbarColor"
           flat
         >
-          <v-toolbar-title class="text-subtitle-1 text-toolbar-title">
+          <v-toolbar-title class="text-toolbar-title text-subtitle-1">
             {{ title }}
           </v-toolbar-title>
           <v-spacer />
           <v-btn
+            density="comfortable"
+            variant="text"
             size="small"
             icon="mdi-close"
             icon-color="toolbar-title"
-            class="text-subtitle-1"
             @click.stop="closePopper"
           />
         </v-toolbar>
         <slot name="card" />
-        <v-card-text v-if="$slots.default">
+        <v-card-text v-if="slots.default">
           <slot />
         </v-card-text>
       </v-card>
@@ -51,12 +63,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, toRefs, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, toRefs, onBeforeUnmount, onMounted, useSlots } from 'vue'
 import { useFloating, autoUpdate, arrow, shift, autoPlacement, size, offset } from '@floating-ui/vue'
 import { useEventBus, onClickOutside } from '@vueuse/core'
 
 const ARROW_SIZE = 10 // px
 const bus = useEventBus('esc-pressed')
+
+const slots = useSlots()
 
 const props = defineProps({
   popperKey: {
@@ -110,6 +124,7 @@ const closePopper = () => {
   visible.value = false
   emit('update:visible', false)
 }
+console.log('slots', Object.keys(slots.popperRef._c))
 
 const togglePopper = () => {
   visible.value = !visible.value
@@ -279,3 +294,4 @@ onMounted(() => {
   overflow-y: auto;
 }
 </style>
+//-->

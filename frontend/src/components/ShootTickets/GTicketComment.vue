@@ -5,17 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list-item>
-    <v-list-item-avatar v-if="avatarUrl" class="align-self-start">
-      <v-avatar size="40px">
-        <img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`" />
+  <g-list-item>
+    <template #prepend>
+      <v-avatar v-if="avatarUrl"
+        size="40px"
+      >
+        <img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`"/>
       </v-avatar>
-    </v-list-item-avatar>
-    <v-list-item-icon v-else class="align-self-start">
-      <v-icon color="primary">mdi-comment-outline</v-icon>
-    </v-list-item-icon>
-    <v-list-item-content class="comment">
-      <v-list-item-title class="comment-header bg-toolbar-background text-toolbar-title">
+      <v-icon v-else icon="mdi-comment-outline" color="primary"/>
+    </template>
+    <g-list-item-content class="comment">
+      <div class="comment-header bg-toolbar-background text-toolbar-title">
         <g-external-link
           :url="htmlUrl"
           class="inherit-color text-toolbar-title"
@@ -27,11 +27,13 @@ SPDX-License-Identifier: Apache-2.0
             content-class="text-toolbar-title"
           />
         </g-external-link>
-      </v-list-item-title>
-      <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
-      <v-list-item-subtitle class="wrap-text comment-body" v-html="commentHtml"></v-list-item-subtitle>
-    </v-list-item-content>
-    </v-list-item>
+      </div>
+      <template #description>
+        <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
+        <div class="wrap-text comment-body" v-html="html"/>
+      </template>
+    </g-list-item-content>
+  </g-list-item>
 </template>
 
 <script>

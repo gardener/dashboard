@@ -5,14 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
-    v-if="shootControlPlaneHighAvailabilityFailureTolerance"
-    title="Control Plane High Availability"
-    :popper-key="`cp_ha_tag_${shootControlPlaneHighAvailabilityFailureTolerance}`"
+  <g-popover v-if="shootControlPlaneHighAvailabilityFailureTolerance"
+    toolbar-title="Control Plane High Availability"
     :toolbar-color="color"
   >
-    <template #popperRef>
+    <template v-slot:activator="{ props }">
       <v-chip
+        v-bind="props"
         variant="outlined"
         :size="size"
         :color="color"
@@ -21,48 +20,41 @@ SPDX-License-Identifier: Apache-2.0
         {{shootControlPlaneHighAvailabilityFailureTolerance}}
       </v-chip>
     </template>
-    <template #card>
-      <v-list class="text-left" style="max-width: 600px;">
-        <v-list-item>
-          <v-list-item-icon>
-            <v-icon color="primary">mdi-information-outline</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle>Failure Tolerance</v-list-item-subtitle>
-          <v-list-item-title>
-            <code>{{shootControlPlaneHighAvailabilityFailureTolerance}}</code>
-          </v-list-item-title>
-        </v-list-item>
+    <template v-slot:default>
+      <g-list class="text-left" style="max-width: 600px;">
+        <g-list-item>
+          <template #prepend>
+            <v-icon icon="mdi-information-outline" color="primary"/>
+          </template>
+          <g-list-item-content label="Failure Tolerance">
+            <code>{{ shootControlPlaneHighAvailabilityFailureTolerance }}</code>
+          </g-list-item-content>
+        </g-list-item>
         <template v-if="zoneHighAvailabilityConfigurationError">
           <v-divider inset></v-divider>
-          <v-list-item>
-            <v-list-item-icon>
-              <v-icon color="error">mdi-alert-circle-outline</v-icon>
-            </v-list-item-icon>
-            <v-list-item-subtitle>Configuration Error</v-list-item-subtitle>
-            <v-list-item-title class="wrap-text">
+          <g-list-item>
+            <template #prepend>
+              <v-icon icon="mdi-alert-circle-outline" color="error"/>
+            </template>
+            <g-list-item-content label="Configuration Error">
               You configured your control plane failure tolerance type to be <code>zone</code>.
               However, no seed assigned to your cloud profile currently supports this.
-            </v-list-item-title>
-          </v-list-item>
+            </g-list-item-content>
+          </g-list-item>
         </template>
-      </v-list>
+      </g-list>
     </template>
-  </g-popper>
+  </g-popover>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-import GPopper from '@/components/GPopper'
-import { shootItem } from '@/mixins/shootItem'
 import { mapActions } from 'pinia'
-import some from 'lodash/some'
 import { useCloudProfileStore } from '@/store'
 
-export default defineComponent({
-  components: {
-    GPopper,
-  },
+import { shootItem } from '@/mixins/shootItem'
+import some from 'lodash/some'
+
+export default {
   props: {
     size: {
       type: [String, Number],
@@ -91,5 +83,5 @@ export default defineComponent({
       'seedsByCloudProfileName',
     ]),
   },
-})
+}
 </script>
