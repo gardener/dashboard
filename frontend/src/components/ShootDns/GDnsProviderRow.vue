@@ -57,8 +57,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="excludeDomains"
               label="Exclude Domains"
               multiple
-              small-chips
-              deletable-chips
+              closable-chips
               variant="underlined"
             >
             </v-combobox>
@@ -69,8 +68,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="includeDomains"
               label="Include Domains"
               multiple
-              small-chips
-              deletable-chips
+              closable-chips
               variant="underlined"
             >
             </v-combobox>
@@ -81,8 +79,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="excludeZones"
               label="Exclude Zones"
               multiple
-              small-chips
-              deletable-chips
+              closable-chips
               variant="underlined"
             >
             </v-combobox>
@@ -93,8 +90,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="includeZones"
               label="Include Zones"
               multiple
-              small-chips
-              deletable-chips
+              closable-chips
               variant="underlined"
             >
             </v-combobox>
@@ -276,8 +272,9 @@ export default defineComponent({
       'patchDnsProvider',
       'deleteDnsProvider',
       'getDnsProviderSecrets',
+      'dnsSecretsByProviderKind',
     ]),
-    ...mapGetters(useSecretStore, [
+    ...mapActions(useSecretStore, [
       'dnsSecretsByProviderKind',
     ]),
     setData (data) {

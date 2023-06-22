@@ -20,10 +20,11 @@ SPDX-License-Identifier: Apache-2.0
             variant="underlined"
           ></v-text-field>
         </v-col>
-        <v-col cols="4" v-show="primaryProviderVisible">
+        <v-col cols="4" v-if="primaryProviderVisible">
           <v-select
             color="primary"
-            item-color="primary"
+            item-title="secretName"
+            return-object
             v-model="primaryProvider"
             @blur="v$.primaryProvider.$touch()"
             @update:modelValue="v$.primaryProvider.$touch()"
@@ -34,19 +35,22 @@ SPDX-License-Identifier: Apache-2.0
             :disabled="!clusterIsNew"
             variant="underlined"
           >
-            <template #item="{ item }">
-              <v-list-item-action>
-                <g-vendor-icon :icon="item.type"/>
-              </v-list-item-action>
-              <v-list-item-title>{{item.secretName}}</v-list-item-title>
-              <v-list-item-subtitle>
-                Type: {{item.type}}
-              </v-list-item-subtitle>
+            <template #item="{ item, props }">
+              <v-list-item
+                v-bind="props"
+              >
+                <template #prepend>
+                  <g-vendor-icon :icon="item.raw.type"/>
+                </template>
+                <v-list-item-subtitle>
+                  Type: {{item.raw.type}}
+                </v-list-item-subtitle>
+              </v-list-item>
             </template>
             <template #selection="{ item }">
-              <g-vendor-icon :icon="item.type"/>
+              <g-vendor-icon :icon="item.raw.type"/>
               <span class="ml-2">
-                {{item.secretName}}
+                {{item.raw.secretName}}
               </span>
             </template>
           </v-select>
@@ -79,7 +83,6 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
           <v-btn
             @click="addDnsProvider"
-            text
             variant="text"
             color="primary">
             Add DNS Provider
@@ -135,7 +138,7 @@ export default defineComponent({
     validators () {
       return {
         primaryProvider: {
-          required: requiredIf('domain'),
+          required: requiredIf(!!this.domain),
           nil: nilUnless('domain'),
         },
       }
@@ -158,7 +161,7 @@ export default defineComponent({
         return this.dnsDomain
       },
       set (value) {
-        this.dnsDomain = value
+        this.setDnsDomain(value)
       },
     },
     primaryProvider: {
@@ -178,6 +181,7 @@ export default defineComponent({
       'addDnsProvider',
       'setDnsPrimaryProvider',
       'setDnsPrimaryProviderValid',
+      'setDnsDomain',
     ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)

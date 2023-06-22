@@ -44,7 +44,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import { useAuthzStore, useCloudProfileStore, useConfigStore } from '@/store'
 
@@ -63,7 +62,7 @@ import map from 'lodash/map'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 
-export default defineComponent({
+export default {
   components: {
     GK8sExpirationMessage,
     GWorkerGroupExpirationMessage,
@@ -357,7 +356,7 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

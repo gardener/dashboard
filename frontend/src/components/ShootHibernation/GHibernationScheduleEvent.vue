@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
           chips
           label="Weekdays on which this rule shall be active"
           multiple
-          small-chips
-          deletable-chips
+          closable-chips
+          variant="underlined"
         ></v-select>
         </v-col>
         <v-col cols="2">
@@ -37,6 +37,7 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages('wakeUpTime')"
             type="time"
             clearable
+            variant="underlined"
           ></v-text-field>
         </v-col>
         <v-col cols="2">
@@ -50,6 +51,7 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages('hibernateTime')"
             type="time"
             clearable
+            variant="underlined"
           ></v-text-field>
         </v-col>
         <v-col cols="3">
@@ -60,6 +62,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="selectedLocation"
             @input="onInputSelectedLocation"
             append-icon="mdi-map-marker-outline"
+            variant="underlined"
             >
           </v-autocomplete>
         </v-col>
@@ -67,11 +70,11 @@ SPDX-License-Identifier: Apache-2.0
     </v-col>
     <v-col cols="1">
       <v-btn
-        small
-        outlined
+        size="x-small"
+        variant="outlined"
         icon
         color="grey"
-        @click.native.stop="removeScheduleEvent">
+        @click.stop="removeScheduleEvent">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-col>
@@ -79,6 +82,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import join from 'lodash/join'
 import split from 'lodash/split'
 import get from 'lodash/get'
@@ -86,56 +90,74 @@ import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { required, requiredIf } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 
 import { getValidationErrors } from '@/utils'
 import moment from '@/utils/moment'
 
 const validationErrors = {
   selectedDays: {
-    required: 'Weekdays is required'
+    required: 'Weekdays is required',
   },
   hibernateTime: {
-    required: 'You need to specify at least hibernation or wake up time'
+    required: 'You need to specify at least hibernation or wake up time',
   },
   wakeUpTime: {
-    required: 'You need to specify at least hibernation or wake up time'
+    required: 'You need to specify at least hibernation or wake up time',
   },
   selectedLocation: {
-    required: 'Location is required'
-  }
+    required: 'Location is required',
+  },
 }
 
-export default {
-  name: 'hibernation-schedule-event',
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   props: {
     scheduleEvent: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  validations: {
-    selectedDays: {
-      required
-    },
-    hibernateTime: {
-      required: requiredIf(function () {
-        return !this.wakeUpTime
-      })
-    },
-    wakeUpTime: {
-      required: requiredIf(function () {
-        return !this.hibernateTime
-      })
-    },
-    selectedLocation: {
-      required
-    }
+  emits: [
+    'update-location',
+    'update-selected-days',
+    'remove-schedule-event',
+    'update-wake-up-time',
+    'update-hibernate-time',
+    'valid',
+  ],
+  validations () {
+    return this.validators
   },
   computed: {
     id () {
       return this.scheduleEvent.id
-    }
+    },
+    validators () {
+      return {
+        selectedDays: {
+          required,
+        },
+        hibernateTime: {
+          required: requiredIf(function () {
+            return !this.wakeUpTime
+          }),
+        },
+        wakeUpTime: {
+          required: requiredIf(function () {
+            return !this.hibernateTime
+          }),
+        },
+        selectedLocation: {
+          required,
+        },
+      }
+    },
   },
   data () {
     return {
@@ -148,41 +170,41 @@ export default {
       valid: undefined,
       weekdays: [
         {
-          text: 'Mon',
+          title: 'Mon',
           value: 1,
-          sortValue: 1
+          sortValue: 1,
         },
         {
-          text: 'Tue',
+          title: 'Tue',
           value: 2,
-          sortValue: 2
+          sortValue: 2,
         },
         {
-          text: 'Wed',
+          title: 'Wed',
           value: 3,
-          sortValue: 3
+          sortValue: 3,
         },
         {
-          text: 'Thu',
+          title: 'Thu',
           value: 4,
-          sortValue: 4
+          sortValue: 4,
         },
         {
-          text: 'Fri',
+          title: 'Fri',
           value: 5,
-          sortValue: 5
+          sortValue: 5,
         },
         {
-          text: 'Sat',
+          title: 'Sat',
           value: 6,
-          sortValue: 6
+          sortValue: 6,
         },
         {
-          text: 'Sun',
+          title: 'Sun',
           value: 0,
-          sortValue: 7
-        }
-      ]
+          sortValue: 7,
+        },
+      ],
     }
   },
   methods: {
@@ -244,32 +266,32 @@ export default {
       if (!get(this, '$refs.selectedDays.isFocused') &&
           !get(this, '$refs.wakeUpTime.isFocused') &&
           !get(this, '$refs.hibernateTime.isFocused')) {
-        this.$v.selectedDays.$touch()
-        this.$v.wakeUpTime.$touch()
-        this.$v.hibernateTime.$touch()
+        this.v$.selectedDays.$touch()
+        this.v$.wakeUpTime.$touch()
+        this.v$.hibernateTime.$touch()
       }
     },
     onInputSelectedDays () {
-      this.$v.selectedDays.$touch()
+      this.v$.selectedDays.$touch()
       this.updateSelectedDays()
     },
     onInputWakeUpTime () {
-      this.$v.wakeUpTime.$touch()
+      this.v$.wakeUpTime.$touch()
       this.updateTime({ eventName: 'update-wake-up-time', time: this.wakeUpTime })
     },
     onInputHibernateTime () {
-      this.$v.wakeUpTime.$touch()
+      this.v$.wakeUpTime.$touch()
       this.updateTime({ eventName: 'update-hibernate-time', time: this.hibernateTime })
     },
     onInputSelectedLocation () {
       this.updateLocation(this.selectedLocation)
     },
     validateInput () {
-      if (this.valid !== !this.$v.$invalid) {
-        this.valid = !this.$v.$invalid
+      if (this.valid !== !this.v$.$invalid) {
+        this.valid = !this.v$.$invalid
         this.$emit('valid', { id: this.id, valid: this.valid })
       }
-    }
+    },
   },
   mounted () {
     this.selectedLocation = this.scheduleEvent.location
@@ -277,6 +299,6 @@ export default {
     this.hibernateTime = this.getTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
     this.updateSelectedDays() // trigger sort
-  }
-}
+  },
+})
 </script>

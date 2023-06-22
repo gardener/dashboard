@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     origin="auto"
     :offset="[9, 0]"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <div v-bind="props">
         <v-progress-circular
           v-if="btnLoading"

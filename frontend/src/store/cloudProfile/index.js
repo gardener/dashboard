@@ -276,12 +276,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
-  // TODO: Is this function used anywhere?
-  function machineTypesByCloudProfileName (cloudProfileName) {
+  function machineTypesByCloudProfileName ({ cloudProfileName }) {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
-  // TODO: Is this function used anywhere?
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
     const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
     const workerGroups = map(shootWorkerGroups, worker => {
@@ -651,5 +649,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     accessRestrictionsForShootByCloudProfileNameAndRegion,
     loadBalancerClassesByCloudProfileName,
     generateWorker,
+    machineImagesByCloudProfileName,
   }
 })

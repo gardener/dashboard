@@ -5,84 +5,88 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <hint-colorizer hint-color="warning">
+  <g-hint-colorizer hint-color="warning">
     <v-autocomplete
       ref="autocomplete"
       color="primary"
       item-color="primary"
       :items="machineTypeItems"
-      item-text="name"
+      item-title="name"
       item-value="name"
       :error-messages="getErrorMessages('internalValue')"
-      @input="$v.internalValue.$touch()"
-      @blur="$v.internalValue.$touch()"
+      @input="v$.internalValue.$touch()"
+      @blur="v$.internalValue.$touch()"
       v-model="internalValue"
-      :search-input.sync="internalSearch"
+      v-model:search-input="internalSearch"
       :filter="filter"
       label="Machine Type"
       :hint="hint"
       persistent-hint
+      variant="underlined"
     >
-      <template v-slot:item="{ item }">
-        <v-list-item-content>
-          <v-list-item-title>
-            {{item.name}}
-          </v-list-item-title>
+      <template #item="{ item, props }">
+        <v-list-item v-bind="props">
           <v-list-item-subtitle>
-            <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
-            <span v-if="item.gpu">GPU: {{item.gpu}} | </span>
-            <span v-if="item.memory">Memory: {{item.memory}}</span>
-            <span v-if="item.storage"> | Volume Type: {{item.storage.type}} | Class: {{item.storage.class}} | Default Size: {{item.storage.size}}</span>
+            <span v-if="item.raw.cpu">CPU: {{ item.raw.cpu }} | </span>
+            <span v-if="item.raw.gpu">GPU: {{ item.raw.gpu }} | </span>
+            <span v-if="item.raw.memory">Memory: {{ item.raw.memory }}</span>
+            <span v-if="item.raw.storage"> | Volume Type: {{ item.raw.storage.type }} | Class: {{ item.raw.storage.class }} | Default Size: {{ item.raw.storage.size }}</span>
           </v-list-item-subtitle>
-        </v-list-item-content>
+        </v-list-item>
       </template>
     </v-autocomplete>
-  </hint-colorizer>
+  </g-hint-colorizer>
 </template>
 
 <script>
-import HintColorizer from '@/components/HintColorizer'
-import { required } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import GHintColorizer from '@/components/GHintColorizer'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 import { getValidationErrors } from '@/utils'
 import find from 'lodash/find'
 
 const validationErrors = {
   internalValue: {
-    required: 'Machine Type is required'
-  }
+    required: 'Machine Type is required',
+  },
 }
 
-const validations = {
-  internalValue: {
-    required
-  }
-}
-
-export default {
+export default defineComponent({
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   components: {
-    HintColorizer
+    GHintColorizer,
   },
   props: {
-    value: {
+    modelValue: {
       type: String,
-      required: true
+      required: true,
     },
     searchInput: {
-      type: String
+      type: String,
     },
     valid: {
-      type: Boolean
+      type: Boolean,
     },
     machineTypes: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
+  emits: [
+    'update:search-input',
+    'update:modelValue',
+    'update:valid',
+  ],
   data () {
     return {
-      lazyValue: this.value,
+      lazyValue: this.modelValue,
       lazySearch: this.searchInput,
-      validationErrors
+      validationErrors,
     }
   },
   computed: {
@@ -92,8 +96,8 @@ export default {
       },
       set (value) {
         this.lazyValue = value ?? ''
-        this.$emit('input', this.lazyValue)
-      }
+        this.$emit('update:modelValue', this.lazyValue)
+      },
     },
     internalSearch: {
       get () {
@@ -104,13 +108,13 @@ export default {
           this.lazySearch = value
           this.$emit('update:search-input', value)
         }
-      }
+      },
     },
     machineTypeItems () {
       const machineTypes = [...this.machineTypes]
       if (this.notInList && this.internalValue) {
         machineTypes.push({
-          name: this.internalValue
+          name: this.internalValue,
         })
       }
       return machineTypes
@@ -121,9 +125,18 @@ export default {
     },
     hint () {
       return this.notInList ? 'This machine type may not be supported by your worker as it is not supported by your current worker settings' : ''
-    }
+    },
+    validators () {
+      return {
+        internalValue: {
+          required,
+        },
+      }
+    },
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -153,29 +166,29 @@ export default {
       }
 
       return terms.every(term => name?.includes(term) || properties.includes(term))
-    }
+    },
   },
   mounted () {
-    this.$v.internalValue.$touch()
+    this.v$.internalValue.$touch()
     const input = this.$refs.autocomplete?.$refs.input
     if (input) {
       input.spellcheck = false
     }
   },
   watch: {
-    value (value) {
+    modelValue (value) {
       this.lazyValue = value
     },
     searchInput (value) {
       this.lazySearch = value
     },
-    '$v.internalValue.$invalid': {
+    'v$.internalValue.$invalid': {
       handler (value) {
         this.$emit('update:valid', !value)
       },
       // force eager callback execution https://vuejs.org/guide/essentials/watchers.html#eager-watchers
-      immediate: true
-    }
-  }
-}
+      immediate: true,
+    },
+  },
+})
 </script>

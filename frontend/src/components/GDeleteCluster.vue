@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     :small-icon="small"
     width="600"
   >
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <v-list>
         <v-list-item-subtitle>
           Created By

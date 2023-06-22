@@ -5,19 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list two-line>
-    <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
-      <v-list-item-action class="align-self-start">
-        <v-checkbox
-          color="primary"
-          v-model="addons[addonDefinition.name].enabled"
-          :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
-        ></v-checkbox>
-      </v-list-item-action>
-      <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
-      <v-list-item-subtitle class="d-flex flex-column g-subtitle">{{addonDefinition.description}}</v-list-item-subtitle>
-    </v-list-item>
-  </v-list>
+  <div>
+    <v-row v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+      <div class="d-flex ma-3">
+        <div class="action-select">
+          <v-checkbox
+            color="primary"
+            v-model="addons[addonDefinition.name].enabled"
+            :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+            density="compact"
+          ></v-checkbox>
+        </div>
+        <div class="d-flex flex-column" :class="textClass(addonDefinition)">
+          <div class="wrap-text text-subtitle-2">
+            {{ addonDefinition.title }}
+          </div>
+          <div class="wrap-text pt-1 text-body-2">
+            {{ addonDefinition.description }}
+          </div>
+        </div>
+      </div>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -68,18 +77,17 @@ export default defineComponent({
         return addon.visible === true || (addons && !!addons[addon.name])
       })
     },
+    textClass (addonDefinition) {
+      return !this.createMode && addonDefinition.forbidDisable && this.addons[addonDefinition.name].enabled
+        ? 'text-disabled'
+        : 'text-secondary'
+    },
   },
 })
 </script>
 
-<style scoped>
-
-.g-subtitle {
-  white-space: normal;
+<style lang="scss" scoped>
+.action-select {
+  min-width: 48px;
 }
-
-.g-subtitle ::v-deep  p {
-  margin-bottom: 4px;
-}
-
 </style>

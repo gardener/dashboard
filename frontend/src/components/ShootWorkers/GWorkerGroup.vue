@@ -9,17 +9,17 @@ SPDX-License-Identifier: Apache-2.0
     :title="workerGroup.name"
     :popper-key="`worker_group_${workerGroup.name}`"
   >
-    <template v-slot:popperRef>
+    <template #popperRef>
       <v-chip
         small
         class="cursor-pointer my-0 ml-0"
         outlined
         color="primary">
-          <vendor-icon :value="machineImageIcon" :size="20"></vendor-icon>
+          <g-vendor-icon :icon="machineImageIcon" :size="20"></g-vendor-icon>
           {{workerGroup.name}}
       </v-chip>
     </template>
-    <template v-slot:card>
+    <template #card>
       <v-tabs
         height="32"
         color="primary"
@@ -173,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-container>
         </v-tab-item>
         <v-tab-item id="yaml">
-          <code-block lang="yaml" :content="workerGroupYaml"></code-block>
+          <g-code-block lang="yaml" :content="workerGroupYaml"></g-code-block>
         </v-tab-item>
       </v-tabs-items>
     </template>
@@ -181,43 +181,42 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-
+import { defineComponent } from 'vue'
 import GPopper from '@/components/GPopper'
-import VendorIcon from '@/components/VendorIcon'
-import CodeBlock from '@/components/CodeBlock'
+import GVendorIcon from '@/components/GVendorIcon'
+import GCodeBlock from '@/components/GCodeBlock'
 import find from 'lodash/find'
 import get from 'lodash/get'
-import { mapGetters } from 'vuex'
+import { mapActions } from 'pinia'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
-export default {
+export default defineComponent({
   name: 'worker-group',
   components: {
     GPopper,
-    VendorIcon,
-    CodeBlock
+    GVendorIcon,
+    GCodeBlock,
   },
   props: {
     workerGroup: {
-      type: Object
+      type: Object,
     },
     cloudProfileName: {
-      type: String
+      type: String,
     },
-    value: {
-      type: String
-    }
+    modelValue: {
+      type: String,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
-      workerGroupYaml: undefined
+      workerGroupYaml: undefined,
     }
   },
   computed: {
-    ...mapGetters([
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName',
-      'machineImagesByCloudProfileName'
-    ]),
     machineType () {
       const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
       const type = get(this.workerGroup, 'machine.type')
@@ -241,7 +240,7 @@ export default {
         return {
           type: volume.type,
           class: this.volumeType?.class,
-          size: volumeSize
+          size: volumeSize,
         }
       }
 
@@ -250,7 +249,7 @@ export default {
         return {
           type: storage.type,
           class: storage.class,
-          size: volumeSize
+          size: volumeSize,
         }
       }
       return {}
@@ -268,22 +267,27 @@ export default {
     },
     tab: {
       get () {
-        return this.value
+        return this.modelValue
       },
-      set (value) {
-        this.$emit('input', value)
-      }
-    }
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
+    },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'machineTypesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
+      'machineImagesByCloudProfileName',
+    ]),
     async updateWorkerGroupYaml (value) {
       this.workerGroupYaml = await this.$yaml.dump(value)
-    }
+    },
   },
   created () {
     this.updateWorkerGroupYaml(this.workerGroup)
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>

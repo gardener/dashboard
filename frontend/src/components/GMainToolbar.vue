@@ -184,7 +184,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-btn>
 
     <!-- terminals -->
-    <template v-if="tabs && tabs.length > 1" v-slot:extension>
+    <template v-if="tabs && tabs.length > 1" #extension>
       <v-tabs
         color="primary"
         slider-color="secondary"

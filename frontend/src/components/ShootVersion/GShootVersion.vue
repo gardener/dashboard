@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-tooltip location="top">
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <div v-bind="props">
           <v-btn
             v-if="chip"
@@ -46,9 +46,9 @@ SPDX-License-Identifier: Apache-2.0
       ref="gDialog"
       width="450"
       >
-      <template v-slot:caption>Update Cluster</template>
-      <template v-slot:affectedObjectName>{{shootName}}</template>
-      <template v-slot:message>
+      <template #caption>Update Cluster</template>
+      <template #affectedObjectName>{{shootName}}</template>
+      <template #message>
         <g-shoot-version-update
           :available-k8s-updates="availableK8sUpdates"
           :current-k8s-version="kubernetesVersion"

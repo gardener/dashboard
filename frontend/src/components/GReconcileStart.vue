@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     :button-text="buttonText"
     confirm-button-text="Trigger now"
     :disabled="isShootReconciliationDeactivated">
-    <template v-slot:actionComponent>
+    <template #actionComponent>
       <v-row>
         <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
       </v-row>

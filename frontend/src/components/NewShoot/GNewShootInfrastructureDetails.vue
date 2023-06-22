@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container class="px-0 mx-0">
     <v-row >
-      <v-col v-show="cloudProfiles.length > 1" cols="3">
+      <v-col v-if="cloudProfiles.length > 1" cols="3">
         <g-cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           >
           <template #item="{ item, props }">
             <!-- Divider / header in items not implemented yet in Vuetify 3: https://github.com/vuetifyjs/vuetify/issues/15721 -->
-            <span class="text-subtitle-1 text-disabled pa-3" v-if="!!item.raw.header">{{item.raw.header}}</span>
+            <v-list-subheader v-if="!!item.raw.header">{{item.raw.header}}</v-list-subheader>
             <v-list-item v-else v-bind="props" />
           </template>
         </v-select>
@@ -152,8 +152,7 @@ SPDX-License-Identifier: Apache-2.0
             @update:modelValue="onInputFirewallNetworks"
             @blur="v$.firewallNetworks.$touch()"
             chips
-            small-chips
-            deletable-chips
+            closable-chips
             multiple
             variant="underlined"
           ></v-select>
@@ -172,8 +171,7 @@ SPDX-License-Identifier: Apache-2.0
             @blur="v$.loadBalancerClassNames.$touch()"
             attach
             chips
-            small-chips
-            deletable-chips
+            closable-chips
             multiple
             variant="underlined"
           >
@@ -485,10 +483,8 @@ export default defineComponent({
       this.validateInput()
     },
     onSecretValid (valid) {
-      if (this.secretValid !== valid) {
-        this.secretValid = valid
-        this.validateInput()
-      }
+      this.secretValid = valid
+      this.validateInput()
     },
     onInputRegion () {
       this.partitionID = head(this.partitionIDs)
@@ -548,10 +544,8 @@ export default defineComponent({
       this.validateInput()
     },
     onCloudProfileNameValid (valid) {
-      if (this.cloudProfileValid !== valid) {
-        this.cloudProfileValid = valid
-        this.validateInput()
-      }
+      this.cloudProfileValid = valid
+      this.validateInput()
     },
     validateInput () {
       const valid = !this.v$.$invalid && this.cloudProfileValid && this.floatingPoolValid && this.secretValid

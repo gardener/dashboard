@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     :valid="hibernationScheduleValid"
     @dialog-opened="onConfigurationDialogOpened"
@@ -13,22 +13,24 @@ SPDX-License-Identifier: Apache-2.0
     width="900"
     caption="Configure Hibernation Schedule">
     <template v-slot:actionComponent>
-      <manage-hibernation-schedule
+      <g-manage-hibernation-schedule
         :key="componentKey"
         :is-hibernation-possible="isHibernationPossible"
         :hibernation-possible-message="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
         ref="hibernationSchedule"
         v-on="$hibernationSchedule.hooks"
-      ></manage-hibernation-schedule>
+      ></g-manage-hibernation-schedule>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
+import { defineComponent, defineAsyncComponent } from 'vue'
+
 import get from 'lodash/get'
 
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -37,22 +39,22 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 import shootItem from '@/mixins/shootItem'
 import asyncRef from '@/mixins/asyncRef'
 
-const ManageHibernationSchedule = () => import('@/components/ShootHibernation/ManageHibernationSchedule')
+const GManageHibernationSchedule = () => defineAsyncComponent(() => import('@/components/ShootHibernation/ManageHibernationSchedule'))
 
-export default {
+export default defineComponent({
   name: 'hibernation-configuration',
   components: {
-    ActionButtonDialog,
-    ManageHibernationSchedule
+    GActionButtonDialog,
+    GManageHibernationSchedule,
   },
   mixins: [
     shootItem,
-    asyncRef('hibernationSchedule')
+    asyncRef('hibernationSchedule'),
   ],
   data () {
     return {
       hibernationScheduleValid: false,
-      componentKey: uuidv4()
+      componentKey: uuidv4(),
     }
   },
   methods: {
@@ -68,18 +70,18 @@ export default {
       try {
         const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
         const noScheduleAnnotation = {
-          'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null
+          'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null,
         }
         const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
         await updateShootHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: scheduleCrontab
+          data: scheduleCrontab,
         })
         await addShootAnnotation({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: noScheduleAnnotation
+          data: noScheduleAnnotation,
         })
       } catch (err) {
         const errorMessage = 'Could not save hibernation configuration'
@@ -97,7 +99,7 @@ export default {
       await this.$hibernationSchedule.dispatch('setScheduleData', {
         hibernationSchedule: this.shootHibernationSchedules,
         noHibernationSchedule: noScheduleAnnotation,
-        purpose: this.shootPurpose
+        purpose: this.shootPurpose,
       })
     },
     onHibernationScheduleValid (value) {
@@ -105,7 +107,7 @@ export default {
     },
     showDialog () { // called from ShootLifeCycleCard
       this.$refs.actionDialog.showDialog()
-    }
-  }
-}
+    },
+  },
+})
 </script>

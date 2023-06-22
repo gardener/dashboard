@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="scheduleEvent.id"
       >
         <v-row class="list-item pt-2" :key="scheduleEvent.id">
-          <!--g-hibernation-schedule-event
+          <g-hibernation-schedule-event
             ref="scheduleEvents"
             :schedule-event="scheduleEvent"
             @remove-schedule-event="onRemoveSchedule(index)"
@@ -23,16 +23,15 @@ SPDX-License-Identifier: Apache-2.0
             @update-hibernate-time="onUpdateHibernateTime"
             @update-selected-days="onUpdateSelectedDays"
             @update-location="onUpdateLocation"
-            @valid="onScheduleEventValid">
-          /-->
+            @valid="onScheduleEventValid" />
         </v-row>
       </v-expand-transition>
       <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
         <v-col>
           <v-btn
-            small
+            size="small"
             @click="addSchedule"
-            outlined
+            variant="outlined"
             fab
             icon
             color="primary">
@@ -40,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
           <v-btn
             @click="addSchedule"
-            text
+            variant="text"
             color="primary">
             Add Hibernation Schedule
           </v-btn>
@@ -93,14 +92,14 @@ import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
-// import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
+import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { useAppStore, useConfigStore } from '@/store'
 
 export default defineComponent({
   components: {
-    // HibernationScheduleEvent,
+    GHibernationScheduleEvent,
   },
   props: {
     userInterActionBus: {

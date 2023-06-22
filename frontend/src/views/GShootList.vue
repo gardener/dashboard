@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip location="bottom">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <div v-bind="props">
               <v-badge
                 class="mr-5"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
                   class="mr-3"
                   color="primary-lighten-3"
                   hide-details>
-                  <template v-slot:label>
+                  <template #label>
                     <span class="text-subtitle-1 text-toolbar-title">Focus</span>
                   </template>
                 </v-switch>
@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-tooltip>
         <v-tooltip location="top" v-if="shootSearch || items.length > 3">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-text-field
               v-bind="props"
               prepend-inner-icon="mdi-magnify"
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
           <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
         </v-tooltip>
         <v-tooltip location="top" v-if="canCreateShoots && projectScope">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               v-bind="props"
               icon="mdi-plus"
@@ -105,10 +105,10 @@ SPDX-License-Identifier: Apache-2.0
         :custom-sort="sortItems"
         class="g-table"
       >
-        <template v-slot:progress>
+        <template #progress>
           <g-shoot-list-progress/>
         </template>
-        <template v-slot:item="{ item }">
+        <template #item="{ item }">
           <g-shoot-list-row
             :shoot-item="item.raw"
             :visible-headers="visibleHeaders"

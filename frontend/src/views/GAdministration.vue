@@ -244,7 +244,7 @@ SPDX-License-Identifier: Apache-2.0
                       :rules="costObjectRules"
                       :save="updateCostObject"
                     >
-                      <template v-if="costObjectDescriptionHtml" v-slot:info>
+                      <template v-if="costObjectDescriptionHtml" #info>
                         <v-alert
                           icon="mdi-information-outline"
                           density="compact"

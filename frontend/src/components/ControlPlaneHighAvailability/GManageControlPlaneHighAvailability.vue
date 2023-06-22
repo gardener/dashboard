@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             hide-details
             :disabled="!controlPlaneFailureToleranceTypeChangeAllowed"
+            density="compact"
             ></v-checkbox>
         </div>
       </template>
