@@ -2869,7 +2869,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["p-timeout", "npm:4.1.0"],\
             ["path-to-regexp", "npm:6.2.1"],\
             ["sanitize-html", "npm:2.10.0"],\
-            ["semver", "npm:7.3.8"],\
+            ["semver", "npm:7.5.3"],\
             ["set-cookie-parser", "npm:2.6.0"],\
             ["showdown", "npm:2.1.0"],\
             ["socket.io", "npm:4.6.1"],\
@@ -2949,7 +2949,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["regenerator-runtime", "npm:0.13.11"],\
             ["sass", "npm:1.59.3"],\
             ["sass-loader", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:12.6.0"],\
-            ["semver", "npm:7.3.8"],\
+            ["semver", "npm:7.5.3"],\
             ["socket.io-client", "npm:4.6.1"],\
             ["splitpanes", "npm:2.4.1"],\
             ["statuses", "npm:2.0.1"],\
@@ -16229,6 +16229,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/semver-npm-7.3.8-25a996cb4f-ba9c7cbbf2.zip/node_modules/semver/",\
           "packageDependencies": [\
             ["semver", "npm:7.3.8"],\
+            ["lru-cache", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:7.5.3", {\
+          "packageLocation": "./.yarn/cache/semver-npm-7.5.3-275095dbf3-9d58db1652.zip/node_modules/semver/",\
+          "packageDependencies": [\
+            ["semver", "npm:7.5.3"],\
             ["lru-cache", "npm:6.0.0"]\
           ],\
           "linkType": "HARD"\
