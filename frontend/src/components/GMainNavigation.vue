@@ -12,9 +12,12 @@ SPDX-License-Identifier: Apache-2.0
   >
     <div class="teaser">
       <div class="content center bg-main-background-darken-2">
-        <v-btn @click.stop="sidebar = false" icon variant="text" class="float-right text-main-navigation-title ma-2">
-          <v-icon>mdi-chevron-double-left</v-icon>
-        </v-btn>
+        <v-btn
+          @click.stop="sidebar = false"
+          icon="mdi-chevron-double-left"
+          variant="text"
+          class="float-right text-main-navigation-title ma-2"
+        />
         <a href="/">
           <img src="/static/assets/logo.svg" class="logo" alt="gardener logo">
           <h1 class="text-main-navigation-title">Gardener <span class="version">{{ version }}</span></h1>

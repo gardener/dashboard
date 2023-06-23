@@ -102,11 +102,10 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="readonly || primaryReadonly"
           size="x-small"
           variant="outlined"
-          icon
+          icon="mdi-close"
           color="grey"
-          @click="onDelete">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+          @click="onDelete"
+        />
       </v-col>
     </v-row>
   </div>

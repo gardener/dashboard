@@ -9,12 +9,12 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="alternate-row-background">
-      <v-expand-transition
-        :appear="animateOnAppear"
-        v-for="(scheduleEvent, index) in parsedScheduleEvents"
-        :key="scheduleEvent.id"
-      >
-        <v-row class="list-item pt-2" :key="scheduleEvent.id">
+      <v-slide-y-transition group>
+        <v-row
+          v-for="(scheduleEvent, index) in parsedScheduleEvents"
+          class="list-item pt-2"
+          :key="scheduleEvent.id"
+          >
           <g-hibernation-schedule-event
             ref="scheduleEvents"
             :schedule-event="scheduleEvent"
@@ -25,23 +25,16 @@ SPDX-License-Identifier: Apache-2.0
             @update-location="onUpdateLocation"
             @valid="onScheduleEventValid" />
         </v-row>
-      </v-expand-transition>
+      </v-slide-y-transition>
       <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
         <v-col>
           <v-btn
-            size="small"
-            @click="addSchedule"
-            variant="outlined"
-            fab
-            icon
-            color="primary">
-            <v-icon class="text-primary">mdi-plus</v-icon>
-          </v-btn>
-          <v-btn
             @click="addSchedule"
             variant="text"
-            color="primary">
-            Add Hibernation Schedule
+            color="primary"
+          >
+            <v-icon class="text-primary">mdi-plus</v-icon>
+             <span class="ml-2">Add Hibernation Schedule</span>
           </v-btn>
         </v-col>
       </v-row>
@@ -122,7 +115,6 @@ export default defineComponent({
       scheduleCrontab: undefined,
       purpose: undefined,
       noSchedule: undefined,
-      animateOnAppear: false,
     }
   },
   computed: {
@@ -280,9 +272,6 @@ export default defineComponent({
         this.setDefaultHibernationSchedule()
       })
     }
-  },
-  updated () {
-    this.animateOnAppear = true
   },
 })
 </script>

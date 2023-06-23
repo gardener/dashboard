@@ -13,9 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props: menuProps }">
       <v-tooltip location="top">
         <template #activator="{ props: tooltipProps }">
-          <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon>
-            <v-icon color="toolbar-title">mdi-dots-vertical</v-icon>
-          </v-btn>
+          <v-btn v-bind="mergeProps(menuProps, tooltipProps)" icon="mdi-dots-vertical" />
         </template>
         Table Options
       </v-tooltip>
@@ -107,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, toRefs } from 'vue'
+import { ref, toRefs, mergeProps } from 'vue'
 
 const columnSelectionMenu = ref(false)
 

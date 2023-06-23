@@ -61,31 +61,24 @@ SPDX-License-Identifier: Apache-2.0
       </v-row>
     </template>
     <div class="alternate-row-background">
-      <v-expand-transition
-        :appear="animateOnAppear"
+      <v-slide-y-transition group>
+        <v-row
+        class="list-item pt-2"
         v-for="id in dnsProviderIds"
         :key="id"
-      >
-        <v-row class="list-item pt-2" :key="id">
+        >
           <g-dns-provider-row :dnsProviderId="id"/>
         </v-row>
-      </v-expand-transition>
+      </v-slide-y-transition>
       <v-row key="addProvider" class="list-item pt-2">
         <v-col>
           <v-btn
-            size="small"
-            @click="addDnsProvider"
-            variant="outlined"
-            fab
-            icon
-            color="primary">
-            <v-icon class="text-primary">mdi-plus</v-icon>
-          </v-btn>
-          <v-btn
             @click="addDnsProvider"
             variant="text"
-            color="primary">
-            Add DNS Provider
+            color="primary"
+          >
+            <v-icon class="text-primary">mdi-plus</v-icon>
+            <span class="ml-2">Add DNS Provider</span>
           </v-btn>
         </v-col>
       </v-row>
@@ -121,11 +114,6 @@ export default defineComponent({
   },
   validations () {
     return this.validators
-  },
-  data () {
-    return {
-      animateOnAppear: false,
-    }
   },
   computed: {
     ...mapState(useShootStagingStore, [
@@ -189,7 +177,6 @@ export default defineComponent({
   },
   mounted () {
     this.v$.$touch()
-    this.animateOnAppear = true
   },
   watch: {
     'v$.primaryProvider.$invalid' (value) {

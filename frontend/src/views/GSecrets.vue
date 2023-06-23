@@ -33,9 +33,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props: menuProps }">
               <v-tooltip location="top">
                 <template #activator="{ props: tooltipProps }">
-                  <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon>
-                    <v-icon color="toolbar-title">mdi-plus</v-icon>
-                  </v-btn>
+                  <v-btn v-bind="mergeProps(menuProps, tooltipProps)" icon="mdi-plus" />
                 </template>
                 Create Infrastructure Secret
               </v-tooltip>
@@ -126,9 +124,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props: menuProps }">
               <v-tooltip location="top">
                 <template #activator="{ props: tooltipProps }">
-                  <v-btn v-bind="{ ...menuProps, ...tooltipProps }" icon>
-                    <v-icon color="toolbar-title">mdi-plus</v-icon>
-                  </v-btn>
+                  <v-btn v-bind="mergeProps(menuProps, tooltipProps)" icon="mdi-plus" />
                 </template>
                 Create DNS Secret
               </v-tooltip>
@@ -195,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, mergeProps } from 'vue'
 
 import { mapGetters, mapActions } from 'pinia'
 import {
@@ -469,6 +465,7 @@ export default defineComponent({
     onDialogClosed () {
       this.visibleSecretDialog = undefined
     },
+    mergeProps,
   },
   mounted () {
     if (!get(this.$route.params, 'name')) {
