@@ -47,6 +47,7 @@ export const useShootStore = defineStore('shoot', () => {
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    projectStore,
   } = useStores([
     'app',
     'authz',
@@ -56,6 +57,7 @@ export const useShootStore = defineStore('shoot', () => {
     'gardenerExtension',
     'ticket',
     'socket',
+    'project',
   ])
 
   const context = {
@@ -69,6 +71,7 @@ export const useShootStore = defineStore('shoot', () => {
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    projectStore,
   }
 
   const state = reactive({
