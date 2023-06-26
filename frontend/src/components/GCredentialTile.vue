@@ -11,15 +11,15 @@ SPDX-License-Identifier: Apache-2.0
     </v-list-item-icon>
     <v-list-item-content :class="{'py-0 my-0' : dense}">
       <v-list-item-title class="d-flex align-center">
-        <v-tooltip location="top">
+        <v-tooltip top>
           <template v-slot:activator="{ on }">
             <span v-on="on">{{title}}</span>
           </template>
           {{titleTooltip}}
         </v-tooltip>
-        <v-tooltip location="top">
+        <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" variant="outlined">{{phaseCaption}}</v-chip>
+            <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
           <template v-if="phaseType === 'Prepared'">
             <template v-if="phase && phase.incomplete">
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
               </div>
               <div v-if="!!lastInitiationTime">
-                Rotation Prepared: <time-string :date-time="lastInitiationTime" mode="past" no-tooltip></time-string>
+                Rotation Prepared: <g-time-string :date-time="lastInitiationTime" mode="past" no-tooltip></g-time-string>
               </div>
             </template>
           </template>
@@ -53,40 +53,40 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item-title>
       <v-list-item-subtitle class="d-flex align-center">
         <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
-          <shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
+          <g-shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
           <span color="warning">Certificate Authorities will expire in less than one year</span>
         </template>
         <template v-else>
-          <span v-if="!!lastCompletionTime">Last Rotated: <time-string :date-time="lastCompletionTime" mode="past"></time-string></span>
+          <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string :date-time="lastCompletionTime" mode="past"></g-time-string></span>
           <span v-else>Not yet rotated</span>
         </template>
       </v-list-item-subtitle>
     </v-list-item-content>
     <v-list-item-action :class="{'py-0 my-1' : dense}">
-      <rotate-credentials :shoot-item="shootItem" :type="type"></rotate-credentials>
+      <g-rotate-credentials :shoot-item="shootItem" :type="type"></g-rotate-credentials>
     </v-list-item-action>
   </v-list-item>
 </template>
 
 <script>
-import RotateCredentials from '@/components/RotateCredentials.vue'
-import TimeString from '@/components/TimeString.vue'
-import ShootMessages from '@/components/ShootMessages/ShootMessages.vue'
+import GRotateCredentials from '@/components/GRotateCredentials'
+import GTimeString from '@/components/GTimeString'
+import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import get from 'lodash/get'
 
 export default {
   name: 'credential-tile',
   components: {
-    RotateCredentials,
-    TimeString,
-    ShootMessages
+    GRotateCredentials,
+    GTimeString,
+    GShootMessages,
   },
   props: {
     dense: {
       type: Boolean,
-      required: false
-    }
+      required: false,
+    },
   },
   mixins: [shootStatusCredentialRotation],
   computed: {
@@ -119,7 +119,7 @@ export default {
     },
     titleTooltip () {
       return this.rotationType?.twoStep ? 'Two-step rotation' : 'One-step rotation'
-    }
-  }
+    },
+  },
 }
 </script>

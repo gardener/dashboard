@@ -879,6 +879,7 @@ __metadata:
     symbol-tree: ^3.2.4
     toidentifier: ^1.0.1
     universal-cookie: ^4.0.4
+    url-template: ^3.1.0
     uuid: ^9.0.0
     vite: ^3.1.9
     vite-plugin-compression: ^0.5.1
@@ -9731,6 +9732,13 @@ __metadata:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
   checksum: fbdba6b1d83336aca2216bbdc38ba658d9cfb8fc7f665eb8b17852de638ff7d1a162c198a8e4ed66001ddbf6c9888d41e4798912c62b4fd777a31657989f7bdf
+  languageName: node
+  linkType: hard
+
+"url-template@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "url-template@npm:3.1.0"
+  checksum: fa9f129a8c4245238cdd9498471fd40c6863a5cd035e71c85f3b4cb919f568613cddecf3f24cc374054dc6c3dd4c21471891ca12152584ba3b353310c80bae75
   languageName: node
   linkType: hard
 

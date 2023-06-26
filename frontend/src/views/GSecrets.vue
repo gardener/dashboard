@@ -264,7 +264,6 @@ export default defineComponent({
     ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
     ...mapGetters(useSecretStore,
       [
-        'getCloudProviderSecretByName',
         'infrastructureSecretList',
         'dnsSecretList',
       ]),
@@ -414,6 +413,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
+    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
       this.visibleSecretDialog = infrastructureKind

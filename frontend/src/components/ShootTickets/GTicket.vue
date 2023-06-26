@@ -79,7 +79,6 @@ export default defineComponent({
   computed: {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',
-
     }),
     ticketTitle () {
       const title = get(this.ticket, 'data.ticketTitle')

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-toolbar>
     <v-list>
       <template v-for="({ title, url, icon }, index) in items" :key="title">
-        <v-divider v-if="index" inset class="my-2"></v-divider>
+        <v-divider v-if="index" :key="index" inset class="my-2"></v-divider>
         <v-list-item>
           <v-list-item-icon>
             <v-icon color="primary">{{icon || 'link'}}</v-icon>
@@ -19,9 +19,9 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
             <v-list-item-title>
-              <external-link :url="expandUrl(url)">
+              <g-external-link :url="expandUrl(url)">
                 {{expandUrl(url)}}
-              </external-link>
+              </g-external-link>
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -33,22 +33,22 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import get from 'lodash/get'
 import { parseTemplate } from 'url-template'
-import ExternalLink from '@/components/ExternalLink.vue'
+import GExternalLink from '@/components/GExternalLink'
 import { shootItem } from '@/mixins/shootItem'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+
+import { useConfigStore } from '@/store'
 
 export default {
   components: {
-    ExternalLink
+    GExternalLink,
   },
   mixins: [shootItem],
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
+    ...mapState(useConfigStore, ['externalTools']),
     items () {
-      return get(this.cfg, 'externalTools', [])
-    }
+      return get(this, 'externalTools', [])
+    },
   },
   methods: {
     expandUrl (url) {
@@ -58,7 +58,7 @@ export default {
         console.error(`Failed to parse URL template "${url}"`)
         return url
       }
-    }
-  }
+    },
+  },
 }
 </script>

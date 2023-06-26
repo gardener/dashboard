@@ -26,7 +26,6 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'pinia'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
-import { updateShootDns } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -41,6 +40,7 @@ export default defineComponent({
     GActionButtonDialog,
     GManageShootDns,
   },
+  inject: ['api'],
   data () {
     return {
       componentKey: uuidv4(),
@@ -68,7 +68,7 @@ export default defineComponent({
         const namespace = this.shootNamespace
         const name = this.shootName
         const data = this.getDnsConfiguration()
-        await updateShootDns({ namespace, name, data })
+        await this.updateShootDns({ namespace, name, data })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
         const errorDetails = errorDetailsFromError(err)

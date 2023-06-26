@@ -17,15 +17,15 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
-            <shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
+            <g-shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
             {{hibernationDescription}}
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <change-hibernation :shoot-item="shootItem"></change-hibernation>
+          <g-change-hibernation :shoot-item="shootItem"></g-change-hibernation>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem"></hibernation-configuration>
+          <g-hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem"></g-hibernation-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-title class="d-flex align-center">
             Maintenance
-            <shoot-messages
+            <g-shoot-messages
             :shoot-item="shootItem"
             filter="last-maintenance"
             show-verbose
@@ -45,16 +45,16 @@ SPDX-License-Identifier: Apache-2.0
             class="ml-1" />
           </v-list-item-title>
           <v-list-item-subtitle>
-            <v-tooltip location="top">
+            <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div class="d-flex align-center pt-1" v-on="on">
-                  <shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
+                  <g-shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
                   <span v-if="isInMaintenanceWindow">
-                    Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. The maintenance time window ends <time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></time-string></span>
+                    Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. The maintenance time window ends <g-time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></g-time-string></span>
                   </span>
                   <span v-else-if="nextMaintenanceBeginTimestamp">
                     Maintenance time window starts
-                    <time-string :date-time="nextMaintenanceBeginTimestamp" no-tooltip></time-string>
+                    <g-time-string :date-time="nextMaintenanceBeginTimestamp" no-tooltip></g-time-string>
                   </span>
                 </div>
               </template>
@@ -64,10 +64,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <maintenance-start :shoot-item="shootItem"></maintenance-start>
+          <g-maintenance-start :shoot-item="shootItem"></g-maintenance-start>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
-          <maintenance-configuration :shoot-item="shootItem"></maintenance-configuration>
+          <g-maintenance-configuration :shoot-item="shootItem"></g-maintenance-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <reconcile-start :shoot-item="shootItem"></reconcile-start>
+          <g-reconcile-start :shoot-item="shootItem"></g-reconcile-start>
         </v-list-item-action>
       </v-list-item>
       <template v-if="canPatchShoots">
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action>
-            <delete-cluster :shoot-item="shootItem"></delete-cluster>
+            <g-delete-cluster :shoot-item="shootItem"></g-delete-cluster>
           </v-list-item-action>
         </v-list-item>
       </template>
@@ -105,40 +105,43 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import get from 'lodash/get'
 
-import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation.vue'
-import DeleteCluster from '@/components/DeleteCluster.vue'
-import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration.vue'
-import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart.vue'
-import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration.vue'
-import ReconcileStart from '@/components/ReconcileStart.vue'
-import ShootMessages from '@/components/ShootMessages/ShootMessages.vue'
-import TimeString from '@/components/TimeString.vue'
+import GChangeHibernation from '@/components/ShootHibernation/GChangeHibernation'
+import GDeleteCluster from '@/components/GDeleteCluster'
+import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
+import GMaintenanceStart from '@/components/ShootMaintenance/GMaintenanceStart'
+import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanceConfiguration'
+import GReconcileStart from '@/components/GReconcileStart'
+import GShootMessages from '@/components/ShootMessages/GShootMessages'
+import GTimeString from '@/components/GTimeString'
 
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
 
 import { shootItem } from '@/mixins/shootItem'
 
+import {
+  useConfigStore,
+  useAuthzStore,
+} from '@/store'
+
 export default {
   components: {
-    ChangeHibernation,
-    MaintenanceStart,
-    MaintenanceConfiguration,
-    HibernationConfiguration,
-    DeleteCluster,
-    ReconcileStart,
-    ShootMessages,
-    TimeString
+    GChangeHibernation,
+    GMaintenanceStart,
+    GMaintenanceConfiguration,
+    GHibernationConfiguration,
+    GDeleteCluster,
+    GReconcileStart,
+    GShootMessages,
+    GTimeString,
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'canPatchShoots',
-      'isShootHasNoHibernationScheduleWarning'
-    ]),
+    ...mapState(useAuthzStore, ['canPatchShoots']),
+    ...mapState(useConfigStore, ['isShootHasNoHibernationScheduleWarning']),
     hibernationDescription () {
       if (this.isShootStatusHibernationProgressing) {
         if (this.isShootSettingHibernated) {
@@ -201,12 +204,12 @@ export default {
       } else {
         return 'Cluster reconciliation will be triggered regularly'
       }
-    }
+    },
   },
   methods: {
     showHibernationConfigurationDialog () {
       this.$refs.hibernationConfiguration.showDialog()
-    }
-  }
+    },
+  },
 }
 </script>

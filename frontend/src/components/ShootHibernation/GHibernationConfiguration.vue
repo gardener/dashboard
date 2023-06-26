@@ -18,8 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         :is-hibernation-possible="isHibernationPossible"
         :hibernation-possible-message="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
-        ref="hibernationSchedule"
-        v-on="$hibernationSchedule.hooks"
+        ref="hibernationScheduleRef"
       ></g-manage-hibernation-schedule>
     </template>
   </g-action-button-dialog>
@@ -32,24 +31,27 @@ import get from 'lodash/get'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
-import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 import shootItem from '@/mixins/shootItem'
-import asyncRef from '@/mixins/asyncRef'
+import { useAsyncRef } from '@/composables'
 
 const GManageHibernationSchedule = () => defineAsyncComponent(() => import('@/components/ShootHibernation/ManageHibernationSchedule'))
 
 export default defineComponent({
-  name: 'hibernation-configuration',
+  setup () {
+    return {
+      ...useAsyncRef('hibernationSchedule'),
+    }
+  },
   components: {
     GActionButtonDialog,
     GManageHibernationSchedule,
   },
+  inject: ['api'],
   mixins: [
     shootItem,
-    asyncRef('hibernationSchedule'),
   ],
   data () {
     return {
@@ -68,17 +70,17 @@ export default defineComponent({
     },
     async updateConfiguration () {
       try {
-        const noHibernationSchedule = await this.$hibernationSchedule.dispatch('getNoHibernationSchedule')
+        const noHibernationSchedule = await this.hibernationSchedule.dispatch('getNoHibernationSchedule')
         const noScheduleAnnotation = {
           'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null,
         }
-        const scheduleCrontab = await this.$hibernationSchedule.dispatch('getScheduleCrontab')
-        await updateShootHibernationSchedules({
+        const scheduleCrontab = await this.hibernationSchedule.dispatch('getScheduleCrontab')
+        await this.updateShootHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: scheduleCrontab,
         })
-        await addShootAnnotation({
+        await this.addShootAnnotation({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: noScheduleAnnotation,
@@ -96,7 +98,7 @@ export default defineComponent({
 
       const noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
 
-      await this.$hibernationSchedule.dispatch('setScheduleData', {
+      await this.hibernationSchedule.dispatch('setScheduleData', {
         hibernationSchedule: this.shootHibernationSchedules,
         noHibernationSchedule: noScheduleAnnotation,
         purpose: this.shootPurpose,

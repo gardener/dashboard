@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     :valid="valid"
     @dialog-opened="onConfigurationDialogOpened"
@@ -13,51 +13,56 @@ SPDX-License-Identifier: Apache-2.0
     width="450"
     caption="Configure Purpose">
     <template v-slot:actionComponent>
-      <purpose
+      <g-purpose
         :secret="secret"
         @update-purpose="onUpdatePurpose"
         @valid="onPurposeValid"
-        ref="purpose"
-        v-on="$purpose.hooks"
-      ></purpose>
+        ref="purposeRef"
+      ></g-purpose>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { defineAsyncComponent } from 'vue'
+import { mapState } from 'pinia'
 import find from 'lodash/find'
 
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
-import { updateShootPurpose } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
 import shootItem from '@/mixins/shootItem'
-import asyncRef from '@/mixins/asyncRef'
+import { useAsyncRef } from '@/composables'
 
-const Purpose = () => import('@/components/Purpose.vue')
+import {
+  useSecretStore,
+} from '@/store'
+
+const GPurpose = defineAsyncComponent(() => import('@/components/GPurpose'))
 
 export default {
-  name: 'purpose-configuration',
-  components: {
-    ActionButtonDialog,
-    Purpose
+  setup () {
+    return {
+      ...useAsyncRef('purpose'),
+    }
   },
+  components: {
+    GActionButtonDialog,
+    GPurpose,
+  },
+  inject: ['api'],
   mixins: [
     shootItem,
-    asyncRef('purpose')
   ],
   data () {
     return {
       purpose: undefined,
-      purposeValid: false
+      purposeValid: false,
     }
   },
   computed: {
-    ...mapGetters([
-      'infrastructureSecretList'
-    ]),
+    ...mapState(useSecretStore, ['infrastructureSecretList']),
     valid () {
       return this.purposeValid
     },
@@ -68,7 +73,7 @@ export default {
         console.error('Secret must not be undefined')
       }
       return secret
-    }
+    },
   },
   methods: {
     onPurposeValid (value) {
@@ -86,12 +91,12 @@ export default {
     },
     async updateConfiguration () {
       try {
-        await updateShootPurpose({
+        await this.updateShootPurpose({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            purpose: this.purpose
-          }
+            purpose: this.purpose,
+          },
         })
       } catch (err) {
         const errorMessage = 'Could not update purpose'
@@ -103,8 +108,8 @@ export default {
     },
     async reset () {
       this.purpose = this.shootPurpose
-      await this.$purpose.dispatch('setPurpose', this.purpose)
-    }
-  }
+      await this.purpose.dispatch('setPurpose', this.purpose)
+    },
+  },
 }
 </script>

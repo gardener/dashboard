@@ -8,10 +8,10 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="gitHubRepoUrl">
     <template v-if="tickets.length">
       <v-card v-for="ticket in tickets" :key="ticket.metadata.issueNumber">
-        <ticket :ticket="ticket"></ticket>
+        <g-ticket :ticket="ticket"></g-ticket>
       </v-card>
       <div class="d-flex align-center justify-center mt-4">
-        <v-btn variant="text" color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
+        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
           <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-toolbar-title class="text-subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
-        <v-btn variant="text" color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
+        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
           <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
@@ -32,41 +32,41 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 
-import Ticket from '@/components/ShootTickets/Ticket.vue'
+import GTicket from '@/components/ShootTickets/GTicket'
 import { shootItem } from '@/mixins/shootItem'
-import sanitizeUrl from '@/mixins/sanitizeUrl'
 import moment from '@/utils/moment'
+
+import { useConfigStore } from '@/store'
 
 export default {
   components: {
-    Ticket
+    GTicket,
   },
-  mixins: [shootItem, sanitizeUrl],
+  inject: ['sanitizeUrl'],
+  mixins: [shootItem],
   computed: {
-    ...mapState([
-      'cfg'
-    ]),
-    ...mapGetters('tickets', {
-      ticketsByProjectAndName: 'issues'
+    ...mapState(useConfigStore, {
+      ticketConfig: 'ticket',
     }),
     tickets () {
-      return this.ticketsByProjectAndName({
-        projectName: this.shootProjectName,
-        name: this.shootName
-      })
+      return [] // TODO where is this method?
+      // return this.ticketsByProjectAndName({
+      //   projectName: this.shootProjectName,
+      //   name: this.shootName,
+      // })
     },
     gitHubRepoUrl () {
-      return get(this.cfg, 'ticket.gitHubRepoUrl')
+      return get(this.ticketConfig, 'gitHubRepoUrl')
     },
     newTicketLabels () {
-      return get(this.cfg, 'ticket.newTicketLabels')
+      return get(this.ticketConfig, 'newTicketLabels')
     },
     issueDescription () {
       const descriptionTemplate = get(this.cfg, 'ticket.issueDescriptionTemplate')
@@ -82,7 +82,7 @@ export default {
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
-        accessRestrictions: this.shootSelectedAccessRestrictions
+        accessRestrictions: this.shootSelectedAccessRestrictions,
       })
     },
     shootUrl () {
@@ -103,8 +103,8 @@ export default {
       const newTicketLabels = encodeURIComponent(this.newTicketLabelsString)
 
       return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}&labels=${newTicketLabels}`
-    }
-  }
+    },
+  },
 }
 </script>
 

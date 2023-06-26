@@ -620,6 +620,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     regionsWithoutSeedByCloudProfileName,
     loadBalancerProviderNamesByCloudProfileNameAndRegion,
     floatingPoolNamesByCloudProfileNameAndRegionAndDomain,
+    floatingPoolsByCloudProfileNameAndRegionAndDomain,
     loadBalancerClassNamesByCloudProfileName,
     partitionIDsByCloudProfileNameAndRegion,
     firewallImagesByCloudProfileName,

@@ -16,10 +16,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>
-            <vendor title extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
+            <g-vendor title extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></g-vendor>
           </v-list-item-subtitle>
           <v-list-item-title class="pt-1 d-flex flex-shrink-1">
-            <vendor extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></vendor>
+            <g-vendor extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></g-vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item v-if="secret">
         <v-list-item-icon/>
-        <secret-details-item-content
+        <g-secret-details-item-content
           class="pb-2"
           infra
           :secret="secret"
@@ -54,14 +54,14 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-content>
             <v-list-item-subtitle>Seed</v-list-item-subtitle>
             <v-list-item-title class="pt-1">
-              <shoot-seed-name :shoot-item="shootItem" />
+              <g-shoot-seed-name :shoot-item="shootItem" />
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action class="mx-0">
-            <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+            <g-copy-btn :clipboard-text="shootSeedName"></g-copy-btn>
           </v-list-item-action>
           <v-list-item-action class="mx-0" v-if="canPatchShootsBinding">
-            <seed-configuration :shoot-item="shootItem"></seed-configuration>
+            <g-seed-configuration :shoot-item="shootItem"></g-seed-configuration>
           </v-list-item-action>
         </v-list-item>
         <v-list-item>
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action class="mx-0">
-            <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
+            <g-copy-btn :clipboard-text="shootTechnicalId"></g-copy-btn>
           </v-list-item-action>
         </v-list-item>
       </template>
@@ -86,13 +86,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title class="pt-1">
             <template v-if="!!shootControlPlaneHighAvailabilityFailureTolerance">
               <span class="mr-1">Failure tolerance type</span>
-              <control-plane-high-availability-tag :shoot-item="shootItem" x-small></control-plane-high-availability-tag>
+              <g-control-plane-high-availability-tag :shoot-item="shootItem" x-small></g-control-plane-high-availability-tag>
             </template>
             <template v-else>Not configured</template>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action class="mx-0">
-          <control-plane-high-availability-configuration :shoot-item="shootItem"></control-plane-high-availability-configuration>
+          <g-control-plane-high-availability-configuration :shoot-item="shootItem"></g-control-plane-high-availability-configuration>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-content>
           <v-list-item-subtitle>
             Shoot Domain
-            <v-chip label x-small color="primary" variant="outlined" class="ml-2">{{customDomainChipText}}</v-chip>
+            <v-chip label x-small color="primary" outlined class="ml-2">{{customDomainChipText}}</v-chip>
           </v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             {{shootDomain}}
@@ -146,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             <template v-if="shootDnsProviders && shootDnsProviders.length">
-                <dns-provider
+                <g-dns-provider
                   class="mr-2"
                   v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
                   :primary="primary"
@@ -157,13 +157,13 @@ SPDX-License-Identifier: Apache-2.0
                   :zones="zones"
                   :key="secretName"
                   :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })">
-              </dns-provider>
+              </g-dns-provider>
             </template>
             <span v-else>No DNS provider configured</span>
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <dns-configuration :shootItem="shootItem"></dns-configuration>
+          <g-dns-configuration :shootItem="shootItem"></g-dns-configuration>
         </v-list-item-action>
       </v-list-item>
       <template v-if="!!shootIngressDomainText">
@@ -193,17 +193,17 @@ SPDX-License-Identifier: Apache-2.0
                 v-for="{ name } in shootLoadbalancerClasses"
                 :key="name"
                 :disabled="name !== defaultLoadbalancerClass"
-                location="top"
+                top
               >
                 <template v-slot:activator="{ on }">
                   <v-chip
                     v-on="on"
                     small
                     class="mr-2"
-                    variant="outlined"
+                    outlined
                     color="primary">
                     {{name}}
-                    <v-icon v-if="name === defaultLoadbalancerClass" size="small">mdi-star</v-icon>
+                    <v-icon v-if="name === defaultLoadbalancerClass" small>mdi-star</v-icon>
                   </v-chip>
                 </template>
                 <span>Default Load Balancer Class</span>
@@ -217,47 +217,47 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapActions } from 'pinia'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import head from 'lodash/head'
 
-import CopyBtn from '@/components/CopyBtn.vue'
-import ShootSeedName from '@/components/ShootSeedName.vue'
-import Vendor from '@/components/Vendor.vue'
-import DnsProvider from '@/components/ShootDns/DnsProvider.vue'
-import DnsConfiguration from '@/components/ShootDns/DnsConfiguration.vue'
-import SeedConfiguration from '@/components/SeedConfiguration.vue'
-import ControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/ControlPlaneHighAvailabilityConfiguration.vue'
-import ControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/ControlPlaneHighAvailabilityTag.vue'
-import SecretDetailsItemContent from '@/components/SecretDetailsItemContent.vue'
+import GCopyBtn from '@/components/GCopyBtn'
+import GShootSeedName from '@/components/GShootSeedName'
+import GVendor from '@/components/GVendor'
+import GDnsProvider from '@/components/ShootDns/GDnsProvider'
+import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
+import GSeedConfiguration from '@/components/GSeedConfiguration'
+import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
+import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
+import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
 
 import { shootItem } from '@/mixins/shootItem'
 
+import {
+  useCloudProfileStore,
+  useSecretStore,
+  useAuthzStore,
+} from '@/store'
+
 export default {
   components: {
-    CopyBtn,
-    ShootSeedName,
-    Vendor,
-    DnsProvider,
-    DnsConfiguration,
-    SeedConfiguration,
-    ControlPlaneHighAvailabilityConfiguration,
-    ControlPlaneHighAvailabilityTag,
-    SecretDetailsItemContent
+    GCopyBtn,
+    GShootSeedName,
+    GVendor,
+    GDnsProvider,
+    GDnsConfiguration,
+    GSeedConfiguration,
+    GControlPlaneHighAvailabilityConfiguration,
+    GControlPlaneHighAvailabilityTag,
+    GSecretDetailsItemContent,
   },
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
-      'namespaces',
-      'cloudProfileByName',
-      'floatingPoolsByCloudProfileNameAndRegionAndDomain',
-      'canPatchShootsBinding',
-      'infrastructureSecretList',
-      'getCloudProviderSecretByName'
-    ]),
+    ...mapState(useAuthzStore, ['canPatchShootsBinding']),
+    ...mapState(useSecretStore, ['infrastructureSecretList']),
     showSeedInfo () {
       return !!this.shootSeedName
     },
@@ -316,7 +316,14 @@ export default {
       const secrets = this.infrastructureSecretList
       const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
       return secret
-    }
-  }
+    },
+  },
+  methods: {
+    ...mapActions(useCloudProfileStore, [
+      'cloudProfileByName',
+      'floatingPoolsByCloudProfileNameAndRegionAndDomain',
+    ]),
+    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+  },
 }
 </script>

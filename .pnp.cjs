@@ -1444,6 +1444,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["symbol-tree", "npm:3.2.4"],\
             ["toidentifier", "npm:1.0.1"],\
             ["universal-cookie", "npm:4.0.4"],\
+            ["url-template", "npm:3.1.0"],\
             ["uuid", "npm:9.0.0"],\
             ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.5"],\
             ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
@@ -11916,6 +11917,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["url-parse", "npm:1.5.10"],\
             ["querystringify", "npm:2.2.0"],\
             ["requires-port", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["url-template", [\
+        ["npm:3.1.0", {\
+          "packageLocation": "./.yarn/cache/url-template-npm-3.1.0-de0990ba6a-fa9f129a8c.zip/node_modules/url-template/",\
+          "packageDependencies": [\
+            ["url-template", "npm:3.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\

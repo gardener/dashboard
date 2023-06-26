@@ -5,12 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
-    :title="workerGroup.name"
-    :popper-key="`worker_group_${workerGroup.name}`"
+  <g-popover
+    :toolbar-title="workerGroup.name"
+    placement="bottom"
   >
-    <template #popperRef>
+    <template #activator="{ props }">
       <v-chip
+        v-bind="props"
         small
         class="cursor-pointer my-0 ml-0"
         outlined
@@ -19,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           {{workerGroup.name}}
       </v-chip>
     </template>
-    <template #card>
+    <template #text>
       <v-tabs
         height="32"
         color="primary"
@@ -177,12 +178,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab-item>
       </v-tabs-items>
     </template>
-  </g-popper>
+  </g-popover>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-import GPopper from '@/components/GPopper'
+import GPopover from '@/components/GPopover'
 import GVendorIcon from '@/components/GVendorIcon'
 import GCodeBlock from '@/components/GCodeBlock'
 import find from 'lodash/find'
@@ -193,7 +194,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 export default defineComponent({
   name: 'worker-group',
   components: {
-    GPopper,
+    GPopover,
     GVendorIcon,
     GCodeBlock,
   },
@@ -211,6 +212,7 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  inject: ['yaml'],
   data () {
     return {
       workerGroupYaml: undefined,
@@ -281,7 +283,7 @@ export default defineComponent({
       'machineImagesByCloudProfileName',
     ]),
     async updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = await this.$yaml.dump(value)
+      this.workerGroupYaml = await this.yaml.dump(value)
     },
   },
   created () {

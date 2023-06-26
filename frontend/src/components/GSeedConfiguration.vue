@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
@@ -23,45 +23,49 @@ SPDX-License-Identifier: Apache-2.0
         persistent-hint>
       </v-select>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
-import { updateShootSeedName } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
 import shootItem from '@/mixins/shootItem'
 
+import {
+  useSeedStore,
+} from '@/store'
+
 export default {
   name: 'seed-configuration',
   components: {
-    ActionButtonDialog
+    GActionButtonDialog,
   },
+  inject: ['api'],
   mixins: [
-    shootItem
+    shootItem,
   ],
   data () {
     return {
-      seedName: undefined
+      seedName: undefined,
     }
   },
   computed: {
-    ...mapGetters([
-      'seedList'
+    ...mapState(useSeedStore, [
+      'seedByName',
     ]),
     seedNames () {
       const filteredSeeds = filter(this.seedList, ['data.type', this.shootCloudProviderKind])
       return map(filteredSeeds, seed => {
         return seed.metadata.name
       })
-    }
+    },
   },
   methods: {
     async onConfigurationDialogOpened () {
@@ -73,12 +77,12 @@ export default {
     },
     async updateConfiguration () {
       try {
-        await updateShootSeedName({
+        await this.updateShootSeedName({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            seedName: this.seedName
-          }
+            seedName: this.seedName,
+          },
         })
       } catch (err) {
         const errorMessage = 'Could not update seedName'
@@ -90,7 +94,7 @@ export default {
     },
     async reset () {
       this.seedName = this.shootSeedName
-    }
-  }
+    },
+  },
 }
 </script>

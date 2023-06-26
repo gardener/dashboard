@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     :disabled="disabled"
     :tooltip="tooltip"
@@ -19,15 +19,14 @@ SPDX-License-Identifier: Apache-2.0
       >
       </g-access-restrictions>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import { replaceShoot } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { mapGetters } from 'pinia'
 import { errorDetailsFromError } from '@/utils/error'
@@ -38,9 +37,10 @@ import {
 export default {
   name: 'access-restriction-configuration',
   components: {
-    ActionButtonDialog,
+    GActionButtonDialog,
     GAccessRestrictions,
   },
+  inject: ['api'],
   mixins: [shootItem],
   computed: {
     ...mapGetters(useCloudProfileStore, [
@@ -73,7 +73,7 @@ export default {
       try {
         const shootResource = cloneDeep(this.shootItem)
         this.$refs.accessRestrictions.applyTo(shootResource)
-        await replaceShoot({ namespace: this.shootNamespace, name: this.shootName, data: shootResource })
+        await this.replaceShoot({ namespace: this.shootNamespace, name: this.shootName, data: shootResource })
       } catch (err) {
         const errorMessage = 'Could not save access restriction configuration'
         const errorDetails = errorDetailsFromError(err)

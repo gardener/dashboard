@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
-import { sanitizeUrl } from '@braintree/sanitize-url'
 
 export default defineComponent({
   props: {
@@ -38,13 +37,11 @@ export default defineComponent({
       default: 14,
     },
   },
+  inject: ['sanitizeUrl'],
   computed: {
     defaultTitle () {
       return this.title ?? this.url
     },
-  },
-  methods: {
-    sanitizeUrl,
   },
 })
 </script>

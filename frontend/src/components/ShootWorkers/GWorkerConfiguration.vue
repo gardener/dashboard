@@ -41,16 +41,14 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
-            ref="manageWorkers"
-            v-on="$manageWorkers.hooks"
+            ref="manageWorkersRef"
           ></g-manage-workers>
         </v-tab-item>
         <v-tab-item id="yaml">
           <g-shoot-editor
             :shoot-item="editorData"
             :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
-            ref="workerEditor"
-            v-on="$workerEditor.hooks"
+            ref="workerEditorRef"
             hide-toolbar
             :style="{ 'min-height': `${overviewTabHeight}px` }"
           >
@@ -87,9 +85,8 @@ SPDX-License-Identifier: Apache-2.0
 import { defineComponent, defineAsyncComponent } from 'vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
-import { patchShootProvider } from '@/utils/api'
 import shootItem from '@/mixins/shootItem'
-import asyncRef from '@/mixins/asyncRef'
+import { useAsyncRef } from '@/composables'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
@@ -99,13 +96,19 @@ const GManageWorkers = () => defineAsyncComponent(() => import('@/components/Sho
 const GShootEditor = () => defineAsyncComponent(() => import('@/components/GShootEditor'))
 
 export default defineComponent({
-  name: 'worker-configuration',
+  setup () {
+    return {
+      ...useAsyncRef('manageWorkers'),
+      ...useAsyncRef('workerEditor'),
+    }
+  },
   components: {
     GActionButtonDialog,
     GManageWorkers,
     GCodeBlock,
     GShootEditor,
   },
+  inject: ['api', 'yaml'],
   data () {
     return {
       workersValid: false,
@@ -120,8 +123,6 @@ export default defineComponent({
   },
   mixins: [
     shootItem,
-    asyncRef('manageWorkers'),
-    asyncRef('workerEditor'),
   ],
   computed: {
     tab: {
@@ -160,7 +161,7 @@ export default defineComponent({
         } else if (this.tab === 'yaml') {
           data = await this.getWorkerEditorData()
         }
-        await patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
+        await this.patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -179,7 +180,7 @@ export default defineComponent({
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
-      await this.$manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
     },
     onWorkersValid (value) {
       this.workersValid = value
@@ -187,14 +188,14 @@ export default defineComponent({
     async setNetworkConfiguration (value) {
       if (value) {
         this.networkConfiguration = value
-        this.networkConfigurationYaml = await this.$yaml.dump(value)
+        this.networkConfigurationYaml = await this.yaml.dump(value)
       } else {
         this.networkConfiguration = []
         this.networkConfigurationYaml = undefined
       }
     },
     async getWorkerComponentData () {
-      const vm = await this.$manageWorkers.vm()
+      const vm = await this.manageWorkers.vm()
       const workers = vm.getWorkers()
       const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
       const data = { workers }
@@ -208,8 +209,8 @@ export default defineComponent({
       return data
     },
     async getWorkerEditorData () {
-      const yaml = await this.$workerEditor.dispatch('getContent')
-      const content = await this.$yaml.load(yaml)
+      const yaml = await this.workerEditor.dispatch('getContent')
+      const content = await this.yaml.load(yaml)
       return get(content, 'spec.provider')
     },
     async setEditorData () {
@@ -222,7 +223,7 @@ export default defineComponent({
             },
           },
         }
-        this.$workerEditor.dispatch('reload')
+        this.workerEditor.dispatch('reload')
       }
     },
     async setOverviewData () {
@@ -230,7 +231,7 @@ export default defineComponent({
         const editorData = await this.getWorkerEditorData()
         const workers = get(editorData, 'workers')
         const zonesNetworkConfiguration = get(editorData, 'infrastructureConfig.networks.zones', [])
-        await this.$manageWorkers.dispatch('updateWorkersData', { workers, zonesNetworkConfiguration })
+        await this.manageWorkers.dispatch('updateWorkersData', { workers, zonesNetworkConfiguration })
       } catch (err) {
         const errorMessage = 'Could not update workers with changed yaml'
         const detailedErrorMessage = err.message
