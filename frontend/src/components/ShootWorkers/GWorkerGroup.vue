@@ -12,9 +12,9 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props }">
       <v-chip
         v-bind="props"
-        small
+        size="small"
         class="cursor-pointer my-0 ml-0"
-        outlined
+        variant="outlined"
         color="primary">
           <g-vendor-icon :icon="machineImageIcon" :size="20"></g-vendor-icon>
           {{workerGroup.name}}

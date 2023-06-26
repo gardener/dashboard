@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           :color="iconColor"
           :loading="loading"
           :width="buttonWidth"
-          class="text-none font-weight-regular justify-start"
+          :class="{ 'text-none font-weight-regular justify-start': !!buttonText }"
           @click="showDialog"
         />
       </template>

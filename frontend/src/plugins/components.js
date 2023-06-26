@@ -19,6 +19,7 @@ import 'floating-vue/dist/style.css'
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
+import GToolbar from '@/components/GToolbar.vue'
 import GPopover from '@/components/GPopover.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
@@ -49,6 +50,7 @@ export default {
     app.component('GList', GList)
     app.component('GListItem', GListItem)
     app.component('GListItemContent', GListItemContent)
+    app.component('GToolbar', GToolbar)
     app.component('GActionButton', GActionButton)
     app.component('GExternalLink', GExternalLink)
     app.component('GTimeString', GTimeString)
