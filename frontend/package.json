@@ -62,7 +62,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2",
-    "vuetify": "^3.3.2",
+    "vuetify": "^3.3.5",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
