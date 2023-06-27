@@ -18,21 +18,19 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card v-else>
-      <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-        <v-toolbar-title class="text-subtitle-1">Ticket</v-toolbar-title>
-      </v-toolbar>
-      <v-card-actions class="d-flex justify-center">
-        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
+      <g-toolbar title="Ticket" />
+      <div class="d-flex justify-center pa-3">
+        <v-btn variant="text" color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
           <span class="pr-2">Create Ticket</span>
           <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
-      </v-card-actions>
+      </div>
     </v-card>
   </div>
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import map from 'lodash/map'
@@ -43,7 +41,7 @@ import GTicket from '@/components/ShootTickets/GTicket'
 import { shootItem } from '@/mixins/shootItem'
 import moment from '@/utils/moment'
 
-import { useConfigStore } from '@/store'
+import { useConfigStore, useTicketStore } from '@/store'
 
 export default {
   components: {
@@ -56,11 +54,10 @@ export default {
       ticketConfig: 'ticket',
     }),
     tickets () {
-      return [] // TODO where is this method?
-      // return this.ticketsByProjectAndName({
-      //   projectName: this.shootProjectName,
-      //   name: this.shootName,
-      // })
+      return this.ticketsByProjectAndName({
+        projectName: this.shootProjectName,
+        name: this.shootName,
+      })
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, 'gitHubRepoUrl')
@@ -105,6 +102,11 @@ export default {
       return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}&labels=${newTicketLabels}`
     },
   },
+  methods: {
+    ...mapActions(useTicketStore, {
+      ticketsByProjectAndName: 'issues',
+    }),
+  }
 }
 </script>
 

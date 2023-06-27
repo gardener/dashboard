@@ -1,3 +1,4 @@
+
 <!--
 SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
 
@@ -6,10 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="text-subtitle-1">Credential Rotation</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
+    <g-toolbar title="Credential Rotation" />
+    <g-list>
       <g-credential-tile
         :shoot-item="shootItem"
         type="ALL_CREDENTIALS"
@@ -49,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
         type="serviceAccountKey"
         dense
       ></g-credential-tile>
-    </v-list>
+    </g-list>
   </v-card>
 </template>
 

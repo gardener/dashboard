@@ -6,35 +6,33 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="text-subtitle-1">Lifecycle</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
-      <v-list-item>
-        <v-list-item-icon>
+    <g-toolbar title="Lifecycle" />
+    <g-list>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-sleep</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>Hibernation</v-list-item-title>
-          <v-list-item-subtitle class="d-flex align-center pt-1">
-            <g-shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
-            {{hibernationDescription}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
+        </template>
+        <g-list-item-content>
+          Hibernation
+          <template #description>
+            <div class="d-flex align-center pt-1">
+              <g-shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
+              {{ hibernationDescription }}
+            </div>
+          </template>
+        </g-list-item-content>
+        <template #append>
           <g-change-hibernation :shoot-item="shootItem"></g-change-hibernation>
-        </v-list-item-action>
-        <v-list-item-action class="mx-0">
           <g-hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem"></g-hibernation-configuration>
-        </v-list-item-action>
-      </v-list-item>
+        </template>
+      </g-list-item>
       <v-divider inset></v-divider>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-wrench-outline</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title class="d-flex align-center">
+        </template>
+        <g-list-item-content label="">
+          <div class="d-flex align-center">
             Maintenance
             <g-shoot-messages
             :shoot-item="shootItem"
@@ -43,8 +41,8 @@ SPDX-License-Identifier: Apache-2.0
             title="Last Maintenance Status"
             small
             class="ml-1" />
-          </v-list-item-title>
-          <v-list-item-subtitle>
+          </div>
+          <template #description>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div class="d-flex align-center pt-1" v-on="on">
@@ -61,47 +59,43 @@ SPDX-License-Identifier: Apache-2.0
               <div>{{maintenanceTooltipBegin}}</div>
               <div>{{maintenanceTooltipEnd}}</div>
             </v-tooltip>
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
+          </template>
+        </g-list-item-content>
+        <template #append>
           <g-maintenance-start :shoot-item="shootItem"></g-maintenance-start>
-        </v-list-item-action>
-        <v-list-item-action class="mx-0">
           <g-maintenance-configuration :shoot-item="shootItem"></g-maintenance-configuration>
-        </v-list-item-action>
-      </v-list-item>
+        </template>
+      </g-list-item>
       <v-divider inset></v-divider>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-tractor</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>Reconcile</v-list-item-title>
-          <v-list-item-subtitle class="pt-1">
+        </template>
+        <g-list-item-content>
+          Reconcile
+          <template #description>
             {{reconcileDescription}}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
+          </template>
+        </g-list-item-content>
+        <template #append>
           <g-reconcile-start :shoot-item="shootItem"></g-reconcile-start>
-        </v-list-item-action>
-      </v-list-item>
+        </template>
+      </g-list-item>
       <template v-if="canPatchShoots">
         <v-divider inset></v-divider>
-        <v-list-item>
-          <v-list-item-icon>
+        <g-list-item>
+          <template #prepend>
             <v-icon color="primary">mdi-delete-circle-outline</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>
-              Delete Cluster
-            </v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-action>
+          </template>
+          <g-list-item-content>
+            Delete Cluster
+          </g-list-item-content>
+          <template #append>
             <g-delete-cluster :shoot-item="shootItem"></g-delete-cluster>
-          </v-list-item-action>
-        </v-list-item>
+          </template>
+        </g-list-item>
       </template>
-    </v-list>
+    </g-list>
   </v-card>
 </template>
 <script>

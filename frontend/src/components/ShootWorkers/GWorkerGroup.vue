@@ -41,8 +41,8 @@ SPDX-License-Identifier: Apache-2.0
           Yaml
         </v-tab>
       </v-tabs>
-      <v-tabs-items v-model="tab">
-        <v-tab-item id="overview">
+      <v-window v-model="tab">
+        <v-window-item value="overview">
           <v-container class="pa-2">
             <v-row dense>
               <v-col cols="6">
@@ -172,11 +172,11 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
             </v-row>
           </v-container>
-        </v-tab-item>
-        <v-tab-item id="yaml">
+        </v-window-item>
+        <v-window-item value="yaml">
           <g-code-block lang="yaml" :content="workerGroupYaml"></g-code-block>
-        </v-tab-item>
-      </v-tabs-items>
+        </v-window-item>
+      </v-window>
     </template>
   </g-popover>
 </template>

@@ -24,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item>
         <g-list-item-content label="Credential">
           <router-link v-if="canLinkToSecret"
+            class="text-anchor"
             :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
           >
             <span class="text-subtitle-1">{{shootSecretBindingName}}</span>

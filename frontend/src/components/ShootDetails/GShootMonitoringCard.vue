@@ -6,17 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="text-subtitle-1">Logging and Monitoring</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
-      <v-list-item>
-        <v-list-item-icon>
+    <g-toolbar title="Logging and Monitoring" />
+    <g-list>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-tractor</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>Status</v-list-item-subtitle>
-          <v-list-item-title class="d-flex align-center pt-1">
+        </template>
+        <g-list-item-content label="Status">
+          <div class="d-flex align-center pt-1">
             <g-shoot-status
               class="pr-2"
               :shoot-item="shootItem"
@@ -25,35 +22,32 @@ SPDX-License-Identifier: Apache-2.0
               show-status-text
               >
             </g-shoot-status>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+          </div>
+        </g-list-item-content>
+      </g-list-item>
       <v-divider inset></v-divider>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-speedometer</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>Readiness</v-list-item-subtitle>
-          <v-list-item-title class="d-flex align-center pt-1">
+        </template>
+        <g-list-item-content label="Readiness">
+          <div class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
             <g-status-tags v-else :shoot-item="shootItem" popper-placement="bottom" show-status-text></g-status-tags>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+          </div>
+        </g-list-item-content>
+      </g-list-item>
       <v-divider inset></v-divider>
       <g-cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></g-cluster-metrics>
-      <v-list-item v-else>
-        <v-list-item-icon>
+      <g-list-item v-else>
+        <template #prepend>
           <v-icon color="primary">mdi-alert-circle-outline</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>
-            {{metricsNotAvailableText}}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
+        </template>
+        <g-list-item-content>
+          {{metricsNotAvailableText}}
+        </g-list-item-content>
+      </g-list-item>
+    </g-list>
   </v-card>
 </template>
 

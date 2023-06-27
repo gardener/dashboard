@@ -5,12 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list-item :dense="dense">
-    <v-list-item-icon>
+  <g-list-item :class="{ 'pt-0 pb-0': dense }">
+    <template #prepend>
       <v-icon v-if="!dense" :color="iconColor">mdi-key-change</v-icon>
-    </v-list-item-icon>
-    <v-list-item-content :class="{'py-0 my-0' : dense}">
-      <v-list-item-title class="d-flex align-center">
+    </template>
+    <g-list-item-content>
+      <div class="d-flex align-center">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <span v-on="on">{{title}}</span>
@@ -50,22 +50,24 @@ SPDX-License-Identifier: Apache-2.0
           </span>
           <span v-else>{{phaseCaption}}</span>
         </v-tooltip>
-      </v-list-item-title>
-      <v-list-item-subtitle class="d-flex align-center">
-        <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
-          <g-shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
-          <span color="warning">Certificate Authorities will expire in less than one year</span>
-        </template>
-        <template v-else>
-          <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string :date-time="lastCompletionTime" mode="past"></g-time-string></span>
-          <span v-else>Not yet rotated</span>
-        </template>
-      </v-list-item-subtitle>
-    </v-list-item-content>
-    <v-list-item-action :class="{'py-0 my-1' : dense}">
+      </div>
+      <template #description>
+        <div class="d-flex align-center">
+          <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
+            <g-shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
+            <span color="warning">Certificate Authorities will expire in less than one year</span>
+          </template>
+          <template v-else>
+            <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string :date-time="lastCompletionTime" mode="past"></g-time-string></span>
+            <span v-else>Not yet rotated</span>
+          </template>
+        </div>
+      </template>
+    </g-list-item-content>
+    <template #append>
       <g-rotate-credentials :shoot-item="shootItem" :type="type"></g-rotate-credentials>
-    </v-list-item-action>
-  </v-list-item>
+    </template>
+  </g-list-item>
 </template>
 
 <script>

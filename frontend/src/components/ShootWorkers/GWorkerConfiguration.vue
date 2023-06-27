@@ -36,15 +36,15 @@ SPDX-License-Identifier: Apache-2.0
       </v-tabs>
     </template>
     <template #card>
-      <v-tabs-items v-model="tab">
-        <v-tab-item id="overview" ref="overviewTab">
+      <v-window v-model="tab">
+        <v-window-item value="overview" ref="overviewTab">
           <g-manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
             ref="manageWorkersRef"
           ></g-manage-workers>
-        </v-tab-item>
-        <v-tab-item id="yaml">
+        </v-window-item>
+        <v-window-item value="yaml">
           <g-shoot-editor
             :shoot-item="editorData"
             :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
@@ -53,8 +53,8 @@ SPDX-License-Identifier: Apache-2.0
             :style="{ 'min-height': `${overviewTabHeight}px` }"
           >
           </g-shoot-editor>
-        </v-tab-item>
-      </v-tabs-items>
+        </v-window-item>
+      </v-window>
     </template>
     <template #errorMessage>
       <v-expand-transition appear>
