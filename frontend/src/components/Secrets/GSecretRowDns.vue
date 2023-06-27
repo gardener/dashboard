@@ -24,11 +24,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-vendor extended :cloud-provider-kind="item.dnsProvider"></g-vendor>
     </td>
     <td v-if="selectedHeaders.details">
-      <v-list color="transparent">
-        <v-list-item class="pa-0">
-          <g-secret-details-item-content dns :secret="item.secret"></g-secret-details-item-content>
-        </v-list-item>
-      </v-list>
+      <g-secret-details-item-content dns class="py-1" :secret="item.secret"></g-secret-details-item-content>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
       <div class="d-flex" :class="{'font-weight-light text-disabled' : !item.relatedShootCount}">

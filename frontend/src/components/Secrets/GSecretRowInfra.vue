@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-vendor extended :cloud-provider-kind="item.infrastructureName" :cloud-profile-name="item.cloudProfileName"></g-vendor>
     </td>
     <td v-if="selectedHeaders.details">
-      <g-secret-details-item-content infra :secret="item.secret"></g-secret-details-item-content>
+      <g-secret-details-item-content infra class="py-1" :secret="item.secret"></g-secret-details-item-content>
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
       <div class="d-flex" :class="{'font-weight-light text-disabled' : !item.relatedShootCount}">

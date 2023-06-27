@@ -6,213 +6,174 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-toolbar flat dense color="toolbar-background toolbar-title--text">
-      <v-toolbar-title class="text-subtitle-1">Infrastructure</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
-      <v-list-item>
-        <v-list-item-icon>
+    <g-toolbar title="Infrastructure" />
+    <g-list>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-cloud-outline</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>
+        </template>
+        <g-list-item-content>
+          <template #label>
             <g-vendor title extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></g-vendor>
-          </v-list-item-subtitle>
-          <v-list-item-title class="pt-1 d-flex flex-shrink-1">
+          </template>
+          <div class="pt-1 d-flex flex-shrink-1">
             <g-vendor extended :cloud-provider-kind="shootCloudProviderKind" :region="shootRegion" :zones="shootZones"></g-vendor>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>Credential</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            <router-link v-if="canLinkToSecret"
-              :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
-            >
-              <span class="text-subtitle-1">{{shootSecretBindingName}}</span>
-            </router-link>
-            <span v-else>{{shootSecretBindingName}}</span>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item v-if="secret">
-        <v-list-item-icon/>
+          </div>
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item>
+        <g-list-item-content label="Credential">
+          <router-link v-if="canLinkToSecret"
+            :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
+          >
+            <span class="text-subtitle-1">{{shootSecretBindingName}}</span>
+          </router-link>
+          <span v-else>{{shootSecretBindingName}}</span>
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item v-if="secret">
         <g-secret-details-item-content
-          class="pb-2"
           infra
           :secret="secret"
           details-title />
-      </v-list-item>
+      </g-list-item>
       <v-divider inset></v-divider>
       <template v-if="showSeedInfo">
-        <v-list-item>
-          <v-list-item-icon>
+        <g-list-item>
+          <template #prepend>
             <v-icon color="primary">mdi-spa</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle>Seed</v-list-item-subtitle>
-            <v-list-item-title class="pt-1">
-              <g-shoot-seed-name :shoot-item="shootItem" />
-            </v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-action class="mx-0">
+          </template>
+          <g-list-item-content label="Seed">
+            <g-shoot-seed-name :shoot-item="shootItem" />
+          </g-list-item-content>
+          <template #append >
             <g-copy-btn :clipboard-text="shootSeedName"></g-copy-btn>
-          </v-list-item-action>
-          <v-list-item-action class="mx-0" v-if="canPatchShootsBinding">
-            <g-seed-configuration :shoot-item="shootItem"></g-seed-configuration>
-          </v-list-item-action>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-icon/>
-          <v-list-item-content class="pt-0">
-            <v-list-item-subtitle>Technical Id</v-list-item-subtitle>
-            <v-list-item-title class="pt-1">
-              {{shootTechnicalId}}
-            </v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-action class="mx-0">
+            <g-seed-configuration v-if="canPatchShootsBinding" :shoot-item="shootItem"></g-seed-configuration>
+          </template>
+        </g-list-item>
+        <g-list-item>
+          <g-list-item-content label="Technical Id">
+            {{shootTechnicalId}}
+          </g-list-item-content>
+          <template #append>
             <g-copy-btn :clipboard-text="shootTechnicalId"></g-copy-btn>
-          </v-list-item-action>
-        </v-list-item>
+          </template>
+        </g-list-item>
       </template>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon v-if="!showSeedInfo" color="primary">mdi-spa</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content :class="{ 'pt-0': showSeedInfo}">
-          <v-list-item-subtitle>Control Plane High Availability</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            <template v-if="!!shootControlPlaneHighAvailabilityFailureTolerance">
-              <span class="mr-1">Failure tolerance type</span>
-              <g-control-plane-high-availability-tag :shoot-item="shootItem" x-small></g-control-plane-high-availability-tag>
-            </template>
-            <template v-else>Not configured</template>
-          </v-list-item-title>
-        </v-list-item-content>
-        <v-list-item-action class="mx-0">
+        </template>
+        <g-list-item-content label="Control Plane High Availability">
+          <template v-if="!!shootControlPlaneHighAvailabilityFailureTolerance">
+            <span class="mr-1">Failure tolerance type</span>
+            <g-control-plane-high-availability-tag :shoot-item="shootItem" x-small></g-control-plane-high-availability-tag>
+          </template>
+          <template v-else>Not configured</template>
+        </g-list-item-content>
+        <template #append>
           <g-control-plane-high-availability-configuration :shoot-item="shootItem"></g-control-plane-high-availability-configuration>
-        </v-list-item-action>
-      </v-list-item>
+        </template>
+      </g-list-item>
       <v-divider inset></v-divider>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-ip-network</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>Pods CIDR</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            {{podsCidr}}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>Nodes CIDR</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            {{nodesCidr}}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>Services CIDR</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            {{servicesCidr}}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+        </template>
+        <g-list-item-content label="Pods CIDR">
+          {{podsCidr}}
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item content-class="py-0">
+        <g-list-item-content label="Nodes CIDR">
+          {{nodesCidr}}
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item>
+        <template #prepend/>
+        <g-list-item-content label="Services CIDR">
+          {{servicesCidr}}
+        </g-list-item-content>
+      </g-list-item>
       <v-divider inset></v-divider>
-      <v-list-item>
-        <v-list-item-icon>
+      <g-list-item>
+        <template #prepend>
           <v-icon color="primary">mdi-dns</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>
+        </template>
+        <g-list-item-content>
+          <template #label>
             Shoot Domain
-            <v-chip label x-small color="primary" outlined class="ml-2">{{customDomainChipText}}</v-chip>
-          </v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            {{shootDomain}}
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>DNS Providers</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            <template v-if="shootDnsProviders && shootDnsProviders.length">
-                <g-dns-provider
-                  class="mr-2"
-                  v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
-                  :primary="primary"
-                  :secretName="secretName"
-                  :shootNamespace="shootNamespace"
-                  :type="type"
-                  :domains="domains"
-                  :zones="zones"
-                  :key="secretName"
-                  :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })">
-              </g-dns-provider>
-            </template>
-            <span v-else>No DNS provider configured</span>
-          </v-list-item-title>
-        </v-list-item-content>
-        <v-list-item-action>
+            <v-chip label size="x-small" color="primary" variant="outlined" class="ml-2">{{customDomainChipText}}</v-chip>
+          </template>
+          {{shootDomain}}
+        </g-list-item-content>
+      </g-list-item>
+      <g-list-item>
+        <template #prepend/>
+        <g-list-item-content label="DNS Providers">
+          <template v-if="shootDnsProviders && shootDnsProviders.length">
+              <g-dns-provider
+                class="mr-2"
+                v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
+                :primary="primary"
+                :secretName="secretName"
+                :shootNamespace="shootNamespace"
+                :type="type"
+                :domains="domains"
+                :zones="zones"
+                :key="secretName"
+                :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })">
+            </g-dns-provider>
+          </template>
+          <span v-else>No DNS provider configured</span>
+        </g-list-item-content>
+        <template #append>
           <g-dns-configuration :shootItem="shootItem"></g-dns-configuration>
-        </v-list-item-action>
-      </v-list-item>
+        </template>
+      </g-list-item>
       <template v-if="!!shootIngressDomainText">
         <v-divider inset></v-divider>
-        <v-list-item>
-          <v-list-item-icon>
+        <g-list-item>
+          <template #prepend>
             <v-icon color="primary">mdi-earth</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle>Ingress Domain</v-list-item-subtitle>
-            <v-list-item-title class="pt-1">
-              {{shootIngressDomainText}}
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          </template>
+          <g-list-item-content label="Ingress Domain">
+            {{shootIngressDomainText}}
+          </g-list-item-content>
+        </g-list-item>
       </template>
       <template v-if="!!shootLoadbalancerClasses">
         <v-divider inset></v-divider>
-        <v-list-item>
-          <v-list-item-icon>
+        <g-list-item>
+          <template #prepend>
             <v-icon color="primary">mdi-ip-network-outline</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle>Available Load Balancer Classes</v-list-item-subtitle>
-            <v-list-item-title class="d-flex align-center pt-1">
+          </template>
+          <g-list-item-content label="Available Load Balancer Classes">
+            <div class="d-flex align-center pt-1">
               <v-tooltip
                 v-for="{ name } in shootLoadbalancerClasses"
                 :key="name"
                 :disabled="name !== defaultLoadbalancerClass"
                 top
               >
-                <template v-slot:activator="{ on }">
+                <template #activator="{ props }">
                   <v-chip
-                    v-on="on"
-                    small
+                    v-bind="props"
+                    size="small"
                     class="mr-2"
-                    outlined
+                    variant="outlined"
                     color="primary">
                     {{name}}
-                    <v-icon v-if="name === defaultLoadbalancerClass" small>mdi-star</v-icon>
+                    <v-icon v-if="name === defaultLoadbalancerClass" size="small">mdi-star</v-icon>
                   </v-chip>
                 </template>
                 <span>Default Load Balancer Class</span>
               </v-tooltip>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+            </div>
+          </g-list-item-content>
+        </g-list-item>
       </template>
-    </v-list>
+    </g-list>
   </v-card>
 </template>
 
