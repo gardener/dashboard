@@ -14,21 +14,22 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props }">
         <v-btn
           v-bind="props"
-          density="comfortable"
           variant="text"
+          :density="isIconButton ? 'comfortable' : 'default'"
           :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
           :[iconProp]="icon"
           :text="buttonText"
           :color="iconColor"
           :loading="loading"
           :width="buttonWidth"
-          class="text-none font-weight-regular justify-start"
+          :class="isIconButton ? '' : 'text-none font-weight-regular justify-start'"
           @click="showDialog"
         />
       </template>
       {{actionToolTip}}
     </v-tooltip>
     <g-dialog
+      ref="gDialog"
       :confirm-button-text="confirmButtonText"
       :confirm-disabled="!valid"
       v-model:error-message="errorMessage"
@@ -37,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
       :max-height="maxHeight"
       :confirm-value="confirmValue"
       :disable-confirm-input-focus="disableConfirmInputFocus"
-      ref="gDialog"
     >
       <template #caption>{{caption}}</template>
       <template #affectedObjectName>{{shootName}}</template>

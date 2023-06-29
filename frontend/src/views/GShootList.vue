@@ -94,6 +94,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table
         :headers="visibleHeaders"
         :items="items"
+        hover
         v-model:options="options"
         v-model:sort-by="sortByInternal"
         v-model:sort-desc="sortDescInternal"
@@ -110,10 +111,11 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
+            :key="item.raw.metadata.uid"
             :shoot-item="item.raw"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
-            :key="item.raw.metadata.uid"
+            @click:action="onClickAction"
           />
         </template>
       </v-data-table>

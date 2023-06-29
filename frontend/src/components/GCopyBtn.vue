@@ -5,29 +5,24 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <v-snackbar
-      v-if="userFeedback"
-      v-model="snackbar"
-      location="bottom"
-      :success="true"
-      :absolute="true"
-      :timeout="2000"
-      :color="snackbarColor"
-    >
-      {{snackbarText}}
-    </v-snackbar>
-    <g-action-button
-      :icon="icon"
-      :color="btnColor"
-      size="small"
-      @click="copyText"
-    >
-      <template #tooltip>
-        <span>{{ tooltipText }}</span>
-      </template>
-    </g-action-button>
-  </div>
+  <v-snackbar
+    v-if="userFeedback"
+    v-model="snackbar"
+    location="bottom"
+    :success="true"
+    :absolute="true"
+    :timeout="2000"
+    :color="snackbarColor"
+  >
+    {{snackbarText}}
+  </v-snackbar>
+  <g-action-button
+    :icon="icon"
+    :color="btnColor"
+    size="small"
+    :tooltip="tooltipText"
+    @click="copyText"
+  />
 </template>
 
 <script setup>

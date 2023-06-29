@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
-    :shoot-item="shootItem"
     ref="actionDialog"
+    :shoot-item="shootItem"
     width="500"
     confirm-required
     caption="Configure Static Token Kubeconfig"

@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="g-action-button">
     <v-btn
-      density="comfortable"
       variant="text"
+      :density="density"
       :disabled="disabled"
       :icon="icon"
       :text="text"
@@ -52,6 +52,10 @@ const props = defineProps({
   },
   size: {
     type: String,
+  },
+  density: {
+    type: String,
+    default: 'comfortable',
   },
   tooltip: {
     type: String,
