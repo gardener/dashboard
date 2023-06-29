@@ -7,6 +7,8 @@
 import { nextTick, unref } from 'vue'
 import semver from 'semver'
 
+import { Buffer } from 'buffer'
+
 // Lodash
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'

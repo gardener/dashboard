@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     :close-on-content-click="false"
   >
 
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <g-action-button
         v-bind="props"
         icon="mdi-dots-vertical"

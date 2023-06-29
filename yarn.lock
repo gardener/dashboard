@@ -797,6 +797,7 @@ __metadata:
     "@vueuse/integrations": ^10.0.2
     "@vueuse/router": ^10.0.2
     ansi-html: ^0.0.9
+    buffer: ^6.0.3
     codemirror: ^5.65.13
     dayjs: ^1.11.7
     downloadjs: ^1.4.7
@@ -824,6 +825,7 @@ __metadata:
     sass: ^1.62.0
     semver: ^7.3.8
     socket.io-client: ^4.6.2
+    splitpanes: ^3.1.5
     statuses: ^2.0.1
     symbol-tree: ^3.2.4
     toidentifier: ^1.0.1
@@ -838,6 +840,9 @@ __metadata:
     vue-router: ^4.2.2
     vuetify: ^3.3.5
     webfontloader: ^1.6.28
+    xterm: ^5.2.1
+    xterm-addon-fit: ^0.7.0
+    xterm-addon-web-links: ^0.8.0
   languageName: unknown
   linkType: soft
 
@@ -8714,6 +8719,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"splitpanes@npm:^3.1.5":
+  version: 3.1.5
+  resolution: "splitpanes@npm:3.1.5"
+  checksum: 187744c86fe7bf4ace6196c7dc53828f261bd422c19e90d2de2e8418c6f571e1ec000a5deab49300ff060997c1462bf2dcbbd51bff31e994320bee26b14540b9
+  languageName: node
+  linkType: hard
+
 "sprintf-js@npm:~1.0.2":
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
@@ -10001,6 +10013,31 @@ __metadata:
   version: 2.0.0
   resolution: "xmlhttprequest-ssl@npm:2.0.0"
   checksum: 1e98df67f004fec15754392a131343ea92e6ab5ac4d77e842378c5c4e4fd5b6a9134b169d96842cc19422d77b1606b8df84a5685562b3b698cb68441636f827e
+  languageName: node
+  linkType: hard
+
+"xterm-addon-fit@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "xterm-addon-fit@npm:0.7.0"
+  peerDependencies:
+    xterm: ^5.0.0
+  checksum: 512d41f80d6f9427ba02dab4e6fd642e94775a9cf7ef72ae4b55eab2a36856b5c67069bfc66b4af412fdce29a0842f9c6382af3672f0b514c4352dfd47defe8f
+  languageName: node
+  linkType: hard
+
+"xterm-addon-web-links@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "xterm-addon-web-links@npm:0.8.0"
+  peerDependencies:
+    xterm: ^5.0.0
+  checksum: fe07572adfaa84ceeb961db3ae577aeb2342ea5dcd4948170d1b733ae8045693fab8808f9c63cc43a532b033ae95e63e62ac14bc2e34def764e68f6362ccae2b
+  languageName: node
+  linkType: hard
+
+"xterm@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "xterm@npm:5.2.1"
+  checksum: 3a9de30e772c7ae30895ec97fcfb3b0906429c5ea0cddf8948e8e30301385f82e467c6e6aca28ae50a48300ce795381d83fe35b4e17886ab4a1357054a15f68f
   languageName: node
   linkType: hard
 

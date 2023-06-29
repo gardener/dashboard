@@ -4,24 +4,21 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 <template>
-  <!--
-  <terminal-splitpanes
+  <g-terminal-splitpanes
     ref="terminalSplitpanes"
     :name="shootName"
     :namespace="shootNamespace"
   >
-    <template v-slot="{ item }">
-  -->
+    <template #default="{ item }">
       <g-shoot-details
         style="overflow: auto; height: 100%"
         :shoot-item="shootItem"
         @add-terminal-shortcut="onAddTerminalShortcut"
       ></g-shoot-details>
-  <!--
+
       <g-positional-dropzone positional-dropzone :uuid="item.uuid"></g-positional-dropzone>
     </template>
-  </terminal-splitpanes>
-  -->
+  </g-terminal-splitpanes>
 </template>
 
 <script>
@@ -30,8 +27,8 @@ import get from 'lodash/get'
 
 import GShootDetails from '@/components/ShootDetails/GShootDetails'
 
-// import GPositionalDropzone from '@/components/GPositionalDropzone'
-// import TerminalSplitpanes from '@/components/TerminalSplitpanes'
+import GPositionalDropzone from '@/components/GPositionalDropzone'
+import GTerminalSplitpanes from '@/components/GTerminalSplitpanes'
 
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
@@ -41,8 +38,8 @@ export default {
   name: 'shoot-item',
   components: {
     GShootDetails,
-    // TerminalSplitpanes,
-    // GPositionalDropzone,
+    GTerminalSplitpanes,
+    GPositionalDropzone,
   },
   computed: {
     shootName () {
@@ -56,16 +53,16 @@ export default {
     },
   },
   methods: {
-    onAddTerminalShortcut (shortcut) {
-      this.$refs.terminalSplitpanes.addShortcut({ position: PositionEnum.BOTTOM, shortcut })
-    },
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
+    onAddTerminalShortcut (shortcut) {
+      this.$refs.terminalSplitpanes.addShortcut({ position: PositionEnum.BOTTOM, shortcut })
+    },
   },
   mounted () {
     const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
-    // this.$refs.terminalSplitpanes.load(addItemFn)
+    this.$refs.terminalSplitpanes.load(addItemFn)
   },
 }
 </script>

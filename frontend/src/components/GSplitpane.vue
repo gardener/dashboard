@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" class="position-relative">
       <g-splitpane v-if="hasChildren(item)" :splitpane-tree="item">
-        <template v-slot="{item: childItem}">
+        <template #default="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
       </g-splitpane>
@@ -24,43 +24,48 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent, nextTick } from 'vue'
+import { mapState } from 'pinia'
 
-import { mapActions } from 'vuex'
+import { useAppStore } from '@/store'
+
 import { Splitpanes, Pane } from 'splitpanes'
 
-export default {
+import 'splitpanes/dist/splitpanes.css'
+
+export default defineComponent({
   name: 'g-splitpane',
   components: {
     Splitpanes,
-    Pane
+    Pane,
   },
   props: {
     splitpaneTree: {
       type: Object,
-      default: undefined
-    }
+      default: undefined,
+    },
   },
   methods: {
-    ...mapActions([
-      'setSplitpaneResize'
+    ...mapState(useAppStore, [
+      'splitpaneResize',
     ]),
     hasChildren (item) {
       const isSplitpaneTree = Reflect.has(item, 'horizontal')
       return isSplitpaneTree
     },
     resize () {
-      // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
+      // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
       // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      this.$nextTick(() => this.setSplitpaneResize(new Date()))
-    }
+      nextTick(() => (this.splitpaneResize = new Date()))
+    },
   },
   watch: {
     // workaround for https://github.com/antoniandre/splitpanes/issues/79
     'splitpaneTree.horizontal' (value) {
       this.resize()
-    }
-  }
-}
+    },
+  },
+})
 
 </script>
 
