@@ -66,10 +66,12 @@ SPDX-License-Identifier: Apache-2.0
     </g-list-item-content>
     <template #append>
       <g-shoot-action-rotate-credentials
-        :shoot-item="shootItem"
-        button
         v-model="rotateCredentialsDialog"
-        :type="type" />
+        :shoot-item="shootItem"
+        :type="type"
+        dialog
+        button
+      />
     </template>
   </g-list-item>
 </template>
@@ -94,12 +96,12 @@ export default {
       required: false,
     },
   },
+  mixins: [shootStatusCredentialRotation],
   data () {
     return {
       rotateCredentialsDialog: false,
     }
   },
-  mixins: [shootStatusCredentialRotation],
   computed: {
     isProgressing () {
       return this.phaseType === 'Preparing' || this.phaseType === 'Completing' || this.phaseType === 'Rotating'

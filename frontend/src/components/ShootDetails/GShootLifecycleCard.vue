@@ -16,17 +16,27 @@ SPDX-License-Identifier: Apache-2.0
           Hibernation
           <template #description>
             <div class="d-flex align-center pt-1">
-              <g-shoot-messages :shoot-item="shootItem" :filter="['no-hibernation-schedule', 'hibernation-constraint']" small class="mr-1" />
+              <g-shoot-messages
+                :shoot-item="shootItem"
+                :filter="['no-hibernation-schedule', 'hibernation-constraint']"
+                small
+                class="mr-1"
+              />
               {{ hibernationDescription }}
             </div>
           </template>
         </g-list-item-content>
         <template #append>
           <g-shoot-action-change-hibernation
-            :shoot-item="shootItem"
             v-model="changeHibernationDialog"
-            button />
-          <g-hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem" />
+            :shoot-item="shootItem"
+            dialog
+            button
+          />
+          <g-hibernation-configuration
+            ref="hibernationConfiguration"
+            :shoot-item="shootItem"
+          />
         </template>
       </g-list-item>
       <v-divider inset></v-divider>
@@ -38,12 +48,13 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex align-center">
             Maintenance
             <g-shoot-messages
-            :shoot-item="shootItem"
-            filter="last-maintenance"
-            show-verbose
-            title="Last Maintenance Status"
-            small
-            class="ml-1" />
+              :shoot-item="shootItem"
+              filter="last-maintenance"
+              show-verbose
+              title="Last Maintenance Status"
+              small
+              class="ml-1"
+            />
           </div>
           <template #description>
             <v-tooltip top>
@@ -66,10 +77,14 @@ SPDX-License-Identifier: Apache-2.0
         </g-list-item-content>
         <template #append>
           <g-shoot-action-maintenance-start
-            :shoot-item="shootItem"
             v-model="maintenanceStartDialog"
-            button />
-          <g-maintenance-configuration :shoot-item="shootItem" />
+            :shoot-item="shootItem"
+            dialog
+            button
+          />
+          <g-maintenance-configuration
+            :shoot-item="shootItem"
+          />
         </template>
       </g-list-item>
       <v-divider inset></v-divider>
@@ -84,7 +99,12 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
         <template #append>
-          <g-reconcile-start :shoot-item="shootItem"></g-reconcile-start>
+          <g-shoot-action-reconcile-start
+            v-model="reconcileStartDialog"
+            :shoot-item="shootItem"
+            dialog
+            button
+          />
         </template>
       </g-list-item>
       <template v-if="canPatchShoots">
@@ -99,25 +119,15 @@ SPDX-License-Identifier: Apache-2.0
           <template #append>
             <g-shoot-action-delete-cluster
               v-model="deleteClusterDialog"
+              :shoot-item="shootItem"
+              dialog
               button
-              :shoot-item="shootItem" />
+            />
           </template>
         </g-list-item>
       </template>
     </g-list>
   </v-card>
-  <g-shoot-action-delete-cluster
-    v-model="deleteClusterDialog"
-    dialog
-    :shoot-item="shootItem" />
-  <g-shoot-action-maintenance-start
-    :shoot-item="shootItem"
-    v-model="maintenanceStartDialog"
-    dialog />
-  <g-shoot-action-change-hibernation
-    :shoot-item="shootItem"
-    v-model="changeHibernationDialog"
-    dialog />
 </template>
 <script>
 import { mapState } from 'pinia'
@@ -128,7 +138,7 @@ import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster'
 import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart'
 import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanceConfiguration'
-import GReconcileStart from '@/components/GReconcileStart'
+import GShootActionReconcileStart from '@/components/GShootActionReconcileStart'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GTimeString from '@/components/GTimeString'
 
@@ -149,18 +159,19 @@ export default {
     GMaintenanceConfiguration,
     GHibernationConfiguration,
     GShootActionDeleteCluster,
-    GReconcileStart,
+    GShootActionReconcileStart,
     GShootMessages,
     GTimeString,
   },
+  mixins: [shootItem],
   data () {
     return {
-      deleteClusterDialog: false,
-      maintenanceStartDialog: false,
       changeHibernationDialog: false,
+      maintenanceStartDialog: false,
+      reconcileStartDialog: false,
+      deleteClusterDialog: false,
     }
   },
-  mixins: [shootItem],
   computed: {
     ...mapState(useAuthzStore, ['canPatchShoots']),
     ...mapState(useConfigStore, ['isShootHasNoHibernationScheduleWarning']),
