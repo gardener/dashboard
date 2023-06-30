@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -8,19 +8,18 @@ SPDX-License-Identifier: Apache-2.0
   <div
     class="g-droppable-listener"
     style="height:100%; width:100%;"
-    v-shortkey.once="{bottom: ['ctrl', 'shift', 'h'], right: ['ctrl', 'shift', 'v']}"
     @dropped="droppedAt"
-    @shortkey="addFromShortkey"
+    @click="foo"
+    @keydown="keyMonitor"
   >
     <g-splitpane
       v-if="splitpaneTree"
       :splitpane-tree="splitpaneTree"
       ref="splitpane"
     >
-      <template v-slot="{item}">
-        <slot v-if="item.data.type === 'SLOT_ITEM'" v-bind:item="item"></slot>
-        <g-terminal
-          v-else
+      <template #default="{item}">
+        <slot v-if="item.data.type === 'SLOT_ITEM'" :item="item"></slot>
+        <g-terminal v-else
           :uuid="item.uuid"
           :data="item.data"
           @terminated="onTermination(item)"
@@ -28,17 +27,21 @@ SPDX-License-Identifier: Apache-2.0
         ></g-terminal>
       </template>
     </g-splitpane>
-    <create-terminal-session-dialog
+    <g-create-terminal-session-dialog
       ref="newTerminal"
       :name="name"
       :namespace="namespace"
-    ></create-terminal-session-dialog>
+    ></g-create-terminal-session-dialog>
   </div>
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
+import { mapState } from 'pinia'
 
-import { mapGetters } from 'vuex'
+import { useAppStore, useAuthzStore } from '@/store'
+
 import every from 'lodash/every'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
@@ -49,52 +52,52 @@ import cloneDeep from 'lodash/cloneDeep'
 import difference from 'lodash/difference'
 import GSplitpane from '@/components/GSplitpane.vue'
 import GTerminal from '@/components/GTerminal.vue'
-import CreateTerminalSessionDialog from '@/components/dialogs/CreateTerminalSessionDialog.vue'
+import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSessionDialog.vue'
 import { TargetEnum, routeName } from '@/utils'
-import { listTerminalSessions } from '@/utils/api'
 import { GSymbolTree, Leaf, PositionEnum } from '@/lib/g-symbol-tree'
-
-import 'splitpanes/dist/splitpanes.css'
 
 function terminatedSessionIds (uuids, terminals) {
   const terminalSessionIds = map(terminals, 'metadata.identifier')
   return difference(uuids, terminalSessionIds)
 }
 
-export default {
+export default defineComponent({
   components: {
     GSplitpane,
     GTerminal,
-    CreateTerminalSessionDialog
+    GCreateTerminalSessionDialog,
   },
+  inject: ['api'],
   props: {
     name: {
-      type: String
+      type: String,
     },
     namespace: {
-      type: String
+      type: String,
     },
     target: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
       tree: new GSymbolTree(),
-      splitpaneTree: undefined // splitpaneTree is a json object representation of the GSymbolTree`this.tree`
+      splitpaneTree: undefined, // splitpaneTree is a json object representation of the GSymbolTree`this.tree`
     }
   },
   computed: {
-    ...mapGetters([
+    ...mapState(useAppStore, [
       'focusedElementId',
+    ]),
+    ...mapState(useAuthzStore, [
       'hasControlPlaneTerminalAccess',
-      'hasShootTerminalAccess'
+      'hasShootTerminalAccess',
     ]),
     terminalCoordinates () {
       const coordinates = {
         name: this.name,
         namespace: this.namespace,
-        target: this.target
+        target: this.target,
       }
       return coordinates
     },
@@ -106,9 +109,29 @@ export default {
     slotItemUUIds () {
       const slotItems = filter(this.tree.items(), ['data.type', 'SLOT_ITEM'])
       return map(slotItems, 'uuid')
-    }
+    },
   },
   methods: {
+    keyMonitor(event) {
+      if (!(event.ctrlKey && event.shiftKey)) {
+        return
+      }
+
+      switch (event.key) {
+        case 'V':
+          this.addFromShortkey({ srcKey: PositionEnum.RIGHT })
+          break;
+          case 'H':
+            this.addFromShortkey({ srcKey: PositionEnum.BOTTOM })
+          break;
+      }
+    },
+    setLocalStorageObject (key, value) {
+      useLocalStorage(key).value = value
+    },
+    getLocalStorageObject (key) {
+      return useLocalStorage(key).value
+    },
     updateSplitpaneTree () {
       this.splitpaneTree = this.tree.toJSON(this.tree.root)
       this.saveSplitpaneTree()
@@ -200,11 +223,11 @@ export default {
     saveSplitpaneTree () {
       const onySlotItemsInTree = every(this.tree.ids(), id => includes(this.slotItemUUIds, id))
       if (onySlotItemsInTree || this.tree.isEmpty()) {
-        this.$localStorage.removeItem(this.storeKey)
+        this.setLocalStorageObject(this.storeKey) // clear value
         return
       }
-      this.$localStorage.setItem(this.storeKey, JSON.stringify({
-        splitpaneTree: this.splitpaneTree
+      this.setLocalStorageObject(this.storeKey, JSON.stringify({
+        splitpaneTree: this.splitpaneTree,
       }))
     },
     async load (addItemFn) {
@@ -213,7 +236,7 @@ export default {
       this.updateSplitpaneTree()
     },
     async restoreSessions (addItemFn = () => this.add()) {
-      const fromStore = this.$localStorage.getItem(this.storeKey)
+      const fromStore = this.getLocalStorageObject(this.storeKey)
       if (!fromStore) {
         addItemFn()
         return
@@ -232,7 +255,7 @@ export default {
       }
 
       const { namespace } = this.terminalCoordinates
-      const { data: terminals } = await listTerminalSessions({ namespace })
+      const { data: terminals } = await this.api.listTerminalSessions({ namespace })
 
       this.tree = GSymbolTree.fromJSON(splitpaneTree)
 
@@ -267,11 +290,8 @@ export default {
           this.add({ position: PositionEnum.BOTTOM, targetId })
           break
       } // ignore unknown orientations
-    }
-  }
-}
+    },
+  },
+})
 
 </script>
-
-<style lang="scss" scoped>
-</style>

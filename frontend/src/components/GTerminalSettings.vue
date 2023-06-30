@@ -13,8 +13,9 @@ SPDX-License-Identifier: Apache-2.0
       hint="Image to be used for the Container"
       persistent-hint
       :error-messages="getErrorMessages('selectedContainerImage')"
-      @update:model-value="$v.selectedContainerImage.$touch()"
-      @blur="$v.selectedContainerImage.$touch()"
+      @update:model-value="v$.selectedContainerImage.$touch()"
+      @blur="v$.selectedContainerImage.$touch()"
+      variant="underlined"
     >
     </v-text-field>
     <template v-if="target === 'shoot'">
@@ -61,23 +62,30 @@ SPDX-License-Identifier: Apache-2.0
         persistent-hint
         :class="{ 'ml-4': isAdmin }"
         class="ml-2"
+        variant="underlined"
       >
-        <template v-slot:item="{ item }">
-          <v-list-item-content v-if="item !== autoSelectNodeItem">
-            <v-list-item-title>{{item.data.kubernetesHostname}}</v-list-item-title>
+        <template #item="{ item, props }">
+          <v-list-item
+            v-if="!isAutoSelectNodeItem(item)"
+            v-bind="props"
+            :title="item.raw.data?.kubernetesHostname"
+          >
             <v-list-item-subtitle>
-              <span>Ready: {{item.data.readyStatus}} | Version: {{item.data.version}} | Created: <time-string :date-time="item.metadata.creationTimestamp" mode="past"></time-string></span>
+              Ready: {{item.raw.data.readyStatus}} | Version: {{item.raw.data.version}} | Created: <g-time-string :date-time="item.raw.metadata.creationTimestamp" mode="past"></g-time-string>
             </v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-content v-else>
-            <v-list-item-title>Auto select node</v-list-item-title>
-            <v-list-item-subtitle>Let the kube-scheduler decide on which node the terminal pod will be scheduled</v-list-item-subtitle>
-          </v-list-item-content>
+          </v-list-item>
+          <v-list-item
+            v-else
+            v-bind="props"
+            title="Auto select node"
+            subtitle="Let the kube-scheduler decide on which node the terminal pod will be scheduled"
+          >
+          </v-list-item>
         </template>
-        <template v-slot:selection="{ item }">
-          <span :class="{'grey--text': !selectedRunOnShootWorker}" class="ml-2">
-            <template v-if="item !== autoSelectNodeItem">
-              {{item.data.kubernetesHostname}} [{{item.data.version}}]
+        <template #selection="{ item }">
+          <span v-if="selectedRunOnShootWorker" :class="{'grey--text': !selectedRunOnShootWorker}" class="ml-2">
+            <template v-if="!isAutoSelectNodeItem(item)">
+              {{item.raw.data?.kubernetesHostname}} [{{item.raw.data?.version}}]
             </template>
             <template v-else>Auto select node</template>
           </span>
@@ -99,10 +107,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import TimeString from '@/components/TimeString.vue'
-import { required } from 'vuelidate/lib/validators'
+import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { mapState } from 'pinia'
+import {
+  useAuthnStore,
+} from '@/store'
+import GTimeString from '@/components/GTimeString.vue'
+import { required } from '@vuelidate/validators'
 import isEmpty from 'lodash/isEmpty'
-import { mapGetters } from 'vuex'
 import some from 'lodash/some'
 import get from 'lodash/get'
 import head from 'lodash/head'
@@ -110,51 +123,59 @@ import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
   selectedContainerImage: {
-    required: 'You can\'t leave this empty.'
-  }
+    required: 'You can\'t leave this empty.',
+  },
 }
 
-export default {
+export default defineComponent({
   components: {
-    TimeString
+    GTimeString,
+  },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   props: {
     target: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
       autoSelectNodeItem: {
         data: {
-          kubernetesHostname: -1 // node will be auto selected by the kube-scheduler. Value needs to be set to any value
-        }
+          kubernetesHostname: -1, // node will be auto selected by the kube-scheduler. Value needs to be set to any value
+        },
       },
       selectedRunOnShootWorkerInternal: false,
       selectedContainerImage: undefined,
       selectedNode: undefined,
       selectedPrivilegedMode: undefined,
       shootNodesInternal: [],
-      validationErrors
+      validationErrors,
     }
   },
+  emits: [
+    'selected-config',
+    'valid-settings',
+  ],
   validations () {
     return this.validators
   },
   computed: {
-    ...mapGetters([
-      'isAdmin'
+    ...mapState(useAuthnStore, [
+      'isAdmin',
     ]),
     validSettings () {
       return !isEmpty(this.selectedContainerImage)
     },
     validators () {
-      const validators = {
+      return {
         selectedContainerImage: {
-          required
-        }
+          required,
+        },
       }
-      return validators
     },
     selectedRunOnShootWorker: {
       get () {
@@ -168,7 +189,7 @@ export default {
           this.selectedPrivilegedMode = value
         }
         this.selectedRunOnShootWorkerInternal = value
-      }
+      },
     },
     shootNodes: {
       get () {
@@ -176,7 +197,7 @@ export default {
       },
       set (value) {
         this.shootNodesInternal = value
-      }
+      },
     },
     selectedConfig () {
       const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname
@@ -188,16 +209,16 @@ export default {
       const selectedConfig = {
         container: {
           image: this.selectedContainerImage,
-          privileged: this.selectedPrivilegedMode
+          privileged: this.selectedPrivilegedMode,
         },
         node,
         preferredHost,
         hostPID: this.selectedPrivilegedMode,
-        hostNetwork: this.selectedPrivilegedMode
+        hostNetwork: this.selectedPrivilegedMode,
       }
 
       return selectedConfig
-    }
+    },
   },
   methods: {
     initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
@@ -223,7 +244,10 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    }
+    },
+    isAutoSelectNodeItem (item) {
+      return item.raw.data?.kubernetesHostname === this.autoSelectNodeItem.data?.kubernetesHostname
+    },
   },
   watch: {
     selectedConfig () {
@@ -231,7 +255,7 @@ export default {
     },
     validSettings () {
       this.$emit('valid-settings', this.validSettings)
-    }
-  }
-}
+    },
+  },
+})
 </script>

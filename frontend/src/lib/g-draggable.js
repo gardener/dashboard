@@ -125,15 +125,14 @@ function keydown (event, binding) {
 /* Utility functions */
 
 function cancelDrag (binding) {
-  const event = createMouseEvent('mouseup', -1, -1)
+  const event = new MouseEvent('mouseup', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': true,
+    'clientX': -1,
+    'clientY': -1
+  })
   mouseup(event, binding)
-}
-
-function createMouseEvent (type, clientX, clientY) {
-  const event = document.createEvent('MouseEvent')
-  event.initMouseEvent(type, true, true, window, 0, 0, 0,
-    clientX, clientY, false, false, false, false, 0, null)
-  return event
 }
 
 function dispatchDragLeaveEventToListeners ({ mouseOverId, mouseOverDropzoneId, listeners, source, animation }, binding) {
@@ -280,10 +279,10 @@ function stopInputEvents (event) {
 
 /* Draggable Directive https://vuejs.org/v2/guide/custom-directive.html */
 export const gDraggable = {
-  bind (el, binding, vnode) {
-    gDraggable.update(el, binding, vnode)
+  beforeMount (el, binding, vnode) {
+    gDraggable.updated(el, binding, vnode)
   },
-  update (el, binding) {
+  updated (el, binding) {
     const handler = get(binding, 'value.handle.$el') || get(binding, 'value.handle') || el
     if (!handler.getAttribute('draggable')) {
       el.removeEventListener('mousedown', el._listener)
@@ -294,7 +293,7 @@ export const gDraggable = {
       handler.setAttribute('draggable', 'true')
     }
   },
-  unbind () {
+  unmounted () {
     dispose()
   },
 }

@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-dialog
     :confirm-button-text="confirmButtonText"
-    width="750"
+    width="800"
     max-height="100vh"
     ref="gDialog"
     >
-    <template v-slot:caption>
+    <template #caption>
       <template v-if="needsUpdate">
         Update Service Account
       </template>
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         Add Service Account
       </template>
     </template>
-    <template v-slot:message>
+    <template #message>
       <div key="confirm-message" style="min-height:100px">
         <div>
           <span v-if="needsUpdate">To access the garden cluster the <span class="font-family-monospace">{{serviceAccountName}}</span> service account requires the <span class="font-family-monospace">admin</span> and <span class="font-family-monospace">serviceaccountmanager</span> role.</span>
@@ -30,14 +30,14 @@ SPDX-License-Identifier: Apache-2.0
            <span v-else>Do you want to create the <span class="font-family-monospace">{{serviceAccountName}}</span> service account and add it as member with <span class="font-family-monospace">admin</span> and <span class="font-family-monospace">serviceaccountmanager</span> role to this project?</span>
           <v-list>
             <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="wrap-text">
-                  <account-avatar :account-name="serviceAccountUsername"></account-avatar>
-                </v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action>
-                <member-account-roles :role-display-names="desiredRoleDisplayNames"></member-account-roles>
-              </v-list-item-action>
+              <v-list-item-title class="wrap-text">
+                <g-account-avatar :account-name="serviceAccountUsername"></g-account-avatar>
+              </v-list-item-title>
+              <template #append>
+                <v-list-item-action>
+                  <g-account-roles :role-display-names="desiredRoleDisplayNames"></g-account-roles>
+                </v-list-item-action>
+              </template>
             </v-list-item>
           </v-list>
         </div>
@@ -53,33 +53,34 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { mapActions } from 'pinia'
+import { useMemberStore } from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
-import AccountAvatar from '@/components/AccountAvatar.vue'
+import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GMessage from '@/components/GMessage.vue'
-import MemberAccountRoles from '@/components/MemberAccountRoles.vue'
+import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { mapActions } from 'vuex'
 import get from 'lodash/get'
 import { sortedRoleDisplayNames } from '@/utils'
 
-export default {
-  name: 'WebterminalServiceAccountDialog',
+export default defineComponent({
   components: {
     GDialog,
     GMessage,
-    AccountAvatar,
-    MemberAccountRoles
+    GAccountAvatar,
+    GAccountRoles,
   },
   props: {
     namespace: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      member: undefined
+      member: undefined,
     }
   },
   computed: {
@@ -106,12 +107,12 @@ export default {
       roles.push('admin')
       roles.push('serviceaccountmanager')
       return roles
-    }
+    },
   },
   methods: {
-    ...mapActions([
+    ...mapActions(useMemberStore, [
       'addMember',
-      'updateMember'
+      'updateMember',
     ]),
     async promptForConfirmation (member) {
       this.member = member
@@ -133,13 +134,13 @@ export default {
           await this.updateMember({
             name: this.serviceAccountUsername,
             roles: this.desiredRoles,
-            description
+            description,
           })
         } else {
           await this.addMember({
             name: this.serviceAccountUsername,
             roles: this.desiredRoles,
-            description
+            description,
           })
         }
         return true
@@ -155,7 +156,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         return false
       }
-    }
-  }
-}
+    },
+  },
+})
 </script>

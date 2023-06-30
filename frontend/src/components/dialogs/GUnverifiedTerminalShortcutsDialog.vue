@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     max-height="100vh"
     ref="gDialog"
     >
-    <template v-slot:caption>Confirm</template>
-    <template v-slot:message>
+    <template #caption>Confirm</template>
+    <template #message>
       <div key="confirm-message" style="min-height:100px">
         <div>
           You selected
@@ -34,17 +34,18 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 
-export default {
+export default defineComponent({
   name: 'UnverifiedTerminalShortcutsDialog',
   components: {
-    GDialog
+    GDialog,
   },
   methods: {
     async promptForConfirmation () {
       return await this.$refs.gDialog.confirmWithDialog()
-    }
-  }
-}
+    },
+  },
+})
 </script>

@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 
-<template>
+ <template>
   <div>
     <v-radio-group
       v-model="selectedTarget"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         :disabled="isShootStatusHibernated"
       >
-        <template v-slot:label>
+        <template #label>
           <div>Cluster</div>
           <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
         </template>
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         :disabled="!isAdmin && isShootStatusHibernated"
       >
-        <template v-slot:label>
+        <template #label>
           <div>Garden Cluster</div>
           <v-icon v-if="!isAdmin && isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
         </template>
@@ -57,33 +57,44 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { defineComponent } from 'vue'
+import { mapState } from 'pinia'
+import {
+  useAuthnStore,
+  useAuthzStore,
+} from '@/store'
 import { shootItem } from '@/mixins/shootItem'
 
-export default {
+export default defineComponent({
   props: {
-    value: {
-      type: String
+    modelValue: {
+      type: String,
     },
     shootItem: {
-      type: Object
-    }
+      type: Object,
+    },
   },
+  emits: [
+    'update:modelValue',
+    'valid',
+  ],
   mixins: [shootItem],
   computed: {
-    ...mapGetters([
+    ...mapState(useAuthnStore, [
+      'isAdmin',
+    ]),
+    ...mapState(useAuthzStore, [
+      'hasGardenTerminalAccess',
       'hasControlPlaneTerminalAccess',
       'hasShootTerminalAccess',
-      'hasGardenTerminalAccess',
-      'isAdmin'
     ]),
     selectedTarget: {
       get () {
-        return this.value
+        return this.modelValue
       },
-      set (value) {
-        this.$emit('input', value)
-      }
+      set (modelValue) {
+        this.$emit('update:modelValue', modelValue)
+      },
     },
     hint () {
       if (!this.isAdmin && this.isShootStatusHibernated) {
@@ -97,15 +108,15 @@ export default {
     },
     valid () {
       return !!this.selectedTarget
-    }
+    },
   },
   mounted () {
     this.$emit('valid', this.valid)
   },
   watch: {
-    value (value) {
+    modelValue (value) {
       this.$emit('valid', this.valid)
-    }
-  }
-}
+    },
+  },
+})
 </script>

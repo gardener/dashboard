@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list-item>
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon icon="mdi-console" color="primary"/>
     </template>
     <g-list-item-content>
       Terminal
-      <template v-slot:description>
+      <template #description>
         {{ description }}
       </template>
     </g-list-item-content>
-    <template v-slot:append>
+    <template #append>
       <g-action-button
         icon="mdi-console-line"
         :disabled="disabled"

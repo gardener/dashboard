@@ -41,16 +41,15 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
     </v-card>
   </v-expand-transition>
-  <!--
-  TODO uncomment
+
   <g-unverified-terminal-shortcuts-dialog
     ref="unverified"
   />
+
   <g-webterminal-service-account-dialog
     ref="serviceAccount"
     :namespace="shootNamespace"
   />
-  -->
 </template>
 
 <script>
@@ -67,8 +66,8 @@ import GActionButton from '@/components/GActionButton.vue'
 import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GTerminalShortcutIcon from '@/components/icons/GTerminalShortcutIcon.vue'
-// import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
-// import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
+import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
+import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 
 import { TargetEnum } from '@/utils'
 
@@ -84,9 +83,10 @@ export default defineComponent({
     GTerminalShortcuts,
     GIconBase,
     GTerminalShortcutIcon,
-    // GUnverifiedTerminalShortcutsDialog,
-    // GWebterminalServiceAccountDialog,
+    GUnverifiedTerminalShortcutsDialog,
+    GWebterminalServiceAccountDialog,
   },
+  inject: ['api'],
   mixins: [shootItem],
   props: {
     popperBoundariesSelector: {

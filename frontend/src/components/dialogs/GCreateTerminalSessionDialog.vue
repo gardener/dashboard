@@ -12,78 +12,82 @@ SPDX-License-Identifier: Apache-2.0
     max-height="100vh"
     ref="gDialog"
   >
-    <template v-slot:caption>Create Terminal Session</template>
-    <template v-slot:message>
+    <template #caption>Create Terminal Session</template>
+    <template #message>
       <v-tabs v-model="tab" color="primary">
-        <v-tab key="target-tab" href="#target-tab">Terminal</v-tab>
-        <v-tab v-if="isTerminalShortcutsFeatureEnabled" key="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
+        <v-tab value="target-tab" href="#target-tab">Terminal</v-tab>
+        <v-tab v-if="isTerminalShortcutsFeatureEnabled" value="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
       </v-tabs>
-      <v-tabs-items v-model="tab">
-        <v-tab-item key="target-tab" value="target-tab">
-          <terminal-target
+      <v-window v-model="tab">
+        <v-window-item value="target-tab">
+          <g-terminal-target
             v-model="targetTab.selectedTarget"
             :shoot-item="shootItem"
             @valid="onTerminalTargetValid"
             @input="updateSettings"
-          ></terminal-target>
+          ></g-terminal-target>
           <v-expansion-panels class="pt-4" focusable v-model="targetTab.value" :disabled="!isAdmin && isShootStatusHibernated">
-            <v-expansion-panel>
-              <v-expansion-panel-header>Terminal Configuration</v-expansion-panel-header>
-              <v-expansion-panel-content>
+            <v-expansion-panel title="Terminal Configuration">
+              <v-expansion-panel-text>
                 <v-skeleton-loader
                   v-show="!targetTab.selectedConfig"
                   height="94"
                   type="list-item-two-line"
                 ></v-skeleton-loader>
-                <terminal-settings
+                <g-terminal-settings
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   :target="targetTab.selectedTarget"
                   @selected-config="selectedConfigChanged"
                   @valid-settings="validSettingsChanged"
-                ></terminal-settings>
-              </v-expansion-panel-content>
+                ></g-terminal-settings>
+              </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
-        </v-tab-item>
+        </v-window-item>
         <!-- popper-boundaries-selector="#shortcut-tab" -->
-        <v-tab-item key="shortcut-tab" value="shortcut-tab">
+        <v-window-item value="shortcut-tab">
           <v-list>
-            <v-list-item-group
+            <!-- <v-list-item-group
               v-model="shortcutTab.selectedShortcuts"
               color="primary"
               active-class="g-border"
               multiple
-            >
-              <terminal-shortcuts
+            > -->
+              <g-terminal-shortcuts
                 :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
                 @add-terminal-shortcut="onAddTerminalShortcut"
-              ></terminal-shortcuts>
-            </v-list-item-group>
+              ></g-terminal-shortcuts>
+            <!-- </v-list-item-group> -->
           </v-list>
-        </v-tab-item>
-      </v-tabs-items>
-      <unverified-terminal-shortcuts-dialog
+        </v-window-item>
+      </v-window>
+      <g-unverified-terminal-shortcuts-dialog
         ref="unverified"
-      ></unverified-terminal-shortcuts-dialog>
-      <webterminal-service-account-dialog
+      ></g-unverified-terminal-shortcuts-dialog>
+      <g-webterminal-service-account-dialog
         :namespace="namespace"
         ref="serviceAccount"
-      ></webterminal-service-account-dialog>
+      ></g-webterminal-service-account-dialog>
     </template>
   </g-dialog>
 </template>
 
 <script>
+import { defineComponent, nextTick } from 'vue'
+import { mapState, mapActions } from 'pinia'
+import {
+  useAuthnStore,
+  useShootStore,
+  useTerminalStore,
+} from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
-import TerminalSettings from '@/components/TerminalSettings.vue'
-import TerminalTarget from '@/components/TerminalTarget.vue'
-import TerminalShortcuts from '@/components/TerminalShortcuts.vue'
-import UnverifiedTerminalShortcutsDialog from '@/components/dialogs/UnverifiedTerminalShortcutsDialog.vue'
-import WebterminalServiceAccountDialog from '@/components/dialogs/WebterminalServiceAccountDialog.vue'
-import { mapGetters } from 'vuex'
-import { getMembers, terminalConfig } from '@/utils/api'
+import GTerminalSettings from '@/components/GTerminalSettings.vue'
+import GTerminalTarget from '@/components/GTerminalTarget.vue'
+import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
+import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
+import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 import { TargetEnum, isShootStatusHibernated } from '@/utils'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
@@ -93,22 +97,23 @@ import pick from 'lodash/pick'
 import find from 'lodash/find'
 import some from 'lodash/some'
 
-export default {
+export default defineComponent({
   components: {
     GDialog,
-    TerminalSettings,
-    TerminalTarget,
-    TerminalShortcuts,
-    UnverifiedTerminalShortcutsDialog,
-    WebterminalServiceAccountDialog
+    GTerminalSettings,
+    GTerminalTarget,
+    GTerminalShortcuts,
+    GUnverifiedTerminalShortcutsDialog,
+    GWebterminalServiceAccountDialog,
   },
+  inject: ['api'],
   props: {
     name: {
-      type: String
+      type: String,
     },
     namespace: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
@@ -119,22 +124,19 @@ export default {
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
-        validSettings: true // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
+        validSettings: true, // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
       },
       shortcutTab: {
-        selectedShortcuts: undefined
-      }
+        selectedShortcuts: undefined,
+      },
     }
   },
   computed: {
-    ...mapGetters([
-      'hasControlPlaneTerminalAccess',
-      'hasShootTerminalAccess',
-      'hasGardenTerminalAccess',
+    ...mapState(useAuthnStore, [
       'isAdmin',
-      'shootByNamespaceAndName',
+    ]),
+    ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
-      'projectList'
     ]),
     shootItem () {
       return this.shootByNamespaceAndName(pick(this, 'namespace', 'name'))
@@ -170,7 +172,7 @@ export default {
             node,
             hostPID,
             hostNetwork,
-            preferredHost
+            preferredHost,
           } = pick(this.targetTab.selectedConfig, ['container', 'node', 'hostPID', 'hostNetwork', 'preferredHost'])
 
           return [{
@@ -179,7 +181,7 @@ export default {
             node,
             hostPID,
             hostNetwork,
-            preferredHost
+            preferredHost,
           }]
         }
         case 'shortcut-tab': {
@@ -189,9 +191,10 @@ export default {
           return undefined
         }
       }
-    }
+    },
   },
   methods: {
+    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForSelections (initialState) {
       this.initialize(initialState)
       const confirmed = await this.$refs.gDialog.confirmWithDialog(
@@ -208,7 +211,7 @@ export default {
             return true
           }
 
-          const { data: projectMembers } = await getMembers({ namespace: this.namespace })
+          const { data: projectMembers } = await this.api.getMembers({ namespace: this.namespace })
           const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
@@ -217,7 +220,7 @@ export default {
           }
 
           return this.$refs.serviceAccount.promptForConfirmation(member)
-        }
+        },
       )
       if (!confirmed) {
         return undefined
@@ -227,10 +230,10 @@ export default {
     initialize ({ target, container }) {
       this.reset()
 
-      this.$nextTick(() => {
+      nextTick(() => {
         this.targetTab.selectedTarget = target
         this.targetTab.selectedConfig = {
-          container
+          container,
         }
       })
     },
@@ -242,10 +245,10 @@ export default {
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
-        validSettings: true // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
+        validSettings: true, // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
       }
       this.shortcutTab = {
-        selectedShortcuts: []
+        selectedShortcuts: [],
       }
     },
     async updateSettings () {
@@ -257,7 +260,7 @@ export default {
       this.targetTab.selectedConfig = undefined
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
-        const { data: config } = await terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
+        const { data: config } = await this.api.terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
         this.$refs.settings.initialize(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
@@ -275,14 +278,14 @@ export default {
     },
     onTerminalTargetValid (valid) {
       this.targetTab.terminalTargetValid = valid
-    }
+    },
   },
   watch: {
     isSettingsExpanded () {
       this.updateSettings()
-    }
-  }
-}
+    },
+  },
+})
 </script>
 
 // Non-scoped style for g-border class, which will be applied to the v-list-item in TerminalShortcut component. Alternatively we could define the g-border class only in the TerminalShortcut component.

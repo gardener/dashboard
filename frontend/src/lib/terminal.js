@@ -19,18 +19,15 @@ import pick from 'lodash/pick'
 
 // Utilities
 import { encodeBase64Url } from '@/utils'
-import {
-  createTerminal,
-  fetchTerminalSession,
-  deleteTerminal,
-  heartbeat,
-} from '@/utils/api'
+import { useApi } from '@/composables'
 
 // Local
 import {
   K8sAttachAddon,
   WsReadyStateEnum,
 } from './xterm-addon-k8s-attach'
+
+const api = useApi()
 
 const WsCloseEventEnum = {
   NORMAL_CLOUSURE: 1000,
@@ -104,17 +101,17 @@ export class TerminalSession {
     body.identifier = this.vm.uuid
     body.container = merge(container, selectedConfigContainer)
 
-    const { data } = await createTerminal({ ...this.terminalCoordinates, body })
+    const { data } = await api.createTerminal({ ...this.terminalCoordinates, body })
     return data
   }
 
   async fetchTerminalSession () {
-    const { data } = await fetchTerminalSession({ ...this.terminalCoordinates })
+    const { data } = await api.fetchTerminalSession({ ...this.terminalCoordinates })
     return data
   }
 
   async deleteTerminal () {
-    const { data } = await deleteTerminal({ ...this.terminalCoordinates })
+    const { data } = await api.deleteTerminal({ ...this.terminalCoordinates })
 
     this.metadata = undefined
 
@@ -122,7 +119,7 @@ export class TerminalSession {
   }
 
   heartbeat () {
-    return heartbeat({ ...this.terminalCoordinates })
+    return api.heartbeat({ ...this.terminalCoordinates })
   }
 
   get isCreated () {
@@ -322,7 +319,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
   })
 
   const connectTimeoutSeconds = 5
-  await pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
+  await pTimeout(connectPromise, { milliseconds: connectTimeoutSeconds * 1000 }, `Could not connect within ${connectTimeoutSeconds} seconds`)
 
   const podRunningPromise = new Promise((resolve, reject) => {
     const resolveOnce = value => {
@@ -378,7 +375,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
     ws.addEventListener('message', messageHandler)
     ws.addEventListener('close', closeHandler)
   })
-  return pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
+  return pTimeout(podRunningPromise, { milliseconds: timeoutSeconds * 1000 }, `Timed out after ${timeoutSeconds}s`)
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {

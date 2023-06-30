@@ -14,41 +14,42 @@ SPDX-License-Identifier: Apache-2.0
     >
     <template v-slot:caption>Change Terminal Settings</template>
     <template v-slot:message>
-      <terminal-settings
+      <g-terminal-settings
         ref="settings"
         :target="target"
         @selected-config="selectedConfigChanged"
         @valid-settings="validSettingsChanged"
-      ></terminal-settings>
+      ></g-terminal-settings>
     </template>
   </g-dialog>
 </template>
 
 <script>
+import { defineComponent, nextTick } from 'vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
-import TerminalSettings from '@/components/TerminalSettings.vue'
+import GTerminalSettings from '@/components/GTerminalSettings.vue'
 
-export default {
+export default defineComponent({
   components: {
     GDialog,
-    TerminalSettings
+    GTerminalSettings,
   },
   props: {
     target: {
-      type: String
-    }
+      type: String,
+    },
   },
   data () {
     return {
       selectedConfig: undefined,
-      validSettings: false
+      validSettings: false,
     }
   },
   methods: {
     promptForConfigurationChange (initialState) {
       const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()
       return new Promise(resolve => {
-        this.$nextTick(async () => {
+        nextTick(async () => {
           // delay execution to make sure that all components (especially $refs.settings) are loaded (slot in g-dialog/v-dialog is lazy)
           this.initialize(initialState)
           const confirmed = await confirmWithDialogPromise
@@ -68,7 +69,7 @@ export default {
     },
     validSettingsChanged (validSettings) {
       this.validSettings = validSettings
-    }
-  }
-}
+    },
+  },
+})
 </script>

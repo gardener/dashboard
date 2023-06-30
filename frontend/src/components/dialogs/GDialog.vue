@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick } from 'vue'
 import GMessage from '@/components/GMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
@@ -220,7 +220,7 @@ export default defineComponent({
       }
       const cardContentRef = this.$refs.cardContent
       if (!cardContentRef || !cardContentRef.clientHeight) {
-        this.$nextTick(() => this.showScrollBar(retryCount + 1))
+        nextTick(() => this.showScrollBar(retryCount + 1))
         return
       }
       const scrollTopVal = cardContentRef.scrollTop
