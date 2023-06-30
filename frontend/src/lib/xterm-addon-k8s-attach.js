@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { Buffer } from 'buffer'
+
 export const WsReadyStateEnum = {
   CONNECTING: 0,
   OPEN: 1,

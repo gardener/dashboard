@@ -26,7 +26,6 @@ import { defineComponent } from 'vue'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
-import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
@@ -37,6 +36,7 @@ export default defineComponent({
     GActionButtonDialog,
     GManageShootAddons,
   },
+  inject: ['api'],
   mixins: [shootItem],
   methods: {
     async onConfigurationDialogOpened () {
@@ -49,7 +49,7 @@ export default defineComponent({
     async updateConfiguration () {
       try {
         const addons = this.$refs.addons.getAddons()
-        await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: addons })
+        await this.updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: addons })
       } catch (err) {
         const errorMessage = 'Could not update addons'
         const errorDetails = errorDetailsFromError(err)

@@ -5,25 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list class="pl-0">
-    <v-list-item class="pl-0">
-      <div class="text-caption text-medium-emphasis">
+  <div>
+    <g-list-item-content>
+      <template #label>
         <span v-if="detailsTitle">Credential Details (</span>
         <span v-for="({ label }, index) in secretDetails" :key="label">
           <span>{{ label }}</span>
           <span v-if="index !== secretDetails.length - 1"> / </span>
         </span>
         <span v-if="detailsTitle">)</span>
-      </div>
-      <div class="text-body-2 text-no-wrap">
-        <span v-for="({ value, label }, index) in secretDetails" :key="label">
-          <span v-if="value">{{ value }}</span>
-          <span v-else class="font-weight-light text-disabled">unknown</span>
-          <span v-if="index !== secretDetails.length - 1"> / </span>
-        </span>
-      </div>
-    </v-list-item>
-  </v-list>
+      </template>
+      <span v-for="({ value, label }, index) in secretDetails" :key="label">
+        <span v-if="value">{{ value }}</span>
+        <span v-else class="font-weight-light text-disabled">unknown</span>
+        <span v-if="index !== secretDetails.length - 1"> / </span>
+      </span>
+    </g-list-item-content>
+  </div>
 </template>
 
 <script>

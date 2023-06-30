@@ -5,14 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item :value="shortcut" :disabled="disabled">
-    <template v-if="!hideIconSlot" v-slot:prepend>
+  <v-list-item :value="shortcut" :disabled="disabled">
+    <template v-if="!hideIconSlot" #prepend>
       <slot name="icon"/>
     </template>
-    <g-list-item-content>
+    <v-list-item-title>
       {{shortcut.title}}
       <v-tooltip v-if="isUnverified" location="top" max-width="400px">
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-chip
             v-bind="props"
             small
@@ -25,18 +25,18 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious
       </v-tooltip>
-      <template v-if="shortcut.description" v-slot:description>
+      <template v-if="shortcut.description" #description>
         {{ shortcut.description }}
       </template>
-    </g-list-item-content>
-    <template v-if="!readOnly" v-slot:append>
+    </v-list-item-title>
+    <template v-if="!readOnly" #append>
       <g-action-button
         icon="mdi-console-line"
         :disabled="disabled"
         class="enablePointerEvents"
         @click.stop="addTerminalShortcut(shortcut)"
       >
-        <template v-slot:tooltip>
+        <template #tooltip>
           <span v-if="!disabled">
             Create
             '<span class="font-family-monospace">{{ shortcut.title }}</span>'
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
         @click.stop="expansionPanel = !expansionPanel"
       />
     </template>
-  </g-list-item>
+  </v-list-item>
   <v-expand-transition>
     <v-card v-if="expansionPanel"
       flat
@@ -74,8 +74,6 @@ import { mapState } from 'pinia'
 
 import { useAuthnStore, useAuthzStore } from '@/store'
 
-import GListItem from './GListItem.vue'
-import GListItemContent from './GListItemContent.vue'
 import GActionButton from './GActionButton.vue'
 import GCodeBlock from './GCodeBlock.vue'
 
@@ -88,12 +86,11 @@ import join from 'lodash/join'
 
 export default defineComponent({
   components: {
-    GListItem,
-    GListItemContent,
     GActionButton,
     GCodeBlock,
   },
   mixins: [shootItem],
+  inject: ['yaml'],
   props: {
     shortcut: {
       type: Object,
@@ -159,15 +156,22 @@ export default defineComponent({
       return !!this.shortcut.unverified
     },
   },
+  emits: [
+    'addTerminalShortcut',
+  ],
   methods: {
     addTerminalShortcut (shortcut) {
-      this.$emit('add-terminal-shortcut', shortcut)
+      this.$emit('addTerminalShortcut', shortcut)
     },
     shortcutTargetDescription (shortcut) {
       return targetText(shortcut.target)
     },
     async updateShortcutYaml (value) {
-      this.shortcutYaml = await this.$yaml.dump(value)
+      try {
+        this.shortcutYaml = await this.yaml.dump(value)
+      } catch (error) {
+        console.log(error)
+      }
     },
   },
   created () {

@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-icon color="primary" :icon="icon"/>
       </template>
       <slot name="notAvailablePlaceholder">
-        <g-list-item-content :label="Credentials">
+        <g-list-item-content label="Credentials">
           <v-icon color="primary" icon="mdi-alert-circle-outline" start/>
           Currently not available
         </g-list-item-content>

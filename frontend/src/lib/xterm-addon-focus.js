@@ -4,6 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { toRef } from 'vue'
+import { useAppStore } from '@/store'
+
+const store = useAppStore()
+
+const focusedElementId = toRef(store, 'focusedElementId')
+
 export class FocusAddon {
   constructor (uuid, store) {
     this.uuid = uuid
@@ -12,13 +19,15 @@ export class FocusAddon {
 
   activate (terminal) {
     terminal.textarea.onfocus = () => {
-      this.store.commit('SET_FOCUSED_ELEMENT_ID', this.uuid)
+      focusedElementId.value = this.uuid
       if (typeof this.onFocus === 'function') {
         this.onFocus()
       }
     }
     terminal.textarea.onblur = () => {
-      this.store.commit('UNSET_FOCUSED_ELEMENT_ID', this.uuid)
+      if (focusedElementId.value === this.uuid) {
+        focusedElementId.value = null
+      }
       if (typeof this.onBlur === 'function') {
         this.onBlur()
       }

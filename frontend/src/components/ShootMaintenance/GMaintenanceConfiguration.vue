@@ -36,7 +36,6 @@ import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 
-import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -47,6 +46,7 @@ export default defineComponent({
     GMaintenanceComponents,
     GMaintenanceTime,
   },
+  inject: ['api'],
   mixins: [shootItem],
   data () {
     return {
@@ -77,7 +77,7 @@ export default defineComponent({
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
-        await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        await this.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
       } catch (err) {
         const errorMessage = 'Could not save maintenance configuration'
         const errorDetails = errorDetailsFromError(err)

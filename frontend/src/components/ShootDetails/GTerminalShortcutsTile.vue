@@ -5,52 +5,51 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <g-list-item>
-      <template v-slot:prepend>
-        <g-icon-base
-          width="24"
-          height="23"
-          icon-color="primary"
-          view-box="-4 0 56 54"
-        >
-          <g-terminal-shortcut-icon/>
-        </g-icon-base>
+  <g-list-item>
+    <template v-slot:prepend>
+      <g-icon-base
+        width="24"
+        height="23"
+        icon-color="primary"
+        view-box="-4 0 56 54"
+      >
+        <g-terminal-shortcut-icon/>
+      </g-icon-base>
+    </template>
+    <g-list-item-content>
+      Terminal Shortcuts
+      <template>
+        Launch preconfigured terminals for frequently used views
       </template>
-      <g-list-item-content>
-        Terminal Shortcuts
-        <template>
-          Launch preconfigured terminals for frequently used views
-        </template>
-      </g-list-item-content>
-      <template v-slot:append>
-        <g-action-button
-          :icon="expansionPanelIcon"
-          :tooltip="expansionPanelTooltip"
-          @click="expansionPanel = !expansionPanel"
+    </g-list-item-content>
+    <template v-slot:append>
+      <g-action-button
+        :icon="expansionPanelIcon"
+        :tooltip="expansionPanelTooltip"
+        @click="expansionPanel = !expansionPanel"
+      />
+    </template>
+  </g-list-item>
+  <v-expand-transition appear>
+    <v-card v-if="expansionPanel" flat class="ml-14 mt-2">
+      <v-card-text class="pa-0">
+        <g-terminal-shortcuts
+          :shoot-item="shootItem"
+          :popper-boundaries-selector="popperBoundariesSelector"
+          @add-terminal-shortcut="onAddTerminalShortcut"
         />
-      </template>
-    </g-list-item>
-    <v-expand-transition appear>
-      <v-card v-if="expansionPanel" flat class="ml-14 mt-2">
-        <v-card-text class="pa-0">
-          <g-terminal-shortcuts
-            :shoot-item="shootItem"
-            :popper-boundaries-selector="popperBoundariesSelector"
-            @add-terminal-shortcut="onAddTerminalShortcut"
-          />
-        </v-card-text>
-      </v-card>
-    </v-expand-transition>
-    <!--
-    TODO uncomment
-    <g-unverified-terminal-shortcuts-dialog
-      ref="unverified"
-    />
-    <g-webterminal-service-account-dialog
-      ref="serviceAccount"
-      :namespace="shootNamespace"
-    />
-    -->
+      </v-card-text>
+    </v-card>
+  </v-expand-transition>
+
+  <g-unverified-terminal-shortcuts-dialog
+    ref="unverified"
+  />
+
+  <g-webterminal-service-account-dialog
+    ref="serviceAccount"
+    :namespace="shootNamespace"
+  />
 </template>
 
 <script>
@@ -67,8 +66,8 @@ import GActionButton from '@/components/GActionButton.vue'
 import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GTerminalShortcutIcon from '@/components/icons/GTerminalShortcutIcon.vue'
-// import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
-// import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
+import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
+import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 
 import { TargetEnum } from '@/utils'
 
@@ -84,9 +83,10 @@ export default defineComponent({
     GTerminalShortcuts,
     GIconBase,
     GTerminalShortcutIcon,
-    // GUnverifiedTerminalShortcutsDialog,
-    // GWebterminalServiceAccountDialog,
+    GUnverifiedTerminalShortcutsDialog,
+    GWebterminalServiceAccountDialog,
   },
+  inject: ['api'],
   mixins: [shootItem],
   props: {
     popperBoundariesSelector: {

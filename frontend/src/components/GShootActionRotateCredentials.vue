@@ -31,7 +31,8 @@ SPDX-License-Identifier: Apache-2.0
       label="Perform this operation in the maintenance time window"
       :disabled="isMaintenanceDisabled"
       :hint="maintenanceHint"
-      persistent-hint>
+      persistent-hint
+    >
     </v-checkbox>
     <div>Type <span class="font-weight-bold">{{shootName}}</span> below to confirm the operation.</div>
   </g-shoot-action-dialog>

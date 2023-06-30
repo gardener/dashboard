@@ -13,31 +13,33 @@ SPDX-License-Identifier: Apache-2.0
       :popper-boundaries-selector="popperBoundariesSelector"
       @add-terminal-shortcut="onAddTerminalShortcut"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
-            <v-badge
-              v-bind="props"
-              avatar
-              overlap
-              bordered
-              bottom
-              color="transparent"
-            >
-              <template v-slot:badge>
-                <v-avatar>
-                  <v-icon icon="mdi-grid-large" color="primary"/>
-                </v-avatar>
-              </template>
-              <g-icon-base
-                width="24"
-                height="23"
-                icon-color="primary"
-                view-box="-4 0 56 54"
+          <template #activator="{ props }">
+            <span v-bind="props" class="v-icon">
+              <v-badge
+                avatar
+                overlap
+                location="bottom right"
+                color="transparent"
               >
-                <g-terminal-shortcut-icon/>
-              </g-icon-base>
-            </v-badge>
+                <template #badge>
+                  <v-avatar>
+                    <v-icon icon="mdi-grid-large" color="primary"/>
+                  </v-avatar>
+                </template>
+                <span class="v-icon">
+                  <g-icon-base
+                    width="24"
+                    height="23"
+                    icon-color="primary"
+                    view-box="-4 0 56 54"
+                  >
+                    <g-terminal-shortcut-icon/>
+                  </g-icon-base>
+                </span>
+              </v-badge>
+            </span>
           </template>
           Project specific terminal shortcut
         </v-tooltip>
@@ -50,10 +52,10 @@ SPDX-License-Identifier: Apache-2.0
       :popper-boundaries-selector="popperBoundariesSelector"
       @add-terminal-shortcut="onAddTerminalShortcut"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
-            <span v-bind="props">
+          <template #activator="{ props }">
+            <span v-bind="props" class="v-icon">
               <g-icon-base
                 width="24"
                 height="23"
@@ -148,7 +150,7 @@ export default defineComponent({
       'terminalShortcutsByTargetsFilter',
     ]),
     onAddTerminalShortcut (shortcut) {
-      this.$emit('add-terminal-shortcut', shortcut)
+      this.$emit('addTerminalShortcut', shortcut)
     },
   },
 })

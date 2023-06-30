@@ -5,21 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popper
-    :title="workerGroup.name"
-    :popper-key="`worker_group_${workerGroup.name}`"
+  <g-popover
+    :toolbar-title="workerGroup.name"
+    placement="bottom"
   >
-    <template #popperRef>
+    <template #activator="{ props }">
       <v-chip
-        small
+        v-bind="props"
+        size="small"
         class="cursor-pointer my-0 ml-0"
-        outlined
+        variant="outlined"
         color="primary">
           <g-vendor-icon :icon="machineImageIcon" :size="20"></g-vendor-icon>
           {{workerGroup.name}}
       </v-chip>
     </template>
-    <template #card>
+    <template #text>
       <v-tabs
         height="32"
         color="primary"
@@ -40,8 +41,8 @@ SPDX-License-Identifier: Apache-2.0
           Yaml
         </v-tab>
       </v-tabs>
-      <v-tabs-items v-model="tab">
-        <v-tab-item id="overview">
+      <v-window v-model="tab">
+        <v-window-item value="overview">
           <v-container class="pa-2">
             <v-row dense>
               <v-col cols="6">
@@ -171,18 +172,18 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
             </v-row>
           </v-container>
-        </v-tab-item>
-        <v-tab-item id="yaml">
+        </v-window-item>
+        <v-window-item value="yaml">
           <g-code-block lang="yaml" :content="workerGroupYaml"></g-code-block>
-        </v-tab-item>
-      </v-tabs-items>
+        </v-window-item>
+      </v-window>
     </template>
-  </g-popper>
+  </g-popover>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-import GPopper from '@/components/GPopper'
+import GPopover from '@/components/GPopover'
 import GVendorIcon from '@/components/GVendorIcon'
 import GCodeBlock from '@/components/GCodeBlock'
 import find from 'lodash/find'
@@ -193,7 +194,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 export default defineComponent({
   name: 'worker-group',
   components: {
-    GPopper,
+    GPopover,
     GVendorIcon,
     GCodeBlock,
   },
@@ -211,6 +212,7 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  inject: ['yaml'],
   data () {
     return {
       workerGroupYaml: undefined,
@@ -281,7 +283,7 @@ export default defineComponent({
       'machineImagesByCloudProfileName',
     ]),
     async updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = await this.$yaml.dump(value)
+      this.workerGroupYaml = await this.yaml.dump(value)
     },
   },
   created () {

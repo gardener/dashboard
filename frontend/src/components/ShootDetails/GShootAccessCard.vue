@@ -28,7 +28,6 @@ SPDX-License-Identifier: Apache-2.0
     <g-terminal-shortcuts-tile v-if="isTerminalShortcutsTileVisible"
       :shoot-item="shootItem"
       popper-boundaries-selector="#accessCardList"
-      class="mt-3"
       @add-terminal-shortcut="onAddTerminalShortcut"
     />
 
