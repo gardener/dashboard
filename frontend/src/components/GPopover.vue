@@ -16,57 +16,50 @@ SPDX-License-Identifier: Apache-2.0
     class="g-popover"
     @update:shown="onUpdateShown"
   >
-    <template v-slot:default="{ shown, show, hide }">
+    <template v-slot:default="popperProps">
       <slot
         name="activator"
-        v-bind="{
-          shown,
-          show,
-          hide,
-          props: {
-            onClick: () => shown ? hide() : show(),
-          },
-        }"
+        v-bind="makeActivatorProps(popperProps)"
       />
     </template>
     <template v-slot:popper="{ hide }">
       <v-theme-provider :theme="themeName" with-background>
-      <v-card
-        variant="text"
-        class="g-popover__card"
-      >
-        <v-toolbar v-if="toolbarTitle"
-          :height="toolbarHeight"
-          :color="toolbarColor"
+        <v-card
+          variant="text"
+          class="g-popover__card"
         >
-          <template v-slot:title >
-            <span class="text-subtitle-1">
-              {{ toolbarTitle }}
-            </span>
-          </template>
-          <template v-slot:append>
-            <v-btn
-              density="comfortable"
-              variant="text"
-              size="small"
-              icon="mdi-close"
-              :color="toolbarColor"
-              @click.stop="hide()"
-            />
-          </template>
-        </v-toolbar>
-        <v-card-item v-if="$slots.item"
-          v-bind="containerProps"
-        >
-          <slot name="item"/>
-        </v-card-item>
-        <v-card-text v-else-if="$slots.text"
-          v-bind="containerProps"
-        >
-          <slot name="text"/>
-        </v-card-text>
-        <slot v-else/>
-      </v-card>
+          <v-toolbar v-if="toolbarTitle"
+            :height="toolbarHeight"
+            :color="toolbarColor"
+          >
+            <template v-slot:title >
+              <span class="text-subtitle-1">
+                {{ toolbarTitle }}
+              </span>
+            </template>
+            <template v-slot:append>
+              <v-btn
+                density="comfortable"
+                variant="text"
+                size="small"
+                icon="mdi-close"
+                :color="toolbarColor"
+                @click.stop="hide()"
+              />
+            </template>
+          </v-toolbar>
+          <v-card-item v-if="$slots.item"
+            v-bind="containerProps"
+          >
+            <slot name="item"/>
+          </v-card-item>
+          <v-card-text v-else-if="$slots.text"
+            v-bind="containerProps"
+          >
+            <slot name="text"/>
+          </v-card-text>
+          <slot v-else/>
+        </v-card>
       </v-theme-provider>
     </template>
   </v-dropdown>
@@ -133,6 +126,21 @@ export default defineComponent({
   methods: {
     onUpdateShown (value) {
       this.$emit('update:visible', value)
+    },
+    makeActivatorProps ({ shown, show, hide }) {
+      const props = {
+        onClick () {
+          if (!shown) {
+            show()
+          }
+        },
+      }
+      return {
+        shown,
+        show,
+        hide,
+        props,
+      }
     },
   },
 })
