@@ -16,15 +16,15 @@ SPDX-License-Identifier: Apache-2.0
       <v-btn
         v-bind="mergeProps(props, { onClick })"
         variant="text"
-        density="default"
+        :density="isTextBtn ? 'default' : 'comfortable'"
         :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
         :loading="loading"
-        :prepend-icon="icon"
+        :[iconProp]="icon"
         :color="color"
-        width="100%"
-        class="text-none font-weight-regular justify-start"
+        :text="text"
+        :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
+        :width="isTextBtn ? '100%' : undefined"
       >
-        {{ text }}
       </v-btn>
     </template>
   </v-tooltip>
@@ -64,6 +64,12 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    isTextBtn() {
+      return !!this.text
+    },
+    iconProp() {
+      return this.isTextBtn ? 'prepend-icon' : 'icon'
+    },
     tooltipText () {
       if (this.tooltip) {
         return this.tooltip

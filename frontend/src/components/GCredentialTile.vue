@@ -65,13 +65,19 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </g-list-item-content>
     <template #append>
-      <g-rotate-credentials :shoot-item="shootItem" :type="type"></g-rotate-credentials>
+      <g-shoot-action-rotate-credentials
+        v-model="rotateCredentialsDialog"
+        :shoot-item="shootItem"
+        :type="type"
+        dialog
+        button
+      />
     </template>
   </g-list-item>
 </template>
 
 <script>
-import GRotateCredentials from '@/components/GRotateCredentials'
+import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials'
 import GTimeString from '@/components/GTimeString'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
@@ -80,7 +86,7 @@ import get from 'lodash/get'
 export default {
   name: 'credential-tile',
   components: {
-    GRotateCredentials,
+    GShootActionRotateCredentials,
     GTimeString,
     GShootMessages,
   },
@@ -91,6 +97,11 @@ export default {
     },
   },
   mixins: [shootStatusCredentialRotation],
+  data () {
+    return {
+      rotateCredentialsDialog: false,
+    }
+  },
   computed: {
     isProgressing () {
       return this.phaseType === 'Preparing' || this.phaseType === 'Completing' || this.phaseType === 'Rotating'
