@@ -22,8 +22,11 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
         <template #append>
-          <g-change-hibernation :shoot-item="shootItem"></g-change-hibernation>
-          <g-hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem"></g-hibernation-configuration>
+          <g-shoot-action-change-hibernation
+            :shoot-item="shootItem"
+            v-model="changeHibernationDialog"
+            button />
+          <g-hibernation-configuration ref="hibernationConfiguration" :shoot-item="shootItem" />
         </template>
       </g-list-item>
       <v-divider inset></v-divider>
@@ -62,8 +65,11 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
         <template #append>
-          <g-maintenance-start :shoot-item="shootItem"></g-maintenance-start>
-          <g-maintenance-configuration :shoot-item="shootItem"></g-maintenance-configuration>
+          <g-shoot-action-maintenance-start
+            :shoot-item="shootItem"
+            v-model="maintenanceStartDialog"
+            button />
+          <g-maintenance-configuration :shoot-item="shootItem" />
         </template>
       </g-list-item>
       <v-divider inset></v-divider>
@@ -91,21 +97,36 @@ SPDX-License-Identifier: Apache-2.0
             Delete Cluster
           </g-list-item-content>
           <template #append>
-            <g-delete-cluster :shoot-item="shootItem"></g-delete-cluster>
+            <g-shoot-action-delete-cluster
+              v-model="deleteClusterDialog"
+              button
+              :shoot-item="shootItem" />
           </template>
         </g-list-item>
       </template>
     </g-list>
   </v-card>
+  <g-shoot-action-delete-cluster
+    v-model="deleteClusterDialog"
+    dialog
+    :shoot-item="shootItem" />
+  <g-shoot-action-maintenance-start
+    :shoot-item="shootItem"
+    v-model="maintenanceStartDialog"
+    dialog />
+  <g-shoot-action-change-hibernation
+    :shoot-item="shootItem"
+    v-model="changeHibernationDialog"
+    dialog />
 </template>
 <script>
 import { mapState } from 'pinia'
 import get from 'lodash/get'
 
-import GChangeHibernation from '@/components/ShootHibernation/GChangeHibernation'
-import GDeleteCluster from '@/components/GDeleteCluster'
+import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation'
+import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster'
 import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
-import GMaintenanceStart from '@/components/ShootMaintenance/GMaintenanceStart'
+import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart'
 import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanceConfiguration'
 import GReconcileStart from '@/components/GReconcileStart'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
@@ -123,14 +144,21 @@ import {
 
 export default {
   components: {
-    GChangeHibernation,
-    GMaintenanceStart,
+    GShootActionChangeHibernation,
+    GShootActionMaintenanceStart,
     GMaintenanceConfiguration,
     GHibernationConfiguration,
-    GDeleteCluster,
+    GShootActionDeleteCluster,
     GReconcileStart,
     GShootMessages,
     GTimeString,
+  },
+  data () {
+    return {
+      deleteClusterDialog: false,
+      maintenanceStartDialog: false,
+      changeHibernationDialog: false,
+    }
   },
   mixins: [shootItem],
   computed: {

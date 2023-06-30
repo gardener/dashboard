@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
     variant="underlined"
   >
     <template #item="{ props, item }">
-      <v-list-item v-bind="props">
+      <v-list-item v-bind="props" :title="undefined">
         <template #prepend>
           <g-vendor-icon :icon="item.raw.icon"></g-vendor-icon>
         </template>
