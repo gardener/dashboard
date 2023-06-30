@@ -79,8 +79,8 @@ SPDX-License-Identifier: Apache-2.0
             @click="deleteTerminal"
           />
           <v-spacer/>
-          <v-icon class="pr-2">mdi-console</v-icon>
-          <span>{{terminalTitle}}</span>
+          <v-icon class="pr-2" color="grey-lighten-1">mdi-console</v-icon>
+          <span class="text-grey-lighten-1">{{terminalTitle}}</span>
           <v-spacer/>
           <v-tooltip v-if="terminalSession.imageHelpText"
             location="top"
@@ -571,7 +571,7 @@ export default defineComponent({
     const term = this.term = new Terminal({
       fontSize: 15,
       fontWeight: 600,
-      fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"'
+      fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
     })
     const fitAddon = this.fitAddon = new FitAddon()
     const focusAddon = new FocusAddon(this.uuid, this.$store)
@@ -643,6 +643,4 @@ export default defineComponent({
   .g-burger-menu-button {
     width: 400px;
   }
-
-
 </style>
