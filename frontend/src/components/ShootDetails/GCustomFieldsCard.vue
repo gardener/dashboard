@@ -16,8 +16,8 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content :label="customField.name">
             <v-tooltip top v-if="customField.tooltip">
-              <template v-slot:activator="{ on }">
-                <span v-on="on">{{customField.value}}</span>
+              <template #activator="{ props }">
+                <span v-bind="props">{{customField.value}}</span>
               </template>
               {{customField.tooltip}}
             </v-tooltip>

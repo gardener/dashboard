@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #prepend>
           <v-icon color="primary">mdi-wrench-outline</v-icon>
         </template>
-        <g-list-item-content label="">
+        <g-list-item-content>
           <div class="d-flex align-center">
             Maintenance
             <g-shoot-messages
@@ -44,8 +44,8 @@ SPDX-License-Identifier: Apache-2.0
           </div>
           <template #description>
             <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div class="d-flex align-center pt-1" v-on="on">
+              <template #activator="{ props }">
+                <div class="d-flex align-center pt-1" v-bind="props">
                   <g-shoot-messages :shoot-item="shootItem" filter="maintenance-constraint" small class="mr-1" />
                   <span v-if="isInMaintenanceWindow">
                     Cluster is currently within the maintenance time window<span v-if="nextMaintenanceEndTimestamp">. The maintenance time window ends <g-time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></g-time-string></span>

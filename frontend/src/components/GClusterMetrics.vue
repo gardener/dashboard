@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list>
+  <g-list>
     <g-link-list-tile
       icon="mdi-developer-board"
       app-title="Grafana"
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     ></g-link-list-tile>
     <v-divider v-show="!!username && !!password" inset></v-divider>
     <g-username-password :username="username" :password="password"></g-username-password>
-  </v-list>
+  </g-list>
 </template>
 
 <script>

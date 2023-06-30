@@ -29,15 +29,13 @@ SPDX-License-Identifier: Apache-2.0
         content-class="ml-1"
       />
     </v-container>
-    <v-list>
-      <g-ticket-comment
-        :comment="ticket"
-      />
-      <g-ticket-comment v-for="comment in commentsForTicket"
-        :key="comment.metadata.id"
-        :comment="comment"
-      />
-    </v-list>
+    <g-ticket-comment
+      :comment="ticket"
+    />
+    <g-ticket-comment v-for="comment in commentsForTicket"
+      :key="comment.metadata.id"
+      :comment="comment"
+    />
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
       <v-btn variant="text" color="primary" :href="sanitizeUrl(addCommentLink)" target="_blank" rel="noopener" title="Add Comment">

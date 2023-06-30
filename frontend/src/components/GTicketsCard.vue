@@ -66,7 +66,7 @@ export default {
       return get(this.ticketConfig, 'newTicketLabels')
     },
     issueDescription () {
-      const descriptionTemplate = get(this.cfg, 'ticket.issueDescriptionTemplate')
+      const descriptionTemplate = get(this.ticketConfig, 'issueDescriptionTemplate')
       const compiled = template(descriptionTemplate)
       return compiled({
         shootName: this.shootName,

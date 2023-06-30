@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-list-item v-if="expansionPanel[index]"
       :key="'expansion-' + title"
     >
-      <g-list-item-content class="pt-0">
+      <g-list-item-content>
         <g-code-block
           lang="shell"
           :content="displayValue"

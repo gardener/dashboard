@@ -12,14 +12,14 @@ SPDX-License-Identifier: Apache-2.0
     <g-list-item-content>
       <div class="d-flex align-center">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{title}}</span>
+          <template #activator="{ props }">
+            <span v-bind="props">{{title}}</span>
           </template>
           {{titleTooltip}}
         </v-tooltip>
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-chip v-on="on" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
+          <template #activator="{ props }">
+            <v-chip v-bind="props" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
           </template>
           <template v-if="phaseType === 'Prepared'">
             <template v-if="phase && phase.incomplete">

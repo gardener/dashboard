@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-list-item-content>
       </g-list-item>
       <g-list-item>
-        <g-list-item-content label="Created at" class="pt-0">
+        <g-list-item-content label="Created at">
           <g-time-string :date-time="shootMetadata.creationTimestamp" mode="past"></g-time-string>
         </g-list-item-content>
       </g-list-item>

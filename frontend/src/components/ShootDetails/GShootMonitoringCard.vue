@@ -13,16 +13,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon color="primary">mdi-tractor</v-icon>
         </template>
         <g-list-item-content label="Status">
-          <div class="d-flex align-center pt-1">
-            <g-shoot-status
-              class="pr-2"
-              :shoot-item="shootItem"
-              :popper-key="`${shootNamespace}/${shootName}_lastOp`"
-              popper-placement="bottom"
-              show-status-text
-              >
-            </g-shoot-status>
-          </div>
+          <g-shoot-status
+            :shoot-item="shootItem"
+            :popper-key="`${shootNamespace}/${shootName}_lastOp`"
+            popper-placement="bottom"
+            show-status-text
+            >
+          </g-shoot-status>
         </g-list-item-content>
       </g-list-item>
       <v-divider inset></v-divider>

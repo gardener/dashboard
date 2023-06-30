@@ -5,16 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item>
-    <template #prepend>
+  <div class="d-flex my-2 mx-4">
+    <div class="mr-2">
       <v-avatar v-if="avatarUrl"
         size="40px"
       >
-        <img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`"/>
+        <v-img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`" />
       </v-avatar>
       <v-icon v-else icon="mdi-comment-outline" color="primary"/>
-    </template>
-    <g-list-item-content class="comment">
+    </div>
+    <div class="comment d-flex flex-column flex-grow-1">
       <div class="comment-header bg-toolbar-background text-toolbar-title">
         <g-external-link
           :url="htmlUrl"
@@ -28,12 +28,9 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-external-link>
       </div>
-      <template #description>
-        <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
-        <div class="wrap-text comment-body" v-html="html"/>
-      </template>
-    </g-list-item-content>
-  </g-list-item>
+      <div class="wrap-text comment-body" v-html="commentHtml"/>
+    </div>
+  </div>
 </template>
 
 <script>

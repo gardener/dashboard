@@ -5,13 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item>
+  <g-list-item :class="contentClass">
     <template v-if="icon" v-slot:prepend>
       <v-icon :icon="icon" color="primary"/>
     </template>
     <g-list-item-content
       :label="appTitle"
-      :class="contentClass"
     >
       <v-tooltip v-if="isShootStatusHibernated"
         location="top"
