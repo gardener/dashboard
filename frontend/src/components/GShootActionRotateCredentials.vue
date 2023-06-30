@@ -5,54 +5,56 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-action-button-dialog
+  <g-shoot-action-dialog v-if="dialog"
+    ref="actionDialog"
+    :shoot-item="shootItem"
+    :caption="componentTexts.caption"
+    :confirm-required="true"
+    :confirm-button-text="confirmButtonText"
+    width="700"
+  >
+    <div class="text-h5 pb-3">
+      {{componentTexts.heading}}
+    </div>
+    <v-alert v-if="mode === 'START'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.</v-alert>
+    <v-alert v-if="mode === 'COMPLETE'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.</v-alert>
+    <div class="font-weight-bold py-3">Actions performed in this step</div>
+    <ul class="px-4">
+      <li
+        v-for="action in componentTexts.actions"
+        :key="action">
+        {{action}}
+      </li>
+    </ul>
+    <v-checkbox
+      v-model="maintenance"
+      label="Perform this operation in the maintenance time window"
+      :disabled="isMaintenanceDisabled"
+      :hint="maintenanceHint"
+      persistent-hint>
+    </v-checkbox>
+    <div>Type <span class="font-weight-bold">{{shootName}}</span> below to confirm the operation.</div>
+  </g-shoot-action-dialog>
+  <g-shoot-action-button v-if="button"
+    ref="actionButton"
     :shoot-item="shootItem"
     :loading="showLoadingIndicator"
     :disabled="isDisabled"
-    @dialog-opened="startDialogOpened"
-    ref="actionDialog"
-    :caption="componentTexts.caption"
-    :tooltip="tooltip"
     :icon ="icon"
-    width="700"
-    :button-text="componentTexts.buttonText"
-    :confirm-required="true"
-    :confirm-button-text="confirmButtonText">
-    <template #actionComponent>
-      <v-row >
-        <v-col>
-          <div class="py-4 text-h5 pt-0 pb-3">{{componentTexts.heading}}</div>
-          <v-alert v-if="mode === 'START'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.</v-alert>
-          <v-alert v-if="mode === 'COMPLETE'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.</v-alert>
-          <strong>Actions performed in this step</strong>
-          <ul>
-            <li
-              v-for="action in componentTexts.actions"
-              :key="action">
-              {{action}}
-            </li>
-          </ul>
-          <v-checkbox
-            v-model="maintenance"
-            label="Perform this operation in the maintenance time window"
-            :disabled="isMaintenanceDisabled"
-            :hint="maintenanceHint"
-            persistent-hint>
-          </v-checkbox>
-          <div class="mt-3">Type <span class="font-weight-bold">{{shootName}}</span> below to confirm the operation.</div>
-        </v-col>
-      </v-row>
-    </template>
-  </g-action-button-dialog>
+    :text="componentTexts.buttonText"
+    :tooltip="tooltip"
+    :caption="componentTexts.caption"
+    @click="internalValue = true"
+  />
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 
 import { useAppStore, useAuthnStore } from '@/store'
 
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
+import GShootActionButton from '@/components/GShootActionButton.vue'
+import GShootActionDialog from '@/components/GShootActionDialog.vue'
 
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 
@@ -61,15 +63,29 @@ import { errorDetailsFromError } from '@/utils/error'
 import includes from 'lodash/includes'
 import compact from 'lodash/compact'
 
-export default defineComponent({
+export default {
   components: {
-    GActionButtonDialog,
+    GShootActionButton,
+    GShootActionDialog,
   },
   inject: ['api', 'logger'],
   mixins: [shootStatusCredentialRotation],
   props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
     text: {
       type: Boolean,
+      default: false,
+    },
+    dialog: {
+      type: Boolean,
+      default: false,
+    },
+    button: {
+      type: Boolean,
+      default: false,
     },
   },
   data () {
@@ -82,6 +98,14 @@ export default defineComponent({
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
+    internalValue: {
+      get () {
+        return this.modelValue
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
+    },
     mode () {
       if (!this.completionOperation) {
         return 'ROTATE'
@@ -360,15 +384,26 @@ export default defineComponent({
       return componentTexts[this.operation]
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
     ]),
-    async startDialogOpened () {
-      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
-      if (confirmed) {
-        this.start()
-      }
+    waitForConfirmation () {
+      this.$nextTick(async () => {
+        const actionDialog = this.$refs.actionDialog
+        try {
+          if (await actionDialog.waitForDialogClosed()) {
+            this.start()
+          }
+        } catch (err) {
+          /* ignore error */
+        } finally {
+          this.internalValue = false
+        }
+      })
     },
     async start () {
       this.actionTriggered = true
@@ -396,6 +431,17 @@ export default defineComponent({
     },
   },
   watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
     isActionToBeScheduled (actionToBeScheduled) {
       const isActionScheduled = !actionToBeScheduled && this.actionTriggered
       if (!isActionScheduled) {
@@ -415,5 +461,5 @@ export default defineComponent({
   mounted () {
     this.maintenance = this.isScheduledForMaintenance
   },
-})
+}
 </script>

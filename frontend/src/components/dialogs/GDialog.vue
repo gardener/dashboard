@@ -5,43 +5,59 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-dialog v-model="visible" persistent :width="width" scrollable max-width="90vw">
+  <v-dialog
+    v-model="visible"
+    persistent
+    scrollable
+    :width="width"
+    max-width="90vw"
+  >
     <v-card>
-      <v-toolbar flat class="bg-toolbar-background text-toolbar-title">
+      <v-toolbar
+        flat
+        density="comfortable"
+        class="bg-toolbar-background text-toolbar-title"
+      >
         <v-toolbar-title class="dialog-title align-center justify-start">
           <slot name="caption">
             Confirm Dialog
           </slot>
           <template v-if="$slots.affectedObjectName">
-            &nbsp;
-            <span class="font-family-monospace font-weight-bold">
+            <span class="font-family-monospace font-weight-bold pl-2">
               <slot name="affectedObjectName"></slot>
             </span>
           </template>
         </v-toolbar-title>
       </v-toolbar>
       <slot name="top"></slot>
-      <div :style="{ 'max-height': maxHeight }" ref="cardContent" class="card-content">
+      <div
+        ref="cardContent"
+        class="card-content"
+        :style="{ 'max-height': maxHeight }"
+      >
         <slot name="card"></slot>
         <v-card-text v-if="$slots.message">
           <slot name="message"></slot>
         </v-card-text>
       </div>
-      <slot name="errorMessage"></slot>
-      <g-message
-        color="error"
-        class="mt-4"
-        v-model:message="message"
-        v-model:detailed-message="detailedMessage"
-      />
+      <div v-if="$slots.errorMessage || message"
+        class="mt-2"
+      >
+        <slot name="errorMessage">
+            <g-message
+              color="error"
+              v-model:message="message"
+              v-model:detailed-message="detailedMessage"
+            />
+        </slot>
+      </div>
+
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-text-field
           v-if="confirmValue && !confirmDisabled"
           ref="deleteDialogInput"
-          class="mr-2 confirm-input"
-          @keyup.enter="resolveAction(true)"
           :label="hint"
           :error="notConfirmed && userInput.length > 0"
           hide-details
@@ -49,8 +65,10 @@ SPDX-License-Identifier: Apache-2.0
           type="text"
           variant="outlined"
           color="primary"
-          density="compact">
-        </v-text-field>
+          density="compact"
+          class="mr-2 confirm-input"
+          @keyup.enter="resolveAction(true)"
+        />
         <v-btn
           variant="text"
           @click="resolveAction(false)"
@@ -80,14 +98,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GMessage from '@/components/GMessage.vue'
+
 import { setDelayedInputFocus } from '@/utils'
 
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
 
-export default defineComponent({
+export default {
   components: {
     GMessage,
   },
@@ -123,6 +141,7 @@ export default defineComponent({
     },
     disableConfirmInputFocus: {
       type: Boolean,
+      default: false,
     },
   },
   data () {
@@ -213,7 +232,7 @@ export default defineComponent({
       this.$emit('dialogClosed', value)
       this.visible = false
     },
-    showScrollBar (retryCount = 0) {
+    showScrollBar (retryCount) {
       if (!this.visible || retryCount > 10) {
         // circuit breaker
         return
@@ -231,11 +250,11 @@ export default defineComponent({
   watch: {
     visible (value) {
       if (value) {
-        this.showScrollBar()
+        this.showScrollBar(0)
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

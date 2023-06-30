@@ -137,16 +137,15 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'actions'">
         <v-row class="fill-height" align="center" justify="end">
-          <g-action-button
+          <g-action-button v-if="canGetSecrets"
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
+            :tooltip="showClusterAccessActionTitle"
             @click="showDialog('access')"
-          >
-            <template #tooltip>
-              <span>{{ showClusterAccessActionTitle }}</span>
-            </template>
-          </g-action-button>
-          <g-shoot-list-row-actions :shoot-item="shootItem"/>
+          />
+          <g-shoot-list-row-actions v-if="canPatchShoots"
+            :shoot-item="shootItem"
+          />
         </v-row>
       </template>
       <v-tooltip location="top" v-if="isStaleShoot">
@@ -160,7 +159,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
@@ -195,7 +193,7 @@ import map from 'lodash/map'
 import isObject from 'lodash/isObject'
 import { useAuthzStore, useTicketStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GAccessRestrictionChips,
     GActionButton,
@@ -225,6 +223,7 @@ export default defineComponent({
   computed: {
     ...mapState(useAuthzStore, [
       'canGetSecrets',
+      'canPatchShoots',
       'canDeleteShoots',
     ]),
 
@@ -320,7 +319,7 @@ export default defineComponent({
       this.$emit('showDialog', { action, shootItem })
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

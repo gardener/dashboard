@@ -5,35 +5,41 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-action-button-dialog
+  <g-shoot-action-dialog v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
-    :loading="isReconcileToBeScheduled"
     :caption="caption"
-    icon="mdi-refresh"
-    width="600"
-    :button-text="buttonText"
     confirm-button-text="Trigger now"
-    :disabled="isShootReconciliationDeactivated"
-    @dialog-opened="startDialogOpened"
+    width="600"
   >
-    <template #actionComponent>
-      <v-row>
-        <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
-      </v-row>
-      <v-row v-if="lastOperationFailed">
-        <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
-      </v-row>
-    </template>
-  </g-action-button-dialog>
+    <v-row>
+      <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
+    </v-row>
+    <v-row v-if="lastOperationFailed">
+      <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
+    </v-row>
+  </g-shoot-action-dialog>
+  <g-shoot-action-button v-if="button"
+    ref="actionButton"
+    :shoot-item="shootItem"
+    :loading="isReconcileToBeScheduled"
+    :disabled="isShootReconciliationDeactivated"
+    icon="mdi-refresh"
+    :text="buttonText"
+    :caption="caption"
+    @click="internalValue = true"
+  />
 </template>
 
 <script>
 import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
+import GShootActionButton from '@/components/GShootActionButton.vue'
+import GShootActionDialog from '@/components/GShootActionDialog.vue'
+
 import { shootItem } from '@/mixins/shootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 import get from 'lodash/get'
@@ -41,13 +47,27 @@ import { useAppStore } from '@/store'
 
 export default defineComponent({
   components: {
-    GActionButtonDialog,
+    GShootActionButton,
+    GShootActionDialog,
   },
   inject: ['api', 'logger'],
   mixins: [shootItem],
   props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
     text: {
       type: Boolean,
+      default: false,
+    },
+    dialog: {
+      type: Boolean,
+      default: false,
+    },
+    button: {
+      type: Boolean,
+      default: false,
     },
   },
   data () {
@@ -57,6 +77,14 @@ export default defineComponent({
     }
   },
   computed: {
+    internalValue: {
+      get () {
+        return this.modelValue
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
+    },
     isReconcileToBeScheduled () {
       return this.shootGenerationValue === this.currentGeneration
     },
@@ -81,15 +109,26 @@ export default defineComponent({
       return get(this.shootLastOperation, 'state') === 'Failed'
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
     ]),
-    async startDialogOpened () {
-      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
-      if (confirmed) {
-        this.startReconcile()
-      }
+    waitForConfirmation () {
+      this.$nextTick(async () => {
+        const actionDialog = this.$refs.actionDialog
+        try {
+          if (await actionDialog.waitForDialogClosed()) {
+            this.startReconcile()
+          }
+        } catch (err) {
+          /* ignore error */
+        } finally {
+          this.internalValue = false
+        }
+      })
     },
     async startReconcile () {
       this.reconcileTriggered = true
@@ -103,7 +142,7 @@ export default defineComponent({
         const errorMessage = 'Could not trigger reconcile'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
-        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        this.$refs.actionDialog?.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.reconcileTriggered = false
@@ -112,6 +151,17 @@ export default defineComponent({
     },
   },
   watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
     isReconcileToBeScheduled (reconcileToBeScheduled) {
       const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
       if (!isReconcileScheduled) {
@@ -131,13 +181,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-  .progress-icon {
-    font-size: 15px;
-  }
-
-  .vertical-align-middle {
-    vertical-align: middle;
-  }
-</style>

@@ -5,52 +5,71 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-action-button-dialog
+  <g-shoot-action-dialog v-if="dialog"
+    ref="actionDialog"
+    :shoot-item="shootItem"
+    :caption="caption"
+    confirm-button-text="Trigger now"
+    width="900"
+  >
+    <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+    <g-maintenance-components
+      title="The following updates will be performed"
+      :selectable="false"
+      ref="maintenanceComponents"
+    ></g-maintenance-components>
+    <v-alert type="warning" variant="outlined" :value="!isMaintenancePreconditionSatisfied">
+      <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
+      {{maintenancePreconditionSatisfiedMessage}}
+    </v-alert>
+  </g-shoot-action-dialog>
+  <g-shoot-action-button v-if="button"
+    ref="actionButton"
     :shoot-item="shootItem"
     :loading="isMaintenanceToBeScheduled"
-    @dialog-opened="startDialogVisible"
-    ref="actionDialog"
-    width="900"
-    :caption="caption"
     icon="mdi-refresh"
-    :button-text="buttonText"
-    confirm-button-text="Trigger now">
-    <template #actionComponent>
-      <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-      <g-maintenance-components
-        title="The following updates will be performed"
-        :selectable="false"
-        ref="maintenanceComponents"
-      ></g-maintenance-components>
-      <v-alert type="warning" variant="outlined" :value="!isMaintenancePreconditionSatisfied">
-        <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-        {{maintenancePreconditionSatisfiedMessage}}
-      </v-alert>
-    </template>
-  </g-action-button-dialog>
+    :text="buttonText"
+    :caption="caption"
+    @click="internalValue = true"
+  />
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+import GShootActionButton from '@/components/GShootActionButton.vue'
+import GShootActionDialog from '@/components/GShootActionDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 
-import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+
+import { errorDetailsFromError } from '@/utils/error'
+
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   components: {
-    GActionButtonDialog,
+    GShootActionButton,
+    GShootActionDialog,
     GMaintenanceComponents,
   },
   props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
     text: {
       type: Boolean,
+      default: false,
+    },
+    dialog: {
+      type: Boolean,
+      default: false,
+    },
+    button: {
+      type: Boolean,
+      default: false,
     },
   },
-  inject: ['api', 'notify'],
+  inject: ['api', 'notify', 'logger'],
   mixins: [shootItem],
   data () {
     return {
@@ -58,6 +77,14 @@ export default defineComponent({
     }
   },
   computed: {
+    internalValue: {
+      get () {
+        return this.modelValue
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
+    },
     isMaintenanceToBeScheduled () {
       return this.shootGardenOperation === 'maintain'
     },
@@ -83,13 +110,23 @@ export default defineComponent({
       return this.buttonTitle
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   methods: {
-    async startDialogVisible () {
-      this.reset()
-      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
-      if (confirmed) {
-        this.startMaintenance()
-      }
+    waitForConfirmation () {
+      this.$nextTick(async () => {
+        const actionDialog = this.$refs.actionDialog
+        try {
+          if (await actionDialog.waitForDialogClosed()) {
+            this.startMaintenance()
+          }
+        } catch (err) {
+          /* ignore error */
+        } finally {
+          this.internalValue = false
+        }
+      })
     },
     async startMaintenance () {
       this.maintenanceTriggered = true
@@ -102,7 +139,7 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.maintenanceTriggered = false
         this.currentGeneration = null
@@ -113,6 +150,17 @@ export default defineComponent({
     },
   },
   watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
     isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
       const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
       if (!isMaintenanceScheduled) {
@@ -132,15 +180,5 @@ export default defineComponent({
       })
     },
   },
-})
+}
 </script>
-
-<style lang="scss" scoped>
-  .progress-icon {
-    font-size: 15px;
-  }
-
-  .vertical-align-middle {
-    vertical-align: middle;
-  }
-</style>

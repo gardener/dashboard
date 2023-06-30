@@ -115,7 +115,6 @@ SPDX-License-Identifier: Apache-2.0
             :shoot-item="item.raw"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
-            @click:action="onClickAction"
           />
         </template>
       </v-data-table>
@@ -153,7 +152,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { mapState, mapActions } from 'pinia'
 import {
@@ -184,7 +183,7 @@ import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
 import debounce from 'lodash/debounce'
 
-export default defineComponent({
+export default {
   components: {
     GToolbar,
     GShootListRow,
@@ -738,5 +737,5 @@ export default defineComponent({
     this.focusModeInternal = false
     next()
   },
-})
+}
 </script>

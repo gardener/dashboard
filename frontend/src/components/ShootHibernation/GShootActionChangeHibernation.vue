@@ -5,45 +5,65 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-action-button-dialog
-    :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
+  <g-shoot-action-dialog v-if="dialog"
     ref="actionDialog"
+    :shoot-item="shootItem"
     :caption="caption"
-    :icon="icon"
     :confirm-button-text="confirmText"
     :confirm-required="confirmRequired"
-    :disabled="!isHibernationPossible && !isShootSettingHibernated"
-    :button-text="buttonText"
-     width="600">
-    <template #actionComponent>
-      <template v-if="!isShootSettingHibernated">
-        This will scale the worker nodes of your cluster down to zero.<br /><br />
-        Type <strong>{{shootName}}</strong> below and confirm to hibernate your cluster.<br /><br />
-      </template>
-      <template v-else>
-        This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
-      </template>
+     width="600"
+  >
+    <template v-if="!isShootSettingHibernated">
+      This will scale the worker nodes of your cluster down to zero.<br /><br />
+      Type <strong>{{shootName}}</strong> below and confirm to hibernate your cluster.<br /><br />
     </template>
-  </g-action-button-dialog>
+    <template v-else>
+      This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
+    </template>
+  </g-shoot-action-dialog>
+  <g-shoot-action-button v-if="button"
+    ref="actionButton"
+    :shoot-item="shootItem"
+    :disabled="!isHibernationPossible && !isShootSettingHibernated"
+    :icon="icon"
+    :text="buttonText"
+    :caption="caption"
+    @click="internalValue = true"
+  />
 </template>
 
 <script>
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-import { errorDetailsFromError } from '@/utils/error'
+import GShootActionButton from '@/components/GShootActionButton.vue'
+import GShootActionDialog from '@/components/GShootActionDialog.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
+import { errorDetailsFromError } from '@/utils/error'
+
 export default {
   components: {
-    GActionButtonDialog,
+    GShootActionButton,
+    GShootActionDialog,
   },
   props: {
+    modelValue: {
+      type: Boolean,
+      required: true,
+    },
     text: {
       type: Boolean,
+      default: false,
+    },
+    dialog: {
+      type: Boolean,
+      default: false,
+    },
+    button: {
+      type: Boolean,
+      default: false,
     },
   },
-  inject: ['api', 'notify'],
+  inject: ['api', 'notify', 'logger'],
   mixins: [shootItem],
   data () {
     return {
@@ -51,6 +71,14 @@ export default {
     }
   },
   computed: {
+    internalValue: {
+      get () {
+        return this.modelValue
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
+    },
     confirmRequired () {
       return !this.isShootSettingHibernated
     },
@@ -88,12 +116,23 @@ export default {
       return this.buttonTitle
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   methods: {
-    async onConfigurationDialogOpened () {
-      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
-      if (confirmed) {
-        this.updateConfiguration()
-      }
+    waitForConfirmation () {
+      this.$nextTick(async () => {
+        const actionDialog = this.$refs.actionDialog
+        try {
+          if (await actionDialog.waitForDialogClosed()) {
+            this.updateConfiguration()
+          }
+        } catch (err) {
+          /* ignore error */
+        } finally {
+          this.internalValue = false
+        }
+      })
     },
     async updateConfiguration () {
       this.hibernationChanged = true
@@ -115,12 +154,23 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         this.hibernationChanged = false
       }
     },
   },
   watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
     isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
       if (this.$refs.actionDialog) {

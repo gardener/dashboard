@@ -5,14 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-menu v-if="canPatchShoots"
+  <v-menu
     v-model="actionMenu"
     location="left"
-    absolute
-    :nudge-bottom="20"
     :close-on-content-click="false"
   >
-
     <template v-slot:activator="{ props }">
       <g-action-button
         v-bind="props"
@@ -20,50 +17,97 @@ SPDX-License-Identifier: Apache-2.0
         tooltip="Cluster Actions"
       />
     </template>
-    <v-list subheader dense class="actionMenuItem" @click.capture="actionMenu=false">
+    <v-list dense @click.capture="actionMenu = false">
       <v-list-item>
-        <g-change-hibernation :shoot-item="shootItem" text/>
+        <g-shoot-action-change-hibernation
+          v-model="changeHibernationDialog"
+          :shoot-item="shootItem"
+          button
+          text
+        />
       </v-list-item>
       <v-list-item>
-        <g-maintenance-start :shoot-item="shootItem" text/>
+        <g-shoot-action-maintenance-start
+          v-model="maintenanceStartDialog"
+          :shoot-item="shootItem"
+          button
+          text
+        />
       </v-list-item>
       <v-list-item>
-        <g-reconcile-start :shoot-item="shootItem" text/>
+        <g-shoot-action-reconcile-start
+          v-model="reconcileStartDialog"
+          :shoot-item="shootItem"
+          button
+          text
+        />
       </v-list-item>
       <v-list-item>
-        <g-rotate-credentials :shoot-item="shootItem" type="ALL_CREDENTIALS" text/>
+        <g-shoot-action-rotate-credentials
+          v-model="rotateCredentialsDialog"
+          :shoot-item="shootItem"
+          :type="rotationType"
+          button
+          text
+        />
       </v-list-item>
       <v-divider></v-divider>
       <v-list-item>
-        <g-delete-cluster :shoot-item="shootItem" text/>
+        <g-shoot-action-delete-cluster
+          v-model="deleteClusterDialog"
+          :shoot-item="shootItem"
+          button
+          text
+        />
       </v-list-item>
     </v-list>
   </v-menu>
+  <g-shoot-action-change-hibernation
+    v-model="changeHibernationDialog"
+    :shoot-item="shootItem"
+    dialog
+  />
+  <g-shoot-action-maintenance-start
+    v-model="maintenanceStartDialog"
+    :shoot-item="shootItem"
+    dialog
+  />
+  <g-shoot-action-reconcile-start
+    v-model="reconcileStartDialog"
+    :shoot-item="shootItem"
+    dialog
+  />
+  <g-shoot-action-rotate-credentials
+    v-model="rotateCredentialsDialog"
+    :shoot-item="shootItem"
+    :type="rotationType"
+    dialog
+  />
+  <g-shoot-action-delete-cluster
+    v-model="deleteClusterDialog"
+    :shoot-item="shootItem"
+    dialog
+  />
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { mapState } from 'pinia'
-
-import { useAuthzStore } from '@/store'
-
-import GActionButton from './GActionButton.vue'
-import GChangeHibernation from '@/components/ShootHibernation/GChangeHibernation.vue'
-import GDeleteCluster from '@/components/GDeleteCluster.vue'
-import GMaintenanceStart from '@/components/ShootMaintenance/GMaintenanceStart.vue'
-import GReconcileStart from '@/components/GReconcileStart.vue'
-import GRotateCredentials from '@/components/GRotateCredentials.vue'
+import GActionButton from '@/components/GActionButton.vue'
+import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
+import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
+import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
+import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
+import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
-export default defineComponent({
+export default {
   components: {
     GActionButton,
-    GChangeHibernation,
-    GMaintenanceStart,
-    GReconcileStart,
-    GRotateCredentials,
-    GDeleteCluster,
+    GShootActionChangeHibernation,
+    GShootActionMaintenanceStart,
+    GShootActionReconcileStart,
+    GShootActionRotateCredentials,
+    GShootActionDeleteCluster,
   },
   mixins: [shootItem],
   props: {
@@ -73,13 +117,24 @@ export default defineComponent({
   },
   data () {
     return {
-      actionMenu: false,
+      menu: false,
+      reconcileStartDialog: false,
+      changeHibernationDialog: false,
+      maintenanceStartDialog: false,
+      rotateCredentialsDialog: false,
+      deleteClusterDialog: false,
+      rotationType: 'ALL_CREDENTIALS',
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'canPatchShoots',
-    ]),
+    actionMenu: {
+      get () {
+        return this.menu
+      },
+      set (value) {
+        this.menu = value
+      },
+    },
   },
-})
+}
 </script>
