@@ -6,33 +6,34 @@ structure:
     frontmatter:
       title: Architecture
       weight: 1
+      categories:
+        - Developers
   nodesSelector:
     path: /docs/architecture
-- name: concepts
-  properties:
-    frontmatter:
-      title: Concepts
-      weight: 2
-  nodesSelector:
-    path: /docs/concepts
-- name: deployment
-  properties:
-    frontmatter:
-      title: Deployment
-      weight: 3
-  nodesSelector:
-    path: /docs/deployment
 - name: development
   properties:
     frontmatter:
       title: Development
-      weight: 4
+      weight: 2
+      categories:
+        - Developers
   nodesSelector:
     path: /docs/development
+- name: operations
+  properties:
+    frontmatter:
+      title: Operations
+      weight: 3
+      categories:
+        - Operators
+  nodesSelector:
+    path: /docs/operations
 - name: usage
   properties:
     frontmatter:
       title: Usage
-      weight: 5
+      weight: 4
+      categories:
+        - Users
   nodesSelector:
     path: /docs/usage
