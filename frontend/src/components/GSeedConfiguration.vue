@@ -59,6 +59,7 @@ export default {
   computed: {
     ...mapState(useSeedStore, [
       'seedByName',
+      'seedList',
     ]),
     seedNames () {
       const filteredSeeds = filter(this.seedList, ['data.type', this.shootCloudProviderKind])
@@ -77,7 +78,7 @@ export default {
     },
     async updateConfiguration () {
       try {
-        await this.updateShootSeedName({
+        await this.api.updateShootSeedName({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {

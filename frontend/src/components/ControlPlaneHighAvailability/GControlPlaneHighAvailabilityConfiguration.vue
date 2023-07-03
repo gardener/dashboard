@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Control Plane High Availability"
     width="600"
     max-height="60vh"
+    confirm-required
     >
     <template #actionComponent>
       <g-manage-control-plane-high-availability :key="componentKey" />
@@ -50,7 +51,7 @@ export default defineComponent({
     ]),
   },
   methods: {
-    ...mapActions('shootStaging', [
+    ...mapActions(useShootStagingStore, [
       'setClusterConfiguration',
     ]),
     async onConfigurationDialogOpened () {

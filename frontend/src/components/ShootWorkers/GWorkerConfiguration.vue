@@ -23,13 +23,13 @@ SPDX-License-Identifier: Apache-2.0
       >
         <v-tab
           key="overview"
-          href="#overview"
+          value="overview"
         >
           Overview
         </v-tab>
         <v-tab
           key="yaml"
-          href="#yaml"
+          value="yaml"
         >
           Yaml
         </v-tab>
@@ -92,8 +92,6 @@ import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import { v4 as uuidv4 } from '@/utils/uuid'
-const GManageWorkers = () => defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers'))
-const GShootEditor = () => defineAsyncComponent(() => import('@/components/GShootEditor'))
 
 export default defineComponent({
   setup () {
@@ -104,9 +102,9 @@ export default defineComponent({
   },
   components: {
     GActionButtonDialog,
-    GManageWorkers,
+    GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
+    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GCodeBlock,
-    GShootEditor,
   },
   inject: ['api', 'yaml'],
   data () {

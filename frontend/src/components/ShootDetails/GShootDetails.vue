@@ -50,8 +50,6 @@ import GTicketsCard from '@/components/GTicketsCard'
 
 import { shootItem } from '@/mixins/shootItem'
 
-const GShootAccessCard = defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard'))
-
 export default {
   name: 'shoot-details',
   components: {
@@ -59,7 +57,7 @@ export default {
     GCustomFieldsCard,
     GShootInfrastructureCard,
     GShootLifecycleCard,
-    GShootAccessCard,
+    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard')),
     GTicketsCard,
     GShootMonitoringCard,
     GShootCredentialRotationCard,

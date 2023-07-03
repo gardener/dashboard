@@ -180,7 +180,9 @@ export default defineComponent({
   },
   watch: {
     'v$.primaryProvider.$invalid' (value) {
-      this.setDnsPrimaryProviderValid(!value)
+      if (this.primaryProviderVisible) {
+        this.setDnsPrimaryProviderValid(!value)
+      }
     },
   },
 })

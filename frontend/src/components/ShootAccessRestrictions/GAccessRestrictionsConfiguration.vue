@@ -73,7 +73,7 @@ export default {
       try {
         const shootResource = cloneDeep(this.shootItem)
         this.$refs.accessRestrictions.applyTo(shootResource)
-        await this.replaceShoot({ namespace: this.shootNamespace, name: this.shootName, data: shootResource })
+        await this.api.replaceShoot({ namespace: this.shootNamespace, name: this.shootName, data: shootResource })
       } catch (err) {
         const errorMessage = 'Could not save access restriction configuration'
         const errorDetails = errorDetailsFromError(err)

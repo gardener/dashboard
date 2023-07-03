@@ -68,7 +68,7 @@ export default defineComponent({
         const namespace = this.shootNamespace
         const name = this.shootName
         const data = this.getDnsConfiguration()
-        await this.updateShootDns({ namespace, name, data })
+        await this.api.updateShootDns({ namespace, name, data })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
         const errorDetails = errorDetailsFromError(err)

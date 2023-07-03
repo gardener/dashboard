@@ -39,8 +39,6 @@ import {
   useSecretStore,
 } from '@/store'
 
-const GPurpose = defineAsyncComponent(() => import('@/components/GPurpose'))
-
 export default {
   setup () {
     return {
@@ -49,7 +47,7 @@ export default {
   },
   components: {
     GActionButtonDialog,
-    GPurpose,
+    GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
   },
   inject: ['api'],
   mixins: [
@@ -57,7 +55,7 @@ export default {
   ],
   data () {
     return {
-      purpose: undefined,
+      purposeValue: undefined,
       purposeValid: false,
     }
   },
@@ -80,7 +78,7 @@ export default {
       this.purposeValid = value
     },
     onUpdatePurpose (purpose) {
-      this.purpose = purpose
+      this.purposeValue = purpose
     },
     async onConfigurationDialogOpened () {
       await this.reset()
@@ -91,11 +89,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        await this.updateShootPurpose({
+        await this.api.updateShootPurpose({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            purpose: this.purpose,
+            purpose: this.purposeValue,
           },
         })
       } catch (err) {
@@ -107,8 +105,8 @@ export default {
       }
     },
     async reset () {
-      this.purpose = this.shootPurpose
-      await this.purpose.dispatch('setPurpose', this.purpose)
+      this.purposeValue = this.shootPurpose
+      await this.purpose.dispatch('setPurpose', this.purposeValue)
     },
   },
 }

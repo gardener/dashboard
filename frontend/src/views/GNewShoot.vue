@@ -479,7 +479,7 @@ export default defineComponent({
       const shootResource = await this.updateShootResourceWithUIComponents()
 
       try {
-        await this.createShoot(shootResource)
+        await this.api.createShoot(shootResource)
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',

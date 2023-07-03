@@ -77,7 +77,7 @@ export default defineComponent({
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
-        await this.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
       } catch (err) {
         const errorMessage = 'Could not save maintenance configuration'
         const errorDetails = errorDetailsFromError(err)

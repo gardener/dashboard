@@ -37,8 +37,6 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
 
-const GManageHibernationSchedule = () => defineAsyncComponent(() => import('@/components/ShootHibernation/ManageHibernationSchedule'))
-
 export default defineComponent({
   setup () {
     return {
@@ -47,7 +45,7 @@ export default defineComponent({
   },
   components: {
     GActionButtonDialog,
-    GManageHibernationSchedule,
+    GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
   },
   inject: ['api'],
   mixins: [
@@ -75,12 +73,12 @@ export default defineComponent({
           'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null,
         }
         const scheduleCrontab = await this.hibernationSchedule.dispatch('getScheduleCrontab')
-        await this.updateShootHibernationSchedules({
+        await this.api.updateShootHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: scheduleCrontab,
         })
-        await this.addShootAnnotation({
+        await this.api.addShootAnnotation({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: noScheduleAnnotation,

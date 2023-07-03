@@ -49,7 +49,7 @@ export default defineComponent({
     async updateConfiguration () {
       try {
         const addons = this.$refs.addons.getAddons()
-        await this.updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: addons })
+        await this.api.updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: addons })
       } catch (err) {
         const errorMessage = 'Could not update addons'
         const errorDetails = errorDetailsFromError(err)
