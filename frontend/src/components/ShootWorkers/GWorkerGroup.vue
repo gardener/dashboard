@@ -15,89 +15,113 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="cursor-pointer my-0 ml-0"
         variant="outlined"
-        color="primary">
-          <g-vendor-icon :icon="machineImageIcon" :size="20"></g-vendor-icon>
-          {{workerGroup.name}}
+        color="primary"
+      >
+        <g-vendor-icon
+          :icon="machineImageIcon"
+          :size="20"
+        />
+        {{workerGroup.name}}
       </v-chip>
     </template>
-    <template #text>
+    <template #item class="pa-0 ma-0">
       <v-tabs
+        v-model="tab"
         height="32"
         color="primary"
-        v-model="tab"
       >
         <v-tab
-          key="overview"
-          href="#overview"
-          class="text-caption"
+          value="overview"
+          class="text-caption text-medium-emphasis"
         >
           Overview
         </v-tab>
         <v-tab
-          key="yaml"
-          href="#yaml"
-          class="text-caption"
+          value="yaml"
+          class="text-caption text-medium-emphasis"
         >
           Yaml
         </v-tab>
       </v-tabs>
-      <v-window v-model="tab">
+    </template>
+    <template #text>
+      <v-window v-model="tab" min-width="600">
         <v-window-item value="overview">
           <v-container class="pa-2">
             <v-row dense>
               <v-col cols="6">
                 <v-card outlined>
-                  <v-system-bar>
-                    <v-icon class="mr-2">mdi-server</v-icon>Machine
-                  </v-system-bar>
+                  <v-toolbar height="28" class="text-medium-emphasis">
+                    <template #prepend>
+                      <v-icon
+                        icon="mdi-server"
+                        size="x-small"
+                      />
+                    </template>
+                    <template #title>
+                      <span class="text-body-2">
+                        Machine
+                      </span>
+                    </template>
+                  </v-toolbar>
                   <v-card-text>
                     <v-row dense>
                       <v-col v-if="workerGroup.machine.architecture">
-                        <legend class="text-caption">Architecture</legend>
-                        <span class="text--primary">{{workerGroup.machine.architecture}}</span>
+                        <legend class="text-caption text-medium-emphasis">Architecture</legend>
+                        <span class="text-body-2">{{workerGroup.machine.architecture}}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption">Type</legend>
-                        <span class="text--primary">{{workerGroup.machine.type}}</span>
+                        <legend class="text-caption text-medium-emphasis">Type</legend>
+                        <span class="text-body-2">{{workerGroup.machine.type}}</span>
                       </v-col>
                       <v-col cols="12" v-if="workerGroup.zones && workerGroup.zones.length">
-                        <legend class="text-caption">Zones</legend>
+                        <legend class="text-caption text-medium-emphasis">Zones</legend>
                         <v-chip small label outlined class="px-1 mr-1" v-for="zone in workerGroup.zones" :key="zone">{{zone}}</v-chip>
                       </v-col>
                       <template v-if="machineType">
                         <v-col>
-                          <legend class="text-caption">CPUs</legend>
-                          <span class="text--primary">{{machineType.cpu}}</span>
+                          <legend class="text-caption text-medium-emphasis">CPUs</legend>
+                          <span class="text-body-2">{{machineType.cpu}}</span>
                         </v-col>
                         <v-col>
-                          <legend class="text-caption">GPUs</legend>
-                          <span class="text--primary">{{machineType.gpu}}</span>
+                          <legend class="text-caption text-medium-emphasis">GPUs</legend>
+                          <span class="text-body-2">{{machineType.gpu}}</span>
                         </v-col>
                         <v-col>
-                          <legend class="text-caption">Memory</legend>
-                          <span class="text--primary">{{machineType.memory}}</span>
+                          <legend class="text-caption text-medium-emphasis">Memory</legend>
+                          <span class="text-body-2">{{machineType.memory}}</span>
                         </v-col>
                       </template>
                     </v-row>
                   </v-card-text>
                 </v-card>
                 <v-card outlined class="mt-2">
-                  <v-system-bar>
-                    <v-icon class="mr-2">mdi-harddisk</v-icon>Volume
-                  </v-system-bar>
+                  <v-toolbar height="28" class="text-medium-emphasis">
+                    <template #prepend>
+                      <v-icon
+                        icon="mdi-harddisk"
+                        size="x-small"
+                      />
+                    </template>
+                    <template #title>
+                      <span class="text-body-2">
+                        Volume
+                      </span>
+                    </template>
+                  </v-toolbar>
                   <v-card-text>
                     <v-row>
                       <v-col v-if="volumeCardData.type">
-                        <legend class="text-caption">Type</legend>
-                        <span class="text--primary">{{volumeCardData.type}}</span>
+                        <legend class="text-caption text-medium-emphasis">Type</legend>
+                        <span class="text-body-2">{{volumeCardData.type}}</span>
                       </v-col>
                       <v-col v-if="volumeCardData.class">
-                        <legend class="text-caption">Class</legend>
-                        <span class="text--primary">{{volumeCardData.class}}</span>
+                        <legend class="text-caption text-medium-emphasis">Class</legend>
+                        <span class="text-body-2">{{volumeCardData.class}}</span>
                       </v-col>
                       <v-col v-if="volumeCardData.size">
-                        <legend class="text-caption">Size</legend>
-                        <span class="text--primary">{{volumeCardData.size}}</span>
+                        <legend class="text-caption text-medium-emphasis">Size</legend>
+                        <span class="text-body-2">{{volumeCardData.size}}</span>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -105,18 +129,28 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
               <v-col cols="6">
                 <v-card outlined>
-                  <v-system-bar>
-                    <v-icon class="mr-2">mdi-disc</v-icon>Image
-                  </v-system-bar>
+                  <v-toolbar height="28" class="text-medium-emphasis">
+                    <template #prepend>
+                      <v-icon
+                        icon="mdi-disc"
+                        size="x-small"
+                      />
+                    </template>
+                    <template #title>
+                      <span class="text-body-2">
+                        Image
+                      </span>
+                    </template>
+                  </v-toolbar>
                   <v-card-text>
                     <v-row dense>
                       <v-col>
-                        <legend class="text-caption">Name</legend>
-                        <span class="text--primary">{{workerGroup.machine.image.name}}</span>
+                        <legend class="text-caption text-medium-emphasis">Name</legend>
+                        <span class="text-body-2">{{workerGroup.machine.image.name}}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption">Version</legend>
-                        <span class="text--primary">{{workerGroup.machine.image.version}}</span>
+                        <legend class="text-caption text-medium-emphasis">Version</legend>
+                        <span class="text-body-2">{{workerGroup.machine.image.version}}</span>
                       </v-col>
                       <v-col cols="12" v-if="!machineImage">
                         <v-icon small class="mr-1" color="warning">mdi-alert</v-icon>Image not found in cloud profile
@@ -128,42 +162,62 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card outlined class="mt-2">
-                  <v-system-bar>
-                    <v-icon class="mr-2">mdi-chart-line-variant</v-icon>Autoscaler
-                  </v-system-bar>
+                  <v-toolbar height="28" class="text-medium-emphasis">
+                    <template #prepend>
+                      <v-icon
+                        icon="mdi-chart-line-variant"
+                        size="x-small"
+                      />
+                    </template>
+                    <template #title>
+                      <span class="text-body-2">
+                        Autoscaler
+                      </span>
+                    </template>
+                  </v-toolbar>
                   <v-card-text>
                     <v-row dense>
                       <v-col cols="6">
-                        <legend class="text-caption">Maximum</legend>
-                        <span class="text--primary">{{workerGroup.maximum}}</span>
+                        <legend class="text-caption text-medium-emphasis">Maximum</legend>
+                        <span class="text-body-2">{{workerGroup.maximum}}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption">Minimum</legend>
-                        <span class="text--primary">{{workerGroup.minimum}}</span>
+                        <legend class="text-caption text-medium-emphasis">Minimum</legend>
+                        <span class="text-body-2">{{workerGroup.minimum}}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption">Max. Surge</legend>
-                        <span class="text--primary">{{workerGroup.maxSurge}}</span>
+                        <legend class="text-caption text-medium-emphasis">Max. Surge</legend>
+                        <span class="text-body-2">{{workerGroup.maxSurge}}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption">Max. Unavailable</legend>
-                        <span class="text--primary">{{workerGroup.maxUnavailable}}</span>
+                        <legend class="text-caption text-medium-emphasis">Max. Unavailable</legend>
+                        <span class="text-body-2">{{workerGroup.maxUnavailable}}</span>
                       </v-col>
                     </v-row>
                   </v-card-text>
                 </v-card>
                 <v-card outlined class="mt-2">
-                  <v-system-bar>
-                    <v-icon class="mr-2">mdi-oci</v-icon>Container Runtime
-                  </v-system-bar>
+                  <v-toolbar height="28" class="text-medium-emphasis">
+                    <template #prepend>
+                      <v-icon
+                        icon="mdi-oci"
+                        size="x-small"
+                      />
+                    </template>
+                    <template #title>
+                      <span class="text-body-2">
+                        Container Runtime
+                      </span>
+                    </template>
+                  </v-toolbar>
                   <v-card-text>
                     <v-row dense>
                       <v-col>
-                        <legend class="text-caption">Name</legend>
-                        <span class="text--primary">{{machineCri.name}}</span>
+                        <legend class="text-caption text-medium-emphasis">Name</legend>
+                        <span class="text-body-2">{{machineCri.name}}</span>
                       </v-col>
                       <v-col cols="12" v-if="machineCri.containerRuntimes && machineCri.containerRuntimes.length">
-                        <legend class="text-caption">Additional OCI Runtimes</legend>
+                        <legend class="text-caption text-medium-emphasis">Additional OCI Runtimes</legend>
                         <v-chip small label outlined class="px-1 mr-1" v-for="containerRuntime in machineCri.containerRuntimes" :key="containerRuntime.type">{{containerRuntime.type}}</v-chip>
                       </v-col>
                     </v-row>
@@ -174,7 +228,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-container>
         </v-window-item>
         <v-window-item value="yaml">
-          <g-code-block lang="yaml" :content="workerGroupYaml"></g-code-block>
+          <g-code-block lang="yaml" :content="workerGroupYaml" style="min-width: 480px"></g-code-block>
         </v-window-item>
       </v-window>
     </template>
@@ -182,30 +236,29 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import GPopover from '@/components/GPopover'
-import GVendorIcon from '@/components/GVendorIcon'
-import GCodeBlock from '@/components/GCodeBlock'
-import find from 'lodash/find'
-import get from 'lodash/get'
 import { mapActions } from 'pinia'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-export default defineComponent({
+import GVendorIcon from '@/components/GVendorIcon'
+import GCodeBlock from '@/components/GCodeBlock'
+
+import find from 'lodash/find'
+import get from 'lodash/get'
+
+export default {
   name: 'worker-group',
   components: {
-    GPopover,
     GVendorIcon,
     GCodeBlock,
   },
   props: {
+    modelValue: {
+      type: [String, Number],
+    },
     workerGroup: {
       type: Object,
     },
     cloudProfileName: {
-      type: String,
-    },
-    modelValue: {
       type: String,
     },
   },
@@ -289,12 +342,6 @@ export default defineComponent({
   created () {
     this.updateWorkerGroupYaml(this.workerGroup)
   },
-})
+}
 </script>
 
-<style lang="scss" scoped>
-  ::v-deep .popper {
-    text-align: initial;
-    width: 600px;
-  }
-</style>

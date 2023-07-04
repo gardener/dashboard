@@ -11,7 +11,9 @@ SPDX-License-Identifier: Apache-2.0
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
     />
-    <router-view :key="routerViewKey"></router-view>
+    <div class="g-main__wrap">
+      <router-view :key="routerViewKey"></router-view>
+    </div>
   </v-main>
 </template>
 
@@ -47,7 +49,7 @@ const routerViewKey = computed(() => {
 })
 
 const mainContainer = computed(() => {
-  return mainRef.value?.$el.querySelector(':scope > .v-container')
+  return mainRef.value?.$el.querySelector(`:scope > div[class$='wrap']`)
 })
 
 function setScrollTop (top = 0) {
@@ -59,7 +61,7 @@ onMounted(() => {
     const mainElement = mainRef.value.$el
     setElementOverflowY(mainElement, 'hidden')
     // Find the first direct child div element of mainElement with a class attribute ending in "wrap"
-    const element = mainElement.querySelector(':scope > .v-container')
+    const element = mainElement.querySelector(`:scope > div[class$='wrap']`)
     setElementOverflowY(element, 'auto')
   } catch (err) {
     logger.error(err.message)
@@ -72,3 +74,13 @@ defineExpose({
 
 provide('mainContainer', mainContainer)
 </script>
+
+<style lang="scss">
+.g-main__wrap {
+    flex: 1 1 auto;
+    position: relative;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100%;
+}
+</style>

@@ -43,22 +43,21 @@ SPDX-License-Identifier: Apache-2.0
                 variant="text"
                 size="small"
                 icon="mdi-close"
-                :color="toolbarColor"
-                @click.stop="hide()"
+                @click="hide()"
               />
             </template>
           </v-toolbar>
-          <v-card-item v-if="$slots.item"
+          <div v-if="$slots.item"
             v-bind="containerProps"
           >
             <slot name="item"/>
-          </v-card-item>
-          <v-card-text v-else-if="$slots.text"
+          </div>
+          <v-card-text v-if="$slots.text"
             v-bind="containerProps"
           >
             <slot name="text"/>
           </v-card-text>
-          <slot v-else/>
+          <slot/>
         </v-card>
       </v-theme-provider>
     </template>
@@ -66,10 +65,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useTheme } from 'vuetify'
 
-export default defineComponent({
+export default {
   setup () {
     const theme = useTheme()
     return {
@@ -143,7 +141,7 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

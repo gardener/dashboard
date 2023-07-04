@@ -53,15 +53,14 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Worker Groups">
           <div class="d-flex flex-wrap align-center">
-            <g-worker-group
-              class="mr-2"
-              v-for="workerGroup in shootWorkerGroups"
+            <g-worker-group v-for="workerGroup in shootWorkerGroups"
+              v-model="workerGroupTab"
+              :key="workerGroup.name"
               :worker-group="workerGroup"
               :cloud-profile-name="shootCloudProfileName"
               :shoot-item="shootItem"
-              :key="workerGroup.name"
-              v-model="workerGroupTab"
-              />
+              class="mr-2"
+            />
           </div>
         </g-list-item-content>
         <template #append>
