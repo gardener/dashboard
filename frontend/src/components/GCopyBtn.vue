@@ -5,30 +5,32 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-snackbar
-    v-if="userFeedback"
-    v-model="snackbar"
-    location="bottom"
-    :success="true"
-    :absolute="true"
-    :timeout="2000"
-    :color="snackbarColor"
-  >
-    {{snackbarText}}
-  </v-snackbar>
-  <g-action-button
-    :icon="icon"
-    :color="btnColor"
-    size="small"
-    :tooltip="tooltipText"
-    @click="copyText"
-  />
+  <div>
+    <g-action-button
+      :icon="icon"
+      :color="btnColor"
+      size="small"
+      :tooltip="tooltipText"
+      @click="copyText"
+    />
+    <v-snackbar
+      v-if="userFeedback"
+      v-model="snackbar"
+      location="bottom"
+      :success="true"
+      :absolute="true"
+      :timeout="2000"
+      :color="snackbarColor"
+    >
+      {{snackbarText}}
+    </v-snackbar>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 
-import GActionButton from '@/components/GActionButton.vue'
+const logger = inject('logger')
 
 // props
 const props = defineProps({
@@ -79,7 +81,7 @@ const btnColor = computed(() => {
 // events
 const emit = defineEmits([
   'copy',
-  'copy-failed',
+  'copyFailed',
 ])
 
 // methods
@@ -93,10 +95,10 @@ const copyText = async () => {
     }, 1000)
     emit('copy')
   } catch (err) {
-    console.error('error', err)
+    logger.error('error', err)
     snackbar.value = true
     copySucceeded.value = false
-    emit('copy-failed')
+    emit('copyFailed')
   }
 }
 </script>
