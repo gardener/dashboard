@@ -17,9 +17,9 @@ SPDX-License-Identifier: Apache-2.0
     {{snackbarText}}
   </v-snackbar>
   <g-action-button
+    class="copy-button"
     :icon="icon"
     :color="btnColor"
-    size="small"
     :tooltip="tooltipText"
     @click="copyText"
   />
@@ -100,3 +100,11 @@ const copyText = async () => {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.copy-button {
+  :deep(.v-icon) {
+    font-size: 18px;
+  }
+}
+</style>
