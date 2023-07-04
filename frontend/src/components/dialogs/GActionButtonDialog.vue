@@ -5,49 +5,51 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <template v-if="canPatchShoots">
-    <v-tooltip
-      top
-      max-width="600px"
-      :disabled="disableToolTip"
-    >
-      <template #activator="{ props }">
-        <v-btn
-          v-bind="props"
-          variant="text"
-          :density="isIconButton ? 'comfortable' : 'default'"
-          :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
-          :[iconProp]="icon"
-          :text="buttonText"
-          :color="iconColor"
-          :loading="loading"
-          :width="buttonWidth"
-          :class="{ 'text-none font-weight-regular justify-start': !!buttonText }"
-          @click="showDialog"
-        />
-      </template>
-      {{actionToolTip}}
-    </v-tooltip>
-    <g-dialog
-      ref="gDialog"
-      :confirm-button-text="confirmButtonText"
-      :confirm-disabled="!valid"
-      v-model:error-message="errorMessage"
-      v-model:detailed-error-message="detailedErrorMessage"
-      :width="width"
-      :max-height="maxHeight"
-      :confirm-value="confirmValue"
-      :disable-confirm-input-focus="disableConfirmInputFocus"
-    >
-      <template #caption>{{caption}}</template>
-      <template #affectedObjectName>{{shootName}}</template>
-      <template #top><slot name="top"></slot></template>
-      <template #card><slot name="card"></slot></template>
-      <template #message><slot name="actionComponent"></slot></template>
-      <template #errorMessage><slot name="errorMessage"></slot></template>
-    </g-dialog>
-  </template>
-  <div v-else style="width: 36px"></div>
+  <div class="g-action-button">
+    <template v-if="canPatchShoots">
+      <v-tooltip
+        top
+        max-width="600px"
+        :disabled="disableToolTip"
+      >
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            variant="text"
+            :density="isIconButton ? 'comfortable' : 'default'"
+            :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+            :[iconProp]="icon"
+            :text="buttonText"
+            :color="iconColor"
+            :loading="loading"
+            :width="buttonWidth"
+            :class="{ 'text-none font-weight-regular justify-start': !!buttonText }"
+            @click="showDialog"
+          />
+        </template>
+        {{actionToolTip}}
+      </v-tooltip>
+      <g-dialog
+        ref="gDialog"
+        :confirm-button-text="confirmButtonText"
+        :confirm-disabled="!valid"
+        v-model:error-message="errorMessage"
+        v-model:detailed-error-message="detailedErrorMessage"
+        :width="width"
+        :max-height="maxHeight"
+        :confirm-value="confirmValue"
+        :disable-confirm-input-focus="disableConfirmInputFocus"
+      >
+        <template #caption>{{caption}}</template>
+        <template #affectedObjectName>{{shootName}}</template>
+        <template #top><slot name="top"></slot></template>
+        <template #card><slot name="card"></slot></template>
+        <template #message><slot name="actionComponent"></slot></template>
+        <template #errorMessage><slot name="errorMessage"></slot></template>
+      </g-dialog>
+    </template>
+    <div v-else style="width: 36px"></div>
+  </div>
 </template>
 
 <script>

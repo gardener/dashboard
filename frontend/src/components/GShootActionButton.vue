@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="tooltipDisabled"
     :text="tooltipText"
     max-width="600px"
+    class="g-action-button"
   >
     <template v-slot:activator="{ props }">
       <v-btn
@@ -63,10 +64,10 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    isTextBtn() {
+    isTextBtn () {
       return !!this.text
     },
-    iconProp() {
+    iconProp () {
       return this.isTextBtn ? 'prepend-icon' : 'icon'
     },
     tooltipText () {

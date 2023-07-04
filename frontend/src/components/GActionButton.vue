@@ -75,11 +75,3 @@ const hasTooltip = computed(() => {
   return !!slots.tooltip || !!tooltip.value
 })
 </script>
-
-<style lang="scss" scoped>
-  .g-action-button {
-    padding-left: 4px;
-    padding-right: 4px;
-    width: fit-content !important;
-  }
-</style>

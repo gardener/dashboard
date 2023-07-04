@@ -102,3 +102,11 @@ const copyText = async () => {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.copy-button {
+  :deep(.v-icon) {
+    font-size: 18px;
+  }
+}
+</style>
