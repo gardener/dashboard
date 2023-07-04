@@ -37,17 +37,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GPopover from './GPopover.vue'
 import GGardenctlConfigExample from './GGardenctlConfigExample.vue'
-import GExternalLink from './GExternalLink.vue'
-import GActionButton from './GActionButton.vue'
 
 export default {
   components: {
-    GPopover,
     GGardenctlConfigExample,
-    GExternalLink,
-    GActionButton,
   },
 }
 </script>
