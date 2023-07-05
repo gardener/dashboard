@@ -25,7 +25,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent, nextTick } from 'vue'
-import { mapState } from 'pinia'
 
 import { useAppStore } from '@/store'
 
@@ -34,7 +33,19 @@ import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
 export default defineComponent({
-  name: 'g-splitpane',
+  setup () {
+    const store = useAppStore()
+
+    function resize () {
+      // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
+      nextTick(store.updateSplitpaneResize)
+    }
+
+    return {
+      resize,
+    }
+  },
   components: {
     Splitpanes,
     Pane,
@@ -46,17 +57,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapState(useAppStore, [
-      'splitpaneResize',
-    ]),
     hasChildren (item) {
       const isSplitpaneTree = Reflect.has(item, 'horizontal')
       return isSplitpaneTree
-    },
-    resize () {
-      // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
-      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      nextTick(() => (this.splitpaneResize = new Date()))
     },
   },
   watch: {

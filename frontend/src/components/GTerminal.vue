@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height position-relative" :id="`boundary_${uuid}`">
+  <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
       :timeout="-1"
@@ -114,6 +114,7 @@ SPDX-License-Identifier: Apache-2.0
             location="bottom"
             offset-y
             min-width="400px"
+            theme="dark"
           >
             <template #activator="{ props }">
               <v-btn
@@ -614,14 +615,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  .position-relative {
-    position: relative !important
-  }
   .terminal-container {
     height: 100%;
     max-height: calc(100% - 49px);
-    /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
-    opacity: .99;
   }
 
   .g-system-bar {
