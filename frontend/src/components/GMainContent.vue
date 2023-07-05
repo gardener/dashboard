@@ -11,14 +11,14 @@ SPDX-License-Identifier: Apache-2.0
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
     />
-    <div class="g-main__wrap">
+    <div class="g-main__wrap" ref="wrapRef">
       <router-view :key="routerViewKey"></router-view>
     </div>
   </v-main>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, provide } from 'vue'
+import { ref, computed, onMounted, provide, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
@@ -34,6 +34,7 @@ const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRe
 
 // refs
 const mainRef = ref(null)
+const wrapRef = ref(null)
 
 function setElementOverflowY (element, value) {
   if (element) {
@@ -48,12 +49,25 @@ const routerViewKey = computed(() => {
   return route.path
 })
 
+const hasTabs = computed(() => {
+  const meta = route.meta ?? {}
+  return !!meta.tabs
+})
+
 const mainContainer = computed(() => {
-  return mainRef.value?.$el.querySelector(`:scope > div[class$='wrap']`)
+  return mainRef.value?.$el.querySelector(':scope > div[class$=\'wrap\']')
 })
 
 function setScrollTop (top = 0) {
   mainRef.value.$el.scrollTop = top
+}
+
+function setWrapElementHeight (element) {
+  const mainToolbarHeight = hasTabs.value ? 112 : 64
+  const wrapElement = wrapRef.value
+  if (wrapElement) {
+    wrapElement.style.height = `calc(100vh - ${mainToolbarHeight}px)`
+  }
 }
 
 onMounted(() => {
@@ -61,11 +75,16 @@ onMounted(() => {
     const mainElement = mainRef.value.$el
     setElementOverflowY(mainElement, 'hidden')
     // Find the first direct child div element of mainElement with a class attribute ending in "wrap"
-    const element = mainElement.querySelector(`:scope > div[class$='wrap']`)
+    const element = mainElement.querySelector(':scope > div[class$=\'wrap\']')
     setElementOverflowY(element, 'auto')
+    setWrapElementHeight()
   } catch (err) {
     logger.error(err.message)
   }
+})
+
+watch(hasTabs, value => {
+  setWrapElementHeight()
 })
 
 defineExpose({
