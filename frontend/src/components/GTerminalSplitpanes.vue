@@ -121,7 +121,7 @@ export default defineComponent({
         case 'V':
           this.addFromShortkey({ srcKey: PositionEnum.RIGHT })
           break
-          case 'H':
+        case 'H':
           this.addFromShortkey({ srcKey: PositionEnum.BOTTOM })
           break
       }
