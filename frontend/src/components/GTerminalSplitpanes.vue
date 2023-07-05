@@ -112,7 +112,7 @@ export default defineComponent({
     },
   },
   methods: {
-    keyMonitor(event) {
+    keyMonitor (event) {
       if (!(event.ctrlKey && event.shiftKey)) {
         return
       }
@@ -120,10 +120,10 @@ export default defineComponent({
       switch (event.key) {
         case 'V':
           this.addFromShortkey({ srcKey: PositionEnum.RIGHT })
-          break;
+          break
           case 'H':
-            this.addFromShortkey({ srcKey: PositionEnum.BOTTOM })
-          break;
+          this.addFromShortkey({ srcKey: PositionEnum.BOTTOM })
+          break
       }
     },
     setLocalStorageObject (key, value) {
