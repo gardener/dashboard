@@ -16,19 +16,16 @@ SPDX-License-Identifier: Apache-2.0
       <template #icon>
         <v-tooltip location="top">
           <template #activator="{ props }">
-            <span v-bind="props" class="v-icon">
+            <span v-bind="props">
               <v-badge
                 avatar
-                overlap
                 location="bottom right"
                 color="transparent"
               >
                 <template #badge>
-                  <v-avatar>
-                    <v-icon icon="mdi-grid-large" color="primary"/>
-                  </v-avatar>
+                  <v-icon icon="mdi-grid-large" color="primary"/>
                 </template>
-                <span class="v-icon">
+                <span>
                   <g-icon-base
                     width="24"
                     height="23"
@@ -55,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #icon>
         <v-tooltip location="top">
           <template #activator="{ props }">
-            <span v-bind="props" class="v-icon">
+            <span v-bind="props">
               <g-icon-base
                 width="24"
                 height="23"

@@ -5,56 +5,67 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list-item :value="shortcut" :disabled="disabled">
-    <template v-if="!hideIconSlot" #prepend>
-      <slot name="icon"/>
-    </template>
-    <v-list-item-title>
-      {{shortcut.title}}
-      <v-tooltip v-if="isUnverified" location="top" max-width="400px">
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            small
-            color="warning"
-            variant="outlined"
-            class="my-0 ml-2 enablePointerEvents"
-          >
-            Unverified
-          </v-chip>
-        </template>
-        This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious
-      </v-tooltip>
-      <template v-if="shortcut.description" #description>
-        {{ shortcut.description }}
+  <v-item
+    :key="shortcut"
+    :value="shortcut"
+    :disabled="disabled"
+    #default="{ selectedClass, toggle }"
+  >
+    <g-list-item
+      class="cursor-pointer"
+      :class="selectedClass"
+      @click="toggle"
+
+    >
+      <template v-if="!hideIconSlot" #prepend>
+        <slot name="icon"/>
       </template>
-    </v-list-item-title>
-    <template v-if="!readOnly" #append>
-      <g-action-button
-        icon="mdi-console-line"
-        :disabled="disabled"
-        class="enablePointerEvents"
-        @click.stop="addTerminalShortcut(shortcut)"
-      >
-        <template #tooltip>
-          <span v-if="!disabled">
-            Create
-            '<span class="font-family-monospace">{{ shortcut.title }}</span>'
-            terminal session
-          </span>
-          <span v-else>
-            Cluster is hibernated. Wake up cluster to open terminal
-          </span>
+      <g-list-item-content>
+        {{shortcut.title}}
+        <v-tooltip v-if="isUnverified" location="top" max-width="400px">
+          <template #activator="{ props }">
+            <v-chip
+              v-bind="props"
+              small
+              color="warning"
+              variant="outlined"
+              class="my-0 ml-2"
+            >
+              Unverified
+            </v-chip>
+          </template>
+          This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious
+        </v-tooltip>
+        <template v-if="shortcut.description" #description>
+          {{ shortcut.description }}
         </template>
-      </g-action-button>
-      <g-action-button
-        :icon="visibilityIconShortcut"
-        :tooltip="shortcutVisibilityTitle"
-        class="enablePointerEvents"
-        @click.stop="expansionPanel = !expansionPanel"
-      />
-    </template>
-  </v-list-item>
+      </g-list-item-content>
+      <v-spacer/>
+      <template v-if="!readOnly" #append>
+        <g-action-button
+          icon="mdi-console-line"
+          :disabled="disabled"
+          @click.stop="addTerminalShortcut(shortcut)"
+        >
+          <template #tooltip>
+            <span v-if="!disabled">
+              Create
+              '<span class="font-family-monospace">{{ shortcut.title }}</span>'
+              terminal session
+            </span>
+            <span v-else>
+              Cluster is hibernated. Wake up cluster to open terminal
+            </span>
+          </template>
+        </g-action-button>
+        <g-action-button
+          :icon="visibilityIconShortcut"
+          :tooltip="shortcutVisibilityTitle"
+          @click.stop="expansionPanel = !expansionPanel"
+        />
+      </template>
+    </g-list-item>
+  </v-item>
   <v-expand-transition>
     <v-card v-if="expansionPanel"
       flat
@@ -184,12 +195,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-  :deep(.popper) {
-    text-align: initial;
-  }
-  .enablePointerEvents {
-    pointer-events: auto !important;
-  }
-</style>

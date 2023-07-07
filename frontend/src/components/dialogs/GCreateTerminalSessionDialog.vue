@@ -47,20 +47,21 @@ SPDX-License-Identifier: Apache-2.0
         </v-window-item>
         <!-- popper-boundaries-selector="#shortcut-tab" -->
         <v-window-item value="shortcut-tab">
-          <v-list>
-            <!-- <v-list-item-group
-              v-model="shortcutTab.selectedShortcuts"
-              color="primary"
-              active-class="g-border"
-              multiple
-            > -->
+          <v-item-group
+            multiple
+            color="primary"
+            selected-class="bg-secondary"
+            :model-value="shortcutTab.selectedShortcuts"
+            @update:model-value="shortcutTab.selectedShortcuts = $event"
+          >
+            <g-list>
               <g-terminal-shortcuts
                 :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
                 @add-terminal-shortcut="onAddTerminalShortcut"
               ></g-terminal-shortcuts>
-            <!-- </v-list-item-group> -->
-          </v-list>
+            </g-list>
+          </v-item-group>
         </v-window-item>
       </v-window>
       <g-unverified-terminal-shortcuts-dialog
@@ -230,12 +231,10 @@ export default defineComponent({
     initialize ({ target, container }) {
       this.reset()
 
-      nextTick(() => {
-        this.targetTab.selectedTarget = target
-        this.targetTab.selectedConfig = {
-          container,
-        }
-      })
+      this.targetTab.selectedTarget = target
+      this.targetTab.selectedConfig = {
+        container,
+      }
     },
     reset () {
       this.tab = 'target-tab'
@@ -274,7 +273,12 @@ export default defineComponent({
     },
     onAddTerminalShortcut (shortcut) {
       this.shortcutTab.selectedShortcuts = [shortcut]
-      this.$refs.gDialog.resolveAction(true)
+      // need to defer execution as at this time.
+      // Otherwise, when clicking on the "run terminal shortcut" button, it is not yet valid and an old cached value is taken.
+      // This is bad and we already discussed that we need to re-design the GDialog component.
+      nextTick(() => {
+        this.$refs.gDialog.resolveAction(true)
+      })
     },
     onTerminalTargetValid (valid) {
       this.targetTab.terminalTargetValid = valid
@@ -287,10 +291,3 @@ export default defineComponent({
   },
 })
 </script>
-
-// Non-scoped style for g-border class, which will be applied to the v-list-item in TerminalShortcut component. Alternatively we could define the g-border class only in the TerminalShortcut component.
-<style>
-  .g-border {
-    border: 1px solid #0097a7;
-  }
-</style>
