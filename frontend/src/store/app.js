@@ -18,9 +18,12 @@ export const useAppStore = defineStore('app', () => {
   const timezone = ref(moment().format('Z'))
   const focusedElementId = ref(null)
   const splitpaneResize = ref(null)
-  const splitpaneLayouts = ref({})
 
   const fromRoute = ref(null)
+
+  function updateSplitpaneResize () {
+    splitpaneResize.value = new Date()
+  }
 
   function setAlert (value) {
     alert.value = value
@@ -43,8 +46,8 @@ export const useAppStore = defineStore('app', () => {
     timezone,
     focusedElementId,
     splitpaneResize,
-    splitpaneLayouts,
     fromRoute,
+    updateSplitpaneResize,
     setAlert,
     setError,
   }

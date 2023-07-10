@@ -11,14 +11,15 @@ SPDX-License-Identifier: Apache-2.0
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
     />
-    <div class="g-main__wrap">
+    <div class="g-main__wrap" ref="wrapRef">
       <router-view :key="routerViewKey"></router-view>
     </div>
   </v-main>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, provide } from 'vue'
+import { ref, computed, onMounted, provide, watch } from 'vue'
+import { useLayout } from 'vuetify'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
@@ -27,6 +28,7 @@ import { useLogger } from '@/composables'
 
 import GAlertBanner from '@/components/GAlertBanner.vue'
 
+const layout = useLayout()
 const route = useRoute()
 const logger = useLogger()
 const configStore = useConfigStore()
@@ -34,6 +36,7 @@ const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRe
 
 // refs
 const mainRef = ref(null)
+const wrapRef = ref(null)
 
 function setElementOverflowY (element, value) {
   if (element) {
@@ -49,11 +52,18 @@ const routerViewKey = computed(() => {
 })
 
 const mainContainer = computed(() => {
-  return mainRef.value?.$el.querySelector(`:scope > div[class$='wrap']`)
+  return mainRef.value?.$el.querySelector(':scope > div[class$=\'wrap\']')
 })
 
 function setScrollTop (top = 0) {
   mainRef.value.$el.scrollTop = top
+}
+
+function setWrapElementHeight (value) {
+  const wrapElement = wrapRef.value
+  if (wrapElement) {
+    wrapElement.style.height = `calc(100vh - ${value}px)`
+  }
 }
 
 onMounted(() => {
@@ -61,11 +71,15 @@ onMounted(() => {
     const mainElement = mainRef.value.$el
     setElementOverflowY(mainElement, 'hidden')
     // Find the first direct child div element of mainElement with a class attribute ending in "wrap"
-    const element = mainElement.querySelector(`:scope > div[class$='wrap']`)
+    const element = mainElement.querySelector(':scope > div[class$=\'wrap\']')
     setElementOverflowY(element, 'auto')
   } catch (err) {
     logger.error(err.message)
   }
+})
+
+watch(layout.mainRect, () => {
+  setWrapElementHeight(layout.mainRect.value.top)
 })
 
 defineExpose({
