@@ -5,11 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-list-item :value="shortcut" :disabled="disabled">
+  <g-list-item>
     <template v-if="!hideIconSlot" #prepend>
       <slot name="icon"/>
     </template>
-    <v-list-item-title>
+    <g-list-item-content>
       {{shortcut.title}}
       <v-tooltip v-if="isUnverified" location="top" max-width="400px">
         <template #activator="{ props }">
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             small
             color="warning"
             variant="outlined"
-            class="my-0 ml-2 enablePointerEvents"
+            class="my-0 ml-2"
           >
             Unverified
           </v-chip>
@@ -28,12 +28,12 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="shortcut.description" #description>
         {{ shortcut.description }}
       </template>
-    </v-list-item-title>
+    </g-list-item-content>
+    <v-spacer/>
     <template v-if="!readOnly" #append>
       <g-action-button
         icon="mdi-console-line"
         :disabled="disabled"
-        class="enablePointerEvents"
         @click.stop="addTerminalShortcut(shortcut)"
       >
         <template #tooltip>
@@ -50,11 +50,10 @@ SPDX-License-Identifier: Apache-2.0
       <g-action-button
         :icon="visibilityIconShortcut"
         :tooltip="shortcutVisibilityTitle"
-        class="enablePointerEvents"
         @click.stop="expansionPanel = !expansionPanel"
       />
     </template>
-  </v-list-item>
+  </g-list-item>
   <v-expand-transition>
     <v-card v-if="expansionPanel"
       flat
@@ -184,12 +183,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-  :deep(.popper) {
-    text-align: initial;
-  }
-  .enablePointerEvents {
-    pointer-events: auto !important;
-  }
-</style>

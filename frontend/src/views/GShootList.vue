@@ -19,16 +19,15 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <div v-bind="props">
-              <v-badge
+              <v-badge v-if="!projectScope && isAdmin"
                 class="mr-5"
                 bordered
                 color="primary-lighten-3"
                 :content="numberOfNewItemsSinceFreeze"
-                :value="numberOfNewItemsSinceFreeze > 0"
+                :model-value="numberOfNewItemsSinceFreeze > 0"
               >
                 <v-switch
                   v-model="focusModeInternal"
-                  v-if="!projectScope && isAdmin"
                   class="mr-3"
                   color="primary-lighten-3"
                   hide-details>
