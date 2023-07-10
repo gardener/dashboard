@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
+  <div class="copy-button d-flex align-center justify-center">
     <g-action-button
       :icon="icon"
       :color="btnColor"

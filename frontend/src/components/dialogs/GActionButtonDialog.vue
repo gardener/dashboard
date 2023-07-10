@@ -42,10 +42,21 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #caption>{{caption}}</template>
         <template #affectedObjectName>{{shootName}}</template>
-        <template #top><slot name="top"></slot></template>
-        <template #card><slot name="card"></slot></template>
-        <template #message><slot name="actionComponent"></slot></template>
-        <template #errorMessage><slot name="errorMessage"></slot></template>
+        <template #top v-if="$slots.top">
+          <slot name="top"></slot>
+        </template>
+        <template #card v-if="$slots.card">
+          <slot name="card"></slot>
+        </template>
+        <template #message v-if="$slots.actionComponent">
+          <slot name="actionComponent"></slot>
+        </template>
+        <template #errorMessage v-if="$slots.errorMessage">
+          <slot name="errorMessage"></slot>
+        </template>
+        <template #additionalMessage v-if="$slots.additionalMessage">
+          <slot name="additionalMessage"></slot>
+        </template>
       </g-dialog>
     </template>
     <div v-else style="width: 36px"></div>
