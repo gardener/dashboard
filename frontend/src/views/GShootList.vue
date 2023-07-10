@@ -265,7 +265,7 @@ export default {
       this.setSelection(null)
     },
     setSelectedHeader (header) {
-      this.selectedColumns[header.value] = !header.selected
+      this.selectedColumns[header.key] = !header.selected
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
@@ -567,7 +567,7 @@ export default {
         ...header,
         class: 'nowrap',
         weight: (index + 1) * 100,
-        selected: get(this.selectedColumns, header.value, header.defaultSelected),
+        selected: get(this.selectedColumns, header.key, header.defaultSelected),
       }))
     },
     customHeaders () {
