@@ -88,7 +88,7 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async reset () {

@@ -90,7 +90,7 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Failed to delete Cloud Provider Secret.'
         this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
