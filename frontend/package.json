@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.2",
+    "@floating-ui/vue": "^1.0.1",
     "@kyvg/vue3-notification": "^2.9.0",
     "@mdi/font": "7.0.96",
     "@vuelidate/core": "^2.0.2",

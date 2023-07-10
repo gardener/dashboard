@@ -692,10 +692,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^1.1.0":
+"@floating-ui/core@npm:^1.1.0, @floating-ui/core@npm:^1.3.1":
   version: 1.3.1
   resolution: "@floating-ui/core@npm:1.3.1"
   checksum: fe3b40fcaec95b0825c01a98330ae75b60c61c395ca012055a32f9c22ab97fde8ce1bd14fce3d242beb9dbe4564c90ce4a7a767851911d4215b9ec7721440e5b
+  languageName: node
+  linkType: hard
+
+"@floating-ui/dom@npm:^1.2.9":
+  version: 1.4.3
+  resolution: "@floating-ui/dom@npm:1.4.3"
+  dependencies:
+    "@floating-ui/core": ^1.3.1
+  checksum: f377960b5a61a685c77b2cdda1243122437008e138d29cdf2c5861d74650742057f011fb75580e6eab045a1c6109ad743202dd3f25b832ef70ef49d391b8f4ea
   languageName: node
   linkType: hard
 
@@ -705,6 +714,16 @@ __metadata:
   dependencies:
     "@floating-ui/core": ^1.1.0
   checksum: 8b7f3b98ed7ec0b634e4a0b735253b0442358c5cea8302935fc185b2bd882202a053622abe9248c76d0908645dd35f93adeaed2d64371b2ab76b36725ce3f7d3
+  languageName: node
+  linkType: hard
+
+"@floating-ui/vue@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@floating-ui/vue@npm:1.0.1"
+  dependencies:
+    "@floating-ui/dom": ^1.2.9
+    vue-demi: ">=0.13.0"
+  checksum: 788667333aac314ee78039e2ee2c65e39ed897639f8c21fbe47af9c2343beecd90134d969a57ce121692dfc53bae9ec506a0e184e6567cdb713e9ee012e2c677
   languageName: node
   linkType: hard
 
@@ -748,6 +767,7 @@ __metadata:
     morgan: ^1.10.0
     nodemon: ^2.0.22
     object-hash: ^3.0.0
+    openapi-types: ^12.1.3
     openid-client: ^5.4.0
     p-event: ^4.2.0
     p-limit: ^3.1.0
@@ -787,6 +807,7 @@ __metadata:
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
     "@braintree/sanitize-url": ^6.0.2
+    "@floating-ui/vue": ^1.0.1
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
     "@vitejs/plugin-vue": ^3.0.3
@@ -7462,7 +7483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openapi-types@npm:*":
+"openapi-types@npm:^12.1.3":
   version: 12.1.3
   resolution: "openapi-types@npm:12.1.3"
   checksum: 7fa5547f87a58d2aa0eba6e91d396f42d7d31bc3ae140e61b5d60b47d2fd068b48776f42407d5a8da7280cf31195aa128c2fc285e8bb871d1105edee5647a0bb
@@ -9646,7 +9667,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-demi@npm:>=0.14.5":
+"vue-demi@npm:>=0.13.0, vue-demi@npm:>=0.14.5":
   version: 0.14.5
   resolution: "vue-demi@npm:0.14.5"
   peerDependencies:
