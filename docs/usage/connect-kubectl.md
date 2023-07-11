@@ -1,16 +1,19 @@
 # Connect kubectl
 
 In Kubernetes, the configuration for access to your cluster is a format known as `kubeconfig` that is stored as a file. It contains details such as cluster API server addresses and access credentials or a command to get the access credential from a `kubectl` credential plugin. In general, treat a `kubeconfig` as sensitive data. Tools like `kubectl` use the `kubeconfig` to connect and authenticate to a cluster and perform operations on it.
-Learn more about [kubeconfig](https://kubernetes.io/docs/operations/configuration/organize-cluster-access-kubeconfig/) and [kubectl](https://kubernetes.io/docs/reference/kubectl/) on [kubernetes.io](https://kubernetes.io).
+Learn more about [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and [kubectl](https://kubernetes.io/docs/reference/kubectl/) on [kubernetes.io](https://kubernetes.io).
 
 ### Prerequisites
 - You are logged on to the Gardener Dashboard.
 - You have created a cluster and its status is operational.
 
 On this page:
-- [Downloading kubeconfig for a cluster](#downloading-kubeconfig-for-a-cluster)
-- [Connecting to the cluster](#connecting-to-the-cluster)
-- [Exporting KUBECONFIG environment variable](#exporting-kubeconfig-environment-variable)
+- [Connect kubectl](#connect-kubectl)
+    - [Prerequisites](#prerequisites)
+    - [Downloading kubeconfig for a cluster](#downloading-kubeconfig-for-a-cluster)
+    - [Connecting to the cluster](#connecting-to-the-cluster)
+    - [Exporting KUBECONFIG environment variable](#exporting-kubeconfig-environment-variable)
+  - [What's next?](#whats-next)
 
 <br/>
 
