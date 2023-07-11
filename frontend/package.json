@@ -64,7 +64,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2",
-    "vuetify": "^3.3.5",
+    "vuetify": "^3.3.7",
     "webfontloader": "^1.6.28",
     "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0",

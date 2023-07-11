@@ -375,7 +375,7 @@ const userAccountTableHeaders = computed(() => {
   return map(headers, header => ({
     ...header,
     class: 'nowrap',
-    selected: get(userAccountSelectedColumns.value, header.value, header.defaultSelected),
+    selected: get(userAccountSelectedColumns.value, header.key, header.defaultSelected),
   }))
 })
 
@@ -449,7 +449,7 @@ const serviceAccountTableHeaders = computed(() => {
   return map(headers, header => ({
     ...header,
     class: 'nowrap',
-    selected: get(serviceAccountSelectedColumns.value, header.value, header.defaultSelected),
+    selected: get(serviceAccountSelectedColumns.value, header.key, header.defaultSelected),
   }))
 })
 
@@ -670,7 +670,7 @@ function sortAccounts (items, sortByArr, sortDescArr) {
 }
 
 function setSelectedHeaderUserAccount (header) {
-  userAccountSelectedColumns.value[header.value] = !header.selected
+  userAccountSelectedColumns.value[header.key] = !header.selected
 }
 
 function resetTableSettingsUserAccount () {
@@ -679,7 +679,7 @@ function resetTableSettingsUserAccount () {
 }
 
 function setSelectedHeaderServiceAccount (header) {
-  serviceAccountSelectedColumns.value[header.value] = !header.selected
+  serviceAccountSelectedColumns.value[header.key] = !header.selected
 }
 
 function resetTableSettingsServiceAccount () {

@@ -838,7 +838,7 @@ __metadata:
     vitest: ^0.29.8
     vue: ^3.3.4
     vue-router: ^4.2.2
-    vuetify: ^3.3.5
+    vuetify: ^3.3.7
     webfontloader: ^1.6.28
     xterm: ^5.2.1
     xterm-addon-fit: ^0.7.0
@@ -9728,9 +9728,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:^3.3.5":
-  version: 3.3.5
-  resolution: "vuetify@npm:3.3.5"
+"vuetify@npm:^3.3.7":
+  version: 3.3.7
+  resolution: "vuetify@npm:3.3.7"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ^1.0.0-alpha.12
@@ -9746,7 +9746,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 7be82835ab00bd9f49f7f04072b62c5655286b466aaaba271904ad821e1b77f653d4866d00dae3934f63c2072f80232f08747b2059e62518150d7d7f11303860
+  checksum: ef652d200caca011bab98d0c1a8b34cdc2a9f2ce4ada76826aac43b66c3eb50d75cda49e02a6609ec9349f0851f4a1a9117a91be8737ce228947b73b71aa707f
   languageName: node
   linkType: hard
 
