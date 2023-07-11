@@ -44,13 +44,13 @@ SPDX-License-Identifier: Apache-2.0
             ref="manageWorkersRef"
           ></g-manage-workers>
         </v-window-item>
-        <v-window-item value="yaml">
+        <v-window-item value="yaml" :style="{ 'min-height': `${overviewTabHeight}px` }">
           <g-shoot-editor
             :shoot-item="editorData"
             :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
             ref="workerEditorRef"
             hide-toolbar
-            :style="{ 'min-height': `${overviewTabHeight}px` }"
+            animate-on-appear
           >
           </g-shoot-editor>
         </v-window-item>
