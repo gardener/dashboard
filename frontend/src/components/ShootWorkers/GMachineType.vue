@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       item-title="name"
       item-value="name"
       :error-messages="getErrorMessages('internalValue')"
-      @input="v$.internalValue.$touch()"
+      @update:model-value="v$.internalValue.$touch()"
       @blur="v$.internalValue.$touch()"
       v-model="internalValue"
       v-model:search-input="internalSearch"

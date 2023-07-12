@@ -1,4 +1,3 @@
-
 <!--
 SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
 
@@ -13,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         item-color="primary"
         :items="criItems"
         :error-messages="getErrorMessages('criName')"
-        @input="onInputCriName"
+        @update:model-value="onInputCriName"
         @blur="v$.criName.$touch()"
         v-model="criName"
         label="Container Runtime"

@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
           :items="zoneItems"
           :error-messages="getErrorMessages('selectedZones')"
           v-model="selectedZones"
-          @input="onInputZones"
+          @update:model-value="onInputZones"
           @blur="v$.selectedZones.$touch()"
           multiple
           chips
