@@ -244,10 +244,10 @@ export default {
       'setSortDesc',
     ]),
     setLocalStorageObject (key, value) {
-      useLocalStorage(key).value = value
+      useLocalStorage(key, {}).value = value
     },
     getLocalStorageObject (key) {
-      return useLocalStorage(key).value
+      return useLocalStorage(key, {}).value
     },
     async showDialog (args) {
       switch (args.action) {
