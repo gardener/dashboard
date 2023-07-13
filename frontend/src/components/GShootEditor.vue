@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-undo" @click="undo" :disabled="historySize.undo" />
+                <g-action-button size="x-small" icon="mdi-undo" @click="undo" :disabled="historySize.undo === 0" />
               </div>
             </template>
             <span>Undo</span>
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-redo" @click="redo" :disabled="historySize.redo" />
+                <g-action-button size="x-small" icon="mdi-redo" @click="redo" :disabled="historySize.redo === 0" />
               </div>
             </template>
             <span>Redo</span>
