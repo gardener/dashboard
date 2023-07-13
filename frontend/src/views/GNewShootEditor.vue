@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #toolbarItemsRight>
         <v-divider vertical></v-divider>
         <v-col class="d-flex fill-height align-center" >
-          <v-btn text @click.stop="createClicked()" class="text-primary">Create</v-btn>
+          <v-btn variant="text" @click.stop="createClicked()" color="primary">Create</v-btn>
         </v-col>
       </template>
     </g-shoot-editor>
