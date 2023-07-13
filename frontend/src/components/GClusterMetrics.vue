@@ -8,9 +8,9 @@ SPDX-License-Identifier: Apache-2.0
   <g-list>
     <g-link-list-tile
       icon="mdi-developer-board"
-      app-title="Grafana"
-      :url="grafanaUrl"
-      :url-text="grafanaUrl"
+      app-title="Plutono"
+      :url="plutonoUrl"
+      :url-text="plutonoUrl"
       :is-shoot-status-hibernated="isShootStatusHibernated"
     ></g-link-list-tile>
     <g-link-list-tile
@@ -45,8 +45,8 @@ export default {
   },
   mixins: [shootItem],
   computed: {
-    grafanaUrl () {
-      return get(this.shootItem, 'info.grafanaUrl', '')
+    plutonoUrl () {
+      return get(this.shootItem, 'info.plutonoUrl', '')
     },
     prometheusUrl () {
       return get(this.shootItem, 'info.prometheusUrl', '')
