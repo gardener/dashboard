@@ -243,11 +243,28 @@ export default {
       'setSortBy',
       'setSortDesc',
     ]),
+    localStorageObjectRef (key) {
+      return useLocalStorage(key, {}, {
+        serializer: {
+          read (value) {
+            return value && value !== 'undefined'
+              ? JSON.parse(value)
+              : null
+          },
+          write (value = null) {
+            JSON.stringify(value)
+          },
+        },
+      })
+    },
     setLocalStorageObject (key, value) {
-      useLocalStorage(key, {}).value = value
+      const objRef = this.localStorageObjectRef(key)
+      if (objRef) {
+        objRef.value = value
+      }
     },
     getLocalStorageObject (key) {
-      return useLocalStorage(key, {}).value
+      return this.localStorageObjectRef(key)?.value
     },
     async showDialog (args) {
       switch (args.action) {
