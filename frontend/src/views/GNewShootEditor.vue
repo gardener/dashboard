@@ -18,10 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         If the resource is invalid, you may lose data when switching back to the overview page.
       </template>
       <template #toolbarItemsRight>
-        <v-divider vertical></v-divider>
-        <v-col class="d-flex fill-height align-center" >
-          <v-btn variant="text" @click.stop="createClicked()" color="primary">Create</v-btn>
-        </v-col>
+        <v-btn variant="text" @click.stop="createClicked()" color="primary">Create</v-btn>
       </template>
     </g-shoot-editor>
     <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
@@ -29,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import { mapState, mapActions } from 'pinia'
 import { errorDetailsFromError } from '@/utils/error'
@@ -40,7 +37,7 @@ import { useAsyncRef } from '@/composables'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 
-export default defineComponent({
+export default {
   components: {
     GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GConfirmDialog,
@@ -137,5 +134,5 @@ export default defineComponent({
     }
     return next()
   },
-})
+}
 </script>
