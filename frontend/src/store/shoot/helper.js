@@ -530,16 +530,18 @@ export function sortItemsFn (state, context) {
     configStore,
   } = context
 
-  return (items, sortByArr, sortDescArr) => {
+  return (items, sortByArr) => {
     if (state.focusMode) {
       // no need to sort in focus mode sorting is freezed and filteredItems return items in last sorted order
       return items
     }
-    const sortBy = isArray(sortByArr) ? head(sortByArr) : sortByArr
-    const sortOrder = (isArray(sortDescArr) ? head(sortDescArr) : sortDescArr) ? 'desc' : 'asc'
-    if (!sortBy) {
+    const sortByObj = head(sortByArr)
+    if (!sortByObj || !sortByObj.key) {
       return items
     }
+    const sortBy = sortByObj.key
+
+    const sortOrder = sortByObj.order
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(context, a, 'name') > getRawVal(context, b, 'name')) {
         return 1

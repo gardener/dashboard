@@ -107,9 +107,8 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="items"
         hover
-        v-model:options="options"
         v-model:sort-by="sortByInternal"
-        v-model:sort-desc="sortDescInternal"
+        v-model:items-per-page="itemsPerPage"
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
         :search="shootSearch"
@@ -190,6 +189,7 @@ import isEmpty from 'lodash/isEmpty'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
+import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
@@ -209,7 +209,7 @@ export default {
     return {
       shootSearch: '',
       dialog: null,
-      options: undefined,
+      itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
       cachedItems: null,
       selectedColumns: undefined,
       itemsPerPageOptions: [
@@ -218,32 +218,6 @@ export default {
         { value: 20, title: '20' },
       ],
     }
-  },
-  watch: {
-    options (value) {
-      if (!value) {
-        return
-      }
-      const { sortBy, sortDesc, itemsPerPage } = value
-      if (!sortBy || !sortBy.length) { // initial table options
-        return
-      }
-
-      if (startsWith(sortBy, 'Z_')) {
-        this.setLocalStorageObject(`project/${this.projectName}/shoot-list/options`, { sortBy, sortDesc })
-
-        const currentTableOptions = this.getLocalStorageObject('projects/shoot-list/options')
-        const tableOptions = {
-          ...this.defaultTableOptions,
-          ...currentTableOptions,
-          itemsPerPage,
-        }
-        this.setLocalStorageObject('projects/shoot-list/options', tableOptions)
-      } else {
-        this.setLocalStorageObject(`project/${this.projectName}/shoot-list/options`) // clear project specific options
-        this.setLocalStorageObject('projects/shoot-list/options', { sortBy, sortDesc, itemsPerPage })
-      }
-    },
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -254,31 +228,7 @@ export default {
       'searchItems',
       'setFocusMode',
       'setSortBy',
-      'setSortDesc',
     ]),
-    localStorageObjectRef (key) {
-      return useLocalStorage(key, {}, {
-        serializer: {
-          read (value) {
-            return value && value !== 'undefined'
-              ? JSON.parse(value)
-              : null
-          },
-          write (value = null) {
-            JSON.stringify(value)
-          },
-        },
-      })
-    },
-    setLocalStorageObject (key, value) {
-      const objRef = this.localStorageObjectRef(key)
-      if (objRef) {
-        objRef.value = value
-      }
-    },
-    getLocalStorageObject (key) {
-      return this.localStorageObjectRef(key)?.value
-    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -299,11 +249,13 @@ export default {
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
-      this.setLocalStorageObject('projects/shoot-list/selected-columns', this.currentStandardSelectedColumns)
+      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
+
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
       if (isEmpty(this.currentCustomSelectedColumns)) {
-        this.setLocalStorageObject(`project/${this.projectName}/shoot-list/selected-columns`)
+        projectSpecificCustomSelectedColumns.value = null
       } else {
-        this.setLocalStorageObject(`project/${this.projectName}/shoot-list/selected-columns`, this.currentCustomSelectedColumns)
+        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
       }
     },
     resetTableSettings () {
@@ -312,34 +264,42 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.options = this.defaultTableOptions
+      this.itemsPerPage = this.defaultItemsPerPage
+      this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
-      const selectedColumns = this.getLocalStorageObject('projects/shoot-list/selected-columns')
-      const projectSpecificSelectedColumns = this.getLocalStorageObject(`project/${this.projectName}/shoot-list/selected-columns`)
+      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
       this.selectedColumns = {
-        ...selectedColumns,
-        ...projectSpecificSelectedColumns,
+        ...selectedColumns.value,
+        ...projectSpecificCustomSelectedColumns.value,
       }
-      const projectSpecificTableOptions = this.getLocalStorageObject(`project/${this.projectName}/shoot-list/options`)
-      const tableOptions = this.getLocalStorageObject('projects/shoot-list/options')
-      this.options = {
-        ...this.defaultTableOptions,
-        ...tableOptions,
-        ...projectSpecificTableOptions,
+
+      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
+      if (!isEmpty(projectSpecificSortBy.value)) {
+        this.sortByInternal = projectSpecificSortBy.value
+        return
       }
+
+      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
+      if (!isEmpty(sortBy.value)) {
+        this.sortByInternal = sortBy.value
+        return
+      }
+
+      this.sortByInternal = this.defaultSortBy
     },
     async toggleFilter ({ value }) {
       const key = value
       await this.setShootListFilter({ filter: key, value: !this.shootListFilters[key] })
 
-      this.setLocalStorageObject('project/_all/shoot-list/filter', pick(this.shootListFilters, [
+      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
         'onlyShootsWithIssues',
         'progressing',
         'noOperatorAction',
         'deactivatedReconciliation',
         'hideTicketsWithLabel',
-      ]))
+      ])
 
       if (key === 'onlyShootsWithIssues') {
         await this.subscribe()
@@ -352,6 +312,16 @@ export default {
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
     }, 500),
+  },
+  watch: {
+    sortBy (sortBy) {
+      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
+      } else {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`).value = null // clear project specific options
+        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
+      }
+    },
   },
   computed: {
     ...mapState(useAuthnStore, [
@@ -386,14 +356,12 @@ export default {
       'numberOfNewItemsSinceFreeze',
       'focusMode',
       'sortBy',
-      'sortDesc',
     ]),
-    defaultTableOptions () {
-      return {
-        sortBy: ['name'],
-        sortDesc: [false],
-        itemsPerPage: 10,
-      }
+    defaultSortBy () {
+      return [{ key: 'name', order: 'asc' }]
+    },
+    defaultItemsPerPage () {
+      return 10
     },
     clusterAccessDialog: {
       get () {
@@ -419,14 +387,6 @@ export default {
       },
       set (value) {
         this.setSortBy(value)
-      },
-    },
-    sortDescInternal: {
-      get () {
-        return this.sortDesc
-      },
-      set (value) {
-        this.setSortDesc(value)
       },
     },
     currentName () {
