@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card>
+  <v-card class="mb-4">
     <g-toolbar title="Details" />
     <g-list>
       <g-list-item>
