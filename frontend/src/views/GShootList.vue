@@ -105,16 +105,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-toolbar>
       <v-data-table
         :headers="visibleHeaders"
-        :items="items"
+        :items="sortedAndFilteredItems"
         hover
         v-model:sort-by="sortByInternal"
         v-model:items-per-page="itemsPerPage"
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
-        :search="shootSearch"
-        :custom-filter="searchItems"
         must-sort
-        :custom-sort="sortItems"
         class="g-table"
       >
         <template #progress>
@@ -163,7 +160,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, toRaw } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { mapState, mapActions } from 'pinia'
 import {
@@ -706,6 +703,10 @@ export default {
     },
     hideClustersWithLabels () {
       return get(this.ticketConfig, 'hideClustersWithLabels', [])
+    },
+    sortedAndFilteredItems () {
+      const items = this.sortItems(this.items, this.sortByInternal)
+      return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
     },
   },
   beforeRouteEnter (to, from, next) {

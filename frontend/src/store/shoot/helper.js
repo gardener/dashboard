@@ -501,7 +501,7 @@ export function searchItemsFn (state, context) {
   let searchQuery
   let lastSearchString
 
-  return (value, search, item) => {
+  return (search, item) => {
     const searchableCustomFields = filter(projectStore.shootCustomFieldList, ['searchable', true])
     const values = [
       getRawVal(context, item, 'name'),
