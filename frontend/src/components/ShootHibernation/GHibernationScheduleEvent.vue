@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="selectedDays"
           ref="selectedDays"
           @blur="touchIfNothingFocused"
-          @input="onInputSelectedDays"
+          @update:model-value="onInputSelectedDays"
           :items="weekdays"
           return-object
           :error-messages="getErrorMessages('selectedDays')"
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Location"
             :items="locations"
             v-model="selectedLocation"
-            @input="onInputSelectedLocation"
+            @update:model-value="onInputSelectedLocation"
             append-icon="mdi-map-marker-outline"
             variant="underlined"
             >

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -140,8 +140,8 @@ SPDX-License-Identifier: Apache-2.0
           <div v-if="this.shootAddonNames.length" class="d-flex flex-wrap align-center">
             <v-chip v-for="(name, index) in this.shootAddonNames"
               :key="index"
-              small
-              outlined
+              size="small"
+              variant="outlined"
               color="primary"
               class="mr-2"
             >

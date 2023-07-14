@@ -33,6 +33,7 @@ import map from 'lodash/map'
 import replace from 'lodash/replace'
 import difference from 'lodash/difference'
 import differenceWith from 'lodash/differenceWith'
+import find from 'lodash/find'
 
 export const useShootStore = defineStore('shoot', () => {
   const api = useApi()

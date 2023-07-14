@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           </p>
           <p>
             You should consider the
-            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" rel="noopener">
+            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" rel="noopener" class="text-anchor">
               Kubernetes release notes
               <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
             </a>

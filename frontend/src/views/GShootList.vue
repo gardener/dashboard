@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -19,16 +19,15 @@ SPDX-License-Identifier: Apache-2.0
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <div v-bind="props">
-              <v-badge
+              <v-badge v-if="!projectScope && isAdmin"
                 class="mr-5"
                 bordered
                 color="primary-lighten-3"
                 :content="numberOfNewItemsSinceFreeze"
-                :value="numberOfNewItemsSinceFreeze > 0"
+                :model-value="numberOfNewItemsSinceFreeze > 0"
               >
                 <v-switch
                   v-model="focusModeInternal"
-                  v-if="!projectScope && isAdmin"
                   class="mr-3"
                   color="primary-lighten-3"
                   hide-details>
@@ -245,10 +244,10 @@ export default {
       'setSortDesc',
     ]),
     setLocalStorageObject (key, value) {
-      useLocalStorage(key).value = value
+      useLocalStorage(key, {}).value = value
     },
     getLocalStorageObject (key) {
-      return useLocalStorage(key).value
+      return useLocalStorage(key, {}).value
     },
     async showDialog (args) {
       switch (args.action) {
@@ -266,7 +265,7 @@ export default {
       this.setSelection(null)
     },
     setSelectedHeader (header) {
-      this.selectedColumns[header.value] = !header.selected
+      this.selectedColumns[header.key] = !header.selected
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
@@ -568,7 +567,7 @@ export default {
         ...header,
         class: 'nowrap',
         weight: (index + 1) * 100,
-        selected: get(this.selectedColumns, header.value, header.defaultSelected),
+        selected: get(this.selectedColumns, header.key, header.defaultSelected),
       }))
     },
     customHeaders () {

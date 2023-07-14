@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         item-value="name"
         v-model="worker.volume.type"
         :error-messages="getErrorMessages('worker.volume.type')"
-        @input="onInputVolumeType"
+        @update:model-value="onInputVolumeType"
         @blur="v$.worker.volume.type.$touch()"
         label="Volume Type"
         :hint="hint"

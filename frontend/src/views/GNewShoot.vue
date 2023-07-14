@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider></v-divider>
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical></v-divider>
-      <v-btn text @click.stop="createClicked()" :disabled="!valid" color="primary">Create</v-btn>
+      <v-btn variant="text" @click.stop="createClicked()" :disabled="!valid" color="primary">Create</v-btn>
     </div>
     <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
   </div>
@@ -478,8 +478,10 @@ export default defineComponent({
     async createClicked () {
       const shootResource = await this.updateShootResourceWithUIComponents()
 
+      console.log(shootResource, this.namespace)
+
       try {
-        await this.api.createShoot(shootResource)
+        await this.createShoot(shootResource)
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',

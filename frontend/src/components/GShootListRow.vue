@@ -1,6 +1,5 @@
-
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -102,7 +101,6 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        access-restriction-chips
         <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"/>
       </template>
       <template v-if="cell.header.key === 'ticket'">

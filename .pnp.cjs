@@ -1379,7 +1379,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.29.8"],\
             ["vue", "npm:3.3.4"],\
             ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.2.2"],\
-            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.5"],\
+            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.7"],\
             ["webfontloader", "npm:1.6.28"],\
             ["xterm", "npm:5.2.1"],\
             ["xterm-addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.7.0"],\
@@ -2852,7 +2852,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["find-cache-dir", "npm:3.3.2"],\
             ["upath", "npm:2.0.1"],\
             ["vue", "npm:3.3.4"],\
-            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.5"]\
+            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.7"]\
           ],\
           "packagePeers": [\
             "@types/vue",\
@@ -11628,7 +11628,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["upath", "npm:2.0.1"],\
             ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.7"],\
             ["vue", "npm:3.3.4"],\
-            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.5"]\
+            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.7"]\
           ],\
           "packagePeers": [\
             "@types/vite",\
@@ -11872,17 +11872,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["vuetify", [\
-        ["npm:3.3.5", {\
-          "packageLocation": "./.yarn/cache/vuetify-npm-3.3.5-9952599c41-7be82835ab.zip/node_modules/vuetify/",\
+        ["npm:3.3.7", {\
+          "packageLocation": "./.yarn/cache/vuetify-npm-3.3.7-d1cc70372b-ef652d200c.zip/node_modules/vuetify/",\
           "packageDependencies": [\
-            ["vuetify", "npm:3.3.5"]\
+            ["vuetify", "npm:3.3.7"]\
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.5", {\
-          "packageLocation": "./.yarn/__virtual__/vuetify-virtual-be0ac4abfa/0/cache/vuetify-npm-3.3.5-9952599c41-7be82835ab.zip/node_modules/vuetify/",\
+        ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.7", {\
+          "packageLocation": "./.yarn/__virtual__/vuetify-virtual-0f46730d05/0/cache/vuetify-npm-3.3.7-d1cc70372b-ef652d200c.zip/node_modules/vuetify/",\
           "packageDependencies": [\
-            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.5"],\
+            ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.7"],\
             ["@types/typescript", null],\
             ["@types/vite-plugin-vuetify", null],\
             ["@types/vue", null],\

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -45,28 +45,29 @@ SPDX-License-Identifier: Apache-2.0
           ></g-manage-workers>
         </v-window-item>
         <v-window-item value="yaml">
-          <g-shoot-editor
-            :shoot-item="editorData"
-            :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
-            ref="workerEditorRef"
-            hide-toolbar
-            :style="{ 'min-height': `${overviewTabHeight}px` }"
-          >
-          </g-shoot-editor>
+          <div :style="{ 'min-height': `${overviewTabHeight}px` }">
+            <g-shoot-editor
+              :shoot-item="editorData"
+              :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
+              ref="workerEditorRef"
+              hide-toolbar
+              animate-on-appear
+            >
+            </g-shoot-editor>
+          </div>
         </v-window-item>
       </v-window>
     </template>
-    <template #errorMessage>
+    <template #additionalMessage>
       <v-expand-transition appear>
         <v-alert
           type="warning"
-          outlined
+          variant="outlined"
           tile
           prominent
           v-if="networkConfiguration.length"
-          dismissible
-          @input="setNetworkConfiguration(undefined)"
-          class="mx-1">
+          closable
+          @input="setNetworkConfiguration(undefined)">
           <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
           <g-code-block
             lang="yaml"
@@ -74,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
             :show-copy-button="false"
             ></g-code-block>
           <div class="font-weight-bold">This change cannot be undone.</div>
-          <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'">yaml</a> tab.</div>
+          <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'" class="text-anchor">yaml</a> tab.</div>
         </v-alert>
       </v-expand-transition>
     </template>
@@ -146,10 +147,14 @@ export default defineComponent({
       await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        await this.updateConfiguration()
+        if (await this.updateConfiguration()) {
+          this.tabValue = 'overview'
+          this.componentKey = uuidv4() // force re-render
+        }
+      } else {
+        this.tabValue = 'overview'
+        this.componentKey = uuidv4() // force re-render
       }
-      this.tabValue = 'overview'
-      this.componentKey = uuidv4() // force re-render
     },
     async updateConfiguration () {
       try {
@@ -159,13 +164,15 @@ export default defineComponent({
         } else if (this.tab === 'yaml') {
           data = await this.getWorkerEditorData()
         }
-        await this.patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
+        await this.api.patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
+        return true
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        return false
       }
     },
     async reset () {
