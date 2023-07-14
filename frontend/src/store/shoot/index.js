@@ -89,7 +89,6 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionState: constants.CLOSED,
     subscriptionError: null,
     sortBy: undefined,
-    sortDesc: undefined,
   })
 
   // state
@@ -119,10 +118,6 @@ export const useShootStore = defineStore('shoot', () => {
 
   const sortBy = computed(() => {
     return state.sortBy
-  })
-
-  const sortDesc = computed(() => {
-    return state.sortDesc
   })
 
   // getters
@@ -378,7 +373,7 @@ export const useShootStore = defineStore('shoot', () => {
   function setFocusMode (value) {
     let sortedUids
     if (value) {
-      const sortedShoots = sortItems([...state.filteredShoots], state.sortBy, state.sortDesc)
+      const sortedShoots = sortItems([...state.filteredShoots], state.sortBy)
       sortedUids = map(sortedShoots, 'metadata.uid')
     }
     state.focusMode = value
@@ -391,10 +386,6 @@ export const useShootStore = defineStore('shoot', () => {
 
   function setSortBy (value) {
     state.sortBy = value
-  }
-
-  function setSortDesc (value) {
-    state.sortDesc = value
   }
 
   function setSubscription (value) {
@@ -536,7 +527,6 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionError,
     focusMode,
     sortBy,
-    sortDesc,
     // getters
     shootList,
     selectedShoot,
@@ -567,7 +557,6 @@ export const useShootStore = defineStore('shoot', () => {
     searchItems,
     sortItems,
     setSortBy,
-    setSortDesc,
     setSubscription,
     setSubscriptionState,
     setSubscriptionError,

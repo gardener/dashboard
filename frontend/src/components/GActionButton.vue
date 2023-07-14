@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip v-if="hasTooltip"
       activator="parent"
       location="top"
+      :disabled="tooltipDisabled"
     >
       <slot name="tooltip">
         {{ tooltip }}
@@ -59,6 +60,10 @@ const props = defineProps({
   },
   tooltip: {
     type: String,
+  },
+  tooltipDisabled: {
+    type: Boolean,
+    default: false,
   },
   to: {
     type: [Object, String],

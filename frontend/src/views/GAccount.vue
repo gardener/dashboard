@@ -200,22 +200,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { mapState } from 'pinia'
 import download from 'downloadjs'
-
-import map from 'lodash/map'
-import find from 'lodash/find'
-import get from 'lodash/get'
-
-import GList from '@/components/GList.vue'
-import GListItem from '@/components/GListItem.vue'
-import GToolbar from '@/components/GToolbar.vue'
-import GCopyBtn from '@/components/GCopyBtn.vue'
-import GCodeBlock from '@/components/GCodeBlock.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
-import GAccountAvatar from '@/components/GAccountAvatar.vue'
-import GActionButton from '@/components/GActionButton.vue'
+import { mapState } from 'pinia'
 
 import {
   useAuthnStore,
@@ -223,18 +209,22 @@ import {
   useProjectStore,
   useKubeconfigStore,
 } from '@/store'
+
+import GCopyBtn from '@/components/GCopyBtn.vue'
+import GCodeBlock from '@/components/GCodeBlock.vue'
+import GAccountAvatar from '@/components/GAccountAvatar.vue'
+
 import moment from '@/utils/moment'
 
-export default defineComponent({
+import map from 'lodash/map'
+import find from 'lodash/find'
+import get from 'lodash/get'
+
+export default {
   components: {
-    GList,
-    GListItem,
-    GToolbar,
     GCopyBtn,
     GCodeBlock,
-    GExternalLink,
     GAccountAvatar,
-    GActionButton,
   },
   inject: ['yaml', 'api'],
   data () {
@@ -408,7 +398,7 @@ export default defineComponent({
       this.updateKubeconfigYaml(value)
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

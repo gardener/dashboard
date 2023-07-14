@@ -748,6 +748,7 @@ __metadata:
     morgan: ^1.10.0
     nodemon: ^2.0.22
     object-hash: ^3.0.0
+    openapi-types: ^12.1.3
     openid-client: ^5.4.0
     p-event: ^4.2.0
     p-limit: ^3.1.0
@@ -809,7 +810,7 @@ __metadata:
     eslint-plugin-vitest: ^0.0.57
     eslint-plugin-vue: ^9.3.0
     eventemitter3: ^5.0.0
-    floating-vue: 2.0.0-beta.22
+    floating-vue: 2.0.0-beta.24
     get-contrast: ^3.0.0
     highlight.js: ^11.8.0
     js-cookie: ^3.0.1
@@ -4875,15 +4876,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"floating-vue@npm:2.0.0-beta.22":
-  version: 2.0.0-beta.22
-  resolution: "floating-vue@npm:2.0.0-beta.22"
+"floating-vue@npm:2.0.0-beta.24":
+  version: 2.0.0-beta.24
+  resolution: "floating-vue@npm:2.0.0-beta.24"
   dependencies:
     "@floating-ui/dom": ~1.1.1
     vue-resize: ^2.0.0-alpha.1
   peerDependencies:
+    "@nuxt/kit": ^3.2.0
     vue: ^3.2.0
-  checksum: 86d97e442aea7b94aaddfe0e18380f3e24f98e96a21b61d53a0022e2eff4454846b979fe56851c10cc621479c885407e3c86df80c61d7366f63b71ef329ecd99
+  peerDependenciesMeta:
+    "@nuxt/kit":
+      optional: true
+  checksum: 2dab3ef6b71768b37e02e40ee280c7a3614db36516fa80f03f6eed7668c1addfc8fe8566407772f97d056529009c030ca4d97bdfc6d6be7b784e21707dffe7a6
   languageName: node
   linkType: hard
 
@@ -7462,7 +7467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openapi-types@npm:*":
+"openapi-types@npm:^12.1.3":
   version: 12.1.3
   resolution: "openapi-types@npm:12.1.3"
   checksum: 7fa5547f87a58d2aa0eba6e91d396f42d7d31bc3ae140e61b5d60b47d2fd068b48776f42407d5a8da7280cf31195aa128c2fc285e8bb871d1105edee5647a0bb

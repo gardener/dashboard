@@ -5,18 +5,21 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <g-popover
-      placement="bottom"
-      toolbar-title="Gardenctl Info"
-    >
-    <template v-slot:activator="{ props }">
+  <g-popover
+    v-model="popover"
+    :z-index="2500"
+    placement="bottom"
+    toolbar-title="Gardenctl Info"
+  >
+    <template #activator="{ props }">
       <g-action-button
         v-bind="props"
         icon="mdi-information-outline"
         tooltip="Show information about gardenctl"
+        :tooltip-disabled="popover"
       />
     </template>
-    <template v-slot:text>
+    <template #text>
       <div class="text-h6 text-grey-darken-1 mb-4">Gardenctl</div>
       <p>
         <span class="font-family-monospace">gardenctl</span>
@@ -43,6 +46,11 @@ import GGardenctlConfigExample from '@/components/GGardenctlConfigExample.vue'
 export default {
   components: {
     GGardenctlConfigExample,
+  },
+  data () {
+    return {
+      popover: false,
+    }
   },
 }
 </script>
