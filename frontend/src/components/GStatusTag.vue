@@ -7,13 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="visible">
     <g-popover
+      v-model="popover"
       :placement="popperPlacement"
       :disabled="!condition.message"
       :toolbar-title="popperTitle"
       :toolbar-color="color"
-      @update:visible="onPopperInput"
     >
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <v-chip
           v-bind="props"
           :class="{ 'cursor-pointer': condition.message }"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
             activator="parent"
             location="top"
             max-width="400px"
-            :disabled="tooltipDisabled"
+            :disabled="popover"
           >
             <div class="font-weight-bold">{{ chipTooltip.title }}</div>
             <div>Status: {{ chipTooltip.status }}</div>
@@ -51,16 +51,14 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </v-chip>
       </template>
-      <template v-slot:default>
-        <g-shoot-message-details
-          :status-title="chipStatus"
-          :last-message="nonErrorMessage"
-          :error-descriptions="errorDescriptions"
-          :last-transition-time="condition.lastTransitionTime"
-          :secret-binding-name="secretBindingName"
-          :namespace="namespace"
-        />
-      </template>
+      <g-shoot-message-details
+        :status-title="chipStatus"
+        :last-message="nonErrorMessage"
+        :error-descriptions="errorDescriptions"
+        :last-transition-time="condition.lastTransitionTime"
+        :secret-binding-name="secretBindingName"
+        :namespace="namespace"
+      />
     </g-popover>
   </div>
 </template>
@@ -102,7 +100,7 @@ export default defineComponent({
   },
   data () {
     return {
-      popperVisible: false,
+      popover: false,
     }
   },
   computed: {
@@ -219,14 +217,6 @@ export default defineComponent({
         return !get(this.condition, 'showAdminOnly', false)
       }
       return true
-    },
-    tooltipDisabled () {
-      return this.popperVisible
-    },
-  },
-  methods: {
-    onPopperInput (value) {
-      this.popperVisible = value
     },
   },
 })

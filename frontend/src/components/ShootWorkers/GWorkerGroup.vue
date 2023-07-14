@@ -24,28 +24,29 @@ SPDX-License-Identifier: Apache-2.0
         {{workerGroup.name}}
       </v-chip>
     </template>
-    <template #item class="pa-0 ma-0">
-      <v-tabs
-        v-model="tab"
-        height="32"
-        color="primary"
+    <v-tabs
+      v-model="tab"
+      height="32"
+      color="primary"
+    >
+      <v-tab
+        value="overview"
+        class="text-caption text-medium-emphasis"
       >
-        <v-tab
-          value="overview"
-          class="text-caption text-medium-emphasis"
-        >
-          Overview
-        </v-tab>
-        <v-tab
-          value="yaml"
-          class="text-caption text-medium-emphasis"
-        >
-          Yaml
-        </v-tab>
-      </v-tabs>
-    </template>
-    <template #text>
-      <v-window v-model="tab" min-width="600">
+        Overview
+      </v-tab>
+      <v-tab
+        value="yaml"
+        class="text-caption text-medium-emphasis"
+      >
+        Yaml
+      </v-tab>
+    </v-tabs>
+    <v-card-text>
+      <v-window
+        v-model="tab"
+        min-width="600"
+      >
         <v-window-item value="overview">
           <v-container class="pa-2">
             <v-row dense>
@@ -231,7 +232,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-code-block lang="yaml" :content="workerGroupYaml" style="min-width: 480px"></g-code-block>
         </v-window-item>
       </v-window>
-    </template>
+    </v-card-text>
   </g-popover>
 </template>
 
@@ -344,4 +345,3 @@ export default {
   },
 }
 </script>
-

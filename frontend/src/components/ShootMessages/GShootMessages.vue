@@ -5,22 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popover
-    v-if="visible"
+  <g-popover v-if="visible"
+    v-model="popover"
     :toolbar-title="statusTitle"
     :toolbar-color="overallColor"
-    :container-props="{ class: 'pa-0' }"
+    content-text-class="pa-0"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <g-action-button
         v-bind="props"
         :icon="icon"
         :color="overallColor"
         :size="size"
         :tooltip="tooltip"
+        :tooltip-disabled="popover"
       />
     </template>
-    <template v-slot:text>
+    <template #text>
       <v-list
         density="compact"
         class="py-1"
@@ -29,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
           v-for="({key, icon, severity, component }) in shootMessages"
           :key="key"
         >
-          <template v-slot:prepend>
+          <template #prepend>
             <v-icon :icon="icon" :color="colorForSeverity(severity)"/>
           </template>
           <component
@@ -90,6 +91,11 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  data () {
+    return {
+      popover: false,
+    }
   },
   computed: {
     ...mapState(useAuthzStore, [
@@ -368,7 +374,7 @@ export default {
     overflow-y: auto;
   }
   :deep(.v-card .v-card-text) {
-      padding: 0px !important;
+    padding: 0px !important;
   }
 
   :deep(.v-card) {

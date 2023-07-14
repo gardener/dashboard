@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     toolbar-title="Control Plane High Availability"
     :toolbar-color="color"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-chip
         v-bind="props"
         variant="outlined"
@@ -20,30 +20,28 @@ SPDX-License-Identifier: Apache-2.0
         {{shootControlPlaneHighAvailabilityFailureTolerance}}
       </v-chip>
     </template>
-    <template v-slot:default>
-      <g-list class="text-left" style="max-width: 600px;">
+    <g-list class="text-left" style="max-width: 600px;">
+      <g-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-information-outline" color="primary"/>
+        </template>
+        <g-list-item-content label="Failure Tolerance">
+          <code>{{ shootControlPlaneHighAvailabilityFailureTolerance }}</code>
+        </g-list-item-content>
+      </g-list-item>
+      <template v-if="zoneHighAvailabilityConfigurationError">
+        <v-divider inset></v-divider>
         <g-list-item>
           <template #prepend>
-            <v-icon icon="mdi-information-outline" color="primary"/>
+            <v-icon icon="mdi-alert-circle-outline" color="error"/>
           </template>
-          <g-list-item-content label="Failure Tolerance">
-            <code>{{ shootControlPlaneHighAvailabilityFailureTolerance }}</code>
+          <g-list-item-content label="Configuration Error">
+            You configured your control plane failure tolerance type to be <code>zone</code>.
+            However, no seed assigned to your cloud profile currently supports this.
           </g-list-item-content>
         </g-list-item>
-        <template v-if="zoneHighAvailabilityConfigurationError">
-          <v-divider inset></v-divider>
-          <g-list-item>
-            <template #prepend>
-              <v-icon icon="mdi-alert-circle-outline" color="error"/>
-            </template>
-            <g-list-item-content label="Configuration Error">
-              You configured your control plane failure tolerance type to be <code>zone</code>.
-              However, no seed assigned to your cloud profile currently supports this.
-            </g-list-item-content>
-          </g-list-item>
-        </template>
-      </g-list>
-    </template>
+      </template>
+    </g-list>
   </g-popover>
 </template>
 

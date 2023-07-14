@@ -7,13 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex align-center">
     <g-popover
+      v-model="popover"
       :toolbar-title="toolbarTitle"
       :toolbar-color="color"
       :placement="popperPlacement"
     >
-      <template v-slot:activator="{ props: activatorProps }">
+      <template #activator="{ props: activatorProps }">
         <div class="d-flex align-center">
-          <v-tooltip location="top">
+          <v-tooltip
+            location="top"
+            :disabled="popover"
+          >
             <template v-slot:activator="{ props: tooltipProps }">
               <v-btn v-if="isUserError"
                 v-bind="mergeProps(activatorProps, tooltipProps)"
@@ -66,16 +70,14 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </div>
       </template>
-      <template v-slot:default>
-        <g-shoot-message-details
-          :status-title="statusTitle"
-          :last-message="lastMessage"
-          :error-descriptions="errorDescriptions"
-          :last-update-time="shootLastOperation.lastUpdateTime"
-          :secret-binding-name="shootSecretBindingName"
-          :namespace="shootNamespace"
-        />
-      </template>
+      <g-shoot-message-details
+        :status-title="statusTitle"
+        :last-message="lastMessage"
+        :error-descriptions="errorDescriptions"
+        :last-update-time="shootLastOperation.lastUpdateTime"
+        :secret-binding-name="shootSecretBindingName"
+        :namespace="shootNamespace"
+      />
     </g-popover>
     <div>
       <g-retry-operation :shoot-item="shootItem"/>
@@ -128,6 +130,7 @@ export default {
   },
   data () {
     return {
+      popover: false,
       retryingOperation: false,
     }
   },
