@@ -7,15 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-card class="ma-3">
-      <v-toolbar flat height="72" color="toolbar-background">
-        <g-icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
-          <g-certified-kubernetes/>
-        </g-icon-base>
+      <v-toolbar
+        flat
+        height="72"
+        color="toolbar-background"
+      >
+        <template #prepend>
+          <g-icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
+            <g-certified-kubernetes/>
+          </g-icon-base>
+        </template>
         <v-toolbar-title class="text-white">
           <div class="text-h5 text-toolbar-title">Kubernetes Clusters</div>
           <div class="text-subtitle-1 text-toolbar-title">{{headlineSubtitle}}</div>
         </v-toolbar-title>
-        <v-spacer></v-spacer>
+        <v-spacer/>
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <div v-bind="props">
@@ -29,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-switch
                   v-model="focusModeInternal"
                   class="mr-3"
+                  density="compact"
                   color="primary-lighten-3"
                   hide-details>
                   <template #label>
@@ -47,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
           </ul>
           <template v-if="numberOfNewItemsSinceFreeze > 0">
             <v-divider color="white"></v-divider>
-            <span class="font-weight-bold">{{numberOfNewItemsSinceFreeze}}</span>
+            <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
             new clusters were added to the list since you enabled focus mode.
           </template>
         </v-tooltip>
@@ -60,9 +67,12 @@ SPDX-License-Identifier: Apache-2.0
               label="Search"
               clearable
               hide-details
+              density="compact"
+              single-line
               variant="solo"
+              flat
               @update:model-value="onInputSearch"
-              @keyup.esc="shootSearch=''"
+              @keyup.esc="shootSearch = ''"
               class="mr-3"
             ></v-text-field>
           </template>
@@ -70,25 +80,28 @@ SPDX-License-Identifier: Apache-2.0
           <span class="font-weight-bold">Use quotes</span> for exact words or phrases: <v-chip label color="primary" small>"my-shoot"</v-chip> <v-chip label color="primary" small>"John Doe"</v-chip><br />
           <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
         </v-tooltip>
-        <v-tooltip location="top" v-if="canCreateShoots && projectScope">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-plus"
-              color="toolbar-title"
-              :to="{ name: 'NewShoot', params: { namespace } }"
-            />
-          </template>
-          <span>Create Cluster</span>
-        </v-tooltip>
-        <g-table-column-selection
-          :headers="selectableHeaders"
-          :filters="selectableFilters"
-          :filterTooltip="filterTooltip"
-          @set-selected-header="setSelectedHeader"
-          @reset="resetTableSettings"
-          @toggle-filter="toggleFilter"
-        ></g-table-column-selection>
+        <template #append>
+
+          <v-tooltip location="top" v-if="canCreateShoots && projectScope">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                color="toolbar-title"
+                :to="{ name: 'NewShoot', params: { namespace } }"
+              />
+            </template>
+            <span>Create Cluster</span>
+          </v-tooltip>
+          <g-table-column-selection
+            :headers="selectableHeaders"
+            :filters="selectableFilters"
+            :filterTooltip="filterTooltip"
+            @set-selected-header="setSelectedHeader"
+            @reset="resetTableSettings"
+            @toggle-filter="toggleFilter"
+          />
+        </template>
       </v-toolbar>
       <v-data-table
         :headers="visibleHeaders"
