@@ -318,7 +318,7 @@ export default {
       if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
         useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
       } else {
-        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`).value = null // clear project specific options
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
         useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
       }
     },
