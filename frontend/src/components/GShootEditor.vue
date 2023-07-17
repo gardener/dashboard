@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { markRaw } from 'vue'
 import { mapGetters } from 'pinia'
 import download from 'downloadjs'
 
@@ -150,9 +150,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
 
-let cmInstance
-
-export default defineComponent({
+export default {
   components: {
     GCopyBtn,
     GActionButton,
@@ -210,6 +208,7 @@ export default defineComponent({
       },
       showManagedFields: false,
       containerClass: undefined,
+      cmInstance: null,
     }
   },
   mixins: [shootItem],
@@ -274,20 +273,20 @@ export default defineComponent({
       return `shoot--${projectName}--${name}.yaml`
     },
     undo () {
-      if (cmInstance) {
-        cmInstance.execCommand('undo')
-        cmInstance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.execCommand('undo')
+        this.cmInstance.focus()
       }
     },
     redo () {
-      if (cmInstance) {
-        cmInstance.execCommand('redo')
-        cmInstance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.execCommand('redo')
+        this.cmInstance.focus()
       }
     },
     focus () {
-      if (cmInstance) {
-        cmInstance.focus()
+      if (this.cmInstance) {
+        this.cmInstance.focus()
       }
     },
     setClean (clean) {
@@ -320,8 +319,8 @@ export default defineComponent({
       this.$nextTick(() => this.refreshInstance())
     },
     refreshInstance () {
-      if (cmInstance) {
-        cmInstance.refresh()
+      if (this.cmInstance) {
+        this.cmInstance.refresh()
       }
     },
     createInstance (element) {
@@ -356,8 +355,8 @@ export default defineComponent({
         extraKeys,
         theme: this.theme,
       }
-      cmInstance = CodeMirror(element, options)
-      cmInstance.setSize('100%', '100%')
+      this.cmInstance = markRaw(CodeMirror(element, options))
+      this.cmInstance.setSize('100%', '100%')
       const onChange = ({ doc }) => {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
@@ -365,7 +364,7 @@ export default defineComponent({
         this.errorMessageInternal = undefined
         this.detailedErrorMessageInternal = undefined
       }
-      cmInstance.on('change', onChange)
+      this.cmInstance.on('change', onChange)
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
@@ -377,7 +376,7 @@ export default defineComponent({
       })
 
       let cmTooltipFnTimerID
-      const cm = cmInstance
+      const cm = this.cmInstance
       CodeMirror.on(element, 'mouseover', (e) => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
@@ -399,18 +398,18 @@ export default defineComponent({
       })
     },
     destroyInstance () {
-      if (cmInstance) {
-        const element = cmInstance.doc.cm.getWrapperElement()
+      if (this.cmInstance) {
+        const element = this.cmInstance.doc.cm.getWrapperElement()
         if (element && element.remove) {
           element.remove()
         }
       }
-      cmInstance = undefined
+      this.cmInstance = undefined
     },
     clearHistory () {
-      if (cmInstance) {
-        cmInstance.doc.clearHistory()
-        this.generation = cmInstance.doc.changeGeneration()
+      if (this.cmInstance) {
+        this.cmInstance.doc.clearHistory()
+        this.generation = this.cmInstance.doc.changeGeneration()
         this.setClean(true)
         this.untouched = true
         this.setConflictPath(null)
@@ -419,14 +418,14 @@ export default defineComponent({
       }
     },
     getContent () {
-      if (cmInstance) {
-        return cmInstance.doc.getValue()
+      if (this.cmInstance) {
+        return this.cmInstance.doc.getValue()
       }
       return ''
     },
     setContent (value) {
-      if (cmInstance) {
-        const editor = cmInstance
+      if (this.cmInstance) {
+        const editor = this.cmInstance
         const doc = editor.doc
         const cursor = doc.getCursor()
         const { left, top } = editor.getScrollInfo() || {}
@@ -476,15 +475,15 @@ export default defineComponent({
 
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    const indentUnit = get(cmInstance, 'options.indentUnit', 2)
+    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
   },
   watch: {
     canPatchShoots (value) {
-      cmInstance.setOption('readOnly', this.isReadOnly)
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
     },
     shootPurpose (value) {
-      cmInstance.setOption('readOnly', this.isReadOnly)
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
     },
     value: {
       deep: true,
@@ -503,13 +502,13 @@ export default defineComponent({
       },
     },
     theme (value) {
-      cmInstance.setOption('theme', value)
+      this.cmInstance.setOption('theme', value)
     },
   },
   beforeUnmount () {
     this.destroyInstance()
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>
