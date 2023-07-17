@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="items.length">
+  <v-card v-if="items.length"
+    class="mb-4"
+  >
     <g-toolbar title="External Tools" />
     <g-list>
       <template v-for="({ title, url, icon }, index) in items" :key="title">

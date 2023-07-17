@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="gitHubRepoUrl">
+  <div v-if="gitHubRepoUrl" class="mb-4">
     <template v-if="tickets.length">
       <v-card v-for="ticket in tickets" :key="ticket.metadata.issueNumber">
         <g-ticket :ticket="ticket"></g-ticket>

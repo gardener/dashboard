@@ -64,15 +64,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
-        - options property has been removed (need to set options individually)
       --->
       <v-data-table
         v-else
         :headers="visibleUserAccountTableHeaders"
         :items="userList"
+        v-model:sort-by="userSortBy"
+        v-model:items-per-page="userItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
-        v-model:options="userAccountTableOptions"
         must-sort
         :custom-sort="sortAccounts"
         :search="userFilter"
@@ -141,15 +140,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - footer-props="{ 'items-per-page-options': [5, 10, 20] }" (option to set footer props has been removed)
-        - options property has been removed (need to set options individually)
       --->
       <v-data-table
         v-else
         :headers="visibleServiceAccountTableHeaders"
         :items="serviceAccountList"
-        :footer-props="{ 'items-per-page-options': [5, 10, 20] }"
-        v-model:options="serviceAccountTableOptions"
+        v-model:sort-by="serviceAccountSortBy"
+        v-model:items-per-page="serviceAccountItemsPerPage"
+        :items-per-page-options="itemsPerPageOptions"
         must-sort
         :custom-sort="sortAccounts"
         :search="serviceAccountFilter"
@@ -258,17 +256,6 @@ const memberStore = useMemberStore()
 const appStore = useAppStore()
 const router = useRouter()
 
-const defaultUserAccountTableOptions = {
-  itemsPerPage: 10,
-  sortBy: ['username'],
-  sortDesc: [false],
-}
-const defaultServiceAccountTableOptions = {
-  itemsPerPage: 5,
-  sortBy: ['displayName'],
-  sortDesc: [false],
-}
-
 const userAddDialog = ref(false)
 const serviceAccountAddDialog = ref(false)
 const userUpdateDialog = ref(false)
@@ -302,9 +289,11 @@ const {
 const { list: memberList } = storeToRefs(memberStore)
 
 const userAccountSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {})
-const userAccountTableOptions = useLocalStorage('members/useraccount-list/options', defaultUserAccountTableOptions)
+const userItemsPerPage = useLocalStorage('members/useraccount-list/itemsPerPage', 10)
+const userSortBy = useLocalStorage('members/useraccount-list/sortBy', [{ key: 'username', order: 'asc' }])
 const serviceAccountSelectedColumns = useLocalStorage('members/serviceaccount-list/selected-columns', {})
-const serviceAccountTableOptions = useLocalStorage('members/serviceaccount-list/options', defaultServiceAccountTableOptions)
+const serviceAccountItemsPerPage = useLocalStorage('members/serviceaccount-list/itemsPerPage', 10)
+const serviceAccountSortBy = useLocalStorage('members/serviceaccount-list/sortBy', [{ key: 'displayName', order: 'asc' }])
 
 const confirmDialog = ref(null)
 
@@ -675,7 +664,8 @@ function setSelectedHeaderUserAccount (header) {
 
 function resetTableSettingsUserAccount () {
   userAccountSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'defaultSelected')
-  userAccountTableOptions.value = defaultUserAccountTableOptions
+  userItemsPerPage.value = 10
+  userSortBy.value = [{ key: 'username', order: 'asc' }]
 }
 
 function setSelectedHeaderServiceAccount (header) {
@@ -684,7 +674,8 @@ function setSelectedHeaderServiceAccount (header) {
 
 function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
-  serviceAccountTableOptions.value = defaultServiceAccountTableOptions
+  serviceAccountItemsPerPage.value = 10
+  serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
 }
 
 </script>

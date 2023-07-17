@@ -150,6 +150,8 @@ import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
 
+let cmInstance
+
 export default defineComponent({
   components: {
     GCopyBtn,
@@ -208,7 +210,6 @@ export default defineComponent({
       },
       showManagedFields: false,
       containerClass: undefined,
-      cmInstance: undefined,
     }
   },
   mixins: [shootItem],
@@ -273,20 +274,20 @@ export default defineComponent({
       return `shoot--${projectName}--${name}.yaml`
     },
     undo () {
-      if (this.cmInstance) {
-        this.cmInstance.execCommand('undo')
-        this.cmInstance.focus()
+      if (cmInstance) {
+        cmInstance.execCommand('undo')
+        cmInstance.focus()
       }
     },
     redo () {
-      if (this.cmInstance) {
-        this.cmInstance.execCommand('redo')
-        this.cmInstance.focus()
+      if (cmInstance) {
+        cmInstance.execCommand('redo')
+        cmInstance.focus()
       }
     },
     focus () {
-      if (this.cmInstance) {
-        this.cmInstance.focus()
+      if (cmInstance) {
+        cmInstance.focus()
       }
     },
     setClean (clean) {
@@ -319,8 +320,8 @@ export default defineComponent({
       this.$nextTick(() => this.refreshInstance())
     },
     refreshInstance () {
-      if (this.cmInstance) {
-        this.cmInstance.refresh()
+      if (cmInstance) {
+        cmInstance.refresh()
       }
     },
     createInstance (element) {
@@ -355,8 +356,8 @@ export default defineComponent({
         extraKeys,
         theme: this.theme,
       }
-      this.cmInstance = CodeMirror(element, options)
-      this.cmInstance.setSize('100%', '100%')
+      cmInstance = CodeMirror(element, options)
+      cmInstance.setSize('100%', '100%')
       const onChange = ({ doc }) => {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
@@ -364,7 +365,7 @@ export default defineComponent({
         this.errorMessageInternal = undefined
         this.detailedErrorMessageInternal = undefined
       }
-      this.cmInstance.on('change', onChange)
+      cmInstance.on('change', onChange)
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
@@ -376,7 +377,7 @@ export default defineComponent({
       })
 
       let cmTooltipFnTimerID
-      const cm = this.cmInstance
+      const cm = cmInstance
       CodeMirror.on(element, 'mouseover', (e) => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
@@ -398,18 +399,18 @@ export default defineComponent({
       })
     },
     destroyInstance () {
-      if (this.cmInstance) {
-        const element = this.cmInstance.doc.cm.getWrapperElement()
+      if (cmInstance) {
+        const element = cmInstance.doc.cm.getWrapperElement()
         if (element && element.remove) {
           element.remove()
         }
       }
-      this.cmInstance = undefined
+      cmInstance = undefined
     },
     clearHistory () {
-      if (this.cmInstance) {
-        this.cmInstance.doc.clearHistory()
-        this.generation = this.cmInstance.doc.changeGeneration()
+      if (cmInstance) {
+        cmInstance.doc.clearHistory()
+        this.generation = cmInstance.doc.changeGeneration()
         this.setClean(true)
         this.untouched = true
         this.setConflictPath(null)
@@ -418,14 +419,14 @@ export default defineComponent({
       }
     },
     getContent () {
-      if (this.cmInstance) {
-        return this.cmInstance.doc.getValue()
+      if (cmInstance) {
+        return cmInstance.doc.getValue()
       }
       return ''
     },
     setContent (value) {
-      if (this.cmInstance) {
-        const editor = this.cmInstance
+      if (cmInstance) {
+        const editor = cmInstance
         const doc = editor.doc
         const cursor = doc.getCursor()
         const { left, top } = editor.getScrollInfo() || {}
@@ -475,15 +476,15 @@ export default defineComponent({
 
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
+    const indentUnit = get(cmInstance, 'options.indentUnit', 2)
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
   },
   watch: {
     canPatchShoots (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
+      cmInstance.setOption('readOnly', this.isReadOnly)
     },
     shootPurpose (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
+      cmInstance.setOption('readOnly', this.isReadOnly)
     },
     value: {
       deep: true,
@@ -502,7 +503,7 @@ export default defineComponent({
       },
     },
     theme (value) {
-      this.cmInstance.setOption('theme', value)
+      cmInstance.setOption('theme', value)
     },
   },
   beforeUnmount () {

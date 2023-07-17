@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card>
+  <v-card class="mb-4">
     <g-toolbar title="Infrastructure" />
     <g-list>
       <g-list-item>
@@ -66,10 +66,10 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon v-if="!showSeedInfo" color="primary">mdi-spa</v-icon>
         </template>
         <g-list-item-content label="Control Plane High Availability">
-          <template v-if="!!shootControlPlaneHighAvailabilityFailureTolerance">
+          <div v-if="!!shootControlPlaneHighAvailabilityFailureTolerance" class="d-flex">
             <span class="mr-1">Failure tolerance type</span>
-            <g-control-plane-high-availability-tag :shoot-item="shootItem" x-small></g-control-plane-high-availability-tag>
-          </template>
+            <g-control-plane-high-availability-tag :shoot-item="shootItem" size="x-small"></g-control-plane-high-availability-tag>
+          </div>
           <template v-else>Not configured</template>
         </g-list-item-content>
         <template #append>
