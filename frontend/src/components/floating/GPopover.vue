@@ -185,7 +185,7 @@ export default {
 
       .v-card {
         position: relative;
-        max-width: inherit;
+        max-width: 1024px;
         max-height: inherit;
         overflow-y: hidden;
 
