@@ -62,18 +62,19 @@ SPDX-License-Identifier: Apache-2.0
           <template #activator="{ props }">
             <v-text-field
               v-bind="props"
+              class="mr-3"
               prepend-inner-icon="mdi-magnify"
               color="primary"
               label="Search"
-              clearable
-              hide-details
-              density="compact"
               single-line
+              hide-details
               variant="solo"
               flat
+              clearable
+              clear-icon="mdi-close"
+              density="compact"
               @update:model-value="onInputSearch"
               @keyup.esc="shootSearch = ''"
-              class="mr-3"
             ></v-text-field>
           </template>
           Search terms are <span class="font-weight-bold">ANDed</span>.<br />
