@@ -74,13 +74,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - options property has been removed (need to set options individually)
       --->
       <v-data-table v-else
         :headers="visibleInfraSecretTableHeaders"
         :items="infrastructureSecretItems"
+        v-model:sort-by="infraSecretSortBy"
+        v-model:items-per-page="infraSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
-        v-model:options="infraSecretTableOptions"
         must-sort
         :search="infraSecretFilter"
         density="compact"
@@ -159,13 +159,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <!--- TODO v-data-table
         - sort currently not working (custom-sort has been removed)
-        - options property has been removed (need to set options individually)
       --->
       <v-data-table v-else
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretItems"
+        v-model:sort-by="dnsSecretSortBy"
+        v-model:items-per-page="dnsSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
-        v-model:options="dnsSecretTableOptions"
         must-sort
         :search="dnsSecretFilter"
         density="compact"
@@ -219,18 +219,6 @@ import {
 } from '@/store'
 import { useLocalStorage } from '@vueuse/core'
 
-const defaultInfraSecretTableOptions = {
-  itemsPerPage: 10,
-  sortBy: ['name'],
-  sortDesc: [false],
-}
-
-const defaultDnsSecretTableOptions = {
-  itemsPerPage: 10,
-  sortBy: ['name'],
-  sortDesc: [false],
-}
-
 export default defineComponent({
   components: {
     GSecretDialogWrapper,
@@ -244,9 +232,11 @@ export default defineComponent({
     return {
       selectedSecret: {},
       infraSecretSelectedColumns: useLocalStorage('secrets/infra-secret-list/selected-columns', {}),
-      infraSecretTableOptions: useLocalStorage('secrets/infra-secret-list/options', defaultInfraSecretTableOptions),
+      infraSecretItemsPerPage: useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10),
+      infraSecretSortBy: useLocalStorage('secrets/infra-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       dnsSecretSelectedColumns: useLocalStorage('secrets/dns-secret-list/selected-columns', {}),
-      dnsSecretTableOptions: useLocalStorage('secrets/dns-secret-list/options', defaultDnsSecretTableOptions),
+      dnsSecretItemsPerPage: useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10),
+      dnsSecretSortBy: useLocalStorage('secrets/dns-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       infraSecretFilter: '',
       createInfraSecretMenu: false,
       dnsSecretFilter: '',
@@ -453,14 +443,16 @@ export default defineComponent({
     },
     resetInfraTableSettings () {
       this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
-      this.infraSecretTableOptions = this.defaultInfraSecretTableOptions
+      this.infraSecretItemsPerPage = 10
+      this.infraSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     setSelectedDnsHeader (header) {
       this.dnsSecretSelectedColumns[header.key] = !header.selected
     },
     resetDnsTableSettings () {
       this.dnsSecretSelectedColumns = mapTableHeader(this.dnsSecretTableHeaders, 'defaultSelected')
-      this.dnsSecretTableOptions = this.defaultDnsSecretTableOptions
+      this.dnsSecretItemsPerPage = 10
+      this.dnsSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
       this.visibleSecretDialog = undefined
