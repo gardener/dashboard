@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-toolbar
         prepend-icon="mdi-account-multiple"
         title="Project Users"
+        :height="64"
       >
         <template #append>
           <v-text-field v-if="userList.length > 3"
@@ -94,6 +95,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
         title="Service Accounts"
+        :height="64"
       >
         <template #append>
           <v-text-field v-if="serviceAccountList.length > 3"

@@ -7,21 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-card class="ma-3">
-      <v-toolbar
-        flat
-        height="72"
-        color="toolbar-background"
+      <g-toolbar
+        :height="72"
       >
         <template #prepend>
-          <g-icon-base width="44" height="60" view-box="0 0 298 403" class="mr-2" icon-color="toolbar-title">
+          <g-icon-base width="44" height="60" view-box="0 0 298 403" class="ml-2" icon-color="toolbar-title">
             <g-certified-kubernetes/>
           </g-icon-base>
         </template>
-        <v-toolbar-title class="text-white">
-          <div class="text-h5 text-toolbar-title">Kubernetes Clusters</div>
-          <div class="text-subtitle-1 text-toolbar-title">{{headlineSubtitle}}</div>
-        </v-toolbar-title>
-        <v-spacer/>
+        <div class="text-h5">Kubernetes Clusters</div>
+        <div class="text-caption">{{headlineSubtitle}}</div>
+        <template #append>
         <v-tooltip location="bottom">
           <template #activator="{ props }">
             <div v-bind="props">
@@ -74,14 +70,13 @@ SPDX-License-Identifier: Apache-2.0
               @update:model-value="onInputSearch"
               @keyup.esc="shootSearch = ''"
               class="mr-3"
+              style="min-width: 180px; max-width: 360px;"
             ></v-text-field>
           </template>
           Search terms are <span class="font-weight-bold">ANDed</span>.<br />
           <span class="font-weight-bold">Use quotes</span> for exact words or phrases: <v-chip label color="primary" small>"my-shoot"</v-chip> <v-chip label color="primary" small>"John Doe"</v-chip><br />
           <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
         </v-tooltip>
-        <template #append>
-
           <v-tooltip location="top" v-if="canCreateShoots && projectScope">
             <template #activator="{ props }">
               <v-btn
@@ -102,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             @toggle-filter="toggleFilter"
           />
         </template>
-      </v-toolbar>
+      </g-toolbar>
       <v-data-table
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
@@ -131,14 +126,12 @@ SPDX-License-Identifier: Apache-2.0
         max-width="850"
       >
         <v-card>
-          <g-toolbar
-            density="default"
-          >
+          <g-toolbar>
             Cluster Access
             <code class="text-toolbar-title">
               {{ currentName }}
             </code>
-            <template v-slot:append>
+            <template #append>
               <v-btn
                 variant="text"
                 density="comfortable"

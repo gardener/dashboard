@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <g-toolbar>Details</g-toolbar>
+          <g-toolbar title="Details" />
           <g-list>
              <g-list-item>
                 <template #prepend>
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <g-toolbar>Access</g-toolbar>
+          <g-toolbar title="Access" />
           <g-list>
             <g-list-item>
               <template #prepend>

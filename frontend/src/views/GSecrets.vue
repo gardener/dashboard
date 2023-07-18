@@ -11,17 +11,20 @@ SPDX-License-Identifier: Apache-2.0
       <g-toolbar
         prepend-icon="mdi-key"
         title="Infrastructure Secrets"
+        :height="64"
       >
         <template #append>
           <v-text-field v-if="infrastructureSecretItems.length > 3"
-            class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
-            hide-details
-            variant="solo"
             clearable
+            hide-details
+            single-line
+            variant="solo"
             density="compact"
+            flat
+            class="mr-3"
             v-model="infraSecretFilter"
             @keyup.esc="infraSecretFilter = ''"
           ></v-text-field>
@@ -102,17 +105,20 @@ SPDX-License-Identifier: Apache-2.0
       <g-toolbar
         prepend-icon="mdi-key"
         title="DNS Secrets"
+        :height="64"
       >
         <template #append>
           <v-text-field v-if="dnsSecretItems.length > 3"
-            class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
-            hide-details
-            variant="solo"
             clearable
+            hide-details
+            single-line
+            variant="solo"
             density="compact"
+            flat
+            class="mr-3"
             v-model="dnsSecretFilter"
             @keyup.esc="dnsSecretFilter = ''"
           ></v-text-field>

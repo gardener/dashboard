@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col class="pa-3">
             <v-card>
-              <g-toolbar title="Details"/>
+              <g-toolbar title="Details" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
@@ -199,7 +199,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-row no-gutters class="flex-column">
           <v-col v-if="canDeleteProject" class="pa-3">
             <v-card>
-              <g-toolbar>Lifecycle</g-toolbar>
+              <g-toolbar title="Lifecycle" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
@@ -229,7 +229,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col v-if="costObjectSettingEnabled" class="pa-3">
             <v-card>
-              <g-toolbar>Billing</g-toolbar>
+              <g-toolbar title="Billing" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
@@ -285,8 +285,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
           <v-col class="pa-3">
             <v-card>
-              <g-toolbar>
-                Quota
+              <g-toolbar title="Quota">
                 <template #append>
                   <g-resource-quota-help/>
                 </template>

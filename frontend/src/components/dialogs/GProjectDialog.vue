@@ -7,7 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog v-model="visible" persistent scrollable max-width="600">
     <v-card>
-      <g-toolbar density="default" prepend-icon="mdi-cube">Create Project</g-toolbar>
+      <g-toolbar
+        prepend-icon="mdi-cube"
+        title="Create Project"
+      />
       <v-card-text class="dialog-content">
         <form>
           <v-container fluid >
