@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
         :color="color"
         class="pr-1 ma-0"
       >
-        <v-row no-gutters>
+        <v-row no-gutters class="ml-2">
           <v-col align-self="center" class="grow mr-3">
             <div class="text-body-2">
               {{message}}

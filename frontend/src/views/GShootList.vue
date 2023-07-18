@@ -61,16 +61,16 @@ SPDX-License-Identifier: Apache-2.0
               prepend-inner-icon="mdi-magnify"
               color="primary"
               label="Search"
-              clearable
-              hide-details
-              density="compact"
               single-line
+              hide-details
               variant="solo"
               flat
+              clearable
+              clear-icon="mdi-close"
+              density="compact"
               @update:model-value="onInputSearch"
               @keyup.esc="shootSearch = ''"
-              class="mr-3"
-              style="min-width: 180px; max-width: 360px;"
+              class="g-search-field mr-3"
             ></v-text-field>
           </template>
           Search terms are <span class="font-weight-bold">ANDed</span>.<br />
@@ -722,3 +722,10 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  .g-search-field {
+    min-width: 180px;
+    max-width: 360px;
+  }
+</style>

@@ -19,9 +19,12 @@ SPDX-License-Identifier: Apache-2.0
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
+            single-line
             hide-details
             variant="solo"
+            flat
             clearable
+            clear-icon="mdi-close"
             density="compact"
             v-model="userFilter"
             @keyup.esc="userFilter = ''"
