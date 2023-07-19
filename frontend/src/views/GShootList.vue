@@ -74,8 +74,15 @@ SPDX-License-Identifier: Apache-2.0
             ></v-text-field>
           </template>
           Search terms are <span class="font-weight-bold">ANDed</span>.<br />
-          <span class="font-weight-bold">Use quotes</span> for exact words or phrases: <v-chip label color="primary" small>"my-shoot"</v-chip> <v-chip label color="primary" small>"John Doe"</v-chip><br />
-          <span class="font-weight-bold">Use minus sign</span> to exclude words that you don't want: <v-chip label color="primary" small>-myproject</v-chip> <v-chip label color="primary" small>-"Jane Doe"</v-chip><br />
+          <span class="font-weight-bold">Use quotes</span> for exact words or phrases:
+          <v-chip label color="primary" variant="flat" size="small" class="mr-1">"my-shoot"</v-chip>
+          <v-chip label color="primary" variant="flat" size="small">"John Doe"</v-chip>
+          <br/>
+          <span class="font-weight-bold">Use minus sign</span>
+          to exclude words that you don't want:
+          <v-chip label color="primary" variant="flat" size="small" class="mr-1">-myproject</v-chip>
+          <v-chip label color="primary" variant="flat" size="small">-"Jane Doe"</v-chip>
+          <br/>
         </v-tooltip>
           <v-tooltip location="top" v-if="canCreateShoots && projectScope">
             <template #activator="{ props }">
@@ -102,6 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
         hover
+        v-model:page="page"
         v-model:sort-by="sortByInternal"
         v-model:items-per-page="itemsPerPage"
         :loading="loading || !connected"
@@ -738,7 +746,7 @@ export default {
 
 <style lang="scss" scoped>
   .g-search-field {
-    min-width: 180px;
-    max-width: 360px;
+    min-width: 240px;
+    max-width: 480px;
   }
 </style>

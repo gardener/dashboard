@@ -70,6 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="visibleUserAccountTableHeaders"
         :items="userSortedList"
+        v-model:page="userPage"
         v-model:sort-by="userSortBy"
         v-model:items-per-page="userItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
@@ -153,6 +154,7 @@ SPDX-License-Identifier: Apache-2.0
         v-else
         :headers="visibleServiceAccountTableHeaders"
         :items="serviceAccountSortedList"
+        v-model:page="serviceAccountPage"
         v-model:sort-by="serviceAccountSortBy"
         v-model:items-per-page="serviceAccountItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"

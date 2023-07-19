@@ -176,6 +176,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table v-else
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretSortedItems"
+        v-model:page="dnsSecretPage"
         v-model:sort-by="dnsSecretSortBy"
         v-model:items-per-page="dnsSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
