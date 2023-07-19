@@ -247,7 +247,7 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 
 export default {
-  name: 'worker-group',
+  name: 'GWorkerGroup',
   components: {
     GVendorIcon,
     GCodeBlock,

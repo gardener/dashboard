@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           <component
             :is="component.name"
             v-bind="component.props"
-            class="message"
+            class="g-message"
           />
         </v-list-item>
       </v-list>
@@ -366,7 +366,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .message {
+  .g-message {
     text-align: left;
     min-width: 250px;
     max-width: 700px;

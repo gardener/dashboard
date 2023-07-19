@@ -137,8 +137,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-bind="props"
                 :disabled="item.raw.disabled"
-              >
-            </v-list-item>
+              />
           </template>
         </v-select>
       </div>
@@ -150,7 +149,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 import GSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
@@ -206,7 +204,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
+export default {
   setup () {
     return {
       v$: useVuelidate(),
@@ -604,7 +602,7 @@ export default defineComponent({
     this.onInputVolumeSize()
     this.immutableZones = this.isNew ? [] : this.initialZones
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>
@@ -620,11 +618,7 @@ export default defineComponent({
     padding: 12px;
   }
 
-  ::v-deep .v-list-item--disabled {
-    opacity:0.5;
-  }
-
-  ::v-deep .v-chip--disabled {
+  :deep(.v-chip--disabled) {
     opacity: 1;
   }
 </style>
