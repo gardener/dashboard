@@ -83,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
         :headers="visibleInfraSecretTableHeaders"
         :items="infrastructureSecretItems"
         v-model:sort-by="infraSecretSortBy"
+        v-model:page="infraSecretPage"
         v-model:items-per-page="infraSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
         must-sort
@@ -98,6 +99,15 @@ SPDX-License-Identifier: Apache-2.0
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
           ></g-secret-row-infra>
+        </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            :items-length="infrastructureSecretItems.length"
+            v-model:page="infraSecretPage"
+            v-model:items-per-page="infraSecretItemsPerPage"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
         </template>
       </v-data-table>
     </v-card>
@@ -188,6 +198,15 @@ SPDX-License-Identifier: Apache-2.0
             @update="onUpdateSecret"
           ></g-secret-row-dns>
         </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            :items-length="dnsSecretItems.length"
+            v-model:page="dnsSecretPage"
+            v-model:items-per-page="dnsSecretItemsPerPage"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
+        </template>
       </v-data-table>
     </v-card>
 
@@ -213,6 +232,8 @@ import GSecretRowInfra from '@/components/Secrets/GSecretRowInfra.vue'
 import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
 import isEmpty from 'lodash/isEmpty'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
@@ -235,14 +256,17 @@ export default defineComponent({
     GSecretRowDns,
     GVendorIcon,
     GToolbar,
+    GDataTableFooter,
   },
   data () {
     return {
       selectedSecret: {},
       infraSecretSelectedColumns: useLocalStorage('secrets/infra-secret-list/selected-columns', {}),
+      infraSecretPage: 1,
       infraSecretItemsPerPage: useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10),
       infraSecretSortBy: useLocalStorage('secrets/infra-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       dnsSecretSelectedColumns: useLocalStorage('secrets/dns-secret-list/selected-columns', {}),
+      dnsSecretPage: 1,
       dnsSecretItemsPerPage: useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10),
       dnsSecretSortBy: useLocalStorage('secrets/dns-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       infraSecretFilter: '',

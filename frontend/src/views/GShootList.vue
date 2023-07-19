@@ -120,6 +120,15 @@ SPDX-License-Identifier: Apache-2.0
             @show-dialog="showDialog"
           />
         </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            :items-length="sortedAndFilteredItems.length"
+            v-model:page="page"
+            v-model:items-per-page="itemsPerPage"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
+        </template>
       </v-data-table>
       <v-dialog
         v-model="clusterAccessDialog"
@@ -171,6 +180,8 @@ import GShootListProgress from '@/components/GShootListProgress.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
 import { mapTableHeader } from '@/utils'
 
 import filter from 'lodash/filter'
@@ -194,12 +205,14 @@ export default {
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,
+    GDataTableFooter,
   },
   data () {
     return {
       shootSearch: '',
       dialog: null,
       itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
+      page: 1,
       cachedItems: null,
       selectedColumns: undefined,
       itemsPerPageOptions: [

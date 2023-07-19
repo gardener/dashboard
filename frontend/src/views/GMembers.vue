@@ -91,6 +91,15 @@ SPDX-License-Identifier: Apache-2.0
             @edit="onEditUser"
           ></g-user-row>
         </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            :items-length="userList.length"
+            v-model:page="userPage"
+            v-model:items-per-page="userItemsPerPage"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
+        </template>
       </v-data-table>
     </v-card>
 
@@ -170,6 +179,15 @@ SPDX-License-Identifier: Apache-2.0
             @edit="onEditServiceAccount"
           ></g-service-account-row>
         </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            :items-length="serviceAccountList.length"
+            v-model:page="serviceAccountPage"
+            v-model:items-per-page="serviceAccountItemsPerPage"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
+        </template>
       </v-data-table>
     </v-card>
 
@@ -228,6 +246,7 @@ import GResetServiceAccount from '@/components/messages/GResetServiceAccount.vue
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import {
   useAuthzStore,
@@ -276,6 +295,8 @@ const userFilter = ref('')
 const serviceAccountFilter = ref('')
 const currentServiceAccountName = ref()
 const currentServiceAccountKubeconfig = ref()
+const userPage = ref(1)
+const serviceAccountPage = ref(1)
 
 const {
   namespace,
