@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-chip
           v-bind="props"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'outlined' : undefined"
+          :variant="!isError ? 'outlined' : 'flat'"
           :text-color="textColor"
           size="small"
           :color="color"
@@ -26,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon v-if="chipIcon"
             :icon="chipIcon"
             size="x-small"
-            start
             class="chip-icon"
           />
           {{chipText}}
@@ -196,7 +195,7 @@ export default defineComponent({
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'grey'
+        return 'unknown'
       }
       if (this.isError) {
         return 'error'
@@ -223,17 +222,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
-  .cursor-pointer :deep(.v-chip__content) {
-    cursor: pointer;
-  }
-
   .status-tag {
-    margin: 1px;
-  }
+    margin: 0 1px;
 
-  .status-tag :deep(.v-chip__content) {
-    margin: -4px;
+    &.cursor-pointer :deep(.v-chip__content) {
+      cursor: pointer;
+    }
+
+    :deep(.v-chip__content) {
+      margin: -2px;
+    }
 
     .chip-icon {
       margin-left: -4px;
