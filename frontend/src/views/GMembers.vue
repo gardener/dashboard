@@ -401,7 +401,7 @@ const visibleUserAccountTableHeaders = computed(() => {
 
 const serviceAccountSortedList = computed(() => {
   const secondSortCriteria = 'username'
-  return sortItems(userList, userSortBy, secondSortCriteria)
+  return sortItems(serviceAccountList, userSortBy, secondSortCriteria)
 })
 
 const serviceAccountList = computed(() => {
