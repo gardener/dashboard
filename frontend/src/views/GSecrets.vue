@@ -76,16 +76,14 @@ SPDX-License-Identifier: Apache-2.0
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table v-else
         :headers="visibleInfraSecretTableHeaders"
-        :items="infrastructureSecretItems"
+        :items="infrastructureSecretSortedItems"
         v-model:sort-by="infraSecretSortBy"
         v-model:page="infraSecretPage"
         v-model:items-per-page="infraSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(visibleInfraSecretTableHeaders)"
         must-sort
         :search="infraSecretFilter"
         density="compact"
@@ -175,15 +173,13 @@ SPDX-License-Identifier: Apache-2.0
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table v-else
         :headers="visibleDnsSecretTableHeaders"
-        :items="dnsSecretItems"
+        :items="dnsSecretSortedItems"
         v-model:sort-by="dnsSecretSortBy"
         v-model:items-per-page="dnsSecretItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(visibleDnsSecretTableHeaders)"
         must-sort
         :search="dnsSecretFilter"
         density="compact"
@@ -234,11 +230,6 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
-import isEmpty from 'lodash/isEmpty'
-import map from 'lodash/map'
-import filter from 'lodash/filter'
-import some from 'lodash/some'
-import includes from 'lodash/includes'
 import {
   useCloudProfileStore,
   useGardenerExtensionStore,
@@ -247,6 +238,16 @@ import {
   useShootStore,
 } from '@/store'
 import { useLocalStorage } from '@vueuse/core'
+
+import filter from 'lodash/filter'
+import head from 'lodash/head'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
+import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
+import orderBy from 'lodash/orderBy'
+import some from 'lodash/some'
 
 export default defineComponent({
   components: {
@@ -349,6 +350,10 @@ export default defineComponent({
     visibleInfraSecretTableHeaders () {
       return filter(this.infraSecretTableHeaders, ['selected', true])
     },
+    infrastructureSecretSortedItems () {
+      const secondSortCriteria = 'name'
+      return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
+    },
     infrastructureSecretItems () {
       return map(this.infrastructureSecretList, secret => ({
         name: secret.metadata.name,
@@ -419,6 +424,10 @@ export default defineComponent({
     visibleDnsSecretTableHeaders () {
       return filter(this.dnsSecretTableHeaders, ['selected', true])
     },
+    dnsSecretSortedItems () {
+      const secondSortCriteria = 'name'
+      return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
+    },
     dnsSecretItems () {
       return map(this.dnsSecretList, secret => ({
         name: secret.metadata.name,
@@ -488,6 +497,31 @@ export default defineComponent({
     },
     onDialogClosed () {
       this.visibleSecretDialog = undefined
+    },
+    sortItems (items, sortByArr, secondSortCriteria) {
+      const sortByObj = head(sortByArr)
+      if (!sortByObj || !sortByObj.key) {
+        return items
+      }
+
+      const sortBy = sortByObj.key
+      const sortOrder = sortByObj.order
+      return orderBy(items, [item => this.getRawVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
+    },
+    getRawVal (item, column) {
+      switch (column) {
+        case 'secret':
+          return `${get(item, 'secret.metadata.project')} ${get(item, 'secret.metadata.name')}`
+        case 'infrastructure':
+          return `${item.infrastructureName} ${item.cloudProfileName}`
+        default:
+          return item[column]
+      }
+    },
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
+      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+      return mapValues(tableKeys, () => () => 0)
     },
     mergeProps,
   },
