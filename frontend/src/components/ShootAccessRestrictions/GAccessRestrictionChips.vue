@@ -66,7 +66,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   section {
-    ::v-deep > p {
+    :deep(> p) {
       margin: 0;
     }
   }

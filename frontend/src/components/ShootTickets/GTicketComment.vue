@@ -158,9 +158,6 @@ export default defineComponent({
       max-width: 100%;
     }
 
-    /*  TODO: this was "::v-deep > h1" before. Check if the new version below, after compile, is actually equivalent.
-     *  Also check this for h2 - h6 below
-     */
     :deep(> h1) {
       font-size: 21px;
       font-weight: 600;

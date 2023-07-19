@@ -310,13 +310,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
-  ::v-deep .v-select__slot {
-    div {
-     flex-wrap: nowrap;
-    }
-  }
-
   .regular-input {
     width: 250px;
     max-width: 300px;

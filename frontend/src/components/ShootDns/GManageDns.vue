@@ -187,11 +187,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-  ::v-deep .v-select__slot {
-    div {
-     flex-wrap: nowrap;
-    }
-  }
-</style>

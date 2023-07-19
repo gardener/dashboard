@@ -20,9 +20,12 @@ SPDX-License-Identifier: Apache-2.0
     variant="underlined"
   >
     <template #item="{ props, item }">
-      <v-list-item v-bind="props" :title="undefined">
+      <v-list-item
+        v-bind="props"
+        :title="undefined"
+      >
         <template #prepend>
-          <g-vendor-icon :icon="item.raw.icon"></g-vendor-icon>
+          <g-vendor-icon :icon="item.raw.icon"/>
         </template>
         <v-list-item-title>Name: {{ item.raw.name }} | Version: {{ item.raw.version }}</v-list-item-title>
         <v-list-item-subtitle v-if="itemDescription(item).length">
@@ -220,13 +223,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-
-  ::v-deep .v-select__slot {
-    div {
-     flex-wrap: nowrap;
-    }
-  }
-
-</style>
