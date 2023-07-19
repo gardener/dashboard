@@ -714,7 +714,8 @@ function resetTableSettingsServiceAccount () {
   serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
 }
 
-function disableCustomKeySort (sortableTableHeaders) {
+function disableCustomKeySort (tableHeaders) {
+  const sortableTableHeaders = filter(tableHeaders.value, ['sortable', true])
   const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
   return mapValues(tableKeys, () => () => 0)
 }

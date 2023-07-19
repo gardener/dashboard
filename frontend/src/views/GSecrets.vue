@@ -518,7 +518,8 @@ export default defineComponent({
           return item[column]
       }
     },
-    disableCustomKeySort (sortableTableHeaders) {
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
