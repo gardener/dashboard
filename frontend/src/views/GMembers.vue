@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="userSortBy"
         v-model:items-per-page="userItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
-        :custom-key-sort="disableCustomKeySort(userAccountTableHeaders)"
+        :custom-key-sort="disableCustomKeySort(visibleUserAccountTableHeaders)"
         must-sort
         :search="userFilter"
         density="compact"
@@ -158,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0
         :items-per-page-options="itemsPerPageOptions"
         must-sort
         :search="serviceAccountFilter"
-        :custom-key-sort="disableCustomKeySort(serviceAccountTableHeaders)"
+        :custom-key-sort="disableCustomKeySort(visibleServiceAccountTableHeaders)"
         class="g-table"
       >
         <template #item="{ item }">
@@ -714,8 +714,7 @@ function resetTableSettingsServiceAccount () {
   serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
 }
 
-function disableCustomKeySort (tableHeaders) {
-  const sortableTableHeaders = filter(tableHeaders.value, ['sortable', true])
+function disableCustomKeySort (sortableTableHeaders) {
   const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
   return mapValues(tableKeys, () => () => 0)
 }
