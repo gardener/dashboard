@@ -66,18 +66,15 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table
         v-else
         :headers="visibleUserAccountTableHeaders"
-        :items="userList"
+        :items="userSortedList"
         v-model:sort-by="userSortBy"
         v-model:items-per-page="userItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(userAccountTableHeaders)"
         must-sort
-        :custom-sort="sortAccounts"
         :search="userFilter"
         density="compact"
         class="g-table"
@@ -152,19 +149,16 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table
         v-else
         :headers="visibleServiceAccountTableHeaders"
-        :items="serviceAccountList"
+        :items="serviceAccountSortedList"
         v-model:sort-by="serviceAccountSortBy"
         v-model:items-per-page="serviceAccountItemsPerPage"
         :items-per-page-options="itemsPerPageOptions"
         must-sort
-        :custom-sort="sortAccounts"
         :search="serviceAccountFilter"
+        :custom-key-sort="disableCustomKeySort(serviceAccountTableHeaders)"
         class="g-table"
       >
         <template #item="{ item }">
@@ -219,20 +213,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, unref, computed, markRaw, inject } from 'vue'
+import { ref, computed, markRaw, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
 
-import includes from 'lodash/includes'
-import toLower from 'lodash/toLower'
-import orderBy from 'lodash/orderBy'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
-import join from 'lodash/join'
-import map from 'lodash/map'
 import get from 'lodash/get'
 import head from 'lodash/head'
+import includes from 'lodash/includes'
+import join from 'lodash/join'
+import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
+import orderBy from 'lodash/orderBy'
+import toLower from 'lodash/toLower'
 
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
@@ -337,6 +333,11 @@ const itemsPerPageOptions = markRaw([
   { value: 20, title: '20' },
 ])
 
+const userSortedList = computed(() => {
+  const secondSortCriteria = 'username'
+  return sortItems(userList, userSortBy, secondSortCriteria)
+})
+
 const userList = computed(() => {
   const users = filter(memberList.value, ({ username }) => !isServiceAccountUsername(username))
   return map(users, user => {
@@ -396,6 +397,11 @@ const userAccountTableHeaders = computed(() => {
 
 const visibleUserAccountTableHeaders = computed(() => {
   return filter(userAccountTableHeaders.value, ['selected', true])
+})
+
+const serviceAccountSortedList = computed(() => {
+  const secondSortCriteria = 'username'
+  return sortItems(userList, userSortBy, secondSortCriteria)
 })
 
 const serviceAccountList = computed(() => {
@@ -677,11 +683,15 @@ function getSortVal (item, sortBy) {
   }
 }
 
-function sortAccounts (items, sortByArr, sortDescArr) {
-  const sortBy = head(sortByArr)
-  const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
-  const sortedItems = orderBy(unref(items), [item => getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
-  return sortedItems
+function sortItems (items, sortByArr, secondSortCriteria) {
+  const sortByObj = head(sortByArr.value)
+  if (!sortByObj || !sortByObj.key) {
+    return items.value
+  }
+
+  const sortBy = sortByObj.key
+  const sortOrder = sortByObj.order
+  return orderBy(items.value, [item => getSortVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
 }
 
 function setSelectedHeaderUserAccount (header) {
@@ -702,6 +712,12 @@ function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
   serviceAccountItemsPerPage.value = 10
   serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
+}
+
+function disableCustomKeySort (tableHeaders) {
+  const sortableTableHeaders = filter(tableHeaders.value, ['sortable', true])
+  const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+  return mapValues(tableKeys, () => () => 0)
 }
 
 </script>
