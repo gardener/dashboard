@@ -114,6 +114,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model:items-per-page="itemsPerPage"
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(visibleHeaders)"
         must-sort
         class="g-table"
       >
@@ -192,17 +193,19 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { mapTableHeader } from '@/utils'
 
+import debounce from 'lodash/debounce'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
 import pick from 'lodash/pick'
 import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
 import startsWith from 'lodash/startsWith'
 import upperCase from 'lodash/upperCase'
-import debounce from 'lodash/debounce'
 
 export default {
   components: {
@@ -323,6 +326,12 @@ export default {
     onInputSearch: debounce(function (value) {
       this.shootSearch = value
     }, 500),
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
+      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+      console.log('mapValues(tableKeys, () => () => 0)', mapValues(tableKeys, () => () => 0))
+      return mapValues(tableKeys, () => () => 0)
+    },
   },
   watch: {
     sortBy (sortBy) {
