@@ -33,7 +33,12 @@ SPDX-License-Identifier: Apache-2.0
                 variant="text"
                 :icon="true"
               >
-                <v-progress-circular v-if="showProgress" :size="27" :width="3" :model-value="shootLastOperation.progress" :color="color" :rotate="-90">
+                <v-progress-circular v-if="showProgress"
+                  :size="27"
+                  :width="3"
+                  :model-value="shootLastOperation.progress"
+                  :color="color"
+                >
                   <v-icon v-if="isShootStatusHibernated" size="small" :color="color">mdi-sleep</v-icon>
                   <v-icon v-else-if="isShootLastOperationTypeDelete" size="small" :color="color">mdi-delete</v-icon>
                   <v-icon v-else-if="isShootMarkedForDeletion" size="small" :color="color">mdi-delete-clock</v-icon>
@@ -48,7 +53,12 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon v-else-if="isAborted && isShootMarkedForDeletion" :color="color">mdi-delete-clock</v-icon>
                 <v-icon v-else-if="isAborted && isTypeCreate" :color="color">mdi-plus</v-icon>
                 <v-icon v-else-if="isError" :color="color">mdi-alert-outline</v-icon>
-                <v-progress-circular v-else-if="isPending" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+                <v-progress-circular v-else-if="isPending"
+                  :size="27"
+                  :width="3"
+                  indeterminate
+                  :color="color"
+                />
                 <v-icon v-else color="success" class="status-icon-check">mdi-check-circle-outline</v-icon>
               </v-btn>
             </template>

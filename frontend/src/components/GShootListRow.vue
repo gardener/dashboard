@@ -29,7 +29,9 @@ SPDX-License-Identifier: Apache-2.0
             </g-auto-hide>
           </v-col>
           <v-col class="shrink pa-0 ma-0">
-            <g-shoot-messages :shoot-item="shootItem" />
+            <g-shoot-messages
+              :shoot-item="shootItem"
+            />
           </v-col>
         </v-row>
       </template>

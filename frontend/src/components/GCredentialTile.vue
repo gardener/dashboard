@@ -54,8 +54,13 @@ SPDX-License-Identifier: Apache-2.0
       <template #description>
         <div class="d-flex align-center">
           <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
-            <g-shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
-            <span color="warning">Certificate Authorities will expire in less than one year</span>
+            <g-shoot-messages
+              :shoot-item="shootItem"
+              :filter="['cacertificatevalidities-constraint']"
+              small
+              class="mr-1"
+            />
+            <span class="text-warning">Certificate Authorities will expire in less than one year</span>
           </template>
           <template v-else>
             <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string :date-time="lastCompletionTime" mode="past"></g-time-string></span>

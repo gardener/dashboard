@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         density="comfortable"
         variant="text"
         icon="mdi-reload"
-        class="text-primary retryButton"
+        color="primary"
         @click="onRetryOperation"
       />
     </template>

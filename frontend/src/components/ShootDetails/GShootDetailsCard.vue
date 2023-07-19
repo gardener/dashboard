@@ -27,7 +27,12 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Cluster Termination">
             <div class="d-flex align-center">
-              <g-shoot-messages :shoot-item="shootItem" filter="cluster-expiration" small class="mr-1" />
+              <g-shoot-messages
+                :shoot-item="shootItem"
+                filter="cluster-expiration"
+                small
+                class="mr-1"
+              />
               <span>{{selfTerminationMessage}}</span>
             </div>
           </g-list-item-content>
@@ -42,7 +47,10 @@ SPDX-License-Identifier: Apache-2.0
           {{shootK8sVersion}}
         </g-list-item-content>
         <template #append>
-          <g-shoot-messages v-if="!isShootMarkedForDeletion" :shoot-item="shootItem" filter="k8s" />
+          <g-shoot-messages v-if="!isShootMarkedForDeletion"
+            :shoot-item="shootItem"
+            filter="k8s"
+          />
           <g-shoot-version :shoot-item="shootItem" />
         </template>
       </g-list-item>
@@ -64,8 +72,13 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
         <template #append>
-          <g-shoot-messages v-if="!isShootMarkedForDeletion" :shoot-item="shootItem" filter="machine-image" />
-          <g-worker-configuration :shoot-item="shootItem"></g-worker-configuration>
+          <g-shoot-messages v-if="!isShootMarkedForDeletion"
+            :shoot-item="shootItem"
+            filter="machine-image"
+          />
+          <g-worker-configuration
+            :shoot-item="shootItem"
+          />
         </template>
       </g-list-item>
       <v-divider inset></v-divider>
@@ -241,11 +254,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
   .markdown {
-    ::v-deep > p {
+    :deep(> p) {
       margin: 0px;
     }
   }
-
 </style>

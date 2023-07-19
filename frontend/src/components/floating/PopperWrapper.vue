@@ -20,16 +20,17 @@ SPDX-License-Identifier: Apache-2.0
       classes,
       result,
     }"
+    v-bind="makePopperProps($attrs)"
     :theme="finalTheme"
     :target-nodes="getTargetNodes"
     :reference-node="() => $refs.reference"
     :popper-node="() => $refs.popperContent.$el"
   >
-
     <div
       ref="reference"
-      class="v-popper"
+      v-bind="makeReferenceProps($attrs)"
       :class="[
+        'v-popper',
         themeClass,
         {
           'v-popper--shown': isShown,
@@ -79,6 +80,11 @@ import {
 
 import 'floating-vue/dist/style.css'
 
+import omit from 'lodash/omit'
+import pick from 'lodash/pick'
+
+const referenceProps = ['class']
+
 export default {
   name: 'VPopperWrapper',
 
@@ -98,6 +104,8 @@ export default {
     PopperMethods,
     ThemeClass('finalTheme'),
   ],
+
+  inheritAttrs: false,
 
   props: {
     theme: {
@@ -120,6 +128,12 @@ export default {
     getTargetNodes () {
       return Array.from(this.$refs.reference.children)
         .filter(node => node !== this.$refs.popperContent.$el)
+    },
+    makePopperProps (attrs) {
+      return omit(attrs, referenceProps)
+    },
+    makeReferenceProps (attrs) {
+      return pick(attrs, referenceProps)
     },
   },
 }
