@@ -5,25 +5,35 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog v-if="dialog"
+  <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="caption"
     confirm-button-text="Trigger now"
     width="900"
   >
-    <div class="text-subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+    <div class="text-subtitle-1 pt-4">
+      Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
+    </div>
     <g-maintenance-components
+      ref="maintenanceComponents"
       title="The following updates will be performed"
       :selectable="false"
-      ref="maintenanceComponents"
-    ></g-maintenance-components>
-    <v-alert type="warning" variant="outlined" :value="!isMaintenancePreconditionSatisfied">
-      <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-      {{maintenancePreconditionSatisfiedMessage}}
+    />
+    <v-alert
+      type="warning"
+      variant="outlined"
+      :value="!isMaintenancePreconditionSatisfied"
+    >
+      <div class="font-weight-bold">
+        Your hibernation schedule may not have any effect:
+      </div>
+      {{ maintenancePreconditionSatisfiedMessage }}
     </v-alert>
   </g-shoot-action-dialog>
-  <g-shoot-action-button v-if="button"
+  <g-shoot-action-button
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     :loading="isMaintenanceToBeScheduled"
@@ -51,6 +61,8 @@ export default {
     GShootActionDialog,
     GMaintenanceComponents,
   },
+  mixins: [shootItem],
+  inject: ['api', 'notify', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -69,8 +81,9 @@ export default {
       default: false,
     },
   },
-  inject: ['api', 'notify', 'logger'],
-  mixins: [shootItem],
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       maintenanceTriggered: false,
@@ -110,9 +123,37 @@ export default {
       return this.buttonTitle
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
+    isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
+      const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
+      if (!isMaintenanceScheduled) {
+        return
+      }
+      this.maintenanceTriggered = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      this.notify({
+        text: `Maintenance scheduled for ${this.shootName}`,
+        type: 'success',
+        position: 'bottom right',
+        duration: 5000,
+      })
+    },
+  },
   methods: {
     waitForConfirmation () {
       this.$nextTick(async () => {
@@ -147,37 +188,6 @@ export default {
     },
     reset () {
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateKubernetesVersion, osUpdates: this.updateOSVersion })
-    },
-  },
-  watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
-    isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
-      const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
-      if (!isMaintenanceScheduled) {
-        return
-      }
-      this.maintenanceTriggered = false
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      this.notify({
-        text: `Maintenance scheduled for ${this.shootName}`,
-        type: 'success',
-        position: 'bottom right',
-        duration: 5000,
-      })
     },
   },
 }

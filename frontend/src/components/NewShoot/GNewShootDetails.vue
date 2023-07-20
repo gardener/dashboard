@@ -6,69 +6,76 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container class="px-0 mx-0">
-    <v-row >
+    <v-row>
       <v-col cols="3">
         <v-text-field
           ref="name"
+          v-model="name"
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          v-model="name"
           :error-messages="getErrorMessages('name')"
-          @input="onInputName"
-          @blur="v$.name.$touch()"
           hint="Maximum name length depends on project name"
           variant="underlined"
-          ></v-text-field>
+          @input="onInputName"
+          @blur="v$.name.$touch()"
+        />
       </v-col>
       <v-col cols="3">
         <g-hint-colorizer hint-color="warning">
           <v-select
+            v-model="kubernetesVersion"
             color="primary"
             item-color="primary"
             label="Kubernetes Version"
             item-title="version"
             item-value="version"
             :items="sortedKubernetesVersionsList"
-            v-model="kubernetesVersion"
             :error-messages="getErrorMessages('kubernetesVersion')"
-            @update:modelValue="onInputKubernetesVersion"
-            @blur="v$.kubernetesVersion.$touch()"
             :hint="versionHint"
             persistent-hint
             variant="underlined"
-            >
+            @update:model-value="onInputKubernetesVersion"
+            @blur="v$.kubernetesVersion.$touch()"
+          >
             <template #item="{ item, props }">
-              <v-list-item v-bind="props" :subtitle="versionItemDescription(item.raw)" />
+              <v-list-item
+                v-bind="props"
+                :subtitle="versionItemDescription(item.raw)"
+              />
             </template>
           </v-select>
         </g-hint-colorizer>
       </v-col>
       <v-col cols="3">
         <g-purpose
+          ref="purposeRef"
           :secret="secret"
           @update-purpose="onUpdatePurpose"
           @valid="onPurposeValid"
-          ref="purposeRef"
-        ></g-purpose>
+        />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig"></g-static-token-kubeconfig-switch>
+        <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig" />
       </v-col>
     </v-row>
-    <v-row  v-if="slaDescriptionHtml">
+    <v-row v-if="slaDescriptionHtml">
       <v-col cols="12">
-        <label>{{slaTitle}}</label>
-        <p class="text-subtitle-1" v-html="slaDescriptionHtml" />
+        <label>{{ slaTitle }}</label>
+        <!-- eslint-disable vue/no-v-html -->
+        <p
+          class="text-subtitle-1"
+          v-html="slaDescriptionHtml"
+        />
       </v-col>
     </v-row>
-</v-container>
+  </v-container>
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import { mapActions, mapState } from 'pinia'
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -107,13 +114,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-      ...useAsyncRef('purpose'),
-    }
-  },
+export default {
   components: {
     GHintColorizer,
     GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
@@ -128,6 +129,12 @@ export default defineComponent({
   emits: [
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+      ...useAsyncRef('purpose'),
+    }
+  },
   data () {
     return {
       validationErrors,
@@ -206,6 +213,21 @@ export default defineComponent({
       }
     },
   },
+  mounted () {
+    this.userInterActionBus.on('updateSecret', secret => {
+      this.secret = secret
+      this.purpose.dispatch('resetPurpose')
+    })
+    this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+      this.cloudProfileName = cloudProfileName
+      this.setDefaultKubernetesVersion()
+    })
+    this.userInterActionBus.on('updateK8sMaintenance', updateK8sMaintenance => {
+      this.updateK8sMaintenance = updateK8sMaintenance
+    })
+
+    setDelayedInputFocus(this, 'name')
+  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'sortedKubernetesVersions',
@@ -278,20 +300,5 @@ export default defineComponent({
       return join(itemDescription, ' | ')
     },
   },
-  mounted () {
-    this.userInterActionBus.on('updateSecret', secret => {
-      this.secret = secret
-      this.purpose.dispatch('resetPurpose')
-    })
-    this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
-      this.cloudProfileName = cloudProfileName
-      this.setDefaultKubernetesVersion()
-    })
-    this.userInterActionBus.on('updateK8sMaintenance', updateK8sMaintenance => {
-      this.updateK8sMaintenance = updateK8sMaintenance
-    })
-
-    setDelayedInputFocus(this, 'name')
-  },
-})
+}
 </script>

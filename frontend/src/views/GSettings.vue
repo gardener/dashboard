@@ -5,9 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container fluid class="px-6">
+  <v-container
+    fluid
+    class="px-6"
+  >
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <v-card class="mt-4">
           <v-toolbar
             flat
@@ -19,10 +25,12 @@ SPDX-License-Identifier: Apache-2.0
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <legend class="text-secondary">Color Scheme</legend>
+                <legend class="text-secondary">
+                  Color Scheme
+                </legend>
                 <v-btn-toggle
-                  label="Color Scheme"
                   v-model="colorMode"
+                  label="Color Scheme"
                   color="primary"
                   mandatory="force"
                   divided
@@ -31,7 +39,12 @@ SPDX-License-Identifier: Apache-2.0
                 >
                   <v-tooltip location="top">
                     <template #activator="{ props }">
-                      <v-btn value="light" v-bind="props" variant="tonal" min-width="36">
+                      <v-btn
+                        value="light"
+                        v-bind="props"
+                        variant="tonal"
+                        min-width="36"
+                      >
                         <v-icon icon="mdi-white-balance-sunny" />
                       </v-btn>
                     </template>
@@ -39,7 +52,12 @@ SPDX-License-Identifier: Apache-2.0
                   </v-tooltip>
                   <v-tooltip location="top">
                     <template #activator="{ props }">
-                      <v-btn value="dark" v-bind="props" variant="tonal" min-width="36">
+                      <v-btn
+                        value="dark"
+                        v-bind="props"
+                        variant="tonal"
+                        min-width="36"
+                      >
                         <v-icon icon="mdi-weather-night" />
                       </v-btn>
                     </template>
@@ -47,7 +65,12 @@ SPDX-License-Identifier: Apache-2.0
                   </v-tooltip>
                   <v-tooltip location="top">
                     <template #activator="{ props }">
-                      <v-btn value="auto" v-bind="props" variant="tonal" min-width="36">
+                      <v-btn
+                        value="auto"
+                        v-bind="props"
+                        variant="tonal"
+                        min-width="36"
+                      >
                         <v-icon icon="mdi-brightness-auto" />
                       </v-btn>
                     </template>
@@ -56,31 +79,34 @@ SPDX-License-Identifier: Apache-2.0
                 </v-btn-toggle>
               </v-col>
               <v-col cols="12">
-                <legend class="text-secondary">Log Level</legend>
+                <legend class="text-secondary">
+                  Log Level
+                </legend>
                 <v-btn-toggle
-                  label="Log Level"
                   v-model="logLevel"
+                  label="Log Level"
                   color="primary"
                   mandatory="force"
                   divided
                   density="compact"
                   class="mt-1 h-75"
                 >
-                  <v-btn v-for="{ value, text, icon, color } in logLevels"
+                  <v-btn
+                    v-for="{ value, text, icon, color } in logLevels"
                     :key="value"
                     :value="value"
                     variant="tonal"
                     :prepend-icon="icon"
                   >
                     <template #prepend>
-                      <v-icon :color="color"></v-icon>
+                      <v-icon :color="color" />
                     </template>
                     <span class="text-lowercase text-caption">{{ text }}</span>
                   </v-btn>
                 </v-btn-toggle>
               </v-col>
               <v-col cols="12">
-               <v-switch
+                <v-switch
                   v-model="autoLogin"
                   true-value="enabled"
                   false-value="disabled"
@@ -95,8 +121,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
-      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+      />
     </v-row>
   </v-container>
 </template>

@@ -6,19 +6,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
+    ref="actionDialog"
     :shoot-item="shootItem"
     :valid="valid"
-    @dialog-opened="onConfigurationDialogOpened"
-    ref="actionDialog"
     width="450"
-    caption="Configure Purpose">
-    <template v-slot:actionComponent>
+    caption="Configure Purpose"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #actionComponent>
       <g-purpose
+        ref="purposeRef"
         :secret="secret"
         @update-purpose="onUpdatePurpose"
         @valid="onPurposeValid"
-        ref="purposeRef"
-      ></g-purpose>
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -40,19 +41,19 @@ import {
 } from '@/store'
 
 export default {
+  components: {
+    GActionButtonDialog,
+    GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
+  },
+  mixins: [
+    shootItem,
+  ],
+  inject: ['api'],
   setup () {
     return {
       ...useAsyncRef('purpose'),
     }
   },
-  components: {
-    GActionButtonDialog,
-    GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
-  },
-  inject: ['api'],
-  mixins: [
-    shootItem,
-  ],
   data () {
     return {
       purposeValue: undefined,

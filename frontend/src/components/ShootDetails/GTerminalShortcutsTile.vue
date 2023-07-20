@@ -6,23 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list-item>
-    <template v-slot:prepend>
+    <template #prepend>
       <g-icon-base
         width="24"
         height="23"
         icon-color="primary"
         view-box="-4 0 56 54"
       >
-        <g-terminal-shortcut-icon/>
+        <g-terminal-shortcut-icon />
       </g-icon-base>
     </template>
     <g-list-item-content>
       Terminal Shortcuts
-      <template>
+      <template #description>
         Launch preconfigured terminals for frequently used views
       </template>
     </g-list-item-content>
-    <template v-slot:append>
+    <template #append>
       <g-action-button
         :icon="expansionPanelIcon"
         :tooltip="expansionPanelTooltip"
@@ -31,7 +31,11 @@ SPDX-License-Identifier: Apache-2.0
     </template>
   </g-list-item>
   <v-expand-transition appear>
-    <v-card v-if="expansionPanel" flat class="ml-14 mt-2">
+    <v-card
+      v-if="expansionPanel"
+      flat
+      class="ml-14 mt-2"
+    >
       <v-card-text class="pa-0">
         <g-terminal-shortcuts
           :shoot-item="shootItem"
@@ -53,7 +57,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store'
@@ -75,7 +78,7 @@ import get from 'lodash/get'
 import find from 'lodash/find'
 import includes from 'lodash/includes'
 
-export default defineComponent({
+export default {
   components: {
     GListItem,
     GListItemContent,
@@ -86,13 +89,14 @@ export default defineComponent({
     GUnverifiedTerminalShortcutsDialog,
     GWebterminalServiceAccountDialog,
   },
-  inject: ['api'],
   mixins: [shootItem],
+  inject: ['api'],
   props: {
     popperBoundariesSelector: {
       type: String,
     },
   },
+  emits: ['addTerminalShortcut'],
   data () {
     return {
       expansionPanel: false,
@@ -109,7 +113,6 @@ export default defineComponent({
       return this.expansionPanel ? 'Hide terminal shortcuts' : 'Show terminal shortcuts'
     },
   },
-  emits: ['addTerminalShortcut'],
   methods: {
     async onAddTerminalShortcut (shortcut) {
       if (shortcut.unverified) {
@@ -136,5 +139,5 @@ export default defineComponent({
       this.$emit('addTerminalShortcut', shortcut)
     },
   },
-})
+}
 </script>

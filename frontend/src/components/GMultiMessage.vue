@@ -7,8 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="wrapper">
     <template v-for="({ type, hint, className }, index) in hints">
-      <div v-if="type === 'html'" v-html="hint" :class="className" :key="index" />
-      <div v-else v-text="hint" :class="className" :key="`else_${index}`" />
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        v-if="type === 'html'"
+        :key="index"
+        :class="className"
+        v-html="hint"
+      />
+      <!-- eslint-enable vue/no-v-html -->
+      <div
+        v-else
+        :key="`else_${index}`"
+        :class="className"
+        v-text="hint"
+      />
     </template>
   </div>
 </template>

@@ -5,12 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top" v-if="projectDetails.phase !== 'Ready'">
-    <template #activator="{ props }">
-      <v-icon v-bind="props" :size="size" :color="color" :icon="icon"  class="ml-1" />
+  <v-tooltip
+    v-if="projectDetails.phase !== 'Ready'"
+    location="top"
+  >
+    <template #activator="{ props: activatorProps }">
+      <v-icon
+        v-bind="activatorProps"
+        :size="size"
+        :color="color"
+        :icon="icon"
+        class="ml-1"
+      />
     </template>
     <div>
-      The project phase is <v-chip color="primary" label x-small class="px-1">{{ projectDetails.phase }}</v-chip>
+      The project phase is <v-chip
+        color="primary"
+        label
+        x-small
+        class="px-1"
+      >
+        {{ projectDetails.phase }}
+      </v-chip>
     </div>
     <div class="text-caption">
       <span v-if="projectDetails.phase === 'Terminating'">

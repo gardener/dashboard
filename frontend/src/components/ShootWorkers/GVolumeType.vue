@@ -8,45 +8,46 @@ SPDX-License-Identifier: Apache-2.0
   <div class="d-flex flex-row">
     <g-hint-colorizer hint-color="warning">
       <v-select
+        v-model="worker.volume.type"
         color="primary"
         item-color="primary"
         :items="volumeTypeItems"
         item-title="name"
         item-value="name"
-        v-model="worker.volume.type"
         :error-messages="getErrorMessages('worker.volume.type')"
-        @update:model-value="onInputVolumeType"
-        @blur="v$.worker.volume.type.$touch()"
         label="Volume Type"
         :hint="hint"
         persistent-hint
         variant="underlined"
+        @update:model-value="onInputVolumeType"
+        @blur="v$.worker.volume.type.$touch()"
       >
         <template #item="{ item, props }">
           <v-list-item v-bind="props">
-            <v-list-item-subtitle v-if="item.raw.class">Class: {{item.raw.class}}</v-list-item-subtitle>
+            <v-list-item-subtitle v-if="item.raw.class">
+              Class: {{ item.raw.class }}
+            </v-list-item-subtitle>
           </v-list-item>
         </template>
       </v-select>
     </g-hint-colorizer>
     <v-text-field
       v-if="isAWS"
+      v-model.number="workerIops"
       class="ml-1"
       color="primary"
       :error-messages="getErrorMessages('workerIops')"
-      @input="onInputIops"
-      @blur="v$.workerIops.$touch()"
-      v-model.number="workerIops"
       type="number"
       min="100"
       label="IOPS"
       variant="underlined"
-    ></v-text-field>
+      @input="onInputIops"
+      @blur="v$.workerIops.$touch()"
+    />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 import GHintColorizer from '@/components/GHintColorizer'
 import { required, requiredIf, minValue } from '@vuelidate/validators'
@@ -59,12 +60,7 @@ import set from 'lodash/set'
 import unset from 'lodash/unset'
 import { useCloudProfileStore } from '@/store'
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GHintColorizer,
   },
@@ -85,6 +81,11 @@ export default defineComponent({
     'updateVolumeType',
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       valid: undefined,
@@ -151,6 +152,11 @@ export default defineComponent({
       return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
     },
   },
+  mounted () {
+    this.workerIops = get(this.worker, 'providerConfig.volume.iops')
+    this.v$.$touch()
+    this.validateInput()
+  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
@@ -184,10 +190,5 @@ export default defineComponent({
       }
     },
   },
-  mounted () {
-    this.workerIops = get(this.worker, 'providerConfig.volume.iops')
-    this.v$.$touch()
-    this.validateInput()
-  },
-})
+}
 </script>

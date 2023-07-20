@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <div>
       <span class="font-weight-bold">Maintenance last triggered on:</span>
       {{ timeString }}
-     </div>
+    </div>
     <div>
       <span class="font-weight-bold">Result: </span>
       <span :class="stateColorClass">{{ state }}</span>

@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span class="label-color" :style="labelStyle(label)">
+  <span
+    class="label-color"
+    :style="labelStyle(label)"
+  >
     {{ label.name }}
   </span>
 </template>

@@ -10,13 +10,13 @@ SPDX-License-Identifier: Apache-2.0
       <span>Rows per page:</span>
       <v-select
         :items="itemsPerPageOptions"
-        :modelValue="itemsPerPage"
-        @update:model-value="value => setItemsPerPage(Number(value))"
+        :model-value="itemsPerPage"
         density="compact"
         variant="solo"
         flat
         single-line
         hide-details
+        @update:model-value="value => setItemsPerPage(Number(value))"
       />
     </div>
     <div class="v-data-table-footer__info">
@@ -26,30 +26,30 @@ SPDX-License-Identifier: Apache-2.0
       <v-btn
         icon="mdi-page-first"
         variant="plain"
-        @click="setPage(1)"
         :disabled="page === 1"
         aria-label="First page"
+        @click="setPage(1)"
       />
       <v-btn
         icon="mdi-chevron-left"
         variant="plain"
-        @click="setPage(Math.max(1, page - 1))"
         :disabled="page === 1"
         aria-label="Previous page"
+        @click="setPage(Math.max(1, page - 1))"
       />
       <v-btn
         icon="mdi-chevron-right"
         variant="plain"
-        @click="setPage(Math.min(pageCount, page + 1))"
         :disabled="page === pageCount"
         aria-label="Next page"
+        @click="setPage(Math.min(pageCount, page + 1))"
       />
       <v-btn
         icon="mdi-page-last"
         variant="plain"
-        @click="setPage(pageCount)"
         :disabled="page === pageCount"
         aria-label="Last page"
+        @click="setPage(pageCount)"
       />
     </div>
   </div>

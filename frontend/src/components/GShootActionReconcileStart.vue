@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog v-if="dialog"
+  <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="caption"
@@ -13,13 +14,18 @@ SPDX-License-Identifier: Apache-2.0
     width="600"
   >
     <v-row>
-      <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
+      <v-col class="text-subtitle-1">
+        Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
+      </v-col>
     </v-row>
     <v-row v-if="lastOperationFailed">
-      <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
+      <v-col class="text-subtitle-1">
+        Note: For clusters in failed state this will retry the operation.
+      </v-col>
     </v-row>
   </g-shoot-action-dialog>
-  <g-shoot-action-button v-if="button"
+  <g-shoot-action-button
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     :loading="isReconcileToBeScheduled"
@@ -32,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 
 import GShootActionButton from '@/components/GShootActionButton.vue'
@@ -45,13 +50,13 @@ import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 import { useAppStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GShootActionButton,
     GShootActionDialog,
   },
-  inject: ['api', 'logger'],
   mixins: [shootItem],
+  inject: ['api', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -70,6 +75,9 @@ export default defineComponent({
       default: false,
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       reconcileTriggered: false,
@@ -109,9 +117,35 @@ export default defineComponent({
       return get(this.shootLastOperation, 'state') === 'Failed'
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
+    isReconcileToBeScheduled (reconcileToBeScheduled) {
+      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
+      if (!isReconcileScheduled) {
+        return
+      }
+      this.reconcileTriggered = false
+      this.currentGeneration = null
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      this.setAlert({
+        message: `Reconcile triggered for ${this.shootName}`,
+      })
+    },
+  },
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
@@ -150,34 +184,5 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
-    isReconcileToBeScheduled (reconcileToBeScheduled) {
-      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
-      if (!isReconcileScheduled) {
-        return
-      }
-      this.reconcileTriggered = false
-      this.currentGeneration = null
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      this.setAlert({
-        message: `Reconcile triggered for ${this.shootName}`,
-      })
-    },
-  },
-})
+}
 </script>

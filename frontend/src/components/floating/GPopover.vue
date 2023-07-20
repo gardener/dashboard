@@ -20,27 +20,28 @@ SPDX-License-Identifier: Apache-2.0
     }"
     @update:shown="onUpdateShown"
   >
-    <template v-slot:default="popperProps">
+    <template #default="popperProps">
       <slot
         name="activator"
         v-bind="makeActivatorProps(popperProps)"
       />
     </template>
-    <template v-slot:popper="{ hide }">
+    <template #popper="{ hide }">
       <v-card
         variant="flat"
       >
-        <v-toolbar v-if="toolbarTitle"
+        <v-toolbar
+          v-if="toolbarTitle"
           absolute
           :height="toolbarHeight"
           :color="toolbarColor"
         >
-          <template v-slot:title >
+          <template #title>
             <span class="text-subtitle-1 pr-6">
               {{ toolbarTitle }}
             </span>
           </template>
-          <template v-slot:append>
+          <template #append>
             <v-btn
               variant="text"
               density="comfortable"
@@ -54,11 +55,12 @@ SPDX-License-Identifier: Apache-2.0
           role="content"
           :class="contentClass"
         >
-          <slot/>
-          <v-card-text v-if="$slots.text"
+          <slot />
+          <v-card-text
+            v-if="$slots.text"
             :class="contentTextClass"
           >
-            <slot name="text"/>
+            <slot name="text" />
           </v-card-text>
         </div>
       </v-card>

@@ -20,42 +20,46 @@ SPDX-License-Identifier: Apache-2.0
             :class="{ 'update_btn_inactive': !canUpdate }"
             @click="showUpdateDialog"
           >
-            <v-icon v-if="availableK8sUpdates"
+            <v-icon
+              v-if="availableK8sUpdates"
               icon="mdi-menu-up"
               size="small"
             />
-            {{shootK8sVersion}}
+            {{ shootK8sVersion }}
           </v-btn>
           <g-action-button
             v-else-if="!!availableK8sUpdates"
             :icon="k8sPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
             @click="showUpdateDialog"
-          >
-          </g-action-button>
+          />
         </div>
       </template>
-      <span>{{tooltipText}}</span>
+      <span>{{ tooltipText }}</span>
     </v-tooltip>
     <g-dialog
+      ref="gDialog"
+      v-model:error-message="updateErrorMessage"
+      v-model:detailed-error-message="updateDetailedErrorMessage"
       :confirm-value="confirm"
       confirm-button-text="Update"
       :confirm-disabled="selectedVersionInvalid"
-      v-model:error-message="updateErrorMessage"
-      v-model:detailed-error-message="updateDetailedErrorMessage"
-      ref="gDialog"
       width="450"
-      >
-      <template #caption>Update Cluster</template>
-      <template #affectedObjectName>{{shootName}}</template>
+    >
+      <template #caption>
+        Update Cluster
+      </template>
+      <template #affectedObjectName>
+        {{ shootName }}
+      </template>
       <template #message>
         <g-shoot-version-update
+          ref="shootVersionUpdate"
           :available-k8s-updates="availableK8sUpdates"
           :current-k8s-version="kubernetesVersion"
           @selected-version="onSelectedVersion"
           @selected-version-type="onSelectedVersionType"
           @selected-version-invalid="onSelectedVersionInvalid"
           @confirm-required="onConfirmRequired"
-          ref="shootVersionUpdate"
         />
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           <p>
@@ -63,14 +67,19 @@ SPDX-License-Identifier: Apache-2.0
           </p>
           <p>
             You should consider the
-            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" rel="noopener" class="text-anchor">
+            <a
+              href="https://github.com/kubernetes/kubernetes/releases"
+              target="_blank"
+              rel="noopener"
+              class="text-anchor"
+            >
               Kubernetes release notes
               <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
             </a>
             before upgrading your cluster.
           </p>
           <p>
-            Type <strong>{{shootName}}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
+            Type <strong>{{ shootName }}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br><br>
           </p>
           <em class="text-warning">This action cannot be undone.</em>
         </template>
@@ -106,6 +115,8 @@ export default defineComponent({
     GShootVersionUpdate,
     GDialog,
   },
+  mixins: [shootItem],
+  inject: ['api', 'logger'],
   props: {
     chip: {
       type: Boolean,
@@ -121,8 +132,6 @@ export default defineComponent({
       updateDetailedErrorMessage: null,
     }
   },
-  inject: ['api', 'logger'],
-  mixins: [shootItem],
   computed: {
     ...mapState(useAuthzStore, [
       'canPatchShoots',

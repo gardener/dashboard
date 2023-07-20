@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="850">
+  <v-dialog
+    v-model="visible"
+    max-width="850"
+  >
     <v-card>
       <g-toolbar
         prepend-icon="mdi-account-plus"
@@ -23,62 +26,96 @@ SPDX-License-Identifier: Apache-2.0
       </g-toolbar>
       <v-card-text>
         <div class="d-flex flex-row pa-3">
-          <div class="d-flex flex-column flex-grow-1" ref="secretDetails">
+          <div
+            ref="secretDetails"
+            class="d-flex flex-column flex-grow-1"
+          >
             <div>
               <template v-if="isCreateMode">
                 <v-text-field
-                  color="primary"
                   ref="name"
                   v-model.trim="name"
+                  color="primary"
                   label="Secret Name"
                   :error-messages="getErrorMessages('name')"
+                  variant="underlined"
                   @update:model-value="v$.name.$touch()"
                   @blur="v$.name.$touch()"
-                  variant="underlined"
-                ></v-text-field>
+                />
               </template>
               <template v-else>
-                <div class="text-h6 pb-4">{{name}}</div>
+                <div class="text-h6 pb-4">
+                  {{ name }}
+                </div>
               </template>
-              </div>
+            </div>
 
             <div v-if="cloudProfiles.length !== 1 && isInfrastructureSecret">
               <g-cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
                 :create-mode="isCreateMode"
-                :cloud-profiles="cloudProfiles">
-              </g-cloud-profile>
+                :cloud-profiles="cloudProfiles"
+              />
             </div>
 
-            <slot name="secret-slot"></slot>
-            <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+            <slot name="secret-slot" />
+            <g-message
+              v-model:message="errorMessage"
+              v-model:detailed-message="detailedErrorMessage"
+              color="error"
+            />
           </div>
           <v-slide-x-reverse-transition>
-            <div v-if="helpVisible" class="pa-3 ml-3 help" :style="helpStyle">
-              <slot name="help-slot"></slot>
+            <div
+              v-if="helpVisible"
+              class="pa-3 ml-3 help"
+              :style="helpStyle"
+            >
+              <slot name="help-slot" />
             </div>
           </v-slide-x-reverse-transition>
-       </div>
+        </div>
       </v-card-text>
-      <v-alert :model-value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0" class="mb-2">
-        This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
+      <v-alert
+        :model-value="!isCreateMode && relatedShootCount > 0"
+        type="warning"
+        rounded="0"
+        class="mb-2"
+      >
+        This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
-       <v-alert :model-value="!isCreateMode && relatedShootCount > 0" type="warning" rounded="0" class="mb-2">
+      <v-alert
+        :model-value="!isCreateMode && relatedShootCount > 0"
+        type="warning"
+        rounded="0"
+        class="mb-2"
+      >
         Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
       </v-alert>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" @click="cancel">Cancel</v-btn>
-        <v-btn variant="text" @click="submit" color="primary" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          @click="cancel"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          variant="text"
+          color="primary"
+          :disabled="!valid"
+          @click="submit"
+        >
+          {{ submitButtonText }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength } from '@vuelidate/validators'
@@ -112,21 +149,12 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GCloudProfile,
     GMessage,
     GToolbar,
   },
-  emits: [
-    'update:modelValue',
-    'cloud-profile-name',
-  ],
   props: {
     modelValue: {
       type: Boolean,
@@ -155,6 +183,15 @@ export default defineComponent({
     secret: {
       type: Object,
     },
+  },
+  emits: [
+    'update:modelValue',
+    'cloud-profile-name',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   data () {
     return {
@@ -257,6 +294,9 @@ export default defineComponent({
       return includes(this.dnsProviderTypes, this.vendor)
     },
   },
+  mounted () {
+    this.reset()
+  },
   methods: {
     ...mapActions(useSecretStore, [
       'createSecret',
@@ -357,10 +397,7 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  mounted () {
-    this.reset()
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

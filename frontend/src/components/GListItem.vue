@@ -12,17 +12,18 @@ SPDX-License-Identifier: Apache-2.0
     <div
       class="d-inline-flex align-self-center align-center justify-center flex-nowrap mr-4 g-list-item__prepend"
     >
-      <slot name="prepend"/>
+      <slot name="prepend" />
     </div>
     <div
       class="d-block align-self-center align-center flex-grow-1 g-list-item__content "
     >
-      <slot/>
+      <slot />
     </div>
-    <div v-if="slots.append"
+    <div
+      v-if="slots.append"
       class="d-inline-flex align-self-center flex-nowrap ml-3 g-list-item__append"
     >
-      <slot name="append"/>
+      <slot name="append" />
     </div>
   </div>
 </template>

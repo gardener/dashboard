@@ -10,47 +10,50 @@ SPDX-License-Identifier: Apache-2.0
       <v-row class="ma-0">
         <v-col cols="7">
           <v-text-field
+            v-model="domain"
             color="primary"
             label="Cluster Domain"
-            v-model="domain"
-            @blur="v$.primaryProvider.$touch()"
             :disabled="!clusterIsNew"
             :persistent-hint="!clusterIsNew"
             :hint="domainHint"
             variant="underlined"
-          ></v-text-field>
+            @blur="v$.primaryProvider.$touch()"
+          />
         </v-col>
-        <v-col cols="4" v-if="primaryProviderVisible">
+        <v-col
+          v-if="primaryProviderVisible"
+          cols="4"
+        >
           <v-select
+            v-model="primaryProvider"
             color="primary"
             item-title="secretName"
             return-object
-            v-model="primaryProvider"
-            @blur="v$.primaryProvider.$touch()"
-            @update:modelValue="v$.primaryProvider.$touch()"
             :items="dnsProvidersWithPrimarySupport"
             :error-messages="getErrorMessages('primaryProvider')"
             label="Primary DNS Provider"
             clearable
             :disabled="!clusterIsNew"
             variant="underlined"
+            @blur="v$.primaryProvider.$touch()"
+            @update:model-value="v$.primaryProvider.$touch()"
           >
             <template #item="{ item, props }">
               <v-list-item
                 v-bind="props"
               >
                 <template #prepend>
-                  <g-vendor-icon :icon="item.raw.type"/>
+                  <g-vendor-icon :icon="item.raw.type" />
                 </template>
                 <v-list-item-subtitle>
-                  Type: {{item.raw.type}}
+                  Type: {{ item.raw.type }}
                 </v-list-item-subtitle>
               </v-list-item>
             </template>
             <template #selection="{ item }">
-              <g-vendor-icon :icon="item.raw.type"/>
+              <g-vendor-icon :icon="item.raw.type" />
               <span class="ml-2">
-                {{item.raw.secretName}}
+                {{ item.raw.secretName }}
               </span>
             </template>
           </v-select>
@@ -63,21 +66,26 @@ SPDX-License-Identifier: Apache-2.0
     <div class="alternate-row-background">
       <v-slide-y-transition group>
         <v-row
-        class="list-item pt-2"
-        v-for="id in dnsProviderIds"
-        :key="id"
+          v-for="id in dnsProviderIds"
+          :key="id"
+          class="list-item pt-2"
         >
-          <g-dns-provider-row :dnsProviderId="id"/>
+          <g-dns-provider-row :dns-provider-id="id" />
         </v-row>
       </v-slide-y-transition>
-      <v-row key="addProvider" class="list-item pt-2">
+      <v-row
+        key="addProvider"
+        class="list-item pt-2"
+      >
         <v-col>
           <v-btn
-            @click="addDnsProvider"
             variant="text"
             color="primary"
+            @click="addDnsProvider"
           >
-            <v-icon class="text-primary">mdi-plus</v-icon>
+            <v-icon class="text-primary">
+              mdi-plus
+            </v-icon>
             <span class="ml-2">Add DNS Provider</span>
           </v-btn>
         </v-col>
@@ -87,8 +95,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapState, mapActions } from 'pinia'
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
@@ -102,15 +108,15 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
+  components: {
+    GDnsProviderRow,
+    GVendorIcon,
+  },
   setup () {
     return {
       v$: useVuelidate(),
     }
-  },
-  components: {
-    GDnsProviderRow,
-    GVendorIcon,
   },
   validations () {
     return this.validators
@@ -164,6 +170,16 @@ export default defineComponent({
       return !!this.primaryProvider || (this.clusterIsNew && !!this.dnsDomain)
     },
   },
+  watch: {
+    'v$.primaryProvider.$invalid' (value) {
+      if (this.primaryProviderVisible) {
+        this.setDnsPrimaryProviderValid(!value)
+      }
+    },
+  },
+  mounted () {
+    this.v$.$touch()
+  },
   methods: {
     ...mapActions(useShootStagingStore, [
       'addDnsProvider',
@@ -175,15 +191,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  mounted () {
-    this.v$.$touch()
-  },
-  watch: {
-    'v$.primaryProvider.$invalid' (value) {
-      if (this.primaryProviderVisible) {
-        this.setDnsPrimaryProviderValid(!value)
-      }
-    },
-  },
-})
+}
 </script>

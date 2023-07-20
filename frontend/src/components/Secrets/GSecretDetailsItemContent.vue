@@ -9,15 +9,24 @@ SPDX-License-Identifier: Apache-2.0
     <g-list-item-content>
       <template #label>
         <span v-if="detailsTitle">Credential Details (</span>
-        <span v-for="({ label }, index) in secretDetails" :key="label">
+        <span
+          v-for="({ label }, index) in secretDetails"
+          :key="label"
+        >
           <span>{{ label }}</span>
           <span v-if="index !== secretDetails.length - 1"> / </span>
         </span>
         <span v-if="detailsTitle">)</span>
       </template>
-      <span v-for="({ value, label }, index) in secretDetails" :key="label">
+      <span
+        v-for="({ value, label }, index) in secretDetails"
+        :key="label"
+      >
         <span v-if="value">{{ value }}</span>
-        <span v-else class="font-weight-light text-disabled">unknown</span>
+        <span
+          v-else
+          class="font-weight-light text-disabled"
+        >unknown</span>
         <span v-if="index !== secretDetails.length - 1"> / </span>
       </span>
     </g-list-item-content>
@@ -25,9 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
 
   props: {
     infra: {
@@ -211,5 +218,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

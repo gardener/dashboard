@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       :timeout="2000"
       :color="snackbarColor"
     >
-      {{snackbarText}}
+      {{ snackbarText }}
     </v-snackbar>
   </div>
 </template>

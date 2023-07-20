@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 
- <template>
+<template>
   <div>
     <v-radio-group
       v-model="selectedTarget"
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         label="Control Plane"
         value="cp"
         color="primary"
-      ></v-radio>
+      />
       <v-radio
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
@@ -27,7 +27,12 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #label>
           <div>Cluster</div>
-          <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
+          <v-icon
+            v-if="isShootStatusHibernated"
+            class="vertical-align-middle ml-2"
+          >
+            mdi-sleep
+          </v-icon>
         </template>
       </v-radio>
       <v-radio
@@ -38,7 +43,12 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #label>
           <div>Garden Cluster</div>
-          <v-icon v-if="!isAdmin && isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
+          <v-icon
+            v-if="!isAdmin && isShootStatusHibernated"
+            class="vertical-align-middle ml-2"
+          >
+            mdi-sleep
+          </v-icon>
         </template>
       </v-radio>
     </v-radio-group>
@@ -50,8 +60,8 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       variant="outlined"
     >
-      <strong>Terminal will be running on <span class="font-family-monospace">{{shootName}}</span> cluster</strong><br>
-      Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{shootName}}</span> cluster before creating this terminal session.
+      <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+      Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
     </v-alert>
   </div>
 </template>
@@ -66,6 +76,7 @@ import {
 import { shootItem } from '@/mixins/shootItem'
 
 export default defineComponent({
+  mixins: [shootItem],
   props: {
     modelValue: {
       type: String,
@@ -78,7 +89,6 @@ export default defineComponent({
     'update:modelValue',
     'valid',
   ],
-  mixins: [shootItem],
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
@@ -110,13 +120,13 @@ export default defineComponent({
       return !!this.selectedTarget
     },
   },
-  mounted () {
-    this.$emit('valid', this.valid)
-  },
   watch: {
     modelValue (value) {
       this.$emit('valid', this.valid)
     },
+  },
+  mounted () {
+    this.$emit('valid', this.valid)
   },
 })
 </script>

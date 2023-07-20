@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     role="list"
     class="g-list"
   >
-    <slot/>
+    <slot />
   </div>
 </template>
 

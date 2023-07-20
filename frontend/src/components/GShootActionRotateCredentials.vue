@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog v-if="dialog"
+  <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="componentTexts.caption"
@@ -14,16 +15,33 @@ SPDX-License-Identifier: Apache-2.0
     width="700"
   >
     <div class="text-h5 pb-3">
-      {{componentTexts.heading}}
+      {{ componentTexts.heading }}
     </div>
-    <v-alert v-if="mode === 'START'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.</v-alert>
-    <v-alert v-if="mode === 'COMPLETE'" type="info" variant="outlined" dense>Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.</v-alert>
-    <div class="font-weight-bold py-3">Actions performed in this step</div>
+    <v-alert
+      v-if="mode === 'START'"
+      type="info"
+      variant="outlined"
+      dense
+    >
+      Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
+    </v-alert>
+    <v-alert
+      v-if="mode === 'COMPLETE'"
+      type="info"
+      variant="outlined"
+      dense
+    >
+      Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
+    </v-alert>
+    <div class="font-weight-bold py-3">
+      Actions performed in this step
+    </div>
     <ul class="px-4">
       <li
         v-for="action in componentTexts.actions"
-        :key="action">
-        {{action}}
+        :key="action"
+      >
+        {{ action }}
       </li>
     </ul>
     <v-checkbox
@@ -32,16 +50,16 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="isMaintenanceDisabled"
       :hint="maintenanceHint"
       persistent-hint
-    >
-    </v-checkbox>
-    <div>Type <span class="font-weight-bold">{{shootName}}</span> below to confirm the operation.</div>
+    />
+    <div>Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the operation.</div>
   </g-shoot-action-dialog>
-  <g-shoot-action-button v-if="button"
+  <g-shoot-action-button
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     :loading="showLoadingIndicator"
     :disabled="isDisabled"
-    :icon ="icon"
+    :icon="icon"
     :text="componentTexts.buttonText"
     :tooltip="tooltip"
     :caption="componentTexts.caption"
@@ -69,8 +87,8 @@ export default {
     GShootActionButton,
     GShootActionDialog,
   },
-  inject: ['api', 'logger'],
   mixins: [shootStatusCredentialRotation],
+  inject: ['api', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -89,6 +107,9 @@ export default {
       default: false,
     },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       actionTriggered: false,
@@ -385,9 +406,37 @@ export default {
       return componentTexts[this.operation]
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
+    isActionToBeScheduled (actionToBeScheduled) {
+      const isActionScheduled = !actionToBeScheduled && this.actionTriggered
+      if (!isActionScheduled) {
+        return
+      }
+      this.actionTriggered = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      this.setAlert({
+        message: this.componentTexts.successMessage,
+      })
+    },
+  },
+  mounted () {
+    this.maintenance = this.isScheduledForMaintenance
+  },
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
@@ -430,37 +479,6 @@ export default {
         this.actionTriggered = false
       }
     },
-  },
-  watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
-    isActionToBeScheduled (actionToBeScheduled) {
-      const isActionScheduled = !actionToBeScheduled && this.actionTriggered
-      if (!isActionScheduled) {
-        return
-      }
-      this.actionTriggered = false
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      this.setAlert({
-        message: this.componentTexts.successMessage,
-      })
-    },
-  },
-  mounted () {
-    this.maintenance = this.isScheduledForMaintenance
   },
 }
 </script>

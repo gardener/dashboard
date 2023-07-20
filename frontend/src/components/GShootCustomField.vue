@@ -19,9 +19,15 @@ SPDX-License-Identifier: Apache-2.0
         :color="color"
       >
         <template #prepend>
-          <v-icon v-if="icon" size="small" class="pr-1">{{icon}}</v-icon>
+          <v-icon
+            v-if="icon"
+            size="small"
+            class="pr-1"
+          >
+            {{ icon }}
+          </v-icon>
         </template>
-        {{name}}
+        {{ name }}
       </v-chip>
     </template>
     <template #text>
@@ -30,78 +36,94 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Icon</v-list-item-subtitle>
           <v-list-item-title>
             <template v-if="icon">
-              <v-icon class="pr-1">{{icon}}</v-icon>
+              <v-icon class="pr-1">
+                {{ icon }}
+              </v-icon>
             </template>
-            <span v-else class="font-weight-light text-disabled">Not defined</span>
+            <span
+              v-else
+              class="font-weight-light text-disabled"
+            >Not defined</span>
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-subtitle>Name</v-list-item-subtitle>
-          <v-list-item-title>{{name}}</v-list-item-title>
+          <v-list-item-title>{{ name }}</v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-subtitle>Tooltip</v-list-item-subtitle>
           <v-list-item-title>
             <template v-if="tooltip">
-              {{tooltip}}
+              {{ tooltip }}
             </template>
-            <span v-else class="font-weight-light text-disabled">Not defined</span>
+            <span
+              v-else
+              class="font-weight-light text-disabled"
+            >Not defined</span>
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-subtitle>Path</v-list-item-subtitle>
-          <v-list-item-title>{{path}}</v-list-item-title>
+          <v-list-item-title>{{ path }}</v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-subtitle>Default Value</v-list-item-subtitle>
           <v-list-item-title>
             <template v-if="defaultValue">
-              {{defaultValue}}
+              {{ defaultValue }}
             </template>
-            <span v-else class="font-weight-light text-disabled">Not defined</span>
+            <span
+              v-else
+              class="font-weight-light text-disabled"
+            >Not defined</span>
           </v-list-item-title>
         </v-list-item>
-        <v-divider></v-divider>
+        <v-divider />
         <v-list-subheader>Cluster List Settings</v-list-subheader>
         <v-list-item>
           <v-list-item-subtitle>Property Visible</v-list-item-subtitle>
           <v-list-item-title>
-              {{showColumn ? 'Yes' : 'No'}}
+            {{ showColumn ? 'Yes' : 'No' }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item v-if="showColumn">
           <v-list-item-subtitle>Property Visible by Default</v-list-item-subtitle>
           <v-list-item-title>
-              {{columnSelectedByDefault ? 'Yes' : 'No'}}
+            {{ columnSelectedByDefault ? 'Yes' : 'No' }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item v-if="showColumn">
           <v-list-item-subtitle>Weight</v-list-item-subtitle>
           <v-list-item-title>
             <template v-if="weight">
-              {{weight}}
+              {{ weight }}
             </template>
-            <span v-else class="font-weight-light text-disabled">Not defined</span>
+            <span
+              v-else
+              class="font-weight-light text-disabled"
+            >Not defined</span>
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
           <v-list-item-subtitle>Searchable</v-list-item-subtitle>
           <v-list-item-title>
-              {{searchable ? 'Yes' : 'No'}}
+            {{ searchable ? 'Yes' : 'No' }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item v-if="showColumn">
           <v-list-item-subtitle>Sortable</v-list-item-subtitle>
           <v-list-item-title>
-              {{searchable ? 'Yes' : 'No'}}
+            {{ searchable ? 'Yes' : 'No' }}
           </v-list-item-title>
         </v-list-item>
-        <v-divider></v-divider>
-        <v-list-subheader Z>Cluster Details Settings</v-list-subheader>
+        <v-divider />
+        <v-list-subheader z>
+          Cluster Details Settings
+        </v-list-subheader>
         <v-list-item>
           <v-list-item-subtitle>Property Visible</v-list-item-subtitle>
           <v-list-item-title>
-              {{showDetails ? 'Yes' : 'No'}}
+            {{ showDetails ? 'Yes' : 'No' }}
           </v-list-item-title>
         </v-list-item>
       </v-list>

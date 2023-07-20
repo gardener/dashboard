@@ -6,60 +6,69 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container class="px-0 mx-0">
-    <v-row >
-      <v-col v-if="cloudProfiles.length > 1" cols="3">
+    <v-row>
+      <v-col
+        v-if="cloudProfiles.length > 1"
+        cols="3"
+      >
         <g-cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
           create-mode
           :cloud-profiles="cloudProfiles"
+          color="primary"
           @valid="onCloudProfileNameValid"
-          @update:modelValue="onUpdateCloudProfileName"
-          color="primary">
-        </g-cloud-profile>
+          @update:model-value="onUpdateCloudProfileName"
+        />
       </v-col>
       <v-col cols="3">
         <g-select-secret
-         :cloudProfileName="cloudProfileName"
-         v-model="secret"
-         @update:modelValue="onUpdateSecret"
-         v-model:valid="secretValid"
-         @update:valid="onSecretValid"></g-select-secret>
+          v-model="secret"
+          v-model:valid="secretValid"
+          :cloud-profile-name="cloudProfileName"
+          @update:model-value="onUpdateSecret"
+          @update:valid="onSecretValid"
+        />
       </v-col>
       <v-col cols="3">
         <v-select
+          v-model="region"
           color="primary"
           item-color="primary"
           label="Region"
           :items="regionItems"
           :hint="regionHint"
           persistent-hint
-          v-model="region"
           :error-messages="getErrorMessages('region')"
-          @update:modelValue="onInputRegion"
-          @blur="v$.region.$touch()"
           variant="underlined"
-          >
+          @update:model-value="onInputRegion"
+          @blur="v$.region.$touch()"
+        >
           <template #item="{ item, props }">
             <!-- Divider / header in items not implemented yet in Vuetify 3: https://github.com/vuetifyjs/vuetify/issues/15721 -->
-            <v-list-subheader v-if="!!item.raw.header">{{item.raw.header}}</v-list-subheader>
-            <v-list-item v-else v-bind="props" />
+            <v-list-subheader v-if="!!item.raw.header">
+              {{ item.raw.header }}
+            </v-list-subheader>
+            <v-list-item
+              v-else
+              v-bind="props"
+            />
           </template>
         </v-select>
       </v-col>
       <v-col cols="3">
         <v-select
+          v-model="networkingType"
           color="primary"
           item-color="primary"
           label="Networking Type"
           :items="networkingTypes"
           persistent-hint
-          v-model="networkingType"
           :error-messages="getErrorMessages('networkingType')"
-          @update:modelValue="v$.networkingType.$touch()"
-          @blur="v$.networkingType.$touch()"
           variant="underlined"
-          ></v-select>
+          @update:model-value="v$.networkingType.$touch()"
+          @blur="v$.networkingType.$touch()"
+        />
       </v-col>
       <template v-if="infrastructureKind === 'openstack'">
         <v-col cols="3">
@@ -68,118 +77,122 @@ SPDX-License-Identifier: Apache-2.0
             :wildcard-select-items="allFloatingPoolNames"
             wildcard-select-label="Floating Pool"
             @valid="onFloatingPoolWildcardValid"
-            ></g-wildcard-select>
+          />
         </v-col>
         <v-col cols="3">
           <v-select
-          color="primary"
-          item-color="primary"
-          label="Load Balancer Provider"
-          :items="allLoadBalancerProviderNames"
-          v-model="loadBalancerProviderName"
-          :error-messages="getErrorMessages('loadBalancerProviderName')"
-          @update:modelValue="onInputLoadBalancerProviderName"
-          @blur="v$.loadBalancerProviderName.$touch()"
-          persistent-hint
-          variant="underlined"
-          ></v-select>
+            v-model="loadBalancerProviderName"
+            color="primary"
+            item-color="primary"
+            label="Load Balancer Provider"
+            :items="allLoadBalancerProviderNames"
+            :error-messages="getErrorMessages('loadBalancerProviderName')"
+            persistent-hint
+            variant="underlined"
+            @update:model-value="onInputLoadBalancerProviderName"
+            @blur="v$.loadBalancerProviderName.$touch()"
+          />
         </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'metal'">
         <v-col cols="3">
           <v-text-field
+            v-model="projectID"
             color="primary"
             item-color="primary"
             label="Project ID"
-            v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
-            @update:modelValue="onInputProjectID"
-            @blur="v$.projectID.$touch()"
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             variant="underlined"
-            ></v-text-field>
+            @update:model-value="onInputProjectID"
+            @blur="v$.projectID.$touch()"
+          />
         </v-col>
         <v-col cols="3">
           <v-select
+            v-model="partitionID"
             color="primary"
             item-color="primary"
             label="Partition ID"
             :items="partitionIDs"
-            v-model="partitionID"
             :error-messages="getErrorMessages('partitionID')"
-            @update:modelValue="onInputPartitionID"
-            @blur="v$.partitionID.$touch()"
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
             variant="underlined"
-          ></v-select>
+            @update:model-value="onInputPartitionID"
+            @blur="v$.partitionID.$touch()"
+          />
         </v-col>
         <v-col cols="3">
           <v-select
+            v-model="firewallImage"
             color="primary"
             item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
-            v-model="firewallImage"
             :error-messages="getErrorMessages('firewallImage')"
-            @update:modelValue="onInputFirewallImage"
-            @blur="v$.firewallImage.$touch()"
             variant="underlined"
-          ></v-select>
+            @update:model-value="onInputFirewallImage"
+            @blur="v$.firewallImage.$touch()"
+          />
         </v-col>
         <v-col cols="3">
           <v-select
+            v-model="firewallSize"
             color="primary"
             item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
-            v-model="firewallSize"
             :error-messages="getErrorMessages('firewallSize')"
-            @update:modelValue="onInputFirewallSize"
-            @blur="v$.firewallImage.$touch()"
             variant="underlined"
-          ></v-select>
+            @update:model-value="onInputFirewallSize"
+            @blur="v$.firewallImage.$touch()"
+          />
         </v-col>
         <v-col cols="3">
           <v-select
+            v-model="firewallNetworks"
             color="primary"
             item-color="primary"
             label="Firewall Networks"
             :items="allFirewallNetworks"
-            v-model="firewallNetworks"
             :error-messages="getErrorMessages('firewallNetworks')"
-            @update:modelValue="onInputFirewallNetworks"
-            @blur="v$.firewallNetworks.$touch()"
             chips
             closable-chips
             multiple
             variant="underlined"
-          ></v-select>
+            @update:model-value="onInputFirewallNetworks"
+            @blur="v$.firewallNetworks.$touch()"
+          />
         </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
         <v-col cols="3">
           <v-select
+            v-model="loadBalancerClassNames"
             color="primary"
             item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
-            v-model="loadBalancerClassNames"
             :error-messages="getErrorMessages('loadBalancerClassNames')"
-            @update:modelValue="onInputLoadBalancerClassNames"
-            @blur="v$.loadBalancerClassNames.$touch()"
             attach
             chips
             closable-chips
             multiple
             variant="underlined"
+            @update:model-value="onInputLoadBalancerClassNames"
+            @blur="v$.loadBalancerClassNames.$touch()"
           >
             <template #item="{ item }">
-              <v-list-item-action >
-                <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'}}</v-icon>
+              <v-list-item-action>
+                <v-icon :color="item.disabled ? 'grey' : ''">
+                  {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
+                </v-icon>
               </v-list-item-action>
-              <v-list-item-title :class="{ 'grey--text': item.disabled }">{{ item.text }}</v-list-item-title>
+              <v-list-item-title :class="{ 'grey--text': item.disabled }">
+                {{ item.text }}
+              </v-list-item-title>
             </template>
           </v-select>
         </v-col>
@@ -189,7 +202,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
@@ -215,12 +227,7 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GCloudProfile,
     GWildcardSelect,
@@ -235,6 +242,11 @@ export default defineComponent({
   emits: [
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       infrastructureKind: undefined,
@@ -417,6 +429,12 @@ export default defineComponent({
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
     },
+  },
+  mounted () {
+    this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
+      this.infrastructureKind = infrastructureKind
+      this.setDefaultCloudProfile()
+    })
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
@@ -603,11 +621,5 @@ export default defineComponent({
       this.validateInput()
     },
   },
-  mounted () {
-    this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
-      this.infrastructureKind = infrastructureKind
-      this.setDefaultCloudProfile()
-    })
-  },
-})
+}
 </script>

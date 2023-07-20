@@ -12,7 +12,10 @@ SPDX-License-Identifier: Apache-2.0
     exact
   >
     <template #divider>
-      <v-icon icon="mdi-chevron-right" size="large"/>
+      <v-icon
+        icon="mdi-chevron-right"
+        size="large"
+      />
     </template>
     <template #title="{ item }">
       <span :class="{ 'text-h6': !item.to }">

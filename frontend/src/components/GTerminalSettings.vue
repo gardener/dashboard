@@ -7,48 +7,48 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-text-field
-      color="primary"
       v-model="selectedContainerImage"
+      color="primary"
       label="Image"
       hint="Image to be used for the Container"
       persistent-hint
       :error-messages="getErrorMessages('selectedContainerImage')"
+      variant="underlined"
       @update:model-value="v$.selectedContainerImage.$touch()"
       @blur="v$.selectedContainerImage.$touch()"
-      variant="underlined"
-    >
-    </v-text-field>
+    />
     <template v-if="target === 'shoot'">
       <v-radio-group
         v-if="isAdmin"
         v-model="selectedRunOnShootWorker"
         label="Terminal Runtime"
         class="mt-6"
-        hint='Choose "Cluster" if you want to troubleshoot a worker node of the cluster'
+        hint="Choose &quot;Cluster&quot; if you want to troubleshoot a worker node of the cluster"
         persistent-hint
       >
         <v-radio
           label="Infrastructure (Seed)"
           :value="false"
           color="primary"
-        ></v-radio>
+        />
         <v-radio
           label="Cluster"
           :value="true"
           color="primary"
-        ></v-radio>
+        />
       </v-radio-group>
       <v-switch
+        v-model="selectedPrivilegedMode"
         :disabled="!selectedRunOnShootWorker"
         color="primary"
-        v-model="selectedPrivilegedMode"
         label="Privileged"
         hint="Enable to schedule a privileged Container, with hostPID and hostNetwork enabled. The host root filesystem will be mounted under the path /host."
         persistent-hint
         :class="{ 'ml-4': isAdmin }"
         class="ml-2"
-      ></v-switch>
+      />
       <v-select
+        v-model="selectedNode"
         :disabled="!selectedRunOnShootWorker"
         no-data-text="No workers available"
         color="primary"
@@ -57,7 +57,6 @@ SPDX-License-Identifier: Apache-2.0
         placeholder="Change worker node..."
         :items="shootNodes"
         item-value="data.kubernetesHostname"
-        v-model="selectedNode"
         hint="Node on which the Pod should be scheduled"
         persistent-hint
         :class="{ 'ml-4': isAdmin }"
@@ -71,7 +70,10 @@ SPDX-License-Identifier: Apache-2.0
             :title="item.raw.data?.kubernetesHostname"
           >
             <v-list-item-subtitle>
-              Ready: {{item.raw.data.readyStatus}} | Version: {{item.raw.data.version}} | Created: <g-time-string :date-time="item.raw.metadata.creationTimestamp" mode="past"></g-time-string>
+              Ready: {{ item.raw.data.readyStatus }} | Version: {{ item.raw.data.version }} | Created: <g-time-string
+                :date-time="item.raw.metadata.creationTimestamp"
+                mode="past"
+              />
             </v-list-item-subtitle>
           </v-list-item>
           <v-list-item
@@ -79,13 +81,16 @@ SPDX-License-Identifier: Apache-2.0
             v-bind="props"
             title="Auto select node"
             subtitle="Let the kube-scheduler decide on which node the terminal pod will be scheduled"
-          >
-          </v-list-item>
+          />
         </template>
         <template #selection="{ item }">
-          <span v-if="selectedRunOnShootWorker" :class="{'grey--text': !selectedRunOnShootWorker}" class="ml-2">
+          <span
+            v-if="selectedRunOnShootWorker"
+            :class="{'grey--text': !selectedRunOnShootWorker}"
+            class="ml-2"
+          >
             <template v-if="!isAutoSelectNodeItem(item)">
-              {{item.raw.data?.kubernetesHostname}} [{{item.raw.data?.version}}]
+              {{ item.raw.data?.kubernetesHostname }} [{{ item.raw.data?.version }}]
             </template>
             <template v-else>Auto select node</template>
           </span>
@@ -131,15 +136,19 @@ export default defineComponent({
   components: {
     GTimeString,
   },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     target: {
       type: String,
     },
+  },
+  emits: [
+    'selected-config',
+    'valid-settings',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   data () {
     return {
@@ -156,10 +165,6 @@ export default defineComponent({
       validationErrors,
     }
   },
-  emits: [
-    'selected-config',
-    'valid-settings',
-  ],
   validations () {
     return this.validators
   },
@@ -220,6 +225,14 @@ export default defineComponent({
       return selectedConfig
     },
   },
+  watch: {
+    selectedConfig () {
+      this.$emit('selected-config', this.selectedConfig)
+    },
+    validSettings () {
+      this.$emit('valid-settings', this.validSettings)
+    },
+  },
   methods: {
     initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
       this.selectedContainerImage = container.image
@@ -247,14 +260,6 @@ export default defineComponent({
     },
     isAutoSelectNodeItem (item) {
       return item.raw.data?.kubernetesHostname === this.autoSelectNodeItem.data?.kubernetesHostname
-    },
-  },
-  watch: {
-    selectedConfig () {
-      this.$emit('selected-config', this.selectedConfig)
-    },
-    validSettings () {
-      this.$emit('valid-settings', this.validSettings)
     },
   },
 })

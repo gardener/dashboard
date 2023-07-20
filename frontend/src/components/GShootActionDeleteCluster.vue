@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog v-if="dialog"
+  <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="caption"
@@ -18,23 +19,32 @@ SPDX-License-Identifier: Apache-2.0
         Created By
       </v-list-item-subtitle>
       <v-list-item-title>
-        <g-account-avatar :account-name="shootCreatedBy" :size="22"/>
+        <g-account-avatar
+          :account-name="shootCreatedBy"
+          :size="22"
+        />
       </v-list-item-title>
     </v-list>
     <p>
-      Type <span class="font-weight-bold">{{shootName}}</span> below and confirm the deletion of the cluster and all of its content.
+      Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
     </p>
     <p class="mt-2 text-error font-weight-bold">
       This action cannot be undone.
     </p>
     <p v-if="isShootReconciliationDeactivated">
-      <v-row class="fill-height" >
-        <v-icon color="warning" class="mr-1">mdi-alert-box</v-icon>
+      <v-row class="fill-height">
+        <v-icon
+          color="warning"
+          class="mr-1"
+        >
+          mdi-alert-box
+        </v-icon>
         <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
       </v-row>
     </p>
   </g-shoot-action-dialog>
-  <g-shoot-action-button v-if="button"
+  <g-shoot-action-button
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     icon="mdi-delete"
@@ -63,6 +73,7 @@ export default {
     GShootActionDialog,
     GAccountAvatar,
   },
+  mixins: [shootItem],
   props: {
     modelValue: {
       type: Boolean,
@@ -85,7 +96,9 @@ export default {
       default: false,
     },
   },
-  mixins: [shootItem],
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       renderDialog: false,
@@ -120,9 +133,19 @@ export default {
       return this.buttonTitle
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
+  },
   methods: {
     ...mapActions(useShootStore, [
       'deleteShoot',
@@ -153,19 +176,6 @@ export default {
       }
     },
 
-  },
-  watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
   },
 }
 </script>

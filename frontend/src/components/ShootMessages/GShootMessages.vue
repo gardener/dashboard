@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-popover v-if="visible"
+  <g-popover
+    v-if="visible"
     v-model="popover"
     :toolbar-title="statusTitle"
     :toolbar-color="overallColor"
@@ -27,15 +28,18 @@ SPDX-License-Identifier: Apache-2.0
         class="py-1"
       >
         <v-list-item
-          v-for="({key, icon, severity, component }) in shootMessages"
-          :key="key"
+          v-for="shootMessage in shootMessages"
+          :key="shootMessage.key"
         >
           <template #prepend>
-            <v-icon :icon="icon" :color="colorForSeverity(severity)"/>
+            <v-icon
+              :icon="shootMessage.icon"
+              :color="colorForSeverity(shootMessage.severity)"
+            />
           </template>
           <component
-            :is="component.name"
-            v-bind="component.props"
+            :is="shootMessage.component.name"
+            v-bind="shootMessage.component.props"
             class="g-message"
           />
         </v-list-item>
@@ -72,8 +76,8 @@ export default {
     GConstraintMessage,
     GMaintenanceStatusMessage,
   },
-  inject: ['mainContainer', 'logger'],
   mixins: [shootItem],
+  inject: ['mainContainer', 'logger'],
   props: {
     small: {
       type: Boolean,

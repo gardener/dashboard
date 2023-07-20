@@ -4,7 +4,10 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <component :is="componentName" v-bind="componentProperties"/>
+  <component
+    :is="componentName"
+    v-bind="componentProperties"
+  />
 </template>
 
 <script>
@@ -89,4 +92,4 @@ export default defineComponent({
     }
   },
 })
-</script >
+</script>

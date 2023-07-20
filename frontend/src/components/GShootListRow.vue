@@ -6,13 +6,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr :class="{ 'stale': isStaleShoot }">
-    <td v-for="cell in cells"
+    <td
+      v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
       class="position-relative"
     >
       <template v-if="cell.header.key === 'project'">
-        <router-link class="text-anchor" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+        <router-link
+          class="text-anchor"
+          :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
+        >
           {{ shootProjectName }}
         </router-link>
       </template>
@@ -21,11 +25,14 @@ SPDX-License-Identifier: Apache-2.0
           <v-col class="grow pa-0 ma-0">
             <g-auto-hide right>
               <template #activator>
-                <router-link class="text-anchor" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+                <router-link
+                  class="text-anchor"
+                  :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }"
+                >
                   {{ shootName }}
                 </router-link>
               </template>
-              <g-copy-btn :clipboard-text="shootName"/>
+              <g-copy-btn :clipboard-text="shootName" />
             </g-auto-hide>
           </v-col>
           <v-col class="shrink pa-0 ma-0">
@@ -47,26 +54,29 @@ SPDX-License-Identifier: Apache-2.0
           <template #activator>
             <g-shoot-seed-name :shoot-item="shootItem" />
           </template>
-          <g-copy-btn :clipboard-text="shootSeedName"/>
+          <g-copy-btn :clipboard-text="shootSeedName" />
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'technicalId'">
         <g-auto-hide right>
           <template #activator>
-            <span>{{shootTechnicalId}}</span>
+            <span>{{ shootTechnicalId }}</span>
           </template>
-          <g-copy-btn :clipboard-text="shootTechnicalId"/>
+          <g-copy-btn :clipboard-text="shootTechnicalId" />
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
-        <g-account-avatar :account-name="shootCreatedBy"/>
+        <g-account-avatar :account-name="shootCreatedBy" />
       </template>
       <template v-if="cell.header.key === 'createdAt'">
-        <g-time-string :date-time="shootCreationTimestamp" mode="past"/>
+        <g-time-string
+          :date-time="shootCreationTimestamp"
+          mode="past"
+        />
       </template>
       <template v-if="cell.header.key === 'purpose'">
         <div class="d-flex justify-center">
-          <g-purpose-tag :purpose="shootPurpose"/>
+          <g-purpose-tag :purpose="shootPurpose" />
         </div>
       </template>
       <template v-if="cell.header.key === 'lastOperation'">
@@ -79,43 +89,63 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'k8sVersion'">
         <div class="d-flex justify-center">
-          <g-shoot-version :shoot-item="shootItem" chip/>
+          <g-shoot-version
+            :shoot-item="shootItem"
+            chip
+          />
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
         <div class="d-flex">
-          <g-status-tags :shoot-item="shootItem"/>
+          <g-status-tags :shoot-item="shootItem" />
         </div>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
-          <g-control-plane-high-availability-tag :shoot-item="shootItem" size="small"/>
+          <g-control-plane-high-availability-tag
+            :shoot-item="shootItem"
+            size="small"
+          />
         </div>
       </template>
       <template v-if="cell.header.key === 'issueSince'">
         <v-tooltip location="top">
           <template #activator="{ props }">
             <div v-bind="props">
-              <g-time-string :date-time="shootIssueSinceTimestamp" mode="past" withoutPrefixOrSuffix/>
+              <g-time-string
+                :date-time="shootIssueSinceTimestamp"
+                mode="past"
+                without-prefix-or-suffix
+              />
             </div>
           </template>
           {{ shootIssueSince }}
         </v-tooltip>
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions"/>
+        <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions" />
       </template>
       <template v-if="cell.header.key === 'ticket'">
-        <g-external-link v-if="shootLastUpdatedTicketUrl" :url="shootLastUpdatedTicketUrl">
-          <g-time-string :date-time="shootLastUpdatedTicketTimestamp" mode="past"/>
+        <g-external-link
+          v-if="shootLastUpdatedTicketUrl"
+          :url="shootLastUpdatedTicketUrl"
+        >
+          <g-time-string
+            :date-time="shootLastUpdatedTicketTimestamp"
+            mode="past"
+          />
         </g-external-link>
       </template>
       <template v-if="cell.header.key === 'ticketLabels'">
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <div class="labels" v-else>
-          <g-ticket-label v-for="label in shootTicketLabels"
+        <div
+          v-else
+          class="labels"
+        >
+          <g-ticket-label
+            v-for="label in shootTicketLabels"
             :key="label.id"
             :label="label"
           />
@@ -123,34 +153,52 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.customField">
         <template v-if="cell.value">
-          <v-tooltip location="top" v-if="cell.header.tooltip">
+          <v-tooltip
+            v-if="cell.header.tooltip"
+            location="top"
+          >
             <template #activator="{ props }">
-              <span v-bind="props">{{cell.value}}</span>
+              <span v-bind="props">{{ cell.value }}</span>
             </template>
-            {{cell.header.tooltip}}
+            {{ cell.header.tooltip }}
           </v-tooltip>
-          <span v-else>{{cell.value}}</span>
+          <span v-else>{{ cell.value }}</span>
         </template>
-        <span class="text-grey" v-else-if="cell.header.defaultValue">
-          {{cell.header.defaultValue}}
+        <span
+          v-else-if="cell.header.defaultValue"
+          class="text-grey"
+        >
+          {{ cell.header.defaultValue }}
         </span>
       </template>
       <template v-if="cell.header.key === 'actions'">
-        <v-row class="fill-height" align="center" justify="end">
-          <g-action-button v-if="canGetSecrets"
+        <v-row
+          class="fill-height"
+          align="center"
+          justify="end"
+        >
+          <g-action-button
+            v-if="canGetSecrets"
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
             @click="showDialog('access')"
           />
-          <g-shoot-list-row-actions v-if="canPatchShoots"
+          <g-shoot-list-row-actions
+            v-if="canPatchShoots"
             :shoot-item="shootItem"
           />
         </v-row>
       </template>
-      <v-tooltip location="top" v-if="isStaleShoot">
+      <v-tooltip
+        v-if="isStaleShoot"
+        location="top"
+      >
         <template #activator="{ props }">
-          <div class="stale-overlay" v-bind="props"></div>
+          <div
+            class="stale-overlay"
+            v-bind="props"
+          />
         </template>
         This cluster is no longer part of the list and kept as stale item
       </v-tooltip>
@@ -213,13 +261,16 @@ export default {
     GExternalLink,
     GControlPlaneHighAvailabilityTag,
   },
+  mixins: [shootItem],
   props: {
     visibleHeaders: {
       type: Array,
       required: true,
     },
   },
-  mixins: [shootItem],
+  emits: [
+    'showDialog',
+  ],
   computed: {
     ...mapState(useAuthzStore, [
       'canGetSecrets',
@@ -306,9 +357,6 @@ export default {
       })
     },
   },
-  emits: [
-    'showDialog',
-  ],
   methods: {
     ...mapActions(useTicketStore, {
       latestUpdatedTicket: 'latestUpdated',

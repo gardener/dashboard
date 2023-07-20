@@ -6,7 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <v-tooltip top :disabled="controlPlaneFailureToleranceTypeChangeAllowed" max-width="400px">
+    <v-tooltip
+      top
+      :disabled="controlPlaneFailureToleranceTypeChangeAllowed"
+      max-width="400px"
+    >
       <template #activator="{ props }">
         <div v-bind="props">
           <v-checkbox
@@ -16,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
             hide-details
             :disabled="!controlPlaneFailureToleranceTypeChangeAllowed"
             density="compact"
-            ></v-checkbox>
+          />
         </div>
       </template>
       It is not possible to change the control plane failure tolerance if a type has already been set
@@ -24,10 +28,17 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <v-expand-transition :appear="animateOnAppear" v-else>
+    <v-expand-transition
+      v-else
+      :appear="animateOnAppear"
+    >
       <div>
-        Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
-        <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" variant="outlined">
+        Control plane failure tolerance type <code>{{ controlPlaneFailureToleranceType }}</code> configured
+        <v-alert
+          v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported"
+          type="info"
+          variant="outlined"
+        >
           <template v-if="clusterIsNew">
             <template v-if="seedName">
               The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
@@ -41,19 +52,31 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
         </v-alert>
-        <v-alert type="info" v-if="controlPlaneFailureToleranceTypeChangeAllowed" variant="outlined">
+        <v-alert
+          v-if="controlPlaneFailureToleranceTypeChangeAllowed"
+          type="info"
+          variant="outlined"
+        >
           It is not possible to disable or change control plane high availability later.
         </v-alert>
       </div>
     </v-expand-transition>
-    <div v-if="!!controlPlaneHighAvailabilityHelpHtml" class="wrap-text" v-html="controlPlaneHighAvailabilityHelpHtml"></div>
-    <g-external-link v-else url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md">More information</g-external-link>
+    <!-- eslint-disable vue/no-v-html -->
+    <div
+      v-if="!!controlPlaneHighAvailabilityHelpHtml"
+      class="wrap-text"
+      v-html="controlPlaneHighAvailabilityHelpHtml"
+    />
+    <g-external-link
+      v-else
+      url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md"
+    >
+      More information
+    </g-external-link>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapState, mapActions } from 'pinia'
 import { transformHtml } from '@/utils'
 import some from 'lodash/some'
@@ -65,7 +88,7 @@ import {
   useSeedStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GExternalLink,
   },
@@ -107,6 +130,15 @@ export default defineComponent({
       return transformHtml(this.controlPlaneHighAvailabilityHelpText, true)
     },
   },
+  watch: {
+    zoneSupported (value) {
+      this.resetToleranceType(value)
+    },
+  },
+  mounted () {
+    this.resetToleranceType(this.zoneSupported)
+    this.animateOnAppear = true
+  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'seedsByCloudProfileName',
@@ -128,14 +160,5 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    zoneSupported (value) {
-      this.resetToleranceType(value)
-    },
-  },
-  mounted () {
-    this.resetToleranceType(this.zoneSupported)
-    this.animateOnAppear = true
-  },
-})
+}
 </script>

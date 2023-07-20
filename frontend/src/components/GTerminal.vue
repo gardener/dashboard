@@ -5,7 +5,12 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height" :id="`boundary_${uuid}`">
+  <div
+    :id="`boundary_${uuid}`"
+    v-resize="onResize"
+    :class="backgroundClass"
+    class="d-flex flex-column fill-height"
+  >
     <v-snackbar
       v-model="snackbarTop"
       :timeout="-1"
@@ -14,7 +19,8 @@ SPDX-License-Identifier: Apache-2.0
       multi-line
     >
       <div>{{ snackbarText }}</div>
-      <g-popover v-if="snackbarDetailsText"
+      <g-popover
+        v-if="snackbarDetailsText"
         toolbar-title="Details"
         placement="bottom"
         :boundary="`#boundary_${uuid}`"
@@ -30,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-btn>
         </template>
         <template #text>
-          {{snackbarDetailsText}}
+          {{ snackbarDetailsText }}
         </template>
       </g-popover>
       <v-btn
@@ -78,11 +84,17 @@ SPDX-License-Identifier: Apache-2.0
             class="text-none g-system-bar-button g-ignore-drag"
             @click="deleteTerminal"
           />
-          <v-spacer/>
-          <v-icon class="pr-2" color="grey-lighten-1">mdi-console</v-icon>
-          <span class="text-grey-lighten-1">{{terminalTitle}}</span>
-          <v-spacer/>
-          <v-tooltip v-if="terminalSession.imageHelpText"
+          <v-spacer />
+          <v-icon
+            class="pr-2"
+            color="grey-lighten-1"
+          >
+            mdi-console
+          </v-icon>
+          <span class="text-grey-lighten-1">{{ terminalTitle }}</span>
+          <v-spacer />
+          <v-tooltip
+            v-if="terminalSession.imageHelpText"
             location="top"
             class="g-ignore-drag"
           >
@@ -94,7 +106,8 @@ SPDX-License-Identifier: Apache-2.0
                 :boundary="`#boundary_${uuid}`"
               >
                 <template #activator="{ props: activatorProps }">
-                  <v-btn v-if="terminalSession.imageHelpText"
+                  <v-btn
+                    v-if="terminalSession.imageHelpText"
                     v-bind="mergeProps(activatorProps, tooltipProps)"
                     icon="mdi-help-circle-outline"
                     size="small"
@@ -104,7 +117,8 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <template #text>
-                  <span v-html="imageHelpHtml"></span>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <span v-html="imageHelpHtml" />
                 </template>
               </g-popover>
             </template>
@@ -135,11 +149,16 @@ SPDX-License-Identifier: Apache-2.0
                   @click="split('horizontal')"
                 >
                   <div class="d-flex g-burger-menu-button">
-                    <g-icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
-                      <g-split-vertically></g-split-vertically>
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      class="mr-2"
+                    >
+                      <g-split-vertically />
                     </g-icon-base>
                     <span>Split Pane Vertically</span>
-                    <v-spacer/>
+                    <v-spacer />
                     <span>(ctrl + shift + v)</span>
                   </div>
                 </v-btn>
@@ -152,16 +171,21 @@ SPDX-License-Identifier: Apache-2.0
                   @click="split('vertical')"
                 >
                   <div class="d-flex g-burger-menu-button">
-                    <g-icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
-                      <g-split-horizontally></g-split-horizontally>
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      class="mr-2"
+                    >
+                      <g-split-horizontally />
                     </g-icon-base>
                     <span>Split Pane Horizontally</span>
-                    <v-spacer/>
+                    <v-spacer />
                     <span>(ctrl + shift + h)</span>
                   </div>
                 </v-btn>
               </v-card-actions>
-              <v-divider class="mt-1 mb-1"></v-divider>
+              <v-divider class="mt-1 mb-1" />
               <v-card-actions>
                 <v-btn
                   size="small"
@@ -170,7 +194,9 @@ SPDX-License-Identifier: Apache-2.0
                   @click="configure('settingsBtn')"
                 >
                   <div class="d-flex g-burger-menu-button">
-                    <v-icon class="mr-2">mdi-cog</v-icon>
+                    <v-icon class="mr-2">
+                      mdi-cog
+                    </v-icon>
                     Settings
                   </div>
                 </v-btn>
@@ -180,15 +206,25 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template #component>
-        <div ref="container" class="terminal-container"></div>
-        <div class="g-system-bar" :class="backgroundClass">
+        <div
+          ref="container"
+          class="terminal-container"
+        />
+        <div
+          class="g-system-bar"
+          :class="backgroundClass"
+        >
           <v-menu
             v-model="connectionMenu"
             location="top"
             offset-y
           >
             <template #activator="{ props: menuProps }">
-              <v-tooltip :disabled="connectionMenu" location="top" style="min-width: 110px">
+              <v-tooltip
+                :disabled="connectionMenu"
+                location="top"
+                style="min-width: 110px"
+              >
                 <template #activator="{ props: tooltipProps }">
                   <v-btn
                     v-bind="mergeProps(menuProps, tooltipProps)"
@@ -197,14 +233,20 @@ SPDX-License-Identifier: Apache-2.0
                     color="grey-lighten-1"
                     class="text-none g-system-bar-button"
                   >
-                    <g-icon-base width="18" height="18" view-box="-2 -2 30 30" icon-color="#bdbdbd" class="mr-2">
-                      <g-connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></g-connected>
-                      <g-disconnected v-else></g-disconnected>
+                    <g-icon-base
+                      width="18"
+                      height="18"
+                      view-box="-2 -2 30 30"
+                      icon-color="#bdbdbd"
+                      class="mr-2"
+                    >
+                      <g-connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED" />
+                      <g-disconnected v-else />
                     </g-icon-base>
-                    <span class="text-none text-grey-lighten-1">{{connectionStateText}}</span>
+                    <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
                   </v-btn>
                 </template>
-                {{terminalSession.detailedConnectionStateText || connectionStateText}}
+                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
               </v-tooltip>
             </template>
             <v-card rounded="0">
@@ -215,17 +257,28 @@ SPDX-License-Identifier: Apache-2.0
                   class="action-button"
                   @click="retry()"
                 >
-                  <v-icon size="small" start>mdi-reload</v-icon>
+                  <v-icon
+                    size="small"
+                    start
+                  >
+                    mdi-reload
+                  </v-icon>
                   Reconnect
                 </v-btn>
               </v-card-actions>
-              <v-card-text v-else class="ml-2 mr-2">
-                {{terminalSession.detailedConnectionStateText || connectionStateText}}
+              <v-card-text
+                v-else
+                class="ml-2 mr-2"
+              >
+                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
               </v-card-text>
             </v-card>
           </v-menu>
 
-          <v-tooltip v-if="imageShortText" location="top">
+          <v-tooltip
+            v-if="imageShortText"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -236,14 +289,19 @@ SPDX-License-Identifier: Apache-2.0
                 class="text-none g-system-bar-button"
                 @click="configure('imageBtn')"
               >
-                <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
-                <span>{{imageShortText}}</span>
+                <v-icon class="mr-2">
+                  mdi-layers-triple-outline
+                </v-icon>
+                <span>{{ imageShortText }}</span>
               </v-btn>
             </template>
-            Image: {{terminalSession.container.image}}
+            Image: {{ terminalSession.container.image }}
           </v-tooltip>
 
-          <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" location="top">
+          <v-tooltip
+            v-if="privilegedMode !== undefined && target === 'shoot'"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -254,16 +312,21 @@ SPDX-License-Identifier: Apache-2.0
                 class="text-none g-system-bar-button"
                 @click="configure('secContextBtn')"
               >
-                <v-icon class="mr-2">mdi-shield-account</v-icon>
-                <span>{{privilegedModeText}}</span>
+                <v-icon class="mr-2">
+                  mdi-shield-account
+                </v-icon>
+                <span>{{ privilegedModeText }}</span>
               </v-btn>
             </template>
-            <strong>Privileged:</strong> {{terminalSession.container.privileged}}<br/>
-            <strong>Host PID:</strong> {{terminalSession.hostPID}}<br/>
-            <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
+            <strong>Privileged:</strong> {{ terminalSession.container.privileged }}<br>
+            <strong>Host PID:</strong> {{ terminalSession.hostPID }}<br>
+            <strong>Host Network:</strong> {{ terminalSession.hostNetwork }}
           </v-tooltip>
 
-          <v-tooltip v-if="terminalSession.node && target === 'shoot'" location="top">
+          <v-tooltip
+            v-if="terminalSession.node && target === 'shoot'"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -274,11 +337,16 @@ SPDX-License-Identifier: Apache-2.0
                 class="text-none g-system-bar-button"
                 @click="configure('nodeBtn')"
               >
-                <v-icon :size="14" class="mr-2">mdi-server</v-icon>
-                <span>{{terminalSession.node}}</span>
+                <v-icon
+                  :size="14"
+                  class="mr-2"
+                >
+                  mdi-server
+                </v-icon>
+                <span>{{ terminalSession.node }}</span>
               </v-btn>
             </template>
-            Node: {{terminalSession.node}}
+            Node: {{ terminalSession.node }}
           </v-tooltip>
         </div>
       </template>
@@ -286,12 +354,12 @@ SPDX-License-Identifier: Apache-2.0
     <g-terminal-settings-dialog
       ref="settings"
       :target="target"
-    ></g-terminal-settings-dialog>
+    />
   </div>
 </template>
 
 <script>
-import { defineComponent, nextTick, reactive } from 'vue'
+import { reactive } from 'vue'
 import { mapState } from 'pinia'
 
 import {
@@ -323,7 +391,7 @@ import GDisconnected from '@/components/icons/GDisconnected.vue'
 import GSplitVertically from '@/components/icons/GSplitVertically.vue'
 import GSplitHorizontally from '@/components/icons/GSplitHorizontally.vue'
 
-export default defineComponent({
+export default {
   components: {
     GTerminalSettingsDialog,
     GIconBase,
@@ -344,6 +412,10 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: [
+    'terminated',
+    'split',
+  ],
   data () {
     return {
       hasFocus: true,
@@ -453,6 +525,49 @@ export default defineComponent({
     target () {
       return this.data.target
     },
+  },
+  watch: {
+    splitpaneResize () {
+      this.onResize()
+    },
+  },
+  mounted () {
+    const term = this.term = new Terminal({
+      fontSize: 15,
+      fontWeight: 600,
+      fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
+    })
+    const fitAddon = this.fitAddon = new FitAddon()
+    const focusAddon = new FocusAddon(this.uuid, this.$store)
+    focusAddon.onFocus = () => {
+      term.options.theme = { background: '#000' }
+      this.hasFocus = true
+    }
+    focusAddon.onBlur = () => {
+      term.options.theme = { background: '#333' }
+      this.hasFocus = false
+    }
+
+    term.open(this.$refs.container)
+    term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
+    term.loadAddon(fitAddon)
+    term.loadAddon(new WebLinksAddon())
+
+    term.focus()
+    this.$nextTick(() => {
+      // use nextTick as xterm needs to be finished with rendering because fitAddon relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
+      fitAddon.fit()
+    })
+
+    this.spinner = new Spinner(term)
+    this.connect()
+  },
+  beforeUnmount () {
+    this.cancelConnectAndClose()
+    if (this.term) {
+      this.term.dispose()
+    }
   },
   methods: {
     focus () {
@@ -568,50 +683,7 @@ export default defineComponent({
       this.$emit('split', orientation)
     },
   },
-  mounted () {
-    const term = this.term = new Terminal({
-      fontSize: 15,
-      fontWeight: 600,
-      fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
-    })
-    const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid, this.$store)
-    focusAddon.onFocus = () => {
-      term.options.theme = { background: '#000' }
-      this.hasFocus = true
-    }
-    focusAddon.onBlur = () => {
-      term.options.theme = { background: '#333' }
-      this.hasFocus = false
-    }
-
-    term.open(this.$refs.container)
-    term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
-    term.loadAddon(fitAddon)
-    term.loadAddon(new WebLinksAddon())
-
-    term.focus()
-    nextTick(() => {
-      // use nextTick as xterm needs to be finished with rendering because fitAddon relies on
-      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      fitAddon.fit()
-    })
-
-    this.spinner = new Spinner(term)
-    this.connect()
-  },
-  beforeUnmount () {
-    this.cancelConnectAndClose()
-    if (this.term) {
-      this.term.dispose()
-    }
-  },
-  watch: {
-    splitpaneResize () {
-      this.onResize()
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

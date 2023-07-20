@@ -6,7 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <div class="text-h6 text-grey-darken-1 my-4">Configuration</div>
+    <div class="text-h6 text-grey-darken-1 my-4">
+      Configuration
+    </div>
     The following is a sample configuration for
     <span class="font-family-monospace pl-1">gardenlogin</span>
     as well as
@@ -30,13 +32,19 @@ SPDX-License-Identifier: Apache-2.0
       :show-copy-button="true"
     />
     <div class="mt-2">
-      <v-icon icon="mdi-information-outline" class="pb-1" size="small"/>
+      <v-icon
+        icon="mdi-information-outline"
+        class="pb-1"
+        size="small"
+      />
       Note that the
       <span class="font-family-monospace">kubeconfig</span>
       refers to the path of the garden cluster
       <span class="font-family-monospace">kubeconfig</span>
       which you can download from the
-      <router-link :to="accountRoute">Account</router-link>
+      <router-link :to="accountRoute">
+        Account
+      </router-link>
       page.
     </div>
   </div>

@@ -14,7 +14,9 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="userList.length > 3"
+          <v-text-field
+            v-if="userList.length > 3"
+            v-model="userFilter"
             class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -26,10 +28,12 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             clear-icon="mdi-close"
             density="compact"
-            v-model="userFilter"
             @keyup.esc="userFilter = ''"
-          ></v-text-field>
-          <v-tooltip location="top" v-if="allEmails" >
+          />
+          <v-tooltip
+            v-if="allEmails"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -39,15 +43,29 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span>Mail to all Members</span>
           </v-tooltip>
-          <v-tooltip location="top" v-if="canManageMembers" >
+          <v-tooltip
+            v-if="canManageMembers"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openUserAddDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                @click.stop="openUserAddDialog"
+              />
             </template>
             <span>Add Member</span>
           </v-tooltip>
-          <v-tooltip location="top" v-if="canManageMembers" >
+          <v-tooltip
+            v-if="canManageMembers"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-help-circle-outline" @click.stop="openUserHelpDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-help-circle-outline"
+                @click.stop="openUserHelpDialog"
+              />
             </template>
             <span>Help</span>
           </v-tooltip>
@@ -55,12 +73,14 @@ SPDX-License-Identifier: Apache-2.0
             :headers="userAccountTableHeaders"
             @set-selected-header="setSelectedHeaderUserAccount"
             @reset="resetTableSettingsUserAccount"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!userList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add users to your project.</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add users to your project.
+        </div>
         <p class="text-body-1">
           Adding users to your project allows you to collaborate across your team.
           Access to resources within your project can be configured by assigning roles.
@@ -68,11 +88,11 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table
         v-else
-        :headers="visibleUserAccountTableHeaders"
-        :items="userSortedList"
         v-model:page="userPage"
         v-model:sort-by="userSortBy"
         v-model:items-per-page="userItemsPerPage"
+        :headers="visibleUserAccountTableHeaders"
+        :items="userSortedList"
         :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleUserAccountTableHeaders)"
         must-sort
@@ -82,18 +102,18 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-user-row
+            :key="item.raw.username"
             :item="item.raw"
             :headers="userAccountTableHeaders"
-            :key="item.raw.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
-          ></g-user-row>
+          />
         </template>
         <template #bottom="{ pageCount }">
           <g-data-table-footer
-            :items-length="userList.length"
             v-model:page="userPage"
             v-model:items-per-page="userItemsPerPage"
+            :items-length="userList.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
@@ -108,7 +128,9 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="serviceAccountList.length > 3"
+          <v-text-field
+            v-if="serviceAccountList.length > 3"
+            v-model="serviceAccountFilter"
             class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -120,18 +142,28 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             clear-icon="mdi-close"
             density="compact"
-            v-model="serviceAccountFilter"
             @keyup.esc="serviceAccountFilter = ''"
-          ></v-text-field>
-          <v-tooltip location="top" v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
+          />
+          <v-tooltip
+            v-if="canManageServiceAccountMembers && canCreateServiceAccounts"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openServiceAccountAddDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                @click.stop="openServiceAccountAddDialog"
+              />
             </template>
             <span>Create Service Account</span>
           </v-tooltip>
           <v-tooltip location="top">
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon ="mdi-help-circle-outline" @click.stop="openServiceAccountHelpDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-help-circle-outline"
+                @click.stop="openServiceAccountHelpDialog"
+              />
             </template>
             <span>Help</span>
           </v-tooltip>
@@ -139,12 +171,14 @@ SPDX-License-Identifier: Apache-2.0
             :headers="serviceAccountTableHeaders"
             @set-selected-header="setSelectedHeaderServiceAccount"
             @reset="resetTableSettingsServiceAccount"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add service accounts to your project.</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add service accounts to your project.
+        </div>
         <p class="text-body-1">
           Adding service accounts to your project allows you to automate processes in your project.
           Access to resources within your project can be configured by assigning roles.
@@ -152,11 +186,11 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table
         v-else
-        :headers="visibleServiceAccountTableHeaders"
-        :items="serviceAccountSortedList"
         v-model:page="serviceAccountPage"
         v-model:sort-by="serviceAccountSortBy"
         v-model:items-per-page="serviceAccountItemsPerPage"
+        :headers="visibleServiceAccountTableHeaders"
+        :items="serviceAccountSortedList"
         :items-per-page-options="itemsPerPageOptions"
         must-sort
         :search="serviceAccountFilter"
@@ -165,21 +199,21 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-service-account-row
+            :key="`${item.raw.namespace}_${item.raw.username}`"
             :item="item.raw"
             :headers="serviceAccountTableHeaders"
-            :key="`${item.raw.namespace}_${item.raw.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
             @reset-serviceaccount="onResetServiceAccount"
             @delete="onGDeleteServiceAccount"
             @edit="onEditServiceAccount"
-          ></g-service-account-row>
+          />
         </template>
         <template #bottom="{ pageCount }">
           <g-data-table-footer
-            :items-length="serviceAccountList.length"
             v-model:page="serviceAccountPage"
             v-model:items-per-page="serviceAccountItemsPerPage"
+            :items-length="serviceAccountList.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
@@ -187,27 +221,62 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <g-member-dialog type="adduser" v-model="userAddDialog"></g-member-dialog>
-    <g-member-dialog type="addservice" v-model="serviceAccountAddDialog"></g-member-dialog>
-    <g-member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></g-member-dialog>
-    <g-member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" :orphaned="orphaned" v-model="serviceAccountUpdateDialog"></g-member-dialog>
-    <g-member-help-dialog type="service" v-model="serviceAccountHelpDialog"></g-member-help-dialog>
-    <g-member-help-dialog type="user" v-model="userHelpDialog"></g-member-help-dialog>
-    <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
+    <g-member-dialog
+      v-model="userAddDialog"
+      type="adduser"
+    />
+    <g-member-dialog
+      v-model="serviceAccountAddDialog"
+      type="addservice"
+    />
+    <g-member-dialog
+      v-model="userUpdateDialog"
+      type="updateuser"
+      :name="memberName"
+      :is-current-user="isCurrentUser(memberName)"
+      :roles="memberRoles"
+    />
+    <g-member-dialog
+      v-model="serviceAccountUpdateDialog"
+      type="updateservice"
+      :name="memberName"
+      :description="serviceAccountDescription"
+      :is-current-user="isCurrentUser(memberName)"
+      :roles="memberRoles"
+      :orphaned="orphaned"
+    />
+    <g-member-help-dialog
+      v-model="serviceAccountHelpDialog"
+      type="service"
+    />
+    <g-member-help-dialog
+      v-model="userHelpDialog"
+      type="user"
+    />
+    <g-confirm-dialog ref="confirmDialog" />
 
-    <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
+    <v-dialog
+      v-model="kubeconfigDialog"
+      persistent
+      max-width="67%"
+    >
       <v-card>
         <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">
-          <div class="text-h5">Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code></div>
-          <v-spacer></v-spacer>
+          <div class="text-h5">
+            Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code>
+          </div>
+          <v-spacer />
           <g-action-button
             icon="mdi-close"
-            @click="kubeconfigDialog = false"
             color="toolbar-title"
+            @click="kubeconfigDialog = false"
           />
         </v-card-title>
         <v-card-text>
-          <g-code-block lang="yaml" :content="currentServiceAccountKubeconfig"></g-code-block>
+          <g-code-block
+            lang="yaml"
+            :content="currentServiceAccountKubeconfig"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>

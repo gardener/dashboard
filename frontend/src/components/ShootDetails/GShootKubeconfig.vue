@@ -6,13 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list-item>
-    <template v-slot:prepend>
-      <v-icon :icon="icon" color="primary"/>
+    <template #prepend>
+      <v-icon
+        :icon="icon"
+        color="primary"
+      />
     </template>
     <g-list-item-content v-if="isGardenloginType">
       Kubeconfig - Gardenlogin
       <div class="text-body-2">
-        <span v-if="isKubeconfigAvailable" class="wrap-text">
+        <span
+          v-if="isKubeconfigAvailable"
+          class="wrap-text"
+        >
           Does not contain credentials
           (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)
         </span>
@@ -30,21 +36,24 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else-if="!isKubeconfigAvailable">
           Static token kubeconfig currently not available
         </span>
-        <span v-else class="wrap-text">
+        <span
+          v-else
+          class="wrap-text"
+        >
           Contains static token credential.
           Not recommended, consider disabling the static token kubeconfig
         </span>
       </div>
     </g-list-item-content>
-    <template v-slot:append>
-      <g-gardenlogin-info v-if="isGardenloginType"/>
+    <template #append>
+      <g-gardenlogin-info v-if="isGardenloginType" />
       <template v-if="isKubeconfigAvailable">
         <g-action-button
           icon="mdi-download"
           tooltip="Download Kubeconfig"
           @click.stop="onDownload"
         />
-        <g-copy-btn :clipboard-text="kubeconfig"/>
+        <g-copy-btn :clipboard-text="kubeconfig" />
         <g-action-button
           :icon="kubeconfigVisibilityIcon"
           :tooltip="kubeconfigVisibilityTitle"
@@ -52,12 +61,14 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
 
-      <g-static-token-kubeconfig-configuration v-if="!isGardenloginType"
-        :shootItem="shootItem"
+      <g-static-token-kubeconfig-configuration
+        v-if="!isGardenloginType"
+        :shoot-item="shootItem"
       />
     </template>
   </g-list-item>
-  <g-list-item v-if="kubeconfigExpansionPanel"
+  <g-list-item
+    v-if="kubeconfigExpansionPanel"
     key="expansion-gardenlogin-kubeconfig"
   >
     <g-list-item-content>
@@ -136,6 +147,11 @@ export default defineComponent({
       return `${prefix}--${this.shootProjectName}--${this.shootName}.yaml`
     },
   },
+  watch: {
+    kubeconfig (value) {
+      this.reset()
+    },
+  },
   methods: {
     toggleKubeconfig () {
       this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
@@ -148,11 +164,6 @@ export default defineComponent({
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')
       }
-    },
-  },
-  watch: {
-    kubeconfig (value) {
-      this.reset()
     },
   },
 })

@@ -4,8 +4,12 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 
-<template >
-  <v-dialog v-model="visible" max-width="650" persistent>
+<template>
+  <v-dialog
+    v-model="visible"
+    max-width="650"
+    persistent
+  >
     <v-card>
       <g-toolbar
         prepend-icon="mdi-account-plus"
@@ -13,41 +17,47 @@ SPDX-License-Identifier: Apache-2.0
       />
       <v-card-text>
         <v-container class="px-0">
-          <v-row >
+          <v-row>
             <v-col cols="7">
               <v-text-field
+                ref="internalName"
+                v-model.trim="internalName"
                 :disabled="isUpdateDialog"
                 color="primary"
-                ref="internalName"
                 :label="nameLabel"
-                v-model.trim="internalName"
                 :error-messages="getErrorMessages('internalName')"
-                @update:model-value="v$.$touch()"
-                @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
                 variant="underlined"
-              ></v-text-field>
+                @update:model-value="v$.$touch()"
+                @keyup.enter="submitAddMember()"
+              />
             </v-col>
             <v-col cols="5">
               <v-select
+                v-model="internalRoles"
                 color="primary"
                 label="Roles"
                 :items="roleItems"
                 multiple
                 item-title="displayName"
                 item-value="name"
-                v-model="internalRoles"
                 :error-messages="getErrorMessages('internalRoles')"
-                @update:model-value="v$.internalRoles.$touch()"
                 :hint="rolesHint"
                 persistent-hint
                 tabindex="2"
                 variant="underlined"
-                >
+                @update:model-value="v$.internalRoles.$touch()"
+              >
                 <template #selection="{ item, index }">
-                  <v-chip size="small" color="primary" variant="outlined" closable @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()">
+                  <v-chip
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    closable
+                    @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()"
+                  >
                     <span>{{ item.raw.displayName }}</span>
                   </v-chip>
                 </template>
@@ -57,13 +67,13 @@ SPDX-License-Identifier: Apache-2.0
           <v-row v-if="isServiceDialog && !isForeignServiceAccount">
             <v-col cols="12">
               <v-text-field
+                v-model.trim="internalDescription "
                 color="primary"
                 label="Description"
-                v-model.trim="internalDescription "
-                @keyup.enter="submitAddMember() "
                 tabindex="3"
                 variant="underlined"
-              ></v-text-field>
+                @keyup.enter="submitAddMember() "
+              />
             </v-col>
           </v-row>
           <v-row class="mt-3">
@@ -76,23 +86,50 @@ SPDX-License-Identifier: Apache-2.0
             >
               The service account does not exist anymore and will be re-created if you update the roles.
             </v-alert>
-            <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+            <g-message
+              v-model:message="errorMessage"
+              v-model:detailed-message="detailedErrorMessage"
+              color="error"
+            />
           </v-row>
         </v-container>
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" @click.stop="cancel" tabindex="5">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" variant="text" @click.stop="submitUpdateMember" :disabled="!valid" class="text-primary" tabindex="4">Update</v-btn>
-        <v-btn v-else variant="text" @click.stop="submitAddMember" :disabled="!valid" class="text-primary" tabindex="4">{{addMemberButtonText}}</v-btn>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          tabindex="5"
+          @click.stop="cancel"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="isUpdateDialog"
+          variant="text"
+          :disabled="!valid"
+          class="text-primary"
+          tabindex="4"
+          @click.stop="submitUpdateMember"
+        >
+          Update
+        </v-btn>
+        <v-btn
+          v-else
+          variant="text"
+          :disabled="!valid"
+          class="text-primary"
+          tabindex="4"
+          @click.stop="submitAddMember"
+        >
+          {{ addMemberButtonText }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required, requiredIf } from '@vuelidate/validators'
@@ -114,12 +151,7 @@ import { useAuthnStore, useAuthzStore, useMemberStore } from '@/store'
 const defaultUsername = ''
 const defaultServiceName = 'robot'
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GMessage,
     GToolbar,
@@ -152,6 +184,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       internalName: undefined,
@@ -327,6 +364,13 @@ export default defineComponent({
       return 'Add'
     },
   },
+  watch: {
+    modelValue: function (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     ...mapActions(useMemberStore, [
       'addMember',
@@ -442,13 +486,5 @@ export default defineComponent({
       return name
     },
   },
-  watch: {
-    modelValue: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
-
+}
 </script>

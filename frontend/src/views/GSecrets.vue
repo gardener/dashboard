@@ -14,7 +14,9 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="infrastructureSecretItems.length > 3"
+          <v-text-field
+            v-if="infrastructureSecretItems.length > 3"
+            v-model="infraSecretFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
@@ -26,18 +28,21 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             flat
             class="mr-3"
-            v-model="infraSecretFilter"
             @keyup.esc="infraSecretFilter = ''"
-          ></v-text-field>
+          />
           <v-menu
             v-if="canCreateSecrets"
-            location="left"
             v-model="createInfraSecretMenu"
-            absolute>
+            location="left"
+            absolute
+          >
             <template #activator="{ props: menuProps }">
               <v-tooltip location="top">
                 <template #activator="{ props: tooltipProps }">
-                  <v-btn v-bind="mergeProps(menuProps, tooltipProps)" icon="mdi-plus" />
+                  <v-btn
+                    v-bind="mergeProps(menuProps, tooltipProps)"
+                    icon="mdi-plus"
+                  />
                 </template>
                 Create Infrastructure Secret
               </v-tooltip>
@@ -46,9 +51,16 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-title class="ma-2 justify-center">
                 Create Infrastructure Secret
               </v-list-item-title>
-              <v-list-item v-for="infrastructure in sortedInfrastructureKindList" :key="infrastructure" @click="openSecretAddDialog(infrastructure)">
+              <v-list-item
+                v-for="infrastructure in sortedInfrastructureKindList"
+                :key="infrastructure"
+                @click="openSecretAddDialog(infrastructure)"
+              >
                 <template #prepend>
-                  <g-vendor-icon :icon="infrastructure" :size="24"/>
+                  <g-vendor-icon
+                    :icon="infrastructure"
+                    :size="24"
+                  />
                 </template>
                 <v-list-item-title>
                   {{ infrastructure }}
@@ -60,28 +72,34 @@ SPDX-License-Identifier: Apache-2.0
             :headers="infraSecretTableHeaders"
             @set-selected-header="setSelectedInfraHeader"
             @reset="resetInfraTableSettings"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!sortedInfrastructureKindList.length">
-        <v-alert class="ma-3" type="warning">
+        <v-alert
+          class="ma-3"
+          type="warning"
+        >
           No supported cloud profile found.
           There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's seed selector.
         </v-alert>
       </v-card-text>
       <v-card-text v-else-if="!infrastructureSecretItems.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add Infrastructure Secrets to your project</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add Infrastructure Secrets to your project
+        </div>
         <p class="text-body-1">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
-      <v-data-table v-else
-        :headers="visibleInfraSecretTableHeaders"
-        :items="infrastructureSecretSortedItems"
+      <v-data-table
+        v-else
         v-model:sort-by="infraSecretSortBy"
         v-model:page="infraSecretPage"
         v-model:items-per-page="infraSecretItemsPerPage"
+        :headers="visibleInfraSecretTableHeaders"
+        :items="infrastructureSecretSortedItems"
         :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleInfraSecretTableHeaders)"
         must-sort
@@ -91,18 +109,18 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             :item="item.raw"
             :headers="infraSecretTableHeaders"
-            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
-          ></g-secret-row-infra>
+          />
         </template>
         <template #bottom="{ pageCount }">
           <g-data-table-footer
-            :items-length="infrastructureSecretItems.length"
             v-model:page="infraSecretPage"
             v-model:items-per-page="infraSecretItemsPerPage"
+            :items-length="infrastructureSecretItems.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
@@ -110,14 +128,19 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
     </v-card>
 
-    <v-card class="ma-3 mt-6" v-if="dnsProviderTypes.length">
+    <v-card
+      v-if="dnsProviderTypes.length"
+      class="ma-3 mt-6"
+    >
       <g-toolbar
         prepend-icon="mdi-key"
         title="DNS Secrets"
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="dnsSecretItems.length > 3"
+          <v-text-field
+            v-if="dnsSecretItems.length > 3"
+            v-model="dnsSecretFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
@@ -129,18 +152,21 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             flat
             class="mr-3"
-            v-model="dnsSecretFilter"
             @keyup.esc="dnsSecretFilter = ''"
-          ></v-text-field>
+          />
           <v-menu
             v-if="canCreateSecrets"
-            location="left"
             v-model="createDnsSecretMenu"
-            absolute>
+            location="left"
+            absolute
+          >
             <template #activator="{ props: menuProps }">
               <v-tooltip location="top">
                 <template #activator="{ props: tooltipProps }">
-                  <v-btn v-bind="mergeProps(menuProps, tooltipProps)" icon="mdi-plus" />
+                  <v-btn
+                    v-bind="mergeProps(menuProps, tooltipProps)"
+                    icon="mdi-plus"
+                  />
                 </template>
                 Create DNS Secret
               </v-tooltip>
@@ -149,12 +175,19 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-title class="ma-2 justify-center">
                 Create DNS Secret
               </v-list-item-title>
-              <v-list-item v-for="dnsProvider in dnsProviderTypes" :key="dnsProvider" @click="openSecretAddDialog(dnsProvider)">
+              <v-list-item
+                v-for="dnsProvider in dnsProviderTypes"
+                :key="dnsProvider"
+                @click="openSecretAddDialog(dnsProvider)"
+              >
                 <template #prepend>
-                  <g-vendor-icon :icon="dnsProvider" :size="24"/>
+                  <g-vendor-icon
+                    :icon="dnsProvider"
+                    :size="24"
+                  />
                 </template>
                 <v-list-item-title>
-                    {{ dnsProvider }}
+                  {{ dnsProvider }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -163,22 +196,25 @@ SPDX-License-Identifier: Apache-2.0
             :headers="dnsSecretTableHeaders"
             @set-selected-header="setSelectedDnsHeader"
             @reset="resetDnsTableSettings"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!dnsSecretItems.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add DNS Secrets to your project</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add DNS Secrets to your project
+        </div>
         <p class="text-body-1">
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
         </p>
       </v-card-text>
-      <v-data-table v-else
-        :headers="visibleDnsSecretTableHeaders"
-        :items="dnsSecretSortedItems"
+      <v-data-table
+        v-else
         v-model:page="dnsSecretPage"
         v-model:sort-by="dnsSecretSortBy"
         v-model:items-per-page="dnsSecretItemsPerPage"
+        :headers="visibleDnsSecretTableHeaders"
+        :items="dnsSecretSortedItems"
         :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleDnsSecretTableHeaders)"
         must-sort
@@ -188,18 +224,18 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             :item="item.raw"
             :headers="dnsSecretTableHeaders"
-            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
-          ></g-secret-row-dns>
+          />
         </template>
         <template #bottom="{ pageCount }">
           <g-data-table-footer
-            :items-length="dnsSecretItems.length"
             v-model:page="dnsSecretPage"
             v-model:items-per-page="dnsSecretItemsPerPage"
+            :items-length="dnsSecretItems.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
@@ -208,9 +244,10 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
 
     <g-secret-dialog-wrapper
-      :visible-dialog="visibleSecretDialog" :selected-secret="selectedSecret"
+      :visible-dialog="visibleSecretDialog"
+      :selected-secret="selectedSecret"
       @dialog-closed="onDialogClosed"
-    ></g-secret-dialog-wrapper>
+    />
   </v-container>
 </template>
 
@@ -443,6 +480,16 @@ export default defineComponent({
       }))
     },
   },
+  mounted () {
+    if (!get(this.$route.params, 'name')) {
+      return
+    }
+    const secret = this.getCloudProviderSecretByName(this.$route.params)
+    if (!secret || !isOwnSecret(secret)) {
+      return
+    }
+    this.onUpdateSecret(secret)
+  },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
@@ -525,16 +572,6 @@ export default defineComponent({
       return mapValues(tableKeys, () => () => 0)
     },
     mergeProps,
-  },
-  mounted () {
-    if (!get(this.$route.params, 'name')) {
-      return
-    }
-    const secret = this.getCloudProviderSecretByName(this.$route.params)
-    if (!secret || !isOwnSecret(secret)) {
-      return
-    }
-    this.onUpdateSecret(secret)
   },
 })
 </script>

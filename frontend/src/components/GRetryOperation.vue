@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top" v-if="canRetry">
+  <v-tooltip
+    v-if="canRetry"
+    location="top"
+  >
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
@@ -30,13 +33,13 @@ import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 
 export default defineComponent({
+  mixins: [shootItem],
+  inject: ['api', 'logger'],
   data () {
     return {
       retryingOperation: false,
     }
   },
-  mixins: [shootItem],
-  inject: ['api', 'logger'],
   computed: {
     canRetry () {
       const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration && !!this.shootObservedGeneration

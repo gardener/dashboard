@@ -10,7 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     <g-list>
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">mdi-sleep</v-icon>
+          <v-icon color="primary">
+            mdi-sleep
+          </v-icon>
         </template>
         <g-list-item-content>
           Hibernation
@@ -39,10 +41,12 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-list-item>
-      <v-divider inset></v-divider>
+      <v-divider inset />
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">mdi-wrench-outline</v-icon>
+          <v-icon color="primary">
+            mdi-wrench-outline
+          </v-icon>
         </template>
         <g-list-item-content>
           <div class="d-flex align-center">
@@ -59,7 +63,10 @@ SPDX-License-Identifier: Apache-2.0
           <template #description>
             <v-tooltip top>
               <template #activator="{ props }">
-                <div class="d-flex align-center pt-1" v-bind="props">
+                <div
+                  class="d-flex align-center pt-1"
+                  v-bind="props"
+                >
                   <g-shoot-messages
                     :shoot-item="shootItem"
                     filter="maintenance-constraint"
@@ -70,17 +77,23 @@ SPDX-License-Identifier: Apache-2.0
                     Cluster is currently within the maintenance time window
                     <span v-if="nextMaintenanceEndTimestamp">
                       . The maintenance time window ends
-                      <g-time-string :date-time="nextMaintenanceEndTimestamp" no-tooltip></g-time-string>
+                      <g-time-string
+                        :date-time="nextMaintenanceEndTimestamp"
+                        no-tooltip
+                      />
                     </span>
                   </span>
                   <span v-else-if="nextMaintenanceBeginTimestamp">
                     Maintenance time window starts
-                    <g-time-string :date-time="nextMaintenanceBeginTimestamp" no-tooltip></g-time-string>
+                    <g-time-string
+                      :date-time="nextMaintenanceBeginTimestamp"
+                      no-tooltip
+                    />
                   </span>
                 </div>
               </template>
-              <div>{{maintenanceTooltipBegin}}</div>
-              <div>{{maintenanceTooltipEnd}}</div>
+              <div>{{ maintenanceTooltipBegin }}</div>
+              <div>{{ maintenanceTooltipEnd }}</div>
             </v-tooltip>
           </template>
         </g-list-item-content>
@@ -96,15 +109,17 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-list-item>
-      <v-divider inset></v-divider>
+      <v-divider inset />
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">mdi-tractor</v-icon>
+          <v-icon color="primary">
+            mdi-tractor
+          </v-icon>
         </template>
         <g-list-item-content>
           Reconcile
           <template #description>
-            {{reconcileDescription}}
+            {{ reconcileDescription }}
           </template>
         </g-list-item-content>
         <template #append>
@@ -117,10 +132,12 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-list-item>
       <template v-if="canPatchShoots">
-        <v-divider inset></v-divider>
+        <v-divider inset />
         <g-list-item>
           <template #prepend>
-            <v-icon color="primary">mdi-delete-circle-outline</v-icon>
+            <v-icon color="primary">
+              mdi-delete-circle-outline
+            </v-icon>
           </template>
           <g-list-item-content>
             Delete Cluster

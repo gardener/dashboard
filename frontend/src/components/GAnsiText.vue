@@ -5,7 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <pre class="ansi-text" v-html="escapedAnsiHTML"></pre>
+  <!-- eslint-disable vue/no-v-html -->
+  <pre
+    class="ansi-text"
+    v-html="escapedAnsiHTML"
+  />
+  <!-- eslint-enable vue/no-v-html -->
 </template>
 
 <script>

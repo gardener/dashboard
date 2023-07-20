@@ -19,17 +19,20 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #actionComponent>
       <v-row>
-        <v-col class="text-subtitle-1">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?</v-col>
+        <v-col class="text-subtitle-1">
+          Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
+        </v-col>
       </v-row>
       <v-row v-if="lastOperationFailed">
-        <v-col class="text-subtitle-1">Note: For clusters in failed state this will retry the operation.</v-col>
+        <v-col class="text-subtitle-1">
+          Note: For clusters in failed state this will retry the operation.
+        </v-col>
       </v-row>
     </template>
   </g-action-button-dialog>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
@@ -39,12 +42,12 @@ import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 import { useAppStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
   },
-  inject: ['api', 'logger'],
   mixins: [shootItem],
+  inject: ['api', 'logger'],
   props: {
     text: {
       type: Boolean,
@@ -81,6 +84,24 @@ export default defineComponent({
       return get(this.shootLastOperation, 'state') === 'Failed'
     },
   },
+  watch: {
+    isReconcileToBeScheduled (reconcileToBeScheduled) {
+      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
+      if (!isReconcileScheduled) {
+        return
+      }
+      this.reconcileTriggered = false
+      this.currentGeneration = null
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      this.setAlert({
+        message: `Reconcile triggered for ${this.shootName}`,
+      })
+    },
+  },
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
@@ -111,25 +132,7 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    isReconcileToBeScheduled (reconcileToBeScheduled) {
-      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
-      if (!isReconcileScheduled) {
-        return
-      }
-      this.reconcileTriggered = false
-      this.currentGeneration = null
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      this.setAlert({
-        message: `Reconcile triggered for ${this.shootName}`,
-      })
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

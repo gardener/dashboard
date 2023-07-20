@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-column fill-height position-relative">
-    <div v-if="!clean" class="flex-shrink-1">
+    <div
+      v-if="!clean"
+      class="flex-shrink-1"
+    >
       <g-alert-banner
         type="warning"
         :identifier="alertBannerIdentifier"
@@ -14,39 +17,60 @@ SPDX-License-Identifier: Apache-2.0
         transition="slide-y-transition"
       >
         <template #message>
-          <slot name="modificationWarning"></slot>
+          <slot name="modificationWarning" />
         </template>
       </g-alert-banner>
     </div>
-    <div ref="container" :style="containerStyles" :class="containerClass"></div>
-    <div v-if="errorMessageInternal" class="flex-shrink-1">
+    <div
+      ref="container"
+      :style="containerStyles"
+      :class="containerClass"
+    />
+    <div
+      v-if="errorMessageInternal"
+      class="flex-shrink-1"
+    >
       <g-message
-        color="error"
-        class="ma-0"
         v-model:message="errorMessageInternal"
         v-model:detailed-message="detailedErrorMessageInternal"
+        color="error"
+        class="ma-0"
         tile
-      ></g-message>
+      />
     </div>
-    <v-divider></v-divider>
-    <div v-if="showToolbar" :style="toolbarStyles" class="d-flex align-center justify-space-between">
+    <v-divider />
+    <div
+      v-if="showToolbar"
+      :style="toolbarStyles"
+      class="d-flex align-center justify-space-between"
+    >
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-reload" @click="reload" :disabled="untouched" />
+                <g-action-button
+                  size="x-small"
+                  icon="mdi-reload"
+                  :disabled="untouched"
+                  @click="reload"
+                />
               </div>
             </template>
             <span>Discard and Reload</span>
           </v-tooltip>
         </div>
-        <v-divider vertical></v-divider>
+        <v-divider vertical />
         <div class="px-2">
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-undo" @click="undo" :disabled="historySize.undo === 0" />
+                <g-action-button
+                  size="x-small"
+                  icon="mdi-undo"
+                  :disabled="historySize.undo === 0"
+                  @click="undo"
+                />
               </div>
             </template>
             <span>Undo</span>
@@ -56,18 +80,27 @@ SPDX-License-Identifier: Apache-2.0
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-redo" @click="redo" :disabled="historySize.redo === 0" />
+                <g-action-button
+                  size="x-small"
+                  icon="mdi-redo"
+                  :disabled="historySize.redo === 0"
+                  @click="redo"
+                />
               </div>
             </template>
             <span>Redo</span>
           </v-tooltip>
         </div>
-        <v-divider vertical></v-divider>
+        <v-divider vertical />
         <div class="px-2">
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" icon="mdi-download" @click="downloadContent" />
+                <g-action-button
+                  size="x-small"
+                  icon="mdi-download"
+                  @click="downloadContent"
+                />
               </div>
             </template>
             <span>Download</span>
@@ -76,30 +109,34 @@ SPDX-License-Identifier: Apache-2.0
         <div class="px-2">
           <g-copy-btn
             :clipboard-text="getContent()"
-            @click.stop="focus"
-            tooltip-text='Copy'
+            tooltip-text="Copy"
             :user-feedback="false"
+            @click.stop="focus"
             @copy="onCopy"
             @copy-failed="onCopyFailed"
-          >
-          </g-copy-btn>
+          />
         </div>
-        <v-divider vertical></v-divider>
+        <v-divider vertical />
         <div class="px-2">
           <v-tooltip top>
             <template #activator="{ props }">
               <div v-bind="props">
-                <g-action-button size="x-small" :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'" @click="showManagedFields = !showManagedFields" :disabled="!untouched" />
+                <g-action-button
+                  size="x-small"
+                  :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'"
+                  :disabled="!untouched"
+                  @click="showManagedFields = !showManagedFields"
+                />
               </div>
             </template>
-            <span>{{showManagedFields ? 'Hide' : 'Show'}} managed fields</span>
+            <span>{{ showManagedFields ? 'Hide' : 'Show' }} managed fields</span>
           </v-tooltip>
         </div>
-        <v-divider vertical></v-divider>
+        <v-divider vertical />
       </div>
       <div class="d-flex fill-height align-center justify-end">
-        <v-divider vertical></v-divider>
-        <slot name="toolbarItemsRight"></slot>
+        <v-divider vertical />
+        <slot name="toolbarItemsRight" />
       </div>
     </div>
     <v-tooltip
@@ -108,11 +145,17 @@ SPDX-License-Identifier: Apache-2.0
       :model-value="helpTooltip.visible"
       :style="`left: ${helpTooltip.posX}px; top: ${helpTooltip.posY}px`"
       max-width="800px"
-      >
-      <span class="font-weight-bold">{{helpTooltip.property}}</span><span class="font-style-italic ml-2">{{helpTooltip.type}}</span><br />
-      <span class="font-wrap">{{helpTooltip.description}}</span>
+    >
+      <span class="font-weight-bold">{{ helpTooltip.property }}</span><span class="font-style-italic ml-2">{{ helpTooltip.type }}</span><br>
+      <span class="font-wrap">{{ helpTooltip.description }}</span>
     </v-tooltip>
-    <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
+    <v-snackbar
+      v-model="snackbar"
+      top
+      absolute
+      :color="snackbarColor"
+      :timeout="snackbarTimeout"
+    >
       {{ snackbarText }}
     </v-snackbar>
   </div>
@@ -157,6 +200,8 @@ export default {
     GMessage,
     GAlertBanner,
   },
+  mixins: [shootItem],
+  inject: ['yaml', 'api', 'colorMode'],
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -180,7 +225,12 @@ export default {
       type: Boolean,
     },
   },
-  inject: ['yaml', 'api', 'colorMode'],
+  emits: [
+    'update:errorMessage',
+    'update:detailedErrorMessage',
+    'clean',
+    'conflictPath',
+  ],
   data () {
     return {
       conflictPath: null,
@@ -211,7 +261,6 @@ export default {
       cmInstance: null,
     }
   },
-  mixins: [shootItem],
   computed: {
     ...mapGetters(useAuthzStore, ['canPatchShoots']),
     value () {
@@ -243,7 +292,7 @@ export default {
         return this.errorMessage
       },
       set (value) {
-        this.$emit('update:error-message', value)
+        this.$emit('update:errorMessage', value)
       },
     },
     detailedErrorMessageInternal: {
@@ -251,7 +300,7 @@ export default {
         return this.detailedErrorMessage
       },
       set (value) {
-        this.$emit('update:detailed-error-message', value)
+        this.$emit('update:detailedErrorMessage', value)
       },
     },
     isReadOnly () {
@@ -265,6 +314,50 @@ export default {
         ? 'seti'
         : 'default'
     },
+  },
+  watch: {
+    canPatchShoots (value) {
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
+    },
+    shootPurpose (value) {
+      this.cmInstance.setOption('readOnly', this.isReadOnly)
+    },
+    value: {
+      deep: true,
+      handler (newValue, oldValue) {
+        if (this.untouched) {
+          return this.update(newValue)
+        }
+        for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
+          const newProp = get(newValue, path)
+          const oldProp = get(oldValue, path)
+          if (!isEqual(newProp, oldProp)) {
+            this.setConflictPath(path)
+            break
+          }
+        }
+      },
+    },
+    theme (value) {
+      this.cmInstance.setOption('theme', value)
+    },
+  },
+  async mounted () {
+    if (this.animateOnAppear) {
+      this.animateExpansion()
+    }
+
+    this.createInstance(this.$refs.container)
+    this.update(this.value)
+    this.refresh()
+
+    const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
+    const shootProperties = get(shootSchemaDefinition, 'properties', {})
+    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
+  },
+  beforeUnmount () {
+    this.destroyInstance()
   },
   methods: {
     getQualifiedName () {
@@ -295,7 +388,7 @@ export default {
     },
     setConflictPath (conflictPath) {
       this.conflictPath = conflictPath
-      this.$emit('conflict-path', conflictPath)
+      this.$emit('conflictPath', conflictPath)
     },
     reload () {
       this.update(this.value)
@@ -463,50 +556,6 @@ export default {
         }, 1500) // remove after animation ends (1.5 sec)
       })
     },
-  },
-  async mounted () {
-    if (this.animateOnAppear) {
-      this.animateExpansion()
-    }
-
-    this.createInstance(this.$refs.container)
-    this.update(this.value)
-    this.refresh()
-
-    const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
-    const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
-  },
-  watch: {
-    canPatchShoots (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
-    },
-    shootPurpose (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
-    },
-    value: {
-      deep: true,
-      handler (newValue, oldValue) {
-        if (this.untouched) {
-          return this.update(newValue)
-        }
-        for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
-          const newProp = get(newValue, path)
-          const oldProp = get(oldValue, path)
-          if (!isEqual(newProp, oldProp)) {
-            this.setConflictPath(path)
-            break
-          }
-        }
-      },
-    },
-    theme (value) {
-      this.cmInstance.setOption('theme', value)
-    },
-  },
-  beforeUnmount () {
-    this.destroyInstance()
   },
 }
 </script>

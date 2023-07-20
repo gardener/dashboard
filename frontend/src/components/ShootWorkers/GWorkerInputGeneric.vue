@@ -9,122 +9,129 @@ SPDX-License-Identifier: Apache-2.0
     <div class="d-flex flex-wrap">
       <div class="regularInput">
         <v-text-field
+          v-model="worker.name"
           color="primary"
           :error-messages="getErrorMessages('worker.name')"
-          @input="onInputName"
-          @blur="v$.worker.name.$touch()"
-          v-model="worker.name"
           counter="15"
           label="Group Name"
           variant="underlined"
-        ></v-text-field>
+          @input="onInputName"
+          @blur="v$.worker.name.$touch()"
+        />
       </div>
       <div class="smallInput">
         <v-select
+          v-model="machineArchitecture"
           color="primary"
           item-color="primary"
           :items="machineArchitectures"
           :error-messages="getErrorMessages('machineArchitecture')"
-          @blur="v$.machineArchitecture.$touch()"
-          v-model="machineArchitecture"
           label="Architecture"
           variant="underlined"
-        ></v-select>
+          @blur="v$.machineArchitecture.$touch()"
+        />
       </div>
       <div class="regularInput">
         <g-machine-type
-          :machine-types="machineTypes"
           v-model="machineTypeValue"
           v-model:valid="internalMachineTypeValid"
-        ></g-machine-type>
+          :machine-types="machineTypes"
+        />
       </div>
       <div class="regularInput">
         <g-machine-image
           :machine-images="machineImages"
           :worker="worker"
           :machine-type="selectedMachineType"
-          :updateOSMaintenance="updateOSMaintenance"
+          :update-o-s-maintenance="updateOSMaintenance"
           @update-machine-image="onUpdateMachineImage"
           @valid="onMachineImageValid"
-        ></g-machine-image>
+        />
       </div>
       <div class="regularInput">
         <g-container-runtime
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :kubernetes-version="kubernetesVersion"
-          @valid="onContainerRuntimeValid">
-        </g-container-runtime>
+          @valid="onContainerRuntimeValid"
+        />
       </div>
-      <div v-if="volumeInCloudProfile" class="regularInput">
+      <div
+        v-if="volumeInCloudProfile"
+        class="regularInput"
+      >
         <g-volume-type
           :volume-types="volumeTypes"
           :worker="worker"
           :cloud-profile-name="cloudProfileName"
           @update-volume-type="onUpdateVolumeType"
           @valid="onVolumeTypeValid"
-        ></g-volume-type>
+        />
       </div>
-      <div v-if="canDefineVolumeSize" class="smallInput">
+      <div
+        v-if="canDefineVolumeSize"
+        class="smallInput"
+      >
         <g-size-input
+          v-model="volumeSize"
           :min="minimumVolumeSize"
           color="primary"
           :error-messages="getErrorMessages('volumeSize')"
+          label="Volume Size"
           @input="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
-          label="Volume Size"
-          v-model="volumeSize"
-        ></g-size-input>
+        />
       </div>
       <div class="smallInput">
         <v-text-field
+          v-model="innerMin"
           min="0"
           color="primary"
           :error-messages="getErrorMessages('worker.minimum')"
-          @input="onInputminimum"
-          @blur="v$.worker.minimum.$touch()"
           type="number"
-          v-model="innerMin"
           label="Autoscaler Min."
           variant="underlined"
-        ></v-text-field>
+          @input="onInputminimum"
+          @blur="v$.worker.minimum.$touch()"
+        />
       </div>
       <div class="smallInput">
         <v-text-field
+          v-model="innerMax"
           min="0"
           color="primary"
           :error-messages="getErrorMessages('worker.maximum')"
-          @input="onInputmaximum"
-          @blur="v$.worker.maximum.$touch()"
           type="number"
-          v-model="innerMax"
           label="Autoscaler Max."
           variant="underlined"
-        ></v-text-field>
+          @input="onInputmaximum"
+          @blur="v$.worker.maximum.$touch()"
+        />
       </div>
       <div class="smallInput">
         <v-text-field
+          v-model="maxSurge"
           min="0"
           color="primary"
           :error-messages="getErrorMessages('worker.maxSurge')"
-          @input="onInputMaxSurge"
-          @blur="v$.worker.maxSurge.$touch()"
-          v-model="maxSurge"
           label="Max. Surge"
           variant="underlined"
-        ></v-text-field>
+          @input="onInputMaxSurge"
+          @blur="v$.worker.maxSurge.$touch()"
+        />
       </div>
 
-      <div class="regularInput" v-if="zonedCluster">
+      <div
+        v-if="zonedCluster"
+        class="regularInput"
+      >
         <v-select
+          v-model="selectedZones"
           color="primary"
           item-color="primary"
           label="Zone"
           :items="zoneItems"
           :error-messages="getErrorMessages('selectedZones')"
-          v-model="selectedZones"
-          @update:model-value="onInputZones"
-          @blur="v$.selectedZones.$touch()"
           multiple
           chips
           closable-chips
@@ -132,18 +139,20 @@ SPDX-License-Identifier: Apache-2.0
           persistent-hint
           item-title="text"
           variant="underlined"
-          >
-            <template #item="{ props, item }">
-              <v-list-item
-                v-bind="props"
-                :disabled="item.raw.disabled"
-              />
+          @update:model-value="onInputZones"
+          @blur="v$.selectedZones.$touch()"
+        >
+          <template #item="{ props, item }">
+            <v-list-item
+              v-bind="props"
+              :disabled="item.raw.disabled"
+            />
           </template>
         </v-select>
       </div>
     </div>
     <div class="ml-4 mr-2">
-      <slot name="action"></slot>
+      <slot name="action" />
     </div>
   </div>
 </template>
@@ -205,11 +214,6 @@ const validationErrors = {
 }
 
 export default {
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   components: {
     GSizeInput,
     GMachineType,
@@ -262,6 +266,11 @@ export default {
     'updateMaxSurge',
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       validationErrors,
@@ -492,6 +501,16 @@ export default {
       },
     },
   },
+  mounted () {
+    this.validateInput()
+    const volumeSize = get(this.worker, 'volume.size')
+    if (volumeSize) {
+      this.volumeSize = volumeSize
+    }
+    this.setVolumeDependingOnMachineType()
+    this.onInputVolumeSize()
+    this.immutableZones = this.isNew ? [] : this.initialZones
+  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'machineTypesByCloudProfileNameAndRegionAndArchitecture',
@@ -591,16 +610,6 @@ export default {
       const machineImage = head(this.machineImages)
       this.worker.machine.image = pick(machineImage, ['name', 'version'])
     },
-  },
-  mounted () {
-    this.validateInput()
-    const volumeSize = get(this.worker, 'volume.size')
-    if (volumeSize) {
-      this.volumeSize = volumeSize
-    }
-    this.setVolumeDependingOnMachineType()
-    this.onInputVolumeSize()
-    this.immutableZones = this.isNew ? [] : this.initialZones
   },
 }
 </script>

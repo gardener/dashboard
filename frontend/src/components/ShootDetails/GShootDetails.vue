@@ -2,25 +2,44 @@
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
+
 <template>
-  <v-container fluid class="pa-6">
+  <v-container
+    fluid
+    class="pa-6"
+  >
     <v-row class="d-flex">
-      <v-col cols="12" md="6">
-        <g-shoot-details-card :shoot-item="shootItem"></g-shoot-details-card>
-        <g-custom-fields-card :custom-fields="customFields"></g-custom-fields-card>
-        <g-shoot-infrastructure-card :shoot-item="shootItem"></g-shoot-infrastructure-card>
-        <g-shoot-external-tools-card :shoot-item="shootItem"></g-shoot-external-tools-card>
-        <g-shoot-lifecycle-card ref="shootLifecycle" :shoot-item="shootItem"></g-shoot-lifecycle-card>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <g-shoot-details-card :shoot-item="shootItem" />
+        <g-custom-fields-card :custom-fields="customFields" />
+        <g-shoot-infrastructure-card :shoot-item="shootItem" />
+        <g-shoot-external-tools-card :shoot-item="shootItem" />
+        <g-shoot-lifecycle-card
+          ref="shootLifecycle"
+          :shoot-item="shootItem"
+        />
       </v-col>
-      <v-col cols="12" md="6">
-        <v-card v-if="canGetSecrets" class="mb-4">
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-card
+          v-if="canGetSecrets"
+          class="mb-4"
+        >
           <g-toolbar title="Access" />
-          <g-shoot-access-card :shoot-item="shootItem" @add-terminal-shortcut="onAddTerminalShortcut"></g-shoot-access-card>
+          <g-shoot-access-card
+            :shoot-item="shootItem"
+            @add-terminal-shortcut="onAddTerminalShortcut"
+          />
         </v-card>
-        <g-shoot-monitoring-card :shoot-item="shootItem"></g-shoot-monitoring-card>
-        <g-shoot-credential-rotation-card :shoot-item="shootItem"></g-shoot-credential-rotation-card>
-        <g-tickets-card :shoot-item="shootItem"></g-tickets-card>
+        <g-shoot-monitoring-card :shoot-item="shootItem" />
+        <g-shoot-credential-rotation-card :shoot-item="shootItem" />
+        <g-tickets-card :shoot-item="shootItem" />
       </v-col>
     </v-row>
   </v-container>
@@ -51,7 +70,7 @@ import GTicketsCard from '@/components/GTicketsCard'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'shoot-details',
+  name: 'ShootDetails',
   components: {
     GShootDetailsCard,
     GCustomFieldsCard,
@@ -64,6 +83,9 @@ export default {
     GShootExternalToolsCard,
   },
   mixins: [shootItem],
+  emits: [
+    'addTerminalShortcut',
+  ],
   computed: {
     ...mapState(useAuthzStore, ['canGetSecrets']),
     ...mapState(useProjectStore, ['shootCustomFieldList']),
@@ -79,15 +101,15 @@ export default {
       }))
     },
   },
-  methods: {
-    onAddTerminalShortcut (shortcut) {
-      this.$emit('add-terminal-shortcut', shortcut)
-    },
-  },
   mounted () {
     if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
       this.$refs.shootLifecycle.showHibernationConfigurationDialog()
     }
+  },
+  methods: {
+    onAddTerminalShortcut (shortcut) {
+      this.$emit('addTerminalShortcut', shortcut)
+    },
   },
 }
 </script>

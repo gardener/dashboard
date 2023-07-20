@@ -23,26 +23,38 @@ SPDX-License-Identifier: Apache-2.0
           :color="color"
           class="status-tag"
         >
-          <v-icon v-if="chipIcon"
+          <v-icon
+            v-if="chipIcon"
             :icon="chipIcon"
             size="x-small"
             class="chip-icon"
           />
-          {{chipText}}
+          {{ chipText }}
           <v-tooltip
             activator="parent"
             location="top"
             max-width="400px"
             :disabled="popover"
           >
-            <div class="font-weight-bold">{{ chipTooltip.title }}</div>
+            <div class="font-weight-bold">
+              {{ chipTooltip.title }}
+            </div>
             <div>Status: {{ chipTooltip.status }}</div>
-            <div v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects" :key="shortDescription">
-              <v-icon class="mr-1" color="white" size="small">mdi-account-alert</v-icon>
+            <div
+              v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects"
+              :key="shortDescription"
+            >
+              <v-icon
+                class="mr-1"
+                color="white"
+                size="small"
+              >
+                mdi-account-alert
+              </v-icon>
               <span class="font-weight-bold text--lighten-2">{{ shortDescription }}</span>
             </div>
             <template v-if="chipTooltip.description">
-              <v-divider color="white"></v-divider>
+              <v-divider color="white" />
               <div>
                 {{ chipTooltip.description }}
               </div>

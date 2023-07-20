@@ -19,12 +19,17 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'standard',
-    'plugin:vue/vue3-essential',
+    'plugin:vue/vue3-recommended',
     'plugin:vitest/recommended',
   ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],
     quotes: ['error', 'single'],
     'space-before-function-paren': ['error', 'always'],
+    'vue/no-mutating-props': ['error', {
+      shallowOnly: true,
+    }],
+    'vue/require-default-prop': 'off',
+    'vue/order-in-components': 'error',
   },
 }

@@ -8,28 +8,31 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <g-hint-colorizer hint-color="warning">
       <v-select
+        v-model="selectedItem"
         :items="items"
         color="primary"
         class="mb-2"
         item-color="primary"
         item-value="version"
-        v-model="selectedItem"
         :label="label"
         :hint="hint"
         :error="isError"
         return-object
         placeholder="Please select version..."
       >
-        <template v-slot:item="{ props }">
-          <v-list-subheader v-if="props.value.type === 'subheader'"
+        <template #item="{ props }">
+          <v-list-subheader
+            v-if="props.value.type === 'subheader'"
             v-bind="props"
           />
-          <v-list-item v-else
+          <v-list-item
+            v-else
             v-bind="props"
             :subtitle="versionItemDescription(props.value)"
             :disabled="props.value.notNextMinor"
           >
-            <v-tooltip v-if="props.value.notNextMinor"
+            <v-tooltip
+              v-if="props.value.notNextMinor"
               activator="parent"
               location="top"
             >
@@ -44,11 +47,12 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-select>
     </g-hint-colorizer>
-    <v-alert v-if="currentK8sVersion.expirationDate && !selectedItem"
+    <v-alert
+      v-if="currentK8sVersion.expirationDate && !selectedItem"
       type="warning"
       variant="outlined"
     >
-      Current Kubernetes version expires on: {{currentK8sVersion.expirationDateString}}.
+      Current Kubernetes version expires on: {{ currentK8sVersion.expirationDateString }}.
       Kubernetes update will be enforced after that date.
     </v-alert>
   </div>
@@ -73,17 +77,12 @@ export default defineComponent({
   },
   props: {
     availableK8sUpdates: {
+      type: Object,
       required: true,
     },
     currentK8sVersion: {
       type: Object,
     },
-  },
-  data () {
-    return {
-      snackbar: false,
-      selectedItem: undefined,
-    }
   },
   emits: [
     'selectedVersion',
@@ -91,6 +90,12 @@ export default defineComponent({
     'selectedVersionType',
     'confirmRequired',
   ],
+  data () {
+    return {
+      snackbar: false,
+      selectedItem: undefined,
+    }
+  },
   computed: {
     items () {
       const selectionItemsForType = (versions, updateType) => {
@@ -204,6 +209,12 @@ export default defineComponent({
       return undefined
     },
   },
+  watch: {
+    selectedItem (value) {
+      this.$emit('selectedVersion', value?.version)
+      this.$emit('selectedVersionType', value?.updateType)
+    },
+  },
   methods: {
     itemIsNotNextMinor (version, updateType) {
       if (!this.currentK8sVersion.version) {
@@ -231,12 +242,6 @@ export default defineComponent({
     },
     reset () {
       this.selectedItem = undefined
-    },
-  },
-  watch: {
-    selectedItem (value) {
-      this.$emit('selectedVersion', value?.version)
-      this.$emit('selectedVersionType', value?.updateType)
     },
   },
 })

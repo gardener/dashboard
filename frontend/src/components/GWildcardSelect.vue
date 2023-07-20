@@ -7,62 +7,63 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-row">
     <v-select
+      v-model="wildcardSelectedValue"
       color="primary"
       item-color="primary"
       :label="wildcardSelectLabel"
       :items="wildcardSelectItemObjects"
       return-object
-      v-model="wildcardSelectedValue"
       :error-messages="getErrorMessages('wildcardSelectedValue')"
-      @update:modelValue="onInput"
-      @blur="v$.wildcardSelectedValue.$touch()"
       :hint="wildcardSelectHint"
       persistent-hint
       variant="underlined"
+      @update:model-value="onInput"
+      @blur="v$.wildcardSelectedValue.$touch()"
     >
       <template #selection="{ item }">
         <div class="d-flex align-center">
           <v-text-field
             v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.customWildcard"
-            @click.stop="$refs.wildCardStart.focus()"
-            @mousedown.stop="$refs.wildCardStart.focus()"
+            ref="wildCardStart"
+            v-model="wildcardVariablePartPrefix"
             density="compact"
             class="mb-1 mr-1 text-field"
             flat
             variant="outlined"
             color="primary"
             hide-details
-            v-model="wildcardVariablePartPrefix"
-            ref="wildCardStart"
-            >
-          </v-text-field>
-          <span>{{item.raw.value}}</span>
+            @click.stop="$refs.wildCardStart.focus()"
+            @mousedown.stop="$refs.wildCardStart.focus()"
+          />
+          <span>{{ item.raw.value }}</span>
           <v-text-field
             v-if="wildcardSelectedValue.endsWithWildcard"
-            @click.stop="$refs.wildCardEnd.focus()"
-            @mousedown.stop="$refs.wildCardEnd.focus()"
-            @input="onInput"
+            ref="wildCardEnd"
+            v-model="wildcardVariablePartSuffix"
             density="compact"
             class="mb-1 ml-1 text-field"
             flat
             variant="outlined"
             color="primary"
             hide-details
-            v-model="wildcardVariablePartSuffix"
-            ref="wildCardEnd"
-            >
-          </v-text-field>
+            @click.stop="$refs.wildCardEnd.focus()"
+            @mousedown.stop="$refs.wildCardEnd.focus()"
+            @input="onInput"
+          />
         </div>
       </template>
       <template #item="{ item, props }">
-        <v-list-item v-bind="props" :title=undefined>
+        <v-list-item
+          v-bind="props"
+          :title="undefined"
+        >
           <template v-if="item.raw.value.length">
             <span v-if="item.raw.startsWithWildcard">&lt;prefix&gt;</span>
-            <span>{{item.raw.value}}</span>
+            <span>{{ item.raw.value }}</span>
             <span v-if="item.raw.endsWithWildcard">&lt;suffix&gt;</span>
           </template>
           <template v-else>
-            Custom {{wildcardSelectLabel}}
+            Custom {{ wildcardSelectLabel }}
           </template>
         </v-list-item>
       </template>
@@ -79,11 +80,6 @@ import { required } from '@vuelidate/validators'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     wildcardSelectItems: {
       type: Array,
@@ -99,6 +95,11 @@ export default defineComponent({
     'valid',
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       wildcardVariablePartPrefix: undefined,
@@ -156,6 +157,14 @@ export default defineComponent({
       }
     },
   },
+  watch: {
+    modelValue (value) {
+      this.setInternalValue(value)
+    },
+  },
+  mounted () {
+    this.setInternalValue(this.modelValue)
+  },
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -194,14 +203,6 @@ export default defineComponent({
   },
   validations () {
     return this.validators
-  },
-  watch: {
-    modelValue (value) {
-      this.setInternalValue(value)
-    },
-  },
-  mounted () {
-    this.setInternalValue(this.modelValue)
   },
 })
 </script>

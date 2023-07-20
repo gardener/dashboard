@@ -13,20 +13,19 @@ SPDX-License-Identifier: Apache-2.0
     :vendor="vendor"
     :create-title="`Add new ${vendor} Secret`"
     :replace-title="`Replace ${vendor} Secret`"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-textarea
           ref="data"
+          v-model="data"
           color="primary"
           variant="filled"
-          v-model="data"
           label="Secret Data"
           :error-messages="getErrorMessages('data')"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
-        ></v-textarea>
+        />
       </div>
     </template>
     <template #help-slot>
@@ -35,18 +34,15 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for {{vendor}}.
+          Please enter data required for {{ vendor }}.
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -59,15 +55,11 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
   },
+  inject: ['yaml'],
   props: {
     modelValue: {
       type: Boolean,
@@ -83,7 +75,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
-  inject: ['yaml'],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       data: undefined,
@@ -121,9 +117,6 @@ export default defineComponent({
     },
   },
   methods: {
-    onInput (value) {
-      this.$emit('input', value)
-    },
     async onInputSecretData () {
       this.secretData = {}
 
@@ -153,7 +146,7 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

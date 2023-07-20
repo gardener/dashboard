@@ -6,21 +6,27 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
+    ref="gDialog"
     confirm-button-text="Confirm"
     width="750"
     max-height="100vh"
-    ref="gDialog"
-    >
-    <template #caption>Confirm</template>
+  >
+    <template #caption>
+      Confirm
+    </template>
     <template #message>
-      <div key="confirm-message" style="min-height:100px">
+      <div
+        key="confirm-message"
+        style="min-height:100px"
+      >
         <div>
           You selected
           <v-chip
             small
             class="my-0"
             variant="outlined"
-            color="warning">
+            color="warning"
+          >
             Unverified
           </v-chip>
           terminal shortcuts that were created by members of this project and therefore could be malicious.
@@ -34,10 +40,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 
-export default defineComponent({
+export default {
   name: 'UnverifiedTerminalShortcutsDialog',
   components: {
     GDialog,
@@ -47,5 +52,5 @@ export default defineComponent({
       return await this.$refs.gDialog.confirmWithDialog()
     },
   },
-})
+}
 </script>

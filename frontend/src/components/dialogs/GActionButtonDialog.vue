@@ -27,44 +27,65 @@ SPDX-License-Identifier: Apache-2.0
             @click="showDialog"
           />
         </template>
-        {{actionToolTip}}
+        {{ actionToolTip }}
       </v-tooltip>
       <g-dialog
         ref="gDialog"
-        :confirm-button-text="confirmButtonText"
-        :confirm-disabled="!valid"
         v-model:error-message="errorMessage"
         v-model:detailed-error-message="detailedErrorMessage"
+        :confirm-button-text="confirmButtonText"
+        :confirm-disabled="!valid"
         :width="width"
         :max-height="maxHeight"
         :confirm-value="confirmValue"
         :disable-confirm-input-focus="disableConfirmInputFocus"
       >
-        <template #caption>{{caption}}</template>
-        <template #affectedObjectName>{{shootName}}</template>
-        <template #top v-if="$slots.top">
-          <slot name="top"></slot>
+        <template #caption>
+          {{ caption }}
         </template>
-        <template #card v-if="$slots.card">
-          <slot name="card"></slot>
+        <template #affectedObjectName>
+          {{ shootName }}
         </template>
-        <template #message v-if="$slots.actionComponent">
-          <slot name="actionComponent"></slot>
+        <template
+          v-if="$slots.top"
+          #top
+        >
+          <slot name="top" />
         </template>
-        <template #errorMessage v-if="$slots.errorMessage">
-          <slot name="errorMessage"></slot>
+        <template
+          v-if="$slots.card"
+          #card
+        >
+          <slot name="card" />
         </template>
-        <template #additionalMessage v-if="$slots.additionalMessage">
-          <slot name="additionalMessage"></slot>
+        <template
+          v-if="$slots.actionComponent"
+          #message
+        >
+          <slot name="actionComponent" />
+        </template>
+        <template
+          v-if="$slots.errorMessage"
+          #errorMessage
+        >
+          <slot name="errorMessage" />
+        </template>
+        <template
+          v-if="$slots.additionalMessage"
+          #additionalMessage
+        >
+          <slot name="additionalMessage" />
         </template>
       </g-dialog>
     </template>
-    <div v-else style="width: 36px"></div>
+    <div
+      v-else
+      style="width: 36px"
+    />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store'
@@ -73,16 +94,11 @@ import { shootItem } from '@/mixins/shootItem'
 
 import GDialog from '@/components/dialogs/GDialog'
 
-export default defineComponent({
+export default {
   components: {
     GDialog,
   },
-  data () {
-    return {
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
-    }
-  },
+  mixins: [shootItem],
   props: {
     icon: {
       type: String,
@@ -131,7 +147,15 @@ export default defineComponent({
       type: String,
     },
   },
-  mixins: [shootItem],
+  emits: [
+    'dialogOpened',
+  ],
+  data () {
+    return {
+      errorMessage: undefined,
+      detailedErrorMessage: undefined,
+    }
+  },
   computed: {
     ...mapState(useAuthzStore, [
       'canPatchShoots',
@@ -164,9 +188,6 @@ export default defineComponent({
       return false
     },
   },
-  emits: [
-    'dialogOpened',
-  ],
   methods: {
     showDialog (resetError = true) {
       if (resetError) {
@@ -194,5 +215,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

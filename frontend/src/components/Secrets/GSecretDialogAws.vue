@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-secret-dialog
-    v-model=visible
+    v-model="visible"
     :data="secretData"
     :data-valid="valid"
     :secret="secret"
@@ -14,46 +14,45 @@ SPDX-License-Identifier: Apache-2.0
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
-
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
-          v-model="accessKeyId"
           ref="accessKeyId"
+          v-model="accessKeyId"
+          color="primary"
           label="Access Key Id"
           :error-messages="getErrorMessages('accessKeyId')"
-          @update:model-value="v$.accessKeyId.$touch()"
-          @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. AKIAIOSFODNN7EXAMPLE"
           variant="underlined"
-        ></v-text-field>
+          @update:model-value="v$.accessKeyId.$touch()"
+          @blur="v$.accessKeyId.$touch()"
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="secretAccessKey"
+          color="primary"
           label="Secret Access Key"
           :error-messages="getErrorMessages('secretAccessKey')"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="v$.secretAccessKey.$touch()"
-          @blur="v$.secretAccessKey.$touch()"
           counter="40"
           hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
           variant="underlined"
-        ></v-text-field>
+          @click:append="() => (hideSecret = !hideSecret)"
+          @update:model-value="v$.secretAccessKey.$touch()"
+          @blur="v$.secretAccessKey.$touch()"
+        />
       </div>
       <div v-if="vendor === 'aws-route53'">
         <v-text-field
-          color="primary"
           v-model="awsRegion"
+          color="primary"
           label="Region (optional)"
           hint="Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1"
           variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
     <template #help-slot>
@@ -67,29 +66,39 @@ SPDX-License-Identifier: Apache-2.0
       <p>
         To manage
         credentials for AWS Identity and Access Management (IAM), use the
-        <g-external-link url="https://console.aws.amazon.com/iam/home">IAM Console</g-external-link>.
+        <g-external-link url="https://console.aws.amazon.com/iam/home">
+          IAM Console
+        </g-external-link>.
       </p>
       <p>
         Copy the AWS IAM policy document below and attach it to the IAM user
-        (<g-external-link url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">official
-        documentation</g-external-link>).
+        (<g-external-link url="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html">
+          official
+          documentation
+        </g-external-link>).
       </p>
-      <g-code-block v-if="vendor==='aws'" height="100%" lang="json" :content="JSON.stringify(templateAws, undefined, 2)"></g-code-block>
+      <g-code-block
+        v-if="vendor==='aws'"
+        height="100%"
+        lang="json"
+        :content="JSON.stringify(templateAws, undefined, 2)"
+      />
       <div v-if="vendor==='aws-route53'">
         <p>In this example, the placeholder for the hosted zone is Z2XXXXXXXXXXXX</p>
-        <g-code-block height="100%" lang="json" :content="JSON.stringify(templateAwsRoute53, undefined, 2)"></g-code-block>
+        <g-code-block
+          height="100%"
+          lang="json"
+          :content="JSON.stringify(templateAwsRoute53, undefined, 2)"
+        />
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, maxLength } from '@vuelidate/validators'
 import { alphaNumUnderscore, base64 } from '@/utils/validators'
@@ -109,12 +118,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GCodeBlock,
@@ -135,6 +139,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       accessKeyId: undefined,
@@ -277,6 +286,13 @@ export default defineComponent({
       return undefined
     },
   },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     reset () {
       this.v$.$reset()
@@ -293,12 +309,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

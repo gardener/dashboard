@@ -22,85 +22,86 @@ SPDX-License-Identifier: Apache-2.0
             md="4"
             lg="4"
           >
-              <v-card class="elevation-1">
-                <v-card-title class="pa-0 d-flex flex-column">
-                  <div class="d-flex flex-column align-center bg-main-background-darken-1 text-primary pa-3 pt-6">
-                    <img
-                      src="/static/assets/logo.svg"
-                      alt="Login to Gardener"
-                      width="180"
-                      height="180"
-                    >
-                    <div class="flex my-4 text-primary text-h5 font-weight-light title-text">
-                      Universal Kubernetes at Scale
-                    </div>
+            <v-card class="elevation-1">
+              <v-card-title class="pa-0 d-flex flex-column">
+                <div class="d-flex flex-column align-center bg-main-background-darken-1 text-primary pa-3 pt-6">
+                  <img
+                    src="/static/assets/logo.svg"
+                    alt="Login to Gardener"
+                    width="180"
+                    height="180"
+                  >
+                  <div class="flex my-4 text-primary text-h5 font-weight-light title-text">
+                    Universal Kubernetes at Scale
                   </div>
-                  <v-tabs
-                    v-if="!isFetching"
-                    v-model="loginType"
-                    align-tabs="center"
-                    color="primary"
-                  >
-                    <v-tab
-                      v-for="item in loginTypes"
-                      :key="item"
-                      :value="item"
-                    >
-                      {{ item }}
-                    </v-tab>
-                  </v-tabs>
-                </v-card-title>
-                <v-card-text class="login-form py-0">
-                  <v-window
-                    v-if="!isFetching"
-                    v-model="loginType"
-                    class="pa-4"
-                  >
-                    <v-window-item value="oidc">
-                      <div class="text-subtitle-1 text-center text-medium-emphasis">
-                        Press Login to be redirected to configured<br> OpenID Connect Provider.
-                      </div>
-                    </v-window-item>
-                    <v-window-item value="token">
-                      <div class="text-subtitle-1 text-center text-medium-emphasis pb-3">
-                        Enter a bearer token trusted by the Kubernetes API server and press Login.
-                      </div>
-                      <v-form autocomplete="off">
-                        <v-text-field
-                          ref="tokenField"
-                          v-model="token"
-                          color="primary"
-                          :append-inner-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
-                          :type="showToken ? 'text' : 'password'"
-                          variant="solo"
-                          label="Token"
-                          required
-                          @click:append-inner="showToken = !showToken"
-                          hide-details="auto"
-                        />
-                      </v-form>
-                    </v-window-item>
-                  </v-window>
-                </v-card-text>
-                <v-card-actions
-                  v-show="!isFetching"
-                  class="py-4"
+                </div>
+                <v-tabs
+                  v-if="!isFetching"
+                  v-model="loginType"
+                  align-tabs="center"
+                  color="primary"
                 >
-                  <div class="d-flex justify-center flex-grow-1">
-                    <v-btn
-                      variant="elevated"
-                      color="primary"
-                      @click="handleLogin"
-                    >
-                      Login
-                    </v-btn>
-                  </div>
-                </v-card-actions>
-              </v-card>
+                  <v-tab
+                    v-for="item in loginTypes"
+                    :key="item"
+                    :value="item"
+                  >
+                    {{ item }}
+                  </v-tab>
+                </v-tabs>
+              </v-card-title>
+              <v-card-text class="login-form py-0">
+                <v-window
+                  v-if="!isFetching"
+                  v-model="loginType"
+                  class="pa-4"
+                >
+                  <v-window-item value="oidc">
+                    <div class="text-subtitle-1 text-center text-medium-emphasis">
+                      Press Login to be redirected to configured<br> OpenID Connect Provider.
+                    </div>
+                  </v-window-item>
+                  <v-window-item value="token">
+                    <div class="text-subtitle-1 text-center text-medium-emphasis pb-3">
+                      Enter a bearer token trusted by the Kubernetes API server and press Login.
+                    </div>
+                    <v-form autocomplete="off">
+                      <v-text-field
+                        ref="tokenField"
+                        v-model="token"
+                        color="primary"
+                        :append-inner-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
+                        :type="showToken ? 'text' : 'password'"
+                        variant="solo"
+                        label="Token"
+                        required
+                        hide-details="auto"
+                        @click:append-inner="showToken = !showToken"
+                      />
+                    </v-form>
+                  </v-window-item>
+                </v-window>
+              </v-card-text>
+              <v-card-actions
+                v-show="!isFetching"
+                class="py-4"
+              >
+                <div class="d-flex justify-center flex-grow-1">
+                  <v-btn
+                    variant="elevated"
+                    color="primary"
+                    @click="handleLogin"
+                  >
+                    Login
+                  </v-btn>
+                </div>
+              </v-card-actions>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>
-      <div v-if="landingPageUrl"
+      <div
+        v-if="landingPageUrl"
         class="footer text-caption"
       >
         <span class="text-primary">
@@ -114,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
         >Gardener Landing Page</a>
       </div>
     </v-main>
-    <g-notify/>
+    <g-notify />
   </v-app>
 </template>
 

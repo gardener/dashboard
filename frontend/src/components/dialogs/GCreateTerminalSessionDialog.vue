@@ -6,17 +6,33 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-dialog
+    ref="gDialog"
     confirm-button-text="Create"
     :confirm-disabled="!valid"
     width="750"
     max-height="100vh"
-    ref="gDialog"
   >
-    <template #caption>Create Terminal Session</template>
+    <template #caption>
+      Create Terminal Session
+    </template>
     <template #message>
-      <v-tabs v-model="tab" color="primary">
-        <v-tab value="target-tab" href="#target-tab">Terminal</v-tab>
-        <v-tab v-if="isTerminalShortcutsFeatureEnabled" value="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
+      <v-tabs
+        v-model="tab"
+        color="primary"
+      >
+        <v-tab
+          value="target-tab"
+          href="#target-tab"
+        >
+          Terminal
+        </v-tab>
+        <v-tab
+          v-if="isTerminalShortcutsFeatureEnabled"
+          value="shortcut-tab"
+          href="#shortcut-tab"
+        >
+          Terminal Shortcuts
+        </v-tab>
       </v-tabs>
       <v-window v-model="tab">
         <v-window-item value="target-tab">
@@ -25,22 +41,27 @@ SPDX-License-Identifier: Apache-2.0
             :shoot-item="shootItem"
             @valid="onTerminalTargetValid"
             @input="updateSettings"
-          ></g-terminal-target>
-          <v-expansion-panels class="pt-4" focusable v-model="targetTab.value" :disabled="!isAdmin && isShootStatusHibernated">
+          />
+          <v-expansion-panels
+            v-model="targetTab.value"
+            class="pt-4"
+            focusable
+            :disabled="!isAdmin && isShootStatusHibernated"
+          >
             <v-expansion-panel title="Terminal Configuration">
               <v-expansion-panel-text>
                 <v-skeleton-loader
                   v-show="!targetTab.selectedConfig"
                   height="94"
                   type="list-item-two-line"
-                ></v-skeleton-loader>
+                />
                 <g-terminal-settings
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   :target="targetTab.selectedTarget"
                   @selected-config="selectedConfigChanged"
                   @valid-settings="validSettingsChanged"
-                ></g-terminal-settings>
+                />
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -59,24 +80,23 @@ SPDX-License-Identifier: Apache-2.0
                 :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
                 @add-terminal-shortcut="onAddTerminalShortcut"
-              ></g-terminal-shortcuts>
+              />
             </g-list>
           </v-item-group>
         </v-window-item>
       </v-window>
       <g-unverified-terminal-shortcuts-dialog
         ref="unverified"
-      ></g-unverified-terminal-shortcuts-dialog>
+      />
       <g-webterminal-service-account-dialog
-        :namespace="namespace"
         ref="serviceAccount"
-      ></g-webterminal-service-account-dialog>
+        :namespace="namespace"
+      />
     </template>
   </g-dialog>
 </template>
 
 <script>
-import { defineComponent, nextTick } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import {
   useAuthnStore,
@@ -98,7 +118,7 @@ import pick from 'lodash/pick'
 import find from 'lodash/find'
 import some from 'lodash/some'
 
-export default defineComponent({
+export default {
   components: {
     GDialog,
     GTerminalSettings,
@@ -194,6 +214,11 @@ export default defineComponent({
       }
     },
   },
+  watch: {
+    isSettingsExpanded () {
+      this.updateSettings()
+    },
+  },
   methods: {
     ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForSelections (initialState) {
@@ -276,7 +301,7 @@ export default defineComponent({
       // need to defer execution as at this time.
       // Otherwise, when clicking on the "run terminal shortcut" button, it is not yet valid and an old cached value is taken.
       // This is bad and we already discussed that we need to re-design the GDialog component.
-      nextTick(() => {
+      this.$nextTick(() => {
         this.$refs.gDialog.resolveAction(true)
       })
     },
@@ -284,10 +309,5 @@ export default defineComponent({
       this.targetTab.terminalTargetValid = valid
     },
   },
-  watch: {
-    isSettingsExpanded () {
-      this.updateSettings()
-    },
-  },
-})
+}
 </script>

@@ -7,24 +7,31 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="fill-height">
     <g-shoot-editor
-      alert-banner-identifier="shootEditorWarning"
+      ref="shootEditorRef"
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
+      alert-banner-identifier="shootEditorWarning"
       :shoot-item="shootItem"
       :extra-keys="extraKeys"
       @clean="onClean"
       @conflict-path="onConflictPath"
-      ref="shootEditorRef"
     >
-      <template v-slot:modificationWarning>
+      <template #modificationWarning>
         By modifying the resource directly you may cause serious problems in your cluster.
         We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
       </template>
-      <template v-slot:toolbarItemsRight>
-        <v-btn variant="text" @click.stop="save()" :disabled="clean" color="primary">Save</v-btn>
+      <template #toolbarItemsRight>
+        <v-btn
+          variant="text"
+          :disabled="clean"
+          color="primary"
+          @click.stop="save()"
+        >
+          Save
+        </v-btn>
       </template>
     </g-shoot-editor>
-    <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
+    <g-confirm-dialog ref="confirmDialog" />
   </div>
 </template>
 
@@ -45,15 +52,30 @@ import get from 'lodash/get'
 import pick from 'lodash/pick'
 
 export default {
+  components: {
+    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
+    GConfirmDialog,
+  },
+  inject: ['yaml', 'api'],
+  async beforeRouteLeave (to, from, next) {
+    if (this.clean) {
+      return next()
+    }
+    try {
+      if (await this.confirmEditorNavigation()) {
+        next()
+      } else {
+        this.focus()
+        next(false)
+      }
+    } catch (err) {
+      next(err)
+    }
+  },
   setup () {
     return {
       ...useAsyncRef('shootEditor'),
     }
-  },
-  inject: ['yaml', 'api'],
-  components: {
-    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
-    GConfirmDialog,
   },
   data () {
     const vm = this
@@ -137,20 +159,6 @@ export default {
       this.shootEditor.dispatch('focus')
     },
   },
-  async beforeRouteLeave (to, from, next) {
-    if (this.clean) {
-      return next()
-    }
-    try {
-      if (await this.confirmEditorNavigation()) {
-        next()
-      } else {
-        this.focus()
-        next(false)
-      }
-    } catch (err) {
-      next(err)
-    }
-  },
+
 }
 </script>

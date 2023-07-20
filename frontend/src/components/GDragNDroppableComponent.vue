@@ -7,19 +7,23 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="fill-height">
     <div
-      class="fill-height full-width"
       v-g-draggable="draggableValue"
+      class="fill-height full-width"
       :data-g-id="uuid"
       :draggable="true"
       @drag-start="dragStart"
       @drag-end="dragEnd"
     >
-      <div ref="handle" :data-g-id="uuid">
-        <slot name="handle"/>
+      <div
+        ref="handle"
+        :data-g-id="uuid"
+      >
+        <slot name="handle" />
       </div>
-      <slot name="component"/>
+      <slot name="component" />
     </div>
-    <g-positional-dropzone v-if="!draggableValue.dragging"
+    <g-positional-dropzone
+      v-if="!draggableValue.dragging"
       :uuid="uuid"
     />
   </div>
@@ -34,7 +38,7 @@ import { gDraggable } from '@/lib/g-draggable'
 import GPositionalDropzone from '@/components/GPositionalDropzone.vue'
 
 export default {
-  name: 'draggable-component',
+  name: 'DraggableComponent',
   directives: {
     gDraggable,
   },
@@ -55,6 +59,9 @@ export default {
       },
     }
   },
+  mounted () {
+    this.draggableValue.handle = this.$refs.handle
+  },
   methods: {
     ...mapActions(useTerminalStore, [
       'setDraggingDragAndDropId',
@@ -66,9 +73,5 @@ export default {
       this.setDraggingDragAndDropId(undefined)
     },
   },
-  mounted () {
-    this.draggableValue.handle = this.$refs.handle
-  },
 }
-
 </script>

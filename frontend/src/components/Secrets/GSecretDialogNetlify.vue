@@ -13,22 +13,21 @@ SPDX-License-Identifier: Apache-2.0
     vendor="netlify-dns"
     create-title="Add new Netlify Secret"
     replace-title="Replace Netlify Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
           v-model="apiToken"
+          color="primary"
           label="Netlify API Token"
           :error-messages="getErrorMessages('apiToken')"
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
+          variant="underlined"
           @click:append="() => (hideApiToken = !hideApiToken)"
           @update:model-value="v$.apiToken.$touch()"
           @blur="v$.apiToken.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
 
@@ -44,19 +43,16 @@ SPDX-License-Identifier: Apache-2.0
           <pre>$ echo -n '1234567890123456789' | base64</pre>
         </p>
         <p>
-          For details see <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui"></g-external-link>
+          For details see <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors } from '@/utils'
@@ -67,12 +63,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -89,6 +80,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       apiToken: undefined,
@@ -129,10 +125,14 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -142,12 +142,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

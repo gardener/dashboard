@@ -7,37 +7,49 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <!-- do not wrap v-row with tooltip component as this breaks expand (appear) animation -->
-    <v-tooltip top :disabled="!readonly" open-delay="0" :activator="$refs.dnsrow">
-      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br />
-      SecretBinding for secret {{secretName}} not found in poject namespace
+    <v-tooltip
+      top
+      :disabled="!readonly"
+      open-delay="0"
+      :activator="$refs.dnsrow"
+    >
+      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br>
+      SecretBinding for secret {{ secretName }} not found in poject namespace
     </v-tooltip>
-    <v-row align="center" class="ma-0" ref="dnsrow">
+    <v-row
+      ref="dnsrow"
+      align="center"
+      class="ma-0"
+    >
       <v-col cols="11">
         <div class="d-flex flex-wrap">
           <div class="regular-input">
             <v-select
+              v-model="type"
               :disabled="readonly || primaryReadonly"
               color="primary"
-              v-model="type"
-              @blur="v$.type.$touch()"
-              @update:modelValue="v$.type.$touch()"
               :items="dnsProviderTypes"
               :error-messages="getErrorMessages('type')"
               label="Dns Provider Type"
               :hint="typeHint"
               persistent-hint
               variant="underlined"
+              @blur="v$.type.$touch()"
+              @update:model-value="v$.type.$touch()"
             >
               <template #item="{ props }">
                 <v-list-item v-bind="props">
                   <template #prepend>
-                    <g-vendor-icon :icon="props.value"/>
+                    <g-vendor-icon :icon="props.value" />
                   </template>
                 </v-list-item>
               </template>
               <template #selection="{ item }">
                 <div class="d-flex">
-                  <g-vendor-icon :icon="item.value" class="mr-2"/>
+                  <g-vendor-icon
+                    :icon="item.value"
+                    class="mr-2"
+                  />
                   {{ item.title }}
                 </div>
               </template>
@@ -45,55 +57,51 @@ SPDX-License-Identifier: Apache-2.0
           </div>
           <div class="regular-input">
             <g-select-secret
+              v-model="secret"
+              v-model:valid="secretValid"
               :disabled="readonly"
               :dns-provider-kind="type"
-              v-model="secret"
-              v-model:valid="secretValid">
-            </g-select-secret>
+            />
           </div>
           <div class="regular-input">
             <v-combobox
-              :disabled="readonly"
               v-model="excludeDomains"
+              :disabled="readonly"
               label="Exclude Domains"
               multiple
               closable-chips
               variant="underlined"
-            >
-            </v-combobox>
+            />
           </div>
           <div class="regular-input">
             <v-combobox
-              :disabled="readonly"
               v-model="includeDomains"
+              :disabled="readonly"
               label="Include Domains"
               multiple
               closable-chips
               variant="underlined"
-            >
-            </v-combobox>
+            />
           </div>
           <div class="regular-input">
             <v-combobox
-              :disabled="readonly"
               v-model="excludeZones"
+              :disabled="readonly"
               label="Exclude Zones"
               multiple
               closable-chips
               variant="underlined"
-            >
-            </v-combobox>
+            />
           </div>
           <div class="regular-input">
             <v-combobox
-              :disabled="readonly"
               v-model="includeZones"
+              :disabled="readonly"
               label="Include Zones"
               multiple
               closable-chips
               variant="underlined"
-            >
-            </v-combobox>
+            />
           </div>
         </div>
       </v-col>
@@ -112,8 +120,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapState, mapGetters, mapActions } from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
@@ -138,24 +144,24 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSelectSecret,
     GVendorIcon,
-  },
-  validations () {
-    return this.validators
   },
   props: {
     dnsProviderId: {
       type: String,
       required: true,
     },
+  },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
+  validations () {
+    return this.validators
   },
   data () {
     return {
@@ -266,6 +272,17 @@ export default defineComponent({
       return get(this.dnsProvider, 'valid')
     },
   },
+  watch: {
+    'v$.$invalid' () {
+      this.updateValid()
+    },
+    secretValid () {
+      this.updateValid()
+    },
+  },
+  mounted () {
+    this.v$.$touch()
+  },
   methods: {
     ...mapActions(useShootStagingStore, [
       'patchDnsProvider',
@@ -295,18 +312,7 @@ export default defineComponent({
       this.deleteDnsProvider(this.dnsProviderId)
     },
   },
-  mounted () {
-    this.v$.$touch()
-  },
-  watch: {
-    'v$.$invalid' () {
-      this.updateValid()
-    },
-    secretValid () {
-      this.updateValid()
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

@@ -6,24 +6,39 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-text-field
+    v-model="innerValue"
     :min="min"
     :color="color"
-    v-model="innerValue"
     suffix="Gi"
     :label="label"
     type="number"
-    @blur="emitBlur"
     :error-messages="errorMessages"
     variant="underlined"
-  ></v-text-field>
+    @blur="emitBlur"
+  />
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { parseSize } from '@/utils'
 
-export default defineComponent({
-  props: ['modelValue', 'label', 'color', 'errorMessages', 'min'],
+export default {
+  props: {
+    modelValue: {
+      type: [String, Number],
+    },
+    label: {
+      type: String,
+    },
+    color: {
+      type: String,
+    },
+    errorMessages: {
+      type: [String, Array],
+    },
+    min: {
+      type: [String, Number],
+    },
+  },
   emits: [
     'update:modelValue',
     'blur',
@@ -53,5 +68,5 @@ export default defineComponent({
       this.$emit('blur', e)
     },
   },
-})
+}
 </script>

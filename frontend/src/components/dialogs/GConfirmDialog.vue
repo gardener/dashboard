@@ -11,19 +11,21 @@ SPDX-License-Identifier: Apache-2.0
     :cancel-button-text="cancelButtonText"
     :width="width"
     :confirm-value="confirmValue"
-    >
-    <template #caption>{{captionText}}</template>
+  >
+    <template #caption>
+      {{ captionText }}
+    </template>
     <template #message>
-      <div v-html="messageHtml"></div>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div v-html="messageHtml" />
     </template>
   </g-dialog>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GDialog from './GDialog.vue'
 
-export default defineComponent({
+export default {
   components: {
     GDialog,
   },
@@ -49,5 +51,5 @@ export default defineComponent({
       return this.$refs.gDialog.confirmWithDialog()
     },
   },
-})
+}
 </script>

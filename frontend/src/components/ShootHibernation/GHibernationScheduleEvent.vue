@@ -5,66 +5,68 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row align="center" class="ma-0">
+  <v-row
+    align="center"
+    class="ma-0"
+  >
     <v-col cols="11">
       <v-row class="ma-0">
         <v-col cols="5">
           <v-select
-          color="primary"
-          item-color="primary"
-          v-model="selectedDays"
-          ref="selectedDays"
-          @blur="touchIfNothingFocused"
-          @update:model-value="onInputSelectedDays"
-          :items="weekdays"
-          return-object
-          :error-messages="getErrorMessages('selectedDays')"
-          chips
-          label="Weekdays on which this rule shall be active"
-          multiple
-          closable-chips
-          variant="underlined"
-        ></v-select>
+            ref="selectedDays"
+            v-model="selectedDays"
+            color="primary"
+            item-color="primary"
+            :items="weekdays"
+            return-object
+            :error-messages="getErrorMessages('selectedDays')"
+            chips
+            label="Weekdays on which this rule shall be active"
+            multiple
+            closable-chips
+            variant="underlined"
+            @blur="touchIfNothingFocused"
+            @update:model-value="onInputSelectedDays"
+          />
         </v-col>
         <v-col cols="2">
           <v-text-field
+            ref="wakeUpTime"
+            v-model="wakeUpTime"
             color="primary"
             label="Wake up at"
-            v-model="wakeUpTime"
-            ref="wakeUpTime"
-            @blur="touchIfNothingFocused"
-            @input="onInputWakeUpTime"
             :error-messages="getErrorMessages('wakeUpTime')"
             type="time"
             clearable
             variant="underlined"
-          ></v-text-field>
+            @blur="touchIfNothingFocused"
+            @input="onInputWakeUpTime"
+          />
         </v-col>
         <v-col cols="2">
           <v-text-field
+            ref="hibernateTime"
+            v-model="hibernateTime"
             color="primary"
             label="Hibernate at"
-            v-model="hibernateTime"
-            ref="hibernateTime"
-            @blur="touchIfNothingFocused"
-            @input="onInputHibernateTime"
             :error-messages="getErrorMessages('hibernateTime')"
             type="time"
             clearable
             variant="underlined"
-          ></v-text-field>
+            @blur="touchIfNothingFocused"
+            @input="onInputHibernateTime"
+          />
         </v-col>
         <v-col cols="3">
           <v-autocomplete
+            v-model="selectedLocation"
             color="primary"
             label="Location"
             :items="locations"
-            v-model="selectedLocation"
-            @update:model-value="onInputSelectedLocation"
             append-icon="mdi-map-marker-outline"
             variant="underlined"
-            >
-          </v-autocomplete>
+            @update:model-value="onInputSelectedLocation"
+          />
         </v-col>
       </v-row>
     </v-col>
@@ -111,11 +113,6 @@ const validationErrors = {
 }
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     scheduleEvent: {
       type: Object,
@@ -130,33 +127,13 @@ export default defineComponent({
     'update-hibernate-time',
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   validations () {
     return this.validators
-  },
-  computed: {
-    id () {
-      return this.scheduleEvent.id
-    },
-    validators () {
-      return {
-        selectedDays: {
-          required,
-        },
-        hibernateTime: {
-          required: requiredIf(function () {
-            return !this.wakeUpTime
-          }),
-        },
-        wakeUpTime: {
-          required: requiredIf(function () {
-            return !this.hibernateTime
-          }),
-        },
-        selectedLocation: {
-          required,
-        },
-      }
-    },
   },
   data () {
     return {
@@ -205,6 +182,38 @@ export default defineComponent({
         },
       ],
     }
+  },
+  computed: {
+    id () {
+      return this.scheduleEvent.id
+    },
+    validators () {
+      return {
+        selectedDays: {
+          required,
+        },
+        hibernateTime: {
+          required: requiredIf(function () {
+            return !this.wakeUpTime
+          }),
+        },
+        wakeUpTime: {
+          required: requiredIf(function () {
+            return !this.hibernateTime
+          }),
+        },
+        selectedLocation: {
+          required,
+        },
+      }
+    },
+  },
+  mounted () {
+    this.selectedLocation = this.scheduleEvent.location
+    this.wakeUpTime = this.getTime(this.scheduleEvent.end)
+    this.hibernateTime = this.getTime(this.scheduleEvent.start)
+    this.setSelectedDays(this.scheduleEvent)
+    this.updateSelectedDays() // trigger sort
   },
   methods: {
     getErrorMessages (field) {
@@ -291,13 +300,6 @@ export default defineComponent({
         this.$emit('valid', { id: this.id, valid: this.valid })
       }
     },
-  },
-  mounted () {
-    this.selectedLocation = this.scheduleEvent.location
-    this.wakeUpTime = this.getTime(this.scheduleEvent.end)
-    this.hibernateTime = this.getTime(this.scheduleEvent.start)
-    this.setSelectedDays(this.scheduleEvent)
-    this.updateSelectedDays() // trigger sort
   },
 })
 </script>

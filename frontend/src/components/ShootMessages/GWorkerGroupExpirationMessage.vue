@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span>
+    Machine image <span class="font-weight-bold">{{ name }} | Version: {{ version }}</span> of worker group <span class="font-weight-bold">{{ workerName }} </span>
     <span v-if="isValidTerminationDate">expires
       <g-time-string
         :date-time="expirationDate"

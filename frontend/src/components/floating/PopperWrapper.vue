@@ -87,26 +87,15 @@ const referenceProps = ['class']
 
 export default {
   name: 'VPopperWrapper',
-
-  setup () {
-    const theme = useTheme()
-    return {
-      themeName: theme.global.name,
-    }
-  },
-
   components: {
     Popper: Popper(),
     PopperContent,
   },
-
   mixins: [
     PopperMethods,
     ThemeClass('finalTheme'),
   ],
-
   inheritAttrs: false,
-
   props: {
     theme: {
       type: String,
@@ -117,13 +106,17 @@ export default {
       default: null,
     },
   },
-
+  setup () {
+    const theme = useTheme()
+    return {
+      themeName: theme.global.name,
+    }
+  },
   computed: {
     finalTheme () {
       return this.theme ?? this.$options.vPopperTheme
     },
   },
-
   methods: {
     getTargetNodes () {
       return Array.from(this.$refs.reference.children)

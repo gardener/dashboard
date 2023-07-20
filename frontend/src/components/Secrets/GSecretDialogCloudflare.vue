@@ -13,29 +13,28 @@ SPDX-License-Identifier: Apache-2.0
     vendor="cloudflare-dns"
     create-title="Add new Cloudflare Secret"
     replace-title="Replace Cloudflare Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
           v-model="apiToken"
+          color="primary"
           label="Cloudflare API Token"
           :error-messages="getErrorMessages('apiToken')"
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
+          variant="underlined"
           @click:append="() => (hideApiToken = !hideApiToken)"
           @update:model-value="v$.apiToken.$touch()"
           @blur="v$.apiToken.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
 
     <template #help-slot>
       <div>
         <p>
-          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys"></g-external-link>.
+          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys" />.
         </p>
         <p class="font-weight-bold">
           Note: You need to generate an API token and not an API key.
@@ -57,15 +56,12 @@ SPDX-License-Identifier: Apache-2.0
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors } from '@/utils'
@@ -76,12 +72,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -98,6 +89,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       apiToken: undefined,
@@ -138,19 +134,6 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
-    },
-    reset () {
-      this.v$.$reset()
-
-      this.apiToken = ''
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
-  },
   watch: {
     value: function (value) {
       if (value) {
@@ -158,5 +141,14 @@ export default defineComponent({
       }
     },
   },
-})
+  methods: {
+    reset () {
+      this.v$.$reset()
+      this.apiToken = ''
+    },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
+  },
+}
 </script>

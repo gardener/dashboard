@@ -11,80 +11,128 @@ SPDX-License-Identifier: Apache-2.0
         :height="72"
       >
         <template #prepend>
-          <g-icon-base width="44" height="60" view-box="0 0 298 403" class="ml-2" icon-color="toolbar-title">
-            <g-certified-kubernetes/>
+          <g-icon-base
+            width="44"
+            height="60"
+            view-box="0 0 298 403"
+            class="ml-2"
+            icon-color="toolbar-title"
+          >
+            <g-certified-kubernetes />
           </g-icon-base>
         </template>
-        <div class="text-h5">Kubernetes Clusters</div>
-        <div class="text-caption">{{headlineSubtitle}}</div>
+        <div class="text-h5">
+          Kubernetes Clusters
+        </div>
+        <div class="text-caption">
+          {{ headlineSubtitle }}
+        </div>
         <template #append>
-        <v-tooltip location="bottom">
-          <template #activator="{ props }">
-            <div v-bind="props">
-              <v-badge v-if="!projectScope && isAdmin"
-                class="mr-5"
-                bordered
-                color="primary-lighten-3"
-                :content="numberOfNewItemsSinceFreeze"
-                :model-value="numberOfNewItemsSinceFreeze > 0"
-              >
-                <v-switch
-                  v-model="focusModeInternal"
-                  class="mr-3"
-                  density="compact"
+          <v-tooltip location="bottom">
+            <template #activator="{ props }">
+              <div v-bind="props">
+                <v-badge
+                  v-if="!projectScope && isAdmin"
+                  class="mr-5"
+                  bordered
                   color="primary-lighten-3"
-                  hide-details>
-                  <template #label>
-                    <span class="text-subtitle-1 text-toolbar-title">Focus</span>
-                  </template>
-                </v-switch>
-              </v-badge>
-            </div>
-          </template>
-          <span class="font-weight-bold">Focus Mode</span>
-          <ul>
-            <li>Cluster list sorting is freezed</li>
-            <li>Items in the list will still be updated</li>
-            <li>New clusters will not be added to the list until you disable focus mode</li>
-            <li>Removed items will be shown as stale (greyed out)</li>
-          </ul>
-          <template v-if="numberOfNewItemsSinceFreeze > 0">
-            <v-divider color="white"></v-divider>
-            <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
-            new clusters were added to the list since you enabled focus mode.
-          </template>
-        </v-tooltip>
-        <v-tooltip location="top" v-if="shootSearch || items.length > 3">
-          <template #activator="{ props }">
-            <v-text-field
-              v-bind="props"
-              prepend-inner-icon="mdi-magnify"
+                  :content="numberOfNewItemsSinceFreeze"
+                  :model-value="numberOfNewItemsSinceFreeze > 0"
+                >
+                  <v-switch
+                    v-model="focusModeInternal"
+                    class="mr-3"
+                    density="compact"
+                    color="primary-lighten-3"
+                    hide-details
+                  >
+                    <template #label>
+                      <span class="text-subtitle-1 text-toolbar-title">Focus</span>
+                    </template>
+                  </v-switch>
+                </v-badge>
+              </div>
+            </template>
+            <span class="font-weight-bold">Focus Mode</span>
+            <ul>
+              <li>Cluster list sorting is freezed</li>
+              <li>Items in the list will still be updated</li>
+              <li>New clusters will not be added to the list until you disable focus mode</li>
+              <li>Removed items will be shown as stale (greyed out)</li>
+            </ul>
+            <template v-if="numberOfNewItemsSinceFreeze > 0">
+              <v-divider color="white" />
+              <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
+              new clusters were added to the list since you enabled focus mode.
+            </template>
+          </v-tooltip>
+          <v-tooltip
+            v-if="shootSearch || items.length > 3"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                prepend-inner-icon="mdi-magnify"
+                color="primary"
+                label="Search"
+                single-line
+                hide-details
+                variant="solo"
+                flat
+                clearable
+                clear-icon="mdi-close"
+                density="compact"
+                class="g-search-field mr-3"
+                @update:model-value="onInputSearch"
+                @keyup.esc="shootSearch = ''"
+              />
+            </template>
+            Search terms are <span class="font-weight-bold">ANDed</span>.<br>
+            <span class="font-weight-bold">Use quotes</span> for exact words or phrases:
+            <v-chip
+              label
               color="primary"
-              label="Search"
-              single-line
-              hide-details
-              variant="solo"
-              flat
-              clearable
-              clear-icon="mdi-close"
-              density="compact"
-              @update:model-value="onInputSearch"
-              @keyup.esc="shootSearch = ''"
-              class="g-search-field mr-3"
-            ></v-text-field>
-          </template>
-          Search terms are <span class="font-weight-bold">ANDed</span>.<br />
-          <span class="font-weight-bold">Use quotes</span> for exact words or phrases:
-          <v-chip label color="primary" variant="flat" size="small" class="mr-1">"my-shoot"</v-chip>
-          <v-chip label color="primary" variant="flat" size="small">"John Doe"</v-chip>
-          <br/>
-          <span class="font-weight-bold">Use minus sign</span>
-          to exclude words that you don't want:
-          <v-chip label color="primary" variant="flat" size="small" class="mr-1">-myproject</v-chip>
-          <v-chip label color="primary" variant="flat" size="small">-"Jane Doe"</v-chip>
-          <br/>
-        </v-tooltip>
-          <v-tooltip location="top" v-if="canCreateShoots && projectScope">
+              variant="flat"
+              size="small"
+              class="mr-1"
+            >
+              "my-shoot"
+            </v-chip>
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+            >
+              "John Doe"
+            </v-chip>
+            <br>
+            <span class="font-weight-bold">Use minus sign</span>
+            to exclude words that you don't want:
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+              class="mr-1"
+            >
+              -myproject
+            </v-chip>
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+            >
+              -"Jane Doe"
+            </v-chip>
+            <br>
+          </v-tooltip>
+          <v-tooltip
+            v-if="canCreateShoots && projectScope"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -98,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-table-column-selection
             :headers="selectableHeaders"
             :filters="selectableFilters"
-            :filterTooltip="filterTooltip"
+            :filter-tooltip="filterTooltip"
             @set-selected-header="setSelectedHeader"
             @reset="resetTableSettings"
             @toggle-filter="toggleFilter"
@@ -106,12 +154,12 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
       <v-data-table
-        :headers="visibleHeaders"
-        :items="sortedAndFilteredItems"
-        hover
         v-model:page="page"
         v-model:sort-by="sortByInternal"
         v-model:items-per-page="itemsPerPage"
+        :headers="visibleHeaders"
+        :items="sortedAndFilteredItems"
+        hover
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleHeaders)"
@@ -119,7 +167,7 @@ SPDX-License-Identifier: Apache-2.0
         class="g-table"
       >
         <template #progress>
-          <g-shoot-list-progress/>
+          <g-shoot-list-progress />
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
@@ -131,9 +179,9 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom="{ pageCount }">
           <g-data-table-footer
-            :items-length="sortedAndFilteredItems.length"
             v-model:page="page"
             v-model:items-per-page="itemsPerPage"
+            :items-length="sortedAndFilteredItems.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
@@ -218,6 +266,24 @@ export default {
     GTableColumnSelection,
     GDataTableFooter,
   },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.cachedItems = null
+      vm.updateTableSettings()
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.shootSearch = null
+    this.updateTableSettings()
+    this.focusModeInternal = false
+    next()
+  },
+  beforeRouteLeave (to, from, next) {
+    this.cachedItems = this.shootList.slice(0)
+    this.shootSearch = null
+    this.focusModeInternal = false
+    next()
+  },
   data () {
     return {
       shootSearch: '',
@@ -232,116 +298,6 @@ export default {
         { value: 20, title: '20' },
       ],
     }
-  },
-  methods: {
-    ...mapActions(useShootStore, [
-      'setSelection',
-      'setShootListFilter',
-      'subscribe',
-      'sortItems',
-      'searchItems',
-      'setFocusMode',
-      'setSortBy',
-    ]),
-    async showDialog (args) {
-      switch (args.action) {
-        case 'access':
-          try {
-            await this.setSelection(args.shootItem.metadata)
-            this.dialog = args.action
-          } catch (error) {
-            // Currently not handled
-          }
-      }
-    },
-    hideDialog () {
-      this.dialog = null
-      this.setSelection(null)
-    },
-    setSelectedHeader (header) {
-      this.selectedColumns[header.key] = !header.selected
-      this.saveSelectedColumns()
-    },
-    saveSelectedColumns () {
-      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
-
-      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
-      if (isEmpty(this.currentCustomSelectedColumns)) {
-        projectSpecificCustomSelectedColumns.value = null
-      } else {
-        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
-      }
-    },
-    resetTableSettings () {
-      this.selectedColumns = {
-        ...this.defaultStandardSelectedColumns,
-        ...this.defaultCustomSelectedColumns,
-      }
-      this.saveSelectedColumns()
-      this.itemsPerPage = this.defaultItemsPerPage
-      this.sortByInternal = this.defaultSortBy
-    },
-    updateTableSettings () {
-      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
-      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
-      this.selectedColumns = {
-        ...selectedColumns.value,
-        ...projectSpecificCustomSelectedColumns.value,
-      }
-
-      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
-      if (!isEmpty(projectSpecificSortBy.value)) {
-        this.sortByInternal = projectSpecificSortBy.value
-        return
-      }
-
-      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
-      if (!isEmpty(sortBy.value)) {
-        this.sortByInternal = sortBy.value
-        return
-      }
-
-      this.sortByInternal = this.defaultSortBy
-    },
-    async toggleFilter ({ value }) {
-      const key = value
-      await this.setShootListFilter({ filter: key, value: !this.shootListFilters[key] })
-
-      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
-        'onlyShootsWithIssues',
-        'progressing',
-        'noOperatorAction',
-        'deactivatedReconciliation',
-        'hideTicketsWithLabel',
-      ])
-
-      if (key === 'onlyShootsWithIssues') {
-        await this.subscribe()
-      }
-    },
-    isFilterActive (key) {
-      const filters = this.shootListFilters
-      return get(filters, key, false)
-    },
-    onInputSearch: debounce(function (value) {
-      this.shootSearch = value
-    }, 500),
-    disableCustomKeySort (tableHeaders) {
-      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
-      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
-      console.log('mapValues(tableKeys, () => () => 0)', mapValues(tableKeys, () => () => 0))
-      return mapValues(tableKeys, () => () => 0)
-    },
-  },
-  watch: {
-    sortBy (sortBy) {
-      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
-        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
-      } else {
-        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
-        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
-      }
-    },
   },
   computed: {
     ...mapState(useAuthnStore, [
@@ -732,23 +688,115 @@ export default {
       return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
     },
   },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.cachedItems = null
-      vm.updateTableSettings()
-    })
+  watch: {
+    sortBy (sortBy) {
+      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
+      } else {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
+        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
+      }
+    },
   },
-  beforeRouteUpdate (to, from, next) {
-    this.shootSearch = null
-    this.updateTableSettings()
-    this.focusModeInternal = false
-    next()
-  },
-  beforeRouteLeave (to, from, next) {
-    this.cachedItems = this.shootList.slice(0)
-    this.shootSearch = null
-    this.focusModeInternal = false
-    next()
+  methods: {
+    ...mapActions(useShootStore, [
+      'setSelection',
+      'setShootListFilter',
+      'subscribe',
+      'sortItems',
+      'searchItems',
+      'setFocusMode',
+      'setSortBy',
+    ]),
+    async showDialog (args) {
+      switch (args.action) {
+        case 'access':
+          try {
+            await this.setSelection(args.shootItem.metadata)
+            this.dialog = args.action
+          } catch (error) {
+            // Currently not handled
+          }
+      }
+    },
+    hideDialog () {
+      this.dialog = null
+      this.setSelection(null)
+    },
+    setSelectedHeader (header) {
+      this.selectedColumns[header.key] = !header.selected
+      this.saveSelectedColumns()
+    },
+    saveSelectedColumns () {
+      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
+
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
+      if (isEmpty(this.currentCustomSelectedColumns)) {
+        projectSpecificCustomSelectedColumns.value = null
+      } else {
+        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
+      }
+    },
+    resetTableSettings () {
+      this.selectedColumns = {
+        ...this.defaultStandardSelectedColumns,
+        ...this.defaultCustomSelectedColumns,
+      }
+      this.saveSelectedColumns()
+      this.itemsPerPage = this.defaultItemsPerPage
+      this.sortByInternal = this.defaultSortBy
+    },
+    updateTableSettings () {
+      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
+      this.selectedColumns = {
+        ...selectedColumns.value,
+        ...projectSpecificCustomSelectedColumns.value,
+      }
+
+      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
+      if (!isEmpty(projectSpecificSortBy.value)) {
+        this.sortByInternal = projectSpecificSortBy.value
+        return
+      }
+
+      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
+      if (!isEmpty(sortBy.value)) {
+        this.sortByInternal = sortBy.value
+        return
+      }
+
+      this.sortByInternal = this.defaultSortBy
+    },
+    async toggleFilter ({ value }) {
+      const key = value
+      await this.setShootListFilter({ filter: key, value: !this.shootListFilters[key] })
+
+      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
+        'onlyShootsWithIssues',
+        'progressing',
+        'noOperatorAction',
+        'deactivatedReconciliation',
+        'hideTicketsWithLabel',
+      ])
+
+      if (key === 'onlyShootsWithIssues') {
+        await this.subscribe()
+      }
+    },
+    isFilterActive (key) {
+      const filters = this.shootListFilters
+      return get(filters, key, false)
+    },
+    onInputSearch: debounce(function (value) {
+      this.shootSearch = value
+    }, 500),
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
+      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+      console.log('mapValues(tableKeys, () => () => 0)', mapValues(tableKeys, () => () => 0))
+      return mapValues(tableKeys, () => () => 0)
+    },
   },
 }
 </script>

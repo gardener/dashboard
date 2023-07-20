@@ -126,11 +126,11 @@ function keydown (event, binding) {
 
 function cancelDrag (binding) {
   const event = new MouseEvent('mouseup', {
-    'view': window,
-    'bubbles': true,
-    'cancelable': true,
-    'clientX': -1,
-    'clientY': -1
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    clientX: -1,
+    clientY: -1,
   })
   mouseup(event, binding)
 }

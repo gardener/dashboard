@@ -11,7 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     :class="[colorClass, backgroundColorClass]"
   >
     <slot name="prepend">
-      <v-icon v-if="prependIcon"
+      <v-icon
+        v-if="prependIcon"
         :icon="prependIcon"
         :color="color"
         :size="size"
@@ -27,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
       <slot>{{ title }}</slot>
     </v-toolbar-title>
     <template v-if="slots.append">
-      <slot name="append"></slot>
+      <slot name="append" />
     </template>
   </v-toolbar>
 </template>

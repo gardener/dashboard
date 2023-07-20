@@ -5,23 +5,34 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="code-block" :data-lang="lang">
-    <div class="code-block-wrapper" :style="{ 'max-height': height }">
-      <pre><code :class="lang" ref="block"></code></pre>
-      <span class="copied" :class="{ 'active': showMessage }">Copied!</span>
+  <div
+    class="code-block"
+    :data-lang="lang"
+  >
+    <div
+      class="code-block-wrapper"
+      :style="{ 'max-height': height }"
+    >
+      <pre><code
+          ref="block"
+          :class="lang"
+      /></pre>
+      <span
+        class="copied"
+        :class="{ 'active': showMessage }"
+      >Copied!</span>
     </div>
     <g-copy-btn
       v-if="showCopyButton"
       class="copy-button"
       :clipboard-text="clipboardText"
-      @copy="onCopy"
       :user-feedback="false"
-    ></g-copy-btn>
+      @copy="onCopy"
+    />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
@@ -42,7 +53,7 @@ hljs.registerLanguage('json', json)
 hljs.registerLanguage('javascript', javascript)
 hljs.registerLanguage('yaml', yaml)
 
-export default defineComponent({
+export default {
   components: {
     GCopyBtn,
   },
@@ -65,6 +76,9 @@ export default defineComponent({
       default: true,
     },
   },
+  emits: [
+    'highlightBlock',
+  ],
   data: () => ({
     showMessage: false,
   }),
@@ -72,6 +86,14 @@ export default defineComponent({
     clipboardText () {
       return this.clipboard ? this.clipboard : this.content
     },
+  },
+  watch: {
+    content (textContent) {
+      this.prettyPrint(textContent)
+    },
+  },
+  mounted () {
+    this.prettyPrint(this.content)
   },
   methods: {
     prettyPrint (textContent) {
@@ -94,7 +116,7 @@ export default defineComponent({
         block.textContent = trim(lines.join('\n'))
       }
       hljs.highlightElement(block)
-      this.$emit('highlight-block')
+      this.$emit('highlightBlock')
     },
     onCopy () {
       this.showMessage = true
@@ -103,15 +125,7 @@ export default defineComponent({
       }, 2000)
     },
   },
-  mounted () {
-    this.prettyPrint(this.content)
-  },
-  watch: {
-    content (textContent) {
-      this.prettyPrint(textContent)
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

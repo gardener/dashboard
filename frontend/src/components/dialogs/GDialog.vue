@@ -24,50 +24,52 @@ SPDX-License-Identifier: Apache-2.0
           </slot>
           <template v-if="$slots.affectedObjectName">
             <span class="font-family-monospace font-weight-bold pl-2">
-              <slot name="affectedObjectName"></slot>
+              <slot name="affectedObjectName" />
             </span>
           </template>
         </v-toolbar-title>
       </v-toolbar>
       <div>
-        <slot name="top"></slot>
+        <slot name="top" />
       </div>
       <div
         ref="cardContent"
         class="card-content"
       >
-        <slot name="card"></slot>
+        <slot name="card" />
         <v-card-text v-if="$slots.message">
-          <slot name="message"></slot>
+          <slot name="message" />
         </v-card-text>
       </div>
-      <div v-if="$slots.additionalMessage"
+      <div
+        v-if="$slots.additionalMessage"
         class="mt-2"
       >
-        <slot name="additionalMessage"></slot>
+        <slot name="additionalMessage" />
       </div>
-      <div v-if="$slots.errorMessage || message"
+      <div
+        v-if="$slots.errorMessage || message"
         class="mt-2"
       >
         <slot name="errorMessage">
           <g-message
-            color="error"
             v-model:message="message"
             v-model:detailed-message="detailedMessage"
+            color="error"
           />
         </slot>
       </div>
 
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-text-field
           v-if="confirmValue && !confirmDisabled"
           ref="deleteDialogInput"
+          v-model="userInput"
           :label="hint"
           :error="notConfirmed && userInput.length > 0"
           hide-details
-          v-model="userInput"
           type="text"
           variant="outlined"
           color="primary"
@@ -76,22 +78,25 @@ SPDX-License-Identifier: Apache-2.0
           @keyup.enter="resolveAction(true)"
         />
         <v-btn
+          v-if="cancelButtonText.length"
           variant="text"
           @click="resolveAction(false)"
-          v-if="cancelButtonText.length"
         >
-          {{cancelButtonText}}
+          {{ cancelButtonText }}
         </v-btn>
-        <v-tooltip location="top" :disabled="valid">
+        <v-tooltip
+          location="top"
+          :disabled="valid"
+        >
           <template #activator="{ props }">
             <div v-bind="props">
               <v-btn
                 variant="text"
-                @click="resolveAction(true)"
                 :disabled="!valid"
                 class="text-toolbar-background"
+                @click="resolveAction(true)"
               >
-                {{confirmButtonText}}
+                {{ confirmButtonText }}
               </v-btn>
             </div>
           </template>
@@ -150,6 +155,11 @@ export default {
       default: false,
     },
   },
+  emits: [
+    'update:errorMessage',
+    'update:detailedErrorMessage',
+    'dialogClosed',
+  ],
   data () {
     return {
       userInput: '',
@@ -189,11 +199,13 @@ export default {
       return !this.confirmDisabled && !this.notConfirmed
     },
   },
-  emits: [
-    'update:errorMessage',
-    'update:detailedErrorMessage',
-    'dialogClosed',
-  ],
+  watch: {
+    visible (value) {
+      if (value) {
+        this.showScrollBar(0)
+      }
+    },
+  },
   methods: {
     confirmWithDialog (confirmationInterceptor) {
       this.showDialog()
@@ -251,13 +263,6 @@ export default {
       const scrollTopVal = cardContentRef.scrollTop
       cardContentRef.scrollTop = scrollTopVal + 10
       cardContentRef.scrollTop = scrollTopVal - 10
-    },
-  },
-  watch: {
-    visible (value) {
-      if (value) {
-        this.showScrollBar(0)
-      }
     },
   },
 }

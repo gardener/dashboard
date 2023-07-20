@@ -3,21 +3,22 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 
 SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <v-select
+    v-model="machineImage"
     color="primary"
     item-color="primary"
     :items="machineImageItems"
     item-value="key"
     return-object
     :error-messages="getErrorMessages('worker.machine.image')"
-    @update:model-value="onInputMachineImage"
-    @blur="v$.worker.machine.image.$touch()"
-    v-model="machineImage"
     label="Machine Image"
     :hint="hint"
     persistent-hint
     variant="underlined"
+    @update:model-value="onInputMachineImage"
+    @blur="v$.worker.machine.image.$touch()"
   >
     <template #item="{ props, item }">
       <v-list-item
@@ -25,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         :title="undefined"
       >
         <template #prepend>
-          <g-vendor-icon :icon="item.raw.icon"/>
+          <g-vendor-icon :icon="item.raw.icon" />
         </template>
         <v-list-item-title>Name: {{ item.raw.name }} | Version: {{ item.raw.version }}</v-list-item-title>
         <v-list-item-subtitle v-if="itemDescription(item).length">
@@ -34,9 +35,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
     </template>
     <template #selection="{ item }">
-      <g-vendor-icon :icon="item.raw.icon"></g-vendor-icon>
+      <g-vendor-icon :icon="item.raw.icon" />
       <span class="ml-2">
-        {{item.raw.name}} [{{item.raw.version}}]
+        {{ item.raw.name }} [{{ item.raw.version }}]
       </span>
     </template>
     <template #message="{ message }">
@@ -67,11 +68,6 @@ const validationErrors = {
 }
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   components: {
     GVendorIcon,
     GMultiMessage,
@@ -93,6 +89,11 @@ export default defineComponent({
     'updateMachineImage',
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       validationErrors,
@@ -191,6 +192,10 @@ export default defineComponent({
   validations () {
     return this.validators
   },
+  mounted () {
+    this.v$.$touch()
+    this.validateInput()
+  },
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -216,10 +221,6 @@ export default defineComponent({
       }
       return join(itemDescription, ' | ')
     },
-  },
-  mounted () {
-    this.v$.$touch()
-    this.validateInput()
   },
 })
 </script>

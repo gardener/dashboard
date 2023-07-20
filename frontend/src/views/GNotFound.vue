@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     message="The page you are looking for is not available!"
     button-text="Get me out of here"
     @click="onClick"
-  ></g-error>
+  />
 </template>
 
 <script setup>

@@ -49,7 +49,6 @@ import startsWith from 'lodash/startsWith'
 import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import padStart from 'lodash/padStart'
-import isArray from 'lodash/isArray'
 import orderBy from 'lodash/orderBy'
 
 export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/

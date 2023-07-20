@@ -8,21 +8,25 @@ SPDX-License-Identifier: Apache-2.0
   <v-row class="my-0">
     <v-card
       v-for="infrastructureKind in sortedInfrastructureKindList"
+      :key="infrastructureKind"
       class="select_infra_card cursor-pointer"
       :class="{
         'select_infra_card_active elevation-8' : infrastructureKind === selectedInfrastructure,
         'elevation-3': infrastructureKind !== selectedInfrastructure,
       }"
-      @click.stop="selectInfrastructure(infrastructureKind)"
-      :key="infrastructureKind"
       hover
-      >
+      @click.stop="selectInfrastructure(infrastructureKind)"
+    >
       <div class="d-flex flex-column justify-center align-center">
         <div>
-          <g-vendor-icon :icon="infrastructureKind" :size="60" no-background/>
+          <g-vendor-icon
+            :icon="infrastructureKind"
+            :size="60"
+            no-background
+          />
         </div>
-        <div class="mt-2" >
-          <span class="text-subtitle-1">{{infrastructureKind}}</span>
+        <div class="mt-2">
+          <span class="text-subtitle-1">{{ infrastructureKind }}</span>
         </div>
       </div>
     </v-card>
@@ -30,14 +34,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import { mapState, mapActions } from 'pinia'
 import {
   useCloudProfileStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GVendorIcon,
   },
@@ -81,7 +84,7 @@ export default defineComponent({
       this.validateInput()
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-app ref="app">
-    <g-loading/>
-    <g-main-navigation/>
-    <g-main-toolbar/>
-    <g-main-content ref="mainContent"/>
-    <g-notify/>
+    <g-loading />
+    <g-main-navigation />
+    <g-main-toolbar />
+    <g-main-content ref="mainContent" />
+    <g-notify />
   </v-app>
 </template>
 

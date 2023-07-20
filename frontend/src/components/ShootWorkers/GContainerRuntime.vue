@@ -8,40 +8,39 @@ SPDX-License-Identifier: Apache-2.0
   <div class="d-flex flex-row">
     <g-hint-colorizer hint-color="warning">
       <v-select
+        v-model="criName"
         color="primary"
         item-color="primary"
         :items="criItems"
         :error-messages="getErrorMessages('criName')"
-        @update:model-value="onInputCriName"
-        @blur="v$.criName.$touch()"
-        v-model="criName"
         label="Container Runtime"
         :hint="hint"
         persistent-hint
         variant="underlined"
+        @update:model-value="onInputCriName"
+        @blur="v$.criName.$touch()"
       >
         <template #item="{ props, item }">
           <v-list-item
             v-bind="props"
             :disabled="item.raw.disabled"
-          >
-          </v-list-item>
+          />
         </template>
       </v-select>
     </g-hint-colorizer>
     <v-select
       v-if="criContainerRuntimeTypes.length"
+      v-model="selectedCriContainerRuntimeTypes"
       class="ml-1"
       color="primary"
       item-color="primary"
       :items="criContainerRuntimeTypes"
-      v-model="selectedCriContainerRuntimeTypes"
       label="Additional OCI Runtimes"
       multiple
       chips
       closable-chips
       variant="underlined"
-    ></v-select>
+    />
   </div>
 </template>
 
@@ -66,11 +65,6 @@ const validationErrors = {
 }
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   components: {
     GHintColorizer,
   },
@@ -91,6 +85,11 @@ export default defineComponent({
   emits: [
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       valid: undefined,
@@ -170,6 +169,16 @@ export default defineComponent({
       return undefined
     },
   },
+  watch: {
+    criItems (criItems) {
+      this.v$.$touch()
+      this.validateInput()
+    },
+  },
+  mounted () {
+    this.v$.$touch()
+    this.validateInput()
+  },
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -184,16 +193,6 @@ export default defineComponent({
         this.valid = !this.v$.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
-    },
-  },
-  mounted () {
-    this.v$.$touch()
-    this.validateInput()
-  },
-  watch: {
-    criItems (criItems) {
-      this.v$.$touch()
-      this.validateInput()
     },
   },
 })

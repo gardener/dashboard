@@ -5,23 +5,25 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog v-if="dialog"
+  <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="caption"
     :confirm-button-text="confirmText"
     :confirm-required="confirmRequired"
-     width="600"
+    width="600"
   >
     <template v-if="!isShootSettingHibernated">
-      This will scale the worker nodes of your cluster down to zero.<br /><br />
-      Type <strong>{{shootName}}</strong> below and confirm to hibernate your cluster.<br /><br />
+      This will scale the worker nodes of your cluster down to zero.<br><br>
+      Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
     </template>
     <template v-else>
-      This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
+      This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
     </template>
   </g-shoot-action-dialog>
-  <g-shoot-action-button v-if="button"
+  <g-shoot-action-button
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
@@ -45,6 +47,8 @@ export default {
     GShootActionButton,
     GShootActionDialog,
   },
+  mixins: [shootItem],
+  inject: ['api', 'notify', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -63,8 +67,9 @@ export default {
       default: false,
     },
   },
-  inject: ['api', 'notify', 'logger'],
-  mixins: [shootItem],
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       hibernationChanged: false,
@@ -116,9 +121,45 @@ export default {
       return this.buttonTitle
     },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  watch: {
+    modelValue (value) {
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
+      }
+    },
+    isShootSettingHibernated (value) {
+      // hide dialog if hibernation state changes
+      if (this.$refs.actionDialog) {
+        this.$refs.actionDialog.hideDialog()
+      }
+    },
+    isShootStatusHibernationProgressing (hibernationProgressing) {
+      if (hibernationProgressing || !this.hibernationChanged) {
+        return
+      }
+      this.hibernationChanged = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      const state = this.isShootStatusHibernated
+        ? 'hibernated'
+        : 'started'
+      this.notify({
+        text: `Cluster ${this.shootName} successfully ${state}`,
+        type: 'success',
+        position: 'bottom right',
+        duration: 5000,
+      })
+    },
+  },
   methods: {
     waitForConfirmation () {
       this.$nextTick(async () => {
@@ -157,45 +198,6 @@ export default {
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         this.hibernationChanged = false
       }
-    },
-  },
-  watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
-    isShootSettingHibernated (value) {
-      // hide dialog if hibernation state changes
-      if (this.$refs.actionDialog) {
-        this.$refs.actionDialog.hideDialog()
-      }
-    },
-    isShootStatusHibernationProgressing (hibernationProgressing) {
-      if (hibernationProgressing || !this.hibernationChanged) {
-        return
-      }
-      this.hibernationChanged = false
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      const state = this.isShootStatusHibernated
-        ? 'hibernated'
-        : 'started'
-      this.notify({
-        text: `Cluster ${this.shootName} successfully ${state}`,
-        type: 'success',
-        position: 'bottom right',
-        duration: 5000,
-      })
     },
   },
 }

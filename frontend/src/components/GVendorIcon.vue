@@ -11,13 +11,15 @@ SPDX-License-Identifier: Apache-2.0
     tile
     :class="{ 'icon-background': !noBackground }"
   >
-    <img v-if="iconSrc"
+    <img
+      v-if="iconSrc"
       :src="iconSrc"
       :style="iconStyle"
       :alt="`${icon} logo`"
       class="rounded-0"
     >
-    <v-icon v-else
+    <v-icon
+      v-else
       :icon="mdiIcon"
       class="text-primary"
       style="font-size:1.5em"
