@@ -5,7 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-dialog v-model="visible" persistent scrollable max-width="600">
+  <v-dialog
+    v-model="visible"
+    persistent
+    scrollable
+    max-width="600"
+  >
     <v-card>
       <g-toolbar
         prepend-icon="mdi-cube"
@@ -13,8 +18,8 @@ SPDX-License-Identifier: Apache-2.0
       />
       <v-card-text class="dialog-content">
         <form>
-          <v-container fluid >
-            <v-row >
+          <v-container fluid>
+            <v-row>
               <v-col cols="12">
                 <v-text-field
                   ref="projectName"
@@ -42,13 +47,24 @@ SPDX-License-Identifier: Apache-2.0
                   @update:model-value="v$.costObject.$touch()"
                   @blur="v$.costObject.$touch()"
                 />
-                <v-alert v-if="!!costObjectDescriptionHtml" density="compact" type="info" variant="outlined" color="primary">
-                  <div class="alert-banner-message" v-html="costObjectDescriptionHtml"></div>
+                <v-alert
+                  v-if="!!costObjectDescriptionHtml"
+                  density="compact"
+                  type="info"
+                  variant="outlined"
+                  color="primary"
+                >
+                  <!-- eslint-disable vue/no-v-html -->
+                  <div
+                    class="alert-banner-message"
+                    v-html="costObjectDescriptionHtml"
+                  />
+                  <!-- eslint-enable vue/no-v-html -->
                 </v-alert>
               </v-col>
             </v-row>
 
-            <v-row >
+            <v-row>
               <v-col cols="12">
                 <v-text-field
                   ref="description"
@@ -59,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
                 />
               </v-col>
             </v-row>
-            <v-row >
+            <v-row>
               <v-col cols="12">
                 <v-text-field
                   ref="purpose"
@@ -71,9 +87,9 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
             </v-row>
             <g-message
-              color="error"
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"
+              color="error"
             />
           </v-container>
         </form>
@@ -86,9 +102,9 @@ SPDX-License-Identifier: Apache-2.0
           <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           variant="text"
           :disabled="loading"
@@ -111,7 +127,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { maxLength, required } from '@vuelidate/validators'
@@ -139,15 +154,10 @@ import { useAuthnStore, useConfigStore, useMemberStore, useProjectStore } from '
 
 const defaultProjectName = ''
 
-export default defineComponent({
+export default {
   components: {
     GMessage,
     GToolbar,
-  },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
   },
   props: {
     modelValue: {
@@ -157,6 +167,15 @@ export default defineComponent({
     project: {
       type: Object,
     },
+  },
+  emits: [
+    'update:modelValue',
+    'cancel',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   data () {
     return {
@@ -279,10 +298,14 @@ export default defineComponent({
       }
     },
   },
-  emits: [
-    'update:modelValue',
-    'cancel',
-  ],
+
+  watch: {
+    modelValue (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     ...mapActions(useProjectStore, [
       'createProject',
@@ -356,14 +379,8 @@ export default defineComponent({
       setDelayedInputFocus(this, 'projectName')
     },
   },
-  watch: {
-    modelValue (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+
+}
 </script>
 
 <style lang="scss" scoped>

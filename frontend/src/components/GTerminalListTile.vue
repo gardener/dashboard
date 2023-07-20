@@ -7,7 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-list-item>
     <template #prepend>
-      <v-icon icon="mdi-console" color="primary"/>
+      <v-icon
+        icon="mdi-console"
+        color="primary"
+      />
     </template>
     <g-list-item-content>
       Terminal
@@ -19,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-action-button
         icon="mdi-console-line"
         :disabled="disabled"
-        :to=to
+        :to="to"
         :tooltip="buttonDescription || description"
       />
     </template>

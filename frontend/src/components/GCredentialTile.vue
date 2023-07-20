@@ -7,58 +7,102 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-list-item :class="{ 'pt-0 pb-0': dense }">
     <template #prepend>
-      <v-icon v-if="!dense" :color="iconColor">mdi-key-change</v-icon>
+      <v-icon
+        v-if="!dense"
+        :color="iconColor"
+      >
+        mdi-key-change
+      </v-icon>
     </template>
     <g-list-item-content>
       <div class="d-flex align-center">
         <v-tooltip top>
           <template #activator="{ props }">
-            <span v-bind="props">{{title}}</span>
+            <span v-bind="props">{{ title }}</span>
           </template>
-          {{titleTooltip}}
+          {{ titleTooltip }}
         </v-tooltip>
         <v-tooltip top>
           <template #activator="{ props }">
-            <v-chip v-bind="props" v-if="showChip" :color="phaseColor" label x-small class="ml-2" outlined>{{phaseCaption}}</v-chip>
+            <v-chip
+              v-if="showChip"
+              v-bind="props"
+              :color="phaseColor"
+              label
+              x-small
+              class="ml-2"
+              outlined
+            >
+              {{ phaseCaption }}
+            </v-chip>
           </template>
           <template v-if="phaseType === 'Prepared'">
             <template v-if="phase && phase.incomplete">
               <div>
                 <strong>
                   All two-step credential rotations need to be in phase
-                  <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
+                  <v-chip
+                    color="primary"
+                    label
+                    x-small
+                    class="ml-2"
+                  >Prepared</v-chip>
                   in order to perform this operation
                 </strong>
               </div>
               <div>Please prepare rotation of the following credentials</div>
               <ul v-if="phase">
-                <li v-for="{title} in phase.unpreparedRotations" :key="title">{{title}}</li>
+                <li
+                  v-for="unpreparedRotation in phase.unpreparedRotations"
+                  :key="unpreparedRotation.title"
+                >
+                  {{ unpreparedRotation.title }}
+                </li>
               </ul>
             </template>
             <template v-else>
               <div>
                 This two-step operation is in phase
-                <v-chip color="primary" label x-small class="ml-2">Prepared</v-chip>
+                <v-chip
+                  color="primary"
+                  label
+                  x-small
+                  class="ml-2"
+                >
+                  Prepared
+                </v-chip>
               </div>
               <div v-if="!!lastInitiationTime">
-                Rotation Prepared: <g-time-string :date-time="lastInitiationTime" mode="past" no-tooltip></g-time-string>
+                Rotation Prepared: <g-time-string
+                  :date-time="lastInitiationTime"
+                  mode="past"
+                  no-tooltip
+                />
               </div>
             </template>
           </template>
           <span v-else-if="isProgressing">
             This operation is currently running
           </span>
-          <span v-else>{{phaseCaption}}</span>
+          <span v-else>{{ phaseCaption }}</span>
         </v-tooltip>
       </div>
       <template #description>
         <div class="d-flex align-center">
           <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
-            <g-shoot-messages :shoot-item="shootItem" :filter="['cacertificatevalidities-constraint']" small class="mr-1" />
-            <span color="warning">Certificate Authorities will expire in less than one year</span>
+            <g-shoot-messages
+              :shoot-item="shootItem"
+              :filter="['cacertificatevalidities-constraint']"
+              small
+              class="mr-1"
+            />
+            <span class="text-warning">Certificate Authorities will expire in less than one year</span>
           </template>
           <template v-else>
-            <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string :date-time="lastCompletionTime" mode="past"></g-time-string></span>
+            <span v-if="!!lastCompletionTime">Last Rotated: <g-time-string
+              :date-time="lastCompletionTime"
+              mode="past"
+            /></span>
             <span v-else>Not yet rotated</span>
           </template>
         </div>
@@ -84,19 +128,19 @@ import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotatio
 import get from 'lodash/get'
 
 export default {
-  name: 'credential-tile',
+  name: 'CredentialTile',
   components: {
     GShootActionRotateCredentials,
     GTimeString,
     GShootMessages,
   },
+  mixins: [shootStatusCredentialRotation],
   props: {
     dense: {
       type: Boolean,
       required: false,
     },
   },
-  mixins: [shootStatusCredentialRotation],
   data () {
     return {
       rotateCredentialsDialog: false,

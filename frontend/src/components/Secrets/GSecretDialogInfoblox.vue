@@ -13,34 +13,33 @@ SPDX-License-Identifier: Apache-2.0
     vendor="infoblox-dns"
     create-title="Add new Infoblox Secret"
     replace-title="Replace Infoblox Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-        color="primary"
-        v-model="infobloxUsername"
-        ref="infobloxUsername"
-        label="Infoblox Username"
-        :error-messages="getErrorMessages('infobloxUsername')"
-        @update:model-value="v$.infobloxUsername.$touch()"
-        @blur="v$.infobloxUsername.$touch()"
+          ref="infobloxUsername"
+          v-model="infobloxUsername"
+          color="primary"
+          label="Infoblox Username"
+          :error-messages="getErrorMessages('infobloxUsername')"
           variant="underlined"
-        ></v-text-field>
+          @update:model-value="v$.infobloxUsername.$touch()"
+          @blur="v$.infobloxUsername.$touch()"
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="infobloxPassword"
+          color="primary"
           label="Infoblox Password"
           :error-messages="getErrorMessages('infobloxPassword')"
           :append-icon="hideInfobloxPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideInfobloxPassword ? 'password' : 'text'"
+          variant="underlined"
           @click:append="() => (hideInfobloxPassword = !hideInfobloxPassword)"
           @update:model-value="v$.infobloxPassword.$touch()"
           @blur="v$.infobloxPassword.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
 
@@ -50,14 +49,11 @@ SPDX-License-Identifier: Apache-2.0
         <p>Please enter account information for a technical user.</p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -71,12 +67,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
   },
@@ -92,6 +83,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       infobloxUsername: undefined,
@@ -137,10 +133,14 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -158,12 +158,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

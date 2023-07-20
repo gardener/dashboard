@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div v-if="!msg.isAlert">
-    {{msg.text}}
+    {{ msg.text }}
   </div>
-  <v-alert v-else
-    @update:model-value="onUpdateModelValue"
+  <v-alert
+    v-else
     variant="tonal"
     density="compact"
     closable
@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     color="error"
     :icon="false"
     class="pl-2 mb-2"
+    @update:model-value="onUpdateModelValue"
   >
     <v-row
       no-gutters
@@ -35,28 +36,36 @@ SPDX-License-Identifier: Apache-2.0
           @click="expanded = !expanded"
         />
       </v-col>
-      <v-col class="alert-title cursor-pointer" @click="expanded = !expanded">
-        {{msg.text}}
+      <v-col
+        class="alert-title cursor-pointer"
+        @click="expanded = !expanded"
+      >
+        {{ msg.text }}
       </v-col>
     </v-row>
-    <v-row v-if="expanded" no-gutters align="center">
+    <v-row
+      v-if="expanded"
+      no-gutters
+      align="center"
+    >
       <v-col class="alert-subtitle">
-        {{msg.description}}
+        {{ msg.description }}
       </v-col>
     </v-row>
   </v-alert>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     message: {
       type: String,
       required: true,
     },
   },
+  emits: [
+    'close',
+  ],
   data () {
     return {
       expanded: false,
@@ -71,9 +80,6 @@ export default defineComponent({
       return { isAlert: false, text: this.message }
     },
   },
-  emits: [
-    'close',
-  ],
   methods: {
     onUpdateModelValue (value) {
       if (!value) {
@@ -81,7 +87,7 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

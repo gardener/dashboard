@@ -5,132 +5,132 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <g-account-avatar v-if="readOnly"
+  <g-account-avatar
+    v-if="readOnly"
     :account-name="modelValue"
     :color="color"
     mail-to
   />
-  <v-menu v-else
-      ref="menu"
-      v-model="isActive"
-      location="top start"
-      origin="overlap"
-      transition="slide-x-reverse-transition"
-      :max-width="contentWidth"
-      :close-on-content-click="false"
-    >
-      <template #activator="{ props }">
-        <div class="d-flex align-center justify-space-between">
-          <div
-            ref="content"
-            v-bind="props"
-            class="content cursor-pointer full-width mr-auto"
-            :class="{ 'content--bounce': contentBounce }"
-          >
-            <g-account-avatar
-              :account-name="modelValue"
-              mail-to
-              :color="color"
-            />
-          </div>
-          <div>
-            <v-btn
-              :icon="activatorIcon"
-              variant="text"
-              size="small"
-              :color="activatorColor"
-              @click.stop="isActive = !isActive"
-            />
-          </div>
-        </div>
-      </template>
-      <v-card
-        flat
-        v-click-outside="onCancel"
-        @keydown.esc.prevent="onCancel"
-        @keydown.enter.prevent="onSave"
-      >
-        <v-autocomplete
-          ref="editable"
-          v-model="internalValue"
-          :items="items"
-          variant="solo"
-          flat
-          density="comfortable"
-          single-line
-          hide-details="auto"
-          autocomplete="off"
-          hide-selected
-          :no-data-text="noDataText"
-          :placeholder="placeholder"
-          :color="color"
-          :loading="loading"
-          :messages="messages"
-          :menu-props="{ offset: [1, 0] }"
-          :error-messages="v$.internalValue.$errors.map(e => e.$message)"
-          @update:modelValue="v$.internalValue.$touch"
-          @blur="v$.internalValue.$touch"
-          class="g-field"
+  <v-menu
+    v-else
+    ref="menu"
+    v-model="isActive"
+    location="top start"
+    origin="overlap"
+    transition="slide-x-reverse-transition"
+    :max-width="contentWidth"
+    :close-on-content-click="false"
+  >
+    <template #activator="{ props }">
+      <div class="d-flex align-center justify-space-between">
+        <div
+          ref="content"
+          v-bind="props"
+          class="content cursor-pointer full-width mr-auto"
+          :class="{ 'content--bounce': contentBounce }"
         >
-          <template #item="{ item, props }">
-            <v-list-item
-              v-bind="props"
-              :title="item.title"
-            >
-              <template #prepend>
-                <v-avatar :image="getAvatarUrl(item)" size="x-small"/>
-              </template>
-            </v-list-item>
-          </template>
-          <template #append>
-            <v-tooltip location="top">
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  :disabled="!valid"
-                  icon="mdi-check"
-                  variant="text"
-                  density="comfortable"
-                  color="success"
-                  @click="onSave"
-                />
-              </template>
-              Save
-            </v-tooltip>
-          </template>
-          <template #message="{ message }">
-            <g-error-message
-              :message="message"
-              @close="clearMessages"
-            />
-          </template>
-        </v-autocomplete>
-      </v-card>
-    </v-menu>
+          <g-account-avatar
+            :account-name="modelValue"
+            mail-to
+            :color="color"
+          />
+        </div>
+        <div>
+          <v-btn
+            :icon="activatorIcon"
+            variant="text"
+            size="small"
+            :color="activatorColor"
+            @click.stop="isActive = !isActive"
+          />
+        </div>
+      </div>
+    </template>
+    <v-card
+      v-click-outside="onCancel"
+      flat
+      @keydown.esc.prevent="onCancel"
+      @keydown.enter.prevent="onSave"
+    >
+      <v-autocomplete
+        ref="editable"
+        v-model="internalValue"
+        :items="items"
+        variant="solo"
+        flat
+        density="comfortable"
+        single-line
+        hide-details="auto"
+        autocomplete="off"
+        hide-selected
+        :no-data-text="noDataText"
+        :placeholder="placeholder"
+        :color="color"
+        :loading="loading"
+        :messages="messages"
+        :menu-props="{ offset: [1, 0] }"
+        :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        class="g-field"
+        @update:model-value="v$.internalValue.$touch"
+        @blur="v$.internalValue.$touch"
+      >
+        <template #item="{ item, props }">
+          <v-list-item
+            v-bind="props"
+            :title="item.title"
+          >
+            <template #prepend>
+              <v-avatar
+                :image="getAvatarUrl(item)"
+                size="x-small"
+              />
+            </template>
+          </v-list-item>
+        </template>
+        <template #append>
+          <v-tooltip location="top">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                :disabled="!valid"
+                icon="mdi-check"
+                variant="text"
+                density="comfortable"
+                color="success"
+                @click="onSave"
+              />
+            </template>
+            Save
+          </v-tooltip>
+        </template>
+        <template #message="{ message }">
+          <g-error-message
+            :message="message"
+            @close="clearMessages"
+          />
+        </template>
+      </v-autocomplete>
+    </v-card>
+  </v-menu>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GErrorMessage from './GErrorMessage.vue'
 import { gravatarUrlGeneric, setDelayedInputFocus } from '@/utils'
 
-export default defineComponent({
+export default {
   components: {
     GErrorMessage,
     GAccountAvatar,
-  },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
   },
   props: {
     items: {
       type: Array,
     },
     modelValue: {
+      type: String,
       required: true,
     },
     save: {
@@ -155,6 +155,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+  },
+  emits: [
+    'update:modelValue',
+    'open',
+    'close',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   data () {
     return {
@@ -214,11 +224,22 @@ export default defineComponent({
       return 'mdi-pencil'
     },
   },
-  emits: [
-    'update:modelValue',
-    'open',
-    'close',
-  ],
+  watch: {
+    active (value) {
+      if (value) {
+        clearTimeout(this.timeoutId)
+        this.internalValue = this.modelValue
+        this.$emit('open')
+        setDelayedInputFocus(this, 'editable', {
+          delay: 50,
+          noSelect: true,
+        })
+      } else {
+        this.reset()
+        this.$emit('close')
+      }
+    },
+  },
   methods: {
     clearMessages () {
       this.messages = []
@@ -262,23 +283,7 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    active (value) {
-      if (value) {
-        clearTimeout(this.timeoutId)
-        this.internalValue = this.modelValue
-        this.$emit('open')
-        setDelayedInputFocus(this, 'editable', {
-          delay: 50,
-          noSelect: true,
-        })
-      } else {
-        this.reset()
-        this.$emit('close')
-      }
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

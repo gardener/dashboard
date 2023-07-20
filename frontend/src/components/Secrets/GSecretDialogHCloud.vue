@@ -13,20 +13,19 @@ SPDX-License-Identifier: Apache-2.0
     vendor="hcloud"
     create-title="Add new Hetzner Cloud Secret"
     replace-title="Replace Hetzner Cloud Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-        color="primary"
-        v-model="hcloudToken"
-        ref="hcloudToken"
-        label="Hetzner Cloud Token"
-        :error-messages="getErrorMessages('hcloudToken')"
-        @update:model-value="v$.hcloudToken.$touch()"
-        @blur="v$.hcloudToken.$touch()"
+          ref="hcloudToken"
+          v-model="hcloudToken"
+          color="primary"
+          label="Hetzner Cloud Token"
+          :error-messages="getErrorMessages('hcloudToken')"
           variant="underlined"
-        ></v-text-field>
+          @update:model-value="v$.hcloudToken.$touch()"
+          @blur="v$.hcloudToken.$touch()"
+        />
       </div>
     </template>
 
@@ -40,19 +39,18 @@ SPDX-License-Identifier: Apache-2.0
           Please read the
           <g-external-link
             url="https://www.hetzner.com/cloud"
-          >Hetzner Cloud Documentation</g-external-link>.
+          >
+            Hetzner Cloud Documentation
+          </g-external-link>.
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -63,12 +61,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -85,6 +78,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       hcloudToken: undefined,
@@ -125,10 +123,14 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -145,12 +147,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

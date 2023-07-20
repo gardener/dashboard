@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<template >
+<template>
   <v-tooltip
     location="top"
     :disabled="tooltipDisabled"
@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     max-width="600px"
     class="g-action-button"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn
         v-bind="mergeProps(props, { onClick })"
         variant="text"
@@ -24,8 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         :text="text"
         :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
         :width="isTextBtn ? '100%' : undefined"
-      >
-      </v-btn>
+      />
     </template>
   </v-tooltip>
 </template>
@@ -34,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
+  mixins: [shootItem],
   inject: ['mergeProps'],
   props: {
     disabled: {
@@ -62,7 +62,7 @@ export default {
       type: String,
     },
   },
-  mixins: [shootItem],
+  emits: ['click'],
   computed: {
     isTextBtn () {
       return !!this.text
@@ -80,7 +80,6 @@ export default {
       return this.text === this.tooltipText
     },
   },
-  emits: ['click'],
   methods: {
     onClick (...args) {
       this.$emit('click', ...args)

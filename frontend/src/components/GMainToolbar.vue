@@ -6,36 +6,55 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-app-bar>
-    <v-app-bar-nav-icon v-if="!sidebar" @click.stop="sidebar = !sidebar"></v-app-bar-nav-icon>
-    <g-breadcrumb/>
-    <v-spacer></v-spacer>
+    <v-app-bar-nav-icon
+      v-if="!sidebar"
+      @click.stop="sidebar = !sidebar"
+    />
+    <g-breadcrumb />
+    <v-spacer />
 
     <!-- connection status -->
     <div class="mr-2">
-      <g-shoot-subscription-status/>
+      <g-shoot-subscription-status />
     </div>
 
     <!-- Help -->
-    <v-btn v-if="helpMenuItems.length" color="primary" icon class="mr-4">
-      <v-tooltip text="Tooltip" location="left">
+    <v-btn
+      v-if="helpMenuItems.length"
+      color="primary"
+      icon
+      class="mr-4"
+    >
+      <v-tooltip
+        text="Tooltip"
+        location="left"
+      >
         <template #activator="{ props }">
-          <v-icon v-bind="props" icon="mdi-help-circle-outline"></v-icon>
+          <v-icon
+            v-bind="props"
+            icon="mdi-help-circle-outline"
+          />
         </template>
       </v-tooltip>
 
       <v-menu
-        activator="parent"
         v-model="help"
+        activator="parent"
         open-on-click
         close-on-content-click
         :offset="[12, 4]"
         transition="slide-y-transition"
       >
-        <v-card rounded="0" width="300px">
+        <v-card
+          rounded="0"
+          width="300px"
+        >
           <v-card-title primary-title>
-            <div class="content text-h6 mb-2">Gardener</div>
+            <div class="content text-h6 mb-2">
+              Gardener
+            </div>
           </v-card-title>
-          <v-divider></v-divider>
+          <v-divider />
           <v-card-actions class="px-3">
             <v-btn
               block
@@ -45,17 +64,43 @@ SPDX-License-Identifier: Apache-2.0
               class="justify-start"
               @click="infoDialog = true"
             >
-              <v-icon color="primary" class="mr-3">mdi-information-outline</v-icon>
+              <v-icon
+                color="primary"
+                class="mr-3"
+              >
+                mdi-information-outline
+              </v-icon>
               About
             </v-btn>
           </v-card-actions>
-          <template v-for="(item, index) in helpMenuItems" :key="index">
-            <v-divider></v-divider>
+          <template
+            v-for="(item, index) in helpMenuItems"
+            :key="index"
+          >
+            <v-divider />
             <v-card-actions class="px-3">
-              <v-btn block variant="text" color="primary" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon color="primary" class="mr-3">{{item.icon}}</v-icon>
-                {{item.title}}
-                <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
+              <v-btn
+                block
+                variant="text"
+                color="primary"
+                class="justify-start"
+                :href="item.url"
+                :target="helpTarget(item)"
+                :title="item.title"
+              >
+                <v-icon
+                  color="primary"
+                  class="mr-3"
+                >
+                  {{ item.icon }}
+                </v-icon>
+                {{ item.title }}
+                <v-icon
+                  color="primary"
+                  class="link-icon"
+                >
+                  mdi-open-in-new
+                </v-icon>
               </v-btn>
             </v-card-actions>
           </template>
@@ -71,27 +116,50 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-tooltip location="left">
         <template #activator="{ props }">
-          <v-badge v-if="isAdmin"
+          <v-badge
+            v-if="isAdmin"
             color="primary"
             location="bottom right"
             icon="mdi-account-supervisor"
           >
-            <v-avatar v-bind="props" size="40" class="cursor-pointer">
-              <v-img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`" />
+            <v-avatar
+              v-bind="props"
+              size="40"
+              class="cursor-pointer"
+            >
+              <v-img
+                :src="avatarUrl"
+                :alt="`avatar of ${avatarTitle}`"
+              />
             </v-avatar>
           </v-badge>
-          <v-avatar v-else v-bind="props" size="40" class="cursor-pointer">
-            <v-img :src="avatarUrl" :alt="`avatar of ${avatarTitle}`" />
+          <v-avatar
+            v-else
+            v-bind="props"
+            size="40"
+            class="cursor-pointer"
+          >
+            <v-img
+              :src="avatarUrl"
+              :alt="`avatar of ${avatarTitle}`"
+            />
           </v-avatar>
         </template>
         <span v-if="isAdmin">
-          {{avatarTitle}}
-          <v-chip size="small" color="primary" variant="elevated">
-            <v-icon start icon="mdi-account-supervisor" />
+          {{ avatarTitle }}
+          <v-chip
+            size="small"
+            color="primary"
+            variant="elevated"
+          >
+            <v-icon
+              start
+              icon="mdi-account-supervisor"
+            />
             <span class="operator">Operator</span>
           </v-chip>
         </span>
-        <span v-else>{{avatarTitle}}</span>
+        <span v-else>{{ avatarTitle }}</span>
       </v-tooltip>
 
       <v-menu
@@ -106,21 +174,35 @@ SPDX-License-Identifier: Apache-2.0
           :elevation="4"
         >
           <div class="text-center pa-3">
-            <div class="text-h6">{{displayName}}</div>
-            <div class="text-caption">{{username}}</div>
-            <div class="text-caption" v-if="isAdmin">Operator</div>
+            <div class="text-h6">
+              {{ displayName }}
+            </div>
+            <div class="text-caption">
+              {{ username }}
+            </div>
+            <div
+              v-if="isAdmin"
+              class="text-caption"
+            >
+              Operator
+            </div>
             <v-btn-toggle
               v-model="colorMode"
               color="primary"
               mandatory="force"
               divided
               density="compact"
-              @click.stop
               class="mt-3"
+              @click.stop
             >
               <v-tooltip location="top">
                 <template #activator="{ props }">
-                  <v-btn value="light" v-bind="props" variant="tonal" min-width="36">
+                  <v-btn
+                    value="light"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
                     <v-icon icon="mdi-white-balance-sunny" />
                   </v-btn>
                 </template>
@@ -128,7 +210,12 @@ SPDX-License-Identifier: Apache-2.0
               </v-tooltip>
               <v-tooltip location="top">
                 <template #activator="{ props }">
-                  <v-btn value="dark" v-bind="props" variant="tonal" min-width="36">
+                  <v-btn
+                    value="dark"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
                     <v-icon icon="mdi-weather-night" />
                   </v-btn>
                 </template>
@@ -136,7 +223,12 @@ SPDX-License-Identifier: Apache-2.0
               </v-tooltip>
               <v-tooltip location="top">
                 <template #activator="{ props }">
-                  <v-btn value="auto" v-bind="props" variant="tonal" min-width="36">
+                  <v-btn
+                    value="auto"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
                     <v-icon icon="mdi-brightness-auto" />
                   </v-btn>
                 </template>
@@ -144,7 +236,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-tooltip>
             </v-btn-toggle>
           </div>
-          <v-divider/>
+          <v-divider />
           <div class="pa-3">
             <v-btn
               block
@@ -166,7 +258,7 @@ SPDX-License-Identifier: Apache-2.0
               Settings
             </v-btn>
           </div>
-          <v-divider/>
+          <v-divider />
           <div class="pa-3">
             <v-btn
               block
@@ -184,21 +276,25 @@ SPDX-License-Identifier: Apache-2.0
     </v-btn>
 
     <!-- terminals -->
-    <template v-if="tabs && tabs.length > 1" #extension>
+    <template
+      v-if="tabs && tabs.length > 1"
+      #extension
+    >
       <v-tabs
         color="primary"
         slider-color="secondary"
         class="tabs-bar-background"
       >
-        <v-tab v-for="tab in tabs"
-          :to="tab.to"
+        <v-tab
+          v-for="tab in tabs"
           :key="tab.key"
+          :to="tab.to"
           :value="tab.key"
           :rounded="0"
           exact
           ripple
         >
-          {{tab.title}}
+          {{ tab.title }}
         </v-tab>
       </v-tabs>
     </template>

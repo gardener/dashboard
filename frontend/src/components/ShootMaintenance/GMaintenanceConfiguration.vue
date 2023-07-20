@@ -6,22 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
+    ref="actionDialog"
     :shoot-item="shootItem"
     :valid="maintenanceTimeValid"
-    @dialog-opened="onConfigurationDialogOpened"
-    ref="actionDialog"
     width="900"
-    caption="Configure Maintenance">
+    caption="Configure Maintenance"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
     <template #actionComponent>
       <g-maintenance-time
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"
         :time-window-end="data.timeWindowEnd"
         @valid="onMaintenanceTimeValid"
-      ></g-maintenance-time>
+      />
       <g-maintenance-components
         ref="maintenanceComponents"
-      ></g-maintenance-components>
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -46,8 +47,8 @@ export default defineComponent({
     GMaintenanceComponents,
     GMaintenanceTime,
   },
-  inject: ['api'],
   mixins: [shootItem],
+  inject: ['api'],
   data () {
     return {
       maintenanceTimeValid: true,

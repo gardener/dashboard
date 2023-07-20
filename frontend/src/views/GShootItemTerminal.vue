@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :namespace="namespace"
     :target="target"
     style="background-color: #333;"
-  ></g-terminal-splitpanes>
+  />
 </template>
 
 <script>

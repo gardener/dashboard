@@ -5,41 +5,51 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container fluid class="px-6">
+  <v-container
+    fluid
+    class="px-6"
+  >
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <v-card>
           <g-toolbar title="Details" />
           <g-list>
-             <g-list-item>
-                <template #prepend>
-                  <v-icon color="primary" :icon="icon"></v-icon>
-                </template>
-                <div class="label text-medium-emphasis">
-                  User
-                </div>
-                <div class="content">
-                  <g-account-avatar
-                    :account-name="username"
-                    mail-to
-                    :size="32"
-                  />
-                </div>
-             </g-list-item>
-             <g-list-item v-if="!!fullDisplayName">
-                <div class="label text-medium-emphasis">
-                  Name
-                </div>
-                <div class="content">
-                  {{ fullDisplayName }}
-                </div>
+            <g-list-item>
+              <template #prepend>
+                <v-icon
+                  color="primary"
+                  :icon="icon"
+                />
+              </template>
+              <div class="label text-medium-emphasis">
+                User
+              </div>
+              <div class="content">
+                <g-account-avatar
+                  :account-name="username"
+                  mail-to
+                  :size="32"
+                />
+              </div>
+            </g-list-item>
+            <g-list-item v-if="!!fullDisplayName">
+              <div class="label text-medium-emphasis">
+                Name
+              </div>
+              <div class="content">
+                {{ fullDisplayName }}
+              </div>
             </g-list-item>
             <g-list-item>
               <div class="label text-medium-emphasis">
                 Groups
               </div>
               <div class="content py-1">
-                <v-chip v-for="(group, index) in groups"
+                <v-chip
+                  v-for="(group, index) in groups"
                   :key="index"
                   label
                   size="small"
@@ -50,45 +60,60 @@ SPDX-License-Identifier: Apache-2.0
               </div>
             </g-list-item>
           </g-list>
-          <v-divider inset/>
+          <v-divider inset />
           <g-list>
             <g-list-item>
               <template #prepend>
-                <v-icon color="primary" icon="mdi-timelapse"></v-icon>
+                <v-icon
+                  color="primary"
+                  icon="mdi-timelapse"
+                />
               </template>
               <div class="label text-medium-emphasis">
                 Session
               </div>
               <div class="content">
-                  Expires {{expiresAt}}
+                Expires {{ expiresAt }}
               </div>
             </g-list-item>
           </g-list>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <v-card>
           <g-toolbar title="Access" />
           <g-list>
             <g-list-item>
               <template #prepend>
-                <v-icon color="primary" icon="mdi-key"></v-icon>
+                <v-icon
+                  color="primary"
+                  icon="mdi-key"
+                />
               </template>
               <div class="text-body-1">
                 Token
-              </div >
+              </div>
               <div class="text-body-2 text-medium-emphasis">
                 Personal bearer token for API authentication
               </div>
               <template #append>
-                <g-copy-btn :clipboard-text="idToken"></g-copy-btn>
+                <g-copy-btn :clipboard-text="idToken" />
               </template>
             </g-list-item>
             <template v-if="isKubeconfigEnabled">
-              <v-divider inset class="my-2"/>
+              <v-divider
+                inset
+                class="my-2"
+              />
               <g-list-item>
                 <template #prepend>
-                  <v-icon color="primary" icon="mdi-file"></v-icon>
+                  <v-icon
+                    color="primary"
+                    icon="mdi-file"
+                  />
                 </template>
                 <div class="text-body-1">
                   Kubeconfig
@@ -120,7 +145,11 @@ SPDX-License-Identifier: Apache-2.0
                 </template>
               </g-list-item>
               <v-expand-transition>
-                <v-card v-if="kubeconfigExpansionPanel" flat class="mx-2 mt-2">
+                <v-card
+                  v-if="kubeconfigExpansionPanel"
+                  flat
+                  class="mx-2 mt-2"
+                >
                   <v-card-text class="pt-0">
                     <div>
                       The downloaded <span class="font-family-monospace">kubeconfig</span> will initiate
@@ -137,45 +166,59 @@ SPDX-License-Identifier: Apache-2.0
                       <br>
                       Below you can configure and preview the <span class="font-family-monospace">kubeconfig</span> file before download.
                     </div>
-                    <v-sheet elevation="1" class="mt-3">
-                      <v-tabs v-model="kubeconfigTab" color="primary" slider-color="primary">
-                        <v-tab :value="'configure'">Configure</v-tab>
-                        <v-tab :value="'preview'">Preview</v-tab>
+                    <v-sheet
+                      elevation="1"
+                      class="mt-3"
+                    >
+                      <v-tabs
+                        v-model="kubeconfigTab"
+                        color="primary"
+                        slider-color="primary"
+                      >
+                        <v-tab :value="'configure'">
+                          Configure
+                        </v-tab>
+                        <v-tab :value="'preview'">
+                          Preview
+                        </v-tab>
                       </v-tabs>
                       <v-window v-model="kubeconfigTab">
-                        <v-window-item :value="'configure'" class="pa-4">
+                        <v-window-item
+                          :value="'configure'"
+                          class="pa-4"
+                        >
                           <v-row>
                             <v-col cols="12">
                               <v-select
-                                color="primary"
                                 v-model="projectName"
+                                color="primary"
                                 :items="projectNames"
                                 variant="underlined"
                                 label="Project"
                                 hint="The namespace of the selected project will be the default namespace in the kubeconfig"
                                 persistent-hint
-                              ></v-select>
+                              />
                             </v-col>
                             <v-col cols="12">
                               <v-select
-                                color="primary"
                                 v-model="grantType"
+                                color="primary"
                                 :items="grantTypes"
                                 variant="underlined"
                                 label="Grant Type"
                                 hint="The authorization grant type to use"
                                 persistent-hint
-                              ></v-select>
+                              />
                             </v-col>
                             <v-col cols="12">
                               <v-switch
-                                color="primary"
                                 v-model="skipOpenBrowser"
+                                color="primary"
                                 variant="underlined"
                                 label="Skip Open Browser"
                                 hint="If true, it does not open the browser on authentication"
                                 persistent-hint
-                              ></v-switch>
+                              />
                             </v-col>
                           </v-row>
                         </v-window-item>
@@ -366,6 +409,22 @@ export default {
       }
     },
   },
+  watch: {
+    kubeconfig (value) {
+      this.updateKubeconfigYaml(value)
+    },
+  },
+  async mounted () {
+    try {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      this.projectName = get(project, 'metadata.name', '')
+      const response = await this.api.getToken()
+      this.idToken = response.data.token
+      this.updateKubeconfigYaml(this.kubeconfig)
+    } catch (err) {
+      console.error(err.message)
+    }
+  },
   methods: {
     async onDownload () {
       const kubeconfig = this.kubeconfigYaml
@@ -380,22 +439,6 @@ export default {
     },
     expansionPanelTooltip (value) {
       return value ? 'Hide advanced options' : 'Show advanced options'
-    },
-  },
-  async mounted () {
-    try {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      this.projectName = get(project, 'metadata.name', '')
-      const response = await this.api.getToken()
-      this.idToken = response.data.token
-      this.updateKubeconfigYaml(this.kubeconfig)
-    } catch (err) {
-      console.error(err.message)
-    }
-  },
-  watch: {
-    kubeconfig (value) {
-      this.updateKubeconfigYaml(value)
     },
   },
 }

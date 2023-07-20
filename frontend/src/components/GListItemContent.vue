@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="slots.label || props.label"
+  <div
+    v-if="slots.label || props.label"
     class="text-body-2 text-medium-emphasis pb-1"
   >
     <slot name="label">
@@ -13,12 +14,15 @@ SPDX-License-Identifier: Apache-2.0
     </slot>
   </div>
   <div class="text-body-1">
-    <slot/>
+    <slot />
   </div>
-  <div v-if="slots.description"
+  <div
+    v-if="slots.description || props.description"
     class="text-body-2 text-high-emphasis pt-1"
   >
-    <slot name="description"/>
+    <slot name="description">
+      {{ props.description }}
+    </slot>
   </div>
 </template>
 
@@ -28,6 +32,9 @@ const slots = useSlots()
 
 const props = defineProps({
   label: {
+    type: String,
+  },
+  description: {
     type: String,
   },
 })

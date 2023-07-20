@@ -6,19 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr>
-    <td class="pa-0" v-if="selectedHeaders.displayName">
+    <td
+      v-if="selectedHeaders.displayName"
+      class="pa-0"
+    >
       <v-list>
         <v-list-item
           :prepend-avatar="item.avatarUrl"
         >
           <v-list-item-title>
             {{ item.displayName }}
-            <v-tooltip v-if="foreign"
+            <v-tooltip
+              v-if="foreign"
               location="top"
             >
-              <template #activator="{ props }">
+              <template #activator="{ props: activatorProps }">
                 <v-icon
-                  v-bind="props"
+                  v-bind="activatorProps"
                   icon="mdi-account-arrow-left"
                   end
                   size="small"
@@ -27,12 +31,13 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               Service Account invited from namespace {{ serviceAccountNamespace }}
             </v-tooltip>
-            <v-tooltip v-if="orphaned"
+            <v-tooltip
+              v-if="orphaned"
               location="top"
             >
-              <template #activator="{ props }">
+              <template #activator="{ props: activatorProps }">
                 <v-icon
-                  v-bind="props"
+                  v-bind="activatorProps"
                   icon="mdi-alert-circle-outline"
                   end
                   size="small"
@@ -42,33 +47,51 @@ SPDX-License-Identifier: Apache-2.0
               Associated Service Account does not exists
             </v-tooltip>
           </v-list-item-title>
-          <v-list-item-subtitle style="flex: 1 0 100%;">{{ item.username }}</v-list-item-subtitle>
+          <v-list-item-subtitle style="flex: 1 0 100%;">
+            {{ item.username }}
+          </v-list-item-subtitle>
         </v-list-item>
       </v-list>
     </td>
     <td v-if="selectedHeaders.createdBy">
-      <g-account-avatar :account-name="item.createdBy" :size="16"></g-account-avatar>
+      <g-account-avatar
+        :account-name="item.createdBy"
+        :size="16"
+      />
     </td>
     <td v-if="selectedHeaders.creationTimestamp">
       <div>
-        <g-time-string v-if="item.creationTimestamp" :date-time="item.creationTimestamp" mode="past"></g-time-string>
-        <span v-else class="font-weight-light text-disabled">unknown</span>
+        <g-time-string
+          v-if="item.creationTimestamp"
+          :date-time="item.creationTimestamp"
+          mode="past"
+        />
+        <span
+          v-else
+          class="font-weight-light text-disabled"
+        >unknown</span>
       </div>
     </td>
     <td v-if="selectedHeaders.description">
       <div class="description-column">
         <span v-if="item.description">{{ item.description }}</span>
-        <span v-else class="font-weight-light text-disabled">not defined</span>
+        <span
+          v-else
+          class="font-weight-light text-disabled"
+        >not defined</span>
       </div>
     </td>
     <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
-        <g-account-roles :role-display-names="item.roleDisplayNames"></g-account-roles>
+        <g-account-roles :role-display-names="item.roleDisplayNames" />
       </div>
     </td>
     <td v-if="selectedHeaders.actions">
       <div class="d-flex justify-end">
-        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
+        <div
+          v-if="!foreign && canCreateTokenRequest"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-download"
             :disabled="orphaned"
@@ -79,7 +102,10 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-action-button>
         </div>
-        <div v-if="!foreign && canCreateTokenRequest" class="ml-1">
+        <div
+          v-if="!foreign && canCreateTokenRequest"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-eye"
             :disabled="orphaned"
@@ -90,7 +116,10 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-action-button>
         </div>
-        <div v-if="!foreign && canDeleteServiceAccounts && canCreateServiceAccounts" class="ml-1">
+        <div
+          v-if="!foreign && canDeleteServiceAccounts && canCreateServiceAccounts"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-refresh"
             @click="onResetServiceAccount"
@@ -100,7 +129,10 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-action-button>
         </div>
-        <div v-if="canManageServiceAccountMembers" class="ml-1">
+        <div
+          v-if="canManageServiceAccountMembers"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-pencil"
             @click="onEdit"
@@ -110,7 +142,10 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-action-button>
         </div>
-        <div v-if="canManageServiceAccountMembers && canDeleteServiceAccounts" class="ml-1">
+        <div
+          v-if="canManageServiceAccountMembers && canDeleteServiceAccounts"
+          class="ml-1"
+        >
           <g-action-button
             :icon="foreign || orphaned ? 'mdi-close' : 'mdi-delete'"
             :disabled="!canDelete"

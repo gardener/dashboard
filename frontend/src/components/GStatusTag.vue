@@ -17,33 +17,44 @@ SPDX-License-Identifier: Apache-2.0
         <v-chip
           v-bind="props"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'outlined' : undefined"
+          :variant="!isError ? 'outlined' : 'flat'"
           :text-color="textColor"
           size="small"
           :color="color"
           class="status-tag"
         >
-          <v-icon v-if="chipIcon"
+          <v-icon
+            v-if="chipIcon"
             :icon="chipIcon"
             size="x-small"
-            start
             class="chip-icon"
           />
-          {{chipText}}
+          {{ chipText }}
           <v-tooltip
             activator="parent"
             location="top"
             max-width="400px"
             :disabled="popover"
           >
-            <div class="font-weight-bold">{{ chipTooltip.title }}</div>
+            <div class="font-weight-bold">
+              {{ chipTooltip.title }}
+            </div>
             <div>Status: {{ chipTooltip.status }}</div>
-            <div v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects" :key="shortDescription">
-              <v-icon class="mr-1" color="white" size="small">mdi-account-alert</v-icon>
+            <div
+              v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects"
+              :key="shortDescription"
+            >
+              <v-icon
+                class="mr-1"
+                color="white"
+                size="small"
+              >
+                mdi-account-alert
+              </v-icon>
               <span class="font-weight-bold text--lighten-2">{{ shortDescription }}</span>
             </div>
             <template v-if="chipTooltip.description">
-              <v-divider color="white"></v-divider>
+              <v-divider color="white" />
               <div>
                 {{ chipTooltip.description }}
               </div>
@@ -196,7 +207,7 @@ export default defineComponent({
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'grey'
+        return 'unknown'
       }
       if (this.isError) {
         return 'error'
@@ -223,17 +234,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
-  .cursor-pointer :deep(.v-chip__content) {
-    cursor: pointer;
-  }
-
   .status-tag {
-    margin: 1px;
-  }
+    margin: 0 1px;
 
-  .status-tag :deep(.v-chip__content) {
-    margin: -4px;
+    &.cursor-pointer :deep(.v-chip__content) {
+      cursor: pointer;
+    }
+
+    :deep(.v-chip__content) {
+      margin: -2px;
+    }
 
     .chip-icon {
       margin-left: -4px;

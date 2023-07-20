@@ -8,27 +8,47 @@ SPDX-License-Identifier: Apache-2.0
   <tr>
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
-        {{item.name}}
-        <v-tooltip v-if="!item.isOwnSecret" location="top">
+        {{ item.name }}
+        <v-tooltip
+          v-if="!item.isOwnSecret"
+          location="top"
+        >
           <template #activator="{ props }">
-            <v-icon v-bind="props" size="small" class="mx-1">mdi-account-arrow-left</v-icon>
+            <v-icon
+              v-bind="props"
+              size="small"
+              class="mx-1"
+            >
+              mdi-account-arrow-left
+            </v-icon>
           </template>
-          <span>Secret shared by {{item.secretNamespace}}</span>
+          <span>Secret shared by {{ item.secretNamespace }}</span>
         </v-tooltip>
       </div>
     </td>
     <td v-if="selectedHeaders.secret">
-      <span v-if="!item.isOwnSecret">{{item.secretNamespace}}: </span>{{item.secretName}}
+      <span v-if="!item.isOwnSecret">{{ item.secretNamespace }}: </span>{{ item.secretName }}
     </td>
     <td v-if="selectedHeaders.infrastructure">
-      <g-vendor extended :cloud-provider-kind="item.infrastructureName" :cloud-profile-name="item.cloudProfileName"></g-vendor>
+      <g-vendor
+        extended
+        :cloud-provider-kind="item.infrastructureName"
+        :cloud-profile-name="item.cloudProfileName"
+      />
     </td>
     <td v-if="selectedHeaders.details">
-      <g-secret-details-item-content infra class="py-1" :secret="item.secret"></g-secret-details-item-content>
+      <g-secret-details-item-content
+        infra
+        class="py-1"
+        :secret="item.secret"
+      />
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
-      <div class="d-flex" :class="{'font-weight-light text-disabled' : !item.relatedShootCount}">
-        {{item.relatedShootCountLabel}}
+      <div
+        class="d-flex"
+        :class="{'font-weight-light text-disabled' : !item.relatedShootCount}"
+      >
+        {{ item.relatedShootCountLabel }}
       </div>
     </td>
     <td v-if="selectedHeaders.actions">
@@ -63,7 +83,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapTableHeader } from '@/utils'
 import GVendor from '@/components/GVendor'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
@@ -71,7 +90,7 @@ import GActionButton from '@/components/GActionButton.vue'
 import { mapGetters } from 'pinia'
 import { useAuthzStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GVendor,
     GSecretDetailsItemContent,
@@ -87,6 +106,10 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: [
+    'update',
+    'delete',
+  ],
   computed: {
     ...mapGetters(useAuthzStore, ['canPatchSecrets', 'canDeleteSecrets']),
     selectedHeaders () {
@@ -101,5 +124,5 @@ export default defineComponent({
       this.$emit('delete', this.item.secret)
     },
   },
-})
+}
 </script>

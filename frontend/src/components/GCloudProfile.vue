@@ -15,9 +15,9 @@ SPDX-License-Identifier: Apache-2.0
         label="Cloud Profile"
         :error-messages="getErrorMessages('modelValue')"
         color="primary"
+        variant="underlined"
         @update:model-value="onInput"
         @blur="v$.modelValue.$touch()"
-        variant="underlined"
       />
     </template>
     <template v-else>
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         :model-value="modelValue"
         :disabled="true"
         label="Cloud Profile"
-      ></v-text-field>
+      />
     </template>
   </div>
 </template>
@@ -43,11 +43,6 @@ const validationErrors = {
 }
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     modelValue: {
       type: String,
@@ -65,6 +60,11 @@ export default defineComponent({
     'update:modelValue',
     'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       validationErrors,

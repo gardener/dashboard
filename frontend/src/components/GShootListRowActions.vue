@@ -10,14 +10,17 @@ SPDX-License-Identifier: Apache-2.0
     location="left"
     :close-on-content-click="false"
   >
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <g-action-button
         v-bind="props"
         icon="mdi-dots-vertical"
         tooltip="Cluster Actions"
       />
     </template>
-    <v-list dense @click.capture="actionMenu = false">
+    <v-list
+      dense
+      @click.capture="actionMenu = false"
+    >
       <v-list-item>
         <g-shoot-action-change-hibernation
           v-model="changeHibernationDialog"
@@ -51,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
           text
         />
       </v-list-item>
-      <v-divider></v-divider>
+      <v-divider />
       <v-list-item>
         <g-shoot-action-delete-cluster
           v-model="deleteClusterDialog"

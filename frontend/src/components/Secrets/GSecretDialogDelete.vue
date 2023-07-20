@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="800">
+  <v-dialog
+    v-model="visible"
+    max-width="800"
+  >
     <v-card>
       <g-toolbar
         prepend-icon="mdi-alert-outline"
@@ -14,24 +17,38 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
-            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
+            Are you sure to delete the secret <span class="font-weight-bold">{{ name }}</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
-        <g-message color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage"></g-message>
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+        />
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" @click="hide">Cancel</v-btn>
-        <v-btn variant="text" @click="onDeleteSecret" color="toolbar-background">Delete Secret</v-btn>
+        <v-spacer />
+        <v-btn
+          variant="text"
+          @click="hide"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          variant="text"
+          color="toolbar-background"
+          @click="onDeleteSecret"
+        >
+          Delete Secret
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 import get from 'lodash/get'
 import GMessage from '@/components/GMessage'
@@ -39,11 +56,12 @@ import GToolbar from '@/components/GToolbar.vue'
 import { errorDetailsFromError } from '@/utils/error'
 import { useSecretStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GMessage,
     GToolbar,
   },
+  inject: ['logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -76,6 +94,13 @@ export default defineComponent({
       return get(this.secret, 'metadata.name', '')
     },
   },
+  watch: {
+    modelValue: function (modelValue) {
+      if (modelValue) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     ...mapActions(useSecretStore, ['deleteSecret']),
     hide () {
@@ -90,22 +115,15 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Failed to delete Cloud Provider Secret.'
         this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
       this.errorMessage = undefined
-      this.detailedMessage = undefined
+      this.detailedErrorMessage = undefined
     },
   },
-  watch: {
-    modelValue: function (modelValue) {
-      if (modelValue) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

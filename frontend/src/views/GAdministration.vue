@@ -8,19 +8,29 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container fluid>
     <v-row no-gutters>
-      <v-col cols="12" md="6">
-        <v-row no-gutters class="flex-column">
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-row
+          no-gutters
+          class="flex-column"
+        >
           <v-col class="pa-3">
             <v-card>
               <g-toolbar title="Details" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-information-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-information-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Name</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Name
+                  </div>
                   <div class="text-body-1">
-                    {{projectName}}
+                    {{ projectName }}
                   </div>
                   <template #append>
                     <g-copy-btn
@@ -32,9 +42,13 @@ SPDX-License-Identifier: Apache-2.0
                 </g-list-item>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-text-subject</v-icon>
+                    <v-icon :color="color">
+                      mdi-text-subject
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Description</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Description
+                  </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
@@ -45,19 +59,34 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </g-list-item>
                 <template v-if="staleSinceTimestamp">
-                  <v-divider inset></v-divider>
+                  <v-divider inset />
                   <g-list-item>
                     <template #prepend>
-                      <v-icon v-if="staleAutoDeleteTimestamp" :color="color">mdi-delete-clock</v-icon>
-                      <v-icon v-else :color="color">mdi-clock-alert-outline</v-icon>
+                      <v-icon
+                        v-if="staleAutoDeleteTimestamp"
+                        :color="color"
+                      >
+                        mdi-delete-clock
+                      </v-icon>
+                      <v-icon
+                        v-else
+                        :color="color"
+                      >
+                        mdi-clock-alert-outline
+                      </v-icon>
                     </template>
-                    <div class="text-body-2 text-medium-emphasis">Stale Project Information</div>
+                    <div class="text-body-2 text-medium-emphasis">
+                      Stale Project Information
+                    </div>
                     <div class="text-body-1 d-flex align-center pt-1">
                       <span v-if="staleAutoDeleteTimestamp">
                         This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project on
                         <v-tooltip location="right">
                           <template #activator="{ props }">
-                            <span class="font-weight-bold" v-bind="props">{{staleAutoDeleteDate}}</span>
+                            <span
+                              class="font-weight-bold"
+                              v-bind="props"
+                            >{{ staleAutoDeleteDate }}</span>
                           </template>
                           <g-time-string
                             :date-time="staleAutoDeleteTimestamp"
@@ -77,12 +106,16 @@ SPDX-License-Identifier: Apache-2.0
                     </div>
                   </g-list-item>
                 </template>
-                <v-divider inset/>
+                <v-divider inset />
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-account-cog-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-account-cog-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Owner</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Owner
+                  </div>
                   <div class="text-body-1">
                     <g-editable-account
                       :read-only="!canManageMembers"
@@ -93,28 +126,45 @@ SPDX-License-Identifier: Apache-2.0
                       placeholder="Select the owner"
                       no-data-text="No project member available"
                       :save="updateOwner"
-                    ></g-editable-account>
+                    />
                   </div>
                 </g-list-item>
-                <v-divider inset/>
+                <v-divider inset />
                 <g-list-item v-if="createdBy">
                   <template #prepend>
-                    <v-icon :color="color">mdi-account-clock-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-account-clock-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Created By</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Created By
+                  </div>
                   <div class="text-body-1">
-                    <g-account-avatar :account-name="createdBy" mail-to></g-account-avatar>
+                    <g-account-avatar
+                      :account-name="createdBy"
+                      mail-to
+                    />
                   </div>
                 </g-list-item>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon v-if="!createdBy" :color="color">mdi-clock-outline</v-icon>
+                    <v-icon
+                      v-if="!createdBy"
+                      :color="color"
+                    >
+                      mdi-clock-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Created At</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Created At
+                  </div>
                   <div class="text-body-1">
                     <v-tooltip location="right">
                       <template #activator="{ props }">
-                        <span v-bind="props" class="text-subtitle-1">{{createdAt}}</span>
+                        <span
+                          v-bind="props"
+                          class="text-subtitle-1"
+                        >{{ createdAt }}</span>
                       </template>
                       <g-time-string
                         :date-time="creationTimestamp"
@@ -123,12 +173,16 @@ SPDX-License-Identifier: Apache-2.0
                     </v-tooltip>
                   </div>
                 </g-list-item>
-                <v-divider inset/>
+                <v-divider inset />
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-label-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-label-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Purpose</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Purpose
+                  </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
@@ -139,55 +193,71 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </g-list-item>
                 <template v-if="slaDescriptionHtml">
-                  <v-divider inset/>
+                  <v-divider inset />
                   <g-list-item>
                     <template #prepend>
-                      <v-icon :color="color">mdi-file-document-outline</v-icon>
+                      <v-icon :color="color">
+                        mdi-file-document-outline
+                      </v-icon>
                     </template>
-                    <div class="text-body-2 text-medium-emphasis">{{slaTitle}}</div>
-                    <div class="text-body-1 markdown wrap-text" v-html="slaDescriptionHtml"></div>
+                    <div class="text-body-2 text-medium-emphasis">
+                      {{ slaTitle }}
+                    </div>
+                    <!-- eslint-disable vue/no-v-html -->
+                    <div
+                      class="text-body-1 markdown wrap-text"
+                      v-html="slaDescriptionHtml"
+                    />
+                    <!-- eslint-enable vue/no-v-html -->
                   </g-list-item>
                 </template>
                 <template v-if="shootCustomFieldList">
-                  <v-divider inset/>
+                  <v-divider inset />
                   <g-list-item>
                     <template #prepend>
-                      <v-icon :color="color">mdi-playlist-star</v-icon>
+                      <v-icon :color="color">
+                        mdi-playlist-star
+                      </v-icon>
                     </template>
-                      <div class="text-body-2 text-medium-emphasis">Custom Fields for Shoots</div>
-                      <div class="text-body-1 d-flex flex-wrap align-center pt-1">
-                        <g-shoot-custom-field
-                          class="mr-2 mb-2"
-                          v-for="{
-                            key,
-                            name,
-                            path,
-                            icon,
-                            tooltip,
-                            defaultValue,
-                            showColumn,
-                            weight,
-                            columnSelectedByDefault,
-                            showDetails,
-                            searchable,
-                            sortable
-                          } in shootCustomFieldList"
-                          :color="color"
-                          :key="key"
-                          :name="name"
-                          :path="path"
-                          :icon="icon"
-                          :tooltip="tooltip"
-                          :default-value="defaultValue"
-                          :show-column="showColumn"
-                          :weight="weight"
-                          :column-selected-by-default="columnSelectedByDefault"
-                          :show-details="showDetails"
-                          :searchable="searchable"
-                          :sortable="sortable"
-                        ></g-shoot-custom-field>
-                        <span v-if="!shootCustomFieldList || !shootCustomFieldList.length" class="font-weight-light text-disabled">Not defined</span>
-                      </div>
+                    <div class="text-body-2 text-medium-emphasis">
+                      Custom Fields for Shoots
+                    </div>
+                    <div class="text-body-1 d-flex flex-wrap align-center pt-1">
+                      <g-shoot-custom-field
+                        v-for="{
+                          key,
+                          name,
+                          path,
+                          icon,
+                          tooltip,
+                          defaultValue,
+                          showColumn,
+                          weight,
+                          columnSelectedByDefault,
+                          showDetails,
+                          searchable,
+                          sortable
+                        } in shootCustomFieldList"
+                        :key="key"
+                        class="mr-2 mb-2"
+                        :color="color"
+                        :name="name"
+                        :path="path"
+                        :icon="icon"
+                        :tooltip="tooltip"
+                        :default-value="defaultValue"
+                        :show-column="showColumn"
+                        :weight="weight"
+                        :column-selected-by-default="columnSelectedByDefault"
+                        :show-details="showDetails"
+                        :searchable="searchable"
+                        :sortable="sortable"
+                      />
+                      <span
+                        v-if="!shootCustomFieldList || !shootCustomFieldList.length"
+                        class="font-weight-light text-disabled"
+                      >Not defined</span>
+                    </div>
                   </g-list-item>
                 </template>
               </g-list>
@@ -195,19 +265,35 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </v-row>
       </v-col>
-      <v-col cols="12" md="6">
-        <v-row no-gutters class="flex-column">
-          <v-col v-if="canDeleteProject" class="pa-3">
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-row
+          no-gutters
+          class="flex-column"
+        >
+          <v-col
+            v-if="canDeleteProject"
+            class="pa-3"
+          >
             <v-card>
               <g-toolbar title="Lifecycle" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-delete-circle-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-delete-circle-outline
+                    </v-icon>
                   </template>
-                  <div class="text-body-1">Delete Project</div>
+                  <div class="text-body-1">
+                    Delete Project
+                  </div>
                   <template #append>
-                    <v-tooltip v-if="canDeleteProject" location="top">
+                    <v-tooltip
+                      v-if="canDeleteProject"
+                      location="top"
+                    >
                       <template #activator="{ props }">
                         <div v-bind="props">
                           <v-btn
@@ -227,15 +313,23 @@ SPDX-License-Identifier: Apache-2.0
               </g-list>
             </v-card>
           </v-col>
-          <v-col v-if="costObjectSettingEnabled" class="pa-3">
+          <v-col
+            v-if="costObjectSettingEnabled"
+            class="pa-3"
+          >
             <v-card>
               <g-toolbar title="Billing" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon icon="mdi-credit-card-outline" :color="color"></v-icon>
+                    <v-icon
+                      icon="mdi-credit-card-outline"
+                      :color="color"
+                    />
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">Cost Object</div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Cost Object
+                  </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
@@ -244,7 +338,10 @@ SPDX-License-Identifier: Apache-2.0
                       :rules="costObjectRules"
                       :save="updateCostObject"
                     >
-                      <template v-if="costObjectDescriptionHtml" #info>
+                      <template
+                        v-if="costObjectDescriptionHtml"
+                        #info
+                      >
                         <v-alert
                           icon="mdi-information-outline"
                           density="compact"
@@ -253,7 +350,12 @@ SPDX-License-Identifier: Apache-2.0
                           :color="color"
                           class="mb-0"
                         >
-                          <div class="alertBannerMessage" v-html="costObjectDescriptionHtml"/>
+                          <!-- eslint-disable vue/no-v-html -->
+                          <div
+                            class="alertBannerMessage"
+                            v-html="costObjectDescriptionHtml"
+                          />
+                          <!-- eslint-enable vue/no-v-html -->
                         </v-alert>
                       </template>
                     </g-editable-text>
@@ -262,21 +364,30 @@ SPDX-License-Identifier: Apache-2.0
               </g-list>
             </v-card>
           </v-col>
-          <v-col v-if="isKubeconfigEnabled" class="pa-3">
+          <v-col
+            v-if="isKubeconfigEnabled"
+            class="pa-3"
+          >
             <v-card>
-              <g-toolbar title="Access"/>
+              <g-toolbar title="Access" />
               <g-list>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-file</v-icon>
+                    <v-icon :color="color">
+                      mdi-file
+                    </v-icon>
                   </template>
-                  <div class="text-body-1">Command Line Interface Access</div>
+                  <div class="text-body-1">
+                    Command Line Interface Access
+                  </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Go to
                     <router-link
-                      :to="{ name: 'Account', query: { namespace: this.namespace } }"
+                      :to="{ name: 'Account', query: { namespace: namespace } }"
                       class="text-anchor"
-                    >My Account</router-link>
+                    >
+                      My Account
+                    </router-link>
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                   </div>
                 </g-list-item>
@@ -287,14 +398,15 @@ SPDX-License-Identifier: Apache-2.0
             <v-card>
               <g-toolbar title="Quota">
                 <template #append>
-                  <g-resource-quota-help/>
+                  <g-resource-quota-help />
                 </template>
               </g-toolbar>
-              <v-skeleton-loader v-if="!projectQuotaStatus"
+              <v-skeleton-loader
+                v-if="!projectQuotaStatus"
                 height="400"
                 type="table: table-heading, table-thead, table-tbody"
                 :types="{ 'table-thead': 'heading@3', 'table-row': 'table-cell@3' }"
-              ></v-skeleton-loader>
+              />
               <v-table v-else-if="projectQuotaStatus.length">
                 <template #default>
                   <thead>
@@ -306,7 +418,7 @@ SPDX-License-Identifier: Apache-2.0
                         Used Quota
                       </th>
                       <th class="text-center">
-                       Quantity
+                        Quantity
                       </th>
                     </tr>
                   </thead>
@@ -326,12 +438,18 @@ SPDX-License-Identifier: Apache-2.0
                       <td class="text-center">
                         <v-tooltip location="top">
                           <template #activator="{ props }">
-                            <v-progress-linear v-bind="props" :model-value="resourceQuota.percentage" :color="resourceQuota.progressColor"></v-progress-linear>
+                            <v-progress-linear
+                              v-bind="props"
+                              :model-value="resourceQuota.percentage"
+                              :color="resourceQuota.progressColor"
+                            />
                           </template>
                           {{ resourceQuota.percentage }}%
                         </v-tooltip>
                       </td>
-                      <td class="text-center">{{resourceQuota.usedValue}} / {{resourceQuota.limitValue}}</td>
+                      <td class="text-center">
+                        {{ resourceQuota.usedValue }} / {{ resourceQuota.limitValue }}
+                      </td>
                     </tr>
                   </tbody>
                 </template>
@@ -339,7 +457,9 @@ SPDX-License-Identifier: Apache-2.0
               <g-list v-else>
                 <g-list-item>
                   <template #prepend>
-                    <v-icon :color="color">mdi-information-outline</v-icon>
+                    <v-icon :color="color">
+                      mdi-information-outline
+                    </v-icon>
                   </template>
                   <div class="text-body-2">
                     No resource quotas defined for this project.
@@ -353,25 +473,24 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
+      ref="gDialog"
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
-      ref="gDialog"
-      width="600">
+      width="600"
+    >
       <template #caption>
         Confirm Delete
       </template>
       <template #message>
-        Are you sure to delete the project <span class="font-weight-bold">{{projectName}}</span>?
-        <br />
+        Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
+        <br>
         <span class="text-error font-weight-bold">The operation can not be undone.</span>
       </template>
     </g-dialog>
-
   </v-container>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import { required, helpers } from '@vuelidate/validators'
 
@@ -412,7 +531,7 @@ import {
   useMemberStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GList,
     GListItem,
@@ -555,6 +674,23 @@ export default defineComponent({
       return this.sla.title
     },
   },
+  created () {
+    // see https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-after-navigation
+    this.$watch(
+      () => this.$route.params,
+      async () => {
+        try {
+          await this.fetchQuotas(this.project.metadata.namespace)
+        } catch (err) {
+          this.setAlert({
+            type: 'error',
+            message: `Failed to fetch project quota: ${err.message}`,
+          })
+        }
+      },
+      { immediate: true },
+    )
+  },
   methods: {
     ...mapActions(useAppStore, [
       'setAlert',
@@ -653,24 +789,7 @@ export default defineComponent({
       this.edit = false
     },
   },
-  created () {
-    // see https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-after-navigation
-    this.$watch(
-      () => this.$route.params,
-      async () => {
-        try {
-          await this.fetchQuotas(this.project.metadata.namespace)
-        } catch (err) {
-          this.setAlert({
-            type: 'error',
-            message: `Failed to fetch project quota: ${err.message}`,
-          })
-        }
-      },
-      { immediate: true },
-    )
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

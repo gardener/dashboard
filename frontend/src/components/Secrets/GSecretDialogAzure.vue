@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 
- <template>
+<template>
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
@@ -14,55 +14,54 @@ SPDX-License-Identifier: Apache-2.0
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
-
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
-          v-model="clientId"
           ref="clientId"
+          v-model="clientId"
+          color="primary"
           label="Client Id"
           :error-messages="getErrorMessages('clientId')"
+          variant="underlined"
           @update:model-value="v$.clientId.$touch()"
           @blur="v$.clientId.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="clientSecret"
+          color="primary"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           label="Client Secret"
           :error-messages="getErrorMessages('clientSecret')"
+          variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.clientSecret.$touch()"
           @blur="v$.clientSecret.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="tenantId"
+          color="primary"
           label="Tenant Id"
           :error-messages="getErrorMessages('tenantId')"
+          variant="underlined"
           @update:model-value="v$.tenantId.$touch()"
           @blur="v$.tenantId.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="subscriptionId"
+          color="primary"
           label="Subscription Id"
           :error-messages="getErrorMessages('subscriptionId')"
+          variant="underlined"
           @update:model-value="v$.subscriptionId.$touch()"
           @blur="v$.subscriptionId.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
     <template #help-slot>
@@ -75,29 +74,32 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Ensure that the service principal has the permissions defined
           <g-external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
-          here</g-external-link> within your subscription assigned.
+            here
+          </g-external-link> within your subscription assigned.
           If no fine-grained permissions are required then assign the <strong>Contributor</strong> role.
         </p>
         <p>
           Read the
           <g-external-link url="https://docs.microsoft.com/azure/active-directory/role-based-access-control-configure">
-          IAM Console help section</g-external-link> on how to manage your credentials and subscriptions.
+            IAM Console help section
+          </g-external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
       <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
-        <p>Follow the steps as described in the Azure documentation to <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">create a service principal account</g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.</p>
+        <p>
+          Follow the steps as described in the Azure documentation to <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">
+            create a service principal account
+          </g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.
+        </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
@@ -116,12 +118,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -141,6 +138,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       clientId: undefined,
@@ -208,6 +210,13 @@ export default defineComponent({
       return undefined
     },
   },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     reset () {
       this.v$.$reset()
@@ -225,12 +234,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

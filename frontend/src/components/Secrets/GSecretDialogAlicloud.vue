@@ -13,38 +13,37 @@ SPDX-License-Identifier: Apache-2.0
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
-          v-model="accessKeyId"
           ref="accessKeyId"
+          v-model="accessKeyId"
+          color="primary"
           label="Access Key Id"
           :error-messages="getErrorMessages('accessKeyId')"
-          @update:model-value="v$.accessKeyId.$touch()"
-          @blur="v$.accessKeyId.$touch()"
           counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
           variant="underlined"
-        ></v-text-field>
+          @update:model-value="v$.accessKeyId.$touch()"
+          @blur="v$.accessKeyId.$touch()"
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="accessKeySecret"
+          color="primary"
           label="Access Key Secret"
           :error-messages="getErrorMessages('accessKeySecret')"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="v$.accessKeySecret.$touch()"
-          @blur="v$.accessKeySecret.$touch()"
           counter="30"
           hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
           variant="underlined"
-        ></v-text-field>
+          @click:append="() => (hideSecret = !hideSecret)"
+          @update:model-value="v$.accessKeySecret.$touch()"
+          @blur="v$.accessKeySecret.$touch()"
+        />
       </div>
     </template>
     <template #help-slot>
@@ -52,41 +51,50 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
-          <g-external-link url="https://ram.console.aliyun.com/overview">RAM Console</g-external-link>.
+          <g-external-link url="https://ram.console.aliyun.com/overview">
+            RAM Console
+          </g-external-link>.
           The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
         </p>
         <p>
           Gardener uses encrypted system disk when creating Shoot, please enable ECS disk encryption on Alibaba Cloud Console
-          (<g-external-link url="https://www.alibabacloud.com/help/doc-detail/59643.htm">official
-          documentation</g-external-link>).
+          (<g-external-link url="https://www.alibabacloud.com/help/doc-detail/59643.htm">
+            official
+            documentation
+          </g-external-link>).
         </p>
         <p>
           Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
-          (<g-external-link url="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp">official
-          documentation</g-external-link>). Alternatively, you can assign following permissions to the RAM
+          (<g-external-link url="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp">
+            official
+            documentation
+          </g-external-link>). Alternatively, you can assign following permissions to the RAM
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>
-        <g-code-block height="100%" lang="json" :content="JSON.stringify(template, undefined, 2)"></g-code-block>
+        <g-code-block
+          height="100%"
+          lang="json"
+          :content="JSON.stringify(template, undefined, 2)"
+        />
       </div>
       <div v-if="vendor==='alicloud-dns'">
         <p>
           You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
         </p>
         <p>
-          For details see <g-external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">AccessKey Client</g-external-link>. Currently the regionId is fixed to cn-shanghai.
+          For details see <g-external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">
+            AccessKey Client
+          </g-external-link>. Currently the regionId is fixed to cn-shanghai.
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength, maxLength } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -103,12 +111,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GCodeBlock,
@@ -129,6 +132,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       accessKeyId: undefined,
@@ -220,10 +228,14 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -238,12 +250,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
+    ref="actionDialog"
     :shoot-item="shootItem"
     :valid="dnsConfigurationValid"
-    ref="actionDialog"
     caption="Configure DNS"
     width="900"
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
-    >
+  >
     <template #actionComponent>
-      <g-manage-shoot-dns :key="componentKey"/>
+      <g-manage-shoot-dns :key="componentKey" />
     </template>
   </g-action-button-dialog>
 </template>
@@ -35,11 +35,11 @@ import {
 } from '@/store'
 
 export default defineComponent({
-  mixins: [shootItem],
   components: {
     GActionButtonDialog,
     GManageShootDns,
   },
+  mixins: [shootItem],
   inject: ['api'],
   data () {
     return {

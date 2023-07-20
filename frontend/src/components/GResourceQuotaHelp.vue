@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="resourceQuotaHelpText" class="mr-2">
+  <div
+    v-if="resourceQuotaHelpText"
+    class="mr-2"
+  >
     <g-action-button
       icon="mdi-help-circle-outline"
       color="toolbar-title"
@@ -20,10 +23,17 @@ SPDX-License-Identifier: Apache-2.0
       confirm-button-text="Ok"
       cancel-button-text=""
       width="600"
-      >
-      <template #caption>Quota Help</template>
+    >
+      <template #caption>
+        Quota Help
+      </template>
       <template #message>
-        <div class="wrap-text" v-html="resourceQuotaHelpHtml"></div>
+        <!-- eslint-disable vue/no-v-html -->
+        <div
+          class="wrap-text"
+          v-html="resourceQuotaHelpHtml"
+        />
+        <!-- eslint-enable vue/no-v-html -->
       </template>
     </g-dialog>
   </div>

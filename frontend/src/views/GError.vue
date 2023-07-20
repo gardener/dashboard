@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-error
         :message="message"
         @click="goHome"
-      ></g-error>
+      />
     </v-main>
   </v-app>
 </template>

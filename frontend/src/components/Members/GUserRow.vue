@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <tr>
-    <td class="pa-0" v-if="selectedHeaders.username">
+    <td
+      v-if="selectedHeaders.username"
+      class="pa-0"
+    >
       <v-list class="g-username">
         <v-list-item
           :prepend-avatar="item.avatarUrl"
@@ -15,7 +18,8 @@ SPDX-License-Identifier: Apache-2.0
             {{ item.displayName }}
           </v-list-item-title>
           <v-list-item-subtitle :class="{ 'inherit-opacity': item.isEmail }">
-            <a v-if="item.isEmail"
+            <a
+              v-if="item.isEmail"
               :href="`mailto:${item.username}`"
               class="text-anchor"
             >{{ item.username }}</a>
@@ -26,12 +30,15 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
-        <g-account-roles :role-display-names="item.roleDisplayNames"></g-account-roles>
+        <g-account-roles :role-display-names="item.roleDisplayNames" />
       </div>
     </td>
     <td v-if="selectedHeaders.actions">
       <div class="d-flex justify-end">
-        <div v-if="canManageMembers" class="ml-1">
+        <div
+          v-if="canManageMembers"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-pencil"
             @click="onEdit"
@@ -41,7 +48,10 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-action-button>
         </div>
-        <div v-if="canManageMembers" class="ml-1">
+        <div
+          v-if="canManageMembers"
+          class="ml-1"
+        >
           <g-action-button
             icon="mdi-close"
             :disabled="item.isOwner"

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :message="message"
     :button-text="buttonText"
     @click="onClick"
-  ></g-error>
+  />
 </template>
 
 <script>

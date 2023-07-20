@@ -6,14 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
-    :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    :shoot-item="shootItem"
     caption="Configure Control Plane High Availability"
     width="600"
     max-height="60vh"
     confirm-required
-    >
+    @dialog-opened="onConfigurationDialogOpened"
+  >
     <template #actionComponent>
       <g-manage-control-plane-high-availability :key="componentKey" />
     </template>
@@ -21,8 +21,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapActions, mapState } from 'pinia'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
@@ -33,7 +31,7 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
     GManageControlPlaneHighAvailability,
@@ -82,5 +80,5 @@ export default defineComponent({
       this.componentKey = uuidv4() // force re-render
     },
   },
-})
+}
 </script>

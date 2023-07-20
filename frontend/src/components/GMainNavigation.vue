@@ -13,13 +13,17 @@ SPDX-License-Identifier: Apache-2.0
     <div class="teaser">
       <div class="content center bg-main-background-darken-2">
         <v-btn
-          @click.stop="sidebar = false"
           icon="mdi-chevron-double-left"
           variant="text"
           class="float-right text-main-navigation-title ma-2"
+          @click.stop="sidebar = false"
         />
         <a href="/">
-          <img src="/static/assets/logo.svg" class="logo" alt="gardener logo">
+          <img
+            src="/static/assets/logo.svg"
+            class="logo"
+            alt="gardener logo"
+          >
           <h1 class="text-main-navigation-title">Gardener <span class="version">{{ version }}</span></h1>
           <h2 class="text-primary">Universal Kubernetes at Scale</h2>
         </a>
@@ -27,13 +31,13 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <template v-if="projectList.length">
       <v-menu
+        v-model="projectMenu"
         location="bottom"
         :attach="true"
         open-on-click
         :close-on-content-click="false"
         :offset="[0]"
         content-class="project-menu"
-        v-model="projectMenu"
       >
         <template #activator="{ props }">
           <v-btn
@@ -49,17 +53,32 @@ SPDX-License-Identifier: Apache-2.0
             @keyup.enter="navigateToHighlightedProject"
           >
             <template #prepend>
-              <v-icon icon="mdi-grid-large" :size="24"/>
+              <v-icon
+                icon="mdi-grid-large"
+                :size="24"
+              />
             </template>
-            <div class="text-left" :class="{ placeholder: !selectedProject }" >
+            <div
+              class="text-left"
+              :class="{ placeholder: !selectedProject }"
+            >
               {{ selectedProjectName }}
               <template v-if="selectedProject">
-                <g-stale-project-warning :project="selectedProject" size="small" />
-                <g-not-ready-project-warning :project="selectedProject" size="small" />
+                <g-stale-project-warning
+                  :project="selectedProject"
+                  size="small"
+                />
+                <g-not-ready-project-warning
+                  :project="selectedProject"
+                  size="small"
+                />
               </template>
             </div>
             <template #append>
-              <v-icon :icon="projectMenuIcon" :size="18"/>
+              <v-icon
+                :icon="projectMenuIcon"
+                :size="18"
+              />
             </template>
           </v-btn>
         </template>
@@ -83,39 +102,62 @@ SPDX-License-Identifier: Apache-2.0
                 @keydown.down="highlightProjectWithKeys('down')"
                 @keydown.up="highlightProjectWithKeys('up')"
               >
-              <template #prepend>
-                <v-icon icon="mdi-magnify" color="primary" class="ml-4"></v-icon>
-              </template>
+                <template #prepend>
+                  <v-icon
+                    icon="mdi-magnify"
+                    color="primary"
+                    class="ml-4"
+                  />
+                </template>
               </v-text-field>
             </v-card-title>
-            <v-divider></v-divider>
+            <v-divider />
           </template>
-          <v-list variant="flat" class="project-list" ref="refProjectList" @scroll="handleProjectListScroll">
+          <v-list
+            ref="refProjectList"
+            variant="flat"
+            class="project-list"
+            @scroll="handleProjectListScroll"
+          >
             <v-list-item
               v-for="project in visibleProjectList"
               ref="refProjectListItems"
-              @click="onProjectClick($event, project)"
+              :key="project.metadata.name"
               class="project-list-tile"
               :height="48"
               :class="{ 'highlighted-item': isHighlightedProject(project) }"
-              :key="project.metadata.name"
               :data-g-project-name="project.metadata.name"
+              @click="onProjectClick($event, project)"
             >
               <template #prepend>
                 <v-icon color="primary">
                   {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
                 </v-icon>
               </template>
-              <v-list-item-title class="project-name text-uppercase">{{ project.metadata.name }}</v-list-item-title>
-              <v-list-item-subtitle class="project-owner">{{ getProjectOwner(project) }}</v-list-item-subtitle>
+              <v-list-item-title class="project-name text-uppercase">
+                {{ project.metadata.name }}
+              </v-list-item-title>
+              <v-list-item-subtitle class="project-owner">
+                {{ getProjectOwner(project) }}
+              </v-list-item-subtitle>
               <template #append>
-                <g-stale-project-warning :project="project" size="small" />
-                <g-not-ready-project-warning :project="project" size="small" />
+                <g-stale-project-warning
+                  :project="project"
+                  size="small"
+                />
+                <g-not-ready-project-warning
+                  :project="project"
+                  size="small"
+                />
               </template>
             </v-list-item>
           </v-list>
           <v-card-actions>
-            <v-tooltip location="top" :disabled="canCreateProject" style="width: 100%">
+            <v-tooltip
+              location="top"
+              :disabled="canCreateProject"
+              style="width: 100%"
+            >
               <template #activator="{ props }">
                 <div v-bind="{ props }">
                   <v-btn
@@ -137,8 +179,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-menu>
     </template>
 
-    <v-list ref="refMainMenu" variant="flat" class="main-menu">
-      <v-list-item v-if="hasNoProjects"
+    <v-list
+      ref="refMainMenu"
+      variant="flat"
+      class="main-menu"
+    >
+      <v-list-item
+        v-if="hasNoProjects"
         exact
         :to="{ name: 'Home' }"
         class="bg-main-background"
@@ -152,14 +199,17 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <template #title>
-          <div class="text-subtitle-1 text-main-navigation-title">Home</div>
+          <div class="text-subtitle-1 text-main-navigation-title">
+            Home
+          </div>
         </template>
       </v-list-item>
       <template v-if="namespace">
         <template v-for="(route, index) in routes">
-          <v-list-item v-if="!route.meta.menu.hidden"
-            :to="namespacedRoute(route)"
+          <v-list-item
+            v-if="!route.meta.menu.hidden"
             :key="index"
+            :to="namespacedRoute(route)"
             class="bg-main-background"
             active-class="active-item"
           >
@@ -170,14 +220,15 @@ SPDX-License-Identifier: Apache-2.0
                 :icon="route.meta.menu.icon"
               />
             </template>
-            <v-list-item-title class="text-uppercase text-main-navigation-title">{{ route.meta.menu.title }}</v-list-item-title>
+            <v-list-item-title class="text-uppercase text-main-navigation-title">
+              {{ route.meta.menu.title }}
+            </v-list-item-title>
           </v-list-item>
         </template>
       </template>
     </v-list>
 
-    <g-project-dialog v-model="projectDialog"></g-project-dialog>
-
+    <g-project-dialog v-model="projectDialog" />
   </v-navigation-drawer>
 </template>
 
@@ -232,9 +283,7 @@ const appStore = useAppStore()
 const configStore = useConfigStore()
 const authzStore = useAuthzStore()
 const router = useRouter()
-const route = useRoute()
 
-// eslint-disable-next-line no-unused-vars
 const projectDialog = ref(false)
 const projectFilter = ref('')
 const projectMenu = ref(false)
@@ -317,23 +366,19 @@ const visibleProjectList = computed(() => {
   return slice(projectList, 0, endIndex)
 })
 
-const getProjectOwner = computed(() => {
-  return (project) => {
-    return emailToDisplayName(get(project, 'data.owner'))
-  }
-})
-
-const namespacedRoute = computed(() => {
-  return (route) => {
-    return getNamespacedRoute(route, namespace.value)
-  }
-})
-
 const projectFilterHasExactMatch = computed(() => {
   const project = head(sortedAndFilteredProjectList.value)
   const projectName = get(project, 'metadata.name')
   return isProjectNameMatchingFilter(projectName)
 })
+
+function getProjectOwner (project) {
+  return emailToDisplayName(get(project, 'data.owner'))
+}
+
+function namespacedRoute (route) {
+  return getNamespacedRoute(route, namespace.value)
+}
 
 function findProjectCaseInsensitive (projectName) {
   return find(sortedAndFilteredProjectListWithAllProjects.value, project => {
@@ -391,6 +436,7 @@ function getProjectMenuTargetRoute (namespace) {
     }
     return false
   }
+  const route = useRoute()
   if (fallbackToShootList(route)) {
     return {
       name: 'ShootList',

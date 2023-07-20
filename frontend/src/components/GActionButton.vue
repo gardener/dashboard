@@ -17,7 +17,8 @@ SPDX-License-Identifier: Apache-2.0
       :to="to"
       @click.stop.prevent="emit('click', $event)"
     />
-    <v-tooltip v-if="hasTooltip"
+    <v-tooltip
+      v-if="hasTooltip"
       activator="parent"
       location="top"
       :disabled="tooltipDisabled"

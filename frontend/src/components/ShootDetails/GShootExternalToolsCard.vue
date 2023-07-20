@@ -5,20 +5,31 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="items.length"
+  <v-card
+    v-if="items.length"
     class="mb-4"
   >
     <g-toolbar title="External Tools" />
     <g-list>
-      <template v-for="({ title, url, icon }, index) in items" :key="title">
-        <v-divider v-if="index" :key="index" inset class="my-2"></v-divider>
+      <template
+        v-for="({ title, url, icon }, index) in items"
+        :key="title"
+      >
+        <v-divider
+          v-if="index"
+          :key="index"
+          inset
+          class="my-2"
+        />
         <g-list-item>
           <template #prepend>
-            <v-icon color="primary">{{icon || 'link'}}</v-icon>
+            <v-icon color="primary">
+              {{ icon || 'link' }}
+            </v-icon>
           </template>
           <g-list-item-content :label="title">
             <g-external-link :url="expandUrl(url)">
-              {{expandUrl(url)}}
+              {{ expandUrl(url) }}
             </g-external-link>
           </g-list-item-content>
         </g-list-item>

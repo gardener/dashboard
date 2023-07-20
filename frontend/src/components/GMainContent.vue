@@ -11,8 +11,11 @@ SPDX-License-Identifier: Apache-2.0
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
     />
-    <div class="g-main__wrap" ref="wrapRef">
-      <router-view :key="routerViewKey"></router-view>
+    <div
+      ref="wrapRef"
+      class="g-main__wrap"
+    >
+      <router-view :key="routerViewKey" />
     </div>
   </v-main>
 </template>

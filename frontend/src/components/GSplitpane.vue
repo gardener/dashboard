@@ -12,13 +12,24 @@ SPDX-License-Identifier: Apache-2.0
     @pane-add="resize"
     @pane-remove="resize"
   >
-    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" class="position-relative">
-      <g-splitpane v-if="hasChildren(item)" :splitpane-tree="item">
+    <pane
+      v-for="item in splitpaneTree.items"
+      :key="item.uuid"
+      min-size="2"
+      class="position-relative"
+    >
+      <g-splitpane
+        v-if="hasChildren(item)"
+        :splitpane-tree="item"
+      >
         <template #default="{item: childItem}">
-          <slot :item="childItem"></slot>
+          <slot :item="childItem" />
         </template>
       </g-splitpane>
-      <slot v-else :item="item"></slot>
+      <slot
+        v-else
+        :item="item"
+      />
     </pane>
   </splitpanes>
 </template>
@@ -33,6 +44,16 @@ import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
 export default defineComponent({
+  components: {
+    Splitpanes,
+    Pane,
+  },
+  props: {
+    splitpaneTree: {
+      type: Object,
+      default: undefined,
+    },
+  },
   setup () {
     const store = useAppStore()
 
@@ -46,26 +67,16 @@ export default defineComponent({
       resize,
     }
   },
-  components: {
-    Splitpanes,
-    Pane,
-  },
-  props: {
-    splitpaneTree: {
-      type: Object,
-      default: undefined,
+  watch: {
+    // workaround for https://github.com/antoniandre/splitpanes/issues/79
+    'splitpaneTree.horizontal' (value) {
+      this.resize()
     },
   },
   methods: {
     hasChildren (item) {
       const isSplitpaneTree = Reflect.has(item, 'horizontal')
       return isSplitpaneTree
-    },
-  },
-  watch: {
-    // workaround for https://github.com/antoniandre/splitpanes/issues/79
-    'splitpaneTree.horizontal' (value) {
-      this.resize()
     },
   },
 })

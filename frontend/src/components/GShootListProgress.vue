@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :color="color"
     :model-value="value"
     :striped="striped"
-  >
-  </v-progress-linear>
+  />
 </template>
 
 <script>

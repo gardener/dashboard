@@ -24,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  inject: ['sanitizeUrl'],
   props: {
     url: {
       type: String,
@@ -37,7 +38,6 @@ export default defineComponent({
       default: 14,
     },
   },
-  inject: ['sanitizeUrl'],
   computed: {
     defaultTitle () {
       return this.title ?? this.url

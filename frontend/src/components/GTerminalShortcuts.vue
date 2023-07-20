@@ -6,7 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <template v-if="projectShortcuts.length || shortcuts.length">
-    <g-terminal-shortcut v-for="shortcut in projectShortcuts"
+    <g-terminal-shortcut
+      v-for="shortcut in projectShortcuts"
       :key="`project-shortcut-${shortcut.id}`"
       :shoot-item="shootItem"
       :shortcut="shortcut"
@@ -23,7 +24,10 @@ SPDX-License-Identifier: Apache-2.0
                 color="transparent"
               >
                 <template #badge>
-                  <v-icon icon="mdi-grid-large" color="primary"/>
+                  <v-icon
+                    icon="mdi-grid-large"
+                    color="primary"
+                  />
                 </template>
                 <span>
                   <g-icon-base
@@ -32,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
                     icon-color="primary"
                     view-box="-4 0 56 54"
                   >
-                    <g-terminal-shortcut-icon/>
+                    <g-terminal-shortcut-icon />
                   </g-icon-base>
                 </span>
               </v-badge>
@@ -42,7 +46,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
       </template>
     </g-terminal-shortcut>
-    <g-terminal-shortcut v-for="shortcut in shortcuts"
+    <g-terminal-shortcut
+      v-for="shortcut in shortcuts"
       :key="`g-shortcut-${shortcut.id}`"
       :shoot-item="shootItem"
       :shortcut="shortcut"
@@ -59,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
                 icon-color="primary"
                 view-box="-4 0 56 54"
               >
-                <g-terminal-shortcut-icon/>
+                <g-terminal-shortcut-icon />
               </g-icon-base>
             </span>
           </template>
@@ -68,9 +73,11 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </g-terminal-shortcut>
   </template>
-  <g-list-item v-else
+  <g-list-item
+    v-else
     disabled
-  ><!-- should not be selectable -->
+  >
+    <!-- should not be selectable -->
     <g-list-item-content>
       No terminal shortcuts available
     </g-list-item-content>
@@ -121,6 +128,9 @@ export default defineComponent({
       type: String,
     },
   },
+  emits: [
+    'addTerminalShortcut',
+  ],
   computed: {
     allPossibleTargets () {
       const targetsFilter = [TargetEnum.GARDEN]
@@ -138,9 +148,6 @@ export default defineComponent({
       return shootSelectorFilter(shortcuts, this.shootItem)
     },
   },
-  emits: [
-    'addTerminalShortcut',
-  ],
   methods: {
     ...mapActions(useTerminalStore, [
       'projectTerminalShortcutsByTargetsFilter',

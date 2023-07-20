@@ -24,17 +24,23 @@ SPDX-License-Identifier: Apache-2.0
           :size="32"
           class="ma-2"
         >
-          <g-icon-base :width="16" :icon-color="color">
-            <component :is="iconName"/>
+          <g-icon-base
+            :width="16"
+            :icon-color="color"
+          >
+            <component :is="iconName" />
           </g-icon-base>
         </v-progress-circular>
         <v-btn
-            v-else
-            icon
-            :color="color"
+          v-else
+          icon
+          :color="color"
         >
-          <g-icon-base :width="16" :icon-color="color">
-            <component :is="iconName"/>
+          <g-icon-base
+            :width="16"
+            :icon-color="color"
+          >
+            <component :is="iconName" />
           </g-icon-base>
         </v-btn>
       </div>
@@ -48,23 +54,42 @@ SPDX-License-Identifier: Apache-2.0
         :color="color"
         class="pr-1 ma-0"
       >
-        <v-row no-gutters class="ml-2">
-          <v-col align-self="center" class="grow mr-3">
+        <v-row
+          no-gutters
+          class="ml-2"
+        >
+          <v-col
+            align-self="center"
+            class="grow mr-3"
+          >
             <div class="text-body-2">
-              {{message}}
+              {{ message }}
             </div>
-            <div v-if="hint" class="text-caption">
-              {{hint}}
+            <div
+              v-if="hint"
+              class="text-caption"
+            >
+              {{ hint }}
             </div>
           </v-col>
           <template v-if="action">
-            <v-col align-self="center" class="shrink flex-grow-0">
-              <v-btn variant="text" :color="color" @click="retry">
-                {{action}}
+            <v-col
+              align-self="center"
+              class="shrink flex-grow-0"
+            >
+              <v-btn
+                variant="text"
+                :color="color"
+                @click="retry"
+              >
+                {{ action }}
               </v-btn>
             </v-col>
           </template>
-          <v-col align-self="center" class="shrink flex-grow-0 mr-2">
+          <v-col
+            align-self="center"
+            class="shrink flex-grow-0 mr-2"
+          >
             <v-btn
               icon="mdi-close"
               variant="text"

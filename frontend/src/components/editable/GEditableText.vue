@@ -6,9 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <span v-if="readOnly">
-    {{modelValue}}
+    {{ modelValue }}
   </span>
-  <v-menu v-else
+  <v-menu
+    v-else
     ref="menu"
     v-model="isActive"
     location="top start"
@@ -25,8 +26,15 @@ SPDX-License-Identifier: Apache-2.0
           class="content cursor-pointer full-width mr-auto"
           :class="{ 'content--bounce': contentBounce }"
         >
-          <template v-if="modelValue">{{ modelValue }}</template>
-          <div v-else class="text-body-2 font-weight-light text-disabled">{{noValueText}}</div>
+          <template v-if="modelValue">
+            {{ modelValue }}
+          </template>
+          <div
+            v-else
+            class="text-body-2 font-weight-light text-disabled"
+          >
+            {{ noValueText }}
+          </div>
         </div>
         <div>
           <v-btn
@@ -44,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
       @keydown.esc.prevent="onCancel"
       @keydown.enter.prevent="onSave"
     >
-      <slot name="info"></slot>
+      <slot name="info" />
       <v-text-field
         ref="textField"
         v-model="internalValue"
@@ -58,9 +66,9 @@ SPDX-License-Identifier: Apache-2.0
         :loading="loading"
         :messages="messages"
         :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        class="g-field"
         @input="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
-        class="g-field"
       >
         <template #append>
           <v-tooltip location="top">
@@ -90,22 +98,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import GErrorMessage from './GErrorMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
-export default defineComponent({
+export default {
   components: {
     GErrorMessage,
   },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     modelValue: {
+      type: Object,
       required: true,
     },
     save: {
@@ -128,6 +131,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+  },
+  emits: [
+    'update:modelValue',
+    'open',
+    'close',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   data () {
     return {
@@ -187,11 +200,21 @@ export default defineComponent({
       return 'mdi-pencil'
     },
   },
-  emits: [
-    'update:modelValue',
-    'open',
-    'close',
-  ],
+  watch: {
+    active (value) {
+      if (value) {
+        clearTimeout(this.timeoutId)
+        this.internalValue = this.modelValue
+        this.$emit('open')
+        setDelayedInputFocus(this, 'textField', {
+          delay: 50,
+        })
+      } else {
+        this.reset()
+        this.$emit('close')
+      }
+    },
+  },
   methods: {
     clearMessages () {
       this.messages = []
@@ -229,22 +252,7 @@ export default defineComponent({
       this.v$.$reset()
     },
   },
-  watch: {
-    active (value) {
-      if (value) {
-        clearTimeout(this.timeoutId)
-        this.internalValue = this.modelValue
-        this.$emit('open')
-        setDelayedInputFocus(this, 'textField', {
-          delay: 50,
-        })
-      } else {
-        this.reset()
-        this.$emit('close')
-      }
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

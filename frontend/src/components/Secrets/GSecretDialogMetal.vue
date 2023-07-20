@@ -13,34 +13,33 @@ SPDX-License-Identifier: Apache-2.0
     vendor="metal"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-          color="primary"
-          v-model="apiUrl"
           ref="apiUrl"
+          v-model="apiUrl"
+          color="primary"
           label="API URL"
           :error-messages="getErrorMessages('apiUrl')"
+          variant="underlined"
           @update:model-value="v$.apiUrl.$touch()"
           @blur="v$.apiUrl.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="apiHmac"
+          color="primary"
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          @click:append="() => (hideSecret = !hideSecret)"
           :error-messages="getErrorMessages('apiHmac')"
+          variant="underlined"
+          @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.apiHmac.$touch()"
           @blur="v$.apiHmac.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
     <template #help-slot>
@@ -51,14 +50,11 @@ SPDX-License-Identifier: Apache-2.0
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, url } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -73,12 +69,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
   },
@@ -94,6 +85,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       apiHmac: undefined,
@@ -140,10 +136,14 @@ export default defineComponent({
       return !this.secret
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -158,12 +158,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

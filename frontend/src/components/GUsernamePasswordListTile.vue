@@ -8,48 +8,62 @@ SPDX-License-Identifier: Apache-2.0
   <div v-if="showCredentials || showNotAvailablePlaceholder">
     <template v-if="showCredentials">
       <g-list-item v-if="username">
-        <template v-slot:prepend>
-          <v-icon color="primary" :icon="icon"></v-icon>
+        <template #prepend>
+          <v-icon
+            color="primary"
+            :icon="icon"
+          />
         </template>
         <g-list-item-content :label="usernameTitle">
-          {{username}}
+          {{ username }}
         </g-list-item-content>
-        <template v-slot:append>
-          <g-copy-btn :clipboard-text="username"/>
+        <template #append>
+          <g-copy-btn :clipboard-text="username" />
         </template>
       </g-list-item>
       <g-list-item v-if="email">
-        <template v-slot:prepend>
-          <v-icon v-if="!username" color="primary" :icon="icon"></v-icon>
+        <template #prepend>
+          <v-icon
+            v-if="!username"
+            color="primary"
+            :icon="icon"
+          />
         </template>
         <g-list-item-content :label="emailTitle">
           {{ email }}
         </g-list-item-content>
-        <template v-slot:append>
-          <g-copy-btn :clipboard-text="email"/>
+        <template #append>
+          <g-copy-btn :clipboard-text="email" />
         </template>
       </g-list-item>
       <g-list-item>
         <g-list-item-content :label="passwordTitle">
           {{ passwordText }}
         </g-list-item-content>
-        <template v-slot:append>
-          <g-copy-btn :clipboard-text="password"/>
+        <template #append>
+          <g-copy-btn :clipboard-text="password" />
           <g-action-button
-           :icon="visibilityIcon"
-           :tooltip="passwordVisibilityTitle"
+            :icon="visibilityIcon"
+            :tooltip="passwordVisibilityTitle"
             @click="showPassword = !showPassword"
           />
         </template>
       </g-list-item>
     </template>
     <g-list-item v-else-if="showNotAvailablePlaceholder">
-      <template v-slot:prepend>
-        <v-icon color="primary" :icon="icon"/>
+      <template #prepend>
+        <v-icon
+          color="primary"
+          :icon="icon"
+        />
       </template>
       <slot name="notAvailablePlaceholder">
         <g-list-item-content label="Credentials">
-          <v-icon color="primary" icon="mdi-alert-circle-outline" start/>
+          <v-icon
+            color="primary"
+            icon="mdi-alert-circle-outline"
+            start
+          />
           Currently not available
         </g-list-item-content>
       </slot>
@@ -106,11 +120,6 @@ export default {
       showPassword: false,
     }
   },
-  methods: {
-    reset () {
-      this.showPassword = false
-    },
-  },
   computed: {
     passwordText () {
       return this.showPassword ? this.password : '****************'
@@ -128,6 +137,11 @@ export default {
   watch: {
     password () {
       this.reset()
+    },
+  },
+  methods: {
+    reset () {
+      this.showPassword = false
     },
   },
 }

@@ -14,14 +14,20 @@ SPDX-License-Identifier: Apache-2.0
     :width="width"
     :max-height="maxHeight"
   >
-    <template #caption>{{ caption }}</template>
-    <template #affectedObjectName>{{ shootName }}</template>
-    <template #message><slot/></template>
+    <template #caption>
+      {{ caption }}
+    </template>
+    <template #affectedObjectName>
+      {{ shootName }}
+    </template>
+    <template #message>
+      <slot />
+    </template>
     <template #errorMessage>
       <g-message
-        color="error"
         v-model:message="errorMessage"
         v-model:detailed-message="detailedErrorMessage"
+        color="error"
       />
     </template>
   </g-dialog>
@@ -38,6 +44,7 @@ export default {
     GDialog,
     GMessage,
   },
+  mixins: [shootItem],
   props: {
     caption: {
       type: String,
@@ -68,7 +75,6 @@ export default {
       default: '50vh',
     },
   },
-  mixins: [shootItem],
   data () {
     return {
       errorMessage: undefined,

@@ -9,9 +9,9 @@ SPDX-License-Identifier: Apache-2.0
     location="top"
     :disabled="noTooltip"
   >
-    <template #activator="{ props }">
+    <template #activator="{ props: activatorProps }">
       <span
-        v-bind="props"
+        v-bind="activatorProps"
         :class="contentClass"
       >{{ relDateTimeString }}</span>
     </template>

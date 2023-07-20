@@ -6,17 +6,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
-    :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    :shoot-item="shootItem"
     caption="Configure Add-ons"
     width="900"
     max-height="60vh"
-    >
+    @dialog-opened="onConfigurationDialogOpened"
+  >
     <template #actionComponent>
       <g-manage-shoot-addons
         ref="addons"
-       ></g-manage-shoot-addons>
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -36,8 +36,8 @@ export default defineComponent({
     GActionButtonDialog,
     GManageShootAddons,
   },
-  inject: ['api'],
   mixins: [shootItem],
+  inject: ['api'],
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()

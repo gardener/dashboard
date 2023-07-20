@@ -6,21 +6,31 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list-item :class="contentClass">
-    <template v-if="icon" v-slot:prepend>
-      <v-icon :icon="icon" color="primary"/>
+    <template
+      v-if="icon"
+      #prepend
+    >
+      <v-icon
+        :icon="icon"
+        color="primary"
+      />
     </template>
     <g-list-item-content
       :label="appTitle"
     >
-      <v-tooltip v-if="isShootStatusHibernated"
+      <v-tooltip
+        v-if="isShootStatusHibernated"
         location="top"
       >
-        <template v-slot:activator="{ props }">
-          <span v-bind="props">{{urlText}}</span>
+        <template #activator="{ props }">
+          <span v-bind="props">{{ urlText }}</span>
         </template>
-        {{appTitle}} is not running for hibernated clusters
+        {{ appTitle }} is not running for hibernated clusters
       </v-tooltip>
-      <g-external-link v-else :url="url"/>
+      <g-external-link
+        v-else
+        :url="url"
+      />
     </g-list-item-content>
   </g-list-item>
 </template>

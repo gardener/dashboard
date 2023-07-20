@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex align-center justify-start flex-nowrap fill-height auto-hide-wrapper">
     <div class="auto-hide-slot">
-      <slot v-if="left"></slot>
+      <slot v-if="left" />
     </div>
-    <slot name="activator"></slot>
+    <slot name="activator" />
     <div class="auto-hide-slot">
-      <slot v-if="right"></slot>
+      <slot v-if="right" />
     </div>
   </div>
 </template>

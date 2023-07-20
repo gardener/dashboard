@@ -7,19 +7,31 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <span v-if="title">{{ titleText }}</span>
   <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
-  <v-tooltip v-else location="top" color="rgba(0, 0, 0, 1)" content-class="tooltip">
+  <v-tooltip
+    v-else
+    location="top"
+  >
     <template #activator="{ props }">
-      <div class="d-flex align-center" v-bind="props">
-        <g-vendor-icon :icon="cloudProviderKind" class="mr-2"/>
+      <div
+        class="d-flex align-center"
+        v-bind="props"
+      >
+        <g-vendor-icon
+          :icon="cloudProviderKind"
+          class="mr-2"
+        />
         {{ description }}
       </div>
     </template>
-    <v-card>
+    <v-card elevation="12">
       <v-list>
         <v-list-item>
           <v-list-item-subtitle>Provider</v-list-item-subtitle>
           <v-list-item-title class="d-flex">
-            <g-vendor-icon :icon="cloudProviderKind" class="mr-2"/>
+            <g-vendor-icon
+              :icon="cloudProviderKind"
+              class="mr-2"
+            />
             {{ cloudProviderKind }}
           </v-list-item-title>
         </v-list-item>
@@ -32,8 +44,8 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title>{{ region }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="zones.length">
-          <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
-          <v-list-item-title>{{zoneText}}</v-list-item-title>
+          <v-list-item-subtitle>{{ zoneTitle }}</v-list-item-subtitle>
+          <v-list-item-title>{{ zoneText }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card>
@@ -120,7 +132,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  .tooltip {
+  :deep(.v-overlay__content) {
     opacity: 1 !important;
     padding: 0;
   }

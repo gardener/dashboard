@@ -8,9 +8,15 @@ SPDX-License-Identifier: Apache-2.0
   <v-card>
     <v-card-title class="text-subtitle-1 mt-4 ticket-toolbar bg-toolbar-background text-toolbar-title">
       <div class="d-flex flex-wrap align-center">
-        <div class="ticket-title mr-2">Ticket {{ticketTitle}}</div>
-        <div v-if="labels.length" class="labels">
-          <g-ticket-label v-for="label in labels"
+        <div class="ticket-title mr-2">
+          Ticket {{ ticketTitle }}
+        </div>
+        <div
+          v-if="labels.length"
+          class="labels"
+        >
+          <g-ticket-label
+            v-for="label in labels"
             :key="label.id"
             :label="label"
           />
@@ -19,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card-title>
 
     <v-container>
-      <span class="font-weight-bold">{{login}}</span> created this
+      <span class="font-weight-bold">{{ login }}</span> created this
       <g-external-link :url="ticketHtmlUrl">
         ticket
       </g-external-link>
@@ -32,17 +38,30 @@ SPDX-License-Identifier: Apache-2.0
     <g-ticket-comment
       :comment="ticket"
     />
-    <g-ticket-comment v-for="comment in commentsForTicket"
+    <g-ticket-comment
+      v-for="comment in commentsForTicket"
       :key="comment.metadata.id"
       :comment="comment"
     />
     <v-card-actions v-if="!!gitHubRepoUrl">
-      <v-spacer></v-spacer>
-      <v-btn variant="text" color="primary" :href="sanitizeUrl(addCommentLink)" target="_blank" rel="noopener" title="Add Comment">
+      <v-spacer />
+      <v-btn
+        variant="text"
+        color="primary"
+        :href="sanitizeUrl(addCommentLink)"
+        target="_blank"
+        rel="noopener"
+        title="Add Comment"
+      >
         Add Comment
-        <v-icon color="anchor" class="link-icon pl-2">mdi-open-in-new</v-icon>
+        <v-icon
+          color="anchor"
+          class="link-icon pl-2"
+        >
+          mdi-open-in-new
+        </v-icon>
       </v-btn>
-      <v-spacer></v-spacer>
+      <v-spacer />
     </v-card-actions>
   </v-card>
 </template>

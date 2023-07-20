@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <component :is="component" v-bind="componentProperties"></component>
+  <component
+    :is="component"
+    v-bind="componentProperties"
+  />
 </template>
 
 <script>
@@ -22,6 +25,14 @@ export default {
   components: {
     GShootItemLoading,
     GShootItemError,
+  },
+  async beforeRouteLeave (to, from, next) {
+    try {
+      this.component = 'div'
+      await this.unsubscribe()
+    } finally {
+      next()
+    }
   },
   data () {
     return {
@@ -55,6 +66,30 @@ export default {
         }
       }
     },
+  },
+  watch: {
+    '$route' (value) {
+      this.load(value)
+    },
+  },
+  mounted () {
+    const shootStore = useShootStore()
+    this.unsubscribeShootStore = shootStore.$onAction(({
+      name,
+      args,
+      after,
+    }) => {
+      switch (name) {
+        case 'handleEvent': {
+          after(() => this.handleShootEvent(...args))
+          break
+        }
+      }
+    })
+    this.load(this.$route)
+  },
+  beforeUnmount () {
+    this.unsubscribeShootStore()
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -114,38 +149,6 @@ export default {
         this.component = 'g-shoot-item-error'
       }
     },
-  },
-  async beforeRouteLeave (to, from, next) {
-    try {
-      this.component = 'div'
-      await this.unsubscribe()
-    } finally {
-      next()
-    }
-  },
-  watch: {
-    '$route' (value) {
-      this.load(value)
-    },
-  },
-  mounted () {
-    const shootStore = useShootStore()
-    this.unsubscribeShootStore = shootStore.$onAction(({
-      name,
-      args,
-      after,
-    }) => {
-      switch (name) {
-        case 'handleEvent': {
-          after(() => this.handleShootEvent(...args))
-          break
-        }
-      }
-    })
-    this.load(this.$route)
-  },
-  beforeUnmount () {
-    this.unsubscribeShootStore()
   },
 }
 </script>

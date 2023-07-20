@@ -20,7 +20,9 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #text>
-      <div class="text-h6 text-grey-darken-1 mb-4">Gardenlogin</div>
+      <div class="text-h6 text-grey-darken-1 mb-4">
+        Gardenlogin
+      </div>
       <p>
         <span class="font-family-monospace">gardenlogin</span>
         is a kubectl credential plugin.
@@ -29,12 +31,16 @@ SPDX-License-Identifier: Apache-2.0
       </p>
       <p>
         If not already done
-        <g-external-link url="https://github.com/gardener/gardenlogin#installation">install</g-external-link>
+        <g-external-link url="https://github.com/gardener/gardenlogin#installation">
+          install
+        </g-external-link>
         <span class="font-family-monospace pl-1">gardenlogin</span> and
-        <g-external-link url="https://github.com/gardener/gardenlogin#configure-gardenlogin">configure</g-external-link>
+        <g-external-link url="https://github.com/gardener/gardenlogin#configure-gardenlogin">
+          configure
+        </g-external-link>
         it accordingly.
       </p>
-      <g-gardenctl-config-example/>
+      <g-gardenctl-config-example />
     </template>
   </g-popover>
 </template>

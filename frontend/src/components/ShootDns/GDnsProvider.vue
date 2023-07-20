@@ -16,27 +16,46 @@ SPDX-License-Identifier: Apache-2.0
         variant="outlined"
         class="cursor-pointer my-0 ml-0"
       >
-        <g-vendor-icon :icon="type" :size="20"/>
-        <span class="px-1">{{secretName}}</span>
-        <v-icon v-if="primary" icon="mdi-star" size="small"/>
+        <g-vendor-icon
+          :icon="type"
+          :size="20"
+        />
+        <span class="px-1">{{ secretName }}</span>
+        <v-icon
+          v-if="primary"
+          icon="mdi-star"
+          size="small"
+        />
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description, to}) in dnsProviderDescriptions" :key="title" class="px-0">
-        <v-list-item-subtitle class="pt-1">{{title}}</v-list-item-subtitle>
+      <v-list-item
+        v-for="({title, value, description, to}) in dnsProviderDescriptions"
+        :key="title"
+        class="px-0"
+      >
+        <v-list-item-subtitle class="pt-1">
+          {{ title }}
+        </v-list-item-subtitle>
         <v-list-item-title v-if="to">
           <router-link :to="to">
-            {{value}} {{description}}
+            {{ value }} {{ description }}
           </router-link>
         </v-list-item-title>
-        <v-list-item-title v-else>{{value}} {{description}}</v-list-item-title>
+        <v-list-item-title v-else>
+          {{ value }} {{ description }}
+        </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="secret" class="px-0">
+      <v-list-item
+        v-if="secret"
+        class="px-0"
+      >
         <g-secret-details-item-content
           class="pb-2"
           dns
           :secret="secret"
-          details-title />
+          details-title
+        />
       </v-list-item>
     </v-list>
   </g-popover>

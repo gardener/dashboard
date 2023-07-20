@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-select
       ref="secret"
+      v-model="secret"
       color="primary"
       item-color="primary"
       label="Secret"
@@ -16,28 +17,41 @@ SPDX-License-Identifier: Apache-2.0
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
-      v-model="secret"
       :error-messages="getErrorMessages('secret')"
-      @update:modelValue="v$.secret.$touch()"
-      @blur="v$.secret.$touch()"
       persistent-hint
       :hint="secretHint"
       variant="underlined"
-      >
+      @update:model-value="v$.secret.$touch()"
+      @blur="v$.secret.$touch()"
+    >
       <template #item="{ item, props }">
-        <v-list-item v-bind="props" :title="undefined" :subtitle="item.raw.description">
+        <v-list-item
+          v-bind="props"
+          :title="undefined"
+          :subtitle="item.raw.description"
+        >
           {{ get(item.raw, 'metadata.name') }}
-          <v-icon v-if="!isOwnSecret(item.raw)">mdi-share</v-icon>
+          <v-icon v-if="!isOwnSecret(item.raw)">
+            mdi-share
+          </v-icon>
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        {{get(item.raw, 'metadata.name')}}
-        <v-icon v-if="!isOwnSecret(item.raw)">mdi-share</v-icon>
+        {{ get(item.raw, 'metadata.name') }}
+        <v-icon v-if="!isOwnSecret(item.raw)">
+          mdi-share
+        </v-icon>
       </template>
       <template #append-item>
-        <v-divider class="mb-2"></v-divider>
-        <v-btn text @click="openSecretDialog" class="mx-2 text-primary">
-          <v-icon class="mr-2">mdi-plus</v-icon>
+        <v-divider class="mb-2" />
+        <v-btn
+          text
+          class="mx-2 text-primary"
+          @click="openSecretDialog"
+        >
+          <v-icon class="mr-2">
+            mdi-plus
+          </v-icon>
           Add new Secret
         </v-btn>
       </template>
@@ -45,13 +59,11 @@ SPDX-License-Identifier: Apache-2.0
     <g-secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"
       @dialog-closed="onSecretDialogClosed"
-    ></g-secret-dialog-wrapper>
+    />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
 import isEqual from 'lodash/isEqual'
@@ -73,12 +85,7 @@ import {
   useProjectStore,
 } from '@/store'
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialogWrapper,
   },
@@ -105,6 +112,11 @@ export default defineComponent({
     'update:valid',
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       secretItemsBeforeAdd: undefined,
@@ -199,6 +211,18 @@ export default defineComponent({
       return selfTerminationDaysForSecret(this.secret)
     },
   },
+  watch: {
+    modelValue () {
+      this.v$.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
+    },
+    'v$.secret.$invalid' (value) {
+      this.secretValid = !value
+    },
+  },
+  mounted () {
+    this.v$.secret.$touch()
+    this.secretValid = !this.v$.secret.$invalid
+  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
@@ -227,17 +251,5 @@ export default defineComponent({
       }
     },
   },
-  mounted () {
-    this.v$.secret.$touch()
-    this.secretValid = !this.v$.secret.$invalid
-  },
-  watch: {
-    modelValue () {
-      this.v$.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
-    },
-    'v$.secret.$invalid' (value) {
-      this.secretValid = !value
-    },
-  },
-})
+}
 </script>

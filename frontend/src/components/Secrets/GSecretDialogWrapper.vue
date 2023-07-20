@@ -5,11 +5,15 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <component v-if="visibleDialog" :is="componentName" v-model="visibleDialogState" v-bind="{ secret: selectedSecret, vendor: visibleDialog  }"></component>
+  <component
+    :is="componentName"
+    v-if="visibleDialog"
+    v-model="visibleDialogState"
+    v-bind="{ secret: selectedSecret, vendor: visibleDialog }"
+  />
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GcpDialog from '@/components/Secrets/GSecretDialogGcp'
 import AwsDialog from '@/components/Secrets/GSecretDialogAws'
 import AzureDialog from '@/components/Secrets/GSecretDialogAzure'
@@ -44,13 +48,8 @@ const components = {
   DeleteDialog,
 }
 
-export default defineComponent({
+export default {
   components,
-  data () {
-    return {
-      visibleDialogState: false,
-    }
-  },
   props: {
     selectedSecret: {
       type: Object,
@@ -64,6 +63,11 @@ export default defineComponent({
   emits: [
     'dialog-closed',
   ],
+  data () {
+    return {
+      visibleDialogState: false,
+    }
+  },
   computed: {
     componentName () {
       switch (this.visibleDialog) {
@@ -93,5 +97,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

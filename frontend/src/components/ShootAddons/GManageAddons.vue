@@ -6,17 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <v-row v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+    <v-row
+      v-for="addonDefinition in addonDefinitionList"
+      :key="addonDefinition.name"
+    >
       <div class="d-flex ma-3">
         <div class="action-select">
           <v-checkbox
-            color="primary"
             v-model="addons[addonDefinition.name].enabled"
+            color="primary"
             :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
             density="compact"
-          ></v-checkbox>
+          />
         </div>
-        <div class="d-flex flex-column" :class="textClass(addonDefinition)">
+        <div
+          class="d-flex flex-column"
+          :class="textClass(addonDefinition)"
+        >
           <div class="wrap-text text-subtitle-2">
             {{ addonDefinition.title }}
           </div>

@@ -5,24 +5,54 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="gitHubRepoUrl" class="mb-4">
+  <div
+    v-if="gitHubRepoUrl"
+    class="mb-4"
+  >
     <template v-if="tickets.length">
-      <v-card v-for="ticket in tickets" :key="ticket.metadata.issueNumber">
-        <g-ticket :ticket="ticket"></g-ticket>
+      <v-card
+        v-for="ticket in tickets"
+        :key="ticket.metadata.issueNumber"
+      >
+        <g-ticket :ticket="ticket" />
       </v-card>
       <div class="d-flex align-center justify-center mt-4">
-        <v-btn text color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
+        <v-btn
+          text
+          color="primary"
+          :href="sanitizeUrl(createTicketLink)"
+          target="_blank"
+          rel="noopener"
+          title="Create Ticket"
+        >
           <span class="pr-2">Create Ticket</span>
-          <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
+          <v-icon
+            color="primary"
+            class="link-icon"
+          >
+            mdi-open-in-new
+          </v-icon>
         </v-btn>
       </div>
     </template>
     <v-card v-else>
       <g-toolbar title="Ticket" />
       <div class="d-flex justify-center pa-3">
-        <v-btn variant="text" color="primary" :href="sanitizeUrl(createTicketLink)" target="_blank" rel="noopener" title="Create Ticket">
+        <v-btn
+          variant="text"
+          color="primary"
+          :href="sanitizeUrl(createTicketLink)"
+          target="_blank"
+          rel="noopener"
+          title="Create Ticket"
+        >
           <span class="pr-2">Create Ticket</span>
-          <v-icon color="primary" class="link-icon">mdi-open-in-new</v-icon>
+          <v-icon
+            color="primary"
+            class="link-icon"
+          >
+            mdi-open-in-new
+          </v-icon>
         </v-btn>
       </div>
     </v-card>
@@ -47,8 +77,8 @@ export default {
   components: {
     GTicket,
   },
-  inject: ['sanitizeUrl'],
   mixins: [shootItem],
+  inject: ['sanitizeUrl'],
   computed: {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',

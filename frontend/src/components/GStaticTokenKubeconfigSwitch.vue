@@ -14,7 +14,12 @@ SPDX-License-Identifier: Apache-2.0
     />
     <div class="text-caption mt-1">
       There are more
-      <g-external-link class="text-caption" url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md">secure alternatives</g-external-link>
+      <g-external-link
+        class="text-caption"
+        url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md"
+      >
+        secure alternatives
+      </g-external-link>
       to access the Shoot cluster.
     </div>
   </div>

@@ -5,13 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top" v-if="projectDetails.staleSinceTimestamp">
-    <template #activator="{ props }">
-      <v-icon v-bind="props" :size="size" :color="color" :icon="icon"  class="ml-1" />
+  <v-tooltip
+    v-if="projectDetails.staleSinceTimestamp"
+    location="top"
+  >
+    <template #activator="{ props: activatorProps }">
+      <v-icon
+        v-bind="activatorProps"
+        :size="size"
+        :color="color"
+        :icon="icon"
+        class="ml-1"
+      />
     </template>
     <span v-if="projectDetails.staleAutoDeleteTimestamp">
       This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project
-      <g-time-string :date-time="projectDetails.staleAutoDeleteTimestamp"
+      <g-time-string
+        :date-time="projectDetails.staleAutoDeleteTimestamp"
         mode="future"
         no-tooltip
         content-class="font-weight-bold"

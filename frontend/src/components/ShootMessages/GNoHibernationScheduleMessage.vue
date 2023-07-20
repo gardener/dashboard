@@ -6,10 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
+    To reduce expenses, this <span class="font-weight-bold">{{ purposeText }}</span> cluster should have a hibernation schedule.
     <template v-if="showNavigationLink">
       Please navigate to the cluster details page to
-      <router-link :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, namespace: shootNamespace } }">configure</router-link>
+      <router-link :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, namespace: shootNamespace } }">
+        configure
+      </router-link>
       a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
     </template>
   </div>

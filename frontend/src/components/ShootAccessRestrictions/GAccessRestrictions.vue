@@ -5,57 +5,81 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="definitions" class="alternate-row-background">
-    <v-row v-for="(definition) in definitions" :key="definition.key" class="my-0">
-      <div v-if="definition" class="d-flex ma-3">
+  <div
+    v-if="definitions"
+    class="alternate-row-background"
+  >
+    <v-row
+      v-for="(definition) in definitions"
+      :key="definition.key"
+      class="my-0"
+    >
+      <div
+        v-if="definition"
+        class="d-flex ma-3"
+      >
         <div class="action-select">
           <v-switch
             v-model="accessRestrictions[definition.key].value"
             color="primary"
             inset
             density="compact"
-          ></v-switch>
+          />
         </div>
         <div>
-          <span class="wrap-text text-subtitle-2">{{definition.input.title}}</span>
-          <span v-if="definition.input.description"
+          <span class="wrap-text text-subtitle-2">{{ definition.input.title }}</span>
+          <!-- eslint-disable vue/no-v-html -->
+          <span
+            v-if="definition.input.description"
             class="wrap-text pt-1 text-body-2"
             v-html="transformHtml(definition.input.description)"
           />
+          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
       <template v-if="definition">
-        <div v-for="optionValue in definition.options" :key="optionValue.key" class="d-flex ma-3">
+        <div
+          v-for="optionValue in definition.options"
+          :key="optionValue.key"
+          class="d-flex ma-3"
+        >
           <div class="action-select">
             <v-checkbox
               v-model="accessRestrictions[definition.key].options[optionValue.key].value"
               :disabled="!enabled(definition)"
               color="primary"
               density="compact"
-            ></v-checkbox>
+            />
           </div>
           <div>
-            <span class="wrap-text text-subtitle-2" :class="textClass(definition)">
+            <span
+              class="wrap-text text-subtitle-2"
+              :class="textClass(definition)"
+            >
               {{ optionValue.input.title }}
             </span>
-            <span v-if="optionValue.input.description"
+            <!-- eslint-disable vue/no-v-html -->
+            <span
+              v-if="optionValue.input.description"
               class="wrap-text pt-1 text-body-2"
               :class="textClass(definition)"
               v-html="transformHtml(optionValue.input.description)"
             />
+            <!-- eslint-enable vue/no-v-html -->
           </div>
         </div>
       </template>
     </v-row>
   </div>
-  <div v-else class="pt-4">
-    {{noItemsText}}
+  <div
+    v-else
+    class="pt-4"
+  >
+    {{ noItemsText }}
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapActions } from 'pinia'
 import cloneDeep from 'lodash/cloneDeep'
 import isEmpty from 'lodash/isEmpty'
@@ -68,7 +92,7 @@ import {
 
 import { transformHtml } from '@/utils'
 
-export default defineComponent({
+export default {
   props: {
     userInterActionBus: {
       type: Object,
@@ -89,6 +113,16 @@ export default defineComponent({
     noItemsText () {
       return this.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+  },
+  mounted () {
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName, region: this.region })
+      })
+      this.userInterActionBus.on('updateRegion', region => {
+        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName: this.cloudProfileName, region })
+      })
+    }
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
@@ -153,18 +187,7 @@ export default defineComponent({
       return shootResource
     },
   },
-  mounted () {
-    if (this.userInterActionBus) {
-      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
-        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName, region: this.region })
-      })
-      this.userInterActionBus.on('updateRegion', region => {
-        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName: this.cloudProfileName, region })
-      })
-    }
-  },
-})
-
+}
 </script>
 
 <style lang="scss" scoped>

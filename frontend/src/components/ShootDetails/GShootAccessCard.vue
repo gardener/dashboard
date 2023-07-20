@@ -7,33 +7,45 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-list key="accessCardList">
     <g-list-item v-if="!isAnyTileVisible">
-      <template v-slot:prepend>
-        <v-icon color="primary" icon="mdi-alert-circle-outline"/>
+      <template #prepend>
+        <v-icon
+          color="primary"
+          icon="mdi-alert-circle-outline"
+        />
       </template>
       <g-list-item-content>
         Access information currently not available
       </g-list-item-content>
     </g-list-item>
 
-    <g-terminal-list-tile v-if="isTerminalTileVisible"
-      :shoot-item=shootItem
+    <g-terminal-list-tile
+      v-if="isTerminalTileVisible"
+      :shoot-item="shootItem"
       target="shoot"
       :description="shootTerminalDescription"
       :button-description="shootTerminalButtonDescription"
       :disabled="shootTerminalButtonDisabled"
     />
 
-    <v-divider v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider
+      v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      inset
+    />
 
-    <g-terminal-shortcuts-tile v-if="isTerminalShortcutsTileVisible"
+    <g-terminal-shortcuts-tile
+      v-if="isTerminalShortcutsTileVisible"
       :shoot-item="shootItem"
       popper-boundaries-selector="#accessCardList"
       @add-terminal-shortcut="onAddTerminalShortcut"
     />
 
-    <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider
+      v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      inset
+    />
 
-    <g-link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth"
+    <g-link-list-tile
+      v-if="isDashboardTileVisible && !hasDashboardTokenAuth"
       icon="mdi-developer-board"
       app-title="Dashboard"
       :url="dashboardUrl"
@@ -43,11 +55,14 @@ SPDX-License-Identifier: Apache-2.0
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <g-list-item>
-        <template v-slot:prepend>
-          <v-icon color="primary" icon="mdi-developer-board"/>
+        <template #prepend>
+          <v-icon
+            color="primary"
+            icon="mdi-developer-board"
+          />
         </template>
         <g-list-item-content>
-          <template v-slot:label>
+          <template #label>
             Dashboard
             <div class="text-caption wrap-text py-2">
               Access Dashboard using the kubectl command-line tool by running the following command:
@@ -55,29 +70,34 @@ SPDX-License-Identifier: Apache-2.0
               Kubectl will make Dashboard available at:
             </div>
           </template>
-          <v-tooltip v-if="isShootStatusHibernated"
+          <v-tooltip
+            v-if="isShootStatusHibernated"
             location="top"
           >
-            <template v-slot:activator="{ props }">
-              <span v-bind="props" class="text-grey">{{dashboardUrlText}}</span>
+            <template #activator="{ props }">
+              <span
+                v-bind="props"
+                class="text-grey"
+              >{{ dashboardUrlText }}</span>
             </template>
             Dashboard is not running for hibernated clusters
           </v-tooltip>
-          <a v-else
+          <a
+            v-else
             :href="dashboardUrl"
             target="_blank"
             rel="noopener"
           >
-            {{dashboardUrlText}}
+            {{ dashboardUrlText }}
           </a>
         </g-list-item-content>
       </g-list-item>
       <g-list-item v-if="token">
         <g-list-item-content label="Token">
-          <pre class="scroll">{{tokenText}}</pre>
+          <pre class="scroll">{{ tokenText }}</pre>
         </g-list-item-content>
-        <template v-slot:append>
-          <g-copy-btn :clipboard-text="token"/>
+        <template #append>
+          <g-copy-btn :clipboard-text="token" />
           <g-action-button
             :icon="visibilityIcon"
             :tooltip="tokenVisibilityTitle"
@@ -87,14 +107,21 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider
+      v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      inset
+    />
 
-    <g-username-password v-if="isCredentialsTileVisible"
+    <g-username-password
+      v-if="isCredentialsTileVisible"
       :username="username"
       :password="password"
     />
 
-    <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider
+      v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)"
+      inset
+    />
 
     <template v-if="isKubeconfigTileVisible">
       <g-shoot-kubeconfig
@@ -109,16 +136,19 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
 
-    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+    <v-divider
+      v-if="isKubeconfigTileVisible && isGardenctlTileVisible"
+      inset
+    />
 
-    <g-gardenctl-commands v-if="isGardenctlTileVisible"
+    <g-gardenctl-commands
+      v-if="isGardenctlTileVisible"
       :shoot-item="shootItem"
     />
   </g-list>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthnStore, useAuthzStore, useTerminalStore } from '@/store'
@@ -141,7 +171,7 @@ import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 
-export default defineComponent({
+export default {
   components: {
     GList,
     GListItem,
@@ -155,18 +185,21 @@ export default defineComponent({
     GGardenctlCommands,
     GTerminalShortcutsTile,
   },
+  mixins: [shootItem],
   props: {
     hideTerminalShortcuts: {
       type: Boolean,
       default: false,
     },
   },
+  emits: [
+    'addTerminalShortcut',
+  ],
   data () {
     return {
       showToken: false,
     }
   },
-  mixins: [shootItem],
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
@@ -264,13 +297,12 @@ export default defineComponent({
       return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
     },
   },
-  emits: ['addTerminalShortcut'],
   methods: {
     onAddTerminalShortcut (shortcut) {
       this.$emit('addTerminalShortcut', shortcut)
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

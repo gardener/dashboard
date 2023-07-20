@@ -9,7 +9,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-card class="mt-2">
       <v-card-text>
         <h3>Let's get started</h3>
-        <v-tooltip location="top" :disabled="canCreateProject">
+        <v-tooltip
+          location="top"
+          :disabled="canCreateProject"
+        >
           <template #activator="{ props }">
             <div v-bind="props">
               <v-btn
@@ -19,15 +22,14 @@ SPDX-License-Identifier: Apache-2.0
                 @click.stop="projectDialog = true"
               >
                 <v-icon>mdi-plus</v-icon>
-                <span class="ml-2">{{createProjectBtnText}}</span>
+                <span class="ml-2">{{ createProjectBtnText }}</span>
               </v-btn>
             </div>
           </template>
           <span>You are not authorized to create projects</span>
         </v-tooltip>
       </v-card-text>
-      <g-project-dialog v-model="projectDialog">
-      </g-project-dialog>
+      <g-project-dialog v-model="projectDialog" />
     </v-card>
   </v-container>
 </template>

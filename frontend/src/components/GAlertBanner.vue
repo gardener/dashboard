@@ -6,14 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-alert
+    v-model="alertVisible"
     class="alertBanner"
     :type="type"
-    v-model="alertVisible"
     :color="color"
     closable
   >
     <slot name="message">
-      <div class="alert-banner-message" v-html="messageHtml"/>
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        class="alert-banner-message"
+        v-html="messageHtml"
+      />
+      <!-- eslint-enable vue/no-v-html -->
     </slot>
   </v-alert>
 </template>

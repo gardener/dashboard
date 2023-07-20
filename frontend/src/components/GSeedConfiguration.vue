@@ -6,22 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
-    :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    :shoot-item="shootItem"
     width="450"
     caption="Configure Seed"
-    confirm-required>
-    <template v-slot:actionComponent>
+    confirm-required
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #actionComponent>
       <v-select
+        v-model="seedName"
         hint="Change seed cluster for this shoot's control plane"
         color="primary"
         item-color="primary"
         label="Seed Cluster"
         :items="seedNames"
-        v-model="seedName"
-        persistent-hint>
-      </v-select>
+        persistent-hint
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -43,14 +44,14 @@ import {
 } from '@/store'
 
 export default {
-  name: 'seed-configuration',
+  name: 'SeedConfiguration',
   components: {
     GActionButtonDialog,
   },
-  inject: ['api'],
   mixins: [
     shootItem,
   ],
+  inject: ['api'],
   data () {
     return {
       seedName: undefined,

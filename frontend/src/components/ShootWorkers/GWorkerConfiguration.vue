@@ -7,19 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     :key="componentKey"
+    ref="actionDialog"
     :shoot-item="shootItem"
     :valid="workersValid"
-    @dialog-opened="onConfigurationDialogOpened"
-    ref="actionDialog"
     width="1250"
     confirm-required
     caption="Configure Workers"
     disable-confirm-input-focus
-    max-height="80vh">
+    max-height="80vh"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
     <template #top>
       <v-tabs
-        color="primary"
         v-model="tab"
+        color="primary"
       >
         <v-tab
           key="overview"
@@ -37,24 +38,26 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #card>
       <v-window v-model="tab">
-        <v-window-item value="overview" ref="overviewTab">
+        <v-window-item
+          ref="overviewTab"
+          value="overview"
+        >
           <g-manage-workers
-            @valid="onWorkersValid"
-            @additionalZonesNetworkConfiguration="setNetworkConfiguration"
-            :disableWorkerAnimation="disableWorkerAnimation"
             ref="manageWorkersRef"
-          ></g-manage-workers>
+            :disable-worker-animation="disableWorkerAnimation"
+            @valid="onWorkersValid"
+            @additional-zones-network-configuration="setNetworkConfiguration"
+          />
         </v-window-item>
         <v-window-item value="yaml">
           <div :style="{ 'min-height': `${overviewTabHeight}px` }">
             <g-shoot-editor
-              :shoot-item="editorData"
-              :completionPaths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
               ref="workerEditorRef"
+              :shoot-item="editorData"
+              :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
               hide-toolbar
               animate-on-appear
-            >
-            </g-shoot-editor>
+            />
           </div>
         </v-window-item>
       </v-window>
@@ -62,21 +65,30 @@ SPDX-License-Identifier: Apache-2.0
     <template #additionalMessage>
       <v-expand-transition>
         <v-alert
+          v-if="networkConfiguration.length"
           type="warning"
           variant="outlined"
           tile
           prominent
-          v-if="networkConfiguration.length"
           closable
-          @input="setNetworkConfiguration(undefined)">
+          @input="setNetworkConfiguration(undefined)"
+        >
           <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
           <g-code-block
             lang="yaml"
             :content="networkConfigurationYaml"
             :show-copy-button="false"
-            ></g-code-block>
-          <div class="font-weight-bold">This change cannot be undone.</div>
-          <div>You can verify and modify the network configuration on the <a href="#" @click="tab='yaml'" class="text-anchor">yaml</a> tab.</div>
+          />
+          <div class="font-weight-bold">
+            This change cannot be undone.
+          </div>
+          <div>
+            You can verify and modify the network configuration on the <a
+              href="#"
+              class="text-anchor"
+              @click="tab='yaml'"
+            >yaml</a> tab.
+          </div>
         </v-alert>
       </v-expand-transition>
     </template>
@@ -84,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import shootItem from '@/mixins/shootItem'
@@ -95,20 +107,24 @@ import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
-export default defineComponent({
-  setup () {
-    return {
-      ...useAsyncRef('manageWorkers'),
-      ...useAsyncRef('workerEditor'),
-    }
-  },
+export default {
+
   components: {
     GActionButtonDialog,
     GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
     GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GCodeBlock,
   },
+  mixins: [
+    shootItem,
+  ],
   inject: ['api', 'yaml'],
+  setup () {
+    return {
+      ...useAsyncRef('manageWorkers'),
+      ...useAsyncRef('workerEditor'),
+    }
+  },
   data () {
     return {
       workersValid: false,
@@ -122,9 +138,6 @@ export default defineComponent({
       disableWorkerAnimation: false,
     }
   },
-  mixins: [
-    shootItem,
-  ],
   computed: {
     tab: {
       get () {
@@ -251,5 +264,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

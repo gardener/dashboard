@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-select
+      v-model="internalPurpose"
       hint="Indicate the importance of the cluster"
       color="primary"
       item-color="primary"
@@ -14,15 +15,17 @@ SPDX-License-Identifier: Apache-2.0
       :items="purposes"
       item-title="purpose"
       item-value="purpose"
-      v-model="internalPurpose"
       persistent-hint
       :error-messages="getErrorMessages('internalPurpose')"
-      @update:modelValue="onInputPurpose"
-      @blur="v$.internalPurpose.$touch()"
       variant="underlined"
-      >
+      @update:model-value="onInputPurpose"
+      @blur="v$.internalPurpose.$touch()"
+    >
       <template #item="{ item, props }">
-        <v-list-item v-bind="props" :subtitle="item.raw.description" />
+        <v-list-item
+          v-bind="props"
+          :subtitle="item.raw.description"
+        />
       </template>
     </v-select>
   </div>
@@ -41,11 +44,6 @@ const validationErrors = {
 }
 
 export default {
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   props: {
     secret: {
       type: Object,
@@ -55,6 +53,11 @@ export default {
     'valid',
     'update-purpose',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       validationErrors,

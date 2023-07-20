@@ -6,12 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list-item>
-    <template v-if="!hideIconSlot" #prepend>
-      <slot name="icon"/>
+    <template
+      v-if="!hideIconSlot"
+      #prepend
+    >
+      <slot name="icon" />
     </template>
     <g-list-item-content>
-      {{shortcut.title}}
-      <v-tooltip v-if="isUnverified" location="top" max-width="400px">
+      {{ shortcut.title }}
+      <v-tooltip
+        v-if="isUnverified"
+        location="top"
+        max-width="400px"
+      >
         <template #activator="{ props }">
           <v-chip
             v-bind="props"
@@ -25,12 +32,18 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious
       </v-tooltip>
-      <template v-if="shortcut.description" #description>
+      <template
+        v-if="shortcut.description"
+        #description
+      >
         {{ shortcut.description }}
       </template>
     </g-list-item-content>
-    <v-spacer/>
-    <template v-if="!readOnly" #append>
+    <v-spacer />
+    <template
+      v-if="!readOnly"
+      #append
+    >
       <g-action-button
         icon="mdi-console-line"
         :disabled="disabled"
@@ -55,7 +68,8 @@ SPDX-License-Identifier: Apache-2.0
     </template>
   </g-list-item>
   <v-expand-transition>
-    <v-card v-if="expansionPanel"
+    <v-card
+      v-if="expansionPanel"
       flat
     >
       <g-code-block
@@ -68,7 +82,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthnStore, useAuthzStore } from '@/store'
@@ -83,7 +96,7 @@ import { TargetEnum, targetText } from '@/utils'
 import get from 'lodash/get'
 import join from 'lodash/join'
 
-export default defineComponent({
+export default {
   components: {
     GActionButton,
     GCodeBlock,
@@ -107,6 +120,9 @@ export default defineComponent({
       default: false,
     },
   },
+  emits: [
+    'addTerminalShortcut',
+  ],
   data () {
     return {
       expansionPanel: false,
@@ -155,9 +171,14 @@ export default defineComponent({
       return !!this.shortcut.unverified
     },
   },
-  emits: [
-    'addTerminalShortcut',
-  ],
+  watch: {
+    async shortcut (value) {
+      this.updateShortcutYaml(this.shortcut)
+    },
+  },
+  created () {
+    this.updateShortcutYaml(this.shortcut)
+  },
   methods: {
     addTerminalShortcut (shortcut) {
       this.$emit('addTerminalShortcut', shortcut)
@@ -173,13 +194,5 @@ export default defineComponent({
       }
     },
   },
-  created () {
-    this.updateShortcutYaml(this.shortcut)
-  },
-  watch: {
-    async shortcut (value) {
-      this.updateShortcutYaml(this.shortcut)
-    },
-  },
-})
+}
 </script>

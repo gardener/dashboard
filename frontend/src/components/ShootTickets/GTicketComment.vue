@@ -7,12 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex my-2 mx-4">
     <div class="mr-2">
-      <v-avatar v-if="avatarUrl"
+      <v-avatar
+        v-if="avatarUrl"
         size="40px"
       >
-        <v-img :src="avatarUrl" :title="login" :alt="`avatar of github user ${login}`" />
+        <v-img
+          :src="avatarUrl"
+          :title="login"
+          :alt="`avatar of github user ${login}`"
+        />
       </v-avatar>
-      <v-icon v-else icon="mdi-comment-outline" color="primary"/>
+      <v-icon
+        v-else
+        icon="mdi-comment-outline"
+        color="primary"
+      />
     </div>
     <div class="comment d-flex flex-column flex-grow-1">
       <div class="comment-header bg-toolbar-background text-toolbar-title">
@@ -20,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           :url="htmlUrl"
           class="inherit-color text-toolbar-title"
         >
-          <span class="font-weight-bold text-toolbar-title">{{login}}</span> commented
+          <span class="font-weight-bold text-toolbar-title">{{ login }}</span> commented
           <g-time-string
             :date-time="createdAt"
             mode="past"
@@ -28,7 +37,12 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-external-link>
       </div>
-      <div class="wrap-text comment-body" v-html="commentHtml"/>
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        class="wrap-text comment-body"
+        v-html="commentHtml"
+      />
+      <!-- eslint-enable vue/no-v-html -->
     </div>
   </div>
 </template>
@@ -158,9 +172,6 @@ export default defineComponent({
       max-width: 100%;
     }
 
-    /*  TODO: this was "::v-deep > h1" before. Check if the new version below, after compile, is actually equivalent.
-     *  Also check this for h2 - h6 below
-     */
     :deep(> h1) {
       font-size: 21px;
       font-weight: 600;

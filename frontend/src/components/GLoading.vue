@@ -8,7 +8,10 @@ SPDX-License-Identifier: Apache-2.0
     :model-value="loading"
     class="align-center justify-center"
   >
-    <v-progress-circular indeterminate size="64" />
+    <v-progress-circular
+      indeterminate
+      size="64"
+    />
   </v-overlay>
 </template>
 

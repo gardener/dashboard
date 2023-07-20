@@ -14,9 +14,12 @@ SPDX-License-Identifier: Apache-2.0
         style="overflow: auto; height: 100%"
         :shoot-item="shootItem"
         @add-terminal-shortcut="onAddTerminalShortcut"
-      ></g-shoot-details>
+      />
 
-      <g-positional-dropzone positional-dropzone :uuid="item.uuid"></g-positional-dropzone>
+      <g-positional-dropzone
+        positional-dropzone
+        :uuid="item.uuid"
+      />
     </template>
   </g-terminal-splitpanes>
 </template>
@@ -35,7 +38,7 @@ import { PositionEnum } from '@/lib/g-symbol-tree'
 import { useShootStore } from '@/store'
 
 export default {
-  name: 'shoot-item',
+  name: 'ShootItem',
   components: {
     GShootDetails,
     GTerminalSplitpanes,
@@ -52,6 +55,10 @@ export default {
       return this.shootByNamespaceAndName(this.$route.params) || {}
     },
   },
+  mounted () {
+    const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
+    this.$refs.terminalSplitpanes.load(addItemFn)
+  },
   methods: {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
@@ -59,10 +66,6 @@ export default {
     onAddTerminalShortcut (shortcut) {
       this.$refs.terminalSplitpanes.addShortcut({ position: PositionEnum.BOTTOM, shortcut })
     },
-  },
-  mounted () {
-    const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
-    this.$refs.terminalSplitpanes.load(addItemFn)
   },
 }
 </script>

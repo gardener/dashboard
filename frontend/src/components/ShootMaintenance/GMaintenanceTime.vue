@@ -1,4 +1,3 @@
-
 import { defineComponent } from 'vue'
 <!--
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
@@ -10,35 +9,33 @@ SPDX-License-Identifier: Apache-2.0
   <v-row class="my-0">
     <v-col class="regularInput">
       <v-text-field
+        v-model="maintenanceBegin"
         color="primary"
         label="Maintenance Start Time"
-        v-model="maintenanceBegin"
         :error-messages="getErrorMessages('maintenanceBegin')"
-        @input="onInputmaintenanceBegin"
-        @blur="v$.maintenanceBegin.$touch()"
         type="time"
         variant="underlined"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
-      ></v-text-field>
+        @input="onInputmaintenanceBegin"
+        @blur="v$.maintenanceBegin.$touch()"
+      />
     </v-col>
     <v-col class="timezoneInput">
       <v-text-field
+        v-model="maintenanceTimezone"
         color="primary"
         label="Timezone"
-        v-model="maintenanceTimezone"
         :error-messages="getErrorMessages('maintenanceTimezone')"
+        variant="underlined"
         @input="onInputmaintenanceTimezone"
         @blur="v$.maintenanceTimezone.$touch()"
-        variant="underlined"
-      ></v-text-field>
+      />
     </v-col>
   </v-row>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
@@ -59,12 +56,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   props: {
     timeWindowBegin: {
       type: String,
@@ -73,10 +65,13 @@ export default defineComponent({
       type: String,
     },
   },
-  computed: {
-    ...mapState(useAppStore, [
-      'timezone',
-    ]),
+  emits: [
+    'valid',
+  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
   },
   validations: {
     maintenanceBegin: {
@@ -95,6 +90,23 @@ export default defineComponent({
       windowDuration: 60,
       valid: undefined,
     }
+  },
+  computed: {
+    ...mapState(useAppStore, [
+      'timezone',
+    ]),
+  },
+  watch: {
+    timeWindowBegin (windowBegin) {
+      this.setBeginTimeTimezoneString(windowBegin)
+      this.validateInput()
+    },
+    timeWindowEnd (windowEnd) {
+      this.setEndTimeTimezoneString(windowEnd)
+    },
+  },
+  mounted () {
+    this.reset()
   },
   methods: {
     getMaintenanceWindow () {
@@ -148,19 +160,7 @@ export default defineComponent({
       this.validateInput()
     },
   },
-  watch: {
-    timeWindowBegin (windowBegin) {
-      this.setBeginTimeTimezoneString(windowBegin)
-      this.validateInput()
-    },
-    timeWindowEnd (windowEnd) {
-      this.setEndTimeTimezoneString(windowEnd)
-    },
-  },
-  mounted () {
-    this.reset()
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

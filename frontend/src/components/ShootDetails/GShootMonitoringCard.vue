@@ -10,7 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     <g-list>
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">mdi-tractor</v-icon>
+          <v-icon color="primary">
+            mdi-tractor
+          </v-icon>
         </template>
         <g-list-item-content label="Status">
           <g-shoot-status
@@ -18,30 +20,41 @@ SPDX-License-Identifier: Apache-2.0
             :popper-key="`${shootNamespace}/${shootName}_lastOp`"
             popper-placement="bottom"
             show-status-text
-            >
-          </g-shoot-status>
+          />
         </g-list-item-content>
       </g-list-item>
-      <v-divider inset></v-divider>
+      <v-divider inset />
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">mdi-speedometer</v-icon>
+          <v-icon color="primary">
+            mdi-speedometer
+          </v-icon>
         </template>
         <g-list-item-content label="Readiness">
           <div class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <g-status-tags v-else :shoot-item="shootItem" popper-placement="bottom" show-status-text></g-status-tags>
+            <g-status-tags
+              v-else
+              :shoot-item="shootItem"
+              popper-placement="bottom"
+              show-status-text
+            />
           </div>
         </g-list-item-content>
       </g-list-item>
-      <v-divider inset></v-divider>
-      <g-cluster-metrics v-if="!metricsNotAvailableText" :shoot-item="shootItem"></g-cluster-metrics>
+      <v-divider inset />
+      <g-cluster-metrics
+        v-if="!metricsNotAvailableText"
+        :shoot-item="shootItem"
+      />
       <g-list-item v-else>
         <template #prepend>
-          <v-icon color="primary">mdi-alert-circle-outline</v-icon>
+          <v-icon color="primary">
+            mdi-alert-circle-outline
+          </v-icon>
         </template>
         <g-list-item-content>
-          {{metricsNotAvailableText}}
+          {{ metricsNotAvailableText }}
         </g-list-item-content>
       </g-list-item>
     </g-list>

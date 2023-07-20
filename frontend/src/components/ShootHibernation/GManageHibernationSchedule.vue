@@ -4,17 +4,15 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<!-- TODO: remove -->
-<!-- eslint-disable vue/no-unused-vars -->
 <template>
   <div>
     <div class="alternate-row-background">
       <g-expand-transition-group>
         <v-row
           v-for="(scheduleEvent, index) in parsedScheduleEvents"
-          class="list-item pt-2"
           :key="scheduleEvent.id"
-          >
+          class="list-item pt-2"
+        >
           <g-hibernation-schedule-event
             ref="scheduleEvents"
             :schedule-event="scheduleEvent"
@@ -23,23 +21,35 @@ SPDX-License-Identifier: Apache-2.0
             @update-hibernate-time="onUpdateHibernateTime"
             @update-selected-days="onUpdateSelectedDays"
             @update-location="onUpdateLocation"
-            @valid="onScheduleEventValid" />
+            @valid="onScheduleEventValid"
+          />
         </v-row>
       </g-expand-transition-group>
-      <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
+      <v-row
+        v-if="!parseError"
+        key="addSchedule"
+        class="list-item pt-2"
+      >
         <v-col>
           <v-btn
-            @click="addSchedule"
             variant="text"
             color="primary"
+            @click="addSchedule"
           >
-            <v-icon class="text-primary">mdi-plus</v-icon>
-             <span class="ml-2">Add Hibernation Schedule</span>
+            <v-icon class="text-primary">
+              mdi-plus
+            </v-icon>
+            <span class="ml-2">Add Hibernation Schedule</span>
           </v-btn>
         </v-col>
       </v-row>
     </div>
-    <v-row v-show="showNoScheduleCheckbox" key="noSchedule" align="center" class="list-item pt-6">
+    <v-row
+      v-show="showNoScheduleCheckbox"
+      key="noSchedule"
+      align="center"
+      class="list-item pt-6"
+    >
       <v-col>
         <v-checkbox
           v-model="confirmNoSchedule"
@@ -47,28 +57,36 @@ SPDX-License-Identifier: Apache-2.0
           class="my-0"
           :label="noScheduleCheckboxLabel"
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
-          persistent-hint>
-        </v-checkbox>
+          persistent-hint
+        />
       </v-col>
     </v-row>
-    <v-row v-if="parseError" class="pt-2">
+    <v-row
+      v-if="parseError"
+      class="pt-2"
+    >
       <v-alert
         type="warning"
         variant="outlined"
       >
-        One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
+        One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br>
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-row>
-    <v-row v-if="!isHibernationPossible" class="pt-2">
+    <v-row
+      v-if="!isHibernationPossible"
+      class="pt-2"
+    >
       <v-col>
         <v-alert
           type="warning"
           variant="outlined"
           :model-value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
         >
-          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-          {{hibernationPossibleMessage}}
+          <div class="font-weight-bold">
+            Your hibernation schedule may not have any effect:
+          </div>
+          {{ hibernationPossibleMessage }}
         </v-alert>
       </v-col>
     </v-row>
@@ -76,7 +94,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
@@ -91,7 +108,7 @@ import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents }
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { useAppStore, useConfigStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GHibernationScheduleEvent,
     GExpandTransitionGroup,
@@ -108,6 +125,9 @@ export default defineComponent({
       type: String,
     },
   },
+  emits: [
+    'valid',
+  ],
   data () {
     return {
       parsedScheduleEvents: undefined,
@@ -135,6 +155,14 @@ export default defineComponent({
       const purpose = this.purpose || ''
       return `This ${purpose} cluster does not need a hibernation schedule`
     },
+  },
+  mounted () {
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updatePurpose', purpose => {
+        this.purpose = purpose
+        this.setDefaultHibernationSchedule()
+      })
+    }
   },
   methods: {
     ...mapActions(useConfigStore, [
@@ -267,13 +295,5 @@ export default defineComponent({
       this.setNoHibernationSchedule(noHibernationSchedule)
     },
   },
-  mounted () {
-    if (this.userInterActionBus) {
-      this.userInterActionBus.on('updatePurpose', purpose => {
-        this.purpose = purpose
-        this.setDefaultHibernationSchedule()
-      })
-    }
-  },
-})
+}
 </script>

@@ -13,59 +13,58 @@ SPDX-License-Identifier: Apache-2.0
     vendor="vsphere"
     create-title="Add new VMware vSphere Secret"
     replace-title="Replace VMware vSphere Secret"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-text-field
-        color="primary"
-        v-model="vsphereUsername"
-        ref="vsphereUsername"
-        label="vSphere Username"
-        :error-messages="getErrorMessages('vsphereUsername')"
-        @update:model-value="v$.vsphereUsername.$touch()"
-        @blur="v$.vsphereUsername.$touch()"
+          ref="vsphereUsername"
+          v-model="vsphereUsername"
+          color="primary"
+          label="vSphere Username"
+          :error-messages="getErrorMessages('vsphereUsername')"
           variant="underlined"
-        ></v-text-field>
+          @update:model-value="v$.vsphereUsername.$touch()"
+          @blur="v$.vsphereUsername.$touch()"
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="vspherePassword"
+          color="primary"
           label="vSphere Password"
           :error-messages="getErrorMessages('vspherePassword')"
           :append-icon="hideVspherePassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideVspherePassword ? 'password' : 'text'"
+          variant="underlined"
           @click:append="() => (hideVspherePassword = !hideVspherePassword)"
           @update:model-value="v$.vspherePassword.$touch()"
           @blur="v$.vspherePassword.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-        color="primary"
-        v-model="nsxtUsername"
-        label="NSX-T Username"
-        :error-messages="getErrorMessages('nsxtUsername')"
-        @update:model-value="v$.nsxtUsername.$touch()"
-        @blur="v$.nsxtUsername.$touch()"
-          variant="underlined"
-        ></v-text-field>
-      </div>
-      <div>
-        <v-text-field
+          v-model="nsxtUsername"
           color="primary"
+          label="NSX-T Username"
+          :error-messages="getErrorMessages('nsxtUsername')"
+          variant="underlined"
+          @update:model-value="v$.nsxtUsername.$touch()"
+          @blur="v$.nsxtUsername.$touch()"
+        />
+      </div>
+      <div>
+        <v-text-field
           v-model="nsxtPassword"
+          color="primary"
           label="NSX-T Password"
           :error-messages="getErrorMessages('nsxtPassword')"
           :append-icon="hideNsxtPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideNsxtPassword ? 'password' : 'text'"
+          variant="underlined"
           @click:append="() => (hideNsxtPassword = !hideNsxtPassword)"
           @update:model-value="v$.nsxtPassword.$touch()"
           @blur="v$.nsxtPassword.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
     </template>
 
@@ -90,15 +89,12 @@ SPDX-License-Identifier: Apache-2.0
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -118,12 +114,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -140,6 +131,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       vsphereUsername: undefined,
@@ -196,6 +192,13 @@ export default defineComponent({
       return !this.secret
     },
   },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+  },
   methods: {
     reset () {
       this.v$.$reset()
@@ -217,12 +220,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-})
+}
 </script>

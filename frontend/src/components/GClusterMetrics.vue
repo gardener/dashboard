@@ -12,23 +12,30 @@ SPDX-License-Identifier: Apache-2.0
       :url="plutonoUrl"
       :url-text="plutonoUrl"
       :is-shoot-status-hibernated="isShootStatusHibernated"
-    ></g-link-list-tile>
+    />
     <g-link-list-tile
       app-title="Prometheus"
       :url="prometheusUrl"
       :url-text="prometheusUrl"
       :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
-    ></g-link-list-tile>
-    <g-link-list-tile v-if="hasAlertmanager"
+    />
+    <g-link-list-tile
+      v-if="hasAlertmanager"
       app-title="Alertmanager"
       :url="alertmanagerUrl"
       :url-text="alertmanagerUrl"
       :is-shoot-status-hibernated="isShootStatusHibernated"
       content-class="pt-0"
-    ></g-link-list-tile>
-    <v-divider v-show="!!username && !!password" inset></v-divider>
-    <g-username-password :username="username" :password="password"></g-username-password>
+    />
+    <v-divider
+      v-show="!!username && !!password"
+      inset
+    />
+    <g-username-password
+      :username="username"
+      :password="password"
+    />
   </g-list>
 </template>
 

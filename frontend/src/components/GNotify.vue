@@ -18,10 +18,10 @@ SPDX-License-Identifier: Apache-2.0
         :color="item.type"
         :title="item.title"
         :text="item.text"
-        @click:close="close"
         closable
         class="mt-2"
-      ></v-alert>
+        @click:close="close"
+      />
     </template>
   </notifications>
 </template>

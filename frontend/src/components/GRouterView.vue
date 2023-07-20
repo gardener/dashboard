@@ -5,5 +5,5 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <router-view/>
+  <router-view />
 </template>

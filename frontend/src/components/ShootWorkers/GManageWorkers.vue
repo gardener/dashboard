@@ -9,9 +9,9 @@ SPDX-License-Identifier: Apache-2.0
     <g-expand-transition-group :disabled="disableWorkerAnimation">
       <v-row
         v-for="(worker, index) in internalWorkers"
-        class="list-item pt-2 my-0 mx-1"
         :key="worker.id"
-        >
+        class="list-item pt-2 my-0 mx-1"
+      >
         <g-worker-input-generic
           ref="workerInput"
           :worker="worker"
@@ -20,16 +20,18 @@ SPDX-License-Identifier: Apache-2.0
           :region="region"
           :all-zones="allZones"
           :available-zones="availableZones"
-          :initialZones="initialZones"
+          :initial-zones="initialZones"
           :zoned-cluster="zonedCluster"
-          :updateOSMaintenance="updateOSMaintenance"
+          :update-o-s-maintenance="updateOSMaintenance"
           :is-new="isNewCluster || worker.isNew"
           :max-additional-zones="maxAdditionalZones"
           :kubernetes-version="kubernetesVersion"
           @valid="onWorkerValid"
-          @removed-zones="onRemovedZones">
+          @removed-zones="onRemovedZones"
+        >
           <template #action>
-            <v-btn v-show="index > 0 || internalWorkers.length > 1"
+            <v-btn
+              v-show="index > 0 || internalWorkers.length > 1"
               size="x-small"
               variant="outlined"
               icon="mdi-close"
@@ -40,15 +42,20 @@ SPDX-License-Identifier: Apache-2.0
         </g-worker-input-generic>
       </v-row>
     </g-expand-transition-group>
-    <v-row key="addWorker" class="list-item mb-1 mx-1">
+    <v-row
+      key="addWorker"
+      class="list-item mb-1 mx-1"
+    >
       <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
-          @click="addWorker"
           variant="text"
           color="primary"
+          @click="addWorker"
         >
-          <v-icon class="text-primary">mdi-plus</v-icon>
+          <v-icon class="text-primary">
+            mdi-plus
+          </v-icon>
           <span class="ml-2">Add Worker Group</span>
         </v-btn>
       </v-col>
@@ -57,8 +64,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import { mapActions } from 'pinia'
@@ -82,8 +87,8 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 const NO_LIMIT = -1
 
-export default defineComponent({
-  name: 'manage-workers',
+export default {
+  name: 'ManageWorkers',
   components: {
     GWorkerInputGeneric,
     GExpandTransitionGroup,
@@ -188,6 +193,30 @@ export default defineComponent({
       })
       this.$emit('additionalZonesNetworkConfiguration', additionalZonesNetworkConfiguration)
     },
+  },
+  mounted () {
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+        this.internalWorkers = []
+        this.cloudProfileName = cloudProfileName
+        /*
+         * do not pass shootspec as we do not have it available in this component and it is (currently) not required to determine isZoned for new clusters. This event handler is only called for new clusters, as the
+         * userInterActionBus is only set for the create cluster use case
+         */
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
+        this.setDefaultWorker()
+      })
+      this.userInterActionBus.on('updateRegion', region => {
+        this.region = region
+        this.setDefaultWorker()
+      })
+      this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
+        this.updateOSMaintenance = updateOSMaintenance
+      })
+      this.userInterActionBus.on('updateKubernetesVersion', updatedVersion => {
+        this.kubernetesVersion = updatedVersion
+      })
+    }
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
@@ -311,29 +340,5 @@ export default defineComponent({
       this.initialZones = uniq(flatMap(workers, 'zones'))
     },
   },
-  mounted () {
-    if (this.userInterActionBus) {
-      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
-        this.internalWorkers = []
-        this.cloudProfileName = cloudProfileName
-        /*
-         * do not pass shootspec as we do not have it available in this component and it is (currently) not required to determine isZoned for new clusters. This event handler is only called for new clusters, as the
-         * userInterActionBus is only set for the create cluster use case
-         */
-        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
-        this.setDefaultWorker()
-      })
-      this.userInterActionBus.on('updateRegion', region => {
-        this.region = region
-        this.setDefaultWorker()
-      })
-      this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
-        this.updateOSMaintenance = updateOSMaintenance
-      })
-      this.userInterActionBus.on('updateKubernetesVersion', updatedVersion => {
-        this.kubernetesVersion = updatedVersion
-      })
-    }
-  },
-})
+}
 </script>

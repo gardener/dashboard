@@ -6,26 +6,27 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
+    ref="actionDialog"
     :shoot-item="shootItem"
     :valid="hibernationScheduleValid"
-    @dialog-opened="onConfigurationDialogOpened"
-    ref="actionDialog"
     width="900"
-    caption="Configure Hibernation Schedule">
-    <template v-slot:actionComponent>
+    caption="Configure Hibernation Schedule"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #actionComponent>
       <g-manage-hibernation-schedule
         :key="componentKey"
+        ref="hibernationScheduleRef"
         :is-hibernation-possible="isHibernationPossible"
         :hibernation-possible-message="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
-        ref="hibernationScheduleRef"
-      ></g-manage-hibernation-schedule>
+      />
     </template>
   </g-action-button-dialog>
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 
 import get from 'lodash/get'
 
@@ -37,20 +38,20 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
 
-export default defineComponent({
+export default {
+  components: {
+    GActionButtonDialog,
+    GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
+  },
+  mixins: [
+    shootItem,
+  ],
+  inject: ['api'],
   setup () {
     return {
       ...useAsyncRef('hibernationSchedule'),
     }
   },
-  components: {
-    GActionButtonDialog,
-    GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
-  },
-  inject: ['api'],
-  mixins: [
-    shootItem,
-  ],
   data () {
     return {
       hibernationScheduleValid: false,
@@ -114,5 +115,5 @@ export default defineComponent({
       this.$refs.actionDialog.showDialog()
     },
   },
-})
+}
 </script>

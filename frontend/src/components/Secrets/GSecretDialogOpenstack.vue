@@ -13,42 +13,41 @@ SPDX-License-Identifier: Apache-2.0
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    >
-
+  >
     <template #secret-slot>
       <div v-if="vendor==='openstack-designate'">
         <v-text-field
-          color="primary"
           v-model="authURL"
+          color="primary"
           label="Auth URL"
           :error-messages="getErrorMessages('authURL')"
+          variant="underlined"
           @update:model-value="v$.authURL.$touch()"
           @blur="v$.authURL.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
-          v-model="domainName"
           ref="domainName"
+          v-model="domainName"
+          color="primary"
           label="Domain Name"
           :error-messages="getErrorMessages('domainName')"
+          variant="underlined"
           @update:model-value="v$.domainName.$touch()"
           @blur="v$.domainName.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-text-field
-          color="primary"
           v-model="tenantName"
+          color="primary"
           label="Project / Tenant Name"
           :error-messages="getErrorMessages('tenantName')"
+          variant="underlined"
           @update:model-value="v$.tenantName.$touch()"
           @blur="v$.tenantName.$touch()"
-          variant="underlined"
-        ></v-text-field>
+        />
       </div>
       <div>
         <v-radio-group
@@ -61,82 +60,82 @@ SPDX-License-Identifier: Apache-2.0
           <v-radio
             label="Technical User"
             value="USER"
-          ></v-radio>
+          />
           <v-radio
             label="Application Credentials"
             value="APPLICATION_CREDENTIALS"
-          ></v-radio>
+          />
         </v-radio-group>
       </div>
       <v-container class="py-0">
         <template v-if="authenticationMethod === 'APPLICATION_CREDENTIALS'">
           <div>
             <v-text-field
-            color="primary"
-            v-model="applicationCredentialID"
-            label="ID"
-            :error-messages="getErrorMessages('applicationCredentialID')"
-            @update:model-value="v$.applicationCredentialID.$touch()"
-            @blur="v$.applicationCredentialID.$touch()"
-              variant="underlined"
-        ></v-text-field>
-          </div>
-          <div>
-            <v-text-field
-            color="primary"
-            v-model="applicationCredentialName"
-            label="Name"
-            :error-messages="getErrorMessages('applicationCredentialName')"
-            @update:model-value="v$.applicationCredentialName.$touch()"
-            @blur="v$.applicationCredentialName.$touch()"
-              variant="underlined"
-        ></v-text-field>
-          </div>
-          <div>
-            <v-text-field
+              v-model="applicationCredentialID"
               color="primary"
+              label="ID"
+              :error-messages="getErrorMessages('applicationCredentialID')"
+              variant="underlined"
+              @update:model-value="v$.applicationCredentialID.$touch()"
+              @blur="v$.applicationCredentialID.$touch()"
+            />
+          </div>
+          <div>
+            <v-text-field
+              v-model="applicationCredentialName"
+              color="primary"
+              label="Name"
+              :error-messages="getErrorMessages('applicationCredentialName')"
+              variant="underlined"
+              @update:model-value="v$.applicationCredentialName.$touch()"
+              @blur="v$.applicationCredentialName.$touch()"
+            />
+          </div>
+          <div>
+            <v-text-field
               v-model="applicationCredentialSecret"
+              color="primary"
               label="Password"
               :error-messages="getErrorMessages('applicationCredentialSecret')"
               :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideApplicationCredentialSecret ? 'password' : 'text'"
+              variant="underlined"
               @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
               @update:model-value="v$.applicationCredentialSecret.$touch()"
               @blur="v$.applicationCredentialSecret.$touch()"
-              variant="underlined"
-        ></v-text-field>
+            />
           </div>
         </template>
         <template v-else>
           <div>
             <g-hint-colorizer hint-color="primary">
               <v-text-field
-                color="primary"
                 v-model="username"
+                color="primary"
                 label="Technical User"
                 :error-messages="getErrorMessages('username')"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+                variant="underlined"
                 @update:model-value="v$.username.$touch()"
                 @blur="v$.username.$touch()"
-                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-                  variant="underlined"
-              ></v-text-field>
+              />
             </g-hint-colorizer>
           </div>
           <div>
             <g-hint-colorizer hint-color="warning">
               <v-text-field
-                color="primary"
                 v-model="password"
+                color="primary"
                 label="Password"
                 :error-messages="getErrorMessages('password')"
                 :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="hideSecret ? 'password' : 'text'"
+                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+                variant="underlined"
                 @click:append="() => (hideSecret = !hideSecret)"
                 @update:model-value="v$.password.$touch()"
                 @blur="v$.password.$touch()"
-                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-                variant="underlined"
-              ></v-text-field>
+              />
             </g-hint-colorizer>
           </div>
         </template>
@@ -159,18 +158,17 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <p>
         Read the
-        <g-external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">OpenStack help section</g-external-link> on how to create and manage roles.
+        <g-external-link url="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html">
+          OpenStack help section
+        </g-external-link> on how to create and manage roles.
       </p>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import { mapActions } from 'pinia'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, requiredIf } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
@@ -210,12 +208,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -236,6 +229,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       domainName: undefined,
@@ -338,11 +336,23 @@ export default defineComponent({
       return undefined
     },
   },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
+    },
+    authenticationMethod () {
+      this.username = undefined
+      this.password = undefined
+      this.applicationCredentialID = undefined
+      this.applicationCredentialName = undefined
+      this.applicationCredentialSecret = undefined
+      this.v$.$reset()
+    },
+  },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfileByName']),
-    onInput (value) {
-      this.$emit('input', value)
-    },
     reset () {
       this.v$.$reset()
 
@@ -367,20 +377,5 @@ export default defineComponent({
       return getValidationErrors(this, field)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-    authenticationMethod () {
-      this.username = undefined
-      this.password = undefined
-      this.applicationCredentialID = undefined
-      this.applicationCredentialName = undefined
-      this.applicationCredentialSecret = undefined
-      this.v$.$reset()
-    },
-  },
-})
+}
 </script>

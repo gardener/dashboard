@@ -6,18 +6,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
+    ref="actionDialog"
     :shoot-item="shootItem"
     :disabled="disabled"
     :tooltip="tooltip"
-    @dialog-opened="onConfigurationDialogOpened"
-    ref="actionDialog"
     width="900"
-    caption="Configure Access Restrictions">
+    caption="Configure Access Restrictions"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
     <template #actionComponent>
       <g-access-restrictions
         ref="accessRestrictions"
-      >
-      </g-access-restrictions>
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -35,13 +35,13 @@ import {
 } from '@/store'
 
 export default {
-  name: 'access-restriction-configuration',
+  name: 'AccessRestrictionConfiguration',
   components: {
     GActionButtonDialog,
     GAccessRestrictions,
   },
-  inject: ['api'],
   mixins: [shootItem],
+  inject: ['api'],
   computed: {
     ...mapGetters(useCloudProfileStore, [
       'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',

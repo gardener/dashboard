@@ -5,8 +5,14 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div v-if="sortedInfrastructureKindList.length" class="newshoot-container">
-    <v-container fluid class="newshoot-cards">
+  <div
+    v-if="sortedInfrastructureKindList.length"
+    class="newshoot-container"
+  >
+    <v-container
+      fluid
+      class="newshoot-cards"
+    >
       <v-card flat>
         <g-toolbar title="Infrastructure" />
         <v-card-text>
@@ -14,108 +20,153 @@ SPDX-License-Identifier: Apache-2.0
             ref="infrastructure"
             :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureValid"
-            ></g-new-shoot-select-infrastructure>
+          />
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Cluster Details" />
         <v-card-text>
           <g-new-shoot-details
             ref="clusterDetails"
             :user-inter-action-bus="userInterActionBus"
             @valid="onDetailsValid"
-            ></g-new-shoot-details>
+          />
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Infrastructure Details" />
         <v-card-text>
           <g-new-shoot-infrastructure-details
             ref="infrastructureDetails"
             :user-inter-action-bus="userInterActionBus"
             @valid="onInfrastructureDetailsValid"
-            ></g-new-shoot-infrastructure-details>
+          />
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Control Plane High Availability" />
         <v-card-text>
           <g-manage-control-plane-high-availability />
-       </v-card-text>
+        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="DNS Configuration" />
         <v-card-text>
-          <g-manage-shoot-dns/>
-       </v-card-text>
+          <g-manage-shoot-dns />
+        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4" v-if="accessRestriction">
+      <v-card
+        v-if="accessRestriction"
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Access Restrictions" />
         <v-card-text>
           <g-access-restrictions
             ref="accessRestrictions"
             :user-inter-action-bus="userInterActionBus"
-          ></g-access-restrictions>
+          />
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Worker" />
         <v-card-text>
           <g-manage-workers
+            ref="manageWorkersRef"
             :user-inter-action-bus="userInterActionBus"
             @valid="onWorkersValid"
-            ref="manageWorkersRef"
           />
-       </v-card-text>
+        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Add-Ons (not actively monitored and provided on a best-effort basis only)" />
         <v-card-text>
           <g-manage-shoot-addons
             ref="addons"
             create-mode
-           ></g-manage-shoot-addons>
-       </v-card-text>
+          />
+        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Maintenance" />
         <v-card-text>
           <g-maintenance-time
             ref="maintenanceTime"
             @valid="onMaintenanceTimeValid"
-          ></g-maintenance-time>
+          />
           <g-maintenance-components
             ref="maintenanceComponents"
             :user-inter-action-bus="userInterActionBus"
-          ></g-maintenance-components>
-       </v-card-text>
+          />
+        </v-card-text>
       </v-card>
-      <v-card flat class="mt-4">
+      <v-card
+        flat
+        class="mt-4"
+      >
         <g-toolbar title="Hibernation" />
         <v-card-text>
           <g-manage-hibernation-schedule
+            ref="hibernationScheduleRef"
             :user-inter-action-bus="userInterActionBus"
             @valid="onHibernationScheduleValid"
-            ref="hibernationScheduleRef"
           />
-       </v-card-text>
+        </v-card-text>
       </v-card>
-      <g-message ref="errorAlert" color="error" v-model:message="errorMessage" v-model:detailed-message="detailedErrorMessage" class="error-alert"></g-message>
+      <g-message
+        ref="errorAlert"
+        v-model:message="errorMessage"
+        v-model:detailed-message="detailedErrorMessage"
+        color="error"
+        class="error-alert"
+      />
     </v-container>
-    <v-divider></v-divider>
+    <v-divider />
     <div class="d-flex align-center justify-end toolbar">
-      <v-divider vertical></v-divider>
-      <v-btn variant="text" @click.stop="createClicked()" :disabled="!valid" color="primary">Create</v-btn>
+      <v-divider vertical />
+      <v-btn
+        variant="text"
+        :disabled="!valid"
+        color="primary"
+        @click.stop="createClicked()"
+      >
+        Create
+      </v-btn>
     </div>
-    <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
+    <g-confirm-dialog ref="confirmDialog" />
   </div>
-  <v-alert class="ma-3" type="warning" v-else>
+  <v-alert
+    v-else
+    class="ma-3"
+    type="warning"
+  >
     There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's requirements.
   </v-alert>
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from 'vue'
 
 import { mapActions, mapState } from 'pinia'
 import set from 'lodash/set'
@@ -155,7 +206,7 @@ import {
   useSecretStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GNewShootSelectInfrastructure,
     GNewShootInfrastructureDetails,
@@ -173,6 +224,26 @@ export default defineComponent({
     GToolbar,
   },
   inject: ['api'],
+  async beforeRouteLeave (to, from, next) {
+    if (!this.sortedInfrastructureKindList.length) {
+      return next()
+    }
+
+    if (to.name === 'NewShootEditor') {
+      if (!this.valid && !await this.confirmNavigateToYamlIfInvalid()) {
+        return next(false)
+      }
+
+      await this.updateShootResourceWithUIComponents()
+      return next()
+    }
+
+    if (!this.isShootCreated && await this.isShootContentDirty() && !await this.confirmNavigation()) {
+      return next(false)
+    }
+
+    return next()
+  },
   setup () {
     return {
       ...useAsyncRef('manageWorkers'),
@@ -222,6 +293,16 @@ export default defineComponent({
         this.hibernationScheduleValid &&
         this.dnsConfigurationValid
     },
+  },
+  mounted () {
+    if (this.sortedInfrastructureKindList.length) {
+      this.updateUIComponentsWithShootResource()
+    }
+  },
+  created () {
+    if (this.sortedInfrastructureKindList.length) {
+      this.setClusterConfiguration(this.newShootResource)
+    }
   },
   methods: {
     ...mapActions(useShootStore, ['setNewShootResource']),
@@ -478,8 +559,6 @@ export default defineComponent({
     async createClicked () {
       const shootResource = await this.updateShootResourceWithUIComponents()
 
-      console.log(shootResource, this.namespace)
-
       try {
         await this.createShoot(shootResource)
         this.isShootCreated = true
@@ -522,37 +601,7 @@ export default defineComponent({
       return find(secrets, ['metadata.name', secretBindingName])
     },
   },
-  async beforeRouteLeave (to, from, next) {
-    if (!this.sortedInfrastructureKindList.length) {
-      return next()
-    }
-
-    if (to.name === 'NewShootEditor') {
-      if (!this.valid && !await this.confirmNavigateToYamlIfInvalid()) {
-        return next(false)
-      }
-
-      await this.updateShootResourceWithUIComponents()
-      return next()
-    }
-
-    if (!this.isShootCreated && await this.isShootContentDirty() && !await this.confirmNavigation()) {
-      return next(false)
-    }
-
-    return next()
-  },
-  mounted () {
-    if (this.sortedInfrastructureKindList.length) {
-      this.updateUIComponentsWithShootResource()
-    }
-  },
-  created () {
-    if (this.sortedInfrastructureKindList.length) {
-      this.setClusterConfiguration(this.newShootResource)
-    }
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>

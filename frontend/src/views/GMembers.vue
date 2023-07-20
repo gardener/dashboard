@@ -14,7 +14,9 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="userList.length > 3"
+          <v-text-field
+            v-if="userList.length > 3"
+            v-model="userFilter"
             class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -26,10 +28,12 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             clear-icon="mdi-close"
             density="compact"
-            v-model="userFilter"
             @keyup.esc="userFilter = ''"
-          ></v-text-field>
-          <v-tooltip location="top" v-if="allEmails" >
+          />
+          <v-tooltip
+            v-if="allEmails"
+            location="top"
+          >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -39,15 +43,29 @@ SPDX-License-Identifier: Apache-2.0
             </template>
             <span>Mail to all Members</span>
           </v-tooltip>
-          <v-tooltip location="top" v-if="canManageMembers" >
+          <v-tooltip
+            v-if="canManageMembers"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openUserAddDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                @click.stop="openUserAddDialog"
+              />
             </template>
             <span>Add Member</span>
           </v-tooltip>
-          <v-tooltip location="top" v-if="canManageMembers" >
+          <v-tooltip
+            v-if="canManageMembers"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-help-circle-outline" @click.stop="openUserHelpDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-help-circle-outline"
+                @click.stop="openUserHelpDialog"
+              />
             </template>
             <span>Help</span>
           </v-tooltip>
@@ -55,41 +73,50 @@ SPDX-License-Identifier: Apache-2.0
             :headers="userAccountTableHeaders"
             @set-selected-header="setSelectedHeaderUserAccount"
             @reset="resetTableSettingsUserAccount"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!userList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add users to your project.</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add users to your project.
+        </div>
         <p class="text-body-1">
           Adding users to your project allows you to collaborate across your team.
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table
         v-else
-        :headers="visibleUserAccountTableHeaders"
-        :items="userList"
+        v-model:page="userPage"
         v-model:sort-by="userSortBy"
         v-model:items-per-page="userItemsPerPage"
+        :headers="visibleUserAccountTableHeaders"
+        :items="userSortedList"
         :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(visibleUserAccountTableHeaders)"
         must-sort
-        :custom-sort="sortAccounts"
         :search="userFilter"
         density="compact"
         class="g-table"
       >
         <template #item="{ item }">
           <g-user-row
+            :key="item.raw.username"
             :item="item.raw"
             :headers="userAccountTableHeaders"
-            :key="item.raw.username"
             @delete="onRemoveUser"
             @edit="onEditUser"
-          ></g-user-row>
+          />
+        </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            v-model:page="userPage"
+            v-model:items-per-page="userItemsPerPage"
+            :items-length="userList.length"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
         </template>
       </v-data-table>
     </v-card>
@@ -101,7 +128,9 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <template #append>
-          <v-text-field v-if="serviceAccountList.length > 3"
+          <v-text-field
+            v-if="serviceAccountList.length > 3"
+            v-model="serviceAccountFilter"
             class="mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -113,18 +142,28 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             clear-icon="mdi-close"
             density="compact"
-            v-model="serviceAccountFilter"
             @keyup.esc="serviceAccountFilter = ''"
-          ></v-text-field>
-          <v-tooltip location="top" v-if="canManageServiceAccountMembers && canCreateServiceAccounts" >
+          />
+          <v-tooltip
+            v-if="canManageServiceAccountMembers && canCreateServiceAccounts"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-plus" @click.stop="openServiceAccountAddDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                @click.stop="openServiceAccountAddDialog"
+              />
             </template>
             <span>Create Service Account</span>
           </v-tooltip>
           <v-tooltip location="top">
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon ="mdi-help-circle-outline" @click.stop="openServiceAccountHelpDialog" />
+              <v-btn
+                v-bind="props"
+                icon="mdi-help-circle-outline"
+                @click.stop="openServiceAccountHelpDialog"
+              />
             </template>
             <span>Help</span>
           </v-tooltip>
@@ -132,68 +171,112 @@ SPDX-License-Identifier: Apache-2.0
             :headers="serviceAccountTableHeaders"
             @set-selected-header="setSelectedHeaderServiceAccount"
             @reset="resetTableSettingsServiceAccount"
-          ></g-table-column-selection>
+          />
         </template>
       </g-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">Add service accounts to your project.</div>
+        <div class="text-h6 text-grey-darken-1 my-4">
+          Add service accounts to your project.
+        </div>
         <p class="text-body-1">
           Adding service accounts to your project allows you to automate processes in your project.
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <!--- TODO v-data-table
-        - sort currently not working (custom-sort has been removed)
-      --->
       <v-data-table
         v-else
-        :headers="visibleServiceAccountTableHeaders"
-        :items="serviceAccountList"
+        v-model:page="serviceAccountPage"
         v-model:sort-by="serviceAccountSortBy"
         v-model:items-per-page="serviceAccountItemsPerPage"
+        :headers="visibleServiceAccountTableHeaders"
+        :items="serviceAccountSortedList"
         :items-per-page-options="itemsPerPageOptions"
         must-sort
-        :custom-sort="sortAccounts"
         :search="serviceAccountFilter"
+        :custom-key-sort="disableCustomKeySort(visibleServiceAccountTableHeaders)"
         class="g-table"
       >
         <template #item="{ item }">
           <g-service-account-row
+            :key="`${item.raw.namespace}_${item.raw.username}`"
             :item="item.raw"
             :headers="serviceAccountTableHeaders"
-            :key="`${item.raw.namespace}_${item.raw.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
             @reset-serviceaccount="onResetServiceAccount"
             @delete="onGDeleteServiceAccount"
             @edit="onEditServiceAccount"
-          ></g-service-account-row>
+          />
+        </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            v-model:page="serviceAccountPage"
+            v-model:items-per-page="serviceAccountItemsPerPage"
+            :items-length="serviceAccountList.length"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
         </template>
       </v-data-table>
     </v-card>
 
-    <g-member-dialog type="adduser" v-model="userAddDialog"></g-member-dialog>
-    <g-member-dialog type="addservice" v-model="serviceAccountAddDialog"></g-member-dialog>
-    <g-member-dialog type="updateuser" :name="memberName" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" v-model="userUpdateDialog"></g-member-dialog>
-    <g-member-dialog type="updateservice" :name="memberName" :description="serviceAccountDescription" :is-current-user="isCurrentUser(memberName)" :roles="memberRoles" :orphaned="orphaned" v-model="serviceAccountUpdateDialog"></g-member-dialog>
-    <g-member-help-dialog type="service" v-model="serviceAccountHelpDialog"></g-member-help-dialog>
-    <g-member-help-dialog type="user" v-model="userHelpDialog"></g-member-help-dialog>
-    <g-confirm-dialog ref="confirmDialog"></g-confirm-dialog>
+    <g-member-dialog
+      v-model="userAddDialog"
+      type="adduser"
+    />
+    <g-member-dialog
+      v-model="serviceAccountAddDialog"
+      type="addservice"
+    />
+    <g-member-dialog
+      v-model="userUpdateDialog"
+      type="updateuser"
+      :name="memberName"
+      :is-current-user="isCurrentUser(memberName)"
+      :roles="memberRoles"
+    />
+    <g-member-dialog
+      v-model="serviceAccountUpdateDialog"
+      type="updateservice"
+      :name="memberName"
+      :description="serviceAccountDescription"
+      :is-current-user="isCurrentUser(memberName)"
+      :roles="memberRoles"
+      :orphaned="orphaned"
+    />
+    <g-member-help-dialog
+      v-model="serviceAccountHelpDialog"
+      type="service"
+    />
+    <g-member-help-dialog
+      v-model="userHelpDialog"
+      type="user"
+    />
+    <g-confirm-dialog ref="confirmDialog" />
 
-    <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
+    <v-dialog
+      v-model="kubeconfigDialog"
+      persistent
+      max-width="67%"
+    >
       <v-card>
         <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">
-          <div class="text-h5">Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code></div>
-          <v-spacer></v-spacer>
+          <div class="text-h5">
+            Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code>
+          </div>
+          <v-spacer />
           <g-action-button
             icon="mdi-close"
-            @click="kubeconfigDialog = false"
             color="toolbar-title"
+            @click="kubeconfigDialog = false"
           />
         </v-card-title>
         <v-card-text>
-          <g-code-block lang="yaml" :content="currentServiceAccountKubeconfig"></g-code-block>
+          <g-code-block
+            lang="yaml"
+            :content="currentServiceAccountKubeconfig"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -201,20 +284,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, unref, computed, markRaw, inject } from 'vue'
+import { ref, computed, markRaw, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
 
-import includes from 'lodash/includes'
-import toLower from 'lodash/toLower'
-import orderBy from 'lodash/orderBy'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
-import join from 'lodash/join'
-import map from 'lodash/map'
 import get from 'lodash/get'
 import head from 'lodash/head'
+import includes from 'lodash/includes'
+import join from 'lodash/join'
+import map from 'lodash/map'
+import mapKeys from 'lodash/mapKeys'
+import mapValues from 'lodash/mapValues'
+import orderBy from 'lodash/orderBy'
+import toLower from 'lodash/toLower'
 
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
@@ -228,6 +313,7 @@ import GResetServiceAccount from '@/components/messages/GResetServiceAccount.vue
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import {
   useAuthzStore,
@@ -276,6 +362,8 @@ const userFilter = ref('')
 const serviceAccountFilter = ref('')
 const currentServiceAccountName = ref()
 const currentServiceAccountKubeconfig = ref()
+const userPage = ref(1)
+const serviceAccountPage = ref(1)
 
 const {
   namespace,
@@ -315,6 +403,11 @@ const itemsPerPageOptions = markRaw([
   { value: 10, title: '10' },
   { value: 20, title: '20' },
 ])
+
+const userSortedList = computed(() => {
+  const secondSortCriteria = 'username'
+  return sortItems(userList, userSortBy, secondSortCriteria)
+})
 
 const userList = computed(() => {
   const users = filter(memberList.value, ({ username }) => !isServiceAccountUsername(username))
@@ -375,6 +468,11 @@ const userAccountTableHeaders = computed(() => {
 
 const visibleUserAccountTableHeaders = computed(() => {
   return filter(userAccountTableHeaders.value, ['selected', true])
+})
+
+const serviceAccountSortedList = computed(() => {
+  const secondSortCriteria = 'username'
+  return sortItems(serviceAccountList, userSortBy, secondSortCriteria)
 })
 
 const serviceAccountList = computed(() => {
@@ -656,11 +754,15 @@ function getSortVal (item, sortBy) {
   }
 }
 
-function sortAccounts (items, sortByArr, sortDescArr) {
-  const sortBy = head(sortByArr)
-  const sortOrder = head(sortDescArr) ? 'desc' : 'asc'
-  const sortedItems = orderBy(unref(items), [item => getSortVal(item, sortBy), 'username'], [sortOrder, 'asc'])
-  return sortedItems
+function sortItems (items, sortByArr, secondSortCriteria) {
+  const sortByObj = head(sortByArr.value)
+  if (!sortByObj || !sortByObj.key) {
+    return items.value
+  }
+
+  const sortBy = sortByObj.key
+  const sortOrder = sortByObj.order
+  return orderBy(items.value, [item => getSortVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
 }
 
 function setSelectedHeaderUserAccount (header) {
@@ -681,6 +783,12 @@ function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
   serviceAccountItemsPerPage.value = 10
   serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
+}
+
+function disableCustomKeySort (tableHeaders) {
+  const sortableTableHeaders = filter(tableHeaders.value, ['sortable', true])
+  const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+  return mapValues(tableKeys, () => () => 0)
 }
 
 </script>

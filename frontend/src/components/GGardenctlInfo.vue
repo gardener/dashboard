@@ -20,7 +20,9 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #text>
-      <div class="text-h6 text-grey-darken-1 mb-4">Gardenctl</div>
+      <div class="text-h6 text-grey-darken-1 mb-4">
+        Gardenctl
+      </div>
       <p>
         <span class="font-family-monospace">gardenctl</span>
         is a command-line client for the Gardener.
@@ -30,12 +32,16 @@ SPDX-License-Identifier: Apache-2.0
       </p>
       <p>
         If not already done
-        <g-external-link url="https://github.com/gardener/gardenctl-v2#installation">install</g-external-link>
+        <g-external-link url="https://github.com/gardener/gardenctl-v2#installation">
+          install
+        </g-external-link>
         <span class="font-family-monospace pl-1">gardenctl</span> and
-        <g-external-link url="https://github.com/gardener/gardenctl-v2#configuration">configure</g-external-link>
+        <g-external-link url="https://github.com/gardener/gardenctl-v2#configuration">
+          configure
+        </g-external-link>
         it accordingly.
       </p>
-      <g-gardenctl-config-example/>
+      <g-gardenctl-config-example />
     </template>
   </g-popover>
 </template>

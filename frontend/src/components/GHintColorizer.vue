@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div ref="root">
-    <slot></slot>
+    <slot />
   </div>
 </template>
 

@@ -8,21 +8,21 @@ SPDX-License-Identifier: Apache-2.0
   <g-hint-colorizer hint-color="warning">
     <v-autocomplete
       ref="autocomplete"
+      v-model="internalValue"
+      v-model:search-input="internalSearch"
       color="primary"
       item-color="primary"
       :items="machineTypeItems"
       item-title="name"
       item-value="name"
       :error-messages="getErrorMessages('internalValue')"
-      @update:model-value="v$.internalValue.$touch()"
-      @blur="v$.internalValue.$touch()"
-      v-model="internalValue"
-      v-model:search-input="internalSearch"
       :filter="filter"
       label="Machine Type"
       :hint="hint"
       persistent-hint
       variant="underlined"
+      @update:model-value="v$.internalValue.$touch()"
+      @blur="v$.internalValue.$touch()"
     >
       <template #item="{ item, props }">
         <v-list-item v-bind="props">
@@ -53,11 +53,6 @@ const validationErrors = {
 }
 
 export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   components: {
     GHintColorizer,
   },
@@ -82,6 +77,11 @@ export default defineComponent({
     'update:modelValue',
     'update:valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       lazyValue: this.modelValue,
@@ -137,6 +137,28 @@ export default defineComponent({
   validations () {
     return this.validators
   },
+  watch: {
+    modelValue (value) {
+      this.lazyValue = value
+    },
+    searchInput (value) {
+      this.lazySearch = value
+    },
+    'v$.internalValue.$invalid': {
+      handler (value) {
+        this.$emit('update:valid', !value)
+      },
+      // force eager callback execution https://vuejs.org/guide/essentials/watchers.html#eager-watchers
+      immediate: true,
+    },
+  },
+  mounted () {
+    this.v$.internalValue.$touch()
+    const input = this.$refs.autocomplete?.$refs.input
+    if (input) {
+      input.spellcheck = false
+    }
+  },
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
@@ -166,28 +188,6 @@ export default defineComponent({
       }
 
       return terms.every(term => name?.includes(term) || properties.includes(term))
-    },
-  },
-  mounted () {
-    this.v$.internalValue.$touch()
-    const input = this.$refs.autocomplete?.$refs.input
-    if (input) {
-      input.spellcheck = false
-    }
-  },
-  watch: {
-    modelValue (value) {
-      this.lazyValue = value
-    },
-    searchInput (value) {
-      this.lazySearch = value
-    },
-    'v$.internalValue.$invalid': {
-      handler (value) {
-        this.$emit('update:valid', !value)
-      },
-      // force eager callback execution https://vuejs.org/guide/essentials/watchers.html#eager-watchers
-      immediate: true,
     },
   },
 })

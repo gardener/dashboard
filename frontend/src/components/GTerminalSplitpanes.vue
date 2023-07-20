@@ -14,24 +14,28 @@ SPDX-License-Identifier: Apache-2.0
   >
     <g-splitpane
       v-if="splitpaneTree"
-      :splitpane-tree="splitpaneTree"
       ref="splitpane"
+      :splitpane-tree="splitpaneTree"
     >
       <template #default="{item}">
-        <slot v-if="item.data.type === 'SLOT_ITEM'" :item="item"></slot>
-        <g-terminal v-else
+        <slot
+          v-if="item.data.type === 'SLOT_ITEM'"
+          :item="item"
+        />
+        <g-terminal
+          v-else
           :uuid="item.uuid"
           :data="item.data"
           @terminated="onTermination(item)"
           @split="orientation => onSplit(item, orientation)"
-        ></g-terminal>
+        />
       </template>
     </g-splitpane>
     <g-create-terminal-session-dialog
       ref="newTerminal"
       :name="name"
       :namespace="namespace"
-    ></g-create-terminal-session-dialog>
+    />
   </div>
 </template>
 

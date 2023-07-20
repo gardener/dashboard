@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 SPDX-License-Identifier: Apache-2.0
  -->
 
- <template>
+<template>
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
@@ -13,26 +13,28 @@ SPDX-License-Identifier: Apache-2.0
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
-    >
-
+  >
     <template #secret-slot>
       <div>
         <v-textarea
           ref="serviceAccountKey"
+          v-model="serviceAccountKey"
           color="primary"
           variant="filled"
-          v-model="serviceAccountKey"
           label="Service Account Key"
           :error-messages="getErrorMessages('serviceAccountKey')"
-          @update:model-value="v$.serviceAccountKey.$touch()"
-          @blur="v$.serviceAccountKey.$touch()"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
-        ></v-textarea>
+          @update:model-value="v$.serviceAccountKey.$touch()"
+          @blur="v$.serviceAccountKey.$touch()"
+        />
       </div>
     </template>
     <template #help-slot>
-      <div class="help-content" v-if="vendor==='gcp'">
+      <div
+        v-if="vendor==='gcp'"
+        class="help-content"
+      >
         <p>
           A service account is a special account that can be used by services and applications running on your Google
           Compute Engine instance to interact with other Google Cloud Platform APIs. Applications can use service
@@ -48,7 +50,6 @@ SPDX-License-Identifier: Apache-2.0
             <li>Service Account User</li>
             <li>Compute Admin</li>
           </ul>
-
         </p>
 
         <p>
@@ -58,7 +59,8 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Read the
           <g-external-link url="https://cloud.google.com/compute/docs/access/service-accounts">
-            Service Account Documentation</g-external-link> on how to apply for credentials
+            Service Account Documentation
+          </g-external-link> on how to apply for credentials
           to service accounts.
         </p>
       </div>
@@ -67,22 +69,19 @@ SPDX-License-Identifier: Apache-2.0
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
         <p>
-          For details on Cloud DNS see <g-external-link url="https://cloud.google.com/dns/docs/zones"></g-external-link>, and on Service Accounts see <g-external-link url="https://cloud.google.com/iam/docs/service-accounts"></g-external-link>
+          For details on Cloud DNS see <g-external-link url="https://cloud.google.com/dns/docs/zones" />, and on Service Accounts see <g-external-link url="https://cloud.google.com/iam/docs/service-accounts" />
         </p>
         <p>
-          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link url="https://cloud.google.com/dns/docs/access-control"></g-external-link>. A possible role is roles/dns.admin "DNS Administrator".
+          The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link url="https://cloud.google.com/dns/docs/access-control" />. A possible role is roles/dns.admin "DNS Administrator".
         </p>
       </div>
     </template>
-
   </g-secret-dialog>
-
 </template>
 
 <script>
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { serviceAccountKey } from '@/utils/validators'
@@ -95,12 +94,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
+export default {
   components: {
     GSecretDialog,
     GExternalLink,
@@ -120,6 +114,11 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       serviceAccountKey: undefined,
@@ -170,10 +169,22 @@ export default defineComponent({
       return undefined
     },
   },
-  methods: {
-    onInput (value) {
-      this.$emit('input', value)
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+
+        // Mounted does not guarantee that all child components have also been mounted.
+        // In addition, the serviceAccountKey ref is within a slot of a v-dialog, which is by default lazily loaded.
+        // We initialize the drop handler once the dialog is shown by watching the `value`.
+        // We use $nextTick to make sure the entire view has been rendered
+        this.$nextTick(() => {
+          this.initializeDropHandlerOnce()
+        })
+      }
     },
+  },
+  methods: {
     reset () {
       this.v$.$reset()
 
@@ -198,22 +209,7 @@ export default defineComponent({
       handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-
-        // Mounted does not guarantee that all child components have also been mounted.
-        // In addition, the serviceAccountKey ref is within a slot of a v-dialog, which is by default lazily loaded.
-        // We initialize the drop handler once the dialog is shown by watching the `value`.
-        // We use $nextTick to make sure the entire view has been rendered
-        this.$nextTick(() => {
-          this.initializeDropHandlerOnce()
-        })
-      }
-    },
-  },
-})
+}
 </script>
 
 <style lang="scss" scoped>
