@@ -102,7 +102,7 @@ export default {
     GCodeBlock,
   },
   mixins: [shootItem],
-  inject: ['yaml'],
+  inject: ['yaml', 'logger'],
   props: {
     shortcut: {
       type: Object,
@@ -189,8 +189,8 @@ export default {
     async updateShortcutYaml (value) {
       try {
         this.shortcutYaml = await this.yaml.dump(value)
-      } catch (error) {
-        console.log(error)
+      } catch (err) {
+        this.logger.error(err)
       }
     },
   },

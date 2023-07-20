@@ -7,6 +7,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+import { useLogger } from '@/composables'
+
 import assign from 'lodash/assign'
 import filter from 'lodash/filter'
 import findIndex from 'lodash/findIndex'
@@ -90,6 +92,8 @@ const putToList = (list, newItem, updatedAtKeyPath, matcher, descending = true) 
 }
 
 export const useTicketStore = defineStore('ticket', () => {
+  const logger = useLogger()
+
   const issueList = ref([])
   const issueComments = ref({})
 
@@ -135,7 +139,7 @@ export const useTicketStore = defineStore('ticket', () => {
         deleteItem(issueList, object)
         break
       default:
-        console.error('undhandled event type', type)
+        logger.error('undhandled event type', type)
     }
     orderTicketsByUpdatedAt(issueList)
   }
@@ -150,7 +154,7 @@ export const useTicketStore = defineStore('ticket', () => {
         deleteComment(issueComments, object)
         break
       default:
-        console.error('undhandled event type', type)
+        logger.error('undhandled event type', type)
     }
     orderTicketsByUpdatedAt(issueList)
   }

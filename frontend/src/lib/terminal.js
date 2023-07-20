@@ -19,7 +19,7 @@ import pick from 'lodash/pick'
 
 // Utilities
 import { encodeBase64Url } from '@/utils'
-import { useApi } from '@/composables'
+import { useApi, useLogger } from '@/composables'
 
 // Local
 import {
@@ -28,6 +28,7 @@ import {
 } from './xterm-addon-k8s-attach'
 
 const api = useApi()
+const logger = useLogger()
 
 const WsCloseEventEnum = {
   NORMAL_CLOUSURE: 1000,
@@ -151,7 +152,7 @@ export class TerminalSession {
       if (this.cancelConnect) {
         return
       }
-      console.error('failed to wait until pod is running', err)
+      logger.error('failed to wait until pod is running', err)
       this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
       this.setDisconnectedState()
       return
@@ -160,7 +161,10 @@ export class TerminalSession {
     // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
     const protocols = addBearerToken(['v4.channel.k8s.io'], this.hostCluster.token)
     const ws = new WebSocket(attachUri(this.hostCluster), protocols)
-    const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
+    const attachAddon = new K8sAttachAddon(ws, {
+      logger,
+      bidirectional: true,
+    })
     this.vm.term.loadAddon(attachAddon)
     let reconnectTimeoutId
     let heartbeatIntervalId
@@ -180,7 +184,7 @@ export class TerminalSession {
         try {
           await this.heartbeat()
         } catch (err) {
-          console.error('heartbeat failed:', err)
+          logger.error('heartbeat failed:', err)
         }
       }, this.vm.heartbeatIntervalSeconds * 1000)
     }
@@ -209,13 +213,11 @@ export class TerminalSession {
       if (wasConnected) {
         // do not start spinner as this would clear the console
         timeoutSeconds = 0
-        // eslint-disable-next-line no-console
-        console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
+        logger.info(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
       } else { // Try again later
         timeoutSeconds = RETRY_TIMEOUT_SECONDS
         this.vm.spinner.start()
-        // eslint-disable-next-line no-console
-        console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
+        logger.info(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
       }
       reconnectTimeoutId = setTimeout(() => this.attachTerminal(), timeoutSeconds * 1000)
     }
@@ -343,7 +345,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
       try {
         event = JSON.parse(message)
       } catch (error) {
-        console.error('could not parse message')
+        logger.error('could not parse message')
         return
       }
       const pod = event.object
@@ -351,7 +353,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
         try {
           handleEvent(event)
         } catch (error) {
-          console.error('error during handleEvent', error.message)
+          logger.error('error during handleEvent', error.message)
         }
       }
 

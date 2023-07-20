@@ -48,7 +48,7 @@ export default {
   mixins: [
     shootItem,
   ],
-  inject: ['api'],
+  inject: ['api', 'logger'],
   setup () {
     return {
       ...useAsyncRef('purpose'),
@@ -69,7 +69,7 @@ export default {
       const secrets = this.infrastructureSecretList
       const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
       if (!secret) {
-        console.error('Secret must not be undefined')
+        this.logger.error('Secret must not be undefined')
       }
       return secret
     },
@@ -102,7 +102,7 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async reset () {

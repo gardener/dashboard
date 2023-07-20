@@ -73,6 +73,7 @@ export default {
     GAccountAvatar,
     GAccountRoles,
   },
+  inject: ['logger'],
   props: {
     namespace: {
       type: String,
@@ -125,8 +126,7 @@ export default {
     },
     async addServiceAccount () {
       if (!this.namespace) {
-        // eslint-disable-next-line no-console
-        console.error('no namespace set')
+        this.logger.error('no namespace set')
         return false
       }
 
@@ -154,8 +154,7 @@ export default {
           this.errorMessage = 'Failed to add service account'
         }
         this.detailedErrorMessage = errorDetails.detailedMessage
-        // eslint-disable-next-line no-console
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         return false
       }
     },

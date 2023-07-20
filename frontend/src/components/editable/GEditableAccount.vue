@@ -126,12 +126,12 @@ export default {
     GAccountAvatar,
   },
   props: {
-    items: {
-      type: Array,
-    },
     modelValue: {
       type: String,
       required: true,
+    },
+    items: {
+      type: Array,
     },
     save: {
       type: Function,

@@ -545,6 +545,7 @@ export default {
     GShootCustomField,
     GResourceQuotaHelp,
   },
+  inject: ['logger'],
   data () {
     return {
       color: 'primary',
@@ -778,7 +779,7 @@ export default {
           const errorDetails = errorDetailsFromError(err)
           this.errorMessage = 'Failed to delete project'
           this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.showDialog()
         }
       }

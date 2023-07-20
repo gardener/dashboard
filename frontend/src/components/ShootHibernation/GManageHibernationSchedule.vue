@@ -113,6 +113,7 @@ export default {
     GHibernationScheduleEvent,
     GExpandTransitionGroup,
   },
+  inject: ['logger'],
   props: {
     userInterActionBus: {
       type: Object,
@@ -175,9 +176,8 @@ export default {
           return parsedScheduleEventsFromCrontabBlock(crontabBlock, this.location)
         })
         this.setParsedSchedules(parsedScheduleEvents)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn(error)
+      } catch (err) {
+        this.logger.warn(err.message)
         this.parseError = true
       }
     },

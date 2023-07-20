@@ -507,7 +507,7 @@ export const useShootStore = defineStore('shoot', () => {
         setFilteredItemsRequired = true
         break
       default:
-        console.error('undhandled event type', event.type)
+        logger.error('undhandled event type', event.type)
     }
     if (setFilteredItemsRequired) {
       state.filteredShoots = getFilteredItems(state, context)

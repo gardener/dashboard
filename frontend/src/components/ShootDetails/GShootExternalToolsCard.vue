@@ -52,6 +52,7 @@ export default {
     GExternalLink,
   },
   mixins: [shootItem],
+  inject: ['logger'],
   computed: {
     ...mapState(useConfigStore, ['externalTools']),
     items () {
@@ -63,7 +64,7 @@ export default {
       try {
         return parseTemplate(url).expand(this.shootMetadata)
       } catch (err) {
-        console.error(`Failed to parse URL template "${url}"`)
+        this.logger.error(`Failed to parse URL template "${url}"`)
         return url
       }
     },
