@@ -794,7 +794,6 @@ export default {
     disableCustomKeySort (tableHeaders) {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
-      console.log('mapValues(tableKeys, () => () => 0)', mapValues(tableKeys, () => () => 0))
       return mapValues(tableKeys, () => () => 0)
     },
   },

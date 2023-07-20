@@ -361,7 +361,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const mapMachineImages = (machineImage) => {
       const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
         if (!semver.valid(version)) {
-          console.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
+          logger.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
           return false
         }
         return true

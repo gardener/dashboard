@@ -9,7 +9,12 @@ import semver from 'semver'
 
 import { Buffer } from 'buffer'
 
-// Lodash
+import { useLogger } from '@/composables'
+
+import moment from './moment'
+import { md5, hash } from './crypto'
+import TimeWithOffset from './TimeWithOffset'
+
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -29,12 +34,8 @@ import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import forEach from 'lodash/forEach'
 
-// Local
-import moment from './moment'
-import { md5, hash } from './crypto'
-import TimeWithOffset from './TimeWithOffset'
-
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
+const logger = useLogger()
 
 export function emailToDisplayName (value) {
   if (value) {
@@ -85,7 +86,9 @@ export function getValidationErrors (vm, field) {
     return errors
   }
 
-  const validators = vm.validators ? vm.validators : vm.$options.validations
+  const validators = vm.validators
+    ? vm.validators
+    : vm.$options.validations
   Object
     .keys(get(validators, field))
     .forEach(key => {
@@ -100,7 +103,7 @@ export function getValidationErrors (vm, field) {
           /* Fallback logic with generic error message.
             This should not happen as for each validation there must be a corresponding text */
           errors.push('Invalid input')
-          console.error('validation error message for ' + field + '.' + key + ' not found')
+          logger.error('validation error message for ' + field + '.' + key + ' not found')
         }
       }
     })
@@ -175,7 +178,7 @@ export function parseSize (value) {
     const [, sizeValue] = result
     return sizeValue
   }
-  console.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
+  logger.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
   return 0
 }
 
@@ -254,8 +257,7 @@ export function routeName (route) {
   if (firstChild && firstChild.name) {
     return firstChild.name
   }
-  // eslint-disable-next-line no-console
-  console.error('could not determine routeName')
+  logger.error('could not determine routeName')
 }
 
 export function getDateFormatted (timestamp) {

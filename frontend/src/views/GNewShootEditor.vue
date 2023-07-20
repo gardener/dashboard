@@ -117,7 +117,7 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Failed to create cluster.'
         this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async isShootContentDirty () {

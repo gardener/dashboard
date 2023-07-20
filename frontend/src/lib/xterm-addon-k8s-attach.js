@@ -5,6 +5,7 @@
 //
 
 import { Buffer } from 'buffer'
+import { useLogger } from '@/composables'
 
 export const WsReadyStateEnum = {
   CONNECTING: 0,
@@ -29,6 +30,7 @@ const BufferEnum = {
 export class K8sAttachAddon {
   constructor (socket, options = {}) {
     this._socket = socket
+    this._logger = options.logger ?? useLogger()
     // always set binary type to arraybuffer, we do not handle blobs
     this._socket.binaryType = 'arraybuffer'
     this._bidirectional = options.bidirectional || false
@@ -63,8 +65,7 @@ export class K8sAttachAddon {
 
     this.pingIntervalId = setInterval(() => {
       if (this._socket.readyState === WsReadyStateEnum.CONNECTING || this._socket.readyState === WsReadyStateEnum.CLOSED) {
-        // eslint-disable-next-line no-console
-        console.log('Websocket closing or already closed. Stopping ping')
+        this._logger.info('Websocket closing or already closed. Stopping ping')
         clearTimeout(this.pingIntervalId)
         return
       }
@@ -97,9 +98,9 @@ export class K8sAttachAddon {
               if (errorData.status === 'Success') {
                 return // just ignore success message
               }
-              console.error('On error channel:', errorData)
+              this._logger.error('On error channel:', errorData)
             } catch (err) {
-              console.error('On error channel:', data)
+              this._logger.error('On error channel:', data)
             }
             break
           default:

@@ -6,7 +6,7 @@
 
 import { ref, watch } from 'vue'
 import pTimeout from 'p-timeout'
-import { useLogger } from '../composables'
+import { useLogger } from '@/composables/useLogger'
 
 export const useAsyncRef = (key, options = {}) => {
   const {

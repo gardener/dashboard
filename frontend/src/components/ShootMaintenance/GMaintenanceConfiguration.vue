@@ -48,7 +48,7 @@ export default defineComponent({
     GMaintenanceTime,
   },
   mixins: [shootItem],
-  inject: ['api'],
+  inject: ['api', 'logger'],
   data () {
     return {
       maintenanceTimeValid: true,
@@ -84,7 +84,7 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {

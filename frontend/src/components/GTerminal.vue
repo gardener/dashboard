@@ -401,7 +401,7 @@ export default {
     GSplitHorizontally,
     GDragNDroppableComponent,
   },
-  inject: ['api', 'mergeProps'],
+  inject: ['api', 'logger', 'mergeProps'],
   props: {
     uuid: {
       type: String,
@@ -615,8 +615,7 @@ export default {
         try {
           await this.terminalSession.deleteTerminal()
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('failed to cleanup terminal session on configuration change')
+          this.logger.error('failed to cleanup terminal session on configuration change', err)
         }
         this.cancelConnectAndClose()
 

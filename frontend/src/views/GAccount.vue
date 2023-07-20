@@ -269,7 +269,7 @@ export default {
     GCodeBlock,
     GAccountAvatar,
   },
-  inject: ['yaml', 'api'],
+  inject: ['api', 'logger', 'yaml'],
   data () {
     return {
       kubeconfigExpansionPanel: false,
@@ -422,7 +422,7 @@ export default {
       this.idToken = response.data.token
       this.updateKubeconfigYaml(this.kubeconfig)
     } catch (err) {
-      console.error(err.message)
+      this.logger.error(err.message)
     }
   },
   methods: {

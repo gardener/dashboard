@@ -159,6 +159,7 @@ export default {
     GMessage,
     GToolbar,
   },
+  inject: ['logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -344,7 +345,7 @@ export default {
 
           const { errorCode, detailedMessage } = errorDetailsFromError(err)
           this.detailedErrorMessage = detailedMessage
-          console.error(this.errorMessage, errorCode, detailedMessage, err)
+          this.logger.error(this.errorMessage, errorCode, detailedMessage, err)
         }
       }
     },

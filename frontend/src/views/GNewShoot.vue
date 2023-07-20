@@ -223,7 +223,7 @@ export default {
     GManageControlPlaneHighAvailability,
     GToolbar,
   },
-  inject: ['api'],
+  inject: ['api', 'logger'],
   async beforeRouteLeave (to, from, next) {
     if (!this.sortedInfrastructureKindList.length) {
       return next()
@@ -558,9 +558,6 @@ export default {
     },
     async createClicked () {
       const shootResource = await this.updateShootResourceWithUIComponents()
-
-      console.log(shootResource, this.namespace)
-
       try {
         await this.createShoot(shootResource)
         this.isShootCreated = true
@@ -575,7 +572,7 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Failed to create cluster.'
         this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.$nextTick(() => {
           // Need to wait for the new element to be rendered, before we can scroll it into view

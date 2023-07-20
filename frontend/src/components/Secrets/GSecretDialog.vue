@@ -155,6 +155,7 @@ export default {
     GMessage,
     GToolbar,
   },
+  inject: ['logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -337,7 +338,7 @@ export default {
             this.errorMessage = 'Failed to update Infrastructure Secret.'
           }
           this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         }
       }
     },

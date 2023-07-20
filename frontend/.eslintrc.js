@@ -24,6 +24,7 @@ module.exports = {
   ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],
+    'no-console': 'error',
     quotes: ['error', 'single'],
     'space-before-function-paren': ['error', 'always'],
     'vue/no-mutating-props': ['error', {

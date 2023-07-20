@@ -40,7 +40,7 @@ export default defineComponent({
     GManageShootDns,
   },
   mixins: [shootItem],
-  inject: ['api'],
+  inject: ['api', 'logger'],
   data () {
     return {
       componentKey: uuidv4(),
@@ -74,7 +74,7 @@ export default defineComponent({
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
