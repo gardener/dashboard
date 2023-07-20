@@ -283,6 +283,7 @@ const appStore = useAppStore()
 const configStore = useConfigStore()
 const authzStore = useAuthzStore()
 const router = useRouter()
+const currentRoute = useRoute()
 
 const projectDialog = ref(false)
 const projectFilter = ref('')
@@ -436,8 +437,7 @@ function getProjectMenuTargetRoute (namespace) {
     }
     return false
   }
-  const route = useRoute()
-  if (fallbackToShootList(route)) {
+  if (fallbackToShootList(currentRoute)) {
     return {
       name: 'ShootList',
       params: {
@@ -445,8 +445,8 @@ function getProjectMenuTargetRoute (namespace) {
       },
     }
   }
-  const name = getRouteName(route)
-  const key = get(route, 'meta.namespaced') === false
+  const name = getRouteName(currentRoute)
+  const key = get(currentRoute, 'meta.namespaced') === false
     ? 'query'
     : 'params'
   return {
