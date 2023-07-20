@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container class="pa-0 ma-0">
-    <v-expand-transition>
-      <template v-if="dnsProviderIds.length">
+    <template v-if="dnsProviderIds.length">
+      <v-expand-transition>
         <v-row class="ma-0">
           <v-col cols="7">
             <v-text-field
@@ -60,11 +60,11 @@ SPDX-License-Identifier: Apache-2.0
             </v-select>
           </v-col>
         </v-row>
-        <v-row class="ma-0">
-          <v-divider class="mx-3" />
-        </v-row>
-      </template>
-    </v-expand-transition>
+      </v-expand-transition>
+      <v-row class="ma-0">
+        <v-divider class="mx-3" />
+      </v-row>
+    </template>
     <div class="alternate-row-background">
       <g-expand-transition-group>
         <v-row
