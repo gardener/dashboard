@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
     <div v-if="!controlPlaneFailureToleranceType">
       No control plane failure tolerance type configured
     </div>
-    <v-expand-transition :appear="animateOnAppear" v-else>
-      <div>
+    <v-expand-transition>
+      <div v-if="controlPlaneFailureToleranceType">
         Control plane failure tolerance type <code>{{controlPlaneFailureToleranceType}}</code> configured
         <v-alert type="info" v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported" variant="outlined">
           <template v-if="clusterIsNew">
@@ -68,11 +68,6 @@ import {
 export default defineComponent({
   components: {
     GExternalLink,
-  },
-  data () {
-    return {
-      animateOnAppear: false,
-    }
   },
   computed: {
     ...mapState(useConfigStore, [
@@ -135,7 +130,6 @@ export default defineComponent({
   },
   mounted () {
     this.resetToleranceType(this.zoneSupported)
-    this.animateOnAppear = true
   },
 })
 </script>

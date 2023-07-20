@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-workers
             @valid="onWorkersValid"
             @additionalZonesNetworkConfiguration="setNetworkConfiguration"
+            :disableWorkerAnimation="disableWorkerAnimation"
             ref="manageWorkersRef"
           ></g-manage-workers>
         </v-window-item>
@@ -59,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-window>
     </template>
     <template #additionalMessage>
-      <v-expand-transition appear>
+      <v-expand-transition>
         <v-alert
           type="warning"
           variant="outlined"
@@ -118,6 +119,7 @@ export default defineComponent({
       editorData: {},
       overviewTabHeight: 0,
       componentKey: uuidv4(),
+      disableWorkerAnimation: false,
     }
   },
   mixins: [
@@ -132,12 +134,17 @@ export default defineComponent({
         this.tabValue = value
         if (value === 'overview') {
           this.setOverviewData()
+          setTimeout(() => {
+            // enable worker group animations after tab navigation animation completed
+            this.disableWorkerAnimation = false
+          }, 1500)
         }
         if (value === 'yaml') {
           // set current height as min-height for yaml tab to avoid
           // dialog downsize as editor not yet rendered
           this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
           this.setEditorData()
+          this.disableWorkerAnimation = true
         }
       },
     },

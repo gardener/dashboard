@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="alternate-row-background">
-    <v-slide-y-transition group>
+    <g-expand-transition-group :disabled="disableWorkerAnimation">
       <v-row
+        v-for="(worker, index) in internalWorkers"
         class="list-item pt-2 my-0 mx-1"
         :key="worker.id"
-        v-for="(worker, index) in internalWorkers"
         >
         <g-worker-input-generic
           ref="workerInput"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-worker-input-generic>
       </v-row>
-    </v-slide-y-transition>
+    </g-expand-transition-group>
     <v-row key="addWorker" class="list-item mb-1 mx-1">
       <v-col>
         <v-btn
@@ -60,6 +60,7 @@ SPDX-License-Identifier: Apache-2.0
 import { defineComponent } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
+import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import { mapActions } from 'pinia'
 import { isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
@@ -85,10 +86,15 @@ export default defineComponent({
   name: 'manage-workers',
   components: {
     GWorkerInputGeneric,
+    GExpandTransitionGroup,
   },
   props: {
     userInterActionBus: {
       type: Object,
+    },
+    disableWorkerAnimation: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: [

@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <div class="alternate-row-background">
-      <v-slide-y-transition group>
+      <g-expand-transition-group>
         <v-row
           v-for="(scheduleEvent, index) in parsedScheduleEvents"
           class="list-item pt-2"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
             @update-location="onUpdateLocation"
             @valid="onScheduleEventValid" />
         </v-row>
-      </v-slide-y-transition>
+      </g-expand-transition-group>
       <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
         <v-col>
           <v-btn
@@ -85,6 +85,7 @@ import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 
+import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -93,6 +94,7 @@ import { useAppStore, useConfigStore } from '@/store'
 export default defineComponent({
   components: {
     GHibernationScheduleEvent,
+    GExpandTransitionGroup,
   },
   props: {
     userInterActionBus: {

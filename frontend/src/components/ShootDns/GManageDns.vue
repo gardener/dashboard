@@ -6,62 +6,64 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container class="pa-0 ma-0">
-    <template v-if="dnsProviderIds.length">
-      <v-row class="ma-0">
-        <v-col cols="7">
-          <v-text-field
-            color="primary"
-            label="Cluster Domain"
-            v-model="domain"
-            @blur="v$.primaryProvider.$touch()"
-            :disabled="!clusterIsNew"
-            :persistent-hint="!clusterIsNew"
-            :hint="domainHint"
-            variant="underlined"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="4" v-if="primaryProviderVisible">
-          <v-select
-            color="primary"
-            item-title="secretName"
-            return-object
-            v-model="primaryProvider"
-            @blur="v$.primaryProvider.$touch()"
-            @update:modelValue="v$.primaryProvider.$touch()"
-            :items="dnsProvidersWithPrimarySupport"
-            :error-messages="getErrorMessages('primaryProvider')"
-            label="Primary DNS Provider"
-            clearable
-            :disabled="!clusterIsNew"
-            variant="underlined"
-          >
-            <template #item="{ item, props }">
-              <v-list-item
-                v-bind="props"
-              >
-                <template #prepend>
-                  <g-vendor-icon :icon="item.raw.type"/>
-                </template>
-                <v-list-item-subtitle>
-                  Type: {{item.raw.type}}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </template>
-            <template #selection="{ item }">
-              <g-vendor-icon :icon="item.raw.type"/>
-              <span class="ml-2">
-                {{item.raw.secretName}}
-              </span>
-            </template>
-          </v-select>
-        </v-col>
-      </v-row>
-      <v-row class="ma-0">
-        <v-divider class="mx-3" />
-      </v-row>
-    </template>
+    <v-expand-transition>
+      <template v-if="dnsProviderIds.length">
+        <v-row class="ma-0">
+          <v-col cols="7">
+            <v-text-field
+              color="primary"
+              label="Cluster Domain"
+              v-model="domain"
+              @blur="v$.primaryProvider.$touch()"
+              :disabled="!clusterIsNew"
+              :persistent-hint="!clusterIsNew"
+              :hint="domainHint"
+              variant="underlined"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="4" v-if="primaryProviderVisible">
+            <v-select
+              color="primary"
+              item-title="secretName"
+              return-object
+              v-model="primaryProvider"
+              @blur="v$.primaryProvider.$touch()"
+              @update:modelValue="v$.primaryProvider.$touch()"
+              :items="dnsProvidersWithPrimarySupport"
+              :error-messages="getErrorMessages('primaryProvider')"
+              label="Primary DNS Provider"
+              clearable
+              :disabled="!clusterIsNew"
+              variant="underlined"
+            >
+              <template #item="{ item, props }">
+                <v-list-item
+                  v-bind="props"
+                >
+                  <template #prepend>
+                    <g-vendor-icon :icon="item.raw.type"/>
+                  </template>
+                  <v-list-item-subtitle>
+                    Type: {{item.raw.type}}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </template>
+              <template #selection="{ item }">
+                <g-vendor-icon :icon="item.raw.type"/>
+                <span class="ml-2">
+                  {{item.raw.secretName}}
+                </span>
+              </template>
+            </v-select>
+          </v-col>
+        </v-row>
+        <v-row class="ma-0">
+          <v-divider class="mx-3" />
+        </v-row>
+      </template>
+    </v-expand-transition>
     <div class="alternate-row-background">
-      <v-slide-y-transition group>
+      <g-expand-transition-group>
         <v-row
         class="list-item pt-2"
         v-for="id in dnsProviderIds"
@@ -69,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
         >
           <g-dns-provider-row :dnsProviderId="id"/>
         </v-row>
-      </v-slide-y-transition>
+      </g-expand-transition-group>
       <v-row key="addProvider" class="list-item pt-2">
         <v-col>
           <v-btn
@@ -95,6 +97,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
+import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import { getValidationErrors } from '@/utils'
 import { nilUnless } from '@/utils/validators'
 
@@ -111,6 +114,7 @@ export default defineComponent({
   components: {
     GDnsProviderRow,
     GVendorIcon,
+    GExpandTransitionGroup,
   },
   validations () {
     return this.validators
