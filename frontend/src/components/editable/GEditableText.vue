@@ -108,7 +108,7 @@ export default {
   },
   props: {
     modelValue: {
-      type: Object,
+      type: String,
       required: true,
     },
     save: {
