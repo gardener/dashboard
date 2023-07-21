@@ -168,7 +168,6 @@ export default {
 
 <style lang="scss" scoped>
   .message-block {
-    max-height: 230px;
-    overflow-y: auto;
+    height: fit-content;
   }
 </style>
