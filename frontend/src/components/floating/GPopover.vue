@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     prevent-overflow
     auto-boundary-max-size
     :boundary="boundaryElement"
+    :distance="distance"
     :overflow-padding="8"
     :disabled="disabled"
     :placement="placement"
@@ -107,6 +108,10 @@ export default {
     },
     boundary: {
       type: [String, Element],
+    },
+    distance: {
+      type: Number,
+      default: 0,
     },
     toolbarTitle: {
       type: String,

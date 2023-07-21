@@ -23,10 +23,10 @@ SPDX-License-Identifier: Apache-2.0
       v-if="helpMenuItems.length"
       color="primary"
       icon
-      class="mr-4"
+      class="mr-5"
     >
       <v-tooltip
-        text="Tooltip"
+        :disabled="help"
         location="left"
       >
         <template #activator="{ props }">
@@ -35,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-help-circle-outline"
           />
         </template>
+        Info
       </v-tooltip>
 
       <v-menu
@@ -112,9 +113,12 @@ SPDX-License-Identifier: Apache-2.0
     <v-btn
       color="primary"
       icon
-      class="mr-4"
+      class="mr-3"
     >
-      <v-tooltip location="left">
+      <v-tooltip
+        :disabled="menu"
+        location="left"
+      >
         <template #activator="{ props }">
           <v-badge
             v-if="isAdmin"
@@ -163,6 +167,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-tooltip>
 
       <v-menu
+        v-model="menu"
         activator="parent"
         open-on-click
         close-on-content-click
@@ -327,6 +332,7 @@ const namespace = useNamespace(route)
 const autoLogin = useLocalStorage('global/auto-login')
 
 const help = ref(false)
+const menu = ref(false)
 const infoDialog = ref(false)
 const sidebar = toRef(appStore, 'sidebar')
 const helpMenuItems = toRef(configStore, 'helpMenuItems')

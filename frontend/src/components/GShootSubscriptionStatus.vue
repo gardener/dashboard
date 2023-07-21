@@ -10,9 +10,8 @@ SPDX-License-Identifier: Apache-2.0
     :close-on-content-click="false"
     :close-on-click="true"
     :persistent="false"
-    location="bottom center"
-    origin="auto"
-    :offset="[9, 0]"
+    :offset="[12, 4]"
+    transition="slide-y-transition"
   >
     <template #activator="{ props }">
       <div v-bind="props">
@@ -45,14 +44,17 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
       </div>
     </template>
-    <v-card>
+    <v-card
+      :rounded="0"
+    >
       <v-alert
         density="compact"
         variant="tonal"
         border="start"
+        :rounded="0"
         min-width="360"
         :color="color"
-        class="pr-1 ma-0"
+        class="pr-0 ma-0"
       >
         <v-row
           no-gutters
