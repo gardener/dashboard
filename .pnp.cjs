@@ -11245,6 +11245,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/__virtual__/vite-virtual-ac23a740fa/0/cache/vite-npm-4.4.6-ea3602d704-5a821897f1.zip/node_modules/vite/",\
           "packageDependencies": [\
             ["vite", "virtual:185bd601e02ffe31741ebe5fd9185af7ea79dc6e098f6290e1bb0212a50aac69c474ab2f2089ce16e96ddfd2444b0860d9e3457861e243603a62f3be84b37977#npm:4.4.6"],\
+            ["@esbuild/linux-arm64", "npm:0.18.15"],\
             ["@esbuild/linux-x64", "npm:0.18.15"],\
             ["@types/less", null],\
             ["@types/lightningcss", null],\
@@ -11285,6 +11286,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/__virtual__/vite-virtual-547ba8ada6/0/cache/vite-npm-4.4.6-ea3602d704-5a821897f1.zip/node_modules/vite/",\
           "packageDependencies": [\
             ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.4.6"],\
+            ["@esbuild/linux-arm64", "npm:0.18.15"],\
             ["@esbuild/linux-x64", "npm:0.18.15"],\
             ["@types/less", null],\
             ["@types/lightningcss", null],\
@@ -11325,6 +11327,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/__virtual__/vite-virtual-c56e726408/0/cache/vite-npm-4.4.6-ea3602d704-5a821897f1.zip/node_modules/vite/",\
           "packageDependencies": [\
             ["vite", "virtual:c065390cddf14a4a73cd418a3f89b06c9fb59126a546f7f8a38e6362e34ea25edb49ccf166f360c2786b8bda53e1bfbffdd05e6162087313ec96dcf00a83dd0a#npm:4.4.6"],\
+            ["@esbuild/linux-arm64", "npm:0.18.15"],\
             ["@esbuild/linux-x64", "npm:0.18.15"],\
             ["@types/less", null],\
             ["@types/lightningcss", null],\

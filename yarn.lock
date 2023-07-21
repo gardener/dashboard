@@ -497,9 +497,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild/linux-arm64@npm:0.18.15":
+"@esbuild/linux-arm64@npm:*, @esbuild/linux-arm64@npm:0.18.15":
   version: 0.18.15
   resolution: "@esbuild/linux-arm64@npm:0.18.15"
+  checksum: fa4371a0bd3696bd81e4de9096bea4b55eb7ac0bfd4c91fb9379d23bd1b07cdbb889a43f74a038bd00b59b939666a9baac0806f3a3fbca4592eb4b581f679da7
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
