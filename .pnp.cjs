@@ -1317,7 +1317,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.9.1"],\
             ["@mdi/font", "npm:7.0.96"],\
             ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.2.3"],\
-            ["@vitest/coverage-c8", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0"],\
+            ["@vitest/coverage-v8", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0"],\
             ["@vuelidate/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.2"],\
             ["@vuelidate/validators", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.2"],\
             ["@vueuse/core", "npm:10.2.0"],\
@@ -2573,24 +2573,30 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["@vitest/coverage-c8", [\
+      ["@vitest/coverage-v8", [\
         ["npm:0.33.0", {\
-          "packageLocation": "./.yarn/cache/@vitest-coverage-c8-npm-0.33.0-01d8279fc3-67573fa400.zip/node_modules/@vitest/coverage-c8/",\
+          "packageLocation": "./.yarn/cache/@vitest-coverage-v8-npm-0.33.0-abf6483733-d7cbc0be72.zip/node_modules/@vitest/coverage-v8/",\
           "packageDependencies": [\
-            ["@vitest/coverage-c8", "npm:0.33.0"]\
+            ["@vitest/coverage-v8", "npm:0.33.0"]\
           ],\
           "linkType": "SOFT"\
         }],\
         ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0", {\
-          "packageLocation": "./.yarn/__virtual__/@vitest-coverage-c8-virtual-6db4244a01/0/cache/@vitest-coverage-c8-npm-0.33.0-01d8279fc3-67573fa400.zip/node_modules/@vitest/coverage-c8/",\
+          "packageLocation": "./.yarn/__virtual__/@vitest-coverage-v8-virtual-dedd6003b0/0/cache/@vitest-coverage-v8-npm-0.33.0-abf6483733-d7cbc0be72.zip/node_modules/@vitest/coverage-v8/",\
           "packageDependencies": [\
-            ["@vitest/coverage-c8", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0"],\
+            ["@vitest/coverage-v8", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0"],\
             ["@ampproject/remapping", "npm:2.2.1"],\
+            ["@bcoe/v8-coverage", "npm:0.2.3"],\
             ["@types/vitest", null],\
-            ["c8", "npm:7.14.0"],\
+            ["istanbul-lib-coverage", "npm:3.2.0"],\
+            ["istanbul-lib-report", "npm:3.0.0"],\
+            ["istanbul-lib-source-maps", "npm:4.0.1"],\
+            ["istanbul-reports", "npm:3.1.5"],\
             ["magic-string", "npm:0.30.1"],\
             ["picocolors", "npm:1.0.0"],\
             ["std-env", "npm:3.3.3"],\
+            ["test-exclude", "npm:6.0.0"],\
+            ["v8-to-istanbul", "npm:9.1.0"],\
             ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.33.0"]\
           ],\
           "packagePeers": [\
@@ -3878,27 +3884,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/bytes-npm-3.1.2-28b8643004-e4bcd3948d.zip/node_modules/bytes/",\
           "packageDependencies": [\
             ["bytes", "npm:3.1.2"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["c8", [\
-        ["npm:7.14.0", {\
-          "packageLocation": "./.yarn/cache/c8-npm-7.14.0-dbb87a3021-ca44bbd200.zip/node_modules/c8/",\
-          "packageDependencies": [\
-            ["c8", "npm:7.14.0"],\
-            ["@bcoe/v8-coverage", "npm:0.2.3"],\
-            ["@istanbuljs/schema", "npm:0.1.3"],\
-            ["find-up", "npm:5.0.0"],\
-            ["foreground-child", "npm:2.0.0"],\
-            ["istanbul-lib-coverage", "npm:3.2.0"],\
-            ["istanbul-lib-report", "npm:3.0.0"],\
-            ["istanbul-reports", "npm:3.1.5"],\
-            ["rimraf", "npm:3.0.2"],\
-            ["test-exclude", "npm:6.0.0"],\
-            ["v8-to-istanbul", "npm:9.1.0"],\
-            ["yargs", "npm:16.2.0"],\
-            ["yargs-parser", "npm:20.2.9"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -6180,15 +6165,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["foreground-child", [\
-        ["npm:2.0.0", {\
-          "packageLocation": "./.yarn/cache/foreground-child-npm-2.0.0-80c976b61e-f77ec9aff6.zip/node_modules/foreground-child/",\
-          "packageDependencies": [\
-            ["foreground-child", "npm:2.0.0"],\
-            ["cross-spawn", "npm:7.0.3"],\
-            ["signal-exit", "npm:3.0.7"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
         ["npm:3.1.1", {\
           "packageLocation": "./.yarn/cache/foreground-child-npm-3.1.1-77e78ed774-139d270bc8.zip/node_modules/foreground-child/",\
           "packageDependencies": [\

@@ -97,7 +97,7 @@ export default defineConfig(({ command, mode }) => {
         'vitest.setup.js',
       ],
       coverage: {
-        provider: 'c8',
+        provider: 'v8',
         branches: 42,
         functions: 27,
         lines: 39,

@@ -9,13 +9,15 @@ module.exports = {
   env: {
     node: true,
     es2022: true,
-    'jest/globals': true,
   },
   parserOptions: {
     ecmaVersion: '2022',
   },
   globals: {
     vi: 'readonly',
+    describe: true,
+    it: true,
+    expect: true,
   },
   extends: [
     'eslint:recommended',
