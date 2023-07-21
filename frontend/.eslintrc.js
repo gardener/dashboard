@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+const { environments } = require('eslint-plugin-vitest')
+
 module.exports = {
   root: true,
   env: {
@@ -14,10 +16,7 @@ module.exports = {
     ecmaVersion: '2022',
   },
   globals: {
-    vi: 'readonly',
-    describe: true,
-    it: true,
-    expect: true,
+    ...environments.env.globals,
   },
   extends: [
     'eslint:recommended',

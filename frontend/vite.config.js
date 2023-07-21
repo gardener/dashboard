@@ -96,6 +96,9 @@ export default defineConfig(({ command, mode }) => {
       setupFiles: [
         'vitest.setup.js',
       ],
+      deps: {
+        inline: ['vuetify'],
+      },
       coverage: {
         provider: 'v8',
         branches: 42,
