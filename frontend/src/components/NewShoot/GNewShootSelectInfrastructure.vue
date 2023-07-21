@@ -102,7 +102,7 @@ export default {
   }
 
   .select_infra_card_active {
-    border: 1px solid var(--v-primary-base);
+    border: 1px solid rgb(var(--v-theme-primary));
     opacity: 1;
     filter: grayscale(0%);
   }
