@@ -9,6 +9,7 @@ module.exports = {
   env: {
     node: true,
     es2022: true,
+    'jest/globals': true,
   },
   parserOptions: {
     ecmaVersion: '2022',
