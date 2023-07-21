@@ -83,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
                 clearable
                 clear-icon="mdi-close"
                 density="compact"
-                class="g-search-field mr-3"
+                class="g-table-search-field mr-3"
                 @update:model-value="onInputSearch"
                 @keyup.esc="shootSearch = ''"
               />
@@ -799,10 +799,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  .g-search-field {
-    min-width: 240px;
-    max-width: 480px;
-  }
-</style>

@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-text-field
             v-if="userList.length > 3"
             v-model="userFilter"
-            class="mr-3"
+            class="g-table-search-field mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
@@ -131,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-text-field
             v-if="serviceAccountList.length > 3"
             v-model="serviceAccountFilter"
-            class="mr-3"
+            class="g-table-search-field mr-3"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"

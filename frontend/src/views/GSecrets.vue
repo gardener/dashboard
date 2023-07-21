@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             clear-icon="mdi-close"
             density="compact"
             flat
-            class="mr-3"
+            class="g-table-search-field mr-3"
             @keyup.esc="infraSecretFilter = ''"
           />
           <v-menu
@@ -151,7 +151,7 @@ SPDX-License-Identifier: Apache-2.0
             clear-icon="mdi-close"
             density="compact"
             flat
-            class="mr-3"
+            class="g-table-search-field mr-3"
             @keyup.esc="dnsSecretFilter = ''"
           />
           <v-menu
