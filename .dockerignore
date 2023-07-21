@@ -79,7 +79,7 @@
 !frontend/.editorconfig
 !frontend/.env*
 !frontend/.eslint*
-!frontend/jest.setup.js
+!frontend/*.setup.js
 !frontend/*.config.js
 !frontend/public
 !frontend/src
