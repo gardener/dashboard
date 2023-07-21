@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-if="!!shortPurpose"
         v-bind="props"
-        :variant="!isCritical ? 'outlined' : undefined"
+        :variant="!isCritical ? 'outlined' : 'flat'"
         :text-color="textColor"
         color="primary"
         size="small"
@@ -72,7 +72,7 @@ export default defineComponent({
   }
 
   .purpose-tag :deep(.v-chip__content) {
-    margin: -4px;
+    margin: -2px;
   }
 
 </style>
