@@ -90,7 +90,8 @@ SPDX-License-Identifier: Apache-2.0
                   Please read the error message carefully and take action.
                 </h4>
                 <span class="wrap-text">
-                  <span v-if="infraAccountError">There is a problem with your secret
+                  <span v-if="infraAccountError">
+                    There is a problem with your secret
                     <code>
                       <router-link
                         v-if="canLinkToSecret"
@@ -99,7 +100,8 @@ SPDX-License-Identifier: Apache-2.0
                         <span>{{ secretBindingName }}</span>
                       </router-link>
                       <span v-else>{{ secretBindingName }}</span>
-                    </code>:</span>
+                    </code>:
+                  </span>
                   <span>{{ description }}</span>
                   <div v-if="link">
                     <g-external-link
