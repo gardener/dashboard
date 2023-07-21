@@ -23,11 +23,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-tooltip>
     </template>
     <v-list density="compact">
-      <v-list-item>
-        <v-list-item-title>
-          Column Selection
-        </v-list-item-title>
-      </v-list-item>
+      <v-list-subheader>
+        Column Selection
+      </v-list-subheader>
       <v-list-item
         v-for="header in headers"
         :key="header.value"

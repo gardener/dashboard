@@ -48,9 +48,9 @@ SPDX-License-Identifier: Apache-2.0
               </v-tooltip>
             </template>
             <v-list>
-              <v-list-item-title class="ma-2 justify-center">
+              <v-list-subheader>
                 Create Infrastructure Secret
-              </v-list-item-title>
+              </v-list-subheader>
               <v-list-item
                 v-for="infrastructure in sortedInfrastructureKindList"
                 :key="infrastructure"
@@ -172,9 +172,9 @@ SPDX-License-Identifier: Apache-2.0
               </v-tooltip>
             </template>
             <v-list density="compact">
-              <v-list-item-title class="ma-2 justify-center">
+              <v-list-subheader>
                 Create DNS Secret
-              </v-list-item-title>
+              </v-list-subheader>
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"
                 :key="dnsProvider"
