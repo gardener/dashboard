@@ -87,7 +87,9 @@
 !frontend/vitest.setup.js
 !frontend/public
 !frontend/src
-!frontend/tests
+!frontend/__tests__
+!frontend/__fixtures__
+!frontend/__mocks__
 
 # include workspace charts
 !charts/package.json
