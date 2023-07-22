@@ -24,6 +24,10 @@ module.exports = {
     'plugin:vue/vue3-recommended',
     'plugin:vitest/recommended',
   ],
+  ignorePatterns: [
+    '/dist/',
+    '/build/',
+  ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],
     'no-console': 'error',

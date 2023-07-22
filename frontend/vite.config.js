@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// vite
+import { defineConfig } from 'vite'
+
 // Plugins
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
@@ -15,18 +18,23 @@ import zlib from 'node:zlib'
 import { createRequire } from 'node:module'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
 
 const proxyTarget = 'http://localhost:3030'
 
 const KiB = 1024
 
 const require = createRequire(import.meta.url)
-const resolve = input => fileURLToPath(new URL(input, import.meta.url))
-const htmlPlugin = env => ({
-  name: 'html-transform',
-  transformIndexHtml: html => html.replace(/%(.*?)%/g, (match, key) => env[key]),
-})
+
+function resolve (input) {
+  return fileURLToPath(new URL(input, import.meta.url))
+}
+
+function htmlPlugin (env) {
+  return {
+    name: 'html-transform',
+    transformIndexHtml: html => html.replace(/%(.*?)%/g, (match, key) => env[key]),
+  }
+}
 
 export default defineConfig(({ command, mode }) => {
   const MODE = mode
@@ -88,25 +96,6 @@ export default defineConfig(({ command, mode }) => {
         '.vue',
       ],
     },
-    test: {
-      include: ['**/__tests__/*'],
-      globals: true,
-      environment: 'jsdom',
-      clearMocks: true,
-      setupFiles: [
-        'vitest.setup.js',
-      ],
-      deps: {
-        inline: ['vuetify'],
-      },
-      coverage: {
-        provider: 'v8',
-        branches: 42,
-        functions: 27,
-        lines: 39,
-        statements: 39,
-      },
-    },
     server: {
       port: 8080,
       strictPort: true,
@@ -119,6 +108,27 @@ export default defineConfig(({ command, mode }) => {
         '/auth': {
           target: proxyTarget,
         },
+      },
+    },
+    test: {
+      include: ['__tests__/**/*.spec.js'],
+      globals: true,
+      environment: 'jsdom',
+      clearMocks: true,
+      setupFiles: [
+        'vitest.setup.js',
+      ],
+      deps: {
+        inline: [
+          'vuetify',
+        ],
+      },
+      coverage: {
+        provider: 'v8',
+        branches: 42,
+        functions: 27,
+        lines: 39,
+        statements: 39,
       },
     },
   }

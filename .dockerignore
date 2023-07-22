@@ -75,16 +75,14 @@
 
 # include workspace frontend
 !frontend/.browserslistrc
-!frontend/.editorconfig
 !frontend/.env*
-!frontend/.eslintignore
 !frontend/.eslintrc.js
 !frontend/.gitignore
-!frontend/index.html
 !frontend/jsconfig.json
 !frontend/package.json
 !frontend/vite.config.js
 !frontend/vitest.setup.js
+!frontend/index.html
 !frontend/public
 !frontend/src
 !frontend/__tests__

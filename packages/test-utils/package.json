@@ -41,8 +41,8 @@
       "no-console": "error"
     }
   },
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.6.1",
   "engines": {
-    "node": "^18.4.0"
+    "node": "^20.5.0"
   }
 }

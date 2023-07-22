@@ -34,7 +34,7 @@
     "http-errors": "^2.0.0",
     "js-yaml": "^4.1.0",
     "lightship": "^7.1.1",
-    "lodash": "4.17.21",
+    "lodash": "^4.17.21",
     "object-hash": "^3.0.0",
     "p-timeout": "^4.1.0"
   },
@@ -92,8 +92,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.6.1",
   "engines": {
-    "node": "^18.4.0"
+    "node": "^20.5.0"
   }
 }
