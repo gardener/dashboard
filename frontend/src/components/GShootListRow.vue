@@ -173,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'actions'">
         <v-row
-          class="fill-height"
+          class="fill-height d-flex flex-nowrap"
           align="center"
           justify="end"
         >
