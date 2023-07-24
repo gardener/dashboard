@@ -5,7 +5,7 @@
 //
 
 import { ref, watch } from 'vue'
-import pTimeout from 'p-timeout'
+import pTimeout from '@/utils/p-timeout'
 import { useLogger } from '@/composables/useLogger'
 
 export const useAsyncRef = (key, options = {}) => {
@@ -41,7 +41,7 @@ export const useAsyncRef = (key, options = {}) => {
     [key + 'Ref']: keyRef,
     [key]: {
       vm: ({ timeout = 3000 } = {}) => {
-        return pTimeout(keyRefPromise, { milliseconds: timeout }, `async reference ${key} timed out`)
+        return pTimeout(keyRefPromise, timeout, `async reference ${key} timed out`)
       },
       async dispatch (obj, ...args) {
         const { method, ...options } = typeof obj === 'string'

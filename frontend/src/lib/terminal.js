@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import pTimeout from 'p-timeout'
+import pTimeout from '@/utils/p-timeout'
 
 // Lodash
 import assign from 'lodash/assign'
@@ -321,7 +321,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
   })
 
   const connectTimeoutSeconds = 5
-  await pTimeout(connectPromise, { milliseconds: connectTimeoutSeconds * 1000 }, `Could not connect within ${connectTimeoutSeconds} seconds`)
+  await pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
 
   const podRunningPromise = new Promise((resolve, reject) => {
     const resolveOnce = value => {
@@ -377,7 +377,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
     ws.addEventListener('message', messageHandler)
     ws.addEventListener('close', closeHandler)
   })
-  return pTimeout(podRunningPromise, { milliseconds: timeoutSeconds * 1000 }, `Timed out after ${timeoutSeconds}s`)
+  return pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {
