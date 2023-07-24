@@ -52,7 +52,7 @@ export default defineComponent({
   computed: {
     stateColorClass () {
       if (this.state === 'Failed') {
-        return 'error--text'
+        return 'text-error'
       }
       return ''
     },
