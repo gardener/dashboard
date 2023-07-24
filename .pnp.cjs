@@ -1367,8 +1367,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["md5", "npm:2.3.0"],\
             ["mitt", "npm:3.0.1"],\
             ["netmask", "npm:2.0.2"],\
-            ["p-timeout", "npm:4.1.0"],\
             ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.4"],\
+            ["roboto-fontface", "npm:0.10.0"],\
             ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.9.2"],\
             ["sass", "npm:1.64.1"],\
             ["semver", "npm:7.5.4"],\
@@ -10095,6 +10095,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["globalthis", "npm:1.0.3"],\
             ["safe-stable-stringify", "npm:2.4.3"],\
             ["semver-compare", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["roboto-fontface", [\
+        ["npm:0.10.0", {\
+          "packageLocation": "./.yarn/cache/roboto-fontface-npm-0.10.0-6476b79561-58749bb491.zip/node_modules/roboto-fontface/",\
+          "packageDependencies": [\
+            ["roboto-fontface", "npm:0.10.0"]\
           ],\
           "linkType": "HARD"\
         }]\
