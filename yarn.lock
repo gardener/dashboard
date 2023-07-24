@@ -816,8 +816,8 @@ __metadata:
     md5: ^2.3.0
     mitt: ^3.0.0
     netmask: ^2.0.2
-    p-timeout: ^4.1.0
     pinia: ^2.0.33
+    roboto-fontface: "*"
     rollup-plugin-visualizer: ^5.9.0
     sass: ^1.62.0
     semver: ^7.3.8
@@ -8225,6 +8225,13 @@ __metadata:
     safe-stable-stringify: ^2.4.1
     semver-compare: ^1.0.0
   checksum: fdb2480672b95aabf96bff92fe34301c119f9188643ca8833d04901255e8733d6ad87bed5b73575d674e3f545caaa171c72a9d9a2a2c4199883df669a6752b03
+  languageName: node
+  linkType: hard
+
+"roboto-fontface@npm:*":
+  version: 0.10.0
+  resolution: "roboto-fontface@npm:0.10.0"
+  checksum: 58749bb49133974aa72d79ab1928d5d0aa1df162daab7398cbceeadc1508d222054d2e81d41ab548361a785c5cd2da97159544c3acecc8a180030c91b504be3b
   languageName: node
   linkType: hard
 

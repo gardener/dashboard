@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <div>
           You selected
           <v-chip
-            small
+            size="small"
             class="my-0"
             variant="outlined"
             color="warning"

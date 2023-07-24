@@ -92,9 +92,9 @@ SPDX-License-Identifier: Apache-2.0
                         <v-chip
                           v-for="zone in workerGroup.zones"
                           :key="zone"
-                          small
+                          size="small"
                           label
-                          outlined
+                          variant="outlined"
                           class="px-1 mr-1"
                         >
                           {{ zone }}
@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  outlined
+                  variant="outlined"
                   class="mt-2"
                 >
                   <v-toolbar
@@ -204,7 +204,7 @@ SPDX-License-Identifier: Apache-2.0
                         cols="12"
                       >
                         <v-icon
-                          small
+                          size="small"
                           class="mr-1"
                           color="warning"
                         >
@@ -216,7 +216,7 @@ SPDX-License-Identifier: Apache-2.0
                         cols="12"
                       >
                         <v-icon
-                          small
+                          size="small"
                           class="mr-1"
                           color="warning"
                         >
@@ -227,7 +227,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  outlined
+                  variant="outlined"
                   class="mt-2"
                 >
                   <v-toolbar
@@ -276,7 +276,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  outlined
+                  variant="outlined"
                   class="mt-2"
                 >
                   <v-toolbar
@@ -313,9 +313,9 @@ SPDX-License-Identifier: Apache-2.0
                         <v-chip
                           v-for="containerRuntime in machineCri.containerRuntimes"
                           :key="containerRuntime.type"
-                          small
+                          size="small"
                           label
-                          outlined
+                          variant="outlined"
                           class="px-1 mr-1"
                         >
                           {{ containerRuntime.type }}
