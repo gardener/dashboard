@@ -5,42 +5,39 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-hint-colorizer hint-color="warning">
-    <v-autocomplete
-      ref="autocomplete"
-      v-model="internalValue"
-      v-model:search-input="internalSearch"
-      color="primary"
-      item-color="primary"
-      :items="machineTypeItems"
-      item-title="name"
-      item-value="name"
-      :error-messages="getErrorMessages('internalValue')"
-      :filter="filter"
-      label="Machine Type"
-      :hint="hint"
-      persistent-hint
-      variant="underlined"
-      @update:model-value="v$.internalValue.$touch()"
-      @blur="v$.internalValue.$touch()"
-    >
-      <template #item="{ item, props }">
-        <v-list-item v-bind="props">
-          <v-list-item-subtitle>
-            <span v-if="item.raw.cpu">CPU: {{ item.raw.cpu }} | </span>
-            <span v-if="item.raw.gpu">GPU: {{ item.raw.gpu }} | </span>
-            <span v-if="item.raw.memory">Memory: {{ item.raw.memory }}</span>
-            <span v-if="item.raw.storage"> | Volume Type: {{ item.raw.storage.type }} | Class: {{ item.raw.storage.class }} | Default Size: {{ item.raw.storage.size }}</span>
-          </v-list-item-subtitle>
-        </v-list-item>
-      </template>
-    </v-autocomplete>
-  </g-hint-colorizer>
+  <v-autocomplete
+    ref="autocomplete"
+    v-model="internalValue"
+    v-model:search-input="internalSearch"
+    v-messages-color="{ color: 'warning' }"
+    color="primary"
+    item-color="primary"
+    :items="machineTypeItems"
+    item-title="name"
+    item-value="name"
+    :error-messages="getErrorMessages('internalValue')"
+    :filter="filter"
+    label="Machine Type"
+    :hint="hint"
+    persistent-hint
+    variant="underlined"
+    @update:model-value="v$.internalValue.$touch()"
+    @blur="v$.internalValue.$touch()"
+  >
+    <template #item="{ item, props }">
+      <v-list-item v-bind="props">
+        <v-list-item-subtitle>
+          <span v-if="item.raw.cpu">CPU: {{ item.raw.cpu }} | </span>
+          <span v-if="item.raw.gpu">GPU: {{ item.raw.gpu }} | </span>
+          <span v-if="item.raw.memory">Memory: {{ item.raw.memory }}</span>
+          <span v-if="item.raw.storage"> | Volume Type: {{ item.raw.storage.type }} | Class: {{ item.raw.storage.class }} | Default Size: {{ item.raw.storage.size }}</span>
+        </v-list-item-subtitle>
+      </v-list-item>
+    </template>
+  </v-autocomplete>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import GHintColorizer from '@/components/GHintColorizer'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { getValidationErrors } from '@/utils'
@@ -52,10 +49,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  components: {
-    GHintColorizer,
-  },
+export default {
   props: {
     modelValue: {
       type: String,
@@ -190,5 +184,5 @@ export default defineComponent({
       return terms.every(term => name?.includes(term) || properties.includes(term))
     },
   },
-})
+}
 </script>

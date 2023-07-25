@@ -22,30 +22,29 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-col>
       <v-col cols="3">
-        <g-hint-colorizer hint-color="warning">
-          <v-select
-            v-model="kubernetesVersion"
-            color="primary"
-            item-color="primary"
-            label="Kubernetes Version"
-            item-title="version"
-            item-value="version"
-            :items="sortedKubernetesVersionsList"
-            :error-messages="getErrorMessages('kubernetesVersion')"
-            :hint="versionHint"
-            persistent-hint
-            variant="underlined"
-            @update:model-value="onInputKubernetesVersion"
-            @blur="v$.kubernetesVersion.$touch()"
-          >
-            <template #item="{ item, props }">
-              <v-list-item
-                v-bind="props"
-                :subtitle="versionItemDescription(item.raw)"
-              />
-            </template>
-          </v-select>
-        </g-hint-colorizer>
+        <v-select
+          v-model="kubernetesVersion"
+          v-messages-color="{ color: 'warning' }"
+          color="primary"
+          item-color="primary"
+          label="Kubernetes Version"
+          item-title="version"
+          item-value="version"
+          :items="sortedKubernetesVersionsList"
+          :error-messages="getErrorMessages('kubernetesVersion')"
+          :hint="versionHint"
+          persistent-hint
+          variant="underlined"
+          @update:model-value="onInputKubernetesVersion"
+          @blur="v$.kubernetesVersion.$touch()"
+        >
+          <template #item="{ item, props }">
+            <v-list-item
+              v-bind="props"
+              :subtitle="versionItemDescription(item.raw)"
+            />
+          </template>
+        </v-select>
       </v-col>
       <v-col cols="3">
         <g-purpose
@@ -84,8 +83,6 @@ import filter from 'lodash/filter'
 import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength } from '@vuelidate/validators'
 
-import GHintColorizer from '@/components/GHintColorizer'
-
 import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
@@ -116,7 +113,6 @@ const validationErrors = {
 
 export default {
   components: {
-    GHintColorizer,
     GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
     GStaticTokenKubeconfigSwitch,
   },

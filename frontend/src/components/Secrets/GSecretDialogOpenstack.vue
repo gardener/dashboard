@@ -108,35 +108,33 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template v-else>
           <div>
-            <g-hint-colorizer hint-color="primary">
-              <v-text-field
-                v-model="username"
-                color="primary"
-                label="Technical User"
-                :error-messages="getErrorMessages('username')"
-                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-                variant="underlined"
-                @update:model-value="v$.username.$touch()"
-                @blur="v$.username.$touch()"
-              />
-            </g-hint-colorizer>
+            <v-text-field
+              v-model="username"
+              v-messages-color="{ color: 'primary' }"
+              color="primary"
+              label="Technical User"
+              :error-messages="getErrorMessages('username')"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              variant="underlined"
+              @update:model-value="v$.username.$touch()"
+              @blur="v$.username.$touch()"
+            />
           </div>
           <div>
-            <g-hint-colorizer hint-color="warning">
-              <v-text-field
-                v-model="password"
-                color="primary"
-                label="Password"
-                :error-messages="getErrorMessages('password')"
-                :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="hideSecret ? 'password' : 'text'"
-                hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-                variant="underlined"
-                @click:append="() => (hideSecret = !hideSecret)"
-                @update:model-value="v$.password.$touch()"
-                @blur="v$.password.$touch()"
-              />
-            </g-hint-colorizer>
+            <v-text-field
+              v-model="password"
+              v-messages-color="{ color: 'warning' }"
+              color="primary"
+              label="Password"
+              :error-messages="getErrorMessages('password')"
+              :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="hideSecret ? 'password' : 'text'"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+              variant="underlined"
+              @click:append="() => (hideSecret = !hideSecret)"
+              @update:model-value="v$.password.$touch()"
+              @blur="v$.password.$touch()"
+            />
           </div>
         </template>
       </v-container>
@@ -172,7 +170,6 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import { useVuelidate } from '@vuelidate/core'
 import { required, requiredIf } from '@vuelidate/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import GHintColorizer from '@/components/GHintColorizer'
 import GExternalLink from '@/components/GExternalLink'
 import {
   useCloudProfileStore,
@@ -212,7 +209,6 @@ export default {
   components: {
     GSecretDialog,
     GExternalLink,
-    GHintColorizer,
   },
   props: {
     modelValue: {

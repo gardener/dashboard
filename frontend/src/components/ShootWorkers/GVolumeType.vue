@@ -6,31 +6,30 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <g-hint-colorizer hint-color="warning">
-      <v-select
-        v-model="worker.volume.type"
-        color="primary"
-        item-color="primary"
-        :items="volumeTypeItems"
-        item-title="name"
-        item-value="name"
-        :error-messages="getErrorMessages('worker.volume.type')"
-        label="Volume Type"
-        :hint="hint"
-        persistent-hint
-        variant="underlined"
-        @update:model-value="onInputVolumeType"
-        @blur="v$.worker.volume.type.$touch()"
-      >
-        <template #item="{ item, props }">
-          <v-list-item v-bind="props">
-            <v-list-item-subtitle v-if="item.raw.class">
-              Class: {{ item.raw.class }}
-            </v-list-item-subtitle>
-          </v-list-item>
-        </template>
-      </v-select>
-    </g-hint-colorizer>
+    <v-select
+      v-model="worker.volume.type"
+      v-messages-color="{ color: 'warning' }"
+      color="primary"
+      item-color="primary"
+      :items="volumeTypeItems"
+      item-title="name"
+      item-value="name"
+      :error-messages="getErrorMessages('worker.volume.type')"
+      label="Volume Type"
+      :hint="hint"
+      persistent-hint
+      variant="underlined"
+      @update:model-value="onInputVolumeType"
+      @blur="v$.worker.volume.type.$touch()"
+    >
+      <template #item="{ item, props }">
+        <v-list-item v-bind="props">
+          <v-list-item-subtitle v-if="item.raw.class">
+            Class: {{ item.raw.class }}
+          </v-list-item-subtitle>
+        </v-list-item>
+      </template>
+    </v-select>
     <v-text-field
       v-if="isAWS"
       v-model.number="workerIops"
@@ -49,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import GHintColorizer from '@/components/GHintColorizer'
 import { required, requiredIf, minValue } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { getValidationErrors } from '@/utils'
@@ -61,9 +59,6 @@ import unset from 'lodash/unset'
 import { useCloudProfileStore } from '@/store'
 
 export default {
-  components: {
-    GHintColorizer,
-  },
   props: {
     worker: {
       type: Object,

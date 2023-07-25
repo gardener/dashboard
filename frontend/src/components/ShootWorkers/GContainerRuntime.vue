@@ -6,28 +6,27 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-row">
-    <g-hint-colorizer hint-color="warning">
-      <v-select
-        v-model="criName"
-        color="primary"
-        item-color="primary"
-        :items="criItems"
-        :error-messages="getErrorMessages('criName')"
-        label="Container Runtime"
-        :hint="hint"
-        persistent-hint
-        variant="underlined"
-        @update:model-value="onInputCriName"
-        @blur="v$.criName.$touch()"
-      >
-        <template #item="{ props, item }">
-          <v-list-item
-            v-bind="props"
-            :disabled="item.raw.disabled"
-          />
-        </template>
-      </v-select>
-    </g-hint-colorizer>
+    <v-select
+      v-model="criName"
+      v-messages-color="{ color: 'warning' }"
+      color="primary"
+      item-color="primary"
+      :items="criItems"
+      :error-messages="getErrorMessages('criName')"
+      label="Container Runtime"
+      :hint="hint"
+      persistent-hint
+      variant="underlined"
+      @update:model-value="onInputCriName"
+      @blur="v$.criName.$touch()"
+    >
+      <template #item="{ props, item }">
+        <v-list-item
+          v-bind="props"
+          :disabled="item.raw.disabled"
+        />
+      </template>
+    </v-select>
     <v-select
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
@@ -45,8 +44,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import GHintColorizer from '@/components/GHintColorizer'
 import { getValidationErrors } from '@/utils'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
@@ -64,10 +61,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
-  components: {
-    GHintColorizer,
-  },
+export default {
   props: {
     worker: {
       type: Object,
@@ -195,5 +189,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

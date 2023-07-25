@@ -5,49 +5,55 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div ref="root">
-    <slot />
+  <div>
+    <slot ref="input" />
   </div>
 </template>
 
-<script setup>
-import { ref, computed, inject, onMounted, onUpdated, watch } from 'vue'
+<script>
 import get from 'lodash/get'
 
-const getColorCode = inject('getColorCode')
-
-const props = defineProps({
-  hintColor: {
-    type: String,
+export default {
+  inject: ['getColorCode'],
+  props: {
+    hintColor: {
+      type: String,
+    },
   },
-})
+  computed: {
+    isSelectErrorColor () {
+      const color = get(this, '$children[0].$children[0].color')
+      return color === 'error'
+    },
+  },
+  watch: {
+    hintColor (hintColor) {
+      this.applyHintColor(hintColor)
+    },
+  },
+  mounted () {
+    this.applyHintColor(this.hintColor)
+  },
+  updated () {
+    this.applyHintColor(this.hintColor)
+  },
+  methods: {
+    applyHintColor (hintColor) {
+      if (!this.$el) {
+        return
+      }
+      const hintElement = this.$el.querySelector('.v-messages__message')
+      if (!hintElement) {
+        return
+      }
 
-const root = ref(null)
-
-const isSelectErrorColor = computed(() => {
-  const color = get(root.value, '$children[0].$children[0].color')
-  return color === 'error'
-})
-
-function applyHintColor () {
-  if (!root.value) {
-    return
-  }
-  const hintElement = root.value.querySelector('.v-messages__message')
-  if (!hintElement) {
-    return
-  }
-
-  const colorCode = getColorCode(props.hintColor)
-  if (!isSelectErrorColor.value && props.hintColor !== 'default') {
-    hintElement.style = `color: ${colorCode}`
-  } else {
-    hintElement.style = ''
-  }
+      const colorCode = this.getColorCode(hintColor)
+      if (!this.isSelectErrorColor && hintColor !== 'default') {
+        hintElement.style = `color: ${colorCode}`
+      } else {
+        hintElement.style = ''
+      }
+    },
+  },
 }
-
-watch(() => props.hintColor, () => applyHintColor())
-onMounted(() => applyHintColor())
-onUpdated(() => applyHintColor())
-
 </script>

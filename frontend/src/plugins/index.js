@@ -6,6 +6,7 @@
 
 import { useLogger } from '@/composables'
 import { useStores } from '@/store'
+import { messagesColor } from '@/directives'
 
 // Styles
 import '@/sass/main.scss'
@@ -30,4 +31,5 @@ export function registerPlugins (app) {
     .use(yaml)
     .use(utils)
     .use(components)
+    .directive('messagesColor', messagesColor)
 }

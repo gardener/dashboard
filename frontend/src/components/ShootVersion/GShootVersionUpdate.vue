@@ -6,47 +6,46 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <g-hint-colorizer hint-color="warning">
-      <v-select
-        v-model="selectedItem"
-        :items="items"
-        color="primary"
-        class="mb-2"
-        item-color="primary"
-        item-value="version"
-        :label="label"
-        :hint="hint"
-        :error="isError"
-        return-object
-        placeholder="Please select version..."
-      >
-        <template #item="{ props }">
-          <v-list-subheader
-            v-if="props.value.type === 'subheader'"
-            v-bind="props"
-          />
-          <v-list-item
-            v-else
-            v-bind="props"
-            :subtitle="versionItemDescription(props.value)"
-            :disabled="props.value.notNextMinor"
+    <v-select
+      v-model="selectedItem"
+      v-messages-color="{ color: 'warning' }"
+      :items="items"
+      color="primary"
+      class="mb-2"
+      item-color="primary"
+      item-value="version"
+      :label="label"
+      :hint="hint"
+      :error="isError"
+      return-object
+      placeholder="Please select version..."
+    >
+      <template #item="{ props }">
+        <v-list-subheader
+          v-if="props.value.type === 'subheader'"
+          v-bind="props"
+        />
+        <v-list-item
+          v-else
+          v-bind="props"
+          :subtitle="versionItemDescription(props.value)"
+          :disabled="props.value.notNextMinor"
+        >
+          <v-tooltip
+            v-if="props.value.notNextMinor"
+            activator="parent"
+            location="top"
           >
-            <v-tooltip
-              v-if="props.value.notNextMinor"
-              activator="parent"
-              location="top"
-            >
-              You cannot upgrade your cluster more than one minor version at a time
-            </v-tooltip>
-            <template #subtitle="{ subtitle }">
-              <div :class="props.value.subtitleClass">
-                {{ subtitle }}
-              </div>
-            </template>
-          </v-list-item>
-        </template>
-      </v-select>
-    </g-hint-colorizer>
+            You cannot upgrade your cluster more than one minor version at a time
+          </v-tooltip>
+          <template #subtitle="{ subtitle }">
+            <div :class="props.value.subtitleClass">
+              {{ subtitle }}
+            </div>
+          </template>
+        </v-list-item>
+      </template>
+    </v-select>
     <v-alert
       v-if="currentK8sVersion.expirationDate && !selectedItem"
       type="warning"
@@ -62,8 +61,6 @@ SPDX-License-Identifier: Apache-2.0
 import { defineComponent } from 'vue'
 import semver from 'semver'
 
-import GHintColorizer from '@/components/GHintColorizer.vue'
-
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import upperFirst from 'lodash/upperFirst'
@@ -72,9 +69,6 @@ import get from 'lodash/get'
 import join from 'lodash/join'
 
 export default defineComponent({
-  components: {
-    GHintColorizer,
-  },
   props: {
     availableK8sUpdates: {
       type: Object,
