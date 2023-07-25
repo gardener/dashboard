@@ -111,7 +111,7 @@ export default {
     },
     distance: {
       type: Number,
-      default: 0,
+      default: 6,
     },
     toolbarTitle: {
       type: String,
